@@ -1,0 +1,40 @@
+# Build directories
+build/
+build*/
+bin/
+out/
+lib/
+
+# Visual Studio / MSVC artifacts
+.vs/
+*.vcxproj.user
+*.vcxproj.filters
+*.dir/
+*.log
+*.tlog
+*.idb
+*.pdb
+*.ilk
+*.obj
+*.lib
+*.exp
+*.exe
+*.dll
+
+# Temporary and test outputs
+*.ppm
+OUT-*.ppm
+*-decoded.pgm
+*-wavelet.pgm
+*-diff.pgm
+scratch/
+
+# CMake artifacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+!ucm.cmake
+!libcineformsdk.pc.cmake
