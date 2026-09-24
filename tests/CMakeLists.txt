@@ -36,3 +36,13 @@ target_link_libraries(test_avi_sample PRIVATE CFHDCodecStatic)
 add_test(NAME test_avi_sample
     COMMAND test_avi_sample "${CMAKE_SOURCE_DIR}/upstream/Example/videos/CFHDsample422.AVI"
 )
+
+# 4. Phase 1A CUDA wavelet transform test
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_cuda_wavelet
+        test_cuda_wavelet.cpp
+    )
+    target_link_libraries(test_cuda_wavelet PRIVATE hypercine_core)
+    add_test(NAME test_cuda_wavelet COMMAND test_cuda_wavelet)
+endif()
+

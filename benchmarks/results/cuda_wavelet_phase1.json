@@ -1,0 +1,215 @@
+{
+  "system": {
+    "os": "Windows x64",
+    "cpu_model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+    "thread_count": 16,
+    "gpu_model": "NVIDIA GeForce RTX 4090 Laptop GPU",
+    "compute_capability": "8.9",
+    "cuda_toolkit_version": "12.8",
+    "cuda_driver_version": "13.3",
+    "compiler": "MSVC 1944",
+    "build_type": "Release"
+  },
+  "benchmarks": [
+    {
+      "name": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "batch_frames": 1,
+      "iterations": 50,
+      "cpu_reference": {
+        "latency_avg_ms": 6.56619,
+        "latency_min_ms": 6.2637,
+        "latency_max_ms": 7.0168,
+        "megapixels_per_sec": 315.799,
+        "effective_gb_per_sec": 1.2632
+      },
+      "cuda_reference": {
+        "kernel_only": {
+          "latency_avg_ms": 1.66479,
+          "latency_min_ms": 1.42336,
+          "latency_max_ms": 9.08186,
+          "megapixels_per_sec": 1245.57,
+          "effective_gb_per_sec": 4.98226
+        },
+        "end_to_end": {
+          "latency_avg_ms": 3.35867,
+          "latency_min_ms": 3.1286,
+          "latency_max_ms": 5.6452,
+          "megapixels_per_sec": 617.388
+        },
+        "speedup_kernel": 3.94417,
+        "speedup_end_to_end": 1.955,
+        "pcie_transfer_percent": 50.4332
+      },
+      "cuda_optimized": {
+        "kernel_only": {
+          "latency_avg_ms": 1.44673,
+          "latency_min_ms": 1.16634,
+          "latency_max_ms": 1.73261,
+          "megapixels_per_sec": 1433.31,
+          "effective_gb_per_sec": 5.73322
+        },
+        "end_to_end": {
+          "latency_avg_ms": 3.13684,
+          "latency_min_ms": 2.8587,
+          "latency_max_ms": 6.3771,
+          "megapixels_per_sec": 661.047
+        },
+        "speedup_kernel": 4.53866,
+        "speedup_end_to_end": 2.09325,
+        "pcie_transfer_percent": 53.8796
+      }
+    },
+    {
+      "name": "4K_UHD",
+      "width": 3840,
+      "height": 2160,
+      "batch_frames": 1,
+      "iterations": 25,
+      "cpu_reference": {
+        "latency_avg_ms": 26.4688,
+        "latency_min_ms": 25.0597,
+        "latency_max_ms": 30.5398,
+        "megapixels_per_sec": 313.365,
+        "effective_gb_per_sec": 1.25346
+      },
+      "cuda_reference": {
+        "kernel_only": {
+          "latency_avg_ms": 1.29867,
+          "latency_min_ms": 1.18784,
+          "latency_max_ms": 1.6855,
+          "megapixels_per_sec": 6386.85,
+          "effective_gb_per_sec": 25.5474
+        },
+        "end_to_end": {
+          "latency_avg_ms": 7.16383,
+          "latency_min_ms": 6.8871,
+          "latency_max_ms": 7.9251,
+          "megapixels_per_sec": 1157.82
+        },
+        "speedup_kernel": 20.3815,
+        "speedup_end_to_end": 3.69479,
+        "pcie_transfer_percent": 81.8719
+      },
+      "cuda_optimized": {
+        "kernel_only": {
+          "latency_avg_ms": 1.2785,
+          "latency_min_ms": 1.21856,
+          "latency_max_ms": 1.3783,
+          "megapixels_per_sec": 6487.58,
+          "effective_gb_per_sec": 25.9503
+        },
+        "end_to_end": {
+          "latency_avg_ms": 7.11033,
+          "latency_min_ms": 6.9673,
+          "latency_max_ms": 7.6541,
+          "megapixels_per_sec": 1166.53
+        },
+        "speedup_kernel": 20.703,
+        "speedup_end_to_end": 3.72259,
+        "pcie_transfer_percent": 82.0191
+      }
+    },
+    {
+      "name": "8K_UHD",
+      "width": 7680,
+      "height": 4320,
+      "batch_frames": 1,
+      "iterations": 10,
+      "cpu_reference": {
+        "latency_avg_ms": 102.483,
+        "latency_min_ms": 100.423,
+        "latency_max_ms": 105.597,
+        "megapixels_per_sec": 323.736,
+        "effective_gb_per_sec": 1.29494
+      },
+      "cuda_reference": {
+        "kernel_only": {
+          "latency_avg_ms": 2.54582,
+          "latency_min_ms": 2.47181,
+          "latency_max_ms": 2.70131,
+          "megapixels_per_sec": 13032.2,
+          "effective_gb_per_sec": 52.1287
+        },
+        "end_to_end": {
+          "latency_avg_ms": 24.5178,
+          "latency_min_ms": 23.8082,
+          "latency_max_ms": 28.0559,
+          "megapixels_per_sec": 1353.2
+        },
+        "speedup_kernel": 40.2555,
+        "speedup_end_to_end": 4.17995,
+        "pcie_transfer_percent": 89.6164
+      },
+      "cuda_optimized": {
+        "kernel_only": {
+          "latency_avg_ms": 2.63762,
+          "latency_min_ms": 2.47603,
+          "latency_max_ms": 3.7417,
+          "megapixels_per_sec": 12578.6,
+          "effective_gb_per_sec": 50.3145
+        },
+        "end_to_end": {
+          "latency_avg_ms": 24.1867,
+          "latency_min_ms": 23.979,
+          "latency_max_ms": 24.517,
+          "megapixels_per_sec": 1371.73
+        },
+        "speedup_kernel": 38.8545,
+        "speedup_end_to_end": 4.23718,
+        "pcie_transfer_percent": 89.0947
+      }
+    },
+    {
+      "name": "1080p_Batch16",
+      "width": 1920,
+      "height": 1080,
+      "batch_frames": 16,
+      "iterations": 20,
+      "cpu_reference": {
+        "latency_avg_ms": 133.818,
+        "latency_min_ms": 129.292,
+        "latency_max_ms": 139.644,
+        "megapixels_per_sec": 247.931,
+        "effective_gb_per_sec": 0.991725
+      },
+      "cuda_reference": {
+        "kernel_only": {
+          "latency_avg_ms": 1.75778,
+          "latency_min_ms": 1.60461,
+          "latency_max_ms": 2.0951,
+          "megapixels_per_sec": 18874.7,
+          "effective_gb_per_sec": 75.4988
+        },
+        "end_to_end": {
+          "latency_avg_ms": 22.9015,
+          "latency_min_ms": 22.524,
+          "latency_max_ms": 24.0345,
+          "megapixels_per_sec": 1448.71
+        },
+        "speedup_kernel": 76.1288,
+        "speedup_end_to_end": 5.84318,
+        "pcie_transfer_percent": 92.3246
+      },
+      "cuda_optimized": {
+        "kernel_only": {
+          "latency_avg_ms": 1.82452,
+          "latency_min_ms": 1.72544,
+          "latency_max_ms": 1.95981,
+          "megapixels_per_sec": 18184.3,
+          "effective_gb_per_sec": 72.737
+        },
+        "end_to_end": {
+          "latency_avg_ms": 22.9258,
+          "latency_min_ms": 22.5619,
+          "latency_max_ms": 23.4656,
+          "megapixels_per_sec": 1447.17
+        },
+        "speedup_kernel": 73.344,
+        "speedup_end_to_end": 5.83699,
+        "pcie_transfer_percent": 92.0416
+      }
+    }
+  ]
+}

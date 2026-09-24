@@ -18,3 +18,14 @@ target_link_libraries(benchmark_codec PRIVATE CFHDCodecStatic)
 if(WIN32)
     target_link_libraries(benchmark_codec PRIVATE psapi)
 endif()
+
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(benchmark_wavelet
+        benchmark_wavelet.cpp
+    )
+    target_link_libraries(benchmark_wavelet PRIVATE hypercine_core)
+    if(WIN32)
+        target_link_libraries(benchmark_wavelet PRIVATE psapi)
+    endif()
+endif()
+

@@ -9,6 +9,30 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(HYPERCINE_BUILD_UPSTREAM "Build upstream CineForm SDK reference components" ON)
 option(HYPERCINE_BUILD_TESTS "Build HyperCine reference tests" ON)
 option(HYPERCINE_BUILD_BENCHMARKS "Build HyperCine benchmark tool" ON)
+option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
+
+if(HYPERCINE_ENABLE_CUDA)
+    include(CheckLanguage)
+    check_language(CUDA)
+    if(NOT CMAKE_CUDA_COMPILER AND DEFINED ENV{CUDA_PATH})
+        if(EXISTS "$ENV{CUDA_PATH}/bin/nvcc.exe")
+            set(CMAKE_CUDA_COMPILER "$ENV{CUDA_PATH}/bin/nvcc.exe" CACHE FILEPATH "CUDA compiler" FORCE)
+        elseif(EXISTS "$ENV{CUDA_PATH}/bin/nvcc")
+            set(CMAKE_CUDA_COMPILER "$ENV{CUDA_PATH}/bin/nvcc" CACHE FILEPATH "CUDA compiler" FORCE)
+        endif()
+    endif()
+    if(CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+        set(CMAKE_CUDA_STANDARD 17)
+        set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+        message(STATUS "CUDA enabled. Compiler: ${CMAKE_CUDA_COMPILER} (Version: ${CMAKE_CUDA_COMPILER_VERSION})")
+        if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+            set(CMAKE_CUDA_ARCHITECTURES native)
+        endif()
+    else()
+        message(FATAL_ERROR "HYPERCINE_ENABLE_CUDA is ON, but no CUDA compiler was detected on this system.")
+    endif()
+endif()
 
 # Configure build settings for MSVC
 if(MSVC)
@@ -25,6 +49,13 @@ if(HYPERCINE_BUILD_UPSTREAM)
     set(BUILD_TOOLS ON CACHE BOOL "Build test tools" FORCE)
     set(BUILD_STATIC ON CACHE BOOL "Build static component" FORCE)
     set(BUILD_SEPARATED OFF CACHE BOOL "Build separate de/encoder libraries" FORCE)
+
+    # Upstream quirk workaround (documented in docs/UPSTREAM.md):
+    # Upstream line 35 does string(STRIP ${ADDITIONAL_LIBS} ADDITIONAL_LIBS) without quotes,
+    # and find_package(OpenMP) in upstream fails when CUDA is an enabled language unless OpenMP_CUDA is satisfied.
+    set(ADDITIONAL_LIBS " ")
+    set(OpenMP_CUDA_FOUND TRUE CACHE BOOL "CUDA OpenMP placeholder" FORCE)
+    set(OpenMP_CUDA_FLAGS "" CACHE STRING "CUDA OpenMP flags placeholder" FORCE)
 
     add_subdirectory(upstream)
 endif()
@@ -49,6 +80,9 @@ target_include_directories(hypercine_core INTERFACE
 if(TARGET CFHDCodecStatic)
     target_link_libraries(hypercine_core INTERFACE CFHDCodecStatic)
 endif()
+
+# Core HyperCine library source
+add_subdirectory(src)
 
 # Tests
 if(HYPERCINE_BUILD_TESTS)

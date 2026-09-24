@@ -75,3 +75,8 @@ CFHD_InitSampleMetadata(&metadata, ...);
 CFHD_SetActiveMetadata(decoder, metadata, TAG_PROCESS_PATH, ...);
 ```
 Without `TAG_PROCESS_PATH` set to `PROCESSING_ALL_ON (0xffff)`, decoder process flags remain uninitialized, leading to bypassed color stages. HyperCine test suites and wrappers always explicitly set this metadata.
+
+### 6. CMake `string(STRIP ${ADDITIONAL_LIBS} ...)` Syntax Error When CUDA is Enabled
+In `upstream/CMakeLists.txt` (line 35), `string(STRIP ${ADDITIONAL_LIBS} ADDITIONAL_LIBS)` is called without quotes. When CUDA is enabled as a project language in modern CMake, `find_package(OpenMP)` in upstream checks OpenMP for C, CXX, and CUDA. Because CUDA lacks OpenMP flags, `OpenMP_FOUND` evaluates to false, leaving `ADDITIONAL_LIBS` unset. An unquoted empty variable causes `string(STRIP)` to fail with "requires two arguments".
+- *Mitigation:* The root `CMakeLists.txt` initializes `set(ADDITIONAL_LIBS " ")`, `set(OpenMP_CUDA_FOUND TRUE)`, and `set(OpenMP_CUDA_FLAGS "")` before `add_subdirectory(upstream)`, ensuring clean CMake configuration without modifying any upstream file.
+
