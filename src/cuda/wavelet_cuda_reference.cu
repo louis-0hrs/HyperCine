@@ -4,6 +4,112 @@
 
 #include "wavelet_cuda_common.cuh"
 
+// Quantize a single 16-bit coefficient: sign-preserving (abs + midpoint) * (2^16/divisor) >> 16
+__device__ __forceinline__ int16_t Quantize16sTo16s(int32_t val, int divisor, int midpoint) {
+    if (divisor <= 1) return CUDASaturate16S(val);
+    uint32_t multiplier = (1U << 16) / static_cast<uint32_t>(divisor);
+    int32_t sign = (val < 0) ? -1 : 1;
+    int32_t abs_val = (val < 0) ? -val : val;
+    uint32_t q = ((static_cast<uint32_t>(abs_val) + static_cast<uint32_t>(midpoint)) * multiplier) >> 16;
+    return CUDASaturate16S(sign * static_cast<int32_t>(q));
+}
+
+// Fused vertical filter + quantization kernel.
+// Inputs:  lowpass  (horizontal lowpass,  width × height)
+//          highpass (horizontal highpass, width × height)
+// Outputs: d_ll (vert-low  of horiz-low),  d_hl (vert-high of horiz-low)
+//          d_lh (vert-low  of horiz-high), d_hh (vert-high of horiz-high)
+// Each output is width × (height/2).
+__global__ void ForwardVerticalQuant26_RefKernel(
+    const int16_t* __restrict__ lowpass,
+    const int16_t* __restrict__ highpass,
+    int width, int height,
+    int low_stride, int high_stride,
+    int16_t* __restrict__ d_ll, int ll_stride,
+    int16_t* __restrict__ d_lh, int lh_stride,
+    int16_t* __restrict__ d_hl, int hl_stride,
+    int16_t* __restrict__ d_hh, int hh_stride,
+    int quant_ll, int quant_lh, int quant_hl, int quant_hh,
+    int midpoint
+) {
+    const int x = blockIdx.x * blockDim.x + threadIdx.x;
+    const int r = blockIdx.y * blockDim.y + threadIdx.y;
+    const int half_h = height / 2;
+
+    if (x >= width || r >= half_h) return;
+
+    const int y = r * 2;
+
+    // --- Process horizontal LOWPASS → LL (vert lowpass) and HL (vert highpass) ---
+    // Vertical lowpass: sum of adjacent pair
+    int32_t even_low = static_cast<int32_t>(lowpass[y * low_stride + x])
+                     + static_cast<int32_t>(lowpass[(y + 1) * low_stride + x]);
+
+    // Vertical highpass: 2-6 biorthogonal filter
+    int32_t odd_low;
+    if (r == 0) {
+        // Top border: [5, -11, 4, 4, -1, -1] / 8
+        odd_low = (5 * static_cast<int32_t>(lowpass[0 * low_stride + x])
+                 - 11 * static_cast<int32_t>(lowpass[1 * low_stride + x])
+                 + 4 * static_cast<int32_t>(lowpass[2 * low_stride + x])
+                 + 4 * static_cast<int32_t>(lowpass[3 * low_stride + x])
+                 - 1 * static_cast<int32_t>(lowpass[4 * low_stride + x])
+                 - 1 * static_cast<int32_t>(lowpass[5 * low_stride + x]) + 4) >> 3;
+    } else if (r < half_h - 1) {
+        // Interior: [-1, -1, 8, -8, 1, 1] / 8
+        int32_t hp = - static_cast<int32_t>(lowpass[(y - 2) * low_stride + x])
+                     - static_cast<int32_t>(lowpass[(y - 1) * low_stride + x])
+                     + static_cast<int32_t>(lowpass[(y + 2) * low_stride + x])
+                     + static_cast<int32_t>(lowpass[(y + 3) * low_stride + x]);
+        hp = (hp + 4) >> 3;
+        odd_low = hp + static_cast<int32_t>(lowpass[y * low_stride + x])
+                     - static_cast<int32_t>(lowpass[(y + 1) * low_stride + x]);
+    } else {
+        // Bottom border: [1, 1, -4, -4, 11, -5] / 8
+        odd_low = (11 * static_cast<int32_t>(lowpass[y * low_stride + x])
+                 - 5 * static_cast<int32_t>(lowpass[(y + 1) * low_stride + x])
+                 - 4 * static_cast<int32_t>(lowpass[(y - 1) * low_stride + x])
+                 - 4 * static_cast<int32_t>(lowpass[(y - 2) * low_stride + x])
+                 + 1 * static_cast<int32_t>(lowpass[(y - 3) * low_stride + x])
+                 + 1 * static_cast<int32_t>(lowpass[(y - 4) * low_stride + x]) + 4) >> 3;
+    }
+
+    // --- Process horizontal HIGHPASS → LH (vert lowpass) and HH (vert highpass) ---
+    int32_t even_high = static_cast<int32_t>(highpass[y * high_stride + x])
+                      + static_cast<int32_t>(highpass[(y + 1) * high_stride + x]);
+
+    int32_t odd_high;
+    if (r == 0) {
+        odd_high = (5 * static_cast<int32_t>(highpass[0 * high_stride + x])
+                  - 11 * static_cast<int32_t>(highpass[1 * high_stride + x])
+                  + 4 * static_cast<int32_t>(highpass[2 * high_stride + x])
+                  + 4 * static_cast<int32_t>(highpass[3 * high_stride + x])
+                  - 1 * static_cast<int32_t>(highpass[4 * high_stride + x])
+                  - 1 * static_cast<int32_t>(highpass[5 * high_stride + x]) + 4) >> 3;
+    } else if (r < half_h - 1) {
+        int32_t hp = - static_cast<int32_t>(highpass[(y - 2) * high_stride + x])
+                     - static_cast<int32_t>(highpass[(y - 1) * high_stride + x])
+                     + static_cast<int32_t>(highpass[(y + 2) * high_stride + x])
+                     + static_cast<int32_t>(highpass[(y + 3) * high_stride + x]);
+        hp = (hp + 4) >> 3;
+        odd_high = hp + static_cast<int32_t>(highpass[y * high_stride + x])
+                      - static_cast<int32_t>(highpass[(y + 1) * high_stride + x]);
+    } else {
+        odd_high = (11 * static_cast<int32_t>(highpass[y * high_stride + x])
+                  - 5 * static_cast<int32_t>(highpass[(y + 1) * high_stride + x])
+                  - 4 * static_cast<int32_t>(highpass[(y - 1) * high_stride + x])
+                  - 4 * static_cast<int32_t>(highpass[(y - 2) * high_stride + x])
+                  + 1 * static_cast<int32_t>(highpass[(y - 3) * high_stride + x])
+                  + 1 * static_cast<int32_t>(highpass[(y - 4) * high_stride + x]) + 4) >> 3;
+    }
+
+    // Quantize and write
+    d_ll[r * ll_stride + x] = Quantize16sTo16s(even_low,  quant_ll, midpoint);
+    d_hl[r * hl_stride + x] = Quantize16sTo16s(odd_low,   quant_hl, midpoint);
+    d_lh[r * lh_stride + x] = Quantize16sTo16s(even_high, quant_lh, midpoint);
+    d_hh[r * hh_stride + x] = Quantize16sTo16s(odd_high,  quant_hh, midpoint);
+}
+
 __global__ void ForwardHorizontal26_RefKernel(
     const int16_t* __restrict__ src, int width, int height, int src_stride,
     int16_t* __restrict__ lowpass, int low_stride,
@@ -256,6 +362,37 @@ HyperCineStatus ForwardVertical26_Reference(
         d_src, width, height, src_stride,
         d_low, low_stride,
         d_high, high_stride
+    );
+    CUDA_CHECK_KERNEL();
+    return HYPERCINE_STATUS_SUCCESS;
+}
+
+HyperCineStatus ForwardVerticalQuant26_Reference(
+    const int16_t* d_low, int low_stride,
+    const int16_t* d_high, int high_stride,
+    int width, int height,
+    int16_t* d_ll, int ll_stride,
+    int16_t* d_lh, int lh_stride,
+    int16_t* d_hl, int hl_stride,
+    int16_t* d_hh, int hh_stride,
+    int quant_ll, int quant_lh, int quant_hl, int quant_hh,
+    int midpoint,
+    cudaStream_t stream
+) {
+    const int half_h = height / 2;
+    dim3 block(16, 16);
+    dim3 grid((width + block.x - 1) / block.x, (half_h + block.y - 1) / block.y);
+
+    ForwardVerticalQuant26_RefKernel<<<grid, block, 0, stream>>>(
+        d_low, d_high,
+        width, height,
+        low_stride, high_stride,
+        d_ll, ll_stride,
+        d_lh, lh_stride,
+        d_hl, hl_stride,
+        d_hh, hh_stride,
+        quant_ll, quant_lh, quant_hl, quant_hh,
+        midpoint
     );
     CUDA_CHECK_KERNEL();
     return HYPERCINE_STATUS_SUCCESS;

@@ -3,6 +3,7 @@
 if(HYPERCINE_ENABLE_CUDA)
     add_library(hypercine_wavelet STATIC
         cpu/wavelet_cpu.cpp
+        cpu/upstream_wrapper.cpp
         cuda/wavelet_cuda_reference.cu
         cuda/wavelet_cuda_optimized.cu
         cuda/wavelet_cuda_api.cu
@@ -20,6 +21,7 @@ if(HYPERCINE_ENABLE_CUDA)
 else()
     add_library(hypercine_wavelet STATIC
         cpu/wavelet_cpu.cpp
+        cpu/upstream_wrapper.cpp
         cuda/wavelet_cuda_stub.cpp
     )
     target_include_directories(hypercine_wavelet PUBLIC

@@ -116,6 +116,20 @@ HyperCineStatus HyperCine_ForwardSpatial2D_CPU(
 );
 
 /**
+ * @brief Production 2D 1-Level 2-6 Spatial Forward Wavelet Transform (Upstream Production CPU).
+ *
+ * Calls the actual upstream production SIMD implementation.
+ */
+HyperCineStatus HyperCine_ForwardSpatial2D_Upstream(
+    const int16_t* src, int width, int height, int src_stride,
+    int16_t* ll, int ll_stride,
+    int16_t* lh, int lh_stride,
+    int16_t* hl, int hl_stride,
+    int16_t* hh, int hh_stride,
+    int quant_ll, int quant_lh, int quant_hl, int quant_hh
+);
+
+/**
  * @brief Production 1D Vertical 2-6 Inverse Wavelet Transform (CPU Reference).
  *
  * Synthesizes two subbands of height @p height into an output of height 2 * @p height.
@@ -199,6 +213,54 @@ HyperCineStatus HyperCine_ForwardSpatial2D_CUDA(
 /**
  * @brief CUDA 1D Vertical 2-6 Inverse Wavelet Transform.
  */
+
+/**
+ * @brief CUDA 2D Spatial Forward Wavelet Transform with Quantization.
+ */
+HyperCineStatus HyperCine_ForwardSpatialQuant2D_CUDA(
+    HyperCineTransformBackend backend,
+    const int16_t* d_src, int width, int height, int src_stride,
+    int16_t* d_ll, int ll_stride,
+    int16_t* d_lh, int lh_stride,
+    int16_t* d_hl, int hl_stride,
+    int16_t* d_hh, int hh_stride,
+    int quant_ll, int quant_lh, int quant_hl, int quant_hh,
+    int prequant_midpoint,
+    void* cuda_stream
+);
+
+/**
+ * @brief Represents a single level in the wavelet pyramid.
+ */
+typedef struct {
+    int16_t* d_ll;
+    int16_t* d_lh;
+    int16_t* d_hl;
+    int16_t* d_hh;
+    int width;
+    int height;
+    int stride_ll;
+    int stride_lh;
+    int stride_hl;
+    int stride_hh;
+    int quant_ll;
+    int quant_lh;
+    int quant_hl;
+    int quant_hh;
+} HyperCinePyramidLevel;
+
+/**
+ * @brief CUDA Multi-Level Wavelet Pyramid with Quantization.
+ */
+HyperCineStatus HyperCine_ForwardPyramid_CUDA(
+    HyperCineTransformBackend backend,
+    const int16_t* d_src, int width, int height, int src_stride,
+    int num_levels,
+    const HyperCinePyramidLevel* levels,
+    int prequant_midpoint,
+    void* cuda_stream
+);
+
 HyperCineStatus HyperCine_InverseVertical26_CUDA(
     HyperCineTransformBackend backend,
     const int16_t* d_low, int low_stride,

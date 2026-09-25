@@ -10,6 +10,20 @@
 #include "hypercine/wavelet.h"
 
 // Reference kernels
+
+HyperCineStatus ForwardVerticalQuant26_Reference(
+    const int16_t* d_low, int low_stride,
+    const int16_t* d_high, int high_stride,
+    int width, int height,
+    int16_t* d_ll, int ll_stride,
+    int16_t* d_lh, int lh_stride,
+    int16_t* d_hl, int hl_stride,
+    int16_t* d_hh, int hh_stride,
+    int quant_ll, int quant_lh, int quant_hl, int quant_hh,
+    int midpoint,
+    cudaStream_t stream
+);
+
 HyperCineStatus ForwardHorizontal26_Reference(
     const int16_t* d_src, int width, int height, int src_stride,
     int16_t* d_low, int low_stride,

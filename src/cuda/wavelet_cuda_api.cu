@@ -167,6 +167,95 @@ HyperCineStatus HyperCine_ForwardSpatial2D_CUDA(
     );
 }
 
+
+HyperCineStatus HyperCine_ForwardSpatialQuant2D_CUDA(
+    HyperCineTransformBackend backend,
+    const int16_t* d_src, int width, int height, int src_stride,
+    int16_t* d_ll, int ll_stride,
+    int16_t* d_lh, int lh_stride,
+    int16_t* d_hl, int hl_stride,
+    int16_t* d_hh, int hh_stride,
+    int quant_ll, int quant_lh, int quant_hl, int quant_hh,
+    int prequant_midpoint,
+    void* cuda_stream
+) {
+    if (!d_src || !d_ll || !d_lh || !d_hl || !d_hh) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (width < 6 || (width % 2) != 0 || height < 6 || (height % 2) != 0) {
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    }
+
+    cudaStream_t stream = static_cast<cudaStream_t>(cuda_stream);
+    const int half_w = width / 2;
+    const size_t intermediate_elements = static_cast<size_t>(half_w) * height;
+
+    ScopedDeviceBuffer d_horiz_low(intermediate_elements, stream);
+    ScopedDeviceBuffer d_horiz_high(intermediate_elements, stream);
+    if (!d_horiz_low.valid() || !d_horiz_high.valid()) {
+        return HYPERCINE_STATUS_OUT_OF_MEMORY;
+    }
+
+    HyperCineStatus status = HyperCine_ForwardHorizontal26_CUDA(
+        backend, d_src, width, height, src_stride,
+        d_horiz_low.get(), half_w,
+        d_horiz_high.get(), half_w,
+        stream
+    );
+    if (status != HYPERCINE_STATUS_SUCCESS) return status;
+
+    return ForwardVerticalQuant26_Reference(
+        d_horiz_low.get(), half_w,
+        d_horiz_high.get(), half_w,
+        half_w, height,
+        d_ll, ll_stride,
+        d_lh, lh_stride,
+        d_hl, hl_stride,
+        d_hh, hh_stride,
+        quant_ll, quant_lh, quant_hl, quant_hh, prequant_midpoint,
+        stream
+    );
+}
+
+HyperCineStatus HyperCine_ForwardPyramid_CUDA(
+    HyperCineTransformBackend backend,
+    const int16_t* d_src, int width, int height, int src_stride,
+    int num_levels,
+    const HyperCinePyramidLevel* levels,
+    int prequant_midpoint,
+    void* cuda_stream
+) {
+    if (num_levels < 1 || num_levels > 3 || !levels) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    const int16_t* current_src = d_src;
+    int current_width = width;
+    int current_height = height;
+    int current_stride = src_stride;
+
+    for (int i = 0; i < num_levels; ++i) {
+        const auto& lvl = levels[i];
+        if (lvl.width != current_width || lvl.height != current_height) {
+            return HYPERCINE_STATUS_INVALID_ARGUMENT;
+        }
+
+        HyperCineStatus status = HyperCine_ForwardSpatialQuant2D_CUDA(
+            backend,
+            current_src, current_width, current_height, current_stride,
+            lvl.d_ll, lvl.stride_ll,
+            lvl.d_lh, lvl.stride_lh,
+            lvl.d_hl, lvl.stride_hl,
+            lvl.d_hh, lvl.stride_hh,
+            lvl.quant_ll, lvl.quant_lh, lvl.quant_hl, lvl.quant_hh,
+            prequant_midpoint,
+            cuda_stream
+        );
+        if (status != HYPERCINE_STATUS_SUCCESS) return status;
+
+        current_src = lvl.d_ll;
+        current_width /= 2;
+        current_height /= 2;
+        current_stride = lvl.stride_ll;
+    }
+    return HYPERCINE_STATUS_SUCCESS;
+}
+
 HyperCineStatus HyperCine_InverseVertical26_CUDA(
     HyperCineTransformBackend backend,
     const int16_t* d_low, int low_stride,

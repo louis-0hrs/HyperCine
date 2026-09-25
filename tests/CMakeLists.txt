@@ -46,3 +46,7 @@ if(HYPERCINE_ENABLE_CUDA)
     add_test(NAME test_cuda_wavelet COMMAND test_cuda_wavelet)
 endif()
 
+
+add_executable(test_cuda_pyramid test_cuda_pyramid.cpp)
+target_link_libraries(test_cuda_pyramid PRIVATE hypercine_wavelet CFHDCodecStatic)
+add_test(NAME test_cuda_pyramid COMMAND test_cuda_pyramid)
