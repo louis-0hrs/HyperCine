@@ -15,304 +15,381 @@
       "name": "1080p",
       "width": 1920,
       "height": 1080,
-      "batch_frames": 1,
-      "iterations": 100,
-      "cpu_reference": {
-        "latency_avg_ms": 6.91798,
-        "latency_median_ms": 6.9915,
-        "latency_p95_ms": 7.7814,
-        "latency_min_ms": 6.4649,
-        "latency_max_ms": 7.7814,
-        "megapixels_per_sec": 299.74,
-        "effective_gb_per_sec": 1.19896
-      },
-      "cpu_production": {
-        "latency_avg_ms": 0.45055,
-        "latency_median_ms": 0.3935,
-        "latency_p95_ms": 1.1787,
-        "latency_min_ms": 0.3871,
-        "latency_max_ms": 1.1787,
-        "megapixels_per_sec": 4602.37
-      },
-      "cpu_full_encoder": {
-        "latency_avg_ms": 8.24799,
-        "latency_median_ms": 8.2413,
-        "latency_p95_ms": 9.0023,
-        "latency_min_ms": 7.828,
-        "latency_max_ms": 9.0023,
-        "megapixels_per_sec": 251.407
-      },
-      "cuda_reference": {
-        "kernel_only": {
-          "latency_avg_ms": 1.46936,
-          "latency_median_ms": 1.42336,
-          "latency_p95_ms": 1.53702,
-          "latency_min_ms": 1.34246,
-          "latency_max_ms": 5.52848,
-          "megapixels_per_sec": 1411.23,
-          "effective_gb_per_sec": 5.6449
+      "batch_frame_count": 10,
+      "iterations": 15,
+      "records": [
+        {
+          "implementation": "HYPERCINE_CPU_REFERENCE",
+          "transfer_mode": "CPU Host-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 70.7947,
+          "batch_duration_median_ms": 70.2787,
+          "batch_duration_min_ms": 66.7148,
+          "batch_duration_max_ms": 76.2474,
+          "latency_avg_ms_per_frame": 7.07947,
+          "latency_median_ms_per_frame": 7.02787,
+          "latency_min_ms_per_frame": 6.67148,
+          "latency_max_ms_per_frame": 7.62474,
+          "megapixels_per_sec": 292.903
         },
-        "end_to_end": {
-          "latency_avg_ms": 2.70062,
-          "latency_median_ms": 2.7124,
-          "latency_p95_ms": 3.1317,
-          "latency_min_ms": 2.1279,
-          "latency_max_ms": 3.373,
-          "megapixels_per_sec": 767.824
+        {
+          "implementation": "UPSTREAM_CPU_PRODUCTION",
+          "transfer_mode": "CPU Host-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 9.77369,
+          "batch_duration_median_ms": 9.7866,
+          "batch_duration_min_ms": 9.5005,
+          "batch_duration_max_ms": 10.0695,
+          "latency_avg_ms_per_frame": 0.977369,
+          "latency_median_ms_per_frame": 0.97866,
+          "latency_min_ms_per_frame": 0.95005,
+          "latency_max_ms_per_frame": 1.00695,
+          "megapixels_per_sec": 2121.61
         },
-        "speedup_kernel": 0.30663,
-        "speedup_end_to_end": 0.166832,
-        "pcie_transfer_percent": 45.5917
-      },
-      "cuda_optimized": {
-        "kernel_only": {
-          "latency_avg_ms": 1.23656,
-          "latency_median_ms": 1.17453,
-          "latency_p95_ms": 1.37197,
-          "latency_min_ms": 1.09568,
-          "latency_max_ms": 5.44154,
-          "megapixels_per_sec": 1676.91,
-          "effective_gb_per_sec": 6.70765
+        {
+          "implementation": "CUDA_REFERENCE",
+          "transfer_mode": "GPU Kernel-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 1.71826,
+          "batch_duration_median_ms": 1.69062,
+          "batch_duration_min_ms": 1.61075,
+          "batch_duration_max_ms": 1.99066,
+          "latency_avg_ms_per_frame": 0.171826,
+          "latency_median_ms_per_frame": 0.169062,
+          "latency_min_ms_per_frame": 0.161075,
+          "latency_max_ms_per_frame": 0.199066,
+          "megapixels_per_sec": 12068
         },
-        "end_to_end": {
-          "latency_avg_ms": 2.43767,
-          "latency_median_ms": 2.3059,
-          "latency_p95_ms": 2.9208,
-          "latency_min_ms": 2.1645,
-          "latency_max_ms": 6.7592,
-          "megapixels_per_sec": 850.65
+        {
+          "implementation": "CUDA_OPTIMIZED",
+          "transfer_mode": "GPU Kernel-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 1.78179,
+          "batch_duration_median_ms": 1.74784,
+          "batch_duration_min_ms": 1.64659,
+          "batch_duration_max_ms": 2.16678,
+          "latency_avg_ms_per_frame": 0.178179,
+          "latency_median_ms_per_frame": 0.174784,
+          "latency_min_ms_per_frame": 0.164659,
+          "latency_max_ms_per_frame": 0.216678,
+          "megapixels_per_sec": 11637.7
         },
-        "speedup_kernel": 0.364358,
-        "speedup_end_to_end": 0.184828,
-        "pcie_transfer_percent": 49.2729
+        {
+          "implementation": "CUDA_REFERENCE",
+          "transfer_mode": "Host->GPU->Host",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 14.7163,
+          "batch_duration_median_ms": 14.6784,
+          "batch_duration_min_ms": 14.2491,
+          "batch_duration_max_ms": 15.2362,
+          "latency_avg_ms_per_frame": 1.47163,
+          "latency_median_ms_per_frame": 1.46784,
+          "latency_min_ms_per_frame": 1.42491,
+          "latency_max_ms_per_frame": 1.52362,
+          "megapixels_per_sec": 1409.05
+        },
+        {
+          "implementation": "CUDA_OPTIMIZED",
+          "transfer_mode": "Host->GPU->Host",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 14.8537,
+          "batch_duration_median_ms": 14.4914,
+          "batch_duration_min_ms": 14.2445,
+          "batch_duration_max_ms": 18.952,
+          "latency_avg_ms_per_frame": 1.48537,
+          "latency_median_ms_per_frame": 1.44914,
+          "latency_min_ms_per_frame": 1.42445,
+          "latency_max_ms_per_frame": 1.8952,
+          "megapixels_per_sec": 1396.01
+        },
+        {
+          "implementation": "FULL_UPSTREAM_ENCODER",
+          "transfer_mode": "CPU Full Pipeline",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 80.8662,
+          "batch_duration_median_ms": 80.451,
+          "batch_duration_min_ms": 79.3247,
+          "batch_duration_max_ms": 84.7421,
+          "latency_avg_ms_per_frame": 8.08662,
+          "latency_median_ms_per_frame": 8.0451,
+          "latency_min_ms_per_frame": 7.93247,
+          "latency_max_ms_per_frame": 8.47421,
+          "megapixels_per_sec": 256.424
+        }
+      ],
+      "transfer_decomposition": {
+        "host_to_device": {
+          "bytes_transferred": 4147200,
+          "latency_avg_ms_per_frame": 0.638506,
+          "latency_median_ms_per_frame": 0.637526,
+          "throughput_gb_sec": 6.49516
+        },
+        "gpu_compute": {
+          "gpu_wavelet_pyramid_avg_ms": 0.128982,
+          "gpu_quantization_avg_ms": 0.0143314,
+          "gpu_fused_total_avg_ms": 0.143314
+        },
+        "device_to_host": {
+          "bytes_transferred": 4147200,
+          "latency_avg_ms_per_frame": 0.679255,
+          "latency_median_ms_per_frame": 0.66961,
+          "throughput_gb_sec": 6.10552
+        },
+        "end_to_end_total_avg_ms": 1.46107
       }
     },
     {
       "name": "4K_UHD",
       "width": 3840,
       "height": 2160,
-      "batch_frames": 1,
-      "iterations": 100,
-      "cpu_reference": {
-        "latency_avg_ms": 28.0788,
-        "latency_median_ms": 28.1444,
-        "latency_p95_ms": 29.3335,
-        "latency_min_ms": 26.2333,
-        "latency_max_ms": 29.3335,
-        "megapixels_per_sec": 295.398,
-        "effective_gb_per_sec": 1.18159
-      },
-      "cpu_production": {
-        "latency_avg_ms": 2.68121,
-        "latency_median_ms": 2.6821,
-        "latency_p95_ms": 2.98,
-        "latency_min_ms": 2.4475,
-        "latency_max_ms": 2.98,
-        "megapixels_per_sec": 3093.53
-      },
-      "cpu_full_encoder": {
-        "latency_avg_ms": 33.9626,
-        "latency_median_ms": 33.7713,
-        "latency_p95_ms": 36.2028,
-        "latency_min_ms": 31.6345,
-        "latency_max_ms": 36.2028,
-        "megapixels_per_sec": 244.221
-      },
-      "cuda_reference": {
-        "kernel_only": {
-          "latency_avg_ms": 1.2037,
-          "latency_median_ms": 1.1991,
-          "latency_p95_ms": 1.26976,
-          "latency_min_ms": 1.13766,
-          "latency_max_ms": 1.31277,
-          "megapixels_per_sec": 6890.78,
-          "effective_gb_per_sec": 27.5631
+      "batch_frame_count": 10,
+      "iterations": 10,
+      "records": [
+        {
+          "implementation": "HYPERCINE_CPU_REFERENCE",
+          "transfer_mode": "CPU Host-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 264.065,
+          "batch_duration_median_ms": 261.583,
+          "batch_duration_min_ms": 258.365,
+          "batch_duration_max_ms": 274.743,
+          "latency_avg_ms_per_frame": 26.4065,
+          "latency_median_ms_per_frame": 26.1583,
+          "latency_min_ms_per_frame": 25.8365,
+          "latency_max_ms_per_frame": 27.4743,
+          "megapixels_per_sec": 314.105
         },
-        "end_to_end": {
-          "latency_avg_ms": 4.55773,
-          "latency_median_ms": 4.4329,
-          "latency_p95_ms": 5.2957,
-          "latency_min_ms": 4.227,
-          "latency_max_ms": 7.9697,
-          "megapixels_per_sec": 1819.86
+        {
+          "implementation": "UPSTREAM_CPU_PRODUCTION",
+          "transfer_mode": "CPU Host-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 37.5779,
+          "batch_duration_median_ms": 37.5609,
+          "batch_duration_min_ms": 36.7598,
+          "batch_duration_max_ms": 38.4824,
+          "latency_avg_ms_per_frame": 3.75779,
+          "latency_median_ms_per_frame": 3.75609,
+          "latency_min_ms_per_frame": 3.67598,
+          "latency_max_ms_per_frame": 3.84824,
+          "megapixels_per_sec": 2207.25
         },
-        "speedup_kernel": 2.22748,
-        "speedup_end_to_end": 0.588277,
-        "pcie_transfer_percent": 73.59
-      },
-      "cuda_optimized": {
-        "kernel_only": {
-          "latency_avg_ms": 1.28432,
-          "latency_median_ms": 1.23699,
-          "latency_p95_ms": 1.34963,
-          "latency_min_ms": 1.1561,
-          "latency_max_ms": 4.64998,
-          "megapixels_per_sec": 6458.2,
-          "effective_gb_per_sec": 25.8328
+        {
+          "implementation": "CUDA_REFERENCE",
+          "transfer_mode": "GPU Kernel-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 2.39973,
+          "batch_duration_median_ms": 2.39922,
+          "batch_duration_min_ms": 2.31315,
+          "batch_duration_max_ms": 2.45965,
+          "latency_avg_ms_per_frame": 0.239973,
+          "latency_median_ms_per_frame": 0.239922,
+          "latency_min_ms_per_frame": 0.231315,
+          "latency_max_ms_per_frame": 0.245965,
+          "megapixels_per_sec": 34563.8
         },
-        "end_to_end": {
-          "latency_avg_ms": 4.82145,
-          "latency_median_ms": 4.4936,
-          "latency_p95_ms": 6.0083,
-          "latency_min_ms": 4.224,
-          "latency_max_ms": 9.5831,
-          "megapixels_per_sec": 1720.31
+        {
+          "implementation": "CUDA_OPTIMIZED",
+          "transfer_mode": "GPU Kernel-Only",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 2.55351,
+          "batch_duration_median_ms": 2.57587,
+          "batch_duration_min_ms": 2.40115,
+          "batch_duration_max_ms": 2.72688,
+          "latency_avg_ms_per_frame": 0.255351,
+          "latency_median_ms_per_frame": 0.257587,
+          "latency_min_ms_per_frame": 0.240115,
+          "latency_max_ms_per_frame": 0.272688,
+          "megapixels_per_sec": 32482.3
         },
-        "speedup_kernel": 2.08764,
-        "speedup_end_to_end": 0.556099,
-        "pcie_transfer_percent": 73.3623
+        {
+          "implementation": "CUDA_REFERENCE",
+          "transfer_mode": "Host->GPU->Host",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 53.6861,
+          "batch_duration_median_ms": 53.8551,
+          "batch_duration_min_ms": 53.0884,
+          "batch_duration_max_ms": 54.1844,
+          "latency_avg_ms_per_frame": 5.36861,
+          "latency_median_ms_per_frame": 5.38551,
+          "latency_min_ms_per_frame": 5.30884,
+          "latency_max_ms_per_frame": 5.41844,
+          "megapixels_per_sec": 1544.98
+        },
+        {
+          "implementation": "CUDA_OPTIMIZED",
+          "transfer_mode": "Host->GPU->Host",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 53.9536,
+          "batch_duration_median_ms": 53.892,
+          "batch_duration_min_ms": 53.3229,
+          "batch_duration_max_ms": 54.8929,
+          "latency_avg_ms_per_frame": 5.39536,
+          "latency_median_ms_per_frame": 5.3892,
+          "latency_min_ms_per_frame": 5.33229,
+          "latency_max_ms_per_frame": 5.48929,
+          "megapixels_per_sec": 1537.32
+        },
+        {
+          "implementation": "FULL_UPSTREAM_ENCODER",
+          "transfer_mode": "CPU Full Pipeline",
+          "number_of_frames": 10,
+          "batch_duration_avg_ms": 320.798,
+          "batch_duration_median_ms": 320.162,
+          "batch_duration_min_ms": 314.191,
+          "batch_duration_max_ms": 329.57,
+          "latency_avg_ms_per_frame": 32.0798,
+          "latency_median_ms_per_frame": 32.0162,
+          "latency_min_ms_per_frame": 31.4191,
+          "latency_max_ms_per_frame": 32.957,
+          "megapixels_per_sec": 258.555
+        }
+      ],
+      "transfer_decomposition": {
+        "host_to_device": {
+          "bytes_transferred": 16588800,
+          "latency_avg_ms_per_frame": 3.80799,
+          "latency_median_ms_per_frame": 2.56184,
+          "throughput_gb_sec": 4.35631
+        },
+        "gpu_compute": {
+          "gpu_wavelet_pyramid_avg_ms": 0.269485,
+          "gpu_quantization_avg_ms": 0.0299428,
+          "gpu_fused_total_avg_ms": 0.299428
+        },
+        "device_to_host": {
+          "bytes_transferred": 16588800,
+          "latency_avg_ms_per_frame": 3.34898,
+          "latency_median_ms_per_frame": 2.6118,
+          "throughput_gb_sec": 4.9534
+        },
+        "end_to_end_total_avg_ms": 7.4564
       }
     },
     {
       "name": "8K_UHD",
       "width": 7680,
       "height": 4320,
-      "batch_frames": 1,
-      "iterations": 50,
-      "cpu_reference": {
-        "latency_avg_ms": 133.95,
-        "latency_median_ms": 127.364,
-        "latency_p95_ms": 148.342,
-        "latency_min_ms": 126.18,
-        "latency_max_ms": 148.342,
-        "megapixels_per_sec": 247.686,
-        "effective_gb_per_sec": 0.990745
-      },
-      "cpu_production": {
-        "latency_avg_ms": 12.7849,
-        "latency_median_ms": 13.2601,
-        "latency_p95_ms": 14.8862,
-        "latency_min_ms": 10.6977,
-        "latency_max_ms": 14.8862,
-        "megapixels_per_sec": 2595.06
-      },
-      "cpu_full_encoder": {
-        "latency_avg_ms": 163.78,
-        "latency_median_ms": 163.008,
-        "latency_p95_ms": 170.316,
-        "latency_min_ms": 158.53,
-        "latency_max_ms": 170.316,
-        "megapixels_per_sec": 202.574
-      },
-      "cuda_reference": {
-        "kernel_only": {
-          "latency_avg_ms": 2.93582,
-          "latency_median_ms": 2.92454,
-          "latency_p95_ms": 3.19795,
-          "latency_min_ms": 2.66138,
-          "latency_max_ms": 3.48877,
-          "megapixels_per_sec": 11301,
-          "effective_gb_per_sec": 45.2039
+      "batch_frame_count": 5,
+      "iterations": 5,
+      "records": [
+        {
+          "implementation": "HYPERCINE_CPU_REFERENCE",
+          "transfer_mode": "CPU Host-Only",
+          "number_of_frames": 5,
+          "batch_duration_avg_ms": 566.737,
+          "batch_duration_median_ms": 567.173,
+          "batch_duration_min_ms": 553.966,
+          "batch_duration_max_ms": 579.072,
+          "latency_avg_ms_per_frame": 113.347,
+          "latency_median_ms_per_frame": 113.435,
+          "latency_min_ms_per_frame": 110.793,
+          "latency_max_ms_per_frame": 115.814,
+          "megapixels_per_sec": 292.707
         },
-        "end_to_end": {
-          "latency_avg_ms": 15.7698,
-          "latency_median_ms": 15.6129,
-          "latency_p95_ms": 17.6213,
-          "latency_min_ms": 14.3898,
-          "latency_max_ms": 18.6901,
-          "megapixels_per_sec": 2103.88
+        {
+          "implementation": "UPSTREAM_CPU_PRODUCTION",
+          "transfer_mode": "CPU Host-Only",
+          "number_of_frames": 5,
+          "batch_duration_avg_ms": 75.1749,
+          "batch_duration_median_ms": 74.9909,
+          "batch_duration_min_ms": 74.572,
+          "batch_duration_max_ms": 75.9377,
+          "latency_avg_ms_per_frame": 15.035,
+          "latency_median_ms_per_frame": 14.9982,
+          "latency_min_ms_per_frame": 14.9144,
+          "latency_max_ms_per_frame": 15.1875,
+          "megapixels_per_sec": 2206.69
         },
-        "speedup_kernel": 4.3548,
-        "speedup_end_to_end": 0.810724,
-        "pcie_transfer_percent": 81.3832
-      },
-      "cuda_optimized": {
-        "kernel_only": {
-          "latency_avg_ms": 2.5334,
-          "latency_median_ms": 2.51597,
-          "latency_p95_ms": 2.66445,
-          "latency_min_ms": 2.44838,
-          "latency_max_ms": 2.80474,
-          "megapixels_per_sec": 13096.1,
-          "effective_gb_per_sec": 52.3842
+        {
+          "implementation": "CUDA_REFERENCE",
+          "transfer_mode": "GPU Kernel-Only",
+          "number_of_frames": 5,
+          "batch_duration_avg_ms": 5.53651,
+          "batch_duration_median_ms": 5.55418,
+          "batch_duration_min_ms": 5.48858,
+          "batch_duration_max_ms": 5.5767,
+          "latency_avg_ms_per_frame": 1.1073,
+          "latency_median_ms_per_frame": 1.11084,
+          "latency_min_ms_per_frame": 1.09772,
+          "latency_max_ms_per_frame": 1.11534,
+          "megapixels_per_sec": 29962.6
         },
-        "end_to_end": {
-          "latency_avg_ms": 15.5686,
-          "latency_median_ms": 15.3961,
-          "latency_p95_ms": 17.3698,
-          "latency_min_ms": 14.3583,
-          "latency_max_ms": 19.9498,
-          "megapixels_per_sec": 2131.05
+        {
+          "implementation": "CUDA_OPTIMIZED",
+          "transfer_mode": "GPU Kernel-Only",
+          "number_of_frames": 5,
+          "batch_duration_avg_ms": 5.55455,
+          "batch_duration_median_ms": 5.54496,
+          "batch_duration_min_ms": 5.52448,
+          "batch_duration_max_ms": 5.58797,
+          "latency_avg_ms_per_frame": 1.11091,
+          "latency_median_ms_per_frame": 1.10899,
+          "latency_min_ms_per_frame": 1.1049,
+          "latency_max_ms_per_frame": 1.11759,
+          "megapixels_per_sec": 29865.3
         },
-        "speedup_kernel": 5.04654,
-        "speedup_end_to_end": 0.821197,
-        "pcie_transfer_percent": 83.7275
-      }
-    },
-    {
-      "name": "1080p_Batch16",
-      "width": 1920,
-      "height": 1080,
-      "batch_frames": 16,
-      "iterations": 50,
-      "cpu_reference": {
-        "latency_avg_ms": 139.407,
-        "latency_median_ms": 137.683,
-        "latency_p95_ms": 168.398,
-        "latency_min_ms": 124.149,
-        "latency_max_ms": 168.398,
-        "megapixels_per_sec": 237.991,
-        "effective_gb_per_sec": 0.951965
-      },
-      "cpu_production": {
-        "latency_avg_ms": 14.7132,
-        "latency_median_ms": 14.3156,
-        "latency_p95_ms": 18.5653,
-        "latency_min_ms": 13.8722,
-        "latency_max_ms": 18.5653,
-        "megapixels_per_sec": 2254.95
-      },
-      "cpu_full_encoder": {
-        "latency_avg_ms": 156.966,
-        "latency_median_ms": 156.954,
-        "latency_p95_ms": 182.058,
-        "latency_min_ms": 130.343,
-        "latency_max_ms": 182.058,
-        "megapixels_per_sec": 211.368
-      },
-      "cuda_reference": {
-        "kernel_only": {
-          "latency_avg_ms": 8.14533,
-          "latency_median_ms": 8.63642,
-          "latency_p95_ms": 13.1789,
-          "latency_min_ms": 4.81587,
-          "latency_max_ms": 32.9298,
-          "megapixels_per_sec": 4073.21,
-          "effective_gb_per_sec": 16.2928
+        {
+          "implementation": "CUDA_REFERENCE",
+          "transfer_mode": "Host->GPU->Host",
+          "number_of_frames": 5,
+          "batch_duration_avg_ms": 107.891,
+          "batch_duration_median_ms": 107.672,
+          "batch_duration_min_ms": 107.505,
+          "batch_duration_max_ms": 108.487,
+          "latency_avg_ms_per_frame": 21.5781,
+          "latency_median_ms_per_frame": 21.5344,
+          "latency_min_ms_per_frame": 21.501,
+          "latency_max_ms_per_frame": 21.6974,
+          "megapixels_per_sec": 1537.56
         },
-        "end_to_end": {
-          "latency_avg_ms": 25.9987,
-          "latency_median_ms": 23.5595,
-          "latency_p95_ms": 46.0636,
-          "latency_min_ms": 22.9075,
-          "latency_max_ms": 49.1924,
-          "megapixels_per_sec": 1276.13
+        {
+          "implementation": "CUDA_OPTIMIZED",
+          "transfer_mode": "Host->GPU->Host",
+          "number_of_frames": 5,
+          "batch_duration_avg_ms": 107.42,
+          "batch_duration_median_ms": 107.495,
+          "batch_duration_min_ms": 107.146,
+          "batch_duration_max_ms": 107.569,
+          "latency_avg_ms_per_frame": 21.4841,
+          "latency_median_ms_per_frame": 21.499,
+          "latency_min_ms_per_frame": 21.4292,
+          "latency_max_ms_per_frame": 21.5138,
+          "megapixels_per_sec": 1544.29
         },
-        "speedup_kernel": 1.80634,
-        "speedup_end_to_end": 0.565923,
-        "pcie_transfer_percent": 68.6702
-      },
-      "cuda_optimized": {
-        "kernel_only": {
-          "latency_avg_ms": 2.54753,
-          "latency_median_ms": 2.16883,
-          "latency_p95_ms": 2.74227,
-          "latency_min_ms": 1.82067,
-          "latency_max_ms": 21.2724,
-          "megapixels_per_sec": 13023.4,
-          "effective_gb_per_sec": 52.0937
+        {
+          "implementation": "FULL_UPSTREAM_ENCODER",
+          "transfer_mode": "CPU Full Pipeline",
+          "number_of_frames": 5,
+          "batch_duration_avg_ms": 641.42,
+          "batch_duration_median_ms": 637.614,
+          "batch_duration_min_ms": 626.886,
+          "batch_duration_max_ms": 659.759,
+          "latency_avg_ms_per_frame": 128.284,
+          "latency_median_ms_per_frame": 127.523,
+          "latency_min_ms_per_frame": 125.377,
+          "latency_max_ms_per_frame": 131.952,
+          "megapixels_per_sec": 258.626
+        }
+      ],
+      "transfer_decomposition": {
+        "host_to_device": {
+          "bytes_transferred": 66355200,
+          "latency_avg_ms_per_frame": 14.0758,
+          "latency_median_ms_per_frame": 10.2208,
+          "throughput_gb_sec": 4.71414
         },
-        "end_to_end": {
-          "latency_avg_ms": 23.8393,
-          "latency_median_ms": 23.2127,
-          "latency_p95_ms": 23.9525,
-          "latency_min_ms": 22.5674,
-          "latency_max_ms": 52.1252,
-          "megapixels_per_sec": 1391.72
+        "gpu_compute": {
+          "gpu_wavelet_pyramid_avg_ms": 1.07695,
+          "gpu_quantization_avg_ms": 0.119661,
+          "gpu_fused_total_avg_ms": 1.19661
         },
-        "speedup_kernel": 5.77549,
-        "speedup_end_to_end": 0.617184,
-        "pcie_transfer_percent": 89.3137
+        "device_to_host": {
+          "bytes_transferred": 66355200,
+          "latency_avg_ms_per_frame": 12.4086,
+          "latency_median_ms_per_frame": 10.4439,
+          "throughput_gb_sec": 5.34754
+        },
+        "end_to_end_total_avg_ms": 27.681
       }
     }
   ]

@@ -30,9 +30,15 @@ if(HYPERCINE_ENABLE_CUDA)
     )
     target_link_libraries(benchmark_phase1b PRIVATE hypercine_core CFHDCodecStatic)
 
+    add_executable(profile_encoder
+        profile_encoder.cpp
+    )
+    target_link_libraries(profile_encoder PRIVATE hypercine_core CFHDCodecStatic)
+
     if(WIN32)
         target_link_libraries(benchmark_wavelet PRIVATE psapi)
         target_link_libraries(benchmark_phase1b PRIVATE psapi)
+        target_link_libraries(profile_encoder PRIVATE psapi)
     endif()
 endif()
 
