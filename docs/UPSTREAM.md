@@ -80,3 +80,25 @@ Without `TAG_PROCESS_PATH` set to `PROCESSING_ALL_ON (0xffff)`, decoder process 
 In `upstream/CMakeLists.txt` (line 35), `string(STRIP ${ADDITIONAL_LIBS} ADDITIONAL_LIBS)` is called without quotes. When CUDA is enabled as a project language in modern CMake, `find_package(OpenMP)` in upstream checks OpenMP for C, CXX, and CUDA. Because CUDA lacks OpenMP flags, `OpenMP_FOUND` evaluates to false, leaving `ADDITIONAL_LIBS` unset. An unquoted empty variable causes `string(STRIP)` to fail with "requires two arguments".
 - *Mitigation:* The root `CMakeLists.txt` initializes `set(ADDITIONAL_LIBS " ")`, `set(OpenMP_CUDA_FOUND TRUE)`, and `set(OpenMP_CUDA_FLAGS "")` before `add_subdirectory(upstream)`, ensuring clean CMake configuration without modifying any upstream file.
 
+### 7. `_THREADED_ENCODER` does not build
+
+`upstream/Codec/config.h` defaults `_THREADED_ENCODER` to 0. The active encode path therefore calls `EncodeQuantizedGroup`, not `EncodeQuantizedGroupThreaded`.
+
+Compiling the same pristine sources with `-D_THREADED_ENCODER=1` fails, so there is no functioning upstream threaded configuration on this tree:
+
+- In C++, `encoder.h` uses the `ENCODER` typedef inside the threaded structs (around line 124) before the typedef at line 203. A forced forward declaration (`cmake/threaded_encoder_prefix.h`, `/FI`, no upstream edit) gets past that C++ rule.
+- `encoder.c` then fails inside the threaded functions. Examples from the MSVC 19.44 build: `display_height` and `ChromaFullRes` are undeclared, `encoder` has no `display_height` or `metasize` members, and calls such as `SetEncoderFormat`, `QuantizationSetRate`, `PutVideoIntraFrameHeader`, and `EncodeQuantizedFrameTransform` do not match their current prototypes. `wavelet.c` has the same class of mismatch in `FilterSpatialYUVQuant16s`.
+
+The optional `CFHDCodecThreaded` target is `EXCLUDE_FROM_ALL`. It reproduces this failure. The sources under `upstream/` were not modified. The stock encoder used for performance comparisons remains the default build (`_THREADED_ENCODER=0`).
+
+### 8. 128×128 YUY2 roundtrip is not pixel-stable
+
+`tests/test_codec_roundtrip` encodes a fixed 128×128 YUY2 corpus with the stock SDK and decodes it again. Across separate processes the encoded sample size stays constant and the wavelet payload stays constant, but the sample hash does not. The bytes that change are the fixed-width metadata written by `CSampleEncoder::HandleMetadata`:
+
+- `TAG_CLIP_GUID` (`GUID`, 16 bytes) from `CoCreateGuid` on every fresh encoder
+- `TAG_ENCODE_DATE` (`DATE`), `TAG_ENCODE_TIME` (`TIME`), and `TAG_TIMECODE` (`TIMC`) from `localtime`
+
+`tests/test_yuy2_stability` zeroes those payloads and requires the remaining sample to match across two encoder opens in the same process, including across a one-second clock step. It also requires the two GUID payloads to differ. A second process can still differ by a few coded bytes (4 bytes on a flat black frame, repeated at the same sites in two channels). The regression therefore compares opens inside one process and does not freeze a cross-process hash.
+
+Decoding the same sample twice does not reconstruct the same pixels. The stock library is built with `_THREADED_DECODER=1`, and `InvertHorizontalStrip16sToYUYV` adds `rand()` into the inverse rounding. Those calls share the process CRT state across decoder worker threads, so the dither assignment depends on scheduling. `srand` does not make two opens match. Pixel PSNR is therefore not a pass/fail gate for this test. Both tests still require `CFHD_DecodeSample` to return success and the output geometry to be 128×128 YUY2 with pitch 256. Upstream sources were not modified.
+

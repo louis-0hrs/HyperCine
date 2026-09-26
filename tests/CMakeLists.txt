@@ -25,6 +25,12 @@ add_executable(test_codec_roundtrip
 target_link_libraries(test_codec_roundtrip PRIVATE CFHDCodecStatic)
 add_test(NAME test_codec_roundtrip COMMAND test_codec_roundtrip)
 
+add_executable(test_yuy2_stability
+    test_yuy2_stability.cpp
+)
+target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
+add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
+
 # 3. Upstream sample AVI decode test
 add_executable(test_avi_sample
     test_avi_sample.cpp
@@ -50,3 +56,29 @@ endif()
 add_executable(test_cuda_pyramid test_cuda_pyramid.cpp)
 target_link_libraries(test_cuda_pyramid PRIVATE hypercine_wavelet CFHDCodecStatic)
 add_test(NAME test_cuda_pyramid COMMAND test_cuda_pyramid)
+
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_entropy_parallel test_entropy_parallel.cpp)
+    target_link_libraries(test_entropy_parallel PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_entropy_parallel COMMAND test_entropy_parallel)
+
+    add_executable(test_hybrid_roundtrip test_hybrid_roundtrip.cpp)
+    target_link_libraries(test_hybrid_roundtrip PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_hybrid_roundtrip COMMAND test_hybrid_roundtrip)
+
+    add_executable(test_phase2a test_phase2a.cpp)
+    target_link_libraries(test_phase2a PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_phase2a COMMAND test_phase2a)
+
+    add_executable(test_phase2b test_phase2b.cpp)
+    target_link_libraries(test_phase2b PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_phase2b COMMAND test_phase2b)
+
+    add_executable(test_phase2c test_phase2c.cpp)
+    target_link_libraries(test_phase2c PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_phase2c COMMAND test_phase2c)
+
+    add_executable(test_phase2d test_phase2d.cpp)
+    target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_phase2d COMMAND test_phase2d)
+endif()

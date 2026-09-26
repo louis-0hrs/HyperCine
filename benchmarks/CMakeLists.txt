@@ -35,10 +35,51 @@ if(HYPERCINE_ENABLE_CUDA)
     )
     target_link_libraries(profile_encoder PRIVATE hypercine_core CFHDCodecStatic)
 
+    add_executable(benchmark_phase1c
+        benchmark_phase1c.cpp
+    )
+    target_link_libraries(benchmark_phase1c PRIVATE hypercine_core CFHDCodecStatic)
+
+    add_executable(benchmark_phase2a
+        benchmark_phase2a.cpp
+    )
+    target_link_libraries(benchmark_phase2a PRIVATE hypercine_core CFHDCodecStatic)
+
+    add_executable(benchmark_phase2b
+        benchmark_phase2b.cpp
+    )
+    target_link_libraries(benchmark_phase2b PRIVATE hypercine_core CFHDCodecStatic)
+
+    add_executable(benchmark_phase2c
+        benchmark_phase2c.cpp
+    )
+    target_link_libraries(benchmark_phase2c PRIVATE hypercine_core CFHDCodecStatic)
+
+    add_executable(benchmark_phase2d
+        benchmark_phase2d.cpp
+    )
+    target_link_libraries(benchmark_phase2d PRIVATE hypercine_core CFHDCodecStatic)
+
     if(WIN32)
         target_link_libraries(benchmark_wavelet PRIVATE psapi)
         target_link_libraries(benchmark_phase1b PRIVATE psapi)
         target_link_libraries(profile_encoder PRIVATE psapi)
+        target_link_libraries(benchmark_phase1c PRIVATE psapi)
+        target_link_libraries(benchmark_phase2a PRIVATE psapi)
+        target_link_libraries(benchmark_phase2b PRIVATE psapi)
+        target_link_libraries(benchmark_phase2c PRIVATE psapi)
+        target_link_libraries(benchmark_phase2d PRIVATE psapi)
+    endif()
+endif()
+
+if(TARGET CFHDCodecThreaded)
+    add_executable(benchmark_upstream_threaded EXCLUDE_FROM_ALL benchmark_upstream_threaded.cpp)
+    target_link_libraries(benchmark_upstream_threaded PRIVATE CFHDCodecThreaded)
+    target_include_directories(benchmark_upstream_threaded PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/upstream/Common)
+    if(WIN32)
+        target_link_libraries(benchmark_upstream_threaded PRIVATE psapi)
     endif()
 endif()
 

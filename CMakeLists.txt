@@ -58,6 +58,37 @@ if(HYPERCINE_BUILD_UPSTREAM)
     set(OpenMP_CUDA_FLAGS "" CACHE STRING "CUDA OpenMP flags placeholder" FORCE)
 
     add_subdirectory(upstream)
+
+    # Second compile of the pristine sources. upstream/ is not modified.
+    # _THREADED_ENCODER is a compile-time switch in upstream/Codec/config.h.
+    file(GLOB HYPERCINE_THREADED_CODEC CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/Codec/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/Codec/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/WarpLib/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/EncoderSDK/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/DecoderSDK/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/ConvertLib/*.cpp")
+    # The threaded sources do not compile (see docs/UPSTREAM.md). The target is
+    # kept so the failure can be reproduced, and it is excluded from the default build.
+    add_library(CFHDCodecThreaded STATIC EXCLUDE_FROM_ALL ${HYPERCINE_THREADED_CODEC})
+    target_compile_definitions(CFHDCodecThreaded PRIVATE
+        _THREADED_ENCODER=1
+        _ALLOCATOR=1
+        WARPSTUFF=1)
+    target_include_directories(CFHDCodecThreaded PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/Common"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/Tables"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/Codec"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/ConvertLib"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/WarpLib"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/Example"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/EncoderSDK"
+        "${CMAKE_CURRENT_SOURCE_DIR}/upstream/DecoderSDK")
+    if(MSVC)
+        target_compile_options(CFHDCodecThreaded PRIVATE
+            /wd4244 /wd4267 /wd4101 /wd4018
+            "/FI${CMAKE_CURRENT_SOURCE_DIR}/cmake/threaded_encoder_prefix.h")
+    endif()
 endif()
 
 # Include directories
