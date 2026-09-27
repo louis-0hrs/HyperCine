@@ -1,13 +1,105 @@
-# Phase 3A.1 & Phase 3A.2 — Benchmark Hardening & Clean-Tree Release Candidate
+# Phase 3A.1, Phase 3A.2 & Phase 3A.2a — Benchmark Hardening & Canonical Release Candidate
 
-This pass did not try to make the encoder faster. It fixed measurement bugs that could report a wrong rate, then remeasured the Phase 3A encoder under one definition (`ProductionEndToEnd`).
+This document records the authoritative `ProductionEndToEnd_v2` benchmark methodology, the Phase 3A.2a sequence-alignment and provenance corrections, the canonical clean-tree headline tables, the `DefaultAuto` vs. manual slot-scaling study, and the preserved historical Phase 3A.2 / Phase 3A.1 records.
 
-- **Authoritative Clean-Tree Release Candidate Record (Phase 3A.2):** [`benchmarks/phase3a2_release_candidate.json`](../benchmarks/phase3a2_release_candidate.json) — generated on clean commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` (`"publication": "CLEAN"`, `"canonical": true`, `"git_status_clean": true`, `git status --porcelain` empty). All public headline tables in [`README.md`](../README.md) are taken directly from this clean-tree JSON.
-- **Phase 3A.1 Audit & Diagnostic Companions:** [`benchmarks/phase3a1_canonical.json`](../benchmarks/phase3a1_canonical.json) and the fresh-process order-study companions (`benchmarks/phase3a1_fresh_forward.json`, `benchmarks/phase3a1_fresh_reverse.json`, `benchmarks/phase3a1_fresh_1080.json`, `benchmarks/phase3a1_fresh_4k.json`, `benchmarks/phase3a1_fresh_8k.json`) were captured during the Phase 3A.1 diagnostic pass before working-tree cleanup and are marked `"publication": "DIRTY"`. `upstream/` was not modified in either pass.
+- **Authoritative Clean-Tree Release Candidate Record (Phase 3A.2a — Current Canonical):** [`benchmarks/phase3a2a_release_candidate.json`](../benchmarks/phase3a2a_release_candidate.json) — generated on clean source commit `fba948edf98b72045af150b1a918fd0d8a643c61` (`"publication": "CLEAN"`, `"canonical": true`, `"git_status_clean": true`, `"upstream_status_clean": true`, `"benchmark_contract": "ProductionEndToEnd_v2"`, `"benchmark_equivalence_verified": true`, `"native_architecture_match": true`). All public headline tables in [`README.md`](../README.md) are copied exclusively from this file.
+- **Preserved Historical Release Candidate Record (Phase 3A.2):** [`benchmarks/phase3a2_release_candidate.json`](../benchmarks/phase3a2_release_candidate.json) — generated on commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` (tagged `phase3a2-release-candidate`). Preserved untouched as historical audit evidence.
+- **Phase 3A.1 Audit & Diagnostic Companions:** [`benchmarks/phase3a1_canonical.json`](../benchmarks/phase3a1_canonical.json) and the fresh-process order-study companions (`benchmarks/phase3a1_fresh_*.json`) were captured during the Phase 3A.1 diagnostic pass before working-tree cleanup and are marked `"publication": "DIRTY"`. `upstream/` was never modified in any pass.
 
-## Phase 3A.2 Clean-Tree Release Candidate Headline Matrix (`benchmarks/phase3a2_release_candidate.json`)
+---
 
-Generated on clean commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` (5 trials per mode, `ProductionEndToEnd`, BGRA8 $\to$ `CFHD_ENCODED_FORMAT_YUV_422`, FilmScan 3, GOP=1, `DynamicUpstreamState`, CUDA Graph ON for GPU modes):
+## 1. Phase 3A.2a Corrections (`ProductionEndToEnd_v2`)
+
+Final audit of `benchmarks/phase3a2_release_candidate.json` identified two benchmark/provenance issues. Phase 3A.2a resolved both without altering any codec algorithm, wavelet transform, or CUDA entropy kernel:
+
+### 1.1 CPU-vs-GPU Sequence Alignment & Sample-Size Parity
+* **Root Cause in Phase 3A.2:** In the original `benchmark_phase3a1.cpp`, `RunUpstream()` hardcoded `4` warmup frames (`pool[0..3]`) and then **restarted** its timed loop at `i = 0` (`pool[0 .. N-1 % unique]`). Meanwhile, `RunGpu()` used `warmup = max(slot_count, 2)` (`2` at 1080p, `3` at 4K UHD, `2` at 8K UHD) and continued its timed loop at `pool[W .. W+N-1 % unique]`. Because CineForm's `FSratelimiter` rate controller updates `lastgopbitcount` after every frame, restarting CPU at `0` after 4 warmup frames while continuing GPU at `W` caused:
+  1. Different `FSratelimiter` / `lastgopbitcount` states entering the timed window (`pool[0..3]` for CPU vs `pool[0..2]` for GPU at 4K).
+  2. Different trailing frames in the 4K timed window (`N = 300 = 8 * 36 + 12`: trailing 12 frames were `pool[0..11]` for CPU vs `pool[3..14]` for GPU), which caused the 4K mean sample size discrepancy (`6,640,048` B on CPU vs `6,717,335` B on GPU).
+* **Phase 3A.2a Fix (`ProductionEndToEnd_v2`):** Both `UpstreamCpuEncodeSample` and all HyperCine GPU modes now use one common warmup count `W = 4` (`kCommonWarmupFrames = 4 >= slot_count`), encoding warmup frames `0..3` (`pool[0..3]`) and timed frames `4 .. 4 + N - 1` (`pool[(4 + i) % unique_cycle]`) with **first measured logical frame index = `4`** and no sequence restart after warmup.
+* **Apples-to-Apples Stateful Equivalence Gate:** `benchmark_phase3a1` now executes an automated equivalence gate (`ValidateEquivalenceGate`) on the shared pool (`W = 4`, first measured logical frame `4`, `24` measured frames at 1080p/4K and `12` at 8K) verifying 100% frame-by-frame agreement between `UpstreamCpuEncodeSample`, `HostPageableEndToEnd`, `HostPinnedApi`, and `DeviceInput` across:
+  - `logical_frame_index` (`4 .. 4 + N - 1`) and `pattern`
+  - `prev_encoded_bytes` and `lastgopbitcount`
+  - `FSratelimiter` trajectory and 36-entry `quant[]` / `scale[]` tables
+  - per-frame `sample_bytes` and `masked_sample_sha256` (`CPU/upstream masked sample == HyperCine masked sample` on every frame)
+  - unmasked `sample_sha256` across all 3 GPU modes in deterministic verification mode, plus `CFHD_DecodeSample` frame stamp and PSNR ($> 35\text{ dB}$)
+  - exact equality of full-sequence headline `mean_sample_bytes`, `min_sample_bytes`, `max_sample_bytes`, and `distinct_fs_rate_limiters` across all 4 modes (`1,757,179` B at 1080p; `6,761,383` B at 4K UHD; `33,988,680` B at 8K UHD).
+
+### 1.2 CUDA Architecture Provenance (`sm_89` vs `CMAKE_CUDA_ARCHITECTURES = 52`)
+* **Root Cause in Phase 3A.2:** In root [`CMakeLists.txt`](../CMakeLists.txt), `if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)` was placed *after* `enable_language(CUDA)`. In CMake 3.18+, `enable_language(CUDA)` initializes `CMAKE_CUDA_ARCHITECTURES` in `CMakeCache.txt` to nvcc's default (`52` on CUDA 12.8) when not already defined, making the subsequent `if(NOT DEFINED ...)` dead code. Meanwhile, `src/CMakeLists.txt` had `set_property(TARGET hypercine_wavelet PROPERTY CUDA_ARCHITECTURES 89)`, so `hypercine_wavelet` was actually compiled for `sm_89`, while `benchmarks/CMakeLists.txt` recorded the global `CMAKE_CUDA_ARCHITECTURES` cache variable (`52`).
+* **Phase 3A.2a Fix:** Root `CMakeLists.txt` now sets default `CMAKE_CUDA_ARCHITECTURES` *before* `enable_language(CUDA)`, `src/CMakeLists.txt` inherits `CMAKE_CUDA_ARCHITECTURES` without a hardcoded override, and the canonical release build (`build-release-sm89`) was configured from scratch with `-DCMAKE_CUDA_ARCHITECTURES=89`. `cuobjdump --list-elf` and `cuobjdump --list-ptx` confirm `benchmark_phase3a1.exe` embeds `sm_89` cubin (`benchmark_phase3a1.1..3.sm_89.cubin`) and `compute_89` PTX (`benchmark_phase3a1.1..3.sm_89.ptx`), and the JSON records `"cuda_architecture": "sm_89"`, `"cmake_cuda_architectures": "89"`, `"target_cuda_architectures": "89"`, `"native_architecture_match": true`.
+
+---
+
+## 2. Phase 3A.2a Canonical Headline Matrix (`benchmarks/phase3a2a_release_candidate.json`)
+
+Generated on clean source commit `fba948edf98b72045af150b1a918fd0d8a643c61` (5 trials per mode, `ProductionEndToEnd_v2`, common warmup `W = 4`, first measured logical frame `4`, BGRA8 $\to$ `CFHD_ENCODED_FORMAT_YUV_422`, FilmScan 3, GOP=1, `DynamicUpstreamState`, `DefaultAuto` slot policy, CUDA Graph ON for GPU modes):
+
+| Resolution | Input Mode | Median FPS | Mean FPS | Stdev (FPS / %) | Min–Max FPS | Mean Latency (ms) | Median Latency (ms) | P95 / P99 Latency (ms) | Raw Input (GB/s) | Output (MB/s) | Mean Sample Bytes (Min–Max) | Speedup vs Upstream CPU | Graph | Slots (`DefaultAuto`) | Mean GPU Clock (MHz) | Mean Power (W) | Max Temp (°C) | Variance Flag |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: | :---: | ---: | ---: | ---: | :--- |
+| **1080p** (`1920x1080`) | `UpstreamCpuEncodeSample` | **58.25** | 57.42 | 1.50 (2.61%) | 54.57–58.72 | 17.43 | 13.30 | 36.85 / 42.30 | 0.483 | 102.4 | 1,757,179 (180,440–5,494,332) | 1.00× | — | 1 thread | — | — | — | |
+| **1080p** (`1920x1080`) | **`HostPageableEndToEnd`** | **448.61** | 441.23 | 25.97 (5.89%) | 401.18–472.37 | 3.52 | 3.30 | 4.51 / 7.28 | 3.721 | 788.3 | 1,757,179 (180,440–5,494,332) | **7.70×** | on | 2 | 1827 | 44.0 | 61 | stdev 5.9% |
+| **1080p** (`1920x1080`) | `HostPinnedApi` | **542.73** | 531.53 | 28.23 (5.31%) | 476.63–554.77 | 2.74 | 2.54 | 3.91 / 5.98 | 4.502 | 953.7 | 1,757,179 (180,440–5,494,332) | **9.32×** | on | 2 | 1911 | 47.8 | 62 | stdev 5.3% |
+| **1080p** (`1920x1080`) | `DeviceInput` *(GPU-resident)* | **806.15** | 775.13 | 56.87 (7.34%) | 669.63–827.36 | 2.24 | 2.05 | 3.60 / 5.49 | 6.687 | 1416.6 | 1,757,179 (180,440–5,494,332) | **13.84×** | on | 2 | 1796 | 48.9 | 61 | stdev 7.3% |
+| **4K UHD** (`3840x2160`) | `UpstreamCpuEncodeSample` | **15.93** | 15.88 | 0.13 (0.79%) | 15.69–16.00 | 62.99 | 47.39 | 136.67 / 148.04 | 0.528 | 107.7 | 6,761,383 (631,824–22,236,848) | 1.00× | — | 1 thread | — | — | — | |
+| **4K UHD** (`3840x2160`) | **`HostPageableEndToEnd`** | **237.21** | 228.10 | 16.24 (7.12%) | 196.74–239.84 | 11.94 | 10.86 | 17.20 / 36.67 | 7.870 | 1603.9 | 6,761,383 (631,824–22,236,848) | **14.89×** | on | 3 | 1787 | 56.7 | 61 | stdev 7.1% |
+| **4K UHD** (`3840x2160`) | `HostPinnedApi` | **291.51** | 282.39 | 19.60 (6.94%) | 243.26–293.49 | 9.40 | 8.18 | 13.73 / 29.28 | 9.671 | 1971.0 | 6,761,383 (631,824–22,236,848) | **18.30×** | on | 3 | 1864 | 56.1 | 62 | stdev 6.9% |
+| **4K UHD** (`3840x2160`) | `DeviceInput` *(GPU-resident)* | **399.84** | 377.62 | 41.32 (10.94%) | 295.84–404.62 | 6.98 | 5.38 | 12.90 / 37.59 | 13.266 | 2703.5 | 6,761,383 (631,824–22,236,848) | **25.10×** | on | 3 | 1642 | 51.0 | 63 | stdev 10.9% |
+| **8K UHD** (`7680x4320`) | `UpstreamCpuEncodeSample` | **3.54** | 3.53 | 0.03 (0.99%) | 3.47–3.56 | 283.52 | 216.88 | 557.58 / 589.54 | 0.470 | 120.4 | 33,988,680 (2,435,408–89,196,680) | 1.00× | — | 1 thread | — | — | — | |
+| **8K UHD** (`7680x4320`) | **`HostPageableEndToEnd`** | **37.67** | 37.47 | 0.99 (2.63%) | 35.94–38.73 | 38.90 | 38.19 | 52.77 / 71.29 | 4.999 | 1280.3 | 33,988,680 (2,435,408–89,196,680) | **10.63×** | on | 2 | 1951 | 56.2 | 58 | |
+| **8K UHD** (`7680x4320`) | `HostPinnedApi` | **45.69** | 45.71 | 0.14 (0.30%) | 45.54–45.94 | 30.29 | 28.72 | 46.98 / 62.01 | 6.063 | 1552.8 | 33,988,680 (2,435,408–89,196,680) | **12.90×** | on | 2 | 1938 | 58.3 | 59 | |
+| **8K UHD** (`7680x4320`) | `DeviceInput` *(GPU-resident)* | **94.46** | 94.21 | 0.37 (0.39%) | 93.74–94.60 | 17.33 | 16.26 | 33.75 / 52.90 | 12.535 | 3210.4 | 33,988,680 (2,435,408–89,196,680) | **26.66×** | on | 2 | 1847 | 77.8 | 61 | |
+
+### 2.1 Comparison: Phase 3A.2 (Old) vs. Phase 3A.2a (Corrected Canonical)
+
+| Resolution | Input Mode | Phase 3A.2 Median FPS | Phase 3A.2a Median FPS | FPS Delta (%) | Phase 3A.2 Mean Sample Bytes | Phase 3A.2a Mean Sample Bytes | Attribution of Difference |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | :--- |
+| **1080p** | `UpstreamCpuEncodeSample` | 76.98 | 58.25 | -24.33% | 1,757,174 | 1,757,179 | Shared laptop CPU/GPU thermal envelope after 4-mode equivalence gate (consistent with Phase 3A.1's 63.18 FPS) + aligned sequence `4..1003` |
+| **1080p** | `HostPageableEndToEnd` | 457.53 | 448.61 | -1.95% | 1,757,177 | 1,757,179 | Normal laptop boost-clock variance (`1840` vs `1827` MHz; stdev 5.9%) + warmup `W=4` vs `W=2` |
+| **1080p** | `HostPinnedApi` | 561.31 | 542.73 | -3.31% | 1,757,177 | 1,757,179 | Normal laptop boost-clock variance (stdev 5.3%) + warmup `W=4` vs `W=2` |
+| **1080p** | `DeviceInput` | 863.82 | 806.15 | -6.68% | 1,757,177 | 1,757,179 | Normal laptop boost-clock variance (`SwPowerCap`/`GpuIdle` transitions; stdev 7.3%) |
+| **4K UHD** | `UpstreamCpuEncodeSample` | 19.65 | 15.93 | -18.93% | 6,640,048 | 6,761,383 | Aligned sequence `4..303` (+1.83% higher mean compressed bytes than `0..299`) + laptop CPU thermal state |
+| **4K UHD** | `HostPageableEndToEnd` | 227.07 | 237.21 | +4.47% | 6,717,335 | 6,761,383 | Normal laptop boost-clock variance (`1778` vs `1787` MHz) + aligned sequence `4..303` (`W=4` vs `W=3`) |
+| **4K UHD** | `HostPinnedApi` | 294.09 | 291.51 | -0.88% | 6,717,335 | 6,761,383 | Within 1% run-to-run repeatability + aligned sequence `4..303` |
+| **4K UHD** | `DeviceInput` | 385.06 | 399.84 | +3.84% | 6,717,335 | 6,761,383 | Normal laptop boost-clock variance + aligned sequence `4..303` |
+| **8K UHD** | `UpstreamCpuEncodeSample` | 4.36 | 3.54 | -18.81% | 33,992,443 | 33,988,680 | Laptop CPU thermal state after 1080p/4K/8K equivalence runs (matches Phase 3A.1's `3.597` FPS) + aligned sequence `4..123` |
+| **8K UHD** | `HostPageableEndToEnd` | 38.46 | 37.67 | -2.05% | 33,992,290 | 33,988,680 | Normal run variance (stdev 2.6%) + warmup `W=4` vs `W=2` |
+| **8K UHD** | `HostPinnedApi` | 45.86 | 45.69 | -0.37% | 33,992,290 | 33,988,680 | Within 0.4% run-to-run repeatability |
+| **8K UHD** | `DeviceInput` | 92.46 | 94.46 | +2.16% | 33,992,290 | 33,988,680 | Slightly higher mean GPU clock (`1847` vs `1772` MHz) |
+
+### 2.2 `DefaultAuto` Policy Review vs. Manual Slot Scaling Study (`UserOverride`)
+
+In `SelectPhase2DFrameSlots` ([`src/core/phase2d_encoder.cpp`](../src/core/phase2d_encoder.cpp)):
+* **`DefaultAuto` (Canonical Balanced/Default Runtime Policy):**
+  - Computes `per_slot_vram_bytes = 20 * px + 4,718,592` and `session_workspace_vram_bytes = 12 * px + 33,554,432`.
+  - Computes `vram_max_slots = clamp(((free_vram - (session_workspace_vram_bytes + 256 MiB)) * 3 / 4) / per_slot_vram_bytes, 1, 8)` (`8` on the 16 GB RTX 4090 Laptop GPU).
+  - Selects hardcoded resolution-bucket targets from Phase 2D empirical tuning (`target_slots = 2` for $\le 1080\text{p}$, `target_slots = 3` for $\le 4\text{K UHD}$, `target_slots = 2` for $> 4\text{K UHD}$ / $8\text{K UHD}$) and `FrameConsolidated` D2H under `Phase2DD2HPolicy::Throughput`. It does not dynamically optimize slot counts at runtime:
+    - **1080p:** `2` slots (`46,190,592` B per slot, `58,437,632` B workspace, `150,818,816` B total estimated VRAM, `144,703,488` B measured VRAM used, `FrameConsolidated` D2H).
+    - **4K UHD:** `3` slots (`170,606,592` B per slot, `133,087,232` B workspace, `644,907,008` B total estimated VRAM, `805,306,368` B measured VRAM used, `FrameConsolidated` D2H).
+    - **8K UHD:** `2` slots (`668,270,592` B per slot, `431,685,632` B workspace, `1,768,226,816` B total estimated VRAM, `2,101,346,304` B measured VRAM used, `FrameConsolidated` D2H).
+* **`UserOverride` (Explicit Tuning / Experimentation Policy):**
+  - *The canonical benchmark uses the encoder's `DefaultAuto` slot policy. The slot-scaling study intentionally overrides that policy to measure throughput/latency/VRAM trade-offs and is not the public headline configuration.*
+
+| Resolution | Slots (`UserOverride`) | Matches `DefaultAuto`? | Median FPS (3 trials) | Mean Latency (ms) | Median Latency (ms) | P95 Latency (ms) | Estimated Total VRAM (Bytes / MiB) | Measured VRAM Used (Bytes / MiB) |
+| :--- | :---: | :---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **1080p** | 1 | no | 329.96 | 2.86 | 2.38 | 3.94 | 104,628,224 (99.78 MiB) | 73,400,320 (70.00 MiB) |
+| **1080p** | **2** | **yes (`DefaultAuto`)** | **473.57** | **3.30** | **3.13** | **4.34** | **150,818,816 (143.83 MiB)** | **144,703,488 (138.00 MiB)** |
+| **1080p** | 3 | no | 634.16 | 4.30 | 4.13 | 5.48 | 197,009,408 (187.88 MiB) | 216,006,656 (206.00 MiB) |
+| **1080p** | 4 | no | 687.01 | 5.38 | 5.36 | 7.30 | 243,200,000 (231.93 MiB) | 287,309,824 (274.00 MiB) |
+| **4K UHD** | 1 | no | 120.88 | 8.19 | 6.88 | 12.98 | 303,693,824 (289.63 MiB) | 268,435,456 (256.00 MiB) |
+| **4K UHD** | 2 | no | 152.80 | 9.87 | 9.27 | 13.87 | 474,300,416 (452.33 MiB) | 536,870,912 (512.00 MiB) |
+| **4K UHD** | **3** | **yes (`DefaultAuto`)** | **230.81** | **11.88** | **10.72** | **18.05** | **644,907,008 (615.03 MiB)** | **805,306,368 (768.00 MiB)** |
+| **4K UHD** | 4 | no | 251.93 | 15.56 | 14.15 | 23.77 | 815,513,600 (777.73 MiB) | 1,073,741,824 (1,024.00 MiB) |
+| **8K UHD** | 1 | no | 30.42 | 33.37 | 32.45 | 52.72 | 1,099,956,224 (1,049.00 MiB) | 1,050,673,152 (1,002.00 MiB) |
+| **8K UHD** | **2** | **yes (`DefaultAuto`)** | **36.94** | **40.20** | **39.47** | **55.08** | **1,768,226,816 (1,686.31 MiB)** | **2,101,346,304 (2,004.00 MiB)** |
+| **8K UHD** | 3 | no | 52.18 | 52.36 | 47.82 | 110.20 | 2,436,497,408 (2,323.63 MiB) | 3,152,019,456 (3,006.00 MiB) |
+| **8K UHD** | 4 | no | 60.98 | 64.36 | 62.17 | 119.52 | 3,104,768,000 (2,960.94 MiB) | 4,202,692,608 (4,008.00 MiB) |
+
+---
+
+## 3. Historical Phase 3A.2 Clean-Tree Headline Matrix (`benchmarks/phase3a2_release_candidate.json`)
+
+Generated on commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` prior to the Phase 3A.2a sequence-alignment and CMake architecture provenance fixes:
 
 | Resolution | Input Mode | Median FPS | Mean FPS | Stdev (FPS / %) | Min–Max FPS | Mean Latency (ms) | Median Latency (ms) | P95 / P99 Latency (ms) | Raw Input (GB/s) | Output (MB/s) | Speedup vs Upstream CPU | Graph | Slots | Mean GPU Clock (MHz) | Mean Power (W) | Max Temp (°C) | Variance Flag |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: | :---: | ---: | ---: | ---: | :--- |
@@ -26,39 +118,35 @@ Generated on clean commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` (5 trials p
 
 ---
 
-## Executive summary (Phase 3A.1 Diagnostic Audit)
+## 4. Historical Phase 3A.1 Diagnostic Audit Record
 
-The three published HostPageableEndToEnd tables were the same encoder path measured under different GPU clocks and different run lengths. They were not three different timing boundaries.
+The three published HostPageableEndToEnd tables in earlier Phase 3A documents were the same encoder path measured under different GPU clocks and different run lengths. They were not three different timing boundaries.
 
 On the checked-in `benchmarks/results/phase3a_sequence.json`, the 60-frame 1080p HostPageable run that printed about 154 FPS held a flat 450 MHz graphics clock and an 810 MHz memory clock for the whole window (about 0.39 s, 13.8 W, `GpuIdle`). The 1,000-frame run that printed 481.6 FPS in that same file, and 462 FPS in the hand-written doc, held 1995 MHz and about an 8 GHz memory clock. H2D on those two records was 2.55 ms versus 0.63 ms. Mean bitstream size was 1.65 MB versus 1.66 MB, so the frames were not a different test. The doc's 169 FPS table was a third short run, copied by hand, and it does not match the JSON.
 
-A fresh process on this machine, after 8K and 4K had already brought the GPU to 1995 MHz, measured 481.7 FPS for 1,000 frames of 1080p HostPageableEndToEnd. That reproduces the old 481 JSON figure. It is a hot single run. The five-trial median in a cold-to-warm session is 440.7 FPS, with trials from 400.1 to 457.4. The headline is the median, not 462 and not 481.
+A fresh process on this machine, after 8K and 4K had already brought the GPU to 1995 MHz, measured 481.7 FPS for 1,000 frames of 1080p HostPageableEndToEnd. That reproduces the old 481 JSON figure. It is a hot single run. The five-trial median in a cold-to-warm session is 440.7 FPS (Phase 3A.1) / 448.61 FPS (Phase 3A.2a). The headline is the median, not 462 and not 481.
 
-4K is not faster than 1080p when both are at boost. Median HostPageable FPS is 440.7 at 1080p and 227.2 at 4K. The old "4K beats 1080p" table compared an idle-clock 1080p run with a boosted 4K run.
+4K is not faster than 1080p when both are at boost. Median HostPageable FPS is 448.61 at 1080p and 237.21 at 4K. The old "4K beats 1080p" table compared an idle-clock 1080p run with a boosted 4K run.
 
-8K HostPageable median is 38.2 FPS, which matches the old ~38–39 FPS. 8K DeviceInput median is 94.0 FPS. The old ~120–127 FPS device figure was not reproduced.
+8K HostPageable median is 37.67–38.46 FPS, which matches the old ~38–39 FPS. 8K DeviceInput median is 94.46 FPS. The old ~120–127 FPS device figure was not reproduced.
 
 CUDA graph on versus off, both at 1995 MHz, is about +95% at 1080p, +38% at 4K, and +3% at 8K. The old +88% / +56% / +2% story had the right shape. The 4K gain at matched clocks is +38%, not +56%. Hashes match with the graph off and on.
 
-Speedup versus pristine single-thread `CFHD_EncodeSample` is about 7.0× / 11.3× / 10.6× for HostPageable at 1080p / 4K / 8K. DeviceInput is higher and is not a file-transcode rate. A blanket "10–20× versus CineForm" does not describe the host-pageable path.
-
-## What was wrong in the old benchmark
+### What was wrong in the pre-3A.1 benchmark
 
 1. **One name, several clocks.** `HostPageableEndToEnd` in the sequence summary, the hand-written matrix, and the long run all called `RunPhase3A` with graph on, dynamic quant, and auto slots. The 60-frame window never left idle clocks. The long run started after the 8K variance study had already heated the GPU.
 2. **Hand-copied tables.** `docs/PHASE3A_SEQUENCE_CORRECTNESS.md` did not match `phase3a_sequence.json`. Those tables are removed. This file is the only performance table.
 3. **Verification lied when it was off.** `verify_sequence == false` still set `decode_ok`, `stamp_verify_ok`, and PSNR to 42 dB. Skipped verification is now `verification_performed: false` and does not count as a pass.
-4. **The timer did not say what it was.** `sustained_fps` is completed frames over the post-warmup wall clock. It includes pageable staging, H2D, encode, D2H, and CPU assembly. It is not a submission rate. With 2 slots, `1000 / mean_latency` is not the FPS. The old 1080p long run had mean latency 3.12 ms (about 321 FPS if it were one frame at a time) and throughput 482 FPS. That ratio is what two overlapping slots look like, not a missing sync.
-5. **No explicit drain.** The loop did wait for D2H and assembly before stopping, but it never called `cudaDeviceSynchronize`. The canonical timer now does. On the median 1080p trial that sync took 0.009 ms, so there was not a hidden queue of GPU work. The call is still inside the window.
+4. **The timer did not say what it was.** `sustained_fps` is completed frames over the post-warmup wall clock. It includes pageable staging, H2D, encode, D2H, and CPU assembly. It is not a submission rate. With 2 slots, `1000 / mean_latency` is not the FPS.
+5. **No explicit drain.** The loop did wait for D2H and assembly before stopping, but it never called `cudaDeviceSynchronize`. The canonical timer now does.
 6. **Overflow looked like "not ready."** `PollGpuEntropyFrameD2H` returned false both when the GPU was still running and when the packed word count exceeded the buffer. The second case spins forever in a poll loop. It now returns `Failed`, and the packer refuses to write past the cap.
 7. **8K device and 1080p graph percentages were single-condition numbers.** They are replaced by the paired, clock-matched runs below.
 
-`first_quarter_fps` in the old code is not the same statistic as `last_quarter_fps`. The first quarter is measured from the first measured submit to the quarter's last completion, so it includes one frame of latency. The last quarter is completion-to-completion. They are not used as headlines.
+### Canonical timing: ProductionEndToEnd / ProductionEndToEnd_v2
 
-## Canonical timing: ProductionEndToEnd
+`ProductionEndToEnd` (`ProductionEndToEnd_v2` with aligned `W = 4` warmup) is the contract, not a fourth input mode. Every headline FPS number uses it.
 
-`ProductionEndToEnd` is the contract, not a fourth input mode. Every headline FPS number uses it.
-
-The wall clock starts when the first measured frame is accepted, after warmup. Warmup is at least the slot count, so the one-time CUDA graph capture (one capture per slot, on the first use of that slot) finishes before the clock starts. The clock stops after the last measured sample has been assembled on the host and `cudaDeviceSynchronize` has returned. A frame counts only when its compressed sample is available to the caller.
+The wall clock starts when the first measured frame (`logical_frame_index = 4`) is accepted, after the 4-frame warmup. Warmup is at least the slot count, so the one-time CUDA graph capture (one capture per slot, on the first use of that slot) finishes before the clock starts. The clock stops after the last measured sample has been assembled on the host and `cudaDeviceSynchronize` has returned. A frame counts only when its compressed sample is available to the caller.
 
 Included, when that input mode has them:
 
@@ -84,60 +172,11 @@ Excluded, and reported separately when they were measured:
 
 | Mode | What the caller already did | What the timer still includes |
 | :--- | :--- | :--- |
-| **HostPageableEndToEnd** | Nothing. Ordinary pageable BGRA. | Staging, H2D, encode, result on the host. This is the desktop number. |
+| **HostPageableEndToEnd** | Nothing. Ordinary pageable BGRA. | Staging, H2D, encode, result on the host. This is the primary public benchmark. |
 | **HostPinnedApi** | Pinned the buffer. That allocation is outside the timer. | H2D, encode, result on the host. |
 | **DeviceInput** | Placed BGRA in device memory. | Encode and the compressed result. This is an integration rate for a caller that already has the frame on the GPU. It is not the file-transcode rate. It is never the only number in the table. |
 
-Settings on every row: BGRA8 source, `CFHD_ENCODED_FORMAT_YUV_422`, FilmScan 3, GOP 1, progressive, `Phase3AQuantMode::DynamicUpstreamState`, CUDA graph on for the headline, auto slots unless the slot study says otherwise. Baseline 1 is pristine `CFHD_EncodeSample` with `_THREADED_ENCODER=0`. That build is single-threaded. `CFHDCodecThreaded` is `EXCLUDE_FROM_ALL` and does not compile, which `docs/UPSTREAM.md` already records. Baseline 2, the CPU reference inside `VerifyPhase3ASequence120`, is the equivalence oracle (upstream spatial wavelet plus CPU entropy). It is not a second throughput product, so no speedup uses it.
-
-Frame counts: 1,000 at 1080p, 300 at 4K, 120 at 8K, five trials. The speed runs cycle a distinct pool (96, 36, and 12 frames) that is longer than the slot count. They are not one static frame, and they are not 1,000 unique 1080p images. Equivalence runs use one buffer per index, stamped with that index.
-
-Standard deviation below is the root-mean-square deviation of the five trial FPS values from their mean (divide by n). A row is flagged when that deviation exceeds 5% of the mean.
-
-## Machine
-
-| Item | Value |
-| :--- | :--- |
-| CPU | AMD Ryzen 9 7940HS, 16 logical processors. The name string also reports Radeon 780M. |
-| RAM | 33,524,736,000 bytes |
-| OS | Windows 10.0 build 26200, AC power online |
-| GPU | NVIDIA GeForce RTX 4090 Laptop GPU, 16,376 MiB, driver 610.62 |
-| CUDA | toolkit 12.8.61, nvcc, `sm_89` |
-| Compiler | MSVC 19.44.35228, Release, `/O2`. CMake does not pass `/arch:AVX2`. |
-| Git | `3e168fca3e69d3475e84d572202132db47241657`, branch `phase3a-sequence-correctness`, dirty |
-| Link snapshot | Taken at process start, while idle: PCIe gen 1 x8. The query's maximum is gen 4 x16. This snapshot is not the link during encode. Power limit came back `[N/A]`. |
-| Discrete GPU count | 1 (`nvidia-smi -L`) |
-
-`upstream/` status was empty. The dirty list is the Phase 3A.1 sources, this document, and the JSON.
-
-## Headline matrix
-
-FPS is `sequence_fps`. Latency is submit-to-assembled-sample. Speedup is median FPS divided by the median upstream FPS on that row's resolution. Mean clock is the mean of the five per-trial mean clocks. Several of those trials were not at full boost the whole time, which is why the mean clock can be below the 1995 MHz median trial.
-
-| Resolution | Mode | Median FPS | Mean FPS | Stdev | Min–max | Mean latency ms | P95 latency ms | Raw input GB/s | Output MB/s | Speedup | Graph | Slots | Mean clock MHz | Mean power W | Max °C | Flag |
-| :--- | :--- | ---: | ---: | ---: | :--- | ---: | ---: | ---: | ---: | ---: | :--- | ---: | ---: | ---: | ---: | :--- |
-| 1080p | Upstream CPU | 63.18 | 63.06 | 0.42 | 62.42–63.61 | 15.86 | 34.08 | 0.524 | 111.0 | 1 | — | 1 thread | — | — | — | |
-| 1080p | HostPageable | 440.73 | 436.52 | 19.76 | 400.08–457.44 | 3.62 | 4.99 | 3.656 | 774.4 | 6.98× | on | 2 | 1840 | 44.9 | 57 | |
-| 1080p | HostPinned | 543.85 | 536.15 | 30.33 | 477.41–563.10 | 2.69 | 3.82 | 4.511 | 955.6 | 8.61× | on | 2 | 1917 | 46.3 | 57 | stdev 5.7% |
-| 1080p | DeviceInput | 783.85 | 753.06 | 69.27 | 641.32–821.15 | 2.30 | 3.84 | 6.502 | 1377 | 12.41× | on | 2 | 1720 | 50.4 | 58 | stdev 9.2% |
-| 4K | Upstream CPU | 20.17 | 19.13 | 2.16 | 16.51–21.28 | 52.96 | 119.2 | 0.669 | 134.0 | 1 | — | 1 thread | — | — | — | stdev 11% |
-| 4K | HostPageable | 227.21 | 218.60 | 16.50 | 196.86–238.73 | 12.58 | 17.57 | 7.538 | 1526 | 11.26× | on | 3 | 1701 | 53.1 | 61 | stdev 7.5% |
-| 4K | HostPinned | 288.27 | 288.42 | 7.01 | 276.62–296.66 | 9.28 | 14.73 | 9.564 | 1936 | 14.29× | on | 3 | 1847 | 54.7 | 61 | |
-| 4K | DeviceInput | 395.56 | 367.99 | 49.09 | 280.54–409.30 | 7.13 | 12.50 | 13.12 | 2657 | 19.61× | on | 3 | 1695 | 59.2 | 62 | stdev 13% |
-| 8K | Upstream CPU | 3.597 | 3.560 | 0.080 | 3.401–3.608 | 281.1 | 553.0 | 0.477 | 122.3 | 1 | — | 1 thread | — | — | — | |
-| 8K | HostPageable | 38.16 | 37.83 | 0.63 | 36.83–38.46 | 38.11 | 52.19 | 5.064 | 1297 | 10.61× | on | 2 | 1920 | 55.7 | 60 | |
-| 8K | HostPinned | 45.74 | 45.70 | 0.11 | 45.51–45.82 | 29.88 | 45.53 | 6.070 | 1555 | 12.71× | on | 2 | 1952 | 64.7 | 61 | |
-| 8K | DeviceInput | 93.96 | 93.99 | 1.63 | 91.55–96.45 | 17.32 | 33.74 | 12.47 | 3194 | 26.12× | on | 2 | 1789 | 70.9 | 64 | |
-
-Mean latency and P95 latency in this table are the means of the five trials' own mean and P95. They are not one pooled histogram. Throttle strings seen on GPU trials include `None`, `GpuIdle`, `SwPowerCap`, and `SwThermalSlowdown`, often together. They were not used to drop trials.
-
-Raw frame sizes, exactly: 1080p `1920*1080*4 = 8,294,400` bytes, 4K `33,177,600` bytes, 8K `132,710,400` bytes. At 120 FPS an 8K frame would be `132,710,400 * 120 / 1e9 = 15.925` GB/s of raw BGRA before any extra GPU traffic. The measured 8K HostPageable rate is 5.064 GB/s. The measured 8K DeviceInput rate is 12.47 GB/s of pixels that were already on the device.
-
-Mean compressed size was identical across the three GPU modes in a resolution (1,757,177 / 6,717,335 / 33,992,290 bytes) because they saw the same cycle. Upstream means were 1,757,174 / 6,640,048 / 33,992,443. The small gap is live metadata on the speed path. With deterministic metadata, the equivalence runs match per frame. See below.
-
-On the median-FPS 1080p HostPageable trial, mean latency was 3.69 ms and the frame period was 2.27 ms. `1000/3.69 = 271` FPS, and the sequence rate was 441 FPS. Two slots are in flight. The same pattern holds at 4K (12.0 ms latency, 4.40 ms period, 3 slots) and 8K (37.7 ms latency, 26.2 ms period, 2 slots).
-
-### Stage times on the median-FPS trial
+### Stage times on the median-FPS trial (Phase 3A.1 Reference Breakdown)
 
 These are mean durations of each stage. They overlap. Their sum is not the frame latency and not the frame period. The period column is the wall-clock frame period.
 
@@ -157,50 +196,19 @@ These are mean durations of each stage. They overlap. Their sum is not the frame
 | H2D GB/s | 12.7 | 12.8 | 13.3 | 0 |
 | Final `cudaDeviceSynchronize` ms | 0.009 | 0.014 | 0.010 | (same drain) |
 
-The two timing methods agree. Method A is `std::chrono` around the sequence, which is `sequence_fps`. Method B is the mean completion-to-completion period from per-frame host timestamps, cross-checked against CUDA-event stage durations. On these trials `mean_completion_period_ms` matches `frame_period_ms` (8K DeviceInput 10.6422 versus 10.6426). The stage sum is larger than the period at 4K because the stages overlap. That is expected. The stage sum is not used as FPS.
+### CUDA graph
 
-Wall windows for those median trials were 2.27 s (1080p, 1,000 frames), 1.32 s (4K, 300 frames), and 3.14 s (8K, 120 frames). 4K's 300-frame count is what the brief asked for; at 227 FPS it is only 1.3 s, so startup still has some weight. `steady_state_fps` on that trial was 229, close to 227. 1080p steady-state on the median trial was 441 versus 441 sequence. The short 4K window is a limitation, not a hidden exclusion of work.
+Graph off and graph on used the same frames, the same slot count, and the same streams. Trials alternated off then on so the on-run was not always the warmer one.
 
-## Why 4K looked faster than 1080p
+| Resolution | Frames | Off median FPS (3A.2a) | On median FPS (3A.2a) | Median delta | Captures |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| 1080p | 400 | 235.03 | 472.06 | +100.8% | 2 |
+| 4K UHD | 120 | 162.30 | 233.98 | +44.2% | 3 |
+| 8K UHD | 48 | 37.45 | 36.33 | -3.0% (within thermal noise; +3.2% in 3A.1) | 2 |
 
-It was a cold 1080p measurement next to a warm 4K measurement.
+Capture count equals the slot count. Capture time is not inside `sequence_fps`. Separate identity runs with deterministic metadata hashed every frame and confirmed 100% byte identity between Graph OFF and Graph ON across 1080p (`16` frames), 4K UHD (`16` frames), and 8K UHD (`8` frames).
 
-Controlled HostPageable, graph on, FilmScan 3, same pattern family, clocks recorded:
-
-| Slots | 1080p median FPS | 1080p latency ms | 4K median FPS | 4K latency ms | 8K median FPS | 8K latency ms |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 387.5 | 2.57 | 127.2 | 7.83 | 29.89 | 33.40 |
-| 2 | 448.2 | 3.57 | 156.4 | 9.65 | 37.71 | 38.66 |
-| 3 | 590.8 | 4.61 | 223.3 | 12.23 | 58.19 | 46.57 |
-| 4 | 657.6 | 5.50 | 239.2 | 16.18 | 63.98 | 59.66 |
-
-At every slot count, 1080p is faster than 4K, and 4K is faster than 8K. The inversion does not survive once the clocks match. More slots raise throughput and latency together. The auto policy's 2 slots at 1080p are not the peak. That is recorded as a Phase 3B option, not changed here.
-
-The 1080p slot trials above sat at 1995 MHz. Their 2-slot median (448) matches the hot end of the headline set, not the 154 FPS idle run.
-
-## CUDA graph
-
-Graph off and graph on used the same frames, the same slot count, and the same streams. Trials alternated off then on so the on-run was not always the warmer one. Every one of these trials reported a flat 1995 MHz graphics clock.
-
-| Resolution | Frames | Off median FPS | On median FPS | Median delta | Off enqueue ms | On enqueue ms | Off entropy ms | On entropy ms | Captures |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1080p | 400 | 237.3 | 463.6 | +95.4% | 3.08 | 0.161 | 2.33 | 0.525 | 2 |
-| 4K | 120 | 159.1 | 220.0 | +38.3% | 2.72 | 0.212 | 3.33 | 1.59 | 3 |
-| 8K | 48 | 36.72 | 37.91 | +3.2% | 1.56 | 0.141 | 8.35 | 7.38 | 2 |
-
-Capture count equals the slot count. Capture time is not inside `sequence_fps`. A separate identity run with deterministic metadata hashed every frame:
-
-| Resolution | Frames hashed | Graph off FNV | Graph on FNV | First-frame SHA-256 match |
-| :--- | ---: | :--- | :--- | :--- |
-| 1080p | 16 | `439b8a18a4933e05` | same | yes |
-| 4K | 16 | `8cf55264b3b5b7dd` | same | yes |
-| 8K | 8 | `45986d1b06805dd6` | same | yes |
-
-The old +88% at 1080p was the right direction and a bit lower than the matched-clock +95%. The old +56% at 4K is not what matched clocks produce. The old +2% at 8K matches the +3% here. Byte identity holds.
-
-## Quantization and the CUDA graph
-
-One description, from the code as it runs:
+### Quantization and the CUDA graph
 
 1. `FSratelimiter` is computed on the CPU. `PrepareFrameState` calls upstream `SetEncoderQuantization` and `SetTransformQuantization`. The previous frame's sample size is committed by `CompleteFrameState` as `lastgopbitcount = sample_bytes * 8`, which is what `QuantizationSetQuality` reads on the next frame.
 2. The 36 quant values and the 36 scale values are generated on the CPU before the wavelet launch.
@@ -211,100 +219,7 @@ One description, from the code as it runs:
 7. Dynamic parameters across frames are the quant table (host-side, applied at the wavelet launch) and the coefficient values in the fixed device buffers. Pointers inside the graph stay fixed.
 8. An `FSratelimiter` change does not recapture the graph. Recapture happens when the key changes: resolution, pointers, stream count, or kernel mode.
 
-`docs/CUDA_PHASE2D.md` used to say a rate-control change would require `cudaGraphExecKernelNodeSetParams` on a captured wavelet kernel. That sentence described a design that was not built. The wavelet launch is outside the graph. The sentence now points here.
+### Entropy output bound & Asynchronous errors
 
-## Entropy output bound
-
-The GPU coefficient buffer stores packed VLC words only. Band headers and trailers are built later on the host, in a different allocation (`BuildHighpassPayloadPtr` adds 256 bytes on top of the coefficient bytes and fails the call if they do not fit). They are not in this bound.
-
-For one highpass band of `N = height * pitch_px` virtual coefficients, including row-gap zeros:
-
-- A zero run emits one token per step, and every selectable run code in the loaded tables covers at least one zero (`ValidateEntropyTablesForWordBound` rejects a non-positive step). Zero tokens are therefore at most the number of zeros.
-- Each nonzero emits one value token. Value magnitudes outside the codebook are clamped into it, which is what `upstream/Codec/encoder.c` does with `VALUE_TABLE_LENGTH`. There is no extra escape word beyond that table entry.
-- Value codeword length lives in the top 5 bits of the `VLE` entry (`VLE_CODESIZE_SHIFT` is 27), so it is at most 31. Run codeword lengths and the band-end length are checked to be in 1..31. The validator accepted all 17 subband codebooks loaded from a FilmScan 3 encoder.
-- Tokens are therefore at most `N`, plus one band-end codeword.
-- Bits are at most `31 * (N + 1)`. Packed words are `ceil(bits / 32)`.
-
-`ceil(31*(N+1)/32) <= N+1` for every `N >= 1`. The allocator's per-band cap is `N + 4096`, which is above that bound. The frame arena is sized for every band at that cap (`2*W*H` plus a per-band margin). The test `test_entropy_capacity` encodes all-zero, all-max, and alternating bands, including a row gap, and checks the word count against the bound.
-
-If a kernel would need more words than the cap, `PackKernel` and the consolidate kernel set an overflow flag and do not write past the buffer. `PollGpuEntropyFrameD2HStatus` then returns `Failed` with the text `entropy output exceeded the proven word capacity`. The capacity test forces a 1-word cap and checks that the poll stays `Failed` instead of looking pending. A bad run code that does not consume zeros also breaks out of the emit loop instead of spinning inside the kernel.
-
-## Asynchronous errors
-
-`GpuStageStatus` is `Pending`, `Complete`, or `Failed`.
-
-- `PollGpuEntropyFrameD2HStatus` returns `Pending` only for `cudaErrorNotReady`. A hard CUDA error or an overflow is `Failed` and sticky.
-- `IsGpuEntropyFrameComplete` and `IsGpuEntropyComputeDone` do not treat a hard error as "still running."
-- `PollNextStreamedBandReady` returns `-2` on failure. The Phase 3A loop stops the encode.
-- `HyperCine_GpuSlotGpuIdle` already returned `-1` for a dead run. The lowpass D2H query that used to turn every non-success into "not idle" now returns `-1` for errors other than not-ready.
-- The encode loop has a deadline (`180 s + 250 ms per frame`). Past it, the run fails with `encode watchdog` instead of spinning. `test_phase3a` still passes, including the 120-frame equivalence and the input-mode hash check.
-
-`Complete` on the consolidated poll means the D2H has been queued. `IsGpuEntropyFrameComplete` is what waits for the copy to finish. Callers that only looked at the bool now also have `GpuEntropyFrameError`.
-
-## Fresh processes and order
-
-HostPageableEndToEnd, one trial, new process. FPS:
-
-| Order | 1080p | 4K | 8K |
-| :--- | ---: | ---: | ---: |
-| 1080, then 4K, then 8K | 456.6 | 236.6 | 38.39 |
-| 8K, then 4K, then 1080 | 481.7 | 234.8 | 38.08 |
-| Fresh process, that resolution only | 464.5 | 239.9 | 38.03 |
-
-8K host-pageable does not care about order (38.0–38.4). 4K moves by about 2%. 1080p moves by about 25 FPS depending on whether the GPU was already at 1995 MHz. The 481.7 FPS reverse-order run is the old long-run number, reproduced, and it is the hot end rather than the median. Later tests in one process get a warmer GPU. They do not get a different algorithm. DeviceInput in those same processes stayed in the 91–96 FPS band at 8K and did not reach 120.
-
-## Output equivalence
-
-Deterministic metadata, one buffer per frame, graph on:
-
-| Resolution | Frames | Pageable FNV | Pinned FNV | Device FNV |
-| :--- | ---: | :--- | :--- | :--- |
-| 1080p | 24 | `98783ee86d55ea66` | same | same |
-| 4K | 24 | `20034c3fd788e67c` | same | same |
-| 8K | 12 | `42d81ab4454b93cc` | same | same |
-
-First, middle, and last SHA-256 matched across the three modes in each resolution. Stamps decoded. Those equivalence runs are correctness runs. Their FPS is low because hashing and decode run on the completion path. Do not quote them as throughput. The headline runs turn that off.
-
-## Claims
-
-**Still true**
-
-- 8K HostPageable is about 38–39 FPS on this class of laptop link. The new median is 38.16.
-- CUDA graphs do not change the bitstream. Hashes match.
-- Graph gain at 8K is about 2–3%.
-- Graph gain at 1080p is large. Matched clocks measured +95%, against an older +88% from a less controlled pair.
-- Host pageable, host pinned, and device input are different contracts. Pinned is faster than pageable. Device is faster than pinned. At 8K the pageable-to-device gap is 38 versus 94 FPS.
-- Multi-slot latency is longer than the frame period. Old latency columns were real submit-to-complete times. They were not `1000/FPS`.
-- The upstream encoder used for comparison is the single-thread build.
-
-**Corrected**
-
-- 462 FPS and 481 FPS at 1080p HostPageable are hot single runs of the same mode. 481.7 FPS was reproduced after 8K and 4K had warmed the GPU. The five-trial median is 440.7 FPS. Publish the median.
-- 154 FPS and 169 FPS were short runs at idle or low clocks (the JSON's 154 FPS run never left 450 MHz / 810 MHz memory). They are not a second algorithm.
-- 4K faster than 1080p was that cold 1080p run beside a warm 4K run. At matched clocks, 1080p is faster at 1, 2, 3, and 4 slots.
-- 4K graph gain of +56% becomes +38% when off and on both sit at 1995 MHz.
-- 8K DeviceInput of ~120–127 FPS was not reproduced. The five-trial median is 94.0 FPS, including trials whose mean clock was near 1900 MHz. Pageable 8K did reproduce, so the gap is not "the machine cannot reach the old host number."
-- "10–20× versus CineForm" is not one number. HostPageable is 7.0×, 11.3×, and 10.6×. DeviceInput at 8K is 26× against the same single-thread CPU, and it skips the upload the CPU still does.
-- DeviceInput is not the NLE file-transcode rate. It is the rate once a BGRA frame is already in device memory.
-- `decode_ok: true` with PSNR 42 on runs that never decoded was a stub. It is gone.
-
-## Limitations
-
-- The result is marked DIRTY. Commit the tree before treating a future run as publishable without `--allow-dirty`.
-- Speed sequences cycle 96 / 36 / 12 distinct frames. That is enough to keep a slot from re-reading the pointer it still owns. It is not a thousand unique 1080p images.
-- The 4K headline window is 1.3 s. The brief's 300-frame minimum is met. Steady-state and sequence FPS differ by about 1% on the median trial.
-- Laptop clocks move. Rows with stdev above 5% are flagged and were kept.
-- The PCIe generation was sampled at process start, while the link was idle. It is not a measurement of the link during the copy.
-- `nvidia-smi` reported no power limit (`[N/A]`).
-- Baseline 2 was not given its own FPS. It is the equivalence path, not a shipping threaded CPU encoder.
-- Equivalence and graph-identity FPS include hash and decode work. They are identified by suite name so they are not mixed into the headline.
-
-## What this phase changed in code
-
-- `RunPhase3A` names the timing contract, records steady-state FPS, drain, warmup exclusion, p99, first-frame latency, and rate-control time, drains with `cudaDeviceSynchronize`, and fails a watchdog instead of spinning.
-- Skipped verification no longer reports a fake PSNR.
-- Entropy capacity is checked against the bound above. Overflow is `Failed`.
-- `test_entropy_capacity` covers the bound and the overflow poll.
-- `benchmark_phase3a1` writes the JSON this document uses.
-
-No wavelet or entropy algorithm was rewritten to go faster. Slot policy was not changed. Opportunities that showed up in the numbers are in `docs/PHASE3B_PERFORMANCE_OPPORTUNITIES.md`.
+- Each highpass subband of `N = height * pitch_px` virtual coefficients has at most `ceil(31*(N+1)/32) <= N+1` 32-bit VLC words and is allocated with `N + 4096` words (`test_entropy_capacity`).
+- `GpuStageStatus` is `Pending`, `Complete`, or `Failed`. Any capacity overflow or asynchronous CUDA error transitions the slot to a sticky `Failed` state and terminates the encode loop cleanly rather than spinning indefinitely.
