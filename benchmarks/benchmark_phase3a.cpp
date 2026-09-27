@@ -112,17 +112,11 @@ UpstreamSequenceBenchResult BenchmarkUpstreamSequence(int width, int height, int
         CFHD_EncodeSample(ref, const_cast<uint8_t*>(f.data()), pitch);
     }
 
-    if (enc) {
-        enc->lastgopbitcount = 0;
-        enc->gop_length = 1;
-        enc->q.FSratelimiter = 4;
-    }
-
     std::vector<double> times;
     times.reserve(static_cast<size_t>(frames));
     const double t_start = NowMs();
     for (int i = 0; i < frames; ++i) {
-        const auto& f = pool[static_cast<size_t>(i % pool_len)];
+        const auto& f = pool[static_cast<size_t>((warmup + i) % pool_len)];
         const double t0 = NowMs();
         CFHD_EncodeSample(ref, const_cast<uint8_t*>(f.data()), pitch);
         void* sptr = nullptr;
@@ -327,7 +321,7 @@ int main() {
         b.warmup = (res.width == 7680) ? 4 : 6;
         b.frames = (res.width == 1920) ? 60 : ((res.width == 3840) ? 40 : 24);
         const int up_frames = (res.width == 1920) ? 24 : ((res.width == 3840) ? 12 : 6);
-        b.upstream = BenchmarkUpstreamSequence(res.width, res.height, 2, up_frames);
+        b.upstream = BenchmarkUpstreamSequence(res.width, res.height, b.warmup, up_frames);
 
         hypercine::Phase3AConfig cfg{};
         cfg.width = res.width;

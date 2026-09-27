@@ -29,7 +29,6 @@ if(HYPERCINE_ENABLE_CUDA)
         ${CMAKE_CURRENT_SOURCE_DIR}/cuda
     )
     target_compile_definitions(hypercine_wavelet PUBLIC HYPERCINE_CUDA_AVAILABLE=1)
-    set_property(TARGET hypercine_wavelet PROPERTY CUDA_ARCHITECTURES 89)
 else()
     add_library(hypercine_wavelet STATIC
         cpu/wavelet_cpu.cpp

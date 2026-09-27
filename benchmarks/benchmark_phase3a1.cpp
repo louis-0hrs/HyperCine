@@ -37,10 +37,12 @@ extern "C" {
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -51,11 +53,18 @@ extern "C" {
 #include <windows.h>
 #endif
 
+#ifndef HYPERCINE_TARGET_CUDA_ARCH
+#define HYPERCINE_TARGET_CUDA_ARCH HYPERCINE_CMAKE_CUDA_ARCH
+#endif
+
 namespace {
+
+constexpr int kCommonWarmupFrames = 4;
 
 struct Options {
     std::string suite = "all";
-    std::string out_path = "benchmarks/phase3a2_release_candidate.json";
+    std::string out_path = "benchmarks/phase3a2a_release_candidate.json";
+    std::string release_commit;
     bool allow_dirty = false;
     int trials = 5;
     std::string resolutions = "1080,4k,8k";
@@ -69,12 +78,13 @@ struct ResolutionSpec {
     int headline_frames;
     int study_frames;
     int unique_frames;
+    int validation_frames;
 };
 
 const ResolutionSpec kSpecs[] = {
-    {"1080p", "1080p", 1920, 1080, 1000, 400, 96},
-    {"4k", "4K_UHD", 3840, 2160, 300, 120, 36},
-    {"8k", "8K_UHD", 7680, 4320, 120, 48, 12},
+    {"1080p", "1080p", 1920, 1080, 1000, 400, 96, 24},
+    {"4k", "4K_UHD", 3840, 2160, 300, 120, 36, 24},
+    {"8k", "8K_UHD", 7680, 4320, 120, 48, 12, 12},
 };
 
 struct GitInfo {
@@ -84,6 +94,7 @@ struct GitInfo {
     std::string status;
     std::string upstream_status;
     bool dirty = false;
+    bool upstream_clean = true;
 };
 
 struct HardwareInfo {
@@ -96,6 +107,7 @@ struct HardwareInfo {
     uint64_t vram_bytes = 0;
     uint64_t vram_mib = 0;
     std::string cuda_arch;
+    std::string cuda_arch_digits;
     std::string cuda_runtime;
     std::string cuda_driver_api;
     std::string nvidia_driver;
@@ -158,6 +170,7 @@ GitInfo ReadGit() {
     git.status = Capture("git -C \"" + git.repo_root + "\" status --porcelain");
     git.upstream_status = Capture("git -C \"" + git.repo_root + "\" status --porcelain upstream/");
     git.dirty = !git.status.empty();
+    git.upstream_clean = git.upstream_status.empty();
     return git;
 }
 
@@ -211,7 +224,8 @@ HardwareInfo ReadHardware() {
         hw.gpu_model = prop.name;
         hw.vram_bytes = static_cast<uint64_t>(prop.totalGlobalMem);
         hw.vram_mib = hw.vram_bytes / (1024ull * 1024ull);
-        hw.cuda_arch = "sm_" + std::to_string(prop.major) + std::to_string(prop.minor);
+        hw.cuda_arch_digits = std::to_string(prop.major) + std::to_string(prop.minor);
+        hw.cuda_arch = "sm_" + hw.cuda_arch_digits;
     }
     hw.nvidia_driver = Capture("nvidia-smi --query-gpu=driver_version --format=csv,noheader");
     hw.pcie_config = Capture(
@@ -223,6 +237,19 @@ HardwareInfo ReadHardware() {
         "pcie.link.gen.current,pcie.link.width.current,pcie.link.gen.max,pcie.link.width.max "
         "--format=csv,noheader");
     return hw;
+}
+
+bool ArchListMatchesRuntime(const std::string& arch_list, const std::string& runtime_digits) {
+    if (runtime_digits.empty()) return false;
+    std::stringstream ss(arch_list);
+    std::string tok;
+    while (std::getline(ss, tok, ';')) {
+        if (tok == runtime_digits || tok == ("sm_" + runtime_digits) || tok == (runtime_digits + "-real") ||
+            tok == (runtime_digits + "-virtual")) {
+            return true;
+        }
+    }
+    return arch_list == runtime_digits;
 }
 
 void Stats(std::vector<double> vals, double* mean, double* median, double* stddev, double* min_v, double* max_v) {
@@ -244,6 +271,20 @@ void Stats(std::vector<double> vals, double* mean, double* median, double* stdde
         const size_t n = vals.size();
         *median = (n & 1u) ? vals[n / 2] : 0.5 * (vals[n / 2 - 1] + vals[n / 2]);
     }
+}
+
+uint64_t FnvMixU64(uint64_t h, uint64_t v) {
+    for (int b = 0; b < 8; ++b) {
+        h ^= static_cast<uint8_t>((v >> (b * 8)) & 0xffu);
+        h *= 1099511628211ull;
+    }
+    return h;
+}
+
+std::string HexU64(uint64_t v) {
+    std::ostringstream os;
+    os << std::hex << std::setw(16) << std::setfill('0') << v;
+    return os.str();
 }
 
 struct FramePool {
@@ -293,7 +334,9 @@ bool BuildPool(const ResolutionSpec& spec, int count, int exact_warmup, FramePoo
     pool->note = pool->exact
         ? "one buffer per pipeline index; measured frame k is stamped k"
         : "unique_cycle=" + std::to_string(pool->unique) +
-              "; later measured frames repeat this cycle; cycle length is greater than the slot count";
+              "; logical sequence frame s uses pool[s % unique_cycle]; warmup=0.." +
+              std::to_string(kCommonWarmupFrames - 1) + ", timed=" +
+              std::to_string(kCommonWarmupFrames) + "..W+N-1";
     (void)error;
     return true;
 }
@@ -331,15 +374,27 @@ bool EnsureDevice(FramePool* pool, std::string* error) {
     return true;
 }
 
+int SlotCountFor(const ResolutionSpec& spec, int override_slots) {
+    const auto sel = hypercine::SelectPhase2DFrameSlots(
+        spec.width, spec.height,
+        override_slots > 0 ? hypercine::Phase2DSlotPolicy::UserOverride : hypercine::Phase2DSlotPolicy::DefaultAuto,
+        override_slots, hypercine::Phase2DD2HPolicy::Throughput);
+    return std::max(1, sel.selected_slots);
+}
+
+int CommonWarmupFor(const ResolutionSpec& spec, int override_slots) {
+    return std::max(SlotCountFor(spec, override_slots), kCommonWarmupFrames);
+}
+
 std::vector<hypercine::Phase3AFrameInput> MakeInputs(const FramePool& pool, int warmup, int frames,
-                                                    hypercine::Phase3AInputMode mode) {
+                                                     hypercine::Phase3AInputMode mode) {
     std::vector<hypercine::Phase3AFrameInput> inputs(static_cast<size_t>(warmup + frames));
-    for (int i = 0; i < warmup + frames; ++i) {
-        const int src = pool.exact ? i : (i % pool.unique);
-        const int measured = pool.exact ? (i - warmup) : src;
-        auto& in = inputs[static_cast<size_t>(i)];
-        in.frame_index = measured >= 0 ? measured : 0;
-        in.pattern = hypercine::SelectSequencePattern(measured >= 0 ? measured : 0);
+    for (int s = 0; s < warmup + frames; ++s) {
+        const int src = pool.exact ? s : (s % pool.unique);
+        const int stamp_id = pool.exact ? std::max(0, s - warmup) : src;
+        auto& in = inputs[static_cast<size_t>(s)];
+        in.frame_index = stamp_id;
+        in.pattern = hypercine::SelectSequencePattern(stamp_id);
         in.host_ref = pool.pageable[static_cast<size_t>(src)].data();
         in.pitch = pool.pitch;
         in.width = pool.width;
@@ -351,23 +406,15 @@ std::vector<hypercine::Phase3AFrameInput> MakeInputs(const FramePool& pool, int 
     return inputs;
 }
 
-int SlotCountFor(const ResolutionSpec& spec, int override_slots) {
-    const auto sel = hypercine::SelectPhase2DFrameSlots(
-        spec.width, spec.height,
-        override_slots > 0 ? hypercine::Phase2DSlotPolicy::UserOverride : hypercine::Phase2DSlotPolicy::DefaultAuto,
-        override_slots, hypercine::Phase2DD2HPolicy::Throughput);
-    return std::max(1, sel.selected_slots);
-}
-
 hypercine::Phase3AResult RunGpu(const ResolutionSpec& spec, const FramePool& pool,
                                 hypercine::Phase3AInputMode mode, bool graph, int override_slots,
-                                int frames, bool verify) {
-    const int slots = SlotCountFor(spec, override_slots);
+                                int frames, bool verify, bool retain_records = false) {
+    const int warmup = pool.exact ? std::max(0, pool.unique - frames) : CommonWarmupFor(spec, override_slots);
     hypercine::Phase3AConfig cfg{};
     cfg.width = spec.width;
     cfg.height = spec.height;
     cfg.frames = frames;
-    cfg.warmup_frames = pool.exact ? std::max(0, pool.unique - frames) : std::max(slots, 2);
+    cfg.warmup_frames = warmup;
     cfg.input_mode = mode;
     cfg.quant_mode = hypercine::Phase3AQuantMode::DynamicUpstreamState;
     cfg.slot_policy = override_slots > 0 ? hypercine::Phase2DSlotPolicy::UserOverride
@@ -378,7 +425,7 @@ hypercine::Phase3AResult RunGpu(const ResolutionSpec& spec, const FramePool& poo
     cfg.sync_mode = hypercine::Phase2DSyncMode::Blocking;
     cfg.deterministic_test_metadata = verify;
     cfg.verify_sequence = verify;
-    cfg.retain_frame_records = verify;
+    cfg.retain_frame_records = verify || retain_records;
     auto inputs = MakeInputs(pool, cfg.warmup_frames, frames, mode);
     return hypercine::RunPhase3A(cfg, &inputs);
 }
@@ -395,12 +442,20 @@ struct CpuTrial {
     size_t mean_bytes = 0;
     size_t min_bytes = 0;
     size_t max_bytes = 0;
+    int warmup_frames = kCommonWarmupFrames;
+    int first_measured_logical_frame = kCommonWarmupFrames;
     int frames = 0;
+    int distinct_fs_rate_limiters = 0;
+    uint64_t sample_bytes_fnv64 = 14695981039346656037ull;
+    uint64_t fs_rate_limiter_fnv64 = 14695981039346656037ull;
+    std::vector<hypercine::Phase3AFrameRecord> frame_records;
     std::string error;
 };
 
-CpuTrial RunUpstream(const FramePool& pool, int frames) {
+CpuTrial RunUpstream(const FramePool& pool, int warmup, int frames, bool capture_records = false) {
     CpuTrial out;
+    out.warmup_frames = warmup;
+    out.first_measured_logical_frame = warmup;
     out.frames = frames;
     CFHD_EncoderRef ref = nullptr;
     if (CFHD_OpenEncoder(&ref, nullptr) != CFHD_ERROR_OKAY) {
@@ -413,22 +468,40 @@ CpuTrial RunUpstream(const FramePool& pool, int frames) {
         out.error = "CFHD_PrepareToEncode failed";
         return out;
     }
-    for (int i = 0; i < 4; ++i) {
-        const auto& frame = pool.pageable[static_cast<size_t>(i % pool.unique)];
+    for (int s = 0; s < warmup; ++s) {
+        const int src = pool.exact ? s : (s % pool.unique);
+        const auto& frame = pool.pageable[static_cast<size_t>(src)];
         if (CFHD_EncodeSample(ref, const_cast<uint8_t*>(frame.data()), pool.pitch) != CFHD_ERROR_OKAY) {
             CFHD_CloseEncoder(ref);
             out.error = "upstream warmup failed";
             return out;
         }
     }
+
+    auto* sample_enc = reinterpret_cast<CSampleEncoder*>(ref);
+    auto* enc = sample_enc ? reinterpret_cast<ENCODER*>(sample_enc->m_encoder) : nullptr;
+    auto* tfs = sample_enc ? reinterpret_cast<TRANSFORM**>(sample_enc->m_transformArray) : nullptr;
+
     std::vector<double> times;
     times.reserve(static_cast<size_t>(frames));
+    if (capture_records) out.frame_records.reserve(static_cast<size_t>(frames));
+    std::set<int> distinct_fs;
     size_t sum_bytes = 0;
     size_t min_bytes = 0;
     size_t max_bytes = 0;
+    uint64_t bytes_fnv = 14695981039346656037ull;
+    uint64_t fs_fnv = 14695981039346656037ull;
+
     const double t0 = NowMs();
     for (int i = 0; i < frames; ++i) {
-        const auto& frame = pool.pageable[static_cast<size_t>(i % pool.unique)];
+        const int seq_idx = warmup + i;
+        const int src = pool.exact ? seq_idx : (seq_idx % pool.unique);
+        const int stamp_id = pool.exact ? i : src;
+        const auto& frame = pool.pageable[static_cast<size_t>(src)];
+
+        const int64_t prev_bits = enc ? enc->lastgopbitcount : 0;
+        const size_t prev_bytes = static_cast<size_t>(prev_bits >> 3);
+
         const double a = NowMs();
         if (CFHD_EncodeSample(ref, const_cast<uint8_t*>(frame.data()), pool.pitch) != CFHD_ERROR_OKAY) {
             CFHD_CloseEncoder(ref);
@@ -440,9 +513,46 @@ CpuTrial RunUpstream(const FramePool& pool, int frames) {
         CFHD_GetSampleData(ref, &sample, &nbytes);
         const double b = NowMs();
         times.push_back(b - a);
+
         sum_bytes += nbytes;
         if (min_bytes == 0 || nbytes < min_bytes) min_bytes = nbytes;
         if (nbytes > max_bytes) max_bytes = nbytes;
+
+        enc = sample_enc ? reinterpret_cast<ENCODER*>(sample_enc->m_encoder) : nullptr;
+        tfs = sample_enc ? reinterpret_cast<TRANSFORM**>(sample_enc->m_transformArray) : nullptr;
+        const int cur_fs = enc ? enc->q.FSratelimiter : 0;
+        distinct_fs.insert(cur_fs);
+        bytes_fnv = FnvMixU64(bytes_fnv, static_cast<uint64_t>(nbytes));
+        fs_fnv = FnvMixU64(fs_fnv, static_cast<uint64_t>(static_cast<uint32_t>(cur_fs)));
+
+        if (capture_records) {
+            hypercine::Phase3AFrameRecord rec{};
+            rec.frame_index = i;
+            rec.pattern = hypercine::SelectSequencePattern(stamp_id);
+            rec.prev_encoded_bytes = prev_bytes;
+            rec.prev_lastgopbitcount = prev_bits;
+            rec.current_fs_rate_limiter = cur_fs;
+            if (enc && tfs) {
+                for (int c = 0; c < 3; ++c) {
+                    for (int lv = 0; lv < 3; ++lv) {
+                        IMAGE* wav = tfs[c] ? tfs[c]->wavelet[lv] : nullptr;
+                        if (!wav) continue;
+                        for (int band = 0; band < 4; ++band) {
+                            rec.quant_table[(c * 3 + lv) * 4 + band] = wav->quant[band];
+                            rec.scale_table[(c * 3 + lv) * 4 + band] = wav->scale[band];
+                        }
+                    }
+                }
+            }
+            rec.sample_bytes = nbytes;
+            const auto* s_bytes = static_cast<const uint8_t*>(sample);
+            const std::vector<uint8_t> raw_sample(s_bytes, s_bytes + nbytes);
+            rec.sample_sha256 = hypercine::Sha256Hex(raw_sample.data(), raw_sample.size());
+            const std::vector<uint8_t> masked = hypercine::MaskCfhdVolatileMetadata(raw_sample);
+            rec.masked_sample_sha256 = hypercine::Sha256Hex(masked.data(), masked.size());
+            rec.latency_ms = b - a;
+            out.frame_records.push_back(std::move(rec));
+        }
     }
     const double wall = NowMs() - t0;
     CFHD_CloseEncoder(ref);
@@ -461,9 +571,48 @@ CpuTrial RunUpstream(const FramePool& pool, int frames) {
     out.mean_bytes = frames > 0 ? sum_bytes / static_cast<size_t>(frames) : 0;
     out.min_bytes = min_bytes;
     out.max_bytes = max_bytes;
+    out.distinct_fs_rate_limiters = static_cast<int>(distinct_fs.size());
+    out.sample_bytes_fnv64 = bytes_fnv;
+    out.fs_rate_limiter_fnv64 = fs_fnv;
     out.ok = true;
     return out;
 }
+
+struct EquivalenceReport {
+    std::string resolution;
+    int width = 0;
+    int height = 0;
+    int warmup_frames = kCommonWarmupFrames;
+    int first_measured_logical_frame = kCommonWarmupFrames;
+    int validation_frames = 0;
+    int headline_frames = 0;
+    bool logical_indices_match = false;
+    bool patterns_match = false;
+    bool prev_encoded_bytes_match = false;
+    bool lastgopbitcount_match = false;
+    bool fs_rate_limiter_trajectory_match = false;
+    bool quant_table_trajectory_match = false;
+    bool sample_bytes_trajectory_match = false;
+    bool masked_sample_sha256_match_upstream = false;
+    bool gpu_modes_unmasked_sha256_match = false;
+    bool decode_and_stamp_verified = false;
+    bool headline_output_size_stats_match = true;
+    int matched_validation_frames = 0;
+    int first_divergent_frame = -1;
+    std::string divergence_reason;
+    size_t validation_mean_bytes = 0;
+    size_t validation_min_bytes = 0;
+    size_t validation_max_bytes = 0;
+    int validation_distinct_fs_limiters = 0;
+    std::string validation_sample_bytes_fnv64;
+    std::string validation_fs_rate_limiter_fnv64;
+    std::string validation_masked_sequence_fnv64;
+    size_t headline_mean_bytes = 0;
+    size_t headline_min_bytes = 0;
+    size_t headline_max_bytes = 0;
+    int headline_distinct_fs_limiters = 0;
+    bool ok = false;
+};
 
 struct TrialRecord {
     std::string suite;
@@ -482,6 +631,221 @@ struct TrialRecord {
     std::string prep_error;
 };
 
+EquivalenceReport ValidateEquivalenceGate(const ResolutionSpec& spec, FramePool& pool,
+                                          std::vector<TrialRecord>* records) {
+    EquivalenceReport rep;
+    rep.resolution = spec.name;
+    rep.width = spec.width;
+    rep.height = spec.height;
+    rep.warmup_frames = CommonWarmupFor(spec, 0);
+    rep.first_measured_logical_frame = rep.warmup_frames;
+    rep.validation_frames = spec.validation_frames;
+    rep.headline_frames = spec.headline_frames;
+
+    std::cout << "  equivalence_gate " << spec.name << " warmup=" << rep.warmup_frames
+              << " first_logical=" << rep.first_measured_logical_frame
+              << " frames=" << rep.validation_frames << "\n" << std::flush;
+
+    CpuTrial cpu_val = RunUpstream(pool, rep.warmup_frames, rep.validation_frames, true);
+    {
+        TrialRecord rec;
+        rec.suite = "equivalence";
+        rec.resolution = spec.name;
+        rec.width = spec.width;
+        rec.height = spec.height;
+        rec.mode = "UpstreamCpuEncodeSample";
+        rec.is_cpu = true;
+        rec.pool_note = pool.note;
+        rec.cpu = cpu_val;
+        records->push_back(rec);
+    }
+
+    auto run_gpu_val = [&](hypercine::Phase3AInputMode mode) -> hypercine::Phase3AResult {
+        TrialRecord rec;
+        rec.suite = "equivalence";
+        rec.resolution = spec.name;
+        rec.width = spec.width;
+        rec.height = spec.height;
+        rec.mode = hypercine::Phase3AInputModeName(mode);
+        rec.graph = true;
+        rec.pool_note = pool.note;
+        if (mode == hypercine::Phase3AInputMode::HostPinnedApi && !EnsurePinned(&pool, &rec.prep_error)) {
+            records->push_back(rec);
+            return rec.gpu;
+        }
+        if (mode == hypercine::Phase3AInputMode::DeviceInput && !EnsureDevice(&pool, &rec.prep_error)) {
+            records->push_back(rec);
+            return rec.gpu;
+        }
+        rec.gpu = RunGpu(spec, pool, mode, true, 0, rep.validation_frames, true, true);
+        std::cout << "    equivalence " << rec.mode << " fps=" << rec.gpu.sustained_fps
+                  << " mean_bytes=" << rec.gpu.mean_bitstream_bytes
+                  << " ok=" << rec.gpu.ok << " " << rec.gpu.error << "\n" << std::flush;
+        hypercine::Phase3AResult out = rec.gpu;
+        records->push_back(std::move(rec));
+        return out;
+    };
+
+    const hypercine::Phase3AResult gpu_page = run_gpu_val(hypercine::Phase3AInputMode::HostPageableEndToEnd);
+    const hypercine::Phase3AResult gpu_pin  = run_gpu_val(hypercine::Phase3AInputMode::HostPinnedApi);
+    const hypercine::Phase3AResult gpu_dev  = run_gpu_val(hypercine::Phase3AInputMode::DeviceInput);
+
+    if (!cpu_val.ok || !gpu_page.ok || !gpu_pin.ok || !gpu_dev.ok) {
+        rep.divergence_reason = "encoder execution failed during equivalence gate";
+        return rep;
+    }
+    const size_t n = static_cast<size_t>(rep.validation_frames);
+    if (cpu_val.frame_records.size() != n || gpu_page.frame_records.size() != n ||
+        gpu_pin.frame_records.size() != n || gpu_dev.frame_records.size() != n) {
+        rep.divergence_reason = "frame_records count mismatch";
+        return rep;
+    }
+
+    rep.logical_indices_match = true;
+    rep.patterns_match = true;
+    rep.prev_encoded_bytes_match = true;
+    rep.lastgopbitcount_match = true;
+    rep.fs_rate_limiter_trajectory_match = true;
+    rep.quant_table_trajectory_match = true;
+    rep.sample_bytes_trajectory_match = true;
+    rep.masked_sample_sha256_match_upstream = true;
+    rep.gpu_modes_unmasked_sha256_match = true;
+    rep.decode_and_stamp_verified = gpu_page.decode_ok && gpu_page.stamp_verify_ok &&
+                                    gpu_pin.decode_ok && gpu_pin.stamp_verify_ok &&
+                                    gpu_dev.decode_ok && gpu_dev.stamp_verify_ok &&
+                                    (gpu_page.min_psnr_db > 35.0) &&
+                                    (gpu_pin.min_psnr_db > 35.0) &&
+                                    (gpu_dev.min_psnr_db > 35.0);
+
+    uint64_t masked_seq_fnv = 14695981039346656037ull;
+    const hypercine::Phase3AResult* gpu_all[3] = {&gpu_page, &gpu_pin, &gpu_dev};
+    const char* gpu_names[3] = {"HostPageableEndToEnd", "HostPinnedApi", "DeviceInput"};
+
+    for (size_t i = 0; i < n; ++i) {
+        const auto& cr = cpu_val.frame_records[i];
+        for (unsigned char ch : cr.masked_sample_sha256) {
+            masked_seq_fnv ^= ch;
+            masked_seq_fnv *= 1099511628211ull;
+        }
+        bool frame_ok = true;
+        for (int m = 0; m < 3; ++m) {
+            const auto& gr = gpu_all[m]->frame_records[i];
+            if (cr.frame_index != gr.frame_index) {
+                rep.logical_indices_match = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " frame_index mismatch";
+                }
+            }
+            if (cr.pattern != gr.pattern) {
+                rep.patterns_match = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " pattern mismatch";
+                }
+            }
+            if (cr.prev_encoded_bytes != gr.prev_encoded_bytes) {
+                rep.prev_encoded_bytes_match = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " prev_encoded_bytes mismatch";
+                }
+            }
+            if (cr.prev_lastgopbitcount != gr.prev_lastgopbitcount) {
+                rep.lastgopbitcount_match = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " lastgopbitcount mismatch";
+                }
+            }
+            if (cr.current_fs_rate_limiter != gr.current_fs_rate_limiter) {
+                rep.fs_rate_limiter_trajectory_match = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " FSratelimiter mismatch";
+                }
+            }
+            if (std::memcmp(cr.quant_table, gr.quant_table, sizeof(cr.quant_table)) != 0 ||
+                std::memcmp(cr.scale_table, gr.scale_table, sizeof(cr.scale_table)) != 0) {
+                rep.quant_table_trajectory_match = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " quant_table mismatch";
+                }
+            }
+            if (cr.sample_bytes != gr.sample_bytes) {
+                rep.sample_bytes_trajectory_match = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " sample_bytes mismatch";
+                }
+            }
+            if (cr.masked_sample_sha256 != gr.masked_sample_sha256) {
+                rep.masked_sample_sha256_match_upstream = false;
+                frame_ok = false;
+                if (rep.first_divergent_frame < 0) {
+                    rep.first_divergent_frame = static_cast<int>(i);
+                    rep.divergence_reason = std::string(gpu_names[m]) + " masked_sample_sha256 mismatch";
+                }
+            }
+        }
+        if (gpu_page.frame_records[i].sample_sha256 != gpu_pin.frame_records[i].sample_sha256 ||
+            gpu_page.frame_records[i].sample_sha256 != gpu_dev.frame_records[i].sample_sha256) {
+            rep.gpu_modes_unmasked_sha256_match = false;
+            frame_ok = false;
+            if (rep.first_divergent_frame < 0) {
+                rep.first_divergent_frame = static_cast<int>(i);
+                rep.divergence_reason = "GPU input modes unmasked sample_sha256 mismatch";
+            }
+        }
+        if (frame_ok) ++rep.matched_validation_frames;
+    }
+
+    rep.validation_mean_bytes = cpu_val.mean_bytes;
+    rep.validation_min_bytes = cpu_val.min_bytes;
+    rep.validation_max_bytes = cpu_val.max_bytes;
+    rep.validation_distinct_fs_limiters = cpu_val.distinct_fs_rate_limiters;
+    rep.validation_sample_bytes_fnv64 = HexU64(cpu_val.sample_bytes_fnv64);
+    rep.validation_fs_rate_limiter_fnv64 = HexU64(cpu_val.fs_rate_limiter_fnv64);
+    rep.validation_masked_sequence_fnv64 = HexU64(masked_seq_fnv);
+
+    rep.ok = rep.logical_indices_match &&
+             rep.patterns_match &&
+             rep.prev_encoded_bytes_match &&
+             rep.lastgopbitcount_match &&
+             rep.fs_rate_limiter_trajectory_match &&
+             rep.quant_table_trajectory_match &&
+             rep.sample_bytes_trajectory_match &&
+             rep.masked_sample_sha256_match_upstream &&
+             rep.gpu_modes_unmasked_sha256_match &&
+             rep.decode_and_stamp_verified &&
+             (rep.matched_validation_frames == rep.validation_frames);
+
+    std::cout << "    equivalence_gate " << spec.name << " ok=" << rep.ok
+              << " matched=" << rep.matched_validation_frames << "/" << rep.validation_frames
+              << " mean_bytes=" << rep.validation_mean_bytes
+              << " min_bytes=" << rep.validation_min_bytes
+              << " max_bytes=" << rep.validation_max_bytes << "\n" << std::flush;
+    return rep;
+}
+
+const char* SlotPolicyName(hypercine::Phase2DSlotPolicy p) {
+    switch (p) {
+    case hypercine::Phase2DSlotPolicy::DefaultAuto: return "DefaultAuto";
+    case hypercine::Phase2DSlotPolicy::LowLatency: return "LowLatency";
+    case hypercine::Phase2DSlotPolicy::MaxThroughput: return "MaxThroughput";
+    case hypercine::Phase2DSlotPolicy::UserOverride: return "UserOverride";
+    default: return "DefaultAuto";
+    }
+}
+
 void WriteGpu(std::ostringstream& json, const TrialRecord& rec) {
     const auto& r = rec.gpu;
     const double raw_bytes = static_cast<double>(rec.width) * static_cast<double>(rec.height) * 4.0;
@@ -493,9 +857,10 @@ void WriteGpu(std::ostringstream& json, const TrialRecord& rec) {
     json << "      \"width\": " << rec.width << ",\n";
     json << "      \"height\": " << rec.height << ",\n";
     json << "      \"input_mode\": \"" << rec.mode << "\",\n";
-    json << "      \"benchmark_contract\": \"ProductionEndToEnd\",\n";
+    json << "      \"benchmark_contract\": \"ProductionEndToEnd_v2\",\n";
     json << "      \"throughput_kind\": \"completed_frame_sequence\",\n";
     json << "      \"graph_mode\": " << (rec.graph ? "true" : "false") << ",\n";
+    json << "      \"slot_policy\": \"" << SlotPolicyName(r.slot_selection.policy) << "\",\n";
     json << "      \"requested_slots\": " << rec.requested_slots << ",\n";
     json << "      \"slot_count\": " << r.slot_selection.selected_slots << ",\n";
     json << "      \"trial\": " << rec.trial << ",\n";
@@ -507,6 +872,7 @@ void WriteGpu(std::ostringstream& json, const TrialRecord& rec) {
     json << "      \"sequence\": {\n";
     json << "        \"frames\": " << r.config.frames << ",\n";
     json << "        \"warmup_frames_excluded\": " << r.config.warmup_frames << ",\n";
+    json << "        \"first_measured_logical_frame_index\": " << r.config.warmup_frames << ",\n";
     json << "        \"submitted_frames\": " << r.submitted_frames << ",\n";
     json << "        \"completed_frames\": " << r.completed_frames << ",\n";
     json << "        \"wall_ms\": " << r.wall_ms << ",\n";
@@ -571,6 +937,14 @@ void WriteGpu(std::ostringstream& json, const TrialRecord& rec) {
     json << "        \"max_bytes\": " << r.max_bitstream_bytes << ",\n";
     json << "        \"distinct_fs_rate_limiters\": " << r.distinct_fs_rate_limiters << "\n";
     json << "      },\n";
+    json << "      \"memory_bytes\": {\n";
+    json << "        \"per_slot_estimated_vram_bytes\": " << r.slot_selection.per_slot_vram_bytes << ",\n";
+    json << "        \"session_workspace_estimated_vram_bytes\": " << r.slot_selection.session_workspace_vram_bytes << ",\n";
+    json << "        \"total_estimated_vram_bytes\": " << r.slot_selection.total_estimated_vram_bytes << ",\n";
+    json << "        \"vram_used_bytes\": " << r.vram_used_bytes << ",\n";
+    json << "        \"slot_vram_bytes\": " << r.slot_vram_bytes << ",\n";
+    json << "        \"slot_pinned_host_bytes\": " << r.slot_pinned_host_bytes << "\n";
+    json << "      },\n";
     json << "      \"telemetry\": {\n";
     json << "        \"graphics_clock_mhz_mean\": " << r.nvml.graphics_clock_mhz_mean << ",\n";
     json << "        \"graphics_clock_mhz_min\": " << r.nvml.graphics_clock_mhz_min << ",\n";
@@ -622,13 +996,16 @@ void WriteCpu(std::ostringstream& json, const TrialRecord& rec) {
     json << "      \"width\": " << rec.width << ",\n";
     json << "      \"height\": " << rec.height << ",\n";
     json << "      \"input_mode\": \"UpstreamCpuEncodeSample\",\n";
-    json << "      \"benchmark_contract\": \"ProductionEndToEnd\",\n";
+    json << "      \"benchmark_contract\": \"ProductionEndToEnd_v2\",\n";
     json << "      \"throughput_kind\": \"completed_frame_sequence\",\n";
     json << "      \"baseline\": \"pristine CFHD_EncodeSample, _THREADED_ENCODER=0, one encode thread\",\n";
     json << "      \"trial\": " << rec.trial << ",\n";
     json << "      \"ok\": " << (c.ok ? "true" : "false") << ",\n";
     json << "      \"error\": \"" << JsonEscape(c.error) << "\",\n";
     json << "      \"pool\": \"" << JsonEscape(rec.pool_note) << "\",\n";
+    json << "      \"sequence\": {\"frames\": " << c.frames
+         << ", \"warmup_frames_excluded\": " << c.warmup_frames
+         << ", \"first_measured_logical_frame_index\": " << c.first_measured_logical_frame << "},\n";
     json << "      \"throughput\": {\"sequence_fps\": " << c.fps << ", \"wall_ms\": " << c.wall_ms << "},\n";
     json << "      \"latency\": {\"mean_ms\": " << c.mean_ms << ", \"median_ms\": " << c.median_ms
          << ", \"p95_ms\": " << c.p95_ms << ", \"p99_ms\": " << c.p99_ms
@@ -636,7 +1013,11 @@ void WriteCpu(std::ostringstream& json, const TrialRecord& rec) {
     json << "      \"bandwidth\": {\"raw_input_gbps\": " << (raw_bytes * c.fps / 1.0e9)
          << ", \"output_mbps\": " << (static_cast<double>(c.mean_bytes) * c.fps / 1.0e6) << "},\n";
     json << "      \"compression\": {\"mean_bytes\": " << c.mean_bytes << ", \"min_bytes\": " << c.min_bytes
-         << ", \"max_bytes\": " << c.max_bytes << ", \"quality\": \"CFHD_ENCODING_QUALITY_FILMSCAN3\","
+         << ", \"max_bytes\": " << c.max_bytes
+         << ", \"distinct_fs_rate_limiters\": " << c.distinct_fs_rate_limiters
+         << ", \"sample_bytes_fnv64\": \"" << HexU64(c.sample_bytes_fnv64) << "\""
+         << ", \"fs_rate_limiter_fnv64\": \"" << HexU64(c.fs_rate_limiter_fnv64) << "\""
+         << ", \"quality\": \"CFHD_ENCODING_QUALITY_FILMSCAN3\","
          << " \"encoded_format\": \"CFHD_ENCODED_FORMAT_YUV_422\", \"source_format\": \"BGRA8\"}\n";
     json << "    }";
 }
@@ -647,7 +1028,8 @@ bool WantRes(const Options& opt, const char* key) {
 
 void WarmGpu(const ResolutionSpec& spec, FramePool& pool) {
     std::cout << "  warmup " << spec.name << "\n" << std::flush;
-    auto r = RunGpu(spec, pool, hypercine::Phase3AInputMode::HostPageableEndToEnd, true, 0, std::min(48, spec.study_frames), false);
+    auto r = RunGpu(spec, pool, hypercine::Phase3AInputMode::HostPageableEndToEnd, true, 0,
+                    std::min(48, spec.study_frames), false, false);
     std::cout << "    warmup fps=" << r.sustained_fps << " clock=" << r.nvml.graphics_clock_mhz_mean
               << " MHz ok=" << r.ok << "\n" << std::flush;
     std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -667,36 +1049,35 @@ int main(int argc, char** argv) {
         if (arg == "--allow-dirty") opt.allow_dirty = true;
         else if (arg.rfind("--suite=", 0) == 0) opt.suite = arg.substr(8);
         else if (arg.rfind("--out=", 0) == 0) opt.out_path = arg.substr(6);
+        else if (arg.rfind("--release-commit=", 0) == 0) opt.release_commit = arg.substr(17);
         else if (arg.rfind("--trials=", 0) == 0) opt.trials = std::max(1, std::atoi(arg.substr(9).c_str()));
         else if (arg.rfind("--resolutions=", 0) == 0) opt.resolutions = arg.substr(14);
         else if (const std::string v = need("--suite"); !v.empty()) opt.suite = v;
         else if (const std::string v = need("--out"); !v.empty()) opt.out_path = v;
+        else if (const std::string v = need("--release-commit"); !v.empty()) opt.release_commit = v;
         else if (const std::string v = need("--trials"); !v.empty()) opt.trials = std::max(1, std::atoi(v.c_str()));
         else if (const std::string v = need("--resolutions"); !v.empty()) opt.resolutions = v;
     }
 
     const GitInfo git = ReadGit();
-    if (git.dirty && !opt.allow_dirty) {
+    if ((git.dirty || !git.upstream_clean) && !opt.allow_dirty) {
         std::cerr << "REFUSING publication: working tree is dirty. Pass --allow-dirty to record a DIRTY result.\n";
         std::cerr << git.status << "\n";
         return 2;
     }
     const HardwareInfo hw = ReadHardware();
     std::vector<TrialRecord> records;
+    std::vector<EquivalenceReport> eq_reports;
 
     auto consider = [&](const ResolutionSpec& spec) {
         if (!WantRes(opt, spec.key == std::string("1080p") ? "1080" : spec.key)) return;
         FramePool pool;
         std::string error;
-        const bool speed_suite = opt.suite == "all" || opt.suite == "headline" || opt.suite == "fresh" ||
-                                 opt.suite == "slots" || opt.suite == "graph";
-        if (speed_suite) {
-            if (!BuildPool(spec, spec.unique_frames, -1, &pool, &error)) {
-                std::cerr << error << "\n";
-                return;
-            }
-            if (opt.suite != "fresh") WarmGpu(spec, pool);
+        if (!BuildPool(spec, spec.unique_frames, -1, &pool, &error)) {
+            std::cerr << error << "\n";
+            return;
         }
+        if (opt.suite != "fresh") WarmGpu(spec, pool);
 
         auto add_gpu = [&](const std::string& suite, hypercine::Phase3AInputMode mode, bool graph,
                            int slots, int trial, int order, int frames, bool verify) {
@@ -721,53 +1102,25 @@ int main(int argc, char** argv) {
                 records.push_back(rec);
                 return;
             }
-            rec.gpu = RunGpu(spec, pool, mode, graph, slots, frames, verify);
+            rec.gpu = RunGpu(spec, pool, mode, graph, slots, frames, verify, false);
             std::cout << "    fps=" << rec.gpu.sustained_fps
                       << " steady=" << rec.gpu.steady_state_fps
                       << " lat=" << rec.gpu.mean_latency_ms
                       << " clock=" << rec.gpu.nvml.graphics_clock_mhz_mean
                       << " slots=" << rec.gpu.slot_selection.selected_slots
+                      << " mean_bytes=" << rec.gpu.mean_bitstream_bytes
                       << " ok=" << rec.gpu.ok << " " << rec.gpu.error << "\n" << std::flush;
             records.push_back(std::move(rec));
         };
 
-        if (opt.suite == "all" || opt.suite == "equivalence") {
-            FramePool exact;
-            const int slots = SlotCountFor(spec, 0);
-            const int warmup = std::max(slots, 2);
-            const int frames = std::min(24, spec.key == std::string("8k") ? 12 : 24);
-            if (!BuildPool(spec, warmup + frames, warmup, &exact, &error)) {
-                std::cerr << error << "\n";
-                return;
-            }
-            auto add_exact = [&](hypercine::Phase3AInputMode mode) {
-                TrialRecord rec;
-                rec.suite = "equivalence";
-                rec.resolution = spec.name;
-                rec.width = spec.width;
-                rec.height = spec.height;
-                rec.mode = hypercine::Phase3AInputModeName(mode);
-                rec.graph = true;
-                rec.pool_note = exact.note;
-                std::cout << "  equivalence " << spec.name << " " << rec.mode << " frames=" << frames << "\n" << std::flush;
-                if (mode == hypercine::Phase3AInputMode::HostPinnedApi && !EnsurePinned(&exact, &rec.prep_error)) {
-                    records.push_back(rec);
-                    return;
-                }
-                if (mode == hypercine::Phase3AInputMode::DeviceInput && !EnsureDevice(&exact, &rec.prep_error)) {
-                    records.push_back(rec);
-                    return;
-                }
-                rec.gpu = RunGpu(spec, exact, mode, true, 0, frames, true);
-                std::cout << "    fps=" << rec.gpu.sustained_fps << " ok=" << rec.gpu.ok << " " << rec.gpu.error << "\n" << std::flush;
-                records.push_back(std::move(rec));
-            };
-            add_exact(hypercine::Phase3AInputMode::HostPageableEndToEnd);
-            add_exact(hypercine::Phase3AInputMode::HostPinnedApi);
-            add_exact(hypercine::Phase3AInputMode::DeviceInput);
+        if (opt.suite == "all" || opt.suite == "headline" || opt.suite == "equivalence") {
+            EquivalenceReport eq = ValidateEquivalenceGate(spec, pool, &records);
+            eq_reports.push_back(std::move(eq));
         }
+
         if (opt.suite == "all" || opt.suite == "headline" || opt.suite == "fresh") {
             const int trials = (opt.suite == "fresh") ? 1 : opt.trials;
+            const int warmup = CommonWarmupFor(spec, 0);
             const hypercine::Phase3AInputMode orders[3][3] = {
                 {hypercine::Phase3AInputMode::HostPageableEndToEnd, hypercine::Phase3AInputMode::HostPinnedApi, hypercine::Phase3AInputMode::DeviceInput},
                 {hypercine::Phase3AInputMode::DeviceInput, hypercine::Phase3AInputMode::HostPageableEndToEnd, hypercine::Phase3AInputMode::HostPinnedApi},
@@ -783,13 +1136,41 @@ int main(int argc, char** argv) {
                     cpu.trial = t;
                     cpu.pool_note = pool.note;
                     std::cout << "  headline " << spec.name << " upstream trial=" << t << "\n" << std::flush;
-                    cpu.cpu = RunUpstream(pool, spec.headline_frames);
-                    std::cout << "    cpu fps=" << cpu.cpu.fps << "\n" << std::flush;
+                    cpu.cpu = RunUpstream(pool, warmup, spec.headline_frames, false);
+                    std::cout << "    cpu fps=" << cpu.cpu.fps
+                              << " mean_bytes=" << cpu.cpu.mean_bytes << "\n" << std::flush;
                     records.push_back(std::move(cpu));
                 }
                 const int ord = t % 3;
                 for (auto mode : orders[ord]) {
                     add_gpu(opt.suite == "fresh" ? "fresh" : "headline", mode, true, 0, t, ord, spec.headline_frames, false);
+                }
+            }
+
+            // Verify headline output-size fairness across all modes for this resolution:
+            for (auto& eq : eq_reports) {
+                if (eq.resolution != spec.name) continue;
+                bool first_rec = true;
+                for (const auto& rec : records) {
+                    if (rec.suite != "headline" || rec.resolution != spec.name) continue;
+                    const size_t mb = rec.is_cpu ? rec.cpu.mean_bytes : rec.gpu.mean_bitstream_bytes;
+                    const size_t minb = rec.is_cpu ? rec.cpu.min_bytes : rec.gpu.min_bitstream_bytes;
+                    const size_t maxb = rec.is_cpu ? rec.cpu.max_bytes : rec.gpu.max_bitstream_bytes;
+                    const int dfs = rec.is_cpu ? rec.cpu.distinct_fs_rate_limiters : rec.gpu.distinct_fs_rate_limiters;
+                    if (first_rec) {
+                        eq.headline_mean_bytes = mb;
+                        eq.headline_min_bytes = minb;
+                        eq.headline_max_bytes = maxb;
+                        eq.headline_distinct_fs_limiters = dfs;
+                        first_rec = false;
+                    } else if (mb != eq.headline_mean_bytes || minb != eq.headline_min_bytes ||
+                               maxb != eq.headline_max_bytes || dfs != eq.headline_distinct_fs_limiters) {
+                        eq.headline_output_size_stats_match = false;
+                        eq.ok = false;
+                        if (eq.divergence_reason.empty()) {
+                            eq.divergence_reason = "headline output sample byte statistics differed between CPU and GPU";
+                        }
+                    }
                 }
             }
         }
@@ -807,34 +1188,29 @@ int main(int argc, char** argv) {
                 add_gpu("graph", hypercine::Phase3AInputMode::HostPageableEndToEnd, false, 0, t, 0, spec.study_frames, false);
                 add_gpu("graph", hypercine::Phase3AInputMode::HostPageableEndToEnd, true, 0, t, 1, spec.study_frames, false);
             }
-            FramePool exact;
-            const int slots = SlotCountFor(spec, 0);
-            const int warmup = std::max(slots, 2);
             const int frames = spec.key == std::string("8k") ? 8 : 16;
-            if (BuildPool(spec, warmup + frames, warmup, &exact, &error)) {
-                auto add_exact_graph = [&](bool graph_on) {
-                    TrialRecord rec;
-                    rec.suite = "graph_identity";
-                    rec.resolution = spec.name;
-                    rec.width = spec.width;
-                    rec.height = spec.height;
-                    rec.mode = "HostPageableEndToEnd";
-                    rec.graph = graph_on;
-                    rec.pool_note = exact.note;
-                    std::cout << "  graph identity " << spec.name << " graph=" << graph_on << "\n" << std::flush;
-                    rec.gpu = RunGpu(spec, exact, hypercine::Phase3AInputMode::HostPageableEndToEnd,
-                                     graph_on, 0, frames, true);
-                    std::cout << "    fps=" << rec.gpu.sustained_fps << " ok=" << rec.gpu.ok
-                              << " " << rec.gpu.error << "\n" << std::flush;
-                    records.push_back(std::move(rec));
-                };
-                add_exact_graph(false);
-                add_exact_graph(true);
-            }
+            auto add_exact_graph = [&](bool graph_on) {
+                TrialRecord rec;
+                rec.suite = "graph_identity";
+                rec.resolution = spec.name;
+                rec.width = spec.width;
+                rec.height = spec.height;
+                rec.mode = "HostPageableEndToEnd";
+                rec.graph = graph_on;
+                rec.pool_note = pool.note;
+                std::cout << "  graph identity " << spec.name << " graph=" << graph_on << "\n" << std::flush;
+                rec.gpu = RunGpu(spec, pool, hypercine::Phase3AInputMode::HostPageableEndToEnd,
+                                 graph_on, 0, frames, true, true);
+                std::cout << "    fps=" << rec.gpu.sustained_fps << " ok=" << rec.gpu.ok
+                          << " " << rec.gpu.error << "\n" << std::flush;
+                records.push_back(std::move(rec));
+            };
+            add_exact_graph(false);
+            add_exact_graph(true);
         }
     };
 
-    std::cout << "Phase 3A.1 canonical benchmark suite=" << opt.suite
+    std::cout << "Phase 3A.2a canonical benchmark suite=" << opt.suite
               << " dirty=" << git.dirty << " commit=" << git.commit << "\n" << std::flush;
     std::vector<const ResolutionSpec*> ordered;
     std::stringstream spec_list(opt.resolutions);
@@ -851,21 +1227,38 @@ int main(int argc, char** argv) {
     }
     for (const ResolutionSpec* spec : ordered) consider(*spec);
 
+    bool all_eq_verified = !eq_reports.empty();
+    for (const auto& eq : eq_reports) {
+        if (!eq.ok || !eq.headline_output_size_stats_match) all_eq_verified = false;
+    }
+    const bool native_arch_match =
+        ArchListMatchesRuntime(HYPERCINE_CMAKE_CUDA_ARCH, hw.cuda_arch_digits) &&
+        ArchListMatchesRuntime(HYPERCINE_TARGET_CUDA_ARCH, hw.cuda_arch_digits);
+    const bool is_canonical = !git.dirty && git.upstream_clean && all_eq_verified && native_arch_match;
+    const std::string release_commit = opt.release_commit.empty() ? git.commit : opt.release_commit;
+
     std::ostringstream json;
     json << std::fixed << std::setprecision(4);
     json << "{\n";
     json << "  \"publication\": \"" << (git.dirty ? "DIRTY" : "CLEAN") << "\",\n";
-    json << "  \"canonical\": " << (git.dirty ? "false" : "true") << ",\n";
+    json << "  \"canonical\": " << (is_canonical ? "true" : "false") << ",\n";
+    json << "  \"source_commit\": \"" << JsonEscape(git.commit) << "\",\n";
+    json << "  \"release_commit\": \"" << JsonEscape(release_commit) << "\",\n";
     json << "  \"git_commit\": \"" << JsonEscape(git.commit) << "\",\n";
     json << "  \"git_branch\": \"" << JsonEscape(git.branch) << "\",\n";
     json << "  \"git_status_clean\": " << (git.dirty ? "false" : "true") << ",\n";
-    json << "  \"benchmark_contract\": \"ProductionEndToEnd\",\n";
-    json << "  \"primary_public_benchmark\": \"HostPageable ProductionEndToEnd\",\n";
+    json << "  \"upstream_status_clean\": " << (git.upstream_clean ? "true" : "false") << ",\n";
+    json << "  \"benchmark_contract\": \"ProductionEndToEnd_v2\",\n";
+    json << "  \"primary_public_benchmark\": \"HostPageable ProductionEndToEnd_v2\",\n";
+    json << "  \"benchmark_equivalence_verified\": " << (all_eq_verified ? "true" : "false") << ",\n";
     json << "  \"git\": {\n";
+    json << "    \"source_commit\": \"" << JsonEscape(git.commit) << "\",\n";
+    json << "    \"release_commit\": \"" << JsonEscape(release_commit) << "\",\n";
     json << "    \"commit\": \"" << JsonEscape(git.commit) << "\",\n";
     json << "    \"branch\": \"" << JsonEscape(git.branch) << "\",\n";
     json << "    \"dirty\": " << (git.dirty ? "true" : "false") << ",\n";
     json << "    \"clean\": " << (git.dirty ? "false" : "true") << ",\n";
+    json << "    \"upstream_clean\": " << (git.upstream_clean ? "true" : "false") << ",\n";
     json << "    \"status\": \"" << JsonEscape(git.status) << "\",\n";
     json << "    \"upstream_status\": \"" << JsonEscape(git.upstream_status) << "\"\n";
     json << "  },\n";
@@ -881,6 +1274,12 @@ int main(int argc, char** argv) {
     json << "    \"nvidia_driver\": \"" << JsonEscape(hw.nvidia_driver) << "\",\n";
     json << "    \"cuda_architecture\": \"" << JsonEscape(hw.cuda_arch) << "\",\n";
     json << "    \"cmake_cuda_architectures\": \"" << JsonEscape(HYPERCINE_CMAKE_CUDA_ARCH) << "\",\n";
+    json << "    \"target_cuda_architectures\": \"" << JsonEscape(HYPERCINE_TARGET_CUDA_ARCH) << "\",\n";
+    json << "    \"native_architecture_match\": " << (native_arch_match ? "true" : "false") << ",\n";
+    json << "    \"generated_cuda_code\": \"--generate-code=arch=compute_" << JsonEscape(HYPERCINE_TARGET_CUDA_ARCH)
+         << ",code=[compute_" << JsonEscape(HYPERCINE_TARGET_CUDA_ARCH) << ",sm_" << JsonEscape(HYPERCINE_TARGET_CUDA_ARCH)
+         << "] (native cubin sm_" << JsonEscape(HYPERCINE_TARGET_CUDA_ARCH) << " + PTX compute_"
+         << JsonEscape(HYPERCINE_TARGET_CUDA_ARCH) << ")\",\n";
     json << "    \"optimization\": \"MSVC Release default /O2. HyperCine CMake does not force /arch:AVX2.\",\n";
     json << "    \"threaded_encoder\": \"_THREADED_ENCODER=0. CFHDCodecThreaded is EXCLUDE_FROM_ALL and does not build.\"\n";
     json << "  },\n";
@@ -907,10 +1306,105 @@ int main(int argc, char** argv) {
     json << "    \"input_format\": \"CFHD_PIXEL_FORMAT_BGRA (8-bit BGRA, progressive, GOP=1)\",\n";
     json << "    \"rate_control_mode\": \"DynamicUpstreamState (sequence-stateful FSratelimiter)\",\n";
     json << "    \"graph_mode\": \"enabled for headline GPU runs; compared against disabled in graph suite\",\n";
+    json << "    \"slot_policy_name\": \"DefaultAuto\",\n";
     json << "    \"slot_count\": {\"1080p\": 2, \"4K_UHD\": 3, \"8K_UHD\": 2, \"policy\": \"DefaultAuto\"},\n";
+    json << "    \"common_warmup_frames\": " << kCommonWarmupFrames << ",\n";
+    json << "    \"first_measured_logical_frame_index\": " << kCommonWarmupFrames << ",\n";
     json << "    \"trial_count\": " << opt.trials << ",\n";
     json << "    \"benchmark_order\": \"resolutions=" << JsonEscape(opt.resolutions) << "; per-trial GPU mode rotation across 3 permutations\",\n";
-    json << "    \"sequence_definition\": \"1080p: 1000 measured frames (96-frame distinct cycle); 4K_UHD: 300 measured frames (36-frame distinct cycle); 8K_UHD: 120 measured frames (12-frame distinct cycle); warmup >= slot_count excluded from wall clock; pipeline fully drained and cudaDeviceSynchronize completed before timer stop\"\n";
+    json << "    \"sequence_cycle_definition\": \"Common warmup W=4 encodes pool frames 0..3; timed section encodes N frames starting at logical sequence index 4 using pool[(4 + i) % unique_cycle] for both UpstreamCpuEncodeSample and all HyperCine GPU modes without restarting at frame 0 after warmup (1080p: N=1000, cycle=96; 4K_UHD: N=300, cycle=36; 8K_UHD: N=120, cycle=12).\"\n";
+    json << "  },\n";
+    json << "  \"default_auto_policy\": {\n";
+    json << "    \"canonical_policy_name\": \"DefaultAuto\",\n";
+    json << "    \"tuning_override_policy_name\": \"UserOverride\",\n";
+    json << "    \"source_location\": \"src/core/phase2d_encoder.cpp:SelectPhase2DFrameSlots\",\n";
+    json << "    \"policy_distinction\": \"DefaultAuto is the canonical balanced/default runtime policy used for all headline benchmarks. UserOverride is an explicit manual tuning/experimentation policy used only in the separate Manual Slot Scaling / Throughput Tuning Study.\",\n";
+    json << "    \"source_code_rationale\": \"SelectPhase2DFrameSlots computes per_slot_vram_bytes = 20*px + 4,718,592 and session_workspace_vram_bytes = 12*px + 33,554,432, caps vram_max_slots to 75% of free VRAM after a 256 MiB + workspace reserve, and under DefaultAuto clamps a resolution-bucket target_slots hardcoded during Phase 2D empirical tuning (target_slots=2 for <=1080p, target_slots=3 for <=4K UHD, target_slots=2 for >4K UHD / 8K UHD). It does not dynamically optimize slot counts per GPU SKU at runtime.\",\n";
+    json << "    \"resolutions\": [\n";
+    for (size_t si = 0; si < sizeof(kSpecs) / sizeof(kSpecs[0]); ++si) {
+        const auto& sp = kSpecs[si];
+        const auto sel = hypercine::SelectPhase2DFrameSlots(
+            sp.width, sp.height, hypercine::Phase2DSlotPolicy::DefaultAuto, 0,
+            hypercine::Phase2DD2HPolicy::Throughput);
+        json << "      {\n";
+        json << "        \"resolution\": \"" << sp.name << "\",\n";
+        json << "        \"width\": " << sp.width << ",\n";
+        json << "        \"height\": " << sp.height << ",\n";
+        const char* policy_reason = (sp.width <= 1920)
+            ? "Hardcoded Phase 2D DefaultAuto target_slots=2 for px<=1920x1080 (clamped by vram_max_slots); FrameConsolidated D2H selected under Throughput policy."
+            : ((sp.width <= 3840)
+                ? "Hardcoded Phase 2D DefaultAuto target_slots=3 for 1080p<px<=3840x2160 (clamped by vram_max_slots); FrameConsolidated D2H selected under Throughput policy."
+                : "Hardcoded Phase 2D DefaultAuto target_slots=2 for px>3840x2160 (8K UHD, clamped by vram_max_slots); FrameConsolidated D2H selected under Throughput policy.");
+        json << "        \"slot_policy\": \"" << SlotPolicyName(sel.policy) << "\",\n";
+        json << "        \"policy_target_slots\": " << sel.policy_target_slots << ",\n";
+        json << "        \"selected_slots\": " << sel.selected_slots << ",\n";
+        json << "        \"vram_max_slots\": " << sel.vram_max_slots << ",\n";
+        json << "        \"per_slot_estimated_vram_bytes\": " << sel.per_slot_vram_bytes << ",\n";
+        json << "        \"session_workspace_estimated_vram_bytes\": " << sel.session_workspace_vram_bytes << ",\n";
+        json << "        \"total_estimated_vram_bytes\": " << sel.total_estimated_vram_bytes << ",\n";
+        json << "        \"d2h_policy\": \"Throughput\",\n";
+        json << "        \"d2h_mode\": \"" << (sel.selected_d2h_mode == hypercine::CompressedD2HMode::FrameConsolidated
+                                                ? "FrameConsolidated"
+                                                : "BandStreamed") << "\",\n";
+        json << "        \"policy_reason\": \"" << JsonEscape(policy_reason) << "\"\n";
+        json << "      }" << (si + 1 < sizeof(kSpecs) / sizeof(kSpecs[0]) ? ",\n" : "\n");
+    }
+    json << "    ]\n";
+    json << "  },\n";
+    json << "  \"benchmark_equivalence\": {\n";
+    json << "    \"verified\": " << (all_eq_verified ? "true" : "false") << ",\n";
+    json << "    \"compared_fields\": [\n";
+    json << "      \"measured_logical_frame_index (W .. W+N-1)\",\n";
+    json << "      \"source_pattern\",\n";
+    json << "      \"prev_encoded_bytes\",\n";
+    json << "      \"lastgopbitcount\",\n";
+    json << "      \"FSratelimiter\",\n";
+    json << "      \"quant_table[36] and scale_table[36]\",\n";
+    json << "      \"output_sample_bytes (per-frame and full-headline mean/min/max)\",\n";
+    json << "      \"masked_sample_sha256 (UpstreamCpuEncodeSample == HostPageableEndToEnd == HostPinnedApi == DeviceInput)\",\n";
+    json << "      \"unmasked_sample_sha256 across GPU modes in deterministic verification mode\",\n";
+    json << "      \"upstream CFHD_DecodeSample frame stamp and PSNR > 35 dB\"\n";
+    json << "    ],\n";
+    json << "    \"resolutions\": [\n";
+    for (size_t ei = 0; ei < eq_reports.size(); ++ei) {
+        const auto& eq = eq_reports[ei];
+        json << "      {\n";
+        json << "        \"resolution\": \"" << eq.resolution << "\",\n";
+        json << "        \"width\": " << eq.width << ",\n";
+        json << "        \"height\": " << eq.height << ",\n";
+        json << "        \"ok\": " << (eq.ok ? "true" : "false") << ",\n";
+        json << "        \"warmup_frames\": " << eq.warmup_frames << ",\n";
+        json << "        \"first_measured_logical_frame_index\": " << eq.first_measured_logical_frame << ",\n";
+        json << "        \"validation_frames\": " << eq.validation_frames << ",\n";
+        json << "        \"matched_validation_frames\": " << eq.matched_validation_frames << ",\n";
+        json << "        \"logical_indices_match\": " << (eq.logical_indices_match ? "true" : "false") << ",\n";
+        json << "        \"patterns_match\": " << (eq.patterns_match ? "true" : "false") << ",\n";
+        json << "        \"prev_encoded_bytes_match\": " << (eq.prev_encoded_bytes_match ? "true" : "false") << ",\n";
+        json << "        \"lastgopbitcount_match\": " << (eq.lastgopbitcount_match ? "true" : "false") << ",\n";
+        json << "        \"fs_rate_limiter_trajectory_match\": " << (eq.fs_rate_limiter_trajectory_match ? "true" : "false") << ",\n";
+        json << "        \"quant_table_trajectory_match\": " << (eq.quant_table_trajectory_match ? "true" : "false") << ",\n";
+        json << "        \"sample_bytes_trajectory_match\": " << (eq.sample_bytes_trajectory_match ? "true" : "false") << ",\n";
+        json << "        \"masked_sample_sha256_match_upstream\": " << (eq.masked_sample_sha256_match_upstream ? "true" : "false") << ",\n";
+        json << "        \"gpu_modes_unmasked_sha256_match\": " << (eq.gpu_modes_unmasked_sha256_match ? "true" : "false") << ",\n";
+        json << "        \"decode_and_stamp_verified\": " << (eq.decode_and_stamp_verified ? "true" : "false") << ",\n";
+        json << "        \"headline_output_size_stats_match\": " << (eq.headline_output_size_stats_match ? "true" : "false") << ",\n";
+        json << "        \"first_divergent_frame\": " << eq.first_divergent_frame << ",\n";
+        json << "        \"divergence_reason\": \"" << JsonEscape(eq.divergence_reason) << "\",\n";
+        json << "        \"validation_mean_sample_bytes\": " << eq.validation_mean_bytes << ",\n";
+        json << "        \"validation_min_sample_bytes\": " << eq.validation_min_bytes << ",\n";
+        json << "        \"validation_max_sample_bytes\": " << eq.validation_max_bytes << ",\n";
+        json << "        \"validation_distinct_fs_rate_limiters\": " << eq.validation_distinct_fs_limiters << ",\n";
+        json << "        \"validation_sample_bytes_fnv64\": \"" << eq.validation_sample_bytes_fnv64 << "\",\n";
+        json << "        \"validation_fs_rate_limiter_fnv64\": \"" << eq.validation_fs_rate_limiter_fnv64 << "\",\n";
+        json << "        \"validation_masked_sequence_fnv64\": \"" << eq.validation_masked_sequence_fnv64 << "\",\n";
+        json << "        \"headline_frames\": " << eq.headline_frames << ",\n";
+        json << "        \"headline_mean_sample_bytes\": " << eq.headline_mean_bytes << ",\n";
+        json << "        \"headline_min_sample_bytes\": " << eq.headline_min_bytes << ",\n";
+        json << "        \"headline_max_sample_bytes\": " << eq.headline_max_bytes << ",\n";
+        json << "        \"headline_distinct_fs_rate_limiters\": " << eq.headline_distinct_fs_limiters << "\n";
+        json << "      }" << (ei + 1 < eq_reports.size() ? ",\n" : "\n");
+    }
+    json << "    ]\n";
     json << "  },\n";
     json << "  \"cpu_baseline_note\": \"Baseline 1 is pristine CFHD_EncodeSample with _THREADED_ENCODER=0 and one encode thread. Baseline 2, the HyperCine CPU reference inside VerifyPhase3ASequence120, is an equivalence oracle using the upstream spatial wavelet and CPU entropy. It is not a second throughput product, so speedups use Baseline 1 only.\",\n";
     json << "  \"device_input_note\": \"DeviceInput measures GPU-resident integration throughput when BGRA frames are already in device memory; it must never be presented as conventional file-transcode performance.\",\n";
@@ -920,6 +1414,7 @@ int main(int argc, char** argv) {
         bool first_summary = true;
         for (const auto& spec : kSpecs) {
             double cpu_median_fps = 0.0;
+            size_t cpu_mean_bytes = 0, cpu_min_bytes = 0, cpu_max_bytes = 0;
             for (const char* mname : mode_names) {
                 std::vector<const TrialRecord*> matching;
                 for (const auto& rec : records) {
@@ -933,7 +1428,8 @@ int main(int argc, char** argv) {
                 int max_temp = 0;
                 int slots_used = 1;
                 bool graph_used = false;
-                size_t mean_bytes = 0;
+                size_t mean_bytes = 0, min_bytes = 0, max_bytes = 0;
+                int distinct_fs = 0;
                 std::string throttles;
                 for (const TrialRecord* tr : matching) {
                     if (tr->is_cpu) {
@@ -943,6 +1439,9 @@ int main(int argc, char** argv) {
                         p95_lat_vals.push_back(tr->cpu.p95_ms);
                         p99_lat_vals.push_back(tr->cpu.p99_ms);
                         mean_bytes = tr->cpu.mean_bytes;
+                        min_bytes = tr->cpu.min_bytes;
+                        max_bytes = tr->cpu.max_bytes;
+                        distinct_fs = tr->cpu.distinct_fs_rate_limiters;
                     } else {
                         fps_vals.push_back(tr->gpu.sustained_fps);
                         mean_lat_vals.push_back(tr->gpu.mean_latency_ms);
@@ -956,6 +1455,9 @@ int main(int argc, char** argv) {
                         slots_used = tr->gpu.slot_selection.selected_slots;
                         graph_used = tr->graph;
                         mean_bytes = tr->gpu.mean_bitstream_bytes;
+                        min_bytes = tr->gpu.min_bitstream_bytes;
+                        max_bytes = tr->gpu.max_bitstream_bytes;
+                        distinct_fs = tr->gpu.distinct_fs_rate_limiters;
                         if (!tr->gpu.nvml.throttle_reasons_str.empty()) {
                             if (!throttles.empty()) throttles += "; ";
                             throttles += tr->gpu.nvml.throttle_reasons_str;
@@ -964,7 +1466,12 @@ int main(int argc, char** argv) {
                 }
                 double mean_fps = 0.0, median_fps = 0.0, stddev_fps = 0.0, min_fps = 0.0, max_fps = 0.0;
                 Stats(fps_vals, &mean_fps, &median_fps, &stddev_fps, &min_fps, &max_fps);
-                if (std::string(mname) == "UpstreamCpuEncodeSample") cpu_median_fps = median_fps;
+                if (std::string(mname) == "UpstreamCpuEncodeSample") {
+                    cpu_median_fps = median_fps;
+                    cpu_mean_bytes = mean_bytes;
+                    cpu_min_bytes = min_bytes;
+                    cpu_max_bytes = max_bytes;
+                }
                 double mean_lat = 0.0, med_lat = 0.0, p95_lat = 0.0, p99_lat = 0.0;
                 Stats(mean_lat_vals, &mean_lat, nullptr, nullptr, nullptr, nullptr);
                 Stats(med_lat_vals, &med_lat, nullptr, nullptr, nullptr, nullptr);
@@ -976,6 +1483,9 @@ int main(int argc, char** argv) {
                 Stats(pwr_vals, &mean_pwr, nullptr, nullptr, nullptr, nullptr);
                 const double raw_bytes = static_cast<double>(spec.width) * static_cast<double>(spec.height) * 4.0;
                 const double speedup = (cpu_median_fps > 0.0) ? (median_fps / cpu_median_fps) : 1.0;
+                const bool bytes_match_cpu = (mean_bytes == cpu_mean_bytes) &&
+                                             (min_bytes == cpu_min_bytes) &&
+                                             (max_bytes == cpu_max_bytes);
                 if (!first_summary) json << ",\n";
                 first_summary = false;
                 json << "    {\n";
@@ -984,8 +1494,12 @@ int main(int argc, char** argv) {
                 json << "      \"height\": " << spec.height << ",\n";
                 json << "      \"input_mode\": \"" << mname << "\",\n";
                 json << "      \"trials\": " << matching.size() << ",\n";
+                json << "      \"slot_policy\": \"" << (std::string(mname) == "UpstreamCpuEncodeSample" ? "N/A" : "DefaultAuto") << "\",\n";
                 json << "      \"graph_mode\": " << (graph_used ? "true" : "false") << ",\n";
                 json << "      \"slot_count\": " << slots_used << ",\n";
+                json << "      \"warmup_frames\": " << kCommonWarmupFrames << ",\n";
+                json << "      \"first_measured_logical_frame_index\": " << kCommonWarmupFrames << ",\n";
+                json << "      \"measured_frames\": " << spec.headline_frames << ",\n";
                 json << "      \"median_fps\": " << median_fps << ",\n";
                 json << "      \"mean_fps\": " << mean_fps << ",\n";
                 json << "      \"stddev_fps\": " << stddev_fps << ",\n";
@@ -998,7 +1512,12 @@ int main(int argc, char** argv) {
                 json << "      \"p99_latency_ms\": " << p99_lat << ",\n";
                 json << "      \"raw_input_gbps_at_median\": " << (raw_bytes * median_fps / 1.0e9) << ",\n";
                 json << "      \"output_mbps_at_median\": " << (static_cast<double>(mean_bytes) * median_fps / 1.0e6) << ",\n";
+                json << "      \"mean_sample_bytes\": " << mean_bytes << ",\n";
+                json << "      \"min_sample_bytes\": " << min_bytes << ",\n";
+                json << "      \"max_sample_bytes\": " << max_bytes << ",\n";
                 json << "      \"mean_bitstream_bytes\": " << mean_bytes << ",\n";
+                json << "      \"distinct_fs_rate_limiters\": " << distinct_fs << ",\n";
+                json << "      \"sample_bytes_match_upstream_exact\": " << (bytes_match_cpu ? "true" : "false") << ",\n";
                 json << "      \"speedup_vs_upstream_cpu_median\": " << speedup << ",\n";
                 json << "      \"graphics_clock_mhz_mean\": " << mean_clk << ",\n";
                 json << "      \"mem_clock_mhz_mean\": " << mean_mem_clk << ",\n";
@@ -1010,6 +1529,64 @@ int main(int argc, char** argv) {
         }
     }
     json << "\n  ],\n";
+    json << "  \"slot_scaling_study_summary\": {\n";
+    json << "    \"study_name\": \"Manual Slot Scaling / Throughput Tuning Study\",\n";
+    json << "    \"slot_policy\": \"UserOverride\",\n";
+    json << "    \"note\": \"The canonical benchmark uses the encoder's DefaultAuto slot policy. The slot-scaling study intentionally overrides that policy to measure throughput/latency/VRAM trade-offs and is not the public headline configuration.\",\n";
+    json << "    \"results\": [\n";
+    {
+        bool first_slot_entry = true;
+        for (const auto& spec : kSpecs) {
+            const int default_slots = SlotCountFor(spec, 0);
+            for (int slots = 1; slots <= 4; ++slots) {
+                std::vector<const TrialRecord*> matching;
+                for (const auto& rec : records) {
+                    if (rec.suite == "slots" && rec.resolution == spec.name && rec.requested_slots == slots) {
+                        matching.push_back(&rec);
+                    }
+                }
+                if (matching.empty()) continue;
+                std::vector<double> fps_vals, mean_lat_vals, med_lat_vals, p95_lat_vals, vram_used_vals;
+                size_t est_vram = 0, per_slot_vram = 0, ws_vram = 0;
+                for (const TrialRecord* tr : matching) {
+                    fps_vals.push_back(tr->gpu.sustained_fps);
+                    mean_lat_vals.push_back(tr->gpu.mean_latency_ms);
+                    med_lat_vals.push_back(tr->gpu.median_latency_ms);
+                    p95_lat_vals.push_back(tr->gpu.p95_latency_ms);
+                    vram_used_vals.push_back(static_cast<double>(tr->gpu.vram_used_bytes));
+                    est_vram = tr->gpu.slot_selection.total_estimated_vram_bytes;
+                    per_slot_vram = tr->gpu.slot_selection.per_slot_vram_bytes;
+                    ws_vram = tr->gpu.slot_selection.session_workspace_vram_bytes;
+                }
+                double mean_fps = 0.0, median_fps = 0.0, mean_lat = 0.0, med_lat = 0.0, p95_lat = 0.0, med_vram = 0.0;
+                Stats(fps_vals, &mean_fps, &median_fps, nullptr, nullptr, nullptr);
+                Stats(mean_lat_vals, &mean_lat, nullptr, nullptr, nullptr, nullptr);
+                Stats(med_lat_vals, &med_lat, nullptr, nullptr, nullptr, nullptr);
+                Stats(p95_lat_vals, &p95_lat, nullptr, nullptr, nullptr, nullptr);
+                Stats(vram_used_vals, nullptr, &med_vram, nullptr, nullptr, nullptr);
+                if (!first_slot_entry) json << ",\n";
+                first_slot_entry = false;
+                json << "      {\n";
+                json << "        \"resolution\": \"" << spec.name << "\",\n";
+                json << "        \"slots\": " << slots << ",\n";
+                json << "        \"slot_policy\": \"UserOverride\",\n";
+                json << "        \"matches_default_auto_slot_count\": " << (slots == default_slots ? "true" : "false") << ",\n";
+                json << "        \"trials\": " << matching.size() << ",\n";
+                json << "        \"median_fps\": " << median_fps << ",\n";
+                json << "        \"mean_fps\": " << mean_fps << ",\n";
+                json << "        \"mean_latency_ms\": " << mean_lat << ",\n";
+                json << "        \"median_latency_ms\": " << med_lat << ",\n";
+                json << "        \"p95_latency_ms\": " << p95_lat << ",\n";
+                json << "        \"per_slot_estimated_vram_bytes\": " << per_slot_vram << ",\n";
+                json << "        \"session_workspace_estimated_vram_bytes\": " << ws_vram << ",\n";
+                json << "        \"total_estimated_vram_bytes\": " << est_vram << ",\n";
+                json << "        \"measured_vram_used_bytes_median\": " << static_cast<uint64_t>(med_vram) << "\n";
+                json << "      }";
+            }
+        }
+    }
+    json << "\n    ]\n";
+    json << "  },\n";
     json << "  \"runs\": [\n";
     for (size_t i = 0; i < records.size(); ++i) {
         if (records[i].is_cpu) WriteCpu(json, records[i]);
@@ -1030,6 +1607,7 @@ int main(int argc, char** argv) {
     }
     file << json.str();
     std::cout << "Wrote " << out.string() << " (" << json.str().size()
-              << " bytes, runs=" << records.size() << ")\n";
-    return 0;
+              << " bytes, runs=" << records.size()
+              << ", equivalence_verified=" << (all_eq_verified ? "true" : "false") << ")\n";
+    return all_eq_verified ? 0 : 3;
 }

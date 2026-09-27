@@ -2194,6 +2194,7 @@ struct PipeSlot3A {
     uint8_t* pinned_stamp_bgra = nullptr;  // 64 rows x pitch for DeviceInput stamp update
     std::atomic<int> stage{static_cast<int>(PipeSlotStage3A::Idle)};
     int frame_index = -1;
+    int expected_stamp_index = -1;
     Phase3APattern pattern = Phase3APattern::HighDetailPhotographicSynthetic;
     uint32_t cfhd_frame_number = 0;
     QuantTables3A quant{};
@@ -2517,6 +2518,7 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     // Retain selected bitstreams for decode & stamp verification:
     struct RetainedDecodeCheck {
         int measured_frame_index;
+        int expected_stamp_index;
         Phase3APattern pattern;
         std::vector<uint8_t> bitstream;
     };
@@ -2634,7 +2636,7 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
                 completed_records.push_back(std::move(rec));
             }
             if (should_retain_for_decode(m_idx)) {
-                decode_checks.push_back(RetainedDecodeCheck{m_idx, slot.pattern, slot.bitstream});
+                decode_checks.push_back(RetainedDecodeCheck{m_idx, slot.expected_stamp_index, slot.pattern, slot.bitstream});
             }
         }
     };
@@ -2798,6 +2800,9 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
                     : SelectSequencePattern(measured_idx);
 
                 slot.frame_index = next_submit_frame;
+                slot.expected_stamp_index = explicit_inputs
+                    ? (*explicit_inputs)[static_cast<size_t>(next_submit_frame)].frame_index
+                    : measured_idx;
                 slot.pattern = pat;
                 slot.state_committed_to_ctx = false;
                 slot.predicted_sample_bytes = 0;
@@ -3335,11 +3340,12 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
             int ext_idx = -1;
             int ext_pat = -1;
             if (!ExtractStampedFrameIdentity(dec_img.data(), width, height, dec_pitch, &ext_idx, &ext_pat) ||
-                ext_idx != chk.measured_frame_index ||
+                ext_idx != chk.expected_stamp_index ||
                 ext_pat != static_cast<int>(chk.pattern)) {
                 res.stamp_verify_ok = false;
                 res.error = "stamp mismatch at frame " + std::to_string(chk.measured_frame_index) +
-                            " (extracted " + std::to_string(ext_idx) + ")";
+                            " (expected " + std::to_string(chk.expected_stamp_index) +
+                            ", extracted " + std::to_string(ext_idx) + ")";
                 break;
             }
             const uint8_t* ref_ptr = nullptr;
