@@ -1,10 +1,32 @@
-# Phase 3A.1 — Benchmark hardening
+# Phase 3A.1 & Phase 3A.2 — Benchmark Hardening & Clean-Tree Release Candidate
 
-This pass did not try to make the encoder faster. It fixed measurement bugs that could report a wrong rate, then remeasured the Phase 3A encoder under one definition. The machine-readable record is [`benchmarks/phase3a1_canonical.json`](../benchmarks/phase3a1_canonical.json). Fresh-process companions are `benchmarks/phase3a1_fresh_forward.json`, `benchmarks/phase3a1_fresh_reverse.json`, `benchmarks/phase3a1_fresh_1080.json`, `benchmarks/phase3a1_fresh_4k.json`, and `benchmarks/phase3a1_fresh_8k.json`.
+This pass did not try to make the encoder faster. It fixed measurement bugs that could report a wrong rate, then remeasured the Phase 3A encoder under one definition (`ProductionEndToEnd`).
 
-The tree was dirty when these files were written. Every JSON file is marked `"publication": "DIRTY"`. `upstream/` was not modified.
+- **Authoritative Clean-Tree Release Candidate Record (Phase 3A.2):** [`benchmarks/phase3a2_release_candidate.json`](../benchmarks/phase3a2_release_candidate.json) — generated on clean commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` (`"publication": "CLEAN"`, `"canonical": true`, `"git_status_clean": true`, `git status --porcelain` empty). All public headline tables in [`README.md`](../README.md) are taken directly from this clean-tree JSON.
+- **Phase 3A.1 Audit & Diagnostic Companions:** [`benchmarks/phase3a1_canonical.json`](../benchmarks/phase3a1_canonical.json) and the fresh-process order-study companions (`benchmarks/phase3a1_fresh_forward.json`, `benchmarks/phase3a1_fresh_reverse.json`, `benchmarks/phase3a1_fresh_1080.json`, `benchmarks/phase3a1_fresh_4k.json`, `benchmarks/phase3a1_fresh_8k.json`) were captured during the Phase 3A.1 diagnostic pass before working-tree cleanup and are marked `"publication": "DIRTY"`. `upstream/` was not modified in either pass.
 
-## Executive summary
+## Phase 3A.2 Clean-Tree Release Candidate Headline Matrix (`benchmarks/phase3a2_release_candidate.json`)
+
+Generated on clean commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` (5 trials per mode, `ProductionEndToEnd`, BGRA8 $\to$ `CFHD_ENCODED_FORMAT_YUV_422`, FilmScan 3, GOP=1, `DynamicUpstreamState`, CUDA Graph ON for GPU modes):
+
+| Resolution | Input Mode | Median FPS | Mean FPS | Stdev (FPS / %) | Min–Max FPS | Mean Latency (ms) | Median Latency (ms) | P95 / P99 Latency (ms) | Raw Input (GB/s) | Output (MB/s) | Speedup vs Upstream CPU | Graph | Slots | Mean GPU Clock (MHz) | Mean Power (W) | Max Temp (°C) | Variance Flag |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: | :---: | ---: | ---: | ---: | :--- |
+| **1080p** (`1920x1080`) | `UpstreamCpuEncodeSample` | **76.98** | 77.03 | 0.47 (0.61%) | 76.40–77.59 | 12.98 | 9.26 | 28.17 / 29.43 | 0.639 | 135.3 | 1.00× | — | 1 thread | — | — | — | |
+| **1080p** (`1920x1080`) | **`HostPageableEndToEnd`** | **457.53** | 443.35 | 30.03 (6.77%) | 391.99–470.47 | 3.42 | 3.20 | 4.16 / 8.14 | 3.795 | 804.0 | **5.94×** | on | 2 | 1840 | 45.2 | 62 | stdev 6.8% |
+| **1080p** (`1920x1080`) | `HostPinnedApi` | **561.31** | 546.87 | 31.02 (5.67%) | 485.01–564.97 | 2.54 | 2.39 | 3.32 / 5.32 | 4.656 | 986.3 | **7.29×** | on | 2 | 1903 | 48.3 | 62 | stdev 5.7% |
+| **1080p** (`1920x1080`) | `DeviceInput` | **863.82** | 808.72 | 83.56 (10.33%) | 694.40–883.58 | 2.10 | 1.90 | 3.27 / 6.05 | 7.165 | 1517.9 | **11.22×** | on | 2 | 1732 | 47.9 | 62 | stdev 10.3% |
+| **4K UHD** (`3840x2160`) | `UpstreamCpuEncodeSample` | **19.65** | 19.64 | 0.08 (0.42%) | 19.49–19.73 | 50.91 | 34.48 | 113.76 / 117.50 | 0.652 | 130.5 | 1.00× | — | 1 thread | — | — | — | |
+| **4K UHD** (`3840x2160`) | **`HostPageableEndToEnd`** | **227.07** | 223.29 | 5.73 (2.57%) | 214.41–228.85 | 12.30 | 11.09 | 17.90 / 29.11 | 7.534 | 1525.3 | **11.56×** | on | 3 | 1778 | 56.4 | 64 | |
+| **4K UHD** (`3840x2160`) | `HostPinnedApi` | **294.09** | 288.10 | 14.74 (5.12%) | 258.82–298.28 | 9.21 | 8.04 | 13.70 / 27.28 | 9.757 | 1975.5 | **14.97×** | on | 3 | 1855 | 58.1 | 63 | stdev 5.1% |
+| **4K UHD** (`3840x2160`) | `DeviceInput` | **385.06** | 374.84 | 34.53 (9.21%) | 315.57–409.91 | 7.01 | 5.54 | 12.39 / 24.57 | 12.775 | 2586.6 | **19.60×** | on | 3 | 1672 | 56.4 | 64 | stdev 9.2% |
+| **8K UHD** (`7680x4320`) | `UpstreamCpuEncodeSample` | **4.36** | 4.36 | 0.01 (0.29%) | 4.35–4.38 | 229.24 | 173.25 | 451.61 / 463.74 | 0.579 | 148.3 | 1.00× | — | 1 thread | — | — | — | |
+| **8K UHD** (`7680x4320`) | **`HostPageableEndToEnd`** | **38.46** | 38.80 | 0.60 (1.55%) | 38.06–39.60 | 37.20 | 35.20 | 50.67 / 71.82 | 5.105 | 1307.5 | **8.81×** | on | 2 | 1950 | 57.7 | 62 | |
+| **8K UHD** (`7680x4320`) | `HostPinnedApi` | **45.86** | 45.73 | 0.51 (1.11%) | 45.01–46.33 | 29.32 | 28.17 | 44.62 / 64.05 | 6.086 | 1558.9 | **10.51×** | on | 2 | 1960 | 58.6 | 63 | |
+| **8K UHD** (`7680x4320`) | `DeviceInput` | **92.46** | 92.68 | 3.19 (3.45%) | 88.24–96.92 | 17.38 | 16.34 | 33.53 / 51.18 | 12.270 | 3142.9 | **21.19×** | on | 2 | 1772 | 80.7 | 64 | |
+
+---
+
+## Executive summary (Phase 3A.1 Diagnostic Audit)
 
 The three published HostPageableEndToEnd tables were the same encoder path measured under different GPU clocks and different run lengths. They were not three different timing boundaries.
 
