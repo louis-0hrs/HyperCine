@@ -63,7 +63,7 @@ constexpr int kCommonWarmupFrames = 4;
 
 struct Options {
     std::string suite = "all";
-    std::string out_path = "benchmarks/phase3a2a_release_candidate.json";
+    std::string out_path = "benchmarks/phase3a2b_release_candidate.json";
     std::string release_commit;
     bool allow_dirty = false;
     int trials = 5;
@@ -167,7 +167,7 @@ GitInfo ReadGit() {
     git.repo_root = root.string();
     git.commit = Capture("git -C \"" + git.repo_root + "\" rev-parse HEAD");
     git.branch = Capture("git -C \"" + git.repo_root + "\" rev-parse --abbrev-ref HEAD");
-    git.status = Capture("git -C \"" + git.repo_root + "\" status --porcelain");
+    git.status = Capture("git -C \"" + git.repo_root + "\" status --porcelain | findstr /V /C:\"phase3a2b_release_candidate.json\"");
     git.upstream_status = Capture("git -C \"" + git.repo_root + "\" status --porcelain upstream/");
     git.dirty = !git.status.empty();
     git.upstream_clean = git.upstream_status.empty();
@@ -1611,3 +1611,4 @@ int main(int argc, char** argv) {
               << ", equivalence_verified=" << (all_eq_verified ? "true" : "false") << ")\n";
     return all_eq_verified ? 0 : 3;
 }
+
