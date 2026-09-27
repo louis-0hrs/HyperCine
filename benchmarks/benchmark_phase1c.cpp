@@ -251,7 +251,7 @@ int main(int argc, char** argv) {
     std::fflush(stderr);
     const std::string json_path = (argc > 1)
         ? argv[1]
-        : "C:/Users/User/Documents/GitHub/HyperCine/benchmarks/results/hybrid_phase1c.json";
+        : "benchmarks/results/hybrid_phase1c.json";
     const int hw = static_cast<int>(std::thread::hardware_concurrency());
     std::fprintf(stderr, "threads %d\n", hw);
     const std::string cpu = CpuBrand();
@@ -626,7 +626,7 @@ int main(int argc, char** argv) {
     std::ofstream out(json_path, std::ios::binary);
     if (!out) {
         std::cerr << "cannot write " << json_path << "\n";
-        const std::string fallback = "C:/Users/User/AppData/Local/Temp/hybrid_phase1c.json";
+        const std::string fallback = "hybrid_phase1c.json";
         std::ofstream alt(fallback, std::ios::binary);
         if (!alt) return 1;
         alt << json.str();

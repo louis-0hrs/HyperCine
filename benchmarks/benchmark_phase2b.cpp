@@ -341,7 +341,7 @@ void WritePhase2B(std::ostream& json, const hypercine::Phase2BRun& run, int gpu_
 
 int main(int argc, char** argv) {
     const std::string path = (argc > 1) ? argv[1]
-                                        : "C:/Users/User/Documents/GitHub/HyperCine/benchmarks/results/phase2b.json";
+                                        : "benchmarks/results/phase2b.json";
     std::ostringstream json;
     HyperCineDeviceLink link{};
     HyperCine_QueryDeviceLink(&link);

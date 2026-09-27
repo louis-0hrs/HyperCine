@@ -57,7 +57,7 @@ int CountThreads() {
 int main(int argc, char** argv) {
     const std::string path = (argc > 1)
         ? argv[1]
-        : "C:/Users/User/Documents/GitHub/HyperCine/benchmarks/results/upstream_threaded.json";
+        : "benchmarks/results/upstream_threaded.json";
     const int idle_threads = CountThreads();
     std::cout << "UPSTREAM_THREADED linked library idle threads " << idle_threads << "\n";
     std::ofstream out(path, std::ios::binary);

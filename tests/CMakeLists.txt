@@ -82,6 +82,13 @@ if(HYPERCINE_ENABLE_CUDA)
     target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2d COMMAND test_phase2d)
 
+    add_executable(test_entropy_capacity test_entropy_capacity.cpp)
+    target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_entropy_capacity PRIVATE psapi)
+    endif()
+    add_test(NAME test_entropy_capacity COMMAND test_entropy_capacity)
+
     add_executable(test_phase3a test_phase3a.cpp)
     target_link_libraries(test_phase3a PRIVATE hypercine_wavelet CFHDCodecStatic)
     if(WIN32)

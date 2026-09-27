@@ -228,6 +228,8 @@ Note: Once CUDA Graph capture reduces the entire 27-band entropy DAG to `0.47 ms
 
 ## Part 10 — End-to-End Benchmark Progression (Apples-to-Apples `SteadyState` & `Frame1Initial`)
 
+> **Historical Phase 2D Note:** The figures in this section are historical Phase 2D fixed-state (`SteadyState` / `Frame1Initial`) development snapshots. For the authoritative 5-trial `ProductionEndToEnd` sequence benchmark with dynamic per-frame `FSratelimiter` rate control on a clean working tree, see [`docs/PHASE3A1_BENCHMARK_HARDENING.md`](PHASE3A1_BENCHMARK_HARDENING.md) and [`benchmarks/phase3a2_release_candidate.json`](../benchmarks/phase3a2_release_candidate.json).
+
 | Resolution | Configuration | Quant State | Slots | Sustained FPS | Speedup vs Upstream | Mean / Med / P95 Latency (ms) | GPU Wavelet (ms) | GPU Entropy (ms) | CPU Assembly (ms) | Norm. CPU % (16 Logical) | Core-Sec / 60fps Sec | Sample Bytes | VRAM (MB) |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **1080p** | `UPSTREAM_DEFAULT` | `SteadyState` | 1 | `42.31` | `1.00x` | `23.63 / 23.60 / 24.26` | — | — | — | — | — | `1,181,024` | — |
@@ -277,7 +279,7 @@ Note: Once CUDA Graph capture reduces the entire 27-band entropy DAG to `0.47 ms
 
 ### 2. Remaining Limitations Before Shipping in a Production SDK
 1. **Pixel Format Frontend Coverage**: The current Phase 2C/2D full-GPU pipeline specializes in 8-bit `BGRA` (`CFHD_PIXEL_FORMAT_BGRA` -> 12-bit internal YUV 4:2:2). Production SDK users also require direct GPU frontend ingestion for 10-bit `v210`, 16-bit `RG48`/`B64A`, 12-bit `BYR4` Bayer RAW, and 4:4:4/4:4:4:4 alpha channels.
-2. **Dynamic Rate-Limiter Feedback in Multi-Frame Streaming**: `Phase2DEncoderContext` supports both `Frame1Initial` and `SteadyState` quantizer tables. For variable-complexity live video streams where `compression` fluctuates across the `4.5 / 5.5 / 6.5` thresholds mid-clip, updating `quant` tables per frame from the previous frame's `compressed_d2h_bytes` requires updating the wavelet quantization kernel parameters (`cudaGraphExecKernelNodeSetParams`) when `FSratelimiter` changes.
+2. **Dynamic Rate-Limiter Feedback in Multi-Frame Streaming**: `Phase2DEncoderContext` supports both `Frame1Initial` and `SteadyState` quantizer tables. Phase 3A applies the per-frame `quant[36]` table in `HyperCine_GpuSlotKickWaveletWithQuant`, which is a normal kernel launch outside the entropy CUDA graph. The entropy graph reads already-quantized coefficient buffers at fixed device pointers and does not contain the quantizer table, so an `FSratelimiter` change does not recapture that graph and does not call `cudaGraphExecKernelNodeSetParams`. The authoritative description is in `docs/PHASE3A1_BENCHMARK_HARDENING.md`.
 3. **Single-Copy-Engine H2DContention on Laptop GPUs**: On GPUs with `asyncEngineCount == 1` (such as RTX 4090 Laptop GPU over PCIe Gen4 x8), raw host-input frames (`33.18 MB` at 4K, `132.71 MB` at 8K) share the single DMA engine with compressed D2H (`4.67 MB` at 4K, `18.39 MB` at 8K), capping host-input throughput at `273.17 FPS` (4K) and `67.45 FPS` (8K) vs `439.12 FPS` (4K) and `103.57 FPS` (8K) for device-resident inputs.
 
 ### 3. What Should Be Ported Directly to Vulkan / Metal Later vs Remain CUDA-Specific

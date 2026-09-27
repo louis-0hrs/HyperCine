@@ -235,7 +235,7 @@ void WriteRun(std::ostream& json, const hypercine::Phase2Run& run) {
 int main(int argc, char** argv) {
     const std::string path = (argc > 1)
         ? argv[1]
-        : "C:/Users/User/Documents/GitHub/HyperCine/benchmarks/results/phase2a.json";
+        : "benchmarks/results/phase2a.json";
     std::ostringstream json;
     HyperCineDeviceLink link{};
     HyperCine_QueryDeviceLink(&link);
@@ -468,7 +468,7 @@ int main(int argc, char** argv) {
     FILE* file = std::fopen(path.c_str(), "wb");
     if (!file) {
         std::perror("fopen results");
-        file = std::fopen("C:/Users/User/AppData/Local/Temp/phase2a.json", "wb");
+        file = std::fopen("phase2a.json", "wb");
     }
     if (!file) {
         std::perror("fopen temp");

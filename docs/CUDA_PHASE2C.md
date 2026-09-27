@@ -2,7 +2,7 @@
 
 Phase 2C combines **Phase 2A's multi-frame overlap throughput** with **Phase 2B's GPU entropy encoder and compressed coefficient D2H transfer** into a unified, production-oriented CUDA pipeline.
 
-The pristine [`upstream/`](file:///c:/Users/User/Documents/GitHub/HyperCine/upstream) tree remains 100% untouched (`git status --porcelain upstream/` is empty). All measurements below come from [`benchmarks/results/phase2c.json`](file:///c:/Users/User/Documents/GitHub/HyperCine/benchmarks/results/phase2c.json), produced by [`benchmarks/benchmark_phase2c.cpp`](file:///c:/Users/User/Documents/GitHub/HyperCine/benchmarks/benchmark_phase2c.cpp) and verified by [`tests/test_phase2c.cpp`](file:///c:/Users/User/Documents/GitHub/HyperCine/tests/test_phase2c.cpp).
+The pristine [`upstream/`](../upstream) tree remains 100% untouched (`git status --porcelain upstream/` is empty). All measurements below come from [`benchmarks/results/phase2c.json`](../benchmarks/results/phase2c.json), produced by [`benchmarks/benchmark_phase2c.cpp`](../benchmarks/benchmark_phase2c.cpp) and verified by [`tests/test_phase2c.cpp`](../tests/test_phase2c.cpp).
 
 ---
 
@@ -97,7 +97,7 @@ Across 1080p, 4K UHD, and 8K UHD, `VerifyPhase2CIdentity` verifies all five leve
 | **4K UHD** | `3,563,684 B` | `44.554 dB` | `f27b313c6ad7ece0bb04996694920426bc1d673a570a9652cdaac21e3fdecf8a` | `f27b313c6ad7ece0bb04996694920426bc1d673a570a9652cdaac21e3fdecf8a` | `f6e4a4dde2c2e0695c8a575ef32c1e1b239912fe37254be8364ad6b130878ae9` |
 | **8K UHD** | `14,009,028 B` | `44.582 dB` | `a14bf4ec63b82aabd3f5314bd084481ca06d6944f986e9f21295df28f5886ae2` | `a14bf4ec63b82aabd3f5314bd084481ca06d6944f986e9f21295df28f5886ae2` | `91373883fc5361188724dc8c72e37f58a7cf48bf1823405791bb6a4acd314bbd` |
 
-*(All 90 per-band coefficient and payload SHA-256 digests across 1080p, 4K, and 8K are recorded in [`benchmarks/results/phase2c.json`](file:///c:/Users/User/Documents/GitHub/HyperCine/benchmarks/results/phase2c.json#L1117-L1403).)*
+*(All 90 per-band coefficient and payload SHA-256 digests across 1080p, 4K, and 8K are recorded in [`benchmarks/results/phase2c.json`](../benchmarks/results/phase2c.json#L1117-L1403).)*
 
 ---
 
@@ -195,7 +195,7 @@ Measured on the device-input pipeline (`FRAME_COMPRESSED_COPY`, 4 entropy stream
 
 ## 7. Canonical Standalone PCIe Benchmark Cleanup
 
-During Phase 2A, initial runs recorded **~3.3 GB/s** due to Windows Controlled Folder Access interference, and a whitelisted rerun recorded **~6.6 GB/s**. In the canonical uncontended Phase 2C environment (9 timed runs per point across 4, 8, 16, 32, 64, and 128 MB, recorded in [`benchmarks/results/phase2c.json`](file:///c:/Users/User/Documents/GitHub/HyperCine/benchmarks/results/phase2c.json#L14-L1095)), the PCIe Gen4 link achieves **~13.0–13.4 GB/s** across all pinned allocation types.
+During Phase 2A, initial runs recorded **~3.3 GB/s** due to Windows Controlled Folder Access interference, and a whitelisted rerun recorded **~6.6 GB/s**. In the canonical uncontended Phase 2C environment (9 timed runs per point across 4, 8, 16, 32, 64, and 128 MB, recorded in [`benchmarks/results/phase2c.json`](../benchmarks/results/phase2c.json#L14-L1095)), the PCIe Gen4 link achieves **~13.0–13.4 GB/s** across all pinned allocation types.
 
 ### Canonical 32 MB & 128 MB Standalone PCIe Transfer Summary (`runs = 9`)
 

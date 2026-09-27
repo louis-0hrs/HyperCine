@@ -62,3 +62,37 @@ Hashes printed by `test_phase2b` are FNV-1a 64-bit. `coeff` is the tight int16 b
 | 4K Y L1 HH | 726773 | 2612812 | 326652 | `0x8544daf4b4fb8e58` | `0x319c0e1f6ef1fcd9` |
 
 Band numbers follow the upstream enum: 1 is LH, 2 is HL, 3 is HH. The test prints the shorter hex form when the high nibble is zero; the table restores the full 16 digits. The 1080p canonical sample is 900396 bytes. Its highpass coefficient download is 768100 bytes and its lowpass download is 129600 bytes.
+
+## Analytical Word Capacity Bound
+
+For one highpass subband of $N = \text{height} \times \text{pitch\_px}$ virtual coefficients (including any implicit row-gap zeros when $\text{pitch\_px} > \text{width}$):
+
+1. **At most one token per virtual coefficient:**
+   - Every selectable zero-run codeword in the loaded CineForm runbooks covers at least one zero ($\text{step} \ge 1$, enforced by `ValidateEntropyTablesForWordBound`). A contiguous zero run of length $z$ therefore emits at most $z$ run tokens.
+   - Every non-zero coefficient emits exactly one value token. Magnitudes exceeding the codebook range are clamped into $\pm(\text{VALUE\_TABLE\_LENGTH}/2 - 1)$ ($\pm 1023$ for `VALUE_TABLE_SIZE = 11`), matching `upstream/Codec/encoder.c`; there is no multi-word escape extension beyond the table entry.
+2. **One end-of-band token:** Exactly one band-end codeword is appended after the last coefficient or run token, yielding at most $N + 1$ total tokens.
+3. **Maximum VLC codeword length:**
+   - Value codebook entries pack the bit length into the upper 5 bits of a 32-bit `VLE` entry (`VLE_CODESIZE_SHIFT = 27`), bounding every value codeword to at most $31$ bits.
+   - Run codeword lengths and the band-end codeword length are validated by `ValidateEntropyTablesForWordBound` to lie in $[1, 31]$ bits across all 17 subband codebooks in FilmScan 3.
+4. **Analytical word upper bound:**
+   Total encoded bits for a band of $N$ virtual coefficients are strictly bounded by $31(N + 1)$, so the number of 32-bit packed VLC words (including zero-padding of the final partial word) is bounded by:
+   $$\text{words}_{\max}(N) = \left\lceil \frac{31(N + 1)}{32} \right\rceil \le N + 1 \quad (\forall N \ge 1)$$
+   This bound is computed by `EntropyPackedWordUpperBound(N)` in [`include/hypercine/entropy_stage.h`](../include/hypercine/entropy_stage.h).
+5. **Why allocation exceeds the bound (`N + 4096`):**
+   Each band's device and host word capacity is allocated as $N + 4096$ words (with the frame-wide arena sized to $2WH + 27 \times 4096$ words). Here $N + 4096$ is not an empirical heuristic; it strictly exceeds the proven analytical upper bound $\lceil 31(N + 1) / 32 \rceil \le N + 1$ while providing extra alignment and safety headroom per subband. Note that CPU-assembled band headers and trailers are written later into a separate host sample buffer (`BuildHighpassPayloadPtr`) and are not stored in the GPU VLC word buffer.
+6. **Why overflow is nevertheless still checked:**
+   Defense-in-depth requires that neither corrupted codebooks, custom future tables, nor test-injected capacity overrides can cause out-of-bounds device writes or host DMA overruns. Both `PackKernel` and `ConsolidateFrameWordsKernel` in [`src/cuda/entropy_gpu.cu`](../src/cuda/entropy_gpu.cu) check the active word capacity before writing, set a mapped device/host overflow flag (`h_overflow`) if the packed word count exceeds the cap, and refuse to write past the buffer. `tests/test_entropy_capacity.cpp` verifies both the analytical bound across all 17 codebooks and the forced-overflow failure path.
+
+## Asynchronous Polling & Error-State Contract
+
+Asynchronous GPU stage polling in [`include/hypercine/entropy_gpu.h`](../include/hypercine/entropy_gpu.h) uses an explicit three-state contract (`GpuStageStatus`):
+
+- `GpuStageStatus::Pending`: The GPU event has returned `cudaErrorNotReady`, indicating that device execution is still in progress.
+- `GpuStageStatus::Complete`: The stage has completed without error (for `PollGpuEntropyFrameD2HStatus`, the consolidated D2H copy has been validated and queued onto `d2h_stream`; `IsGpuEntropyFrameComplete` then checks `d2h_done_ev` for copy completion).
+- `GpuStageStatus::Failed`: A fatal error occurred (a CUDA event/copy failure, an invalid slot mode, or `h_overflow` / word count exceeding the proven capacity bound).
+
+### Non-Hanging Failure Guarantees
+1. **Sticky failure state:** Once a slot enters `GpuStageStatus::Failed`, `slot->failed` remains latched until the next frame reset, and `GpuEntropyFrameError(slot)` returns the human-readable failure diagnostic.
+2. **Distinguishing errors from incomplete work:** Polling functions (`PollGpuEntropyFrameD2HStatus`, `PollNextStreamedBandReady`, `IsGpuEntropyFrameComplete`, `IsGpuEntropyComputeDone`, and `HyperCine_GpuSlotGpuIdle`) treat only `cudaErrorNotReady` as incomplete work. Any other non-success CUDA status or capacity overflow immediately transitions the slot to a fatal error state (`GpuStageStatus::Failed`, `-2`, or `-1`).
+3. **No silent infinite polling:** The multi-frame encoder loop in `RunPhase3A` checks for slot failure on every poll iteration and enforces a wall-clock watchdog deadline (`180 s + 250 ms/frame`), ensuring that tests and callers fail deterministically rather than hanging.
+

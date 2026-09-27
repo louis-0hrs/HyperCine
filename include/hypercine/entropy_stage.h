@@ -73,6 +73,25 @@ struct EntropySymbols {
 
 bool LoadEntropyTables(encoder* encoder, int subband, EntropyTables* tables);
 
+// Upper bound on packed uint32 words for one highpass band of N virtual
+// coefficients (N = height * pitch_px). Includes the band-end codeword and the
+// final partial word. It does not include the CPU band header or trailer;
+// those are assembled in a separate buffer.
+//
+// Assumptions, checked by ValidateEntropyTablesForWordBound:
+//   * every selectable run code covers at least one zero and is 1..31 bits
+//   * every value codeword is 0..31 bits (VLE stores the size in 5 bits)
+//   * the band-end code is 1..31 bits
+// Under those rules the encoder emits at most one token per virtual coefficient
+// plus one band-end codeword, so bits <= 31*(N+1) and words = ceil(bits/32) <= N+1.
+inline int EntropyPackedWordUpperBound(int virtual_coefficients) {
+    if (virtual_coefficients <= 0) return 1;
+    const long long bits = 31ll * (static_cast<long long>(virtual_coefficients) + 1ll);
+    return static_cast<int>((bits + 31ll) / 32ll);
+}
+
+bool ValidateEntropyTablesForWordBound(const EntropyTables& tables, std::string* error);
+
 // pitch_px is in samples. Samples past `width` on each row are implicit zeros
 // and are not read. The active FilmScan path uses pitch_px == width.
 EntropySymbols EncodeHighpassStages(const int16_t* coeff, int width, int height, int pitch_px,

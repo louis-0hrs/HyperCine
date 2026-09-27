@@ -65,6 +65,19 @@ if(HYPERCINE_ENABLE_CUDA)
     )
     target_link_libraries(benchmark_phase3a PRIVATE hypercine_core CFHDCodecStatic)
 
+    add_executable(benchmark_phase3a1
+        benchmark_phase3a1.cpp
+    )
+    target_link_libraries(benchmark_phase3a1 PRIVATE hypercine_core CFHDCodecStatic)
+    string(REPLACE ";" "," HYPERCINE_CUDA_ARCH_STR "${CMAKE_CUDA_ARCHITECTURES}")
+    target_compile_definitions(benchmark_phase3a1 PRIVATE
+        HYPERCINE_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+        HYPERCINE_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+        HYPERCINE_CUDA_COMPILER_VERSION="${CMAKE_CUDA_COMPILER_VERSION}"
+        HYPERCINE_BUILD_TYPE="$<CONFIG>"
+        HYPERCINE_CMAKE_CUDA_ARCH="${HYPERCINE_CUDA_ARCH_STR}"
+        HYPERCINE_CMAKE_OPTS="HYPERCINE_ENABLE_CUDA=${HYPERCINE_ENABLE_CUDA},HYPERCINE_BUILD_UPSTREAM=${HYPERCINE_BUILD_UPSTREAM},HYPERCINE_BUILD_TESTS=${HYPERCINE_BUILD_TESTS},HYPERCINE_BUILD_BENCHMARKS=${HYPERCINE_BUILD_BENCHMARKS}")
+
     if(WIN32)
         target_link_libraries(benchmark_wavelet PRIVATE psapi)
         target_link_libraries(benchmark_phase1b PRIVATE psapi)
@@ -75,6 +88,7 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(benchmark_phase2c PRIVATE psapi)
         target_link_libraries(benchmark_phase2d PRIVATE psapi)
         target_link_libraries(benchmark_phase3a PRIVATE psapi)
+        target_link_libraries(benchmark_phase3a1 PRIVATE psapi)
     endif()
 endif()
 

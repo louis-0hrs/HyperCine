@@ -1380,7 +1380,12 @@ extern "C" int HyperCine_GpuSlotGpuIdle(HyperCineGpuSlot* slot) {
         if (state == 1) return 0;
         if (state == 2) {
             const cudaError_t query = cudaEventQuery(slot->extra[i].d2h_end);
-            if (query != cudaSuccess) return 0;
+            if (query == cudaErrorNotReady) return 0;
+            if (query != cudaSuccess) {
+                slot->run_error = -6;
+                slot->run_phase = 3;
+                return -1;
+            }
         }
     }
     return 1;

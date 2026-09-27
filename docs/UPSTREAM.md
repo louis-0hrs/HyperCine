@@ -18,8 +18,8 @@ The upstream repository was incorporated into HyperCine via `git subtree` to mai
 ## 2. Licensing and Copyright
 
 The upstream GoPro CineForm SDK is dual-licensed under:
-1. **The MIT License** (`upstream/LICENSE.txt`)
-2. **The Apache License, Version 2.0** (`upstream/LICENSE-APACHE.txt`)
+1. **The MIT License** (`upstream/LICENSE-MIT` and `upstream/LICENSE.txt`)
+2. **The Apache License, Version 2.0** (`upstream/LICENSE-APACHE` and `upstream/LICENSE.txt`)
 
 ### Upstream Copyright Notice
 ```

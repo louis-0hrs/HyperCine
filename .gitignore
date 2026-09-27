@@ -4,9 +4,21 @@ build*/
 bin/
 out/
 lib/
+x64/
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+_deps/
 
-# Visual Studio / MSVC artifacts
+# Visual Studio / MSVC / IDE local state
 .vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 *.vcxproj.user
 *.vcxproj.filters
 *.dir/
@@ -16,25 +28,63 @@ lib/
 *.pdb
 *.ilk
 *.obj
+*.o
+*.a
+*.so
+*.dylib
 *.lib
 *.exp
 *.exe
 *.dll
 
-# Temporary and test outputs
+# CUDA intermediate artifacts
+*.ptx
+*.cubin
+*.fatbin
+*.cudafe*
+*.module_id
+tmpxft_*
+
+# Profiler traces & crash dumps
+*.nsys-rep
+*.ncu-rep
+*.qdrep
+*.sqlite
+*.etl
+*.nvprof
+*.dmp
+*.mdmp
+*.hdmp
+core.*
+
+# Temporary and local test outputs
 *.ppm
 OUT-*.ppm
 *-decoded.pgm
 *-wavelet.pgm
 *-diff.pgm
+*.avi
+*.mov
+*.mp4
+*.mkv
+*.raw
+*.yuv
+!upstream/Example/videos/CFHDsample422.AVI
 scratch/
+debug_out.txt
+benchmarks/tmp_*.json
+benchmarks/*_tmp*.json
+benchmarks/*_smoke*.json
 
 # CMake artifacts
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
+CTestTestfile.cmake
+Testing/
 Makefile
 *.cmake
 !CMakeLists.txt
 !ucm.cmake
 !libcineformsdk.pc.cmake
+

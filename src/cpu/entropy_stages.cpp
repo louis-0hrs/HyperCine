@@ -216,6 +216,35 @@ bool LoadEntropyTables(encoder* enc_opaque, int subband, EntropyTables* tables) 
     return tables->band_end_size > 0 && tables->band_end_size < 32;
 }
 
+bool ValidateEntropyTablesForWordBound(const EntropyTables& tables, std::string* error) {
+    auto fail = [&](const char* message) {
+        if (error) *error = message;
+        return false;
+    };
+    if (tables.run_length <= 1 || tables.value_length <= 0) return fail("codebook is empty");
+    if (static_cast<int>(tables.run_size.size()) < tables.run_length ||
+        static_cast<int>(tables.run_count.size()) < tables.run_length) {
+        return fail("run codebook tables are shorter than run_length");
+    }
+    if (tables.band_end_size < 1 || tables.band_end_size > 31) {
+        return fail("band-end codeword is outside 1..31 bits");
+    }
+    for (int i = 1; i < tables.run_length; ++i) {
+        const int step = tables.run_count[static_cast<size_t>(i)];
+        const int bits = tables.run_size[static_cast<size_t>(i)];
+        if (step < 1) return fail("a selectable run code covers fewer than one zero");
+        if (bits < 1 || bits > 31) return fail("a run codeword is outside 1..31 bits");
+    }
+    if (static_cast<int>(tables.value_entry.size()) < tables.value_length) {
+        return fail("value codebook is shorter than value_length");
+    }
+    for (int i = 0; i < tables.value_length; ++i) {
+        const int bits = static_cast<int>(tables.value_entry[static_cast<size_t>(i)] >> 27);
+        if (bits < 0 || bits > 31) return fail("a value codeword is outside 0..31 bits");
+    }
+    return true;
+}
+
 EntropySymbols EncodeHighpassStages(const int16_t* coeff, int width, int height, int pitch_px,
                                     const EntropyTables& tables, bool keep_symbols) {
     EntropySymbols out;

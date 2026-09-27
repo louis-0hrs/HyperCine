@@ -176,8 +176,10 @@ __device__ void EmitRunDevice(uint32_t* tokens, int& cursor, const int16_t* cove
     (void)bits_unused;
     while (zeros > 0) {
         const int index = zeros < run_length ? zeros : run_length - 1;
+        const int step = covered[index];
+        if (step <= 0) break;
         tokens[cursor++] = static_cast<uint32_t>(index);
-        zeros -= covered[index];
+        zeros -= step;
     }
 }
 
@@ -282,8 +284,13 @@ __global__ void StoreBandBitsAndTokensKernel(const uint32_t* __restrict__ offset
 
 __global__ void PackKernel(const uint32_t* __restrict__ code, const uint32_t* __restrict__ length,
                            const uint32_t* __restrict__ offset, const int* __restrict__ token_total,
-                           const uint32_t* __restrict__ total_bits, uint32_t* __restrict__ words) {
+                           const uint32_t* __restrict__ total_bits, uint32_t* __restrict__ words,
+                           uint32_t word_limit, int* __restrict__ overflow) {
     const uint32_t word_count = (*total_bits + 31u) >> 5;
+    if (word_count > word_limit) {
+        if (threadIdx.x == 0 && blockIdx.x == 0 && overflow) atomicExch(overflow, 1);
+        return;
+    }
     const int codes = *token_total + 1;
     const uint32_t stride = static_cast<uint32_t>(gridDim.x) * blockDim.x;
     for (uint32_t word_index = static_cast<uint32_t>(blockIdx.x) * blockDim.x + threadIdx.x;
@@ -323,7 +330,8 @@ struct FrameCompactMeta {
 
 __global__ void ComputeFrameLayoutKernel(const uint32_t* __restrict__ d_total_bits, int count,
                                          FrameCompactMeta* __restrict__ d_meta,
-                                         FrameCompactMeta* __restrict__ h_meta_mapped) {
+                                         FrameCompactMeta* __restrict__ h_meta_mapped,
+                                         uint32_t consolidated_limit, int* __restrict__ overflow) {
     if (threadIdx.x != 0 || blockIdx.x != 0) return;
     uint32_t sum = 0;
     for (int i = 0; i < count; ++i) {
@@ -338,16 +346,24 @@ __global__ void ComputeFrameLayoutKernel(const uint32_t* __restrict__ d_total_bi
     }
     d_meta->total_words = sum;
     if (h_meta_mapped) h_meta_mapped->total_words = sum;
+    if (sum > consolidated_limit && overflow) atomicExch(overflow, 1);
 }
 
 __global__ void ConsolidateFrameWordsKernel(const uint32_t* __restrict__ src_all,
                                             const uint32_t* __restrict__ src_band_offsets,
                                             const FrameCompactMeta* __restrict__ meta,
                                             uint32_t* __restrict__ dst_consolidated,
-                                            int count) {
+                                            int count, uint32_t consolidated_limit,
+                                            int* __restrict__ overflow) {
+    if (overflow && *overflow) return;
     const int b = static_cast<int>(blockIdx.y);
     if (b >= count) return;
     const uint32_t n = meta->word_count[b];
+    const uint32_t off = meta->word_offset[b];
+    if (off >= consolidated_limit || n > consolidated_limit - off) {
+        if (threadIdx.x == 0 && blockIdx.x == 0 && overflow) atomicExch(overflow, 1);
+        return;
+    }
     const uint32_t* src = src_all + src_band_offsets[b];
     uint32_t* dst = dst_consolidated + meta->word_offset[b];
     const uint32_t stride = static_cast<uint32_t>(gridDim.x) * blockDim.x;
@@ -530,10 +546,12 @@ __global__ void TokenizeAndCodebookFusedKernel(const int* __restrict__ run_zeros
         int cursor = token_offset[index];
         while (zeros > 0) {
             const int r_idx = zeros < run_length ? zeros : run_length - 1;
+            const int step = covered[r_idx];
+            if (step <= 0) break;
             code[cursor] = run_bits[r_idx];
             length[cursor] = static_cast<uint32_t>(run_size[r_idx]);
             ++cursor;
-            zeros -= covered[r_idx];
+            zeros -= step;
         }
         if (index == nonzero) {
             code[cursor] = band_end_code;
@@ -1127,6 +1145,14 @@ struct GpuEntropyFrameSlot {
     bool graph_captured_this_frame = false;
     double host_enqueue_ms = 0.0;
     double graph_capture_ms = 0.0;
+
+    int* h_overflow = nullptr;
+    int* d_overflow = nullptr;
+    uint32_t test_band_word_cap_override = 0;
+    uint32_t test_consolidated_word_cap_override = 0;
+    uint32_t active_consolidated_limit = 0;
+    bool failed = false;
+    std::string error;
 };
 
 int GpuEntropyScanOccupancy() {
@@ -1230,7 +1256,8 @@ bool LaunchHighpass(Workspace& ws, const int16_t* device_coeff, int width, int h
     cudaEventRecord(ws.ev[5], stream);
     const int word_limit = (segments * 31 + 31) / 32;
     const int pack_blocks = std::min((word_limit + 127) / 128, 2048);
-    PackKernel<<<pack_blocks, 128, 0, stream>>>(ws.code, ws.length, ws.bit_offset, ws.token_total, ws.total_bits, ws.words);
+    PackKernel<<<pack_blocks, 128, 0, stream>>>(ws.code, ws.length, ws.bit_offset, ws.token_total, ws.total_bits, ws.words,
+                                                static_cast<uint32_t>(std::max(word_limit, 1)), nullptr);
     cudaEventRecord(ws.ev[6], stream);
     cudaEventRecord(ws.ev[7], stream);
     if (cudaMemcpyAsync(&ws.pinned->token_total, ws.token_total, sizeof(int), cudaMemcpyDeviceToHost, stream) != cudaSuccess) {
@@ -1413,7 +1440,8 @@ bool LaunchHighpassIntoFrameSlot(Workspace& ws, GpuEntropyFrameSlot* fslot, int 
     uint32_t* dst_words = fslot->d_band_words + fslot->band_word_offset[band_idx];
     const int word_limit = static_cast<int>(fslot->band_word_cap[band_idx]);
     const int pack_blocks = std::min((word_limit + 127) / 128, 2048);
-    PackKernel<<<pack_blocks, 128, 0, stream>>>(ws.code, ws.length, ws.bit_offset, ws.token_total, ws.total_bits, dst_words);
+    PackKernel<<<pack_blocks, 128, 0, stream>>>(ws.code, ws.length, ws.bit_offset, ws.token_total, ws.total_bits, dst_words,
+                                                static_cast<uint32_t>(std::max(word_limit, 1)), fslot->d_overflow);
     launches += 1;
     if (rec) cudaEventRecord(bev[7], stream);
 
@@ -1664,8 +1692,12 @@ GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
     slot->max_width = max_width;
     slot->max_height = max_height;
 
-    // Total highpass coefficients across 3 channels (4:2:2) and 3 levels is ~2 * W * H.
-    // Allocate full 1 word/coeff capacity across all resolutions so high-entropy noise frames never overflow.
+    // Highpass virtual coefficients for 4:2:2 are below 2*W*H. Each band of N
+    // coefficients is proven to need at most ceil(31*(N+1)/32) <= N+1 packed
+    // words when the codebooks pass ValidateEntropyTablesForWordBound. The
+    // per-band queue cap is N+4096, which is above that bound. The arena below
+    // holds every band at that cap. The coefficient-word buffer does not store
+    // band headers; those are built on the host.
     const size_t max_pixels = static_cast<size_t>(max_width) * static_cast<size_t>(max_height);
     const size_t word_mult = 2u;
     slot->total_band_words_cap = max_pixels * word_mult + static_cast<size_t>(kMaxHighpassBands) * 32768u;
@@ -1693,6 +1725,9 @@ GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
     if (cudaHostGetDevicePointer(&slot->d_scalars, slot->h_scalars, 0) != cudaSuccess) return fail();
     if (cudaHostAlloc(&slot->h_frame_meta, sizeof(FrameCompactMeta), cudaHostAllocMapped) != cudaSuccess) return fail();
     if (cudaHostGetDevicePointer(&slot->d_frame_meta_mapped, slot->h_frame_meta, 0) != cudaSuccess) return fail();
+    if (cudaHostAlloc(&slot->h_overflow, sizeof(int), cudaHostAllocMapped) != cudaSuccess) return fail();
+    if (cudaHostGetDevicePointer(&slot->d_overflow, slot->h_overflow, 0) != cudaSuccess) return fail();
+    *slot->h_overflow = 0;
     std::memset(slot->h_consolidated_words, 0, sizeof(uint32_t) * slot->consolidated_words_cap);
     std::memset(slot->h_band_words, 0, sizeof(uint32_t) * slot->total_band_words_cap);
     std::memset(slot->h_band_offsets, 0, sizeof(uint32_t) * kMaxHighpassBands);
@@ -1737,6 +1772,7 @@ void DestroyGpuEntropyFrameSlot(GpuEntropyFrameSlot* slot) {
     if (slot->h_band_offsets) cudaFreeHost(slot->h_band_offsets);
     if (slot->h_scalars) cudaFreeHost(slot->h_scalars);
     if (slot->h_frame_meta) cudaFreeHost(slot->h_frame_meta);
+    if (slot->h_overflow) cudaFreeHost(slot->h_overflow);
     if (slot->consolidate_stream) cudaStreamDestroy(slot->consolidate_stream);
     if (slot->d2h_stream) cudaStreamDestroy(slot->d2h_stream);
     if (slot->entropy_start_ev) cudaEventDestroy(slot->entropy_start_ev);
@@ -1777,12 +1813,32 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
     slot->graph_used = cfg.use_cuda_graph;
     slot->graph_captured_this_frame = false;
     slot->graph_capture_ms = 0.0;
+    slot->failed = false;
+    slot->error.clear();
+    if (slot->h_overflow) *slot->h_overflow = 0;
 
     uint32_t running_offset = 0;
     for (int b = 0; b < count; ++b) {
+        std::string why;
+        if (!ValidateEntropyTablesForWordBound(tables[b], &why)) {
+            slot->failed = true;
+            slot->error = why.empty() ? "entropy codebook violates the word-capacity proof" : why;
+            return false;
+        }
         const int vlen = requests[b].height * requests[b].pitch_px;
-        const uint32_t cap = static_cast<uint32_t>(vlen + 4096);
-        if (static_cast<size_t>(running_offset) + cap > slot->total_band_words_cap) return false;
+        const int proven = EntropyPackedWordUpperBound(vlen);
+        uint32_t cap = static_cast<uint32_t>(vlen) + 4096u;
+        if (slot->test_band_word_cap_override > 0) cap = slot->test_band_word_cap_override;
+        else if (cap < static_cast<uint32_t>(proven)) {
+            slot->failed = true;
+            slot->error = "band word allocation is below the proven upper bound";
+            return false;
+        }
+        if (static_cast<size_t>(running_offset) + cap > slot->total_band_words_cap) {
+            slot->failed = true;
+            slot->error = "sum of per-band word caps exceeds the frame arena";
+            return false;
+        }
         slot->band_word_offset[b] = running_offset;
         slot->h_band_offsets[b] = running_offset;
         slot->band_word_cap[b] = cap;
@@ -1791,6 +1847,12 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
         slot->h_scalars[b].total_bits = 0;
         running_offset += cap;
     }
+    uint32_t consolidated_limit = static_cast<uint32_t>(
+        std::min<size_t>(slot->consolidated_words_cap, 0xffffffffu));
+    if (slot->test_consolidated_word_cap_override > 0) {
+        consolidated_limit = slot->test_consolidated_word_cap_override;
+    }
+    slot->active_consolidated_limit = consolidated_limit;
 
     // Build per-stream band schedule (LPT load balancing across `streams`).
     std::vector<int> order(static_cast<size_t>(count));
@@ -1871,6 +1933,11 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
             if (cudaStreamBeginCapture(slot->consolidate_stream, cudaStreamCaptureModeThreadLocal) != cudaSuccess) {
                 return false;
             }
+            // Cleared on every replay. Quantizer tables are not graph nodes: wavelet
+            // quantization is launched outside this capture, and the graph reads the
+            // already-quantized coefficient buffers at the fixed device pointers in
+            // GraphCacheKey. FSratelimiter changes do not recapture this graph.
+            cudaMemsetAsync(slot->d_overflow, 0, sizeof(int), slot->consolidate_stream);
             cudaEventRecord(slot->graph_fork_ev, slot->consolidate_stream);
 
             int launches = 0;
@@ -1893,10 +1960,12 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
 
             if (cfg.d2h_mode == CompressedD2HMode::FrameConsolidated) {
                 ComputeFrameLayoutKernel<<<1, 32, 0, slot->consolidate_stream>>>(
-                    slot->d_total_bits, count, slot->d_frame_meta, slot->d_frame_meta_mapped);
+                    slot->d_total_bits, count, slot->d_frame_meta, slot->d_frame_meta_mapped,
+                    slot->active_consolidated_limit, slot->d_overflow);
                 const dim3 grid(64, static_cast<unsigned int>(count));
                 ConsolidateFrameWordsKernel<<<grid, 256, 0, slot->consolidate_stream>>>(
-                    slot->d_band_words, slot->d_band_offsets, slot->d_frame_meta, slot->d_consolidated_words, count);
+                    slot->d_band_words, slot->d_band_offsets, slot->d_frame_meta, slot->d_consolidated_words, count,
+                    slot->active_consolidated_limit, slot->d_overflow);
                 launches += 2;
             }
 
@@ -1978,9 +2047,12 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
     }
 
     int launches = 0;
+    cudaMemsetAsync(slot->d_overflow, 0, sizeof(int), slot->consolidate_stream);
+    cudaEventRecord(slot->graph_fork_ev, slot->consolidate_stream);
     for (int s = 0; s < streams; ++s) {
         if (stream_bands[s].empty()) continue;
         cudaStream_t st = session->slots[s].stream;
+        cudaStreamWaitEvent(st, slot->graph_fork_ev, 0);
         if (wait_ev) cudaStreamWaitEvent(st, wait_ev, 0);
         if (session->has_last_frame_done && session->last_frame_done_ev) {
             cudaStreamWaitEvent(st, session->last_frame_done_ev, 0);
@@ -2007,10 +2079,12 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
     if (cfg.d2h_mode == CompressedD2HMode::FrameConsolidated) {
         cudaEventRecord(slot->consolidate_start_ev, slot->consolidate_stream);
         ComputeFrameLayoutKernel<<<1, 32, 0, slot->consolidate_stream>>>(
-            slot->d_total_bits, count, slot->d_frame_meta, slot->d_frame_meta_mapped);
+            slot->d_total_bits, count, slot->d_frame_meta, slot->d_frame_meta_mapped,
+            slot->active_consolidated_limit, slot->d_overflow);
         const dim3 grid(64, static_cast<unsigned int>(count));
         ConsolidateFrameWordsKernel<<<grid, 256, 0, slot->consolidate_stream>>>(
-            slot->d_band_words, slot->d_band_offsets, slot->d_frame_meta, slot->d_consolidated_words, count);
+            slot->d_band_words, slot->d_band_offsets, slot->d_frame_meta, slot->d_consolidated_words, count,
+            slot->active_consolidated_limit, slot->d_overflow);
         launches += 2;
         cudaEventRecord(slot->entropy_done_ev, slot->consolidate_stream);
     } else {
@@ -2033,41 +2107,118 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
     return true;
 }
 
-bool PollGpuEntropyFrameD2H(GpuEntropyFrameSlot* slot) {
-    if (!slot || slot->d2h_mode != CompressedD2HMode::FrameConsolidated) return false;
-    if (slot->d2h_started) return true;
-    if (cudaEventQuery(slot->entropy_done_ev) != cudaSuccess) return false;
+namespace {
 
-    const uint32_t total_words = slot->h_frame_meta->total_words;
-    if (total_words > slot->consolidated_words_cap) return false;
+void FailEntropySlot(GpuEntropyFrameSlot* slot, const char* message) {
+    if (!slot) return;
+    slot->failed = true;
+    if (slot->error.empty() && message) slot->error = message;
+}
+
+}  // namespace
+
+const char* GpuEntropyFrameError(const GpuEntropyFrameSlot* slot) {
+    if (!slot || slot->error.empty()) return "";
+    return slot->error.c_str();
+}
+
+bool GpuEntropyFrameHasFailed(const GpuEntropyFrameSlot* slot) {
+    return slot && slot->failed;
+}
+
+void SetGpuEntropyCapacityOverrideForTest(GpuEntropyFrameSlot* slot,
+                                          uint32_t per_band_words,
+                                          uint32_t consolidated_words) {
+    if (!slot) return;
+    slot->test_band_word_cap_override = per_band_words;
+    slot->test_consolidated_word_cap_override = consolidated_words;
+}
+
+GpuStageStatus PollGpuEntropyFrameD2HStatus(GpuEntropyFrameSlot* slot) {
+    if (!slot || slot->d2h_mode != CompressedD2HMode::FrameConsolidated) {
+        FailEntropySlot(slot, "FrameConsolidated D2H poll used on a slot that is not in that mode");
+        return GpuStageStatus::Failed;
+    }
+    if (slot->failed) return GpuStageStatus::Failed;
+    if (slot->d2h_started) return GpuStageStatus::Complete;
+
+    const cudaError_t query = cudaEventQuery(slot->entropy_done_ev);
+    if (query == cudaErrorNotReady) return GpuStageStatus::Pending;
+    if (query != cudaSuccess) {
+        FailEntropySlot(slot, "entropy completion event failed");
+        return GpuStageStatus::Failed;
+    }
+    if (slot->h_overflow && *slot->h_overflow) {
+        FailEntropySlot(slot, "entropy output exceeded the proven word capacity");
+        return GpuStageStatus::Failed;
+    }
+    const uint32_t total_words = slot->h_frame_meta ? slot->h_frame_meta->total_words : 0;
+    if (static_cast<size_t>(total_words) > slot->consolidated_words_cap ||
+        total_words > slot->active_consolidated_limit) {
+        FailEntropySlot(slot, "entropy output exceeded the proven word capacity");
+        return GpuStageStatus::Failed;
+    }
     cudaEventRecord(slot->d2h_start_ev, slot->d2h_stream);
     if (total_words > 0) {
-        cudaMemcpyAsync(slot->h_consolidated_words, slot->d_consolidated_words,
-                        static_cast<size_t>(total_words) * sizeof(uint32_t),
-                        cudaMemcpyDeviceToHost, slot->d2h_stream);
+        if (cudaMemcpyAsync(slot->h_consolidated_words, slot->d_consolidated_words,
+                            static_cast<size_t>(total_words) * sizeof(uint32_t),
+                            cudaMemcpyDeviceToHost, slot->d2h_stream) != cudaSuccess) {
+            FailEntropySlot(slot, "consolidated D2H memcpy failed to queue");
+            return GpuStageStatus::Failed;
+        }
     }
     cudaEventRecord(slot->d2h_done_ev, slot->d2h_stream);
     slot->d2h_started = true;
-    return true;
+    return GpuStageStatus::Complete;
+}
+
+bool PollGpuEntropyFrameD2H(GpuEntropyFrameSlot* slot) {
+    return PollGpuEntropyFrameD2HStatus(slot) == GpuStageStatus::Complete;
 }
 
 bool WaitAndStartGpuEntropyFrameD2H(GpuEntropyFrameSlot* slot) {
-    if (!slot || slot->d2h_mode != CompressedD2HMode::FrameConsolidated) return false;
+    if (!slot || slot->d2h_mode != CompressedD2HMode::FrameConsolidated) {
+        FailEntropySlot(slot, "FrameConsolidated D2H wait used on a slot that is not in that mode");
+        return false;
+    }
+    if (slot->failed) return false;
     if (slot->d2h_started) return true;
-    if (cudaEventSynchronize(slot->entropy_done_ev) != cudaSuccess) return false;
-    return PollGpuEntropyFrameD2H(slot);
+    if (cudaEventSynchronize(slot->entropy_done_ev) != cudaSuccess) {
+        FailEntropySlot(slot, "entropy completion wait failed");
+        return false;
+    }
+    return PollGpuEntropyFrameD2HStatus(slot) == GpuStageStatus::Complete;
 }
 
 int PollNextStreamedBandReady(GpuEntropyFrameSlot* slot) {
-    if (!slot || slot->d2h_mode != CompressedD2HMode::BandStreamed) return -1;
+    if (!slot || slot->failed || slot->d2h_mode != CompressedD2HMode::BandStreamed) {
+        if (slot && slot->d2h_mode != CompressedD2HMode::BandStreamed) {
+            FailEntropySlot(slot, "band-streamed poll used on a consolidated slot");
+        }
+        return slot && slot->failed ? -2 : -1;
+    }
+    if (slot->h_overflow && *slot->h_overflow) {
+        FailEntropySlot(slot, "entropy output exceeded the proven word capacity");
+        return -2;
+    }
     const int count = slot->active_bands;
     // First, queue D2H for any band whose GPU pack kernel just completed.
     for (int b = 0; b < count; ++b) {
         if (slot->band_state[b] == 0) {
-            if (cudaEventQuery(slot->band_pack_done_ev[b]) == cudaSuccess) {
+            const cudaError_t pack_query = cudaEventQuery(slot->band_pack_done_ev[b]);
+            if (pack_query != cudaSuccess && pack_query != cudaErrorNotReady) {
+                FailEntropySlot(slot, "band pack completion event failed");
+                return -2;
+            }
+            if (pack_query == cudaSuccess) {
                 const uint32_t bits = slot->h_scalars[b].total_bits;
                 const uint32_t words = (bits + 31u) >> 5;
                 const uint32_t off = slot->band_word_offset[b];
+                if (words > slot->band_word_cap[b] ||
+                    static_cast<size_t>(off) + words > slot->total_band_words_cap) {
+                    FailEntropySlot(slot, "entropy output exceeded the proven word capacity");
+                    return -2;
+                }
                 if (!slot->d2h_FirstBandRecorded) {
                     cudaEventRecord(slot->d2h_start_ev, slot->d2h_stream);
                     slot->d2h_FirstBandRecorded = true;
@@ -2087,20 +2238,31 @@ int PollNextStreamedBandReady(GpuEntropyFrameSlot* slot) {
     // Second, check if any queued D2H copy has completed and is ready for host header/trailer wrap.
     for (int b = 0; b < count; ++b) {
         if (slot->band_state[b] == 1) {
-            if (cudaEventQuery(slot->band_d2h_done_ev[b]) == cudaSuccess) {
-                slot->band_state[b] = 2;
-                return b;
+            const cudaError_t d2h_query = cudaEventQuery(slot->band_d2h_done_ev[b]);
+            if (d2h_query == cudaErrorNotReady) continue;
+            if (d2h_query != cudaSuccess) {
+                FailEntropySlot(slot, "band D2H completion event failed");
+                return -2;
             }
+            slot->band_state[b] = 2;
+            return b;
         }
     }
     return -1;
 }
 
 bool IsGpuEntropyFrameComplete(GpuEntropyFrameSlot* slot) {
-    if (!slot) return false;
+    if (!slot || slot->failed) return false;
     if (slot->d2h_mode == CompressedD2HMode::FrameConsolidated) {
-        if (!PollGpuEntropyFrameD2H(slot)) return false;
-        return cudaEventQuery(slot->d2h_done_ev) == cudaSuccess;
+        const GpuStageStatus status = PollGpuEntropyFrameD2HStatus(slot);
+        if (status != GpuStageStatus::Complete) return false;
+        const cudaError_t query = cudaEventQuery(slot->d2h_done_ev);
+        if (query == cudaErrorNotReady) return false;
+        if (query != cudaSuccess) {
+            FailEntropySlot(slot, "consolidated D2H completion event failed");
+            return false;
+        }
+        return true;
     } else {
         for (int b = 0; b < slot->active_bands; ++b) {
             if (slot->band_state[b] < 2) return false;
@@ -2130,8 +2292,14 @@ bool WaitGpuEntropyFrameComplete(GpuEntropyFrameSlot* slot) {
 }
 
 bool IsGpuEntropyComputeDone(GpuEntropyFrameSlot* slot) {
-    if (!slot) return false;
-    return cudaEventQuery(slot->entropy_done_ev) == cudaSuccess;
+    if (!slot || slot->failed) return false;
+    const cudaError_t query = cudaEventQuery(slot->entropy_done_ev);
+    if (query == cudaErrorNotReady) return false;
+    if (query != cudaSuccess) {
+        FailEntropySlot(slot, "entropy completion event failed");
+        return false;
+    }
+    return true;
 }
 
 bool WaitGpuEntropyComputeDone(GpuEntropyFrameSlot* slot) {

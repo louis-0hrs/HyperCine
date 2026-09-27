@@ -1,0 +1,36 @@
+name: CPU Reference CI
+
+on:
+  push:
+    branches: [ "**" ]
+    tags: [ "*" ]
+  pull_request:
+
+jobs:
+  cpu-only-windows-msvc:
+    name: Windows MSVC (CPU-Only Build & Tests)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify upstream immutability
+        shell: pwsh
+        run: |
+          $status = git status --porcelain upstream/
+          if ($status) {
+            Write-Error "upstream/ directory has been modified: $status"
+            exit 1
+          }
+
+      - name: Configure CMake (CPU-Only)
+        shell: pwsh
+        run: cmake -B build-cpu -S . -DHYPERCINE_ENABLE_CUDA=OFF
+
+      - name: Build Release
+        shell: pwsh
+        run: cmake --build build-cpu --config Release
+
+      - name: Run CPU CTest Suite
+        shell: pwsh
+        run: ctest --test-dir build-cpu -C Release --output-on-failure

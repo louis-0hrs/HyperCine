@@ -126,8 +126,3 @@ if(HYPERCINE_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/scratch/simple_test.cpp")
-    add_executable(simple_test scratch/simple_test.cpp)
-    target_link_libraries(simple_test PRIVATE CFHDCodecStatic)
-    target_include_directories(simple_test PRIVATE include upstream/Codec upstream/Common)
-endif()

@@ -132,9 +132,30 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
                           void* wait_wavelet_event = nullptr,
                           void* const* wait_band_events = nullptr);
 
+// Poll results are three-way. Pending means the stage is still running.
+// Failed is a sticky error (CUDA failure or entropy word overflow) and must
+// not be treated as "not finished yet".
+enum class GpuStageStatus {
+    Pending = 0,
+    Complete = 1,
+    Failed = 2
+};
+
 // Non-blocking progress for FrameConsolidated mode: starts the single consolidated
 // D2H DMA copy as soon as GPU entropy + compaction completes.
+// Complete means the copy has been queued, not that the copy has finished.
+// IsGpuEntropyFrameComplete waits for the copy as well.
+GpuStageStatus PollGpuEntropyFrameD2HStatus(GpuEntropyFrameSlot* slot);
 bool PollGpuEntropyFrameD2H(GpuEntropyFrameSlot* slot);
+
+const char* GpuEntropyFrameError(const GpuEntropyFrameSlot* slot);
+bool GpuEntropyFrameHasFailed(const GpuEntropyFrameSlot* slot);
+
+// Test hook. A non-zero cap replaces the proven allocation for the next queue
+// so overflow returns Failed instead of writing past the buffer.
+void SetGpuEntropyCapacityOverrideForTest(GpuEntropyFrameSlot* slot,
+                                          uint32_t per_band_words,
+                                          uint32_t consolidated_words);
 
 // Blocking progress for FrameConsolidated mode: waits on blocking event for GPU
 // entropy + compaction to complete, then queues the consolidated D2H DMA copy.

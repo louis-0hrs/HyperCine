@@ -1,3 +1,7 @@
+// Copyright (c) 2026 HyperCine Contributors.
+// Dual-licensed under the MIT License or Apache License, Version 2.0.
+// See LICENSE-MIT and LICENSE-APACHE for details.
+
 /**
  * @file test_avi_sample.cpp
  * @brief Reference test that decodes the upstream sample AVI (CFHDsample422.AVI)

@@ -85,6 +85,8 @@ struct Phase3AFrameInput {
     int frame_index = 0;
     Phase3APattern pattern = Phase3APattern::HighDetailPhotographicSynthetic;
     const uint8_t* bgra_ptr = nullptr;
+    // Host copy used for PSNR when bgra_ptr is device memory.
+    const uint8_t* host_ref = nullptr;
     int pitch = 0;
     int width = 0;
     int height = 0;
@@ -352,6 +354,20 @@ struct Phase3AResult {
     double mean_period_ms = 0.0;
     double median_period_ms = 0.0;
     double p95_period_ms = 0.0;
+    double p99_latency_ms = 0.0;
+    double first_frame_latency_ms = 0.0;
+
+    // ProductionEndToEnd accounting. sustained_fps is completed-frame throughput
+    // of the post-warmup window, not a submission rate and not 1000/mean_latency.
+    double steady_state_fps = 0.0;
+    int steady_state_frames = 0;
+    double warmup_excluded_ms = 0.0;
+    double drain_ms = 0.0;
+    double device_sync_ms = 0.0;
+    bool device_drained = false;
+    bool watchdog_tripped = false;
+    double rate_control_ms = 0.0;
+    std::string throughput_definition;
 
     // Per-frame GPU & CPU stage breakdown (averages over measured frames).
     double host_pageable_stage_ms = 0.0;
@@ -418,6 +434,9 @@ struct Phase3AResult {
     double avg_frames_in_flight = 0.0;
 
     // Sequence & quality verification.
+    // decode_ok / stamp_verify_ok are meaningful only when verification_performed
+    // is true. A skipped verify is not a pass.
+    bool verification_performed = false;
     bool sequence_order_ok = false;
     bool decode_ok = false;
     bool stamp_verify_ok = false;

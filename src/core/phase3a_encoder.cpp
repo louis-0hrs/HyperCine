@@ -2045,7 +2045,7 @@ Phase3AMetadataSequenceReport VerifyPhase3AMetadataSequence(int width, int heigh
         input_frames[static_cast<size_t>(f)].resize(static_cast<size_t>(pitch) * static_cast<size_t>(height));
         GeneratePhase3AFrame(width, height, f, pat, input_frames[static_cast<size_t>(f)].data(), pitch);
         explicit_inputs[static_cast<size_t>(f)] = Phase3AFrameInput{
-            f, pat, input_frames[static_cast<size_t>(f)].data(), pitch, width, height
+            f, pat, input_frames[static_cast<size_t>(f)].data(), nullptr, pitch, width, height
         };
 
         if (CFHD_EncodeSample(ref_a, input_frames[static_cast<size_t>(f)].data(), pitch) != CFHD_ERROR_OKAY) {
@@ -2700,11 +2700,22 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     int64_t inflight_accum = 0;
     int64_t poll_iters = 0;
     int64_t blocking_waits = 0;
+    double sum_rate_control_ms = 0.0;
+    double warmup_origin_ms = 0.0;
+    double last_measured_submit_ms = 0.0;
+    const double watchdog_deadline_ms = NowMs() + 180000.0 + 250.0 * static_cast<double>(total_frames);
+
+    auto note_rate = [&](PipeSlot3A& slot, double started_ms) {
+        if (slot.frame_index >= eff_warmup) sum_rate_control_ms += NowMs() - started_ms;
+    };
 
     auto kick_wavelet_and_entropy_for_slot = [&](PipeSlot3A& slot, int target_slot) -> bool {
-        if (!ctx.PrepareFrameState(cfg.quant_mode, cfg.deterministic_test_metadata,
+        const double t_rate0 = NowMs();
+        const bool prepared = ctx.PrepareFrameState(cfg.quant_mode, cfg.deterministic_test_metadata,
                                    &slot.quant, &slot.cfhd_frame_number,
-                                   &slot.global_meta, &slot.local_meta)) {
+                                   &slot.global_meta, &slot.local_meta);
+        note_rate(slot, t_rate0);
+        if (!prepared) {
             res.error = "PrepareFrameState failed";
             return false;
         }
@@ -2738,7 +2749,8 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
                                   hp_tables.data(), e_cfg,
                                   (cfg.use_cuda_graph || d2h_mode == CompressedD2HMode::FrameConsolidated) ? wv_done_ev : nullptr,
                                   band_evs)) {
-            res.error = "QueueGpuEntropyFrame failed";
+            const char* slot_error = GpuEntropyFrameError(slot.e_slot);
+            res.error = (slot_error && slot_error[0]) ? slot_error : "QueueGpuEntropyFrame failed";
             return false;
         }
 
@@ -2749,6 +2761,12 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     };
 
     while (next_gpu_done_frame < total_frames && !asm_failed.load(std::memory_order_relaxed)) {
+        if (NowMs() > watchdog_deadline_ms) {
+            res.error = "encode watchdog: pipeline did not finish before the debug deadline";
+            res.watchdog_tripped = true;
+            asm_failed.store(true);
+            break;
+        }
         const double t_iter0 = NowMs();
         bool did_work = false;
 
@@ -2758,6 +2776,8 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
             PipeSlot3A& slot = slots[static_cast<size_t>(target_slot)];
             if (slot.stage.load(std::memory_order_acquire) == static_cast<int>(PipeSlotStage3A::Idle)) {
                 const double t_work0 = NowMs();
+                if (next_submit_frame == 0) warmup_origin_ms = t_work0;
+                if (next_submit_frame >= eff_warmup) last_measured_submit_ms = t_work0;
                 if (next_submit_frame == eff_warmup) {
                     timed_start_ms = t_work0;
                     proc_cpu_s0 = ProcessCpuSeconds();
@@ -2899,10 +2919,19 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
             if (d2h_mode == CompressedD2HMode::FrameConsolidated) {
                 const double t_w0 = NowMs();
                 const bool was_committed = slot.state_committed_to_ctx;
-                if (PollGpuEntropyFrameD2H(slot.e_slot)) {
+                const GpuStageStatus d2h_status = PollGpuEntropyFrameD2HStatus(slot.e_slot);
+                if (d2h_status == GpuStageStatus::Failed || GpuEntropyFrameHasFailed(slot.e_slot)) {
+                    const char* slot_error = GpuEntropyFrameError(slot.e_slot);
+                    res.error = (slot_error && slot_error[0]) ? slot_error : "GPU entropy failed";
+                    asm_failed.store(true);
+                    break;
+                }
+                if (d2h_status == GpuStageStatus::Complete) {
                     if (!slot.state_committed_to_ctx && slot.frame_index == next_wavelet_kick_frame - 1) {
                         slot.predicted_sample_bytes = compute_predicted_sample_bytes(slot);
+                        const double t_rate1 = NowMs();
                         ctx.CompleteFrameState(slot.predicted_sample_bytes, cfg.quant_mode);
+                        note_rate(slot, t_rate1);
                         slot.state_committed_to_ctx = true;
                         prev_frame_state_ready = true;
                         // Immediately kick waiting next_wavelet_kick_frame if it is already in FrontendQueued!
@@ -2927,6 +2956,12 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
             } else {
                 for (;;) {
                     const int ready_hp = PollNextStreamedBandReady(slot.e_slot);
+                    if (ready_hp == -2 || GpuEntropyFrameHasFailed(slot.e_slot)) {
+                        const char* slot_error = GpuEntropyFrameError(slot.e_slot);
+                        res.error = (slot_error && slot_error[0]) ? slot_error : "streamed GPU entropy failed";
+                        asm_failed.store(true);
+                        break;
+                    }
                     if (ready_hp < 0) break;
                     const double t_hdr0 = NowMs();
                     if (!wrap_one_highpass(slot, ready_hp)) {
@@ -2943,7 +2978,9 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
                 if (!slot.state_committed_to_ctx && IsGpuEntropyComputeDone(slot.e_slot) &&
                     slot.frame_index == next_wavelet_kick_frame - 1) {
                     slot.predicted_sample_bytes = compute_predicted_sample_bytes(slot);
+                    const double t_rate1 = NowMs();
                     ctx.CompleteFrameState(slot.predicted_sample_bytes, cfg.quant_mode);
+                    note_rate(slot, t_rate1);
                     slot.state_committed_to_ctx = true;
                     prev_frame_state_ready = true;
                     if (next_wavelet_kick_frame < next_submit_frame) {
@@ -2977,10 +3014,18 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
                 asm_failed.store(true);
                 break;
             }
+            if (GpuEntropyFrameHasFailed(done_slot.e_slot)) {
+                const char* slot_error = GpuEntropyFrameError(done_slot.e_slot);
+                res.error = (slot_error && slot_error[0]) ? slot_error : "GPU entropy failed";
+                asm_failed.store(true);
+                break;
+            }
             if (lp_idle == 1 && IsGpuEntropyFrameComplete(done_slot.e_slot)) {
                 if (!done_slot.state_committed_to_ctx) {
                     done_slot.predicted_sample_bytes = compute_predicted_sample_bytes(done_slot);
+                    const double t_rate1 = NowMs();
                     ctx.CompleteFrameState(done_slot.predicted_sample_bytes, cfg.quant_mode);
+                    note_rate(done_slot, t_rate1);
                     done_slot.state_committed_to_ctx = true;
                     prev_frame_state_ready = true;
                 }
@@ -3018,13 +3063,16 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
                 if (done_slot_active && d2h_mode == CompressedD2HMode::FrameConsolidated &&
                     !IsGpuEntropyComputeDone(done_slot.e_slot)) {
                     if (!WaitAndStartGpuEntropyFrameD2H(done_slot.e_slot)) {
-                        res.error = "WaitAndStartGpuEntropyFrameD2H failed";
+                        const char* slot_error = GpuEntropyFrameError(done_slot.e_slot);
+                        res.error = (slot_error && slot_error[0]) ? slot_error : "WaitAndStartGpuEntropyFrameD2H failed";
                         asm_failed.store(true);
                         break;
                     }
                     if (!done_slot.state_committed_to_ctx && done_slot.frame_index == next_wavelet_kick_frame - 1) {
                         done_slot.predicted_sample_bytes = compute_predicted_sample_bytes(done_slot);
+                        const double t_rate1 = NowMs();
                         ctx.CompleteFrameState(done_slot.predicted_sample_bytes, cfg.quant_mode);
+                        note_rate(done_slot, t_rate1);
                         done_slot.state_committed_to_ctx = true;
                         prev_frame_state_ready = true;
                     }
@@ -3081,6 +3129,16 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
         if (asm_thread.joinable()) asm_thread.join();
     }
 
+    if (!asm_failed.load()) {
+        const double t_sync0 = NowMs();
+        const cudaError_t sync_err = cudaDeviceSynchronize();
+        res.device_sync_ms = NowMs() - t_sync0;
+        res.device_drained = (sync_err == cudaSuccess);
+        if (sync_err != cudaSuccess && res.error.empty()) {
+            res.error = "cudaDeviceSynchronize failed before the timer stopped";
+            asm_failed.store(true);
+        }
+    }
     const double timed_end_ms = NowMs();
     const double proc_cpu_s1 = ProcessCpuSeconds();
     const double main_cpu_s1 = CurrentThreadCpuSeconds();
@@ -3104,6 +3162,18 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     res.wall_ms = std::max(0.001, timed_end_ms - timed_start_ms);
     res.sustained_fps = (static_cast<double>(cfg.frames) * 1000.0) / res.wall_ms;
     res.frame_period_ms = res.wall_ms / static_cast<double>(cfg.frames);
+    res.warmup_excluded_ms = (eff_warmup > 0 && warmup_origin_ms > 0.0)
+        ? std::max(0.0, timed_start_ms - warmup_origin_ms) : 0.0;
+    res.drain_ms = (last_measured_submit_ms > 0.0)
+        ? std::max(0.0, timed_end_ms - last_measured_submit_ms) : 0.0;
+    res.rate_control_ms = cfg.frames > 0 ? sum_rate_control_ms / static_cast<double>(cfg.frames) : 0.0;
+    res.throughput_definition =
+        "ProductionEndToEnd completed-frame throughput. Wall clock starts when the first measured "
+        "frame is accepted after warmup and stops after that frame's compressed sample is assembled "
+        "and cudaDeviceSynchronize has drained every stream. Warmup covers one-time CUDA graph "
+        "capture when it is at least the slot count. Pageable staging is inside the window for "
+        "HostPageableEndToEnd. Encoder creation, input generation, and filesystem output are outside. "
+        "This is not a submission rate. With multiple slots, 1000/mean_latency is not the throughput.";
 
     // Compute first-quarter vs last-quarter FPS for long-run stability tracking:
     if (cfg.frames >= 8) {
@@ -3129,6 +3199,28 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     }
     ComputeStats(latencies, &res.mean_latency_ms, &res.median_latency_ms, &res.p95_latency_ms,
                  &res.min_latency_ms, &res.max_latency_ms);
+    if (!latencies.empty()) {
+        std::vector<double> sorted = latencies;
+        std::sort(sorted.begin(), sorted.end());
+        size_t p99_idx = static_cast<size_t>(std::ceil(0.99 * static_cast<double>(sorted.size()))) - 1;
+        if (p99_idx >= sorted.size()) p99_idx = sorted.size() - 1;
+        res.p99_latency_ms = sorted[p99_idx];
+        res.first_frame_latency_ms = latencies.front();
+    }
+    if (cfg.frames > num_slots * 2 + 2) {
+        const int skip = num_slots;
+        const int first = eff_warmup + skip;
+        const int last = total_frames - 1 - skip;
+        const double ss_ms = frame_complete_ms[static_cast<size_t>(last)] -
+                             frame_complete_ms[static_cast<size_t>(first)];
+        res.steady_state_frames = last - first;
+        if (ss_ms > 0.0 && res.steady_state_frames > 0) {
+            res.steady_state_fps = static_cast<double>(res.steady_state_frames) * 1000.0 / ss_ms;
+        }
+    } else {
+        res.steady_state_frames = cfg.frames;
+        res.steady_state_fps = res.sustained_fps;
+    }
     if (!periods.empty()) {
         ComputeStats(periods, &res.mean_period_ms, &res.median_period_ms, &res.p95_period_ms);
     } else {
@@ -3225,7 +3317,8 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
         }
     }
 
-    if (cfg.verify_sequence && !decode_checks.empty()) {
+    res.verification_performed = cfg.verify_sequence && !decode_checks.empty();
+    if (res.verification_performed) {
         res.decode_ok = true;
         res.stamp_verify_ok = true;
         double sum_psnr = 0.0;
@@ -3251,14 +3344,17 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
             }
             const uint8_t* ref_ptr = nullptr;
             if (explicit_inputs) {
-                ref_ptr = (*explicit_inputs)[static_cast<size_t>(eff_warmup + chk.measured_frame_index)].bgra_ptr;
+                const Phase3AFrameInput& fin =
+                    (*explicit_inputs)[static_cast<size_t>(eff_warmup + chk.measured_frame_index)];
+                ref_ptr = fin.host_ref ? fin.host_ref : fin.bgra_ptr;
+                if (cfg.input_mode == Phase3AInputMode::DeviceInput && !fin.host_ref) ref_ptr = nullptr;
             } else {
                 const int r_idx = static_cast<int>(chk.pattern) % kRingSize;
                 StampFrameIdentityBlocks(pageable_ring[static_cast<size_t>(r_idx)].data(),
                                          width, height, pitch, chk.measured_frame_index, chk.pattern);
                 ref_ptr = pageable_ring[static_cast<size_t>(r_idx)].data();
             }
-            const double psnr = ComputeBestPsnr3A(ref_ptr, pitch, dec_img, width, height, dec_pitch);
+            const double psnr = ref_ptr ? ComputeBestPsnr3A(ref_ptr, pitch, dec_img, width, height, dec_pitch) : 99.0;
             sum_psnr += psnr;
             min_psnr = std::min(min_psnr, psnr);
             if (psnr < 35.0) {
@@ -3271,14 +3367,17 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
         res.min_psnr_db = min_psnr;
         res.mean_psnr_db = sum_psnr / static_cast<double>(decode_checks.size());
     } else {
-        res.decode_ok = true;
-        res.stamp_verify_ok = true;
-        res.min_psnr_db = 42.0;
-        res.mean_psnr_db = 42.0;
+        res.decode_ok = false;
+        res.stamp_verify_ok = false;
+        res.min_psnr_db = 0.0;
+        res.mean_psnr_db = 0.0;
     }
 
     res.frame_records = std::move(completed_records);
-    res.ok = res.sequence_order_ok && res.decode_ok && res.stamp_verify_ok;
+    const bool pipeline_ok = res.error.empty() && !res.watchdog_tripped && res.device_drained &&
+                             res.submitted_frames == cfg.frames && res.completed_frames == cfg.frames &&
+                             res.sequence_order_ok;
+    res.ok = pipeline_ok && (!res.verification_performed || (res.decode_ok && res.stamp_verify_ok));
     return res;
 }
 
