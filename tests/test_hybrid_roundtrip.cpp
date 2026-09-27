@@ -61,6 +61,8 @@ static bool Decode(const std::vector<uint8_t>& sample, int width, int height, st
                                 static_cast<uint32_t>(sample.size()));
         unsigned int processflags = PROCESSING_ALL_ON;
         CFHD_SetActiveMetadata(decoder, metadata, TAG_PROCESS_PATH, METADATATYPE_UINT32, &processflags, sizeof(processflags));
+        uint32_t cpu_max = 1;
+        CFHD_SetActiveMetadata(decoder, metadata, TAG_CPU_MAX, METADATATYPE_HIDDEN, &cpu_max, sizeof(cpu_max));
     }
     err = CFHD_DecodeSample(decoder, const_cast<uint8_t*>(sample.data()), sample.size(), image->data(), pitch);
     if (metadata) CFHD_CloseMetadata(metadata);
@@ -127,7 +129,7 @@ int main() {
             std::vector<uint8_t> image;
             int image_pitch = 0;
             if (!Decode(sample_bytes, width, height, &image, &image_pitch)) continue;
-            const double a = score(image, image_pitch, false);
+            const double a = score(image, image_pitch, false); printf("Decode attempt %d: a=%f\n", attempt, a);
             const double b = score(image, image_pitch, true);
             best = std::max(best, std::max(a, b));
         }
@@ -187,3 +189,4 @@ int main() {
     std::cout << "hybrid roundtrip tests passed\n";
     return 0;
 }
+
