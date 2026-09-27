@@ -366,10 +366,6 @@ bool MatchUpstreamHighpass(encoder* enc_opaque, transform* transforms_opaque[], 
         symbols->error = "peaks coding is not in the GPU entropy path";
         return false;
     }
-    *symbols = EncodeHighpassStages(static_cast<const int16_t*>(coeff.data), coeff.width, coeff.height,
-                                    coeff.width, tables, true);
-    if (!symbols->ok) return false;
-
     IMAGE* wavelet = nullptr;
     for (int k = 0; transforms[coeff.channel] && k < transforms[coeff.channel]->num_wavelets; ++k) {
         IMAGE* image = transforms[coeff.channel]->wavelet[k];
@@ -380,6 +376,11 @@ bool MatchUpstreamHighpass(encoder* enc_opaque, transform* transforms_opaque[], 
         symbols->ok = false;
         return false;
     }
+    const int pitch_px = std::max(coeff.width, wavelet->pitch / static_cast<int>(sizeof(PIXEL)));
+    *symbols = EncodeHighpassStages(static_cast<const int16_t*>(coeff.data), coeff.width, coeff.height,
+                                    pitch_px, tables, true);
+    if (!symbols->ok) return false;
+
     int quantization = wavelet->quantization[coeff.band];
     if (quantization <= 0) quantization = wavelet->quant[coeff.band];
     if (quantization <= 0) quantization = 1;

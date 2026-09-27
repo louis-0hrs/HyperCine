@@ -11,6 +11,7 @@ if(HYPERCINE_ENABLE_CUDA)
         core/phase2b_encoder.cpp
         core/phase2c_encoder.cpp
         core/phase2d_encoder.cpp
+        core/phase3a_encoder.cpp
         cuda/wavelet_cuda_reference.cu
         cuda/wavelet_cuda_optimized.cu
         cuda/wavelet_cuda_api.cu

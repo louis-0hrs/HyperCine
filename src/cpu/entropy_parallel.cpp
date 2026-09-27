@@ -701,12 +701,12 @@ namespace {
 // the upstream routine indexes them, and int8 transport never reaches it.
 template <typename Sample>
 void EncodeQuantLongRunsOf(ENCODER* encoder, BITSTREAM* stream, const Sample* image,
-                           int width, int height, int pitch_elems, int active_codebook) {
+                           int width, int height, int virtual_pitch_elems, int active_codebook) {
     RLCBOOK* runsbook = encoder->codebook_runbook[active_codebook];
     VALBOOK* valuebook = encoder->valuebook[active_codebook];
     const Sample* rowptr = image;
     int count = 0;
-    const int gap = pitch_elems - width;
+    const int gap = std::max(0, virtual_pitch_elems - width);
 
     for (int row = 0; row < height; ++row) {
         int index = 0;
@@ -783,7 +783,7 @@ void EncodeQuantLongRunsOf(ENCODER* encoder, BITSTREAM* stream, const Sample* im
         stream->nBitsFree = nBitsFree;
         stream->lpCurrentWord = reinterpret_cast<uint8_t*>(lpCurrentWord);
         stream->nWordsUsed = nWordsUsed;
-        rowptr += pitch_elems;
+        rowptr += width;
     }
     if (count > 0) PutZeroRun(stream, count, runsbook);
 }
@@ -822,19 +822,20 @@ bool EncodeHighpassView(ENCODER* encoder, IMAGE* wavelet, const ExternalCoeff& c
     const bool as_int8 = coeff.elem_bytes == 1 && !peaks_coding;
     piece->used_int8 = as_int8;
     piece->peaks_fallback = peaks_coding != 0;
+    const int virtual_pitch_elems = std::max(coeff.width, wavelet->pitch / static_cast<int>(sizeof(PIXEL)));
 
     if (as_int8) {
         PutVideoBandHeader(&stream, coeff.band, coeff.width, coeff.height, coeff.subband,
                            BAND_ENCODING_RUNLENGTHS, quantization, scale, 0, nullptr, codingflags, peaks_coding);
         EncodeQuantLongRunsOf<int8_t>(encoder, &stream, static_cast<const int8_t*>(coeff.data),
-                                      coeff.width, coeff.height, coeff.width, active_codebook);
+                                      coeff.width, coeff.height, virtual_pitch_elems, active_codebook);
         FinishEncodeBand(&stream, encoder->band_end_code[active_codebook], encoder->band_end_size[active_codebook]);
         PutVideoBandTrailer(&stream);
     } else if (!peaks_coding && coeff.elem_bytes == 2) {
         PutVideoBandHeader(&stream, coeff.band, coeff.width, coeff.height, coeff.subband,
                            BAND_ENCODING_RUNLENGTHS, quantization, scale, 0, nullptr, codingflags, peaks_coding);
         EncodeQuantLongRunsOf<int16_t>(encoder, &stream, static_cast<const int16_t*>(coeff.data),
-                                       coeff.width, coeff.height, coeff.width, active_codebook);
+                                       coeff.width, coeff.height, virtual_pitch_elems, active_codebook);
         FinishEncodeBand(&stream, encoder->band_end_code[active_codebook], encoder->band_end_size[active_codebook]);
         PutVideoBandTrailer(&stream);
     } else {

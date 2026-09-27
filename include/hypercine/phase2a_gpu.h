@@ -107,6 +107,8 @@ int HyperCine_GpuSlotBegin(HyperCineGpuSlot* slot, int input_kind, int transport
 
 int HyperCine_GpuSlotKick(HyperCineGpuSlot* slot);
 int HyperCine_GpuSlotKickStaged(HyperCineGpuSlot* slot, void* wait_frontend_event, void* wait_wavelet_event, int gpu_pack_lowpass);
+int HyperCine_GpuSlotKickFrontendOnly(HyperCineGpuSlot* slot, void* wait_frontend_event);
+int HyperCine_GpuSlotKickWaveletWithQuant(HyperCineGpuSlot* slot, const int quant[36], void* wait_wavelet_event, int gpu_pack_lowpass);
 int HyperCine_GpuSlotPollBand(HyperCineGpuSlot* slot, HyperCineReadyBand* band);
 int HyperCine_GpuSlotGpuIdle(HyperCineGpuSlot* slot);
 int HyperCine_GpuSlotWaveletIdle(HyperCineGpuSlot* slot);

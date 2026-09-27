@@ -60,6 +60,11 @@ if(HYPERCINE_ENABLE_CUDA)
     )
     target_link_libraries(benchmark_phase2d PRIVATE hypercine_core CFHDCodecStatic)
 
+    add_executable(benchmark_phase3a
+        benchmark_phase3a.cpp
+    )
+    target_link_libraries(benchmark_phase3a PRIVATE hypercine_core CFHDCodecStatic)
+
     if(WIN32)
         target_link_libraries(benchmark_wavelet PRIVATE psapi)
         target_link_libraries(benchmark_phase1b PRIVATE psapi)
@@ -69,6 +74,7 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(benchmark_phase2b PRIVATE psapi)
         target_link_libraries(benchmark_phase2c PRIVATE psapi)
         target_link_libraries(benchmark_phase2d PRIVATE psapi)
+        target_link_libraries(benchmark_phase3a PRIVATE psapi)
     endif()
 endif()
 

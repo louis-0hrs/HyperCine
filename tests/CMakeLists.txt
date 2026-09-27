@@ -53,11 +53,11 @@ if(HYPERCINE_ENABLE_CUDA)
 endif()
 
 
-add_executable(test_cuda_pyramid test_cuda_pyramid.cpp)
-target_link_libraries(test_cuda_pyramid PRIVATE hypercine_wavelet CFHDCodecStatic)
-add_test(NAME test_cuda_pyramid COMMAND test_cuda_pyramid)
-
 if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_cuda_pyramid test_cuda_pyramid.cpp)
+    target_link_libraries(test_cuda_pyramid PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_cuda_pyramid COMMAND test_cuda_pyramid)
+
     add_executable(test_entropy_parallel test_entropy_parallel.cpp)
     target_link_libraries(test_entropy_parallel PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_entropy_parallel COMMAND test_entropy_parallel)
@@ -81,4 +81,11 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2d test_phase2d.cpp)
     target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2d COMMAND test_phase2d)
+
+    add_executable(test_phase3a test_phase3a.cpp)
+    target_link_libraries(test_phase3a PRIVATE hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_phase3a PRIVATE psapi)
+    endif()
+    add_test(NAME test_phase3a COMMAND test_phase3a)
 endif()

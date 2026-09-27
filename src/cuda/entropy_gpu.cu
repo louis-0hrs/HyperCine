@@ -893,7 +893,8 @@ struct Workspace {
         token_cap = std::max(tokens_needed, 1);
         const int max_tiles = (token_cap + 1023) / 1024 + 4;
         auto alloc = [](void** ptr, size_t bytes) {
-            return cudaMalloc(ptr, bytes) == cudaSuccess;
+            if (cudaMalloc(ptr, bytes) != cudaSuccess) return false;
+            return cudaMemset(*ptr, 0, bytes) == cudaSuccess;
         };
         if (!alloc(reinterpret_cast<void**>(&prefix), sizeof(int) * block_cap)) return false;
         if (!alloc(reinterpret_cast<void**>(&suffix), sizeof(int) * block_cap)) return false;
@@ -937,6 +938,7 @@ struct Workspace {
         if (scan_bytes > 0) {
             if (!alloc(&scan_temp, scan_bytes)) return false;
         }
+        cudaStreamSynchronize(0);
         return true;
     }
 
@@ -1663,10 +1665,11 @@ GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
     slot->max_height = max_height;
 
     // Total highpass coefficients across 3 channels (4:2:2) and 3 levels is ~2 * W * H.
-    // Allocate generous per-band word capacity (~0.5 words/coeff + 16384 words per band).
+    // Allocate full 1 word/coeff capacity across all resolutions so high-entropy noise frames never overflow.
     const size_t max_pixels = static_cast<size_t>(max_width) * static_cast<size_t>(max_height);
-    slot->total_band_words_cap = max_pixels + static_cast<size_t>(kMaxHighpassBands) * 32768u;
-    slot->consolidated_words_cap = max_pixels / 2u + 131072u;
+    const size_t word_mult = 2u;
+    slot->total_band_words_cap = max_pixels * word_mult + static_cast<size_t>(kMaxHighpassBands) * 32768u;
+    slot->consolidated_words_cap = max_pixels * word_mult + 262144u;
 
     auto fail = [&]() {
         DestroyGpuEntropyFrameSlot(slot);
@@ -1677,6 +1680,10 @@ GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
     if (cudaMalloc(&slot->d_consolidated_words, sizeof(uint32_t) * slot->consolidated_words_cap) != cudaSuccess) return fail();
     if (cudaMalloc(&slot->d_total_bits, sizeof(uint32_t) * kMaxHighpassBands) != cudaSuccess) return fail();
     if (cudaMalloc(&slot->d_frame_meta, sizeof(FrameCompactMeta)) != cudaSuccess) return fail();
+    cudaMemset(slot->d_band_words, 0, sizeof(uint32_t) * slot->total_band_words_cap);
+    cudaMemset(slot->d_consolidated_words, 0, sizeof(uint32_t) * slot->consolidated_words_cap);
+    cudaMemset(slot->d_total_bits, 0, sizeof(uint32_t) * kMaxHighpassBands);
+    cudaMemset(slot->d_frame_meta, 0, sizeof(FrameCompactMeta));
 
     if (cudaHostAlloc(&slot->h_consolidated_words, sizeof(uint32_t) * slot->consolidated_words_cap, cudaHostAllocDefault) != cudaSuccess) return fail();
     if (cudaHostAlloc(&slot->h_band_words, sizeof(uint32_t) * slot->total_band_words_cap, cudaHostAllocDefault) != cudaSuccess) return fail();
@@ -1686,6 +1693,12 @@ GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
     if (cudaHostGetDevicePointer(&slot->d_scalars, slot->h_scalars, 0) != cudaSuccess) return fail();
     if (cudaHostAlloc(&slot->h_frame_meta, sizeof(FrameCompactMeta), cudaHostAllocMapped) != cudaSuccess) return fail();
     if (cudaHostGetDevicePointer(&slot->d_frame_meta_mapped, slot->h_frame_meta, 0) != cudaSuccess) return fail();
+    std::memset(slot->h_consolidated_words, 0, sizeof(uint32_t) * slot->consolidated_words_cap);
+    std::memset(slot->h_band_words, 0, sizeof(uint32_t) * slot->total_band_words_cap);
+    std::memset(slot->h_band_offsets, 0, sizeof(uint32_t) * kMaxHighpassBands);
+    std::memset(slot->h_scalars, 0, sizeof(BandScalarMeta) * kMaxHighpassBands);
+    std::memset(slot->h_frame_meta, 0, sizeof(FrameCompactMeta));
+    cudaStreamSynchronize(0);
 
     if (cudaStreamCreateWithFlags(&slot->consolidate_stream, cudaStreamNonBlocking) != cudaSuccess) return fail();
     if (cudaStreamCreateWithFlags(&slot->d2h_stream, cudaStreamNonBlocking) != cudaSuccess) return fail();
@@ -1768,7 +1781,7 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
     uint32_t running_offset = 0;
     for (int b = 0; b < count; ++b) {
         const int vlen = requests[b].height * requests[b].pitch_px;
-        const uint32_t cap = static_cast<uint32_t>(std::max(vlen / 2 + 16384, std::min(vlen + 1024, 65536)));
+        const uint32_t cap = static_cast<uint32_t>(vlen + 4096);
         if (static_cast<size_t>(running_offset) + cap > slot->total_band_words_cap) return false;
         slot->band_word_offset[b] = running_offset;
         slot->h_band_offsets[b] = running_offset;

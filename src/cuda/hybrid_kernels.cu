@@ -1131,6 +1131,64 @@ extern "C" int HyperCine_GpuSlotKickStaged(HyperCineGpuSlot* slot, void* wait_fr
     return 0;
 }
 
+extern "C" int HyperCine_GpuSlotKickFrontendOnly(HyperCineGpuSlot* slot, void* wait_frontend_event) {
+    if (!slot || slot->run_phase == 3) return -1;
+    if (slot->run_phase >= 1) return 0;
+    cudaStream_t f_stream = slot->frontend_stream ? slot->frontend_stream : slot->stream;
+    if (wait_frontend_event) {
+        cudaStreamWaitEvent(f_stream, static_cast<cudaEvent_t>(wait_frontend_event), 0);
+    }
+    if (QueueFrontOn(slot, f_stream) != 0) {
+        slot->run_phase = 3;
+        slot->run_error = -2;
+        return -1;
+    }
+    slot->run_phase = 1;
+    if (cudaGetLastError() != cudaSuccess) {
+        slot->run_phase = 3;
+        slot->run_error = -4;
+        return -1;
+    }
+    return 0;
+}
+
+extern "C" int HyperCine_GpuSlotKickWaveletWithQuant(HyperCineGpuSlot* slot, const int quant[36],
+                                                     void* wait_wavelet_event, int gpu_pack_lowpass) {
+    if (!slot || !quant || slot->run_phase == 3) return -1;
+    if (slot->run_phase == 2) return 0;
+    if (slot->run_phase == 0) {
+        if (HyperCine_GpuSlotKickFrontendOnly(slot, nullptr) != 0) return -1;
+    }
+    for (int i = 0; i < 36; ++i) slot->run_quant[i] = quant[i];
+    slot->gpu_pack_lowpass = gpu_pack_lowpass;
+    cudaStream_t f_stream = slot->frontend_stream ? slot->frontend_stream : slot->stream;
+    if (f_stream != slot->stream) {
+        cudaStreamWaitEvent(slot->stream, slot->ev_color1, 0);
+    }
+    if (wait_wavelet_event) {
+        cudaStreamWaitEvent(slot->stream, static_cast<cudaEvent_t>(wait_wavelet_event), 0);
+    }
+    cudaEventRecord(slot->ev_comp0, slot->stream);
+    for (int channel = 0; channel < kChannels; ++channel) {
+        for (int level = 0; level < kLevels; ++level) {
+            if (QueueLevel(slot, channel, level) != 0) {
+                slot->run_phase = 3;
+                slot->run_error = -3;
+                return -1;
+            }
+        }
+    }
+    cudaEventRecord(slot->ev_comp1, slot->stream);
+    if (slot->run_d2h_open) cudaEventRecord(slot->ev_all_host, slot->copy_stream);
+    slot->run_phase = 2;
+    if (cudaGetLastError() != cudaSuccess) {
+        slot->run_phase = 3;
+        slot->run_error = -4;
+        return -1;
+    }
+    return 0;
+}
+
 extern "C" int HyperCine_GpuSlotKick(HyperCineGpuSlot* slot) {
     if (!slot) return -1;
     if (slot->run_phase == 3) return -1;
