@@ -40,35 +40,37 @@ HyperCine accelerates the CineForm intra-frame wavelet encoding pipeline on NVID
 
 ## 3. Canonical Benchmark Summary (`ProductionEndToEnd_v2`)
 
-### Methodology (`ProductionEndToEnd_v2`)
-All headline numbers are generated from a clean git working tree by [`benchmarks/benchmark_phase3a1.cpp`](benchmarks/benchmark_phase3a1.cpp) and stored in [`benchmarks/phase3a2a_release_candidate.json`](benchmarks/phase3a2a_release_candidate.json) (benchmarked source commit `fba948edf98b72045af150b1a918fd0d8a643c61`, `"publication": "CLEAN"`, `"canonical": true`, `"git_status_clean": true`, `"upstream_status_clean": true`, `"benchmark_equivalence_verified": true`, `"native_architecture_match": true`).
+#### Methodology (`ProductionEndToEnd_v2`)
+All headline numbers are generated from a clean git working tree by [`benchmarks/benchmark_phase3a1.cpp`](benchmarks/benchmark_phase3a1.cpp) and stored in [`benchmarks/phase3a2c_release_candidate.json`](benchmarks/phase3a2c_release_candidate.json) (benchmarked source commit `57ca3f37be4f017af8a72592e042b2fe285416a3`, `"publication": "CLEAN"`, `"canonical": true`, `"benchmark_tree_clean": true`, `"upstream_tree_clean": true`, `"benchmark_equivalence_verified": true`, `"native_architecture_match": true`).
+
+> **Provenance Note (Source vs. Release Revision):** The benchmark executable was built natively for sm_89 and executed from source commit `57ca3f37be4f017af8a72592e042b2fe285416a3` on a 100% clean working tree with benchmark output written outside the repository (`%TEMP%\phase3a2c_release_candidate.json`). The generated benchmark artifact and updated documentation were then committed without changing production source, CUDA kernels, tests, benchmark source, or build logic. The annotated release-candidate tag `phase3a2c-release-candidate` points to the resulting documentation/artifact commit.
 
 * **Timed Boundary (`ProductionEndToEnd`):** Starts when the first measured frame (`logical_frame_index = 4`) is submitted after the common warmup prefix (`warmup_frames = 4 >= slot_count`, so one-time CUDA Graph capture is excluded and reported separately). For `HostPageableEndToEnd`, the timed window includes ordinary pageable source $\to$ pageable-to-pinned staging $\to$ H2D DMA $\to$ GPU frontend $\to$ wavelet + dynamic quantization $\to$ GPU entropy $\to$ compressed D2H DMA $\to$ host `CFHD` sample assembly $\to$ final worker drain and `cudaDeviceSynchronize()`. Encoder creation, CUDA context creation, input-frame generation, one-time CUDA Graph capture, and filesystem output are excluded.
 * **Aligned Warmup & Sequence Definition (`ProductionEndToEnd_v2`):** Both `UpstreamCpuEncodeSample` and all three HyperCine GPU modes execute the exact same `W = 4` warmup frames (`pool[0..3]`) followed without reset or restart by `N` timed frames starting at logical sequence index `4` (`pool[(4 + i) % unique_cycle]`: `N = 1000` over a `96`-frame cycle at 1080p, `N = 300` over a `36`-frame cycle at 4K UHD, and `N = 120` over a `12`-frame cycle at 8K UHD). Each configuration runs **5 trials** with per-trial GPU input-mode permutation; the **5-trial median** is the canonical headline figure.
 * **Apples-to-Apples Stateful Equivalence & Output-Size Fairness Gate:** Before headline trials are marked canonical, `benchmark_phase3a1` verifies on the shared sequence (`W = 4`, first measured logical frame `4`) that `UpstreamCpuEncodeSample`, `HostPageableEndToEnd`, `HostPinnedApi`, and `DeviceInput` produce identical per-frame logical indices, patterns, `prev_encoded_bytes`, `lastgopbitcount`, `FSratelimiter` trajectories, 36-entry `quant[]` / `scale[]` tables, per-frame sample byte counts, and masked `CFHD` sample SHA-256 digests (`24/24` at 1080p, `24/24` at 4K UHD, `12/12` at 8K UHD), and that full-sequence headline `mean_sample_bytes`, `min_sample_bytes`, `max_sample_bytes`, and `distinct_fs_rate_limiters` match 100% across all four modes.
 * **CPU Baseline Definition:** Baseline 1 (`UpstreamCpuEncodeSample`) is the pristine upstream `CFHD_EncodeSample` compiled from unmodified `upstream/` with its default `_THREADED_ENCODER=0` (single-threaded encoder) and MSVC Release `/O2` optimization. As documented in [`docs/UPSTREAM.md`](docs/UPSTREAM.md), upstream's optional `CFHDCodecThreaded` (`_THREADED_ENCODER=1`) target is marked `EXCLUDE_FROM_ALL` upstream and does not compile due to missing legacy symbols. Neither upstream nor HyperCine forces `/arch:AVX2` in CMake.
 
-### Canonical 5-Trial Results (`benchmarks/phase3a2a_release_candidate.json`)
+### Canonical 5-Trial Results (`benchmarks/phase3a2c_release_candidate.json`)
 
 **Test System:** AMD Ryzen 9 7940HS (16 logical processors, 33.5 GB RAM), NVIDIA GeForce RTX 4090 Laptop GPU (runtime `sm_89`, built natively with `-DCMAKE_CUDA_ARCHITECTURES=89` $\to$ cubin `sm_89` + PTX `compute_89`, 16,375 MiB VRAM, NVIDIA Driver `610.62`, CUDA `12.8.61`), Windows 10.0 Build 26200 x64, MSVC `19.44.35228.0` (`Release /O2`), AC power online.
 
 | Resolution | Input Mode | Median FPS | Mean FPS | Stdev (FPS / %) | Min–Max FPS | Mean Latency (ms) | Median Latency (ms) | P95 / P99 Latency (ms) | Raw Input (GB/s) | Output (MB/s) | Mean Sample Bytes (Min–Max) | Speedup vs Upstream CPU | Graph | Slots (`DefaultAuto`) | Mean GPU Clock (MHz) | Mean Power (W) | Max Temp (°C) |
-| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: | :---: | ---: | ---: | ---: |
-| **1080p** (`1920x1080`) | `UpstreamCpuEncodeSample` | **58.25** | 57.42 | 1.50 (2.61%) | 54.57–58.72 | 17.43 | 13.30 | 36.85 / 42.30 | 0.483 | 102.4 | 1,757,179 (180,440–5,494,332) | 1.00× | — | 1 thread | — | — | — |
-| **1080p** (`1920x1080`) | **`HostPageableEndToEnd`** | **448.61** | 441.23 | 25.97 (5.89%) | 401.18–472.37 | 3.52 | 3.30 | 4.51 / 7.28 | 3.721 | 788.3 | 1,757,179 (180,440–5,494,332) | **7.70×** | on | 2 | 1827 | 44.0 | 61 |
-| **1080p** (`1920x1080`) | `HostPinnedApi` | **542.73** | 531.53 | 28.23 (5.31%) | 476.63–554.77 | 2.74 | 2.54 | 3.91 / 5.98 | 4.502 | 953.7 | 1,757,179 (180,440–5,494,332) | **9.32×** | on | 2 | 1911 | 47.8 | 62 |
-| **1080p** (`1920x1080`) | `DeviceInput` *(GPU-resident)* | **806.15** | 775.13 | 56.87 (7.34%) | 669.63–827.36 | 2.24 | 2.05 | 3.60 / 5.49 | 6.687 | 1416.6 | 1,757,179 (180,440–5,494,332) | **13.84×** | on | 2 | 1796 | 48.9 | 61 |
-| **4K UHD** (`3840x2160`) | `UpstreamCpuEncodeSample` | **15.93** | 15.88 | 0.13 (0.79%) | 15.69–16.00 | 62.99 | 47.39 | 136.67 / 148.04 | 0.528 | 107.7 | 6,761,383 (631,824–22,236,848) | 1.00× | — | 1 thread | — | — | — |
-| **4K UHD** (`3840x2160`) | **`HostPageableEndToEnd`** | **237.21** | 228.10 | 16.24 (7.12%) | 196.74–239.84 | 11.94 | 10.86 | 17.20 / 36.67 | 7.870 | 1603.9 | 6,761,383 (631,824–22,236,848) | **14.89×** | on | 3 | 1787 | 56.7 | 61 |
-| **4K UHD** (`3840x2160`) | `HostPinnedApi` | **291.51** | 282.39 | 19.60 (6.94%) | 243.26–293.49 | 9.40 | 8.18 | 13.73 / 29.28 | 9.671 | 1971.0 | 6,761,383 (631,824–22,236,848) | **18.30×** | on | 3 | 1864 | 56.1 | 62 |
-| **4K UHD** (`3840x2160`) | `DeviceInput` *(GPU-resident)* | **399.84** | 377.62 | 41.32 (10.94%) | 295.84–404.62 | 6.98 | 5.38 | 12.90 / 37.59 | 13.266 | 2703.5 | 6,761,383 (631,824–22,236,848) | **25.10×** | on | 3 | 1642 | 51.0 | 63 |
-| **8K UHD** (`7680x4320`) | `UpstreamCpuEncodeSample` | **3.54** | 3.53 | 0.03 (0.99%) | 3.47–3.56 | 283.52 | 216.88 | 557.58 / 589.54 | 0.470 | 120.4 | 33,988,680 (2,435,408–89,196,680) | 1.00× | — | 1 thread | — | — | — |
-| **8K UHD** (`7680x4320`) | **`HostPageableEndToEnd`** | **37.67** | 37.47 | 0.99 (2.63%) | 35.94–38.73 | 38.90 | 38.19 | 52.77 / 71.29 | 4.999 | 1280.3 | 33,988,680 (2,435,408–89,196,680) | **10.63×** | on | 2 | 1951 | 56.2 | 58 |
-| **8K UHD** (`7680x4320`) | `HostPinnedApi` | **45.69** | 45.71 | 0.14 (0.30%) | 45.54–45.94 | 30.29 | 28.72 | 46.98 / 62.01 | 6.063 | 1552.8 | 33,988,680 (2,435,408–89,196,680) | **12.90×** | on | 2 | 1938 | 58.3 | 59 |
-| **8K UHD** (`7680x4320`) | `DeviceInput` *(GPU-resident)* | **94.46** | 94.21 | 0.37 (0.39%) | 93.74–94.60 | 17.33 | 16.26 | 33.75 / 52.90 | 12.535 | 3210.4 | 33,988,680 (2,435,408–89,196,680) | **26.66×** | on | 2 | 1847 | 77.8 | 61 |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: | :---: | ---: | ---: | ---: |
+| **1080p** (`1920x1080`) | `UpstreamCpuEncodeSample` | **63.27** | 65.53 | 4.93 (7.52%) | 60.26–74.39 | 15.34 | 11.58 | 33.53 / 36.55 | 0.525 | 111.2 | 1,757,179 (180,440–5,494,332) | 1.00× | — | 1 thread | — | — | — |
+| **1080p** (`1920x1080`) | **`HostPageableEndToEnd`** | **450.65** | 442.29 | 17.00 (3.84%) | 414.08–461.93 | 3.55 | 3.34 | 4.75 / 7.70 | 3.738 | 791.9 | 1,757,179 (180,440–5,494,332) | **7.12×** | on | 2 | 1822 | 44.6 | 61 |
+| **1080p** (`1920x1080`) | `HostPinnedApi` | **551.37** | 540.28 | 24.70 (4.57%) | 491.31–556.73 | 2.66 | 2.48 | 3.75 / 6.22 | 4.573 | 968.9 | 1,757,179 (180,440–5,494,332) | **8.71×** | on | 2 | 1899 | 48.7 | 61 |
+| **1080p** (`1920x1080`) | `DeviceInput` *(GPU-resident)* | **792.82** | 749.39 | 66.80 (8.91%) | 649.74–819.99 | 2.31 | 2.07 | 3.81 / 6.82 | 6.576 | 1393.1 | 1,757,179 (180,440–5,494,332) | **12.53×** | on | 2 | 1702 | 47.7 | 62 |
+| **4K UHD** (`3840x2160`) | `UpstreamCpuEncodeSample` | **17.52** | 17.91 | 1.28 (7.17%) | 16.46–19.94 | 56.13 | 40.81 | 124.92 / 137.64 | 0.581 | 118.4 | 6,761,383 (631,824–22,236,848) | 1.00× | — | 1 thread | — | — | — |
+| **4K UHD** (`3840x2160`) | **`HostPageableEndToEnd`** | **222.56** | 219.14 | 14.61 (6.67%) | 200.89–234.74 | 12.43 | 10.91 | 17.70 / 50.95 | 7.384 | 1504.8 | 6,761,383 (631,824–22,236,848) | **12.71×** | on | 3 | 1786 | 50.3 | 63 |
+| **4K UHD** (`3840x2160`) | `HostPinnedApi` | **290.27** | 269.37 | 42.40 (15.74%) | 184.75–293.96 | 10.16 | 9.21 | 15.60 / 30.22 | 9.631 | 1962.6 | 6,761,383 (631,824–22,236,848) | **16.57×** | on | 3 | 1901 | 56.0 | 63 |
+| **4K UHD** (`3840x2160`) | `DeviceInput` *(GPU-resident)* | **393.60** | 380.38 | 23.71 (6.23%) | 341.95–405.29 | 6.86 | 5.49 | 12.32 / 24.29 | 13.059 | 2661.3 | 6,761,383 (631,824–22,236,848) | **22.47×** | on | 3 | 1642 | 54.6 | 64 |
+| **8K UHD** (`7680x4320`) | `UpstreamCpuEncodeSample` | **3.61** | 3.60 | 0.04 (1.17%) | 3.55–3.66 | 277.89 | 207.05 | 567.99 / 592.38 | 0.479 | 122.7 | 33,988,680 (2,435,408–89,196,680) | 1.00× | — | 1 thread | — | — | — |
+| **8K UHD** (`7680x4320`) | **`HostPageableEndToEnd`** | **36.82** | 37.03 | 0.67 (1.80%) | 36.18–38.01 | 39.36 | 38.97 | 53.83 / 84.04 | 4.887 | 1251.5 | 33,988,680 (2,435,408–89,196,680) | **10.20×** | on | 2 | 1953 | 54.4 | 60 |
+| **8K UHD** (`7680x4320`) | `HostPinnedApi` | **45.74** | 45.44 | 0.76 (1.68%) | 43.92–45.94 | 29.95 | 27.77 | 45.39 / 72.32 | 6.070 | 1554.7 | 33,988,680 (2,435,408–89,196,680) | **12.67×** | on | 2 | 1976 | 56.9 | 60 |
+| **8K UHD** (`7680x4320`) | `DeviceInput` *(GPU-resident)* | **93.22** | 93.80 | 0.92 (0.98%) | 93.01–95.43 | 17.53 | 17.05 | 33.60 / 54.78 | 12.372 | 3168.5 | 33,988,680 (2,435,408–89,196,680) | **25.82×** | on | 2 | 1813 | 76.6 | 62 |
 
 #### Baseline Comparison Interpretation
-On the tested RTX 4090 Laptop GPU system, HyperCine `HostPageableEndToEnd` (`ProductionEndToEnd_v2`) achieved **7.70×** (`448.61 FPS` vs `58.25 FPS` at 1080p), **14.89×** (`237.21 FPS` vs `15.93 FPS` at 4K UHD), and **10.63×** (`37.67 FPS` vs `3.54 FPS` at 8K UHD) the median throughput of the pristine single-threaded GoPro CineForm SDK encoder under the documented benchmark configuration. Caller-pinned host memory (`HostPinnedApi`) reached **9.32×** / **18.30×** / **12.90×**, and GPU-resident `DeviceInput` (in-VRAM integration throughput, not file transcode) reached **13.84×** / **25.10×** / **26.66×** (`806.15` / `399.84` / `94.46` FPS).
+On the tested RTX 4090 Laptop GPU system, HyperCine `HostPageableEndToEnd` (`ProductionEndToEnd_v2`) achieved **7.12×** (`450.65 FPS` vs `63.27 FPS` at 1080p), **12.71×** (`222.56 FPS` vs `17.52 FPS` at 4K UHD), and **10.20×** (`36.82 FPS` vs `3.61 FPS` at 8K UHD) the median throughput of the pristine single-threaded GoPro CineForm SDK encoder under the documented benchmark configuration. Caller-pinned host memory (`HostPinnedApi`) reached **8.71×** / **16.57×** / **12.67×** (`551.37` / `290.27` / `45.74` FPS), and GPU-resident `DeviceInput` (in-VRAM integration throughput, not file transcode) reached **12.53×** / **22.47×** / **25.82×** (`792.82` / `393.60` / `93.22` FPS).
 
 ### `DefaultAuto` Runtime Slot Policy vs. Manual Slot Scaling Study
 
@@ -84,18 +86,18 @@ HyperCine distinguishes between two slot-selection policies in `SelectPhase2DFra
 
 | Resolution | Slots (`UserOverride`) | Matches `DefaultAuto`? | Median FPS (3 trials) | Mean Latency (ms) | Median Latency (ms) | P95 Latency (ms) | Estimated Total VRAM | Measured VRAM Used (Median) |
 | :--- | :---: | :---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| **1080p** (`400` frames) | 1 | no | 329.96 | 2.86 | 2.38 | 3.94 | 104.63 MB (99.78 MiB) | 73.40 MB (70.00 MiB) |
-| **1080p** (`400` frames) | **2** | **yes (`DefaultAuto`)** | **473.57** | **3.30** | **3.13** | **4.34** | **150.82 MB (143.83 MiB)** | **144.70 MB (138.00 MiB)** |
-| **1080p** (`400` frames) | 3 | no | 634.16 | 4.30 | 4.13 | 5.48 | 197.01 MB (187.88 MiB) | 216.01 MB (206.00 MiB) |
-| **1080p** (`400` frames) | 4 | no | 687.01 | 5.38 | 5.36 | 7.30 | 243.20 MB (231.93 MiB) | 287.31 MB (274.00 MiB) |
-| **4K UHD** (`120` frames) | 1 | no | 120.88 | 8.19 | 6.88 | 12.98 | 303.69 MB (289.63 MiB) | 268.44 MB (256.00 MiB) |
-| **4K UHD** (`120` frames) | 2 | no | 152.80 | 9.87 | 9.27 | 13.87 | 474.30 MB (452.33 MiB) | 536.87 MB (512.00 MiB) |
-| **4K UHD** (`120` frames) | **3** | **yes (`DefaultAuto`)** | **230.81** | **11.88** | **10.72** | **18.05** | **644.91 MB (615.03 MiB)** | **805.31 MB (768.00 MiB)** |
-| **4K UHD** (`120` frames) | 4 | no | 251.93 | 15.56 | 14.15 | 23.77 | 815.51 MB (777.73 MiB) | 1,073.74 MB (1,024.00 MiB) |
-| **8K UHD** (`48` frames) | 1 | no | 30.42 | 33.37 | 32.45 | 52.72 | 1,099.96 MB (1,049.00 MiB) | 1,050.67 MB (1,002.00 MiB) |
-| **8K UHD** (`48` frames) | **2** | **yes (`DefaultAuto`)** | **36.94** | **40.20** | **39.47** | **55.08** | **1,768.23 MB (1,686.31 MiB)** | **2,101.35 MB (2,004.00 MiB)** |
-| **8K UHD** (`48` frames) | 3 | no | 52.18 | 52.36 | 47.82 | 110.20 | 2,436.50 MB (2,323.63 MiB) | 3,152.02 MB (3,006.00 MiB) |
-| **8K UHD** (`48` frames) | 4 | no | 60.98 | 64.36 | 62.17 | 119.52 | 3,104.77 MB (2,960.94 MiB) | 4,202.69 MB (4,008.00 MiB) |
+| **1080p** (`400` frames) | 1 | no | 385.66 | 2.58 | 2.37 | 3.77 | 104.63 MB (99.78 MiB) | 73.40 MB (70.00 MiB) |
+| **1080p** (`400` frames) | **2** | **yes (`DefaultAuto`)** | **464.59** | **3.39** | **3.21** | **4.53** | **150.82 MB (143.83 MiB)** | **144.70 MB (138.00 MiB)** |
+| **1080p** (`400` frames) | 3 | no | 612.91 | 4.44 | 4.20 | 5.98 | 197.01 MB (187.88 MiB) | 216.01 MB (206.00 MiB) |
+| **1080p** (`400` frames) | 4 | no | 651.31 | 5.53 | 5.49 | 7.79 | 243.20 MB (231.93 MiB) | 287.31 MB (274.00 MiB) |
+| **4K UHD** (`120` frames) | 1 | no | 122.23 | 8.16 | 7.08 | 12.90 | 303.69 MB (289.63 MiB) | 268.44 MB (256.00 MiB) |
+| **4K UHD** (`120` frames) | 2 | no | 155.71 | 9.71 | 8.78 | 13.67 | 474.30 MB (452.33 MiB) | 536.87 MB (512.00 MiB) |
+| **4K UHD** (`120` frames) | **3** | **yes (`DefaultAuto`)** | **231.32** | **11.79** | **10.62** | **18.83** | **644.91 MB (615.03 MiB)** | **805.31 MB (768.00 MiB)** |
+| **4K UHD** (`120` frames) | 4 | no | 234.80 | 16.61 | 14.95 | 28.46 | 815.51 MB (777.73 MiB) | 1,073.74 MB (1,024.00 MiB) |
+| **8K UHD** (`48` frames) | 1 | no | 29.37 | 33.70 | 32.03 | 50.20 | 1,099.96 MB (1,049.00 MiB) | 1,050.67 MB (1,002.00 MiB) |
+| **8K UHD** (`48` frames) | **2** | **yes (`DefaultAuto`)** | **37.25** | **39.38** | **37.69** | **56.25** | **1,768.23 MB (1,686.31 MiB)** | **2,101.35 MB (2,004.00 MiB)** |
+| **8K UHD** (`48` frames) | 3 | no | 53.70 | 50.33 | 48.63 | 97.75 | 2,436.50 MB (2,323.63 MiB) | 3,152.02 MB (3,006.00 MiB) |
+| **8K UHD** (`48` frames) | 4 | no | 60.85 | 62.94 | 61.03 | 113.59 | 3,104.77 MB (2,960.94 MiB) | 4,202.69 MB (4,008.00 MiB) |
 
 Full per-stage timing, CUDA Graph off-vs-on deltas, and historical Phase 3A.2 vs. Phase 3A.2a comparisons are documented in [`docs/PHASE3A1_BENCHMARK_HARDENING.md`](docs/PHASE3A1_BENCHMARK_HARDENING.md).
 
@@ -137,21 +139,22 @@ compute-sanitizer --tool memcheck .\build-release-sm89\tests\Release\test_phase3
 *(Note: On Windows, `compute-sanitizer` uses a local `127.0.0.1` loopback TCP socket for IPC with the target binary, which may trigger a one-time Windows Firewall prompt; no external network access is used.)*
 
 ### Running the Canonical Benchmark Harness
-`benchmark_phase3a1.exe` refuses to emit a canonical benchmark file if `git status --porcelain` or `git status --porcelain upstream/` is non-empty unless `--allow-dirty` is explicitly passed:
+`benchmark_phase3a1.exe` enforces strict working-tree cleanliness (`git status --porcelain` and `git status --porcelain upstream/` must be 100% empty) and requires canonical output to be written to a path outside the repository (e.g., `%TEMP%\phase3a2c_release_candidate.json`) before being copied in:
 
 ```powershell
 # Canonical 5-trial benchmark suite (equivalence + headline + slots + graph) on a clean working tree:
-.\build-release-sm89\benchmarks\Release\benchmark_phase3a1.exe --suite=all --trials=5 --out=benchmarks/phase3a2a_release_candidate.json
+.\build-release-sm89\benchmarks\Release\benchmark_phase3a1.exe --suite=all --trials=5 --out="$env:TEMP\phase3a2c_release_candidate.json"
+Copy-Item "$env:TEMP\phase3a2c_release_candidate.json" "benchmarks\phase3a2c_release_candidate.json"
 
 # Exploratory run on a modified working tree (marked "publication": "DIRTY"):
-.\build-release-sm89\benchmarks\Release\benchmark_phase3a1.exe --allow-dirty --suite=headline --trials=1 --out=benchmarks/phase3a1_tmp.json
+.\build-release-sm89\benchmarks\Release\benchmark_phase3a1.exe --allow-dirty --suite=headline --trials=1 --out="$env:TEMP\phase3a1_tmp.json"
 ```
 
 ---
 
 ## 5. Current Limitations
 
-To ensure transparent technical evaluation, please note the following scope boundaries of the Phase 3A.2a release candidate:
+To ensure transparent technical evaluation, please note the following scope boundaries of the Phase 3A.2c release candidate:
 
 1. **Platform & Vendor Scope:** GPU acceleration currently targets **Windows x64 + NVIDIA CUDA** only. Vulkan (`src/vulkan/`) and Apple Metal (`src/metal/`) backends are planned for future phases and are not implemented in this release. The CPU-only reference path (`-DHYPERCINE_ENABLE_CUDA=OFF`) has been locally executed and verified on Windows x64 (MSVC 19.44) and is configured in [`.github/workflows/ci-cpu.yml`](.github/workflows/ci-cpu.yml) for `windows-latest`; Linux and macOS builds have not yet been executed or verified.
 2. **Pixel Format & Compression Profile Scope:** The full GPU pipeline (`Phase3AEncoderContext`) currently accelerates 8-bit `BGRA` (`CFHD_PIXEL_FORMAT_BGRA`) $\to$ 12-bit internal `YUV 4:2:2` (`CFHD_ENCODED_FORMAT_YUV_422`) at `FilmScan 3` (`CFHD_ENCODING_QUALITY_FILMSCAN3`), progressive, `GOP = 1`. Other CineForm pixel formats (`v210`, `RG48`, `b64a`, `BYR4` Bayer RAW, `YUV 4:4:4`, alpha channels) fall back to the upstream CPU SDK.
