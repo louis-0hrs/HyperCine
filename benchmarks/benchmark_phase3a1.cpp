@@ -63,8 +63,8 @@ constexpr int kCommonWarmupFrames = 4;
 
 struct Options {
     std::string suite = "all";
-    std::string out_path = "benchmarks/phase3a2b_release_candidate.json";
-    std::string release_commit;
+    std::string out_path;
+    std::string intended_release_tag = "phase3a2c-release-candidate";
     bool allow_dirty = false;
     int trials = 5;
     std::string resolutions = "1080,4k,8k";
@@ -164,10 +164,10 @@ std::filesystem::path FindRepoRoot() {
 GitInfo ReadGit() {
     GitInfo git;
     const std::filesystem::path root = FindRepoRoot();
-    git.repo_root = root.string();
+    git.repo_root = std::filesystem::absolute(root).string();
     git.commit = Capture("git -C \"" + git.repo_root + "\" rev-parse HEAD");
     git.branch = Capture("git -C \"" + git.repo_root + "\" rev-parse --abbrev-ref HEAD");
-    git.status = Capture("git -C \"" + git.repo_root + "\" status --porcelain | findstr /V /C:\"phase3a2b_release_candidate.json\"");
+    git.status = Capture("git -C \"" + git.repo_root + "\" status --porcelain");
     git.upstream_status = Capture("git -C \"" + git.repo_root + "\" status --porcelain upstream/");
     git.dirty = !git.status.empty();
     git.upstream_clean = git.upstream_status.empty();
@@ -1049,20 +1049,50 @@ int main(int argc, char** argv) {
         if (arg == "--allow-dirty") opt.allow_dirty = true;
         else if (arg.rfind("--suite=", 0) == 0) opt.suite = arg.substr(8);
         else if (arg.rfind("--out=", 0) == 0) opt.out_path = arg.substr(6);
-        else if (arg.rfind("--release-commit=", 0) == 0) opt.release_commit = arg.substr(17);
+        else if (arg.rfind("--intended-tag=", 0) == 0) opt.intended_release_tag = arg.substr(15);
+        else if (arg.rfind("--intended-release-tag=", 0) == 0) opt.intended_release_tag = arg.substr(23);
+        else if (arg.rfind("--release-commit=", 0) == 0) opt.intended_release_tag = arg.substr(17);
         else if (arg.rfind("--trials=", 0) == 0) opt.trials = std::max(1, std::atoi(arg.substr(9).c_str()));
         else if (arg.rfind("--resolutions=", 0) == 0) opt.resolutions = arg.substr(14);
         else if (const std::string v = need("--suite"); !v.empty()) opt.suite = v;
         else if (const std::string v = need("--out"); !v.empty()) opt.out_path = v;
-        else if (const std::string v = need("--release-commit"); !v.empty()) opt.release_commit = v;
+        else if (const std::string v = need("--intended-tag"); !v.empty()) opt.intended_release_tag = v;
+        else if (const std::string v = need("--intended-release-tag"); !v.empty()) opt.intended_release_tag = v;
+        else if (const std::string v = need("--release-commit"); !v.empty()) opt.intended_release_tag = v;
         else if (const std::string v = need("--trials"); !v.empty()) opt.trials = std::max(1, std::atoi(v.c_str()));
         else if (const std::string v = need("--resolutions"); !v.empty()) opt.resolutions = v;
     }
 
-    const GitInfo git = ReadGit();
+    GitInfo git = ReadGit();
     if ((git.dirty || !git.upstream_clean) && !opt.allow_dirty) {
         std::cerr << "REFUSING publication: working tree is dirty. Pass --allow-dirty to record a DIRTY result.\n";
         std::cerr << git.status << "\n";
+        return 2;
+    }
+
+    std::filesystem::path out_file(opt.out_path);
+    if (out_file.empty()) {
+        std::error_code ec;
+        out_file = std::filesystem::temp_directory_path(ec) / "phase3a2c_release_candidate.json";
+    } else if (out_file.is_relative()) {
+        out_file = std::filesystem::absolute(std::filesystem::path(git.repo_root) / out_file);
+    } else {
+        out_file = std::filesystem::absolute(out_file);
+    }
+
+    bool out_is_inside_repo = false;
+    {
+        std::error_code ec;
+        std::filesystem::path can_out = std::filesystem::weakly_canonical(out_file, ec);
+        std::filesystem::path can_repo = std::filesystem::weakly_canonical(git.repo_root, ec);
+        auto [root_end, _] = std::mismatch(can_repo.begin(), can_repo.end(), can_out.begin(), can_out.end());
+        if (root_end == can_repo.end()) {
+            out_is_inside_repo = true;
+        }
+    }
+    if (out_is_inside_repo && !opt.allow_dirty) {
+        std::cerr << "REFUSING publication: canonical benchmark output path must be outside the repository.\n";
+        std::cerr << "Specified out: " << out_file.string() << "\n";
         return 2;
     }
     const HardwareInfo hw = ReadHardware();
@@ -1210,7 +1240,7 @@ int main(int argc, char** argv) {
         }
     };
 
-    std::cout << "Phase 3A.2a canonical benchmark suite=" << opt.suite
+    std::cout << "Phase 3A.2c canonical benchmark suite=" << opt.suite
               << " dirty=" << git.dirty << " commit=" << git.commit << "\n" << std::flush;
     std::vector<const ResolutionSpec*> ordered;
     std::stringstream spec_list(opt.resolutions);
@@ -1234,31 +1264,37 @@ int main(int argc, char** argv) {
     const bool native_arch_match =
         ArchListMatchesRuntime(HYPERCINE_CMAKE_CUDA_ARCH, hw.cuda_arch_digits) &&
         ArchListMatchesRuntime(HYPERCINE_TARGET_CUDA_ARCH, hw.cuda_arch_digits);
-    const bool is_canonical = !git.dirty && git.upstream_clean && all_eq_verified && native_arch_match;
-    const std::string release_commit = opt.release_commit.empty() ? git.commit : opt.release_commit;
+
+    // Re-verify repository cleanliness before assembling publication JSON
+    const GitInfo git_check = ReadGit();
+    if ((git_check.dirty || !git_check.upstream_clean) && !opt.allow_dirty) {
+        std::cerr << "REFUSING publication: working tree became dirty during benchmark run. Pass --allow-dirty to record a DIRTY result.\n";
+        std::cerr << git_check.status << "\n";
+        return 2;
+    }
+    git = git_check;
+
+    const bool is_canonical = !git.dirty && git.upstream_clean && all_eq_verified && native_arch_match && !out_is_inside_repo;
 
     std::ostringstream json;
     json << std::fixed << std::setprecision(4);
     json << "{\n";
     json << "  \"publication\": \"" << (git.dirty ? "DIRTY" : "CLEAN") << "\",\n";
     json << "  \"canonical\": " << (is_canonical ? "true" : "false") << ",\n";
-    json << "  \"source_commit\": \"" << JsonEscape(git.commit) << "\",\n";
-    json << "  \"release_commit\": \"" << JsonEscape(release_commit) << "\",\n";
-    json << "  \"git_commit\": \"" << JsonEscape(git.commit) << "\",\n";
+    json << "  \"benchmark_artifact_schema\": \"3.0\",\n";
+    json << "  \"benchmarked_source_commit\": \"" << JsonEscape(git.commit) << "\",\n";
+    json << "  \"intended_release_tag\": \"" << JsonEscape(opt.intended_release_tag) << "\",\n";
+    json << "  \"benchmark_tree_clean\": " << (git.dirty ? "false" : "true") << ",\n";
+    json << "  \"upstream_tree_clean\": " << (git.upstream_clean ? "true" : "false") << ",\n";
     json << "  \"git_branch\": \"" << JsonEscape(git.branch) << "\",\n";
-    json << "  \"git_status_clean\": " << (git.dirty ? "false" : "true") << ",\n";
-    json << "  \"upstream_status_clean\": " << (git.upstream_clean ? "true" : "false") << ",\n";
     json << "  \"benchmark_contract\": \"ProductionEndToEnd_v2\",\n";
     json << "  \"primary_public_benchmark\": \"HostPageable ProductionEndToEnd_v2\",\n";
     json << "  \"benchmark_equivalence_verified\": " << (all_eq_verified ? "true" : "false") << ",\n";
     json << "  \"git\": {\n";
-    json << "    \"source_commit\": \"" << JsonEscape(git.commit) << "\",\n";
-    json << "    \"release_commit\": \"" << JsonEscape(release_commit) << "\",\n";
-    json << "    \"commit\": \"" << JsonEscape(git.commit) << "\",\n";
+    json << "    \"benchmarked_source_commit\": \"" << JsonEscape(git.commit) << "\",\n";
     json << "    \"branch\": \"" << JsonEscape(git.branch) << "\",\n";
-    json << "    \"dirty\": " << (git.dirty ? "true" : "false") << ",\n";
-    json << "    \"clean\": " << (git.dirty ? "false" : "true") << ",\n";
-    json << "    \"upstream_clean\": " << (git.upstream_clean ? "true" : "false") << ",\n";
+    json << "    \"benchmark_tree_clean\": " << (git.dirty ? "false" : "true") << ",\n";
+    json << "    \"upstream_tree_clean\": " << (git.upstream_clean ? "true" : "false") << ",\n";
     json << "    \"status\": \"" << JsonEscape(git.status) << "\",\n";
     json << "    \"upstream_status\": \"" << JsonEscape(git.upstream_status) << "\"\n";
     json << "  },\n";
@@ -1596,17 +1632,15 @@ int main(int argc, char** argv) {
     }
     json << "  ]\n}\n";
 
-    std::filesystem::path out(opt.out_path);
-    if (out.is_relative()) out = std::filesystem::path(git.repo_root) / out;
     std::error_code ec;
-    if (out.has_parent_path()) std::filesystem::create_directories(out.parent_path(), ec);
-    std::ofstream file(out, std::ios::binary);
+    if (out_file.has_parent_path()) std::filesystem::create_directories(out_file.parent_path(), ec);
+    std::ofstream file(out_file, std::ios::binary);
     if (!file) {
-        std::cerr << "failed to write " << out.string() << "\n";
+        std::cerr << "failed to write " << out_file.string() << "\n";
         return 1;
     }
     file << json.str();
-    std::cout << "Wrote " << out.string() << " (" << json.str().size()
+    std::cout << "Wrote " << out_file.string() << " (" << json.str().size()
               << " bytes, runs=" << records.size()
               << ", equivalence_verified=" << (all_eq_verified ? "true" : "false") << ")\n";
     return all_eq_verified ? 0 : 3;
