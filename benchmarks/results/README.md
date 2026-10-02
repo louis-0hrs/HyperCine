@@ -16,8 +16,8 @@ The JSON files in this directory (`benchmarks/results/*.json`), the preserved Ph
 
 ### Historical Files Inventory
 - `../phase3a2b_release_candidate.json` — Phase 3A.2b exploratory release candidate (superseded; generated with `-DCMAKE_CUDA_ARCHITECTURES=52` fallback build and dirty-tree filter workaround, noncanonical). Preserved as historical evidence.
-- `../phase3a2a_release_candidate.json` — Phase 3A.2a release candidate (commit `fba948edf98b72045af150b1a918fd0d8a643c61`, tagged `phase3a2a-release-candidate`, superseded by Phase 3A.2c release-pipeline corrections). Preserved as historical evidence.
-- `../phase3a2_release_candidate.json` — Phase 3A.2 release candidate (commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b`, tagged `phase3a2-release-candidate`, superseded). Preserved as historical evidence.
+- `../phase3a2a_release_candidate.json` — Phase 3A.2a release candidate (benchmarked source commit `fba948edf98b72045af150b1a918fd0d8a643c61`, artifact/release commit `76ed8d1e6ff2ecba44c33d6bb96f25fa166c2282`, release tag `phase3a2a-release-candidate`, superseded by Phase 3A.2c release-pipeline corrections). Preserved as historical evidence.
+- `../phase3a2_release_candidate.json` — Phase 3A.2 release candidate (benchmarked source commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b`, artifact/release commit `f7c54a30adc1169992be2f72ee9bf145e65dcccd`, release tag `phase3a2-release-candidate`, superseded). Preserved as historical evidence.
 - `reference_windows_msvc.json` — Phase 0 pristine upstream CPU baseline snapshot.
 - `cuda_wavelet_phase1.json` — Phase 1A standalone 2-6 CUDA wavelet kernel microbenchmarks.
 - `cuda_wavelet_phase1b.json` — Phase 1B multi-level GPU wavelet pyramid & quantization timings.

@@ -11,7 +11,7 @@
 
 HyperCine accelerates the CineForm intra-frame wavelet encoding pipeline on NVIDIA CUDA GPUs while maintaining strict bitstream equivalence with the pristine upstream GoPro CineForm SDK reference encoder (`CFHD_EncodeSample`).
 
-### Supported Scope (Phase 3A.2a Release Candidate)
+### Supported Scope (HyperCine v0.1.0-alpha)
 * **Primary Accelerated Platform:** Windows 10/11 x64 with NVIDIA CUDA GPUs (verified on native `sm_89` / GeForce RTX 4090 Laptop GPU built with `-DCMAKE_CUDA_ARCHITECTURES=89`; configurable via `CMAKE_CUDA_ARCHITECTURES`).
 * **CPU-Only Reference Build:** Portable ISO C++17 CPU-only path (`-DHYPERCINE_ENABLE_CUDA=OFF`) compiling the unmodified upstream SDK and CPU reference wrappers. Locally executed and verified on Windows x64 (MSVC 19.44) and configured for GitHub Actions CPU-only CI ([`.github/workflows/ci-cpu.yml`](.github/workflows/ci-cpu.yml) on `windows-latest`). Intended to build on platforms supported by the upstream SDK, though Linux and macOS builds have not yet been executed or verified.
 * **Accelerated Pixel & Compression Profile:**
@@ -188,5 +188,6 @@ HyperCine is dual-licensed under the **MIT License** or the **Apache License, Ve
 * [`LICENSE-APACHE`](LICENSE-APACHE)
 * [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
 
-Original CineForm SDK (`upstream/`): Copyright (c) 2017 GoPro, Inc. (dual-licensed under MIT or Apache-2.0; see [`upstream/LICENSE.txt`](upstream/LICENSE.txt) and [`upstream/LICENSE-APACHE.txt`](upstream/LICENSE-APACHE.txt)).  
+Original CineForm SDK (`upstream/`): Copyright (c) 2017 GoPro, Inc. (dual-licensed under MIT or Apache-2.0; see [`upstream/LICENSE.txt`](upstream/LICENSE.txt) and [`upstream/LICENSE-APACHE.txt`](upstream/LICENSE-APACHE)).
+
 HyperCine additions: Copyright (c) 2026 HyperCine Contributors.
