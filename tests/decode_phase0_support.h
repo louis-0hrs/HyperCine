@@ -191,6 +191,8 @@ public:
     int CodecPrecision() const {
         return NativeDecoder(decoder_.get())->codec.precision;
     }
+    DECODER* GetNative() const { return NativeDecoder(decoder_.get()); }
+    void* GetHandle() const { return decoder_.get(); }
     // Seed outside the timed region. Only one decoder runs at a time: rand()
     // belongs to the process CRT, not the decoder instance.
     void SeedDither() const { std::srand(Seed); }

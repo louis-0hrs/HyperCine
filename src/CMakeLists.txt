@@ -18,6 +18,7 @@ if(HYPERCINE_ENABLE_CUDA)
         cuda/hybrid_kernels.cu
         cuda/phase2a_transfer.cu
         cuda/entropy_gpu.cu
+        cuda/decode_inverse_cuda.cu
     )
     set_target_properties(hypercine_wavelet PROPERTIES
         CUDA_STANDARD 17
@@ -34,6 +35,7 @@ else()
         cpu/wavelet_cpu.cpp
         cpu/upstream_wrapper.cpp
         cuda/wavelet_cuda_stub.cpp
+        cuda/decode_inverse_stub.cpp
     )
     target_include_directories(hypercine_wavelet PUBLIC
         ${CMAKE_SOURCE_DIR}/include

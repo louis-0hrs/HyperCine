@@ -1,0 +1,113 @@
+{
+  "schema": "hypercine_decode_phase1_v1",
+  "contract": "compressed sample -> CPU entropy -> CUDA inverse wavelet -> D2H -> CPU YU64 conversion",
+  "input": "YUY2 YUV422 FilmScan3", "seed": 322420463,
+  "trials": 5, "cycles_per_trial": 3,
+  "resolutions": [
+    {
+      "name": "1080",
+      "width": 1920,
+      "height": 1080,
+      "frames_per_trial": 15,
+      "cpu_baseline": {
+        "median_fps": 106.543247,
+        "mean_latency_ms": 9.412656,
+        "median_latency_ms": 6.489800,
+        "min_latency_ms": 4.865100,
+        "max_latency_ms": 24.487800,
+        "p95_latency_ms": 22.958850
+      },
+      "hybrid_cuda_inverse": {
+        "median_fps": 71.485726,
+        "megapixels_per_sec": 148.232801,
+        "mean_latency_ms": 13.848249,
+        "median_latency_ms": 10.751200,
+        "min_latency_ms": 8.883000,
+        "max_latency_ms": 29.857400,
+        "p95_latency_ms": 27.611770,
+        "p99_latency_ms": 29.217670
+      },
+      "stages_ms": {
+        "cpu_entropy": 9.658225,
+        "coefficient_h2d": 0.977095,
+        "cuda_inverse_wavelet": 0.202687,
+        "planar_d2h": 0.875239,
+        "cpu_final_conversion": 2.026799
+      },
+      "memory": {
+        "peak_host_working_set_bytes": 165953536,
+        "peak_gpu_allocated_bytes": 1408761856
+      }
+    },
+    {
+      "name": "4k",
+      "width": 3840,
+      "height": 2160,
+      "frames_per_trial": 15,
+      "cpu_baseline": {
+        "median_fps": 21.946480,
+        "mean_latency_ms": 45.641880,
+        "median_latency_ms": 30.680800,
+        "min_latency_ms": 20.714200,
+        "max_latency_ms": 122.462400,
+        "p95_latency_ms": 117.507680
+      },
+      "hybrid_cuda_inverse": {
+        "median_fps": 12.252802,
+        "megapixels_per_sec": 101.629639,
+        "mean_latency_ms": 84.563193,
+        "median_latency_ms": 66.196000,
+        "min_latency_ms": 55.779000,
+        "max_latency_ms": 171.241500,
+        "p95_latency_ms": 157.140180,
+        "p99_latency_ms": 167.508866
+      },
+      "stages_ms": {
+        "cpu_entropy": 44.013947,
+        "coefficient_h2d": 12.645146,
+        "cuda_inverse_wavelet": 4.153481,
+        "planar_d2h": 13.007433,
+        "cpu_final_conversion": 10.497229
+      },
+      "memory": {
+        "peak_host_working_set_bytes": 293122048,
+        "peak_gpu_allocated_bytes": 1522008064
+      }
+    },
+    {
+      "name": "8k",
+      "width": 7680,
+      "height": 4320,
+      "frames_per_trial": 3,
+      "cpu_baseline": {
+        "median_fps": 11.046139,
+        "mean_latency_ms": 90.747613,
+        "median_latency_ms": 88.099500,
+        "min_latency_ms": 83.310600,
+        "max_latency_ms": 119.889100,
+        "p95_latency_ms": 109.106300
+      },
+      "hybrid_cuda_inverse": {
+        "median_fps": 4.607467,
+        "megapixels_per_sec": 152.864693,
+        "mean_latency_ms": 202.851480,
+        "median_latency_ms": 177.387800,
+        "min_latency_ms": 161.688700,
+        "max_latency_ms": 326.001700,
+        "p95_latency_ms": 266.952430,
+        "p99_latency_ms": 314.191846
+      },
+      "stages_ms": {
+        "cpu_entropy": 91.732140,
+        "coefficient_h2d": 27.172510,
+        "cuda_inverse_wavelet": 10.037099,
+        "planar_d2h": 27.543849,
+        "cpu_final_conversion": 46.207207
+      },
+      "memory": {
+        "peak_host_working_set_bytes": 699035648,
+        "peak_gpu_allocated_bytes": 1863843840
+      }
+    }
+  ]
+}

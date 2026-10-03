@@ -102,4 +102,16 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(test_phase3a PRIVATE psapi)
     endif()
     add_test(NAME test_phase3a COMMAND test_phase3a)
+
+    add_executable(test_decode_inverse_wavelet_cuda test_decode_inverse_wavelet_cuda.cpp)
+    target_compile_definitions(test_decode_inverse_wavelet_cuda PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_inverse_wavelet_cuda PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_decode_inverse_wavelet_cuda COMMAND test_decode_inverse_wavelet_cuda)
+
+    add_executable(test_decode_phase1 test_decode_phase1.cpp)
+    target_compile_definitions(test_decode_phase1 PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase1 PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_decode_phase1 COMMAND test_decode_phase1
+        "${CMAKE_CURRENT_SOURCE_DIR}/decode_phase0_golden.txt")
+    set_tests_properties(test_decode_phase1 PROPERTIES TIMEOUT 300)
 endif()

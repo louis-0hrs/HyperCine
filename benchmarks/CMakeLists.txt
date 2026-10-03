@@ -143,6 +143,13 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(benchmark_phase3a PRIVATE psapi)
         target_link_libraries(benchmark_phase3a1 PRIVATE psapi)
     endif()
+
+    add_executable(benchmark_decode_phase1 benchmark_decode_phase1.cpp)
+    target_link_libraries(benchmark_decode_phase1 PRIVATE hypercine_wavelet CFHDCodecStatic)
+    target_compile_definitions(benchmark_decode_phase1 PRIVATE _ALLOCATOR=1)
+    if(WIN32)
+        target_link_libraries(benchmark_decode_phase1 PRIVATE psapi)
+    endif()
 endif()
 
 if(TARGET CFHDCodecThreaded)
