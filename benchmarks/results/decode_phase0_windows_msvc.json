@@ -1,0 +1,636 @@
+{
+  "schema": "hypercine_decode_phase0_v1",
+  "source_commit": "51435890ba5853e87e8cf1ddc7cc747954bd9e80",
+  "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+  "contract": "host CFHD in memory -> complete host output; CFHD_DecodeSample only",
+  "input": "YUY2 YUV422 FilmScan3",
+  "seed": 322420463,
+  "cpu_max": 1,
+  "trials": 5,
+  "cycles_per_trial": 3,
+  "hash_algorithm": "FNV1a64",
+  "instrumented": false,
+  "rows": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "output": "BGRA8",
+      "pitch": 7680,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 125.785003,
+          "decode_wall_ms": 119.2511,
+          "mean_ms": 7.950073,
+          "median_ms": 5.3028,
+          "p95_ms": 20.52865,
+          "p99_ms": 21.01949
+        },
+        {
+          "fps": 119.263714,
+          "decode_wall_ms": 125.7717,
+          "mean_ms": 8.38478,
+          "median_ms": 5.5411,
+          "p95_ms": 21.14167,
+          "p99_ms": 21.925054
+        },
+        {
+          "fps": 116.719528,
+          "decode_wall_ms": 128.5132,
+          "mean_ms": 8.567547,
+          "median_ms": 5.5719,
+          "p95_ms": 21.20388,
+          "p99_ms": 21.274776
+        },
+        {
+          "fps": 122.899041,
+          "decode_wall_ms": 122.0514,
+          "mean_ms": 8.13676,
+          "median_ms": 5.4184,
+          "p95_ms": 21.05423,
+          "p99_ms": 22.237006
+        },
+        {
+          "fps": 124.142589,
+          "decode_wall_ms": 120.8288,
+          "mean_ms": 8.055253,
+          "median_ms": 5.0174,
+          "p95_ms": 21.12268,
+          "p99_ms": 21.210376
+        }
+      ],
+      "headline_median_fps": 122.899041,
+      "mean_ms": 8.218883,
+      "median_ms": 5.4208,
+      "p95_ms": 21.18582,
+      "p99_ms": 22.227968,
+      "raw_output_GBps": 1.019374,
+      "compressed_input_MBps": 157.274099,
+      "peak_process_working_set_bytes": 43057152,
+      "stages": [],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "71c3d0baa39dc325",
+          "compressed_hash": "95b06b63ffcdce70",
+          "compressed_bytes": 153176,
+          "decoded_hash": "2733f8198c87c325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "364eeebc04c88d85",
+          "compressed_hash": "fe622f7164071989",
+          "compressed_bytes": 292696,
+          "decoded_hash": "2af324f0b68219f7"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "362051b4ccd6c168",
+          "compressed_hash": "d5cdfed98902761d",
+          "compressed_bytes": 4784300,
+          "decoded_hash": "058be9bce809b0b1"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "40aca976a13ffd25",
+          "compressed_hash": "4f7bac2184ffc14b",
+          "compressed_bytes": 629056,
+          "decoded_hash": "8ee3a24e862c8651"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "f53c69011ab5ffa5",
+          "compressed_hash": "4fe33f8b19bd20d9",
+          "compressed_bytes": 539280,
+          "decoded_hash": "d0db7e8f533deada"
+        }
+      ],
+      "megapixels_per_second": 254.843451
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "output": "YU64",
+      "pitch": 7680,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 128.187927,
+          "decode_wall_ms": 117.0157,
+          "mean_ms": 7.801047,
+          "median_ms": 4.961,
+          "p95_ms": 20.8095,
+          "p99_ms": 20.91814
+        },
+        {
+          "fps": 128.160546,
+          "decode_wall_ms": 117.0407,
+          "mean_ms": 7.802713,
+          "median_ms": 5.0182,
+          "p95_ms": 21.12859,
+          "p99_ms": 22.682198
+        },
+        {
+          "fps": 126.918693,
+          "decode_wall_ms": 118.1859,
+          "mean_ms": 7.87906,
+          "median_ms": 5.2601,
+          "p95_ms": 21.16305,
+          "p99_ms": 21.48197
+        },
+        {
+          "fps": 125.610993,
+          "decode_wall_ms": 119.4163,
+          "mean_ms": 7.961087,
+          "median_ms": 5.0122,
+          "p95_ms": 21.2274,
+          "p99_ms": 22.4818
+        },
+        {
+          "fps": 112.382532,
+          "decode_wall_ms": 133.4727,
+          "mean_ms": 8.89818,
+          "median_ms": 5.4257,
+          "p95_ms": 25.3307,
+          "p99_ms": 25.7647
+        }
+      ],
+      "headline_median_fps": 126.918693,
+      "mean_ms": 8.068417,
+      "median_ms": 5.0559,
+      "p95_ms": 21.93181,
+      "p99_ms": 25.2997,
+      "raw_output_GBps": 1.052714,
+      "compressed_input_MBps": 162.418055,
+      "peak_process_working_set_bytes": 43278336,
+      "stages": [],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "71c3d0baa39dc325",
+          "compressed_hash": "95b06b63ffcdce70",
+          "compressed_bytes": 153176,
+          "decoded_hash": "bfe8ded7a8276325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "364eeebc04c88d85",
+          "compressed_hash": "fe622f7164071989",
+          "compressed_bytes": 292696,
+          "decoded_hash": "512d0889198b3b95"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "362051b4ccd6c168",
+          "compressed_hash": "d5cdfed98902761d",
+          "compressed_bytes": 4784300,
+          "decoded_hash": "45e6f8378942c5b4"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "40aca976a13ffd25",
+          "compressed_hash": "4f7bac2184ffc14b",
+          "compressed_bytes": 629056,
+          "decoded_hash": "0df82cc64e6dbca5"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "f53c69011ab5ffa5",
+          "compressed_hash": "4fe33f8b19bd20d9",
+          "compressed_bytes": 539280,
+          "decoded_hash": "7e521076ba5e10f5"
+        }
+      ],
+      "megapixels_per_second": 263.178602
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "output": "BGRA8",
+      "pitch": 15360,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 33.369825,
+          "decode_wall_ms": 449.5079,
+          "mean_ms": 29.967193,
+          "median_ms": 18.7041,
+          "p95_ms": 81.83877,
+          "p99_ms": 82.715674
+        },
+        {
+          "fps": 29.458581,
+          "decode_wall_ms": 509.1895,
+          "mean_ms": 33.945967,
+          "median_ms": 22.0254,
+          "p95_ms": 99.36764,
+          "p99_ms": 100.213128
+        },
+        {
+          "fps": 26.927889,
+          "decode_wall_ms": 557.0433,
+          "mean_ms": 37.13622,
+          "median_ms": 23.5092,
+          "p95_ms": 103.63275,
+          "p99_ms": 108.12703
+        },
+        {
+          "fps": 26.707813,
+          "decode_wall_ms": 561.6334,
+          "mean_ms": 37.442227,
+          "median_ms": 23.7278,
+          "p95_ms": 100.88294,
+          "p99_ms": 105.070508
+        },
+        {
+          "fps": 27.817124,
+          "decode_wall_ms": 539.2362,
+          "mean_ms": 35.94908,
+          "median_ms": 22.0895,
+          "p95_ms": 99.07697,
+          "p99_ms": 100.292674
+        }
+      ],
+      "headline_median_fps": 27.817124,
+      "mean_ms": 34.888137,
+      "median_ms": 22.0254,
+      "p95_ms": 100.47613,
+      "p99_ms": 106.932032,
+      "raw_output_GBps": 0.922905,
+      "compressed_input_MBps": 138.669362,
+      "peak_process_working_set_bytes": 144441344,
+      "stages": [],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "e9ef41e67a10a325",
+          "compressed_hash": "7183481dffb2ddc8",
+          "compressed_bytes": 604172,
+          "decoded_hash": "d4e9364295b8a325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "d6916b0db456a4a5",
+          "compressed_hash": "f1cef188c8c3d978",
+          "compressed_bytes": 904900,
+          "decoded_hash": "16cefe43e46f2082"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "95ee379f1276e35f",
+          "compressed_hash": "6b12d20527760fc6",
+          "compressed_bytes": 19005892,
+          "decoded_hash": "b191ab3a11b9f0ae"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "9bff24f45b84f025",
+          "compressed_hash": "89a091e0609b03a8",
+          "compressed_bytes": 2356460,
+          "decoded_hash": "451113f6f72d6046"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "88d9aee7de047c25",
+          "compressed_hash": "1ab5662142060c40",
+          "compressed_bytes": 2053756,
+          "decoded_hash": "ca361685f26c9563"
+        }
+      ],
+      "megapixels_per_second": 230.726353
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "output": "YU64",
+      "pitch": 15360,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 28.047208,
+          "decode_wall_ms": 534.8126,
+          "mean_ms": 35.654173,
+          "median_ms": 21.3043,
+          "p95_ms": 100.32977,
+          "p99_ms": 102.757874
+        },
+        {
+          "fps": 27.328368,
+          "decode_wall_ms": 548.8802,
+          "mean_ms": 36.592013,
+          "median_ms": 21.4855,
+          "p95_ms": 104.1347,
+          "p99_ms": 107.99646
+        },
+        {
+          "fps": 28.060566,
+          "decode_wall_ms": 534.558,
+          "mean_ms": 35.6372,
+          "median_ms": 21.8557,
+          "p95_ms": 98.21245,
+          "p99_ms": 98.51457
+        },
+        {
+          "fps": 27.781317,
+          "decode_wall_ms": 539.9312,
+          "mean_ms": 35.995413,
+          "median_ms": 21.573,
+          "p95_ms": 100.78626,
+          "p99_ms": 102.036292
+        },
+        {
+          "fps": 26.474553,
+          "decode_wall_ms": 566.5818,
+          "mean_ms": 37.77212,
+          "median_ms": 22.9559,
+          "p95_ms": 108.48479,
+          "p99_ms": 109.385438
+        }
+      ],
+      "headline_median_fps": 27.781317,
+      "mean_ms": 36.330184,
+      "median_ms": 21.573,
+      "p95_ms": 102.65363,
+      "p99_ms": 109.130562,
+      "raw_output_GBps": 0.921717,
+      "compressed_input_MBps": 138.490867,
+      "peak_process_working_set_bytes": 144445440,
+      "stages": [],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "e9ef41e67a10a325",
+          "compressed_hash": "7183481dffb2ddc8",
+          "compressed_bytes": 604172,
+          "decoded_hash": "f49afe33f4372325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "d6916b0db456a4a5",
+          "compressed_hash": "f1cef188c8c3d978",
+          "compressed_bytes": 904900,
+          "decoded_hash": "4e433e3f491bc045"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "95ee379f1276e35f",
+          "compressed_hash": "6b12d20527760fc6",
+          "compressed_bytes": 19005892,
+          "decoded_hash": "843eaf41142c07a1"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "9bff24f45b84f025",
+          "compressed_hash": "89a091e0609b03a8",
+          "compressed_bytes": 2356460,
+          "decoded_hash": "89d32cb066dddc65"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "88d9aee7de047c25",
+          "compressed_hash": "1ab5662142060c40",
+          "compressed_bytes": 2053756,
+          "decoded_hash": "58fad128245e5c20"
+        }
+      ],
+      "megapixels_per_second": 230.429356
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "output": "BGRA8",
+      "pitch": 30720,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 8.160196,
+          "decode_wall_ms": 1838.1912,
+          "mean_ms": 122.54608,
+          "median_ms": 77.6848,
+          "p95_ms": 335.8739,
+          "p99_ms": 340.73302
+        },
+        {
+          "fps": 7.823893,
+          "decode_wall_ms": 1917.2041,
+          "mean_ms": 127.813607,
+          "median_ms": 76.6606,
+          "p95_ms": 350.73824,
+          "p99_ms": 376.418608
+        },
+        {
+          "fps": 6.711547,
+          "decode_wall_ms": 2234.9543,
+          "mean_ms": 148.996953,
+          "median_ms": 89.9886,
+          "p95_ms": 417.70026,
+          "p99_ms": 423.560212
+        },
+        {
+          "fps": 6.911345,
+          "decode_wall_ms": 2170.3444,
+          "mean_ms": 144.689627,
+          "median_ms": 86.2566,
+          "p95_ms": 402.18205,
+          "p99_ms": 410.51457
+        },
+        {
+          "fps": 6.949064,
+          "decode_wall_ms": 2158.5641,
+          "mean_ms": 143.904273,
+          "median_ms": 85.3006,
+          "p95_ms": 401.06796,
+          "p99_ms": 404.672232
+        }
+      ],
+      "headline_median_fps": 6.949064,
+      "mean_ms": 137.590108,
+      "median_ms": 81.2963,
+      "p95_ms": 406.92084,
+      "p99_ms": 417.281692,
+      "raw_output_GBps": 0.922213,
+      "compressed_input_MBps": 136.791979,
+      "peak_process_working_set_bytes": 547708928,
+      "stages": [],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "dbecbb83dbdc2325",
+          "compressed_hash": "e175e4a3798e6bba",
+          "compressed_bytes": 2408120,
+          "decoded_hash": "33348afbca7c2325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "547b5b66f4806d25",
+          "compressed_hash": "15942a87fae03028",
+          "compressed_bytes": 3013508,
+          "decoded_hash": "46825dd40ae5912e"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "7cea3a6b7284c323",
+          "compressed_hash": "8d6d2517b90af90e",
+          "compressed_bytes": 75620560,
+          "decoded_hash": "d4b84708bd053fdb"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "ec411823d3751725",
+          "compressed_hash": "a78b401beaa2b1aa",
+          "compressed_bytes": 9240076,
+          "decoded_hash": "27e369c3c9071f75"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "25af4187e2f4df25",
+          "compressed_hash": "47eec0162401f414",
+          "compressed_bytes": 8142488,
+          "decoded_hash": "1a695ffe02340a3e"
+        }
+      ],
+      "megapixels_per_second": 230.553266
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "output": "YU64",
+      "pitch": 30720,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 7.059583,
+          "decode_wall_ms": 2124.7715,
+          "mean_ms": 141.651433,
+          "median_ms": 86.9238,
+          "p95_ms": 397.93154,
+          "p99_ms": 400.786308
+        },
+        {
+          "fps": 7.121918,
+          "decode_wall_ms": 2106.1742,
+          "mean_ms": 140.411613,
+          "median_ms": 84.8819,
+          "p95_ms": 387.73544,
+          "p99_ms": 388.396688
+        },
+        {
+          "fps": 6.705877,
+          "decode_wall_ms": 2236.8438,
+          "mean_ms": 149.12292,
+          "median_ms": 90.9453,
+          "p95_ms": 429.42156,
+          "p99_ms": 433.571832
+        },
+        {
+          "fps": 6.783682,
+          "decode_wall_ms": 2211.1887,
+          "mean_ms": 147.41258,
+          "median_ms": 94.9942,
+          "p95_ms": 405.94086,
+          "p99_ms": 408.492892
+        },
+        {
+          "fps": 6.590932,
+          "decode_wall_ms": 2275.8541,
+          "mean_ms": 151.723607,
+          "median_ms": 95.8207,
+          "p95_ms": 424.85802,
+          "p99_ms": 431.197444
+        }
+      ],
+      "headline_median_fps": 6.783682,
+      "mean_ms": 146.064431,
+      "median_ms": 90.9995,
+      "p95_ms": 414.87329,
+      "p99_ms": 433.257346,
+      "raw_output_GBps": 0.900265,
+      "compressed_input_MBps": 133.536435,
+      "peak_process_working_set_bytes": 547737600,
+      "stages": [],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "dbecbb83dbdc2325",
+          "compressed_hash": "e175e4a3798e6bba",
+          "compressed_bytes": 2408120,
+          "decoded_hash": "8fbf3a5044762325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "547b5b66f4806d25",
+          "compressed_hash": "15942a87fae03028",
+          "compressed_bytes": 3013508,
+          "decoded_hash": "34766d2a0a7e7165"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "7cea3a6b7284c323",
+          "compressed_hash": "8d6d2517b90af90e",
+          "compressed_bytes": 75620560,
+          "decoded_hash": "8471d6179e34c26f"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "ec411823d3751725",
+          "compressed_hash": "a78b401beaa2b1aa",
+          "compressed_bytes": 9240076,
+          "decoded_hash": "e68c3b8386e01525"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "25af4187e2f4df25",
+          "compressed_hash": "47eec0162401f414",
+          "compressed_bytes": 8142488,
+          "decoded_hash": "c6d747298baaa5e5"
+        }
+      ],
+      "megapixels_per_second": 225.066288
+    }
+  ],
+  "license": "Copyright (c) 2026 HyperCine Contributors. MIT OR Apache-2.0.",
+  "provenance": {
+    "branch": "decode-phase0",
+    "measured_run_completed_utc": "2026-10-03T16:12:32.5143546Z",
+    "system": {
+      "os": "Windows x64",
+      "cpu": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics",
+      "logical_processors": 16,
+      "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+      "gpu_memory_reported_MiB": 16376,
+      "pcie_max_generation_reported": 4,
+      "pcie_max_width_reported": 16,
+      "pcie_dma_bandwidth_measured": false,
+      "compiler": "MSVC",
+      "compiler_version": "19.44.35228.0",
+      "cmake_version": "3.31.6-msvc6",
+      "configuration": "Release",
+      "c_cpp_flags": "/O2 /Ob2 /DNDEBUG; dynamic CRT /MD",
+      "cuda_regression_toolkit": "12.8.61",
+      "cuda_regression_architecture": "89"
+    },
+    "harness_local_uncommitted_at_measurement": true,
+    "harness_sha256_raw_working_files": {
+      "benchmarks/CMakeLists.txt": "3470b0b0736446bcd4731a579702c51dfb7460523c106b1bd67ca38dcb5b31db",
+      "benchmarks/benchmark_decode_phase0.cpp": "a200fe82cfc3406ef1eca163b13eb91745cd7021a5a757fad1f41f704b47b498",
+      "benchmarks/decode_profile_hooks.cpp": "e4abd6bf18c458d21c14b3afd850fd5e9a22d3dd8ef7c4dfca114bb2979bf42e",
+      "benchmarks/decode_profile_hooks.h": "082e159206aebc8920d48627536938cd666f43882501d7be3e8b3f525ba26270",
+      "benchmarks/generate_decode_profile.py": "004e2389923fd397b748b8c1f7d8557a6f5f2ef898dbe12bd59c68761036e45b",
+      "tests/CMakeLists.txt": "13ca99d6916d147ff768736e605e525bedfc49004433c2dedb9d16de9e14d4c9",
+      "tests/decode_phase0_support.h": "4112c38ed3cf90e724f14d73371cf0c83c2334aabdaeb2a80132f47b65d706f8",
+      "tests/test_decode_phase0.cpp": "fd396d3b0ecdf9fa0be7a561b676a727eef915e9db923bd43ca82329784d2379",
+      "tests/decode_phase0_golden.txt": "dbe8d97f5bcfcd709c7b1994cba0b8c2e7d0fa89130e2ace775cf8d704d0c026"
+    },
+    "binary_sha256": {
+      "stock": "02d1d06bccbc40fbf339620543fc0ae1740a2a27b32096d8b25216608cb28d7b",
+      "profile": "1386c4d452a166d505fb64d3a8505e59e6d319be2776178d624beb128affa6e5",
+      "golden_test": "89704fdcf5a647032129b3aec6bc94f8b24a6436dd9485c1d2978c90e4a80527"
+    },
+    "corpus_codec_precision": 10,
+    "output_bytes_per_pixel": 4,
+    "metadata_normalization": "GUID/DATE/TIME/TIMC payloads zeroed within parsed metadata chunks",
+    "percentiles": "linear interpolation at q*(n-1), combined 75 frame latencies per row",
+    "headline": "median throughput of five trials of 15 frames",
+    "profile_exclusive_bins": "fused BGRA final horizontal inverse/color/packing is reported separately; coefficient LUT dequant cost remains partly fused with entropy"
+  }
+}

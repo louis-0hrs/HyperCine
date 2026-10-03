@@ -31,6 +31,13 @@ add_executable(test_yuy2_stability
 target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
 add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 
+add_executable(test_decode_phase0 test_decode_phase0.cpp)
+target_compile_definitions(test_decode_phase0 PRIVATE _ALLOCATOR=1)
+target_link_libraries(test_decode_phase0 PRIVATE CFHDCodecStatic)
+add_test(NAME test_decode_phase0 COMMAND test_decode_phase0
+    "${CMAKE_CURRENT_SOURCE_DIR}/decode_phase0_golden.txt")
+set_tests_properties(test_decode_phase0 PROPERTIES TIMEOUT 300)
+
 # 3. Upstream sample AVI decode test
 add_executable(test_avi_sample
     test_avi_sample.cpp

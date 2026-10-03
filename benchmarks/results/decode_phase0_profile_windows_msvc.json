@@ -1,0 +1,960 @@
+{
+  "schema": "hypercine_decode_phase0_v1",
+  "source_commit": "51435890ba5853e87e8cf1ddc7cc747954bd9e80",
+  "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+  "contract": "host CFHD in memory -> complete host output; CFHD_DecodeSample only",
+  "input": "YUY2 YUV422 FilmScan3",
+  "seed": 322420463,
+  "cpu_max": 1,
+  "trials": 5,
+  "cycles_per_trial": 3,
+  "hash_algorithm": "FNV1a64",
+  "instrumented": true,
+  "rows": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "output": "BGRA8",
+      "pitch": 7680,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 117.355465,
+          "decode_wall_ms": 127.8168,
+          "mean_ms": 8.52112,
+          "median_ms": 5.7127,
+          "p95_ms": 21.70132,
+          "p99_ms": 21.819144
+        },
+        {
+          "fps": 118.453284,
+          "decode_wall_ms": 126.6322,
+          "mean_ms": 8.442147,
+          "median_ms": 5.5846,
+          "p95_ms": 22.14632,
+          "p99_ms": 22.215984
+        },
+        {
+          "fps": 120.096173,
+          "decode_wall_ms": 124.8999,
+          "mean_ms": 8.32666,
+          "median_ms": 5.5605,
+          "p95_ms": 21.65231,
+          "p99_ms": 21.833582
+        },
+        {
+          "fps": 119.769372,
+          "decode_wall_ms": 125.2407,
+          "mean_ms": 8.34938,
+          "median_ms": 5.5634,
+          "p95_ms": 21.84309,
+          "p99_ms": 21.899258
+        },
+        {
+          "fps": 118.376163,
+          "decode_wall_ms": 126.7147,
+          "mean_ms": 8.447647,
+          "median_ms": 5.4989,
+          "p95_ms": 21.77065,
+          "p99_ms": 21.79725
+        }
+      ],
+      "headline_median_fps": 118.453284,
+      "mean_ms": 8.417391,
+      "median_ms": 5.578,
+      "p95_ms": 21.85769,
+      "p99_ms": 22.141344,
+      "raw_output_GBps": 0.982499,
+      "compressed_input_MBps": 151.584858,
+      "peak_process_working_set_bytes": 43069440,
+      "stages": [
+        {
+          "name": "parsing_metadata",
+          "mean_ms": 0.117564,
+          "percent_wall": 1.39668,
+          "calls": 36900
+        },
+        {
+          "name": "entropy_coefficients",
+          "mean_ms": 4.656971,
+          "percent_wall": 55.325585,
+          "calls": 2250
+        },
+        {
+          "name": "inverse_quantization",
+          "mean_ms": 0.142068,
+          "percent_wall": 1.687791,
+          "calls": 2025
+        },
+        {
+          "name": "inverse_wavelet_reconstruction",
+          "mean_ms": 1.218819,
+          "percent_wall": 14.479768,
+          "calls": 525
+        },
+        {
+          "name": "active_color",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "color_conversion_output_packing",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "state_lock_overhead",
+          "mean_ms": 0.002052,
+          "percent_wall": 0.024378,
+          "calls": 4725
+        },
+        {
+          "name": "fused_horizontal_inverse_color_packing",
+          "mean_ms": 2.259312,
+          "percent_wall": 26.841002,
+          "calls": 40500
+        },
+        {
+          "name": "unattributed_glue_and_timer_overhead",
+          "mean_ms": 0.020605,
+          "percent_wall": 0.244795
+        }
+      ],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "71c3d0baa39dc325",
+          "compressed_hash": "95b06b63ffcdce70",
+          "compressed_bytes": 153176,
+          "decoded_hash": "2733f8198c87c325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "364eeebc04c88d85",
+          "compressed_hash": "fe622f7164071989",
+          "compressed_bytes": 292696,
+          "decoded_hash": "2af324f0b68219f7"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "362051b4ccd6c168",
+          "compressed_hash": "d5cdfed98902761d",
+          "compressed_bytes": 4784300,
+          "decoded_hash": "058be9bce809b0b1"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "40aca976a13ffd25",
+          "compressed_hash": "4f7bac2184ffc14b",
+          "compressed_bytes": 629056,
+          "decoded_hash": "8ee3a24e862c8651"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "f53c69011ab5ffa5",
+          "compressed_hash": "4fe33f8b19bd20d9",
+          "compressed_bytes": 539280,
+          "decoded_hash": "d0db7e8f533deada"
+        }
+      ],
+      "megapixels_per_second": 245.62473
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "output": "YU64",
+      "pitch": 7680,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 127.534211,
+          "decode_wall_ms": 117.6155,
+          "mean_ms": 7.841033,
+          "median_ms": 4.9419,
+          "p95_ms": 21.02406,
+          "p99_ms": 21.242572
+        },
+        {
+          "fps": 125.35004,
+          "decode_wall_ms": 119.6649,
+          "mean_ms": 7.97766,
+          "median_ms": 5.068,
+          "p95_ms": 21.52569,
+          "p99_ms": 21.876978
+        },
+        {
+          "fps": 124.760356,
+          "decode_wall_ms": 120.2305,
+          "mean_ms": 8.015367,
+          "median_ms": 5.267,
+          "p95_ms": 21.38587,
+          "p99_ms": 21.656294
+        },
+        {
+          "fps": 127.567075,
+          "decode_wall_ms": 117.5852,
+          "mean_ms": 7.839013,
+          "median_ms": 5.0933,
+          "p95_ms": 21.13778,
+          "p99_ms": 21.161076
+        },
+        {
+          "fps": 126.061225,
+          "decode_wall_ms": 118.9898,
+          "mean_ms": 7.932653,
+          "median_ms": 5.0017,
+          "p95_ms": 21.2821,
+          "p99_ms": 21.30226
+        }
+      ],
+      "headline_median_fps": 126.061225,
+      "mean_ms": 7.921145,
+      "median_ms": 5.0168,
+      "p95_ms": 21.30023,
+      "p99_ms": 21.786534,
+      "raw_output_GBps": 1.045602,
+      "compressed_input_MBps": 161.320752,
+      "peak_process_working_set_bytes": 43294720,
+      "stages": [
+        {
+          "name": "parsing_metadata",
+          "mean_ms": 0.126857,
+          "percent_wall": 1.601502,
+          "calls": 36900
+        },
+        {
+          "name": "entropy_coefficients",
+          "mean_ms": 4.616295,
+          "percent_wall": 58.278121,
+          "calls": 2250
+        },
+        {
+          "name": "inverse_quantization",
+          "mean_ms": 0.14162,
+          "percent_wall": 1.787873,
+          "calls": 2025
+        },
+        {
+          "name": "inverse_wavelet_reconstruction",
+          "mean_ms": 2.189675,
+          "percent_wall": 27.64341,
+          "calls": 525
+        },
+        {
+          "name": "active_color",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "color_conversion_output_packing",
+          "mean_ms": 0.825201,
+          "percent_wall": 10.417702,
+          "calls": 81000
+        },
+        {
+          "name": "state_lock_overhead",
+          "mean_ms": 0.002063,
+          "percent_wall": 0.02604,
+          "calls": 4725
+        },
+        {
+          "name": "fused_horizontal_inverse_color_packing",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "unattributed_glue_and_timer_overhead",
+          "mean_ms": 0.019435,
+          "percent_wall": 0.245352
+        }
+      ],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "71c3d0baa39dc325",
+          "compressed_hash": "95b06b63ffcdce70",
+          "compressed_bytes": 153176,
+          "decoded_hash": "bfe8ded7a8276325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "364eeebc04c88d85",
+          "compressed_hash": "fe622f7164071989",
+          "compressed_bytes": 292696,
+          "decoded_hash": "512d0889198b3b95"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "362051b4ccd6c168",
+          "compressed_hash": "d5cdfed98902761d",
+          "compressed_bytes": 4784300,
+          "decoded_hash": "45e6f8378942c5b4"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "40aca976a13ffd25",
+          "compressed_hash": "4f7bac2184ffc14b",
+          "compressed_bytes": 629056,
+          "decoded_hash": "0df82cc64e6dbca5"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "f53c69011ab5ffa5",
+          "compressed_hash": "4fe33f8b19bd20d9",
+          "compressed_bytes": 539280,
+          "decoded_hash": "7e521076ba5e10f5"
+        }
+      ],
+      "megapixels_per_second": 261.400556
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "output": "BGRA8",
+      "pitch": 15360,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 32.119646,
+          "decode_wall_ms": 467.0039,
+          "mean_ms": 31.133593,
+          "median_ms": 19.9287,
+          "p95_ms": 83.11932,
+          "p99_ms": 83.798824
+        },
+        {
+          "fps": 32.806684,
+          "decode_wall_ms": 457.2239,
+          "mean_ms": 30.481593,
+          "median_ms": 19.8473,
+          "p95_ms": 82.19612,
+          "p99_ms": 82.482504
+        },
+        {
+          "fps": 31.874982,
+          "decode_wall_ms": 470.5885,
+          "mean_ms": 31.372567,
+          "median_ms": 20.3059,
+          "p95_ms": 83.56388,
+          "p99_ms": 84.355496
+        },
+        {
+          "fps": 32.061106,
+          "decode_wall_ms": 467.8566,
+          "mean_ms": 31.19044,
+          "median_ms": 20.0302,
+          "p95_ms": 83.48884,
+          "p99_ms": 84.011208
+        },
+        {
+          "fps": 31.912592,
+          "decode_wall_ms": 470.0339,
+          "mean_ms": 31.335593,
+          "median_ms": 19.4328,
+          "p95_ms": 83.30811,
+          "p99_ms": 84.219622
+        }
+      ],
+      "headline_median_fps": 32.061106,
+      "mean_ms": 31.102757,
+      "median_ms": 19.9029,
+      "p95_ms": 83.43691,
+      "p99_ms": 84.475034,
+      "raw_output_GBps": 1.063711,
+      "compressed_input_MBps": 159.825767,
+      "peak_process_working_set_bytes": 144465920,
+      "stages": [
+        {
+          "name": "parsing_metadata",
+          "mean_ms": 0.162703,
+          "percent_wall": 0.523113,
+          "calls": 36900
+        },
+        {
+          "name": "entropy_coefficients",
+          "mean_ms": 17.983559,
+          "percent_wall": 57.819821,
+          "calls": 2250
+        },
+        {
+          "name": "inverse_quantization",
+          "mean_ms": 0.140729,
+          "percent_wall": 0.452466,
+          "calls": 2025
+        },
+        {
+          "name": "inverse_wavelet_reconstruction",
+          "mean_ms": 4.577145,
+          "percent_wall": 14.716204,
+          "calls": 525
+        },
+        {
+          "name": "active_color",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "color_conversion_output_packing",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "state_lock_overhead",
+          "mean_ms": 0.002611,
+          "percent_wall": 0.008394,
+          "calls": 4725
+        },
+        {
+          "name": "fused_horizontal_inverse_color_packing",
+          "mean_ms": 8.212507,
+          "percent_wall": 26.404433,
+          "calls": 81000
+        },
+        {
+          "name": "unattributed_glue_and_timer_overhead",
+          "mean_ms": 0.023504,
+          "percent_wall": 0.075569
+        }
+      ],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "e9ef41e67a10a325",
+          "compressed_hash": "7183481dffb2ddc8",
+          "compressed_bytes": 604172,
+          "decoded_hash": "d4e9364295b8a325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "d6916b0db456a4a5",
+          "compressed_hash": "f1cef188c8c3d978",
+          "compressed_bytes": 904900,
+          "decoded_hash": "16cefe43e46f2082"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "95ee379f1276e35f",
+          "compressed_hash": "6b12d20527760fc6",
+          "compressed_bytes": 19005892,
+          "decoded_hash": "b191ab3a11b9f0ae"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "9bff24f45b84f025",
+          "compressed_hash": "89a091e0609b03a8",
+          "compressed_bytes": 2356460,
+          "decoded_hash": "451113f6f72d6046"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "88d9aee7de047c25",
+          "compressed_hash": "1ab5662142060c40",
+          "compressed_bytes": 2053756,
+          "decoded_hash": "ca361685f26c9563"
+        }
+      ],
+      "megapixels_per_second": 265.927638
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "output": "YU64",
+      "pitch": 15360,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 33.340824,
+          "decode_wall_ms": 449.8989,
+          "mean_ms": 29.99326,
+          "median_ms": 18.7555,
+          "p95_ms": 81.74355,
+          "p99_ms": 82.09327
+        },
+        {
+          "fps": 33.354161,
+          "decode_wall_ms": 449.719,
+          "mean_ms": 29.981267,
+          "median_ms": 18.7827,
+          "p95_ms": 81.61309,
+          "p99_ms": 81.704538
+        },
+        {
+          "fps": 33.104376,
+          "decode_wall_ms": 453.1123,
+          "mean_ms": 30.207487,
+          "median_ms": 19.094,
+          "p95_ms": 84.39275,
+          "p99_ms": 85.24871
+        },
+        {
+          "fps": 33.289657,
+          "decode_wall_ms": 450.5904,
+          "mean_ms": 30.03936,
+          "median_ms": 19.1253,
+          "p95_ms": 81.57064,
+          "p99_ms": 81.862288
+        },
+        {
+          "fps": 32.864229,
+          "decode_wall_ms": 456.4233,
+          "mean_ms": 30.42822,
+          "median_ms": 18.7312,
+          "p95_ms": 82.00548,
+          "p99_ms": 82.252216
+        }
+      ],
+      "headline_median_fps": 33.289657,
+      "mean_ms": 30.129919,
+      "median_ms": 18.7827,
+      "p95_ms": 82.00885,
+      "p99_ms": 84.33161,
+      "raw_output_GBps": 1.104471,
+      "compressed_input_MBps": 165.95014,
+      "peak_process_working_set_bytes": 144470016,
+      "stages": [
+        {
+          "name": "parsing_metadata",
+          "mean_ms": 0.143699,
+          "percent_wall": 0.47693,
+          "calls": 36900
+        },
+        {
+          "name": "entropy_coefficients",
+          "mean_ms": 17.807844,
+          "percent_wall": 59.103525,
+          "calls": 2250
+        },
+        {
+          "name": "inverse_quantization",
+          "mean_ms": 0.1395,
+          "percent_wall": 0.462995,
+          "calls": 2025
+        },
+        {
+          "name": "inverse_wavelet_reconstruction",
+          "mean_ms": 8.95182,
+          "percent_wall": 29.710734,
+          "calls": 525
+        },
+        {
+          "name": "active_color",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "color_conversion_output_packing",
+          "mean_ms": 3.063161,
+          "percent_wall": 10.16651,
+          "calls": 162000
+        },
+        {
+          "name": "state_lock_overhead",
+          "mean_ms": 0.002523,
+          "percent_wall": 0.008373,
+          "calls": 4725
+        },
+        {
+          "name": "fused_horizontal_inverse_color_packing",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "unattributed_glue_and_timer_overhead",
+          "mean_ms": 0.021372,
+          "percent_wall": 0.070933
+        }
+      ],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "e9ef41e67a10a325",
+          "compressed_hash": "7183481dffb2ddc8",
+          "compressed_bytes": 604172,
+          "decoded_hash": "f49afe33f4372325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "d6916b0db456a4a5",
+          "compressed_hash": "f1cef188c8c3d978",
+          "compressed_bytes": 904900,
+          "decoded_hash": "4e433e3f491bc045"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "95ee379f1276e35f",
+          "compressed_hash": "6b12d20527760fc6",
+          "compressed_bytes": 19005892,
+          "decoded_hash": "843eaf41142c07a1"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "9bff24f45b84f025",
+          "compressed_hash": "89a091e0609b03a8",
+          "compressed_bytes": 2356460,
+          "decoded_hash": "89d32cb066dddc65"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "88d9aee7de047c25",
+          "compressed_hash": "1ab5662142060c40",
+          "compressed_bytes": 2053756,
+          "decoded_hash": "58fad128245e5c20"
+        }
+      ],
+      "megapixels_per_second": 276.117731
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "output": "BGRA8",
+      "pitch": 30720,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 8.268861,
+          "decode_wall_ms": 1814.0345,
+          "mean_ms": 120.935633,
+          "median_ms": 74.6515,
+          "p95_ms": 336.61274,
+          "p99_ms": 340.348388
+        },
+        {
+          "fps": 8.220347,
+          "decode_wall_ms": 1824.7405,
+          "mean_ms": 121.649367,
+          "median_ms": 75.7426,
+          "p95_ms": 333.9344,
+          "p99_ms": 336.8408
+        },
+        {
+          "fps": 8.025363,
+          "decode_wall_ms": 1869.0743,
+          "mean_ms": 124.604953,
+          "median_ms": 80.3011,
+          "p95_ms": 337.99323,
+          "p99_ms": 342.565126
+        },
+        {
+          "fps": 7.953275,
+          "decode_wall_ms": 1886.0156,
+          "mean_ms": 125.734373,
+          "median_ms": 75.4685,
+          "p95_ms": 345.57395,
+          "p99_ms": 346.98655
+        },
+        {
+          "fps": 8.207159,
+          "decode_wall_ms": 1827.6727,
+          "mean_ms": 121.844847,
+          "median_ms": 78.2649,
+          "p95_ms": 334.10757,
+          "p99_ms": 337.915514
+        }
+      ],
+      "headline_median_fps": 8.207159,
+      "mean_ms": 122.953835,
+      "median_ms": 75.9718,
+      "p95_ms": 341.42165,
+      "p99_ms": 345.47305,
+      "raw_output_GBps": 1.089175,
+      "compressed_input_MBps": 161.557513,
+      "peak_process_working_set_bytes": 547741696,
+      "stages": [
+        {
+          "name": "parsing_metadata",
+          "mean_ms": 0.181996,
+          "percent_wall": 0.14802,
+          "calls": 36900
+        },
+        {
+          "name": "entropy_coefficients",
+          "mean_ms": 72.01592,
+          "percent_wall": 58.571512,
+          "calls": 2250
+        },
+        {
+          "name": "inverse_quantization",
+          "mean_ms": 0.170121,
+          "percent_wall": 0.138362,
+          "calls": 2025
+        },
+        {
+          "name": "inverse_wavelet_reconstruction",
+          "mean_ms": 18.5365,
+          "percent_wall": 15.075984,
+          "calls": 525
+        },
+        {
+          "name": "active_color",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "color_conversion_output_packing",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "state_lock_overhead",
+          "mean_ms": 0.006077,
+          "percent_wall": 0.004943,
+          "calls": 4725
+        },
+        {
+          "name": "fused_horizontal_inverse_color_packing",
+          "mean_ms": 32.016331,
+          "percent_wall": 26.03931,
+          "calls": 162000
+        },
+        {
+          "name": "unattributed_glue_and_timer_overhead",
+          "mean_ms": 0.026889,
+          "percent_wall": 0.021869
+        }
+      ],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "dbecbb83dbdc2325",
+          "compressed_hash": "e175e4a3798e6bba",
+          "compressed_bytes": 2408120,
+          "decoded_hash": "33348afbca7c2325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "547b5b66f4806d25",
+          "compressed_hash": "15942a87fae03028",
+          "compressed_bytes": 3013508,
+          "decoded_hash": "46825dd40ae5912e"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "7cea3a6b7284c323",
+          "compressed_hash": "8d6d2517b90af90e",
+          "compressed_bytes": 75620560,
+          "decoded_hash": "d4b84708bd053fdb"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "ec411823d3751725",
+          "compressed_hash": "a78b401beaa2b1aa",
+          "compressed_bytes": 9240076,
+          "decoded_hash": "27e369c3c9071f75"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "25af4187e2f4df25",
+          "compressed_hash": "47eec0162401f414",
+          "compressed_bytes": 8142488,
+          "decoded_hash": "1a695ffe02340a3e"
+        }
+      ],
+      "megapixels_per_second": 272.293838
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "output": "YU64",
+      "pitch": 30720,
+      "frames_per_trial": 15,
+      "trial_results": [
+        {
+          "fps": 8.099224,
+          "decode_wall_ms": 1852.0292,
+          "mean_ms": 123.468613,
+          "median_ms": 79.0428,
+          "p95_ms": 336.6358,
+          "p99_ms": 340.11844
+        },
+        {
+          "fps": 8.043462,
+          "decode_wall_ms": 1864.8687,
+          "mean_ms": 124.32458,
+          "median_ms": 81.3999,
+          "p95_ms": 342.34892,
+          "p99_ms": 343.860024
+        },
+        {
+          "fps": 8.007892,
+          "decode_wall_ms": 1873.1522,
+          "mean_ms": 124.876813,
+          "median_ms": 80.4667,
+          "p95_ms": 345.05447,
+          "p99_ms": 356.287454
+        },
+        {
+          "fps": 7.734894,
+          "decode_wall_ms": 1939.2639,
+          "mean_ms": 129.28426,
+          "median_ms": 77.418,
+          "p95_ms": 348.70547,
+          "p99_ms": 377.862374
+        },
+        {
+          "fps": 6.700784,
+          "decode_wall_ms": 2238.544,
+          "mean_ms": 149.236267,
+          "median_ms": 88.6814,
+          "p95_ms": 406.9928,
+          "p99_ms": 409.6052
+        }
+      ],
+      "headline_median_fps": 8.007892,
+      "mean_ms": 130.238107,
+      "median_ms": 81.9301,
+      "p95_ms": 366.91247,
+      "p99_ms": 406.8062,
+      "raw_output_GBps": 1.062731,
+      "compressed_input_MBps": 157.634951,
+      "peak_process_working_set_bytes": 547786752,
+      "stages": [
+        {
+          "name": "parsing_metadata",
+          "mean_ms": 0.175001,
+          "percent_wall": 0.13437,
+          "calls": 36900
+        },
+        {
+          "name": "entropy_coefficients",
+          "mean_ms": 76.462519,
+          "percent_wall": 58.70979,
+          "calls": 2250
+        },
+        {
+          "name": "inverse_quantization",
+          "mean_ms": 0.175136,
+          "percent_wall": 0.134474,
+          "calls": 2025
+        },
+        {
+          "name": "inverse_wavelet_reconstruction",
+          "mean_ms": 39.825533,
+          "percent_wall": 30.579017,
+          "calls": 525
+        },
+        {
+          "name": "active_color",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "color_conversion_output_packing",
+          "mean_ms": 13.565459,
+          "percent_wall": 10.415891,
+          "calls": 324000
+        },
+        {
+          "name": "state_lock_overhead",
+          "mean_ms": 0.006307,
+          "percent_wall": 0.004842,
+          "calls": 4725
+        },
+        {
+          "name": "fused_horizontal_inverse_color_packing",
+          "mean_ms": 0.0,
+          "percent_wall": 0.0,
+          "calls": 0
+        },
+        {
+          "name": "unattributed_glue_and_timer_overhead",
+          "mean_ms": 0.028152,
+          "percent_wall": 0.021616
+        }
+      ],
+      "samples": [
+        {
+          "pattern": "flat",
+          "input_hash": "dbecbb83dbdc2325",
+          "compressed_hash": "e175e4a3798e6bba",
+          "compressed_bytes": 2408120,
+          "decoded_hash": "8fbf3a5044762325"
+        },
+        {
+          "pattern": "gradient",
+          "input_hash": "547b5b66f4806d25",
+          "compressed_hash": "15942a87fae03028",
+          "compressed_bytes": 3013508,
+          "decoded_hash": "34766d2a0a7e7165"
+        },
+        {
+          "pattern": "noise",
+          "input_hash": "7cea3a6b7284c323",
+          "compressed_hash": "8d6d2517b90af90e",
+          "compressed_bytes": 75620560,
+          "decoded_hash": "8471d6179e34c26f"
+        },
+        {
+          "pattern": "texture",
+          "input_hash": "ec411823d3751725",
+          "compressed_hash": "a78b401beaa2b1aa",
+          "compressed_bytes": 9240076,
+          "decoded_hash": "e68c3b8386e01525"
+        },
+        {
+          "pattern": "edges",
+          "input_hash": "25af4187e2f4df25",
+          "compressed_hash": "47eec0162401f414",
+          "compressed_bytes": 8142488,
+          "decoded_hash": "c6d747298baaa5e5"
+        }
+      ],
+      "megapixels_per_second": 265.682638
+    }
+  ],
+  "license": "Copyright (c) 2026 HyperCine Contributors. MIT OR Apache-2.0.",
+  "provenance": {
+    "branch": "decode-phase0",
+    "measured_run_completed_utc": "2026-10-03T16:11:15.7195255Z",
+    "system": {
+      "os": "Windows x64",
+      "cpu": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics",
+      "logical_processors": 16,
+      "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+      "gpu_memory_reported_MiB": 16376,
+      "pcie_max_generation_reported": 4,
+      "pcie_max_width_reported": 16,
+      "pcie_dma_bandwidth_measured": false,
+      "compiler": "MSVC",
+      "compiler_version": "19.44.35228.0",
+      "cmake_version": "3.31.6-msvc6",
+      "configuration": "Release",
+      "c_cpp_flags": "/O2 /Ob2 /DNDEBUG; dynamic CRT /MD",
+      "cuda_regression_toolkit": "12.8.61",
+      "cuda_regression_architecture": "89"
+    },
+    "harness_local_uncommitted_at_measurement": true,
+    "harness_sha256_raw_working_files": {
+      "benchmarks/CMakeLists.txt": "3470b0b0736446bcd4731a579702c51dfb7460523c106b1bd67ca38dcb5b31db",
+      "benchmarks/benchmark_decode_phase0.cpp": "a200fe82cfc3406ef1eca163b13eb91745cd7021a5a757fad1f41f704b47b498",
+      "benchmarks/decode_profile_hooks.cpp": "e4abd6bf18c458d21c14b3afd850fd5e9a22d3dd8ef7c4dfca114bb2979bf42e",
+      "benchmarks/decode_profile_hooks.h": "082e159206aebc8920d48627536938cd666f43882501d7be3e8b3f525ba26270",
+      "benchmarks/generate_decode_profile.py": "004e2389923fd397b748b8c1f7d8557a6f5f2ef898dbe12bd59c68761036e45b",
+      "tests/CMakeLists.txt": "13ca99d6916d147ff768736e605e525bedfc49004433c2dedb9d16de9e14d4c9",
+      "tests/decode_phase0_support.h": "4112c38ed3cf90e724f14d73371cf0c83c2334aabdaeb2a80132f47b65d706f8",
+      "tests/test_decode_phase0.cpp": "fd396d3b0ecdf9fa0be7a561b676a727eef915e9db923bd43ca82329784d2379",
+      "tests/decode_phase0_golden.txt": "dbe8d97f5bcfcd709c7b1994cba0b8c2e7d0fa89130e2ace775cf8d704d0c026"
+    },
+    "binary_sha256": {
+      "stock": "02d1d06bccbc40fbf339620543fc0ae1740a2a27b32096d8b25216608cb28d7b",
+      "profile": "1386c4d452a166d505fb64d3a8505e59e6d319be2776178d624beb128affa6e5",
+      "golden_test": "89704fdcf5a647032129b3aec6bc94f8b24a6436dd9485c1d2978c90e4a80527"
+    },
+    "corpus_codec_precision": 10,
+    "output_bytes_per_pixel": 4,
+    "metadata_normalization": "GUID/DATE/TIME/TIMC payloads zeroed within parsed metadata chunks",
+    "percentiles": "linear interpolation at q*(n-1), combined 75 frame latencies per row",
+    "headline": "median throughput of five trials of 15 frames",
+    "profile_exclusive_bins": "fused BGRA final horizontal inverse/color/packing is reported separately; coefficient LUT dequant cost remains partly fused with entropy"
+  }
+}
