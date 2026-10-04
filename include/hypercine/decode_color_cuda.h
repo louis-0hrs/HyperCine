@@ -5,8 +5,13 @@
 #pragma once
 
 #include <cstdint>
-#include <cstddef>
+#if defined(HYPERCINE_CUDA_AVAILABLE) || defined(__CUDACC__)
 #include <cuda_runtime.h>
+#else
+typedef struct CUstream_st* cudaStream_t;
+typedef struct CUevent_st* cudaEvent_t;
+typedef int cudaError_t;
+#endif
 
 namespace HyperCine {
 

@@ -1,0 +1,89 @@
+{
+  "benchmark": "decode_phase2b",
+  "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+  "compute_capability": "8.9",
+  "results": [
+    {
+      "name": "1080p", "width": 1920, "height": 1080,
+      "reference_cpu": { "fps": 104.169, "latency_ms": 9.6537 },
+      "phase2a_device_bgra": {
+        "fps": 81.0035, "latency_ms": 12.374,
+        "megapixels_per_sec": 167.969
+      },
+      "phase2b_device_bgra": {
+        "fps": 10.168, "latency_ms": 99.0508,
+        "megapixels_per_sec": 21.0843,
+        "stages_ms": {
+          "host_parse": 0.022068,
+          "compressed_h2d": 0.196216,
+          "gpu_ll": 0.0633105,
+          "gpu_vlc": 98.2946,
+          "gpu_entropy": 98.3579,
+          "cuda_inverse": 0.28175,
+          "cuda_color_conversion": 0.033027,
+          "total_gpu": 98.8755
+        }
+      },
+      "phase2b_host_bgra": {
+        "fps": 10.0367, "latency_ms": 99.6039,
+        "d2h_ms": 1.16224
+      }
+    },
+    {
+      "name": "4K UHD", "width": 3840, "height": 2160,
+      "reference_cpu": { "fps": 28.2992, "latency_ms": 35.2487 },
+      "phase2a_device_bgra": {
+        "fps": 20.0211, "latency_ms": 48.6489,
+        "megapixels_per_sec": 166.063
+      },
+      "phase2b_device_bgra": {
+        "fps": 2.52377, "latency_ms": 403.601,
+        "megapixels_per_sec": 20.9331,
+        "stages_ms": {
+          "host_parse": 0.0265967,
+          "compressed_h2d": 0.742733,
+          "gpu_ll": 0.397619,
+          "gpu_vlc": 401.183,
+          "gpu_entropy": 401.58,
+          "cuda_inverse": 0.4644,
+          "cuda_color_conversion": 0.221798,
+          "total_gpu": 403.016
+        }
+      },
+      "phase2b_host_bgra": {
+        "fps": 2.51114, "latency_ms": 398.145,
+        "d2h_ms": 3.63846
+      }
+    },
+    {
+      "name": "8K flat", "width": 7680, "height": 4320,
+      "reference_cpu": { "fps": 13.6944, "latency_ms": 72.6907 },
+      "phase2a_device_bgra": {
+        "fps": 10.7678, "latency_ms": 92.8417,
+        "megapixels_per_sec": 357.249
+      },
+      "phase2b_device_bgra": {
+        "fps": 63.1512, "latency_ms": 15.8456,
+        "megapixels_per_sec": 2095.21,
+        "stages_ms": {
+          "host_parse": 0.0133333,
+          "compressed_h2d": 0.259883,
+          "gpu_ll": 0.874496,
+          "gpu_vlc": 12.244,
+          "gpu_entropy": 13.1185,
+          "cuda_inverse": 1.64557,
+          "cuda_color_conversion": 0.656043,
+          "total_gpu": 15.6854
+        }
+      },
+      "phase2b_host_bgra": {
+        "fps": 36.897, "latency_ms": 27.163,
+        "d2h_ms": 11.3766
+      }
+    }
+  ],
+  "memory": {
+    "peak_working_set_bytes": 536629248,
+    "peak_gpu_allocated_bytes": 1366818816
+  }
+}

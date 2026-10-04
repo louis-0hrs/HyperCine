@@ -7,8 +7,13 @@
 #include <cstdint>
 #include <cstddef>
 #include <memory>
-#include <vector>
+#if defined(HYPERCINE_CUDA_AVAILABLE) || defined(__CUDACC__)
 #include <cuda_runtime.h>
+#else
+typedef struct CUstream_st* cudaStream_t;
+typedef struct CUevent_st* cudaEvent_t;
+typedef int cudaError_t;
+#endif
 #include "hypercine/decode_inverse_cuda.h"
 #include "hypercine/decode_color_cuda.h"
 
