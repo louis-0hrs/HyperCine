@@ -1,0 +1,75 @@
+{
+  "schema": "hypercine_decode_phase2a_v1",
+  "contract": "CUDA Color Conversion & Native DeviceOutput",
+  "input": "YUV422 FilmScan3", "seed": 322420463,
+  "trials": 5, "cycles_per_trial": 3,
+  "resolutions": [
+    {
+      "name": "1080", "width": 1920, "height": 1080,
+      "reference_cpu": { "fps": 99.759513, "latency_ms": 10.103755 },
+      "hybrid_phase1": { "fps": 30.135277, "latency_ms": 32.948955 },
+      "device_planar": { "fps": 77.400140, "latency_ms": 12.810969 },
+      "device_bgra": {
+        "fps": 79.436488, "latency_ms": 12.678975,
+        "megapixels_per_sec": 164.719502,
+        "stages_ms": {
+          "cpu_entropy": 11.304363,
+          "upload_h2d": 1.031141,
+          "cuda_inverse": 0.206748,
+          "cuda_color_conversion": 0.043302,
+          "total_gpu": 1.287585
+        }
+      },
+      "host_bgra_from_device": {
+        "fps": 75.022244, "latency_ms": 13.363233,
+        "d2h_ms": 0.794676
+      }
+    },
+    {
+      "name": "4k", "width": 3840, "height": 2160,
+      "reference_cpu": { "fps": 27.564490, "latency_ms": 36.288521 },
+      "hybrid_phase1": { "fps": 6.114260, "latency_ms": 163.827792 },
+      "device_planar": { "fps": 16.552800, "latency_ms": 60.420359 },
+      "device_bgra": {
+        "fps": 17.709703, "latency_ms": 58.687468,
+        "megapixels_per_sec": 146.891363,
+        "stages_ms": {
+          "cpu_entropy": 40.626428,
+          "upload_h2d": 12.342909,
+          "cuda_inverse": 3.191329,
+          "cuda_color_conversion": 1.582217,
+          "total_gpu": 17.130127
+        }
+      },
+      "host_bgra_from_device": {
+        "fps": 15.438373, "latency_ms": 64.832289,
+        "d2h_ms": 10.090049
+      }
+    },
+    {
+      "name": "8k", "width": 7680, "height": 4320,
+      "reference_cpu": { "fps": 13.391117, "latency_ms": 74.086327 },
+      "hybrid_phase1": { "fps": 2.191069, "latency_ms": 457.904033 },
+      "device_planar": { "fps": 6.784079, "latency_ms": 148.879820 },
+      "device_bgra": {
+        "fps": 10.121628, "latency_ms": 103.369127,
+        "megapixels_per_sec": 335.811333,
+        "stages_ms": {
+          "cpu_entropy": 86.826907,
+          "upload_h2d": 12.592559,
+          "cuda_inverse": 2.584130,
+          "cuda_color_conversion": 1.193370,
+          "total_gpu": 16.376900
+        }
+      },
+      "host_bgra_from_device": {
+        "fps": 8.975893, "latency_ms": 116.365553,
+        "d2h_ms": 12.792793
+      }
+    }
+  ],
+  "memory": {
+    "peak_working_set_bytes": 832139264,
+    "peak_gpu_allocated_bytes": 1364721664
+  }
+}

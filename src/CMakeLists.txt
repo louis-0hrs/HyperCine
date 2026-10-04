@@ -19,6 +19,8 @@ if(HYPERCINE_ENABLE_CUDA)
         cuda/phase2a_transfer.cu
         cuda/entropy_gpu.cu
         cuda/decode_inverse_cuda.cu
+        cuda/decode_color_cuda.cu
+        cuda/decode_phase2a_pipeline.cu
     )
     set_target_properties(hypercine_wavelet PROPERTIES
         CUDA_STANDARD 17
