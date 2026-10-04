@@ -13,13 +13,13 @@ In Phase 1, the pipeline reconstructed signed-16 planar YUV422 on the GPU, but r
      - **CUDA BGRA8 DeviceOutput**: **0 diff bytes** vs pristine upstream CPU decoder (`CFHD_PIXEL_FORMAT_BGRA`) and bit-exact match against golden SHA-256 / FNV-1a hashes.
      - **Planar Signed-16 YUV422 DeviceOutput**: **0 diff bytes** vs CPU reference planes.
 2. **Dedicated CUDA Color Conversion Kernel**:
-   - Reconstructed planar signed-16 YUV422 is converted to packed BGRA8 directly on the GPU in **0.04 ms** (1080p), **0.16 ms** (4K), and **0.70 ms** (8K).
+   - Reconstructed planar signed-16 YUV422 is converted to packed BGRA8 directly on the GPU in **0.04 ms** (1080p), **1.58 ms** (4K), and **1.19 ms** (8K).
    - Exact fixed-point integer arithmetic, including SSE2 saturation emulation (`clamp255`), fixed-point color matrix multiplication, and scalar fallback border handling for right-edge chroma pixels ($x \ge \text{post\_column\_pixels}$).
 3. **Explicit Slot Pool & Lifetime Contract**:
    - Multi-slot pool (default 3 slots) with monotonic 64-bit tickets.
    - Strict ticket lifecycle: `QueueDecode` $\to$ `PollDecode` $\to$ `GetDeviceOutput` $\to$ `ReleaseOutput`.
    - Slots are locked against reuse until explicitly released by the consumer.
-4. **Zero-Copy Stream Synchronization (`StreamWait`)**:
+4. **GPU-Resident Stream Synchronization (`StreamWait`)**:
    - Non-blocking CUDA event semantics (`ev_ready`) allow consumer CUDA streams (such as Vulkan renderers, display pipelines, or compute kernels) to synchronize with decode completion on the GPU without host CPU stalls.
 5. **Major Performance Speedup**:
    - DeviceBGRA throughput achieves **79.4 FPS** at 1080p, **17.7 FPS** at 4K, and **10.1 FPS** at 8K, representing a **2.6x to 4.4x speedup** over Phase 1's hybrid path.
@@ -85,7 +85,7 @@ Phase 2A Native DeviceOutput Path:
 │ Planar Signed-16 YUV422 │ ◄── Optional Planar DeviceOutput
 └────────────┬────────────┘
              │
-             ▼ (CUDA Color Conversion Kernel: ~0.04 - 0.70 ms)
+             ▼ (CUDA Color Conversion Kernel: ~0.04 - 1.58 ms)
 ┌─────────────────────────┐
 │ Packed BGRA8 in VRAM    │ ◄── Primary BGRA8 DeviceOutput
 └────────────┬────────────┘
@@ -306,7 +306,7 @@ Each pipeline slot owns 3 dedicated non-blocking CUDA streams (`streams[0]`, `st
 5. **Ready Event**:
    - Stream $0$ records `ev_ready`.
 
-### Zero-Copy Consumer Synchronization (`StreamWait`)
+### GPU-Resident Consumer Synchronization (`StreamWait`)
 If a downstream consumer runs on another CUDA stream (such as a rendering engine), the caller calls:
 ```cpp
 pipeline.StreamWait(ticket, caller_stream);
