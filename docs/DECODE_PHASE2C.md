@@ -15,10 +15,10 @@ Phase 2C introduces a **parallel intra-band entropy decoding architecture**:
 
 ### Headline Phase 2C Achievements
 
-1. **45x to 54x Speedup in GPU Entropy Decoding for Dense Patterns**:
-   - **1080p Noise**: GPU VLC decode dropped from **325.19 ms** (Phase 2B) to **7.08 ms** (Phase 2C), achieving a **45.94x** entropy kernel speedup.
-   - **4K Noise**: GPU VLC decode dropped from **1318.00 ms** (Phase 2B) to **28.91 ms** (Phase 2C), achieving a **45.59x** entropy kernel speedup.
-   - **4K Texture**: GPU VLC decode dropped from **438.94 ms** (Phase 2B) to **9.32 ms** (Phase 2C), achieving a **47.12x** entropy kernel speedup.
+1. **45x to 54x Speedup in GPU VLC Replay for Dense Patterns**:
+   - **1080p Noise**: GPU VLC decode dropped from **325.19 ms** (Phase 2B) to **7.08 ms** (Phase 2C), achieving a **45.94x** GPU VLC replay speedup.
+   - **4K Noise**: GPU VLC decode dropped from **1318.00 ms** (Phase 2B) to **28.91 ms** (Phase 2C), achieving a **45.59x** GPU VLC replay speedup.
+   - **4K Texture**: GPU VLC decode dropped from **438.94 ms** (Phase 2B) to **9.32 ms** (Phase 2C), achieving a **47.12x** GPU VLC replay speedup.
 
 2. **10x to 12x End-to-End Decoder Speedup on Aggregate Workloads**:
    - **1080p Headline Aggregate**: Increased from **10.32 FPS** (Phase 2B) to **108.44 FPS** (Phase 2C, **10.51x speedup**, 224.85 MP/s). Multi-frame pipelining (3 slots) delivers **151.75 FPS** (314.67 MP/s).
@@ -171,7 +171,7 @@ During Phase 2C research, two parallelization architectures were prototyped and 
 
 Design A was selected as the primary production architecture for Phase 2C:
 1. **Dramatically Lower Memory Footprint**: Design A requires under **4 KB** of descriptor memory per frame, whereas Design B requires over **238 MB of scratch VRAM per band** (exceeding 6.4 GB for a full 27-band 4K frame).
-2. **Massive Replay Speedup**: Design A achieves **45x to 64x** GPU entropy speedup on critical noise bands.
+2. **Massive Replay Speedup**: Design A achieves **45x to 64x** GPU VLC replay speedup on critical noise bands.
 3. **Deterministic Exactness**: Checkpoint replay produces bit-exact coefficients identical to the serial reference.
 4. **Research Status for Design B**: Design B remains preserved in `tests/prototype_phase2c_research.cu` for future exploratory compute models.
 
@@ -258,13 +258,15 @@ Defined in `DetermineAdaptiveSegmentCount()` (Rules 13, 14, 15):
 
 ### 1080p (1920x1080) Detailed Per-Pattern Breakdown
 
-| Pattern | CPU Total (ms) | Phase 2B Entropy (ms) | Phase 2B Total (ms) | Phase 2C Host Index (ms) | Phase 2C GPU VLC (ms) | Phase 2C Total (ms) | Entropy Speedup | End-to-End Speedup | Ratio vs CPU |
+| Pattern | CPU Total (ms) | Phase 2B Entropy (ms) | Phase 2B Total (ms) | Phase 2C Host Index (ms) | Phase 2C GPU VLC (ms) | Phase 2C Total (ms) | GPU VLC Replay Speedup | End-to-End Speedup | Ratio vs CPU |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **flat** | 5.58 | 0.83 | 1.24 | 0.07 | 0.27 | **0.75** | **2.42x** | **1.65x** | **7.43x faster** |
 | **gradient** | 5.83 | 18.69 | 19.23 | 0.64 | 1.55 | **2.69** | **11.58x** | **7.15x** | **2.17x faster** |
 | **noise** | 22.75 | 325.19 | 326.31 | 19.47 | 7.00 | **28.02** | **45.94x** | **11.65x** | 0.81x |
 | **texture** | 7.52 | 108.51 | 109.12 | 2.11 | 4.41 | **7.18** | **24.11x** | **15.20x** | **1.05x faster** |
 | **edges** | 6.83 | 30.84 | 31.42 | 1.83 | 2.50 | **4.69** | **12.08x** | **6.69x** | **1.46x faster** |
+
+*Note: "GPU VLC Replay Speedup" reflects isolated GPU kernel execution time (Phase 2B GPU VLC vs. Phase 2C GPU VLC Replay), excluding host indexing time. End-to-End Speedup includes host parsing, host indexing, H2D transfers, GPU replay, inverse wavelet, and color conversion.*
 
 **Headline Aggregate (1080p)**:
 - Phase 2B: **10.32 FPS** (96.94 ms)
@@ -273,13 +275,15 @@ Defined in `DetermineAdaptiveSegmentCount()` (Rules 13, 14, 15):
 
 ### 4K UHD (3840x2160) Detailed Per-Pattern Breakdown
 
-| Pattern | CPU Total (ms) | Phase 2B Entropy (ms) | Phase 2B Total (ms) | Phase 2C Host Index (ms) | Phase 2C GPU VLC (ms) | Phase 2C Total (ms) | Entropy Speedup | End-to-End Speedup | Ratio vs CPU |
+| Pattern | CPU Total (ms) | Phase 2B Entropy (ms) | Phase 2B Total (ms) | Phase 2C Host Index (ms) | Phase 2C GPU VLC (ms) | Phase 2C Total (ms) | GPU VLC Replay Speedup | End-to-End Speedup | Ratio vs CPU |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **flat** | 20.64 | 3.25 | 3.90 | 0.16 | 0.72 | **1.91** | **3.86x** | **2.04x** | **10.78x faster** |
 | **gradient** | 23.07 | 54.30 | 55.05 | 2.12 | 2.53 | **5.14** | **20.96x** | **10.71x** | **4.49x faster** |
 | **noise** | 98.63 | 1318.00 | 1321.00 | 88.70 | 28.84 | **118.90** | **45.59x** | **11.11x** | 0.83x |
 | **texture** | 27.47 | 438.94 | 439.80 | 8.81 | 9.24 | **18.61** | **47.12x** | **23.64x** | **1.48x faster** |
 | **edges** | 25.72 | 125.18 | 126.20 | 7.64 | 5.37 | **13.54** | **22.99x** | **9.32x** | **1.90x faster** |
+
+*Note: "GPU VLC Replay Speedup" reflects isolated GPU kernel execution time (Phase 2B GPU VLC vs. Phase 2C GPU VLC Replay), excluding host indexing time.*
 
 **Headline Aggregate (4K UHD)**:
 - Phase 2B: **2.57 FPS** (389.38 ms)
@@ -288,7 +292,7 @@ Defined in `DetermineAdaptiveSegmentCount()` (Rules 13, 14, 15):
 
 ### 8K Flat High-Throughput
 
-| Pattern | CPU Total (ms) | Phase 2B Entropy (ms) | Phase 2C GPU VLC (ms) | Phase 2C Total (ms) | Entropy Speedup | End-to-End Speedup | Ratio vs CPU |
+| Pattern | CPU Total (ms) | Phase 2B Entropy (ms) | Phase 2C GPU VLC (ms) | Phase 2C Total (ms) | GPU VLC Replay Speedup | End-to-End Speedup | Ratio vs CPU |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **flat** | 71.82 | 14.57 | 2.38 | **6.68** | **5.35x** | **2.56x** | **10.75x faster** |
 
