@@ -25,6 +25,7 @@ if(HYPERCINE_ENABLE_CUDA)
         core/decode_fsm_tables.cpp
         cuda/decode_entropy_cuda.cu
         cuda/decode_phase2b_pipeline.cu
+        cuda/decode_phase2c_pipeline.cu
     )
     set_target_properties(hypercine_wavelet PROPERTIES
         CUDA_STANDARD 17
@@ -44,6 +45,7 @@ else()
         cuda/decode_inverse_stub.cpp
         core/decode_parser.cpp
         cuda/decode_phase2b_stub.cpp
+        cuda/decode_phase2c_stub.cpp
     )
     target_include_directories(hypercine_wavelet PUBLIC
         ${CMAKE_SOURCE_DIR}/include

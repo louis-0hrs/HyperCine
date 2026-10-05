@@ -535,4 +535,467 @@ cudaError_t LaunchDecodeEntropyDiagnosticGpu(
     return cudaGetLastError();
 }
 
+// ============================================================================
+// Phase 2C Intra-Band Parallel Kernels & CPU Indexing (Rules 5, 10, 14, 15)
+// ============================================================================
+
+int DetermineAdaptiveSegmentCount(size_t payload_bytes, size_t coeff_count) {
+    (void)coeff_count;
+    // Rule 15: Small-band fallback (payload < 512 bytes executes as 1 segment)
+    if (payload_bytes < 512) return 1;
+    if (payload_bytes < 4096) return 4;
+    if (payload_bytes < 32768) return 8;
+    if (payload_bytes < 131072) return 16;
+    if (payload_bytes < 524288) return 32;
+    // Rule 14 & 20: High-entropy dense noise / large bands
+    return 64;
+}
+
+bool GenerateBandCheckpointsCpu(
+    const uint8_t* compressed_sample,
+    size_t compressed_size,
+    const std::vector<GpuEntropyBandDescriptor>& vlc_bands,
+    const std::vector<GpuFsmEntry>& fsm_tables,
+    GpuEntropyMode mode,
+    int fixed_segments_per_band,
+    std::vector<GpuEntropySegmentDescriptor>& out_segments
+) {
+    out_segments.clear();
+    if (!compressed_sample || vlc_bands.empty() || fsm_tables.empty()) {
+        return false;
+    }
+
+    for (size_t b = 0; b < vlc_bands.size(); ++b) {
+        const auto& desc = vlc_bands[b];
+        if (desc.payload_offset >= compressed_size) {
+            continue;
+        }
+        uint32_t payload_bytes = desc.payload_bytes;
+        if (desc.payload_offset + payload_bytes > compressed_size) {
+            payload_bytes = static_cast<uint32_t>(compressed_size - desc.payload_offset);
+        }
+
+        int target_segs = 1;
+        if (mode == GpuEntropyMode::ParallelAdaptive) {
+            target_segs = DetermineAdaptiveSegmentCount(payload_bytes, desc.coefficient_count);
+        } else if (mode == GpuEntropyMode::ParallelConfigurable) {
+            target_segs = (fixed_segments_per_band > 0) ? fixed_segments_per_band : 1;
+        } else {
+            target_segs = 1;
+        }
+
+        if (target_segs <= 1 || payload_bytes == 0) {
+            GpuEntropySegmentDescriptor seg{};
+            seg.band_index = static_cast<int>(b);
+            seg.byte_offset = 0;
+            seg.nibble_idx = 0;
+            seg.initial_state = desc.initial_fsm_state;
+            seg.out_coeff_pos = 0;
+            seg.end_byte_offset = payload_bytes;
+            seg.end_nibble_idx = 0;
+            seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
+            out_segments.push_back(seg);
+            continue;
+        }
+
+        size_t codebook_base = (desc.codebook_id == 1) ? CS17_BASE_OFFSET :
+                              ((desc.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
+
+        const uint8_t* src = compressed_sample + desc.payload_offset;
+        uint32_t target_nibbles_per_seg = (payload_bytes * 2 + target_segs - 1) / target_segs;
+        if (target_nibbles_per_seg < 16) target_nibbles_per_seg = 16;
+
+        GpuEntropySegmentDescriptor initial_seg{};
+        initial_seg.band_index = static_cast<int>(b);
+        initial_seg.byte_offset = 0;
+        initial_seg.nibble_idx = 0;
+        initial_seg.initial_state = desc.initial_fsm_state;
+        initial_seg.out_coeff_pos = 0;
+        initial_seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
+        out_segments.push_back(initial_seg);
+
+        uint32_t byte_idx = 0;
+        uint32_t out_pos = 0;
+        uint16_t state = desc.initial_fsm_state;
+        uint32_t seg_start_nibble = 0;
+        uint32_t curr_nibble_global = 0;
+        int current_seg_count = 1;
+        bool terminated = false;
+
+        while (byte_idx < payload_bytes && !terminated) {
+            uint8_t byte = src[byte_idx];
+
+            for (int nib_in_byte = 0; nib_in_byte < 2; ++nib_in_byte) {
+                uint8_t nibble = (nib_in_byte == 0) ? (byte >> 4) : (byte & 0x0f);
+                size_t entry_idx = codebook_base + state * 16 + nibble;
+                const auto& entry = fsm_tables[entry_idx];
+
+                if (entry.value0 == BAND_END_MARKER) {
+                    terminated = true;
+                    out_segments.back().end_byte_offset = byte_idx;
+                    out_segments.back().end_nibble_idx = static_cast<uint8_t>(nib_in_byte);
+                    break;
+                }
+
+                uint32_t pre = entry.pre_post_skip & 0x1ff;
+                uint32_t post = (entry.pre_post_skip >> 12) & 0x7;
+                out_pos += pre + post;
+                state = entry.next_state;
+                curr_nibble_global++;
+
+                if ((curr_nibble_global - seg_start_nibble) >= target_nibbles_per_seg &&
+                    current_seg_count < target_segs) {
+                    uint32_t next_byte = (nib_in_byte == 0) ? byte_idx : (byte_idx + 1);
+                    uint8_t next_nib = (nib_in_byte == 0) ? 1 : 0;
+
+                    out_segments.back().end_byte_offset = next_byte;
+                    out_segments.back().end_nibble_idx = next_nib;
+
+                    GpuEntropySegmentDescriptor next_seg{};
+                    next_seg.band_index = static_cast<int>(b);
+                    next_seg.byte_offset = next_byte;
+                    next_seg.nibble_idx = next_nib;
+                    next_seg.initial_state = state;
+                    next_seg.out_coeff_pos = out_pos;
+                    next_seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
+                    out_segments.push_back(next_seg);
+
+                    seg_start_nibble = curr_nibble_global;
+                    current_seg_count++;
+                }
+            }
+            byte_idx++;
+        }
+
+        if (!terminated) {
+            out_segments.back().end_byte_offset = payload_bytes;
+            out_segments.back().end_nibble_idx = 0;
+        }
+    }
+
+    return true;
+}
+
+__global__ void ZeroAllVlcBandsKernel(
+    const GpuEntropyBandDescriptor* __restrict__ d_descriptors,
+    int num_vlc_bands
+) {
+    int band_idx = blockIdx.x;
+    if (band_idx >= num_vlc_bands) return;
+
+    const GpuEntropyBandDescriptor desc = d_descriptors[band_idx];
+    if (!desc.d_destination) return;
+
+    int16_t* dst = desc.d_destination;
+    size_t total_capacity = desc.coefficient_count;
+
+    for (size_t i = threadIdx.x; i < total_capacity; i += blockDim.x) {
+        dst[i] = 0;
+    }
+}
+
+__global__ void DecodeHighpassVlcParallelCudaKernel(
+    const uint8_t* __restrict__ d_compressed_sample,
+    size_t compressed_size,
+    const GpuEntropyBandDescriptor* __restrict__ d_band_descriptors,
+    int num_vlc_bands,
+    const GpuEntropySegmentDescriptor* __restrict__ d_segments,
+    int num_segments,
+    const GpuFsmEntry* __restrict__ d_fsm_tables,
+    GpuSegmentDecodeResult* __restrict__ d_seg_results
+) {
+    int seg_idx = blockIdx.x;
+    if (seg_idx >= num_segments) return;
+
+    const GpuEntropySegmentDescriptor seg = d_segments[seg_idx];
+    if (seg.band_index < 0 || seg.band_index >= num_vlc_bands) {
+        if (threadIdx.x == 0 && d_seg_results) {
+            d_seg_results[seg_idx].status = GpuBandDecodeStatus::InvalidDescriptor;
+        }
+        return;
+    }
+
+    const GpuEntropyBandDescriptor desc = d_band_descriptors[seg.band_index];
+    if (!desc.d_destination) {
+        if (threadIdx.x == 0 && d_seg_results) {
+            d_seg_results[seg_idx].status = GpuBandDecodeStatus::InvalidDescriptor;
+        }
+        return;
+    }
+
+    int16_t* dst = desc.d_destination;
+    size_t coeff_capacity = desc.coefficient_count;
+    int quant = desc.quantization;
+
+    size_t codebook_base = (desc.codebook_id == 1) ? CS17_BASE_OFFSET :
+                          ((desc.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
+
+    if (threadIdx.x == 0) {
+        uint64_t start_clk = clock64();
+        GpuBandDecodeStatus status = GpuBandDecodeStatus::Complete;
+        uint32_t nonzero_count = 0;
+        uint32_t byte_idx = seg.byte_offset;
+        uint16_t state = seg.initial_state;
+        uint32_t out_pos = seg.out_coeff_pos;
+
+        if (desc.payload_offset + seg.end_byte_offset > compressed_size) {
+            status = GpuBandDecodeStatus::InputTruncated;
+        } else {
+            const uint8_t* src = d_compressed_sample + desc.payload_offset;
+
+            uint8_t nib_idx = seg.nibble_idx;
+            uint32_t end_byte = seg.end_byte_offset;
+            uint8_t end_nib = seg.end_nibble_idx;
+
+            while (true) {
+                if (byte_idx > end_byte || (byte_idx == end_byte && nib_idx >= end_nib)) {
+                    break;
+                }
+
+                uint8_t byte = src[byte_idx];
+                uint8_t nibble = (nib_idx == 0) ? (byte >> 4) : (byte & 0x0f);
+                size_t entry_idx = codebook_base + state * 16 + nibble;
+                GpuFsmEntry entry = d_fsm_tables[entry_idx];
+
+                if (entry.value0 == BAND_END_MARKER) {
+                    break;
+                }
+
+                uint32_t pre = entry.pre_post_skip & 0x1ff;
+                uint32_t post = (entry.pre_post_skip >> 12) & 0x7;
+                uint32_t write_pos = out_pos + pre;
+
+                if ((entry.value0 != 0 && write_pos >= coeff_capacity) ||
+                    (entry.value1 != 0 && (write_pos + 1) >= coeff_capacity) ||
+                    (write_pos + post > coeff_capacity + 8)) {
+                    status = GpuBandDecodeStatus::CoefficientOverflow;
+                    break;
+                }
+
+                out_pos += pre;
+                if (entry.value0 != 0) {
+                    dst[out_pos] = static_cast<int16_t>(entry.value0 * quant);
+                    nonzero_count++;
+                }
+                if (entry.value1 != 0) {
+                    dst[out_pos + 1] = static_cast<int16_t>(entry.value1 * quant);
+                    nonzero_count++;
+                }
+                out_pos += post;
+                state = entry.next_state;
+
+                if (nib_idx == 0) {
+                    nib_idx = 1;
+                } else {
+                    nib_idx = 0;
+                    byte_idx++;
+                }
+            }
+        }
+
+        uint64_t end_clk = clock64();
+
+        if (d_seg_results) {
+            d_seg_results[seg_idx].status = status;
+            d_seg_results[seg_idx].consumed_bytes = (status == GpuBandDecodeStatus::InputTruncated) ? 0 : (byte_idx - seg.byte_offset);
+            d_seg_results[seg_idx].final_fsm_state = state;
+            d_seg_results[seg_idx].final_coeff_pos = out_pos;
+            d_seg_results[seg_idx].nonzero_count = nonzero_count;
+            d_seg_results[seg_idx].duration_cycles = end_clk - start_clk;
+        }
+    }
+}
+
+__global__ void CooperativeDifferenceCodingAllBandsKernel(
+    const GpuEntropyBandDescriptor* __restrict__ d_descriptors,
+    int num_vlc_bands
+) {
+    int band_idx = blockIdx.x;
+    if (band_idx >= num_vlc_bands) return;
+
+    const GpuEntropyBandDescriptor desc = d_descriptors[band_idx];
+    if (!desc.difference_coding || !desc.d_destination) return;
+
+    int width = desc.width;
+    int height = desc.height;
+    size_t pitch_samples = desc.pitch_samples;
+    int16_t* dst = desc.d_destination;
+
+    for (int y = threadIdx.x; y < height; y += blockDim.x) {
+        int16_t* line = dst + y * pitch_samples;
+        for (int x = 1; x < width; ++x) {
+            line[x] += line[x - 1];
+        }
+    }
+}
+
+__global__ void DecodeEntropyParallelDiagnosticCudaKernel(
+    const uint8_t* __restrict__ d_compressed_sample,
+    size_t compressed_size,
+    const GpuEntropyBandDescriptor* __restrict__ d_band_desc,
+    const GpuEntropySegmentDescriptor* __restrict__ d_segments,
+    int num_segments,
+    const GpuFsmEntry* __restrict__ d_fsm_tables,
+    GpuSegmentDiagnostic* __restrict__ d_diagnostics
+) {
+    int seg_idx = blockIdx.x;
+    if (seg_idx >= num_segments || threadIdx.x != 0) return;
+
+    const GpuEntropySegmentDescriptor seg = d_segments[seg_idx];
+    const GpuEntropyBandDescriptor desc = *d_band_desc;
+
+    size_t codebook_base = (desc.codebook_id == 1) ? CS17_BASE_OFFSET :
+                          ((desc.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
+
+    GpuSegmentDiagnostic diag{};
+    diag.start_byte = seg.byte_offset;
+    diag.start_nibble = seg.nibble_idx;
+    diag.start_state = seg.initial_state;
+    diag.start_out_pos = seg.out_coeff_pos;
+
+    if (desc.payload_offset + seg.end_byte_offset > compressed_size) {
+        diag.termination_status = GpuBandDecodeStatus::InputTruncated;
+    } else {
+        const uint8_t* src = d_compressed_sample + desc.payload_offset;
+        uint32_t byte_idx = seg.byte_offset;
+        uint8_t nib_idx = seg.nibble_idx;
+        uint32_t end_byte = seg.end_byte_offset;
+        uint8_t end_nib = seg.end_nibble_idx;
+
+        uint16_t state = seg.initial_state;
+        uint32_t out_pos = seg.out_coeff_pos;
+        uint32_t sym_count = 0;
+
+        while (true) {
+            if (byte_idx > end_byte || (byte_idx == end_byte && nib_idx >= end_nib)) {
+                break;
+            }
+
+            uint8_t byte = src[byte_idx];
+            uint8_t nibble = (nib_idx == 0) ? (byte >> 4) : (byte & 0x0f);
+            size_t entry_idx = codebook_base + state * 16 + nibble;
+            GpuFsmEntry entry = d_fsm_tables[entry_idx];
+
+            if (entry.value0 == BAND_END_MARKER) {
+                break;
+            }
+
+            uint32_t pre = entry.pre_post_skip & 0x1ff;
+            uint32_t post = (entry.pre_post_skip >> 12) & 0x7;
+            out_pos += pre;
+            if (entry.value0 != 0 || entry.value1 != 0) {
+                sym_count++;
+            }
+            out_pos += post;
+            state = entry.next_state;
+
+            if (nib_idx == 0) {
+                nib_idx = 1;
+            } else {
+                nib_idx = 0;
+                byte_idx++;
+            }
+        }
+
+        diag.end_byte = byte_idx;
+        diag.end_nibble = nib_idx;
+        diag.end_state = state;
+        diag.end_out_pos = out_pos;
+        diag.emitted_symbols = sym_count;
+        diag.termination_status = GpuBandDecodeStatus::Complete;
+    }
+
+    if (d_diagnostics) {
+        d_diagnostics[seg_idx] = diag;
+    }
+}
+
+// ============================================================================
+// Phase 2C Launch APIs
+// ============================================================================
+
+cudaError_t LaunchZeroVlcBandsGpu(
+    const GpuEntropyBandDescriptor* d_descriptors,
+    int num_vlc_bands,
+    cudaStream_t stream
+) {
+    if (!d_descriptors || num_vlc_bands <= 0) return cudaErrorInvalidValue;
+
+    ZeroAllVlcBandsKernel<<<num_vlc_bands, 256, 0, stream>>>(d_descriptors, num_vlc_bands);
+    return cudaGetLastError();
+}
+
+cudaError_t LaunchDecodeEntropyParallelGpu(
+    const uint8_t* d_compressed_sample,
+    size_t compressed_size,
+    const GpuEntropyBandDescriptor* d_band_descriptors,
+    int num_vlc_bands,
+    const GpuEntropySegmentDescriptor* d_segments,
+    int num_segments,
+    const GpuFsmEntry* d_fsm_tables,
+    GpuSegmentDecodeResult* d_seg_results,
+    cudaStream_t stream
+) {
+    if (!d_compressed_sample || !d_band_descriptors || num_vlc_bands <= 0 ||
+        !d_segments || num_segments <= 0 || !d_fsm_tables) {
+        return cudaErrorInvalidValue;
+    }
+
+    DecodeHighpassVlcParallelCudaKernel<<<num_segments, 64, 0, stream>>>(
+        d_compressed_sample,
+        compressed_size,
+        d_band_descriptors,
+        num_vlc_bands,
+        d_segments,
+        num_segments,
+        d_fsm_tables,
+        d_seg_results
+    );
+
+    return cudaGetLastError();
+}
+
+cudaError_t LaunchCooperativeDifferenceCodingGpu(
+    const GpuEntropyBandDescriptor* d_band_descriptors,
+    int num_vlc_bands,
+    cudaStream_t stream
+) {
+    if (!d_band_descriptors || num_vlc_bands <= 0) return cudaErrorInvalidValue;
+
+    CooperativeDifferenceCodingAllBandsKernel<<<num_vlc_bands, 128, 0, stream>>>(
+        d_band_descriptors,
+        num_vlc_bands
+    );
+
+    return cudaGetLastError();
+}
+
+cudaError_t LaunchDecodeEntropyParallelDiagnosticGpu(
+    const uint8_t* d_compressed_sample,
+    size_t compressed_size,
+    const GpuEntropyBandDescriptor* d_band_desc,
+    const GpuEntropySegmentDescriptor* d_segments,
+    int num_segments,
+    const GpuFsmEntry* d_fsm_tables,
+    GpuSegmentDiagnostic* d_diagnostics,
+    cudaStream_t stream
+) {
+    if (!d_compressed_sample || !d_band_desc || !d_segments || num_segments <= 0 || !d_fsm_tables) {
+        return cudaErrorInvalidValue;
+    }
+
+    DecodeEntropyParallelDiagnosticCudaKernel<<<num_segments, 1, 0, stream>>>(
+        d_compressed_sample,
+        compressed_size,
+        d_band_desc,
+        d_segments,
+        num_segments,
+        d_fsm_tables,
+        d_diagnostics
+    );
+
+    return cudaGetLastError();
+}
+
 } // namespace HyperCine
+

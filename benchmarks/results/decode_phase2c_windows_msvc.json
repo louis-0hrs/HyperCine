@@ -1,0 +1,203 @@
+{
+  "benchmark": "decode_phase2c",
+  "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+  "compute_capability": "8.9",
+  "results": [
+    {
+      "resolution": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "megapixels": 2.0736,
+      "phase2b_fps": 10.3161,
+      "phase2b_latency_ms": 96.9359,
+      "phase2c_fps": 108.436,
+      "phase2c_latency_ms": 9.22305,
+      "phase2c_throughput_mpps": 224.852,
+      "speedup_vs_phase2b": 10.5113,
+      "patterns": [
+        {
+          "pattern": "flat",
+          "cpu_total_ms": 5.5755,
+          "phase2b_entropy_ms": 0.829099,
+          "phase2b_total_ms": 1.23737,
+          "phase2c_entropy_ms": 0.34304,
+          "phase2c_host_index_ms": 0.07178,
+          "phase2c_vlc_ms": 0.271155,
+          "phase2c_diff_coding_ms": 0.0038912,
+          "phase2c_total_ms": 0.75024,
+          "entropy_speedup": 2.41692,
+          "total_speedup": 1.64929,
+          "ratio_vs_cpu": 7.43162
+        },
+        {
+          "pattern": "gradient",
+          "cpu_total_ms": 5.82987,
+          "phase2b_entropy_ms": 18.6935,
+          "phase2b_total_ms": 19.2284,
+          "phase2c_entropy_ms": 1.61485,
+          "phase2c_host_index_ms": 0.63654,
+          "phase2c_vlc_ms": 1.54788,
+          "phase2c_diff_coding_ms": 0.0043008,
+          "phase2c_total_ms": 2.69056,
+          "entropy_speedup": 11.576,
+          "total_speedup": 7.14663,
+          "ratio_vs_cpu": 2.16679
+        },
+        {
+          "pattern": "noise",
+          "cpu_total_ms": 22.7537,
+          "phase2b_entropy_ms": 325.193,
+          "phase2b_total_ms": 326.31,
+          "phase2c_entropy_ms": 7.07827,
+          "phase2c_host_index_ms": 19.4677,
+          "phase2c_vlc_ms": 7.00416,
+          "phase2c_diff_coding_ms": 0.0045056,
+          "phase2c_total_ms": 28.0197,
+          "entropy_speedup": 45.9425,
+          "total_speedup": 11.6457,
+          "ratio_vs_cpu": 0.812061
+        },
+        {
+          "pattern": "texture",
+          "cpu_total_ms": 7.5177,
+          "phase2b_entropy_ms": 108.515,
+          "phase2b_total_ms": 109.118,
+          "phase2c_entropy_ms": 4.50048,
+          "phase2c_host_index_ms": 2.16316,
+          "phase2c_vlc_ms": 4.44068,
+          "phase2c_diff_coding_ms": 0.0038912,
+          "phase2c_total_ms": 7.1807,
+          "entropy_speedup": 24.1118,
+          "total_speedup": 15.1959,
+          "ratio_vs_cpu": 1.04693
+        },
+        {
+          "pattern": "edges",
+          "cpu_total_ms": 6.83027,
+          "phase2b_entropy_ms": 30.8432,
+          "phase2b_total_ms": 31.3639,
+          "phase2c_entropy_ms": 2.55283,
+          "phase2c_host_index_ms": 1.64252,
+          "phase2c_vlc_ms": 2.48772,
+          "phase2c_diff_coding_ms": 0.0038784,
+          "phase2c_total_ms": 4.69108,
+          "entropy_speedup": 12.082,
+          "total_speedup": 6.68585,
+          "ratio_vs_cpu": 1.45601
+        }
+      ]
+    },
+    {
+      "resolution": "4K UHD",
+      "width": 3840,
+      "height": 2160,
+      "megapixels": 8.2944,
+      "phase2b_fps": 2.5682,
+      "phase2b_latency_ms": 389.378,
+      "phase2c_fps": 32.5354,
+      "phase2c_latency_ms": 30.737,
+      "phase2c_throughput_mpps": 269.861,
+      "speedup_vs_phase2b": 12.6685,
+      "patterns": [
+        {
+          "pattern": "flat",
+          "cpu_total_ms": 20.6354,
+          "phase2b_entropy_ms": 3.25154,
+          "phase2b_total_ms": 3.89913,
+          "phase2c_entropy_ms": 0.841728,
+          "phase2c_host_index_ms": 0.44786,
+          "phase2c_vlc_ms": 0.620749,
+          "phase2c_diff_coding_ms": 0.0038912,
+          "phase2c_total_ms": 1.91486,
+          "entropy_speedup": 3.86294,
+          "total_speedup": 2.03625,
+          "ratio_vs_cpu": 10.7764
+        },
+        {
+          "pattern": "gradient",
+          "cpu_total_ms": 23.0712,
+          "phase2b_entropy_ms": 54.2962,
+          "phase2b_total_ms": 55.0491,
+          "phase2c_entropy_ms": 2.59027,
+          "phase2c_host_index_ms": 1.83828,
+          "phase2c_vlc_ms": 2.36995,
+          "phase2c_diff_coding_ms": 0.0036864,
+          "phase2c_total_ms": 5.13868,
+          "entropy_speedup": 20.9616,
+          "total_speedup": 10.7127,
+          "ratio_vs_cpu": 4.48971
+        },
+        {
+          "pattern": "noise",
+          "cpu_total_ms": 98.628,
+          "phase2b_entropy_ms": 1318,
+          "phase2b_total_ms": 1320.9,
+          "phase2c_entropy_ms": 28.9091,
+          "phase2c_host_index_ms": 86.2646,
+          "phase2c_vlc_ms": 28.5112,
+          "phase2c_diff_coding_ms": 0.0043008,
+          "phase2c_total_ms": 118.901,
+          "entropy_speedup": 45.5912,
+          "total_speedup": 11.1092,
+          "ratio_vs_cpu": 0.829494
+        },
+        {
+          "pattern": "texture",
+          "cpu_total_ms": 27.466,
+          "phase2b_entropy_ms": 438.943,
+          "phase2b_total_ms": 439.95,
+          "phase2c_entropy_ms": 9.31594,
+          "phase2c_host_index_ms": 8.37852,
+          "phase2c_vlc_ms": 9.09619,
+          "phase2c_diff_coding_ms": 0.004096,
+          "phase2c_total_ms": 18.6134,
+          "entropy_speedup": 47.1174,
+          "total_speedup": 23.6362,
+          "ratio_vs_cpu": 1.47561
+        },
+        {
+          "pattern": "edges",
+          "cpu_total_ms": 25.7245,
+          "phase2b_entropy_ms": 125.175,
+          "phase2b_total_ms": 126.115,
+          "phase2c_entropy_ms": 5.44461,
+          "phase2c_host_index_ms": 7.17978,
+          "phase2c_vlc_ms": 5.22998,
+          "phase2c_diff_coding_ms": 0.0036864,
+          "phase2c_total_ms": 13.538,
+          "entropy_speedup": 22.9907,
+          "total_speedup": 9.31567,
+          "ratio_vs_cpu": 1.90018
+        }
+      ]
+    },
+    {
+      "resolution": "8K flat",
+      "width": 7680,
+      "height": 4320,
+      "megapixels": 33.1776,
+      "phase2b_fps": 58.6448,
+      "phase2b_latency_ms": 17.052,
+      "phase2c_fps": 145.88,
+      "phase2c_latency_ms": 6.85693,
+      "phase2c_throughput_mpps": 4839.96,
+      "speedup_vs_phase2b": 2.48752,
+      "patterns": [
+        {
+          "pattern": "flat",
+          "cpu_total_ms": 71.8156,
+          "phase2b_entropy_ms": 14.5691,
+          "phase2b_total_ms": 17.0655,
+          "phase2c_entropy_ms": 2.7244,
+          "phase2c_host_index_ms": 1.43556,
+          "phase2c_vlc_ms": 1.7836,
+          "phase2c_diff_coding_ms": 0.0047104,
+          "phase2c_total_ms": 6.67774,
+          "entropy_speedup": 5.34765,
+          "total_speedup": 2.55558,
+          "ratio_vs_cpu": 10.7545
+        }
+      ]
+    }
+  ]
+}
