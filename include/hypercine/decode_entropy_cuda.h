@@ -183,6 +183,20 @@ bool GenerateBandCheckpointsCpu(
     std::vector<GpuEntropySegmentDescriptor>& out_segments
 );
 
+// Generate checkpoints on host CPU for a single VLC band descriptor (Pass A1)
+bool GenerateSingleBandCheckpointsCpu(
+    const uint8_t* compressed_sample,
+    size_t compressed_size,
+    const GpuEntropyBandDescriptor& desc,
+    int band_index,
+    const GpuFsmEntry* fsm_tables,
+    size_t fsm_tables_size,
+    GpuEntropyMode mode,
+    int fixed_segments_per_band,
+    std::vector<GpuEntropySegmentDescriptor>& out_segments,
+    std::string* out_error = nullptr
+);
+
 // Global GPU FSM base tables manager
 class GpuFsmTableManager {
 public:

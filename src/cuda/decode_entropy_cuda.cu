@@ -551,6 +551,154 @@ int DetermineAdaptiveSegmentCount(size_t payload_bytes, size_t coeff_count) {
     return 64;
 }
 
+bool GenerateSingleBandCheckpointsCpu(
+    const uint8_t* compressed_sample,
+    size_t compressed_size,
+    const GpuEntropyBandDescriptor& desc,
+    int band_index,
+    const GpuFsmEntry* fsm_tables,
+    size_t fsm_tables_size,
+    GpuEntropyMode mode,
+    int fixed_segments_per_band,
+    std::vector<GpuEntropySegmentDescriptor>& out_segments,
+    std::string* out_error
+) {
+    out_segments.clear();
+    if (!compressed_sample || !fsm_tables || fsm_tables_size == 0) {
+        if (out_error) *out_error = "null sample or invalid fsm tables";
+        return false;
+    }
+
+    if (desc.payload_offset >= compressed_size) {
+        if (out_error) *out_error = "payload offset exceeds compressed buffer size";
+        return false;
+    }
+
+    uint32_t payload_bytes = desc.payload_bytes;
+    if (desc.payload_offset + payload_bytes > compressed_size) {
+        if (out_error) *out_error = "payload is truncated within compressed buffer";
+        return false;
+    }
+
+    if (desc.codebook_id < 0 || desc.codebook_id > 2) {
+        if (out_error) *out_error = "invalid codebook id";
+        return false;
+    }
+
+    if (desc.coefficient_count == 0) {
+        if (out_error) *out_error = "invalid descriptor: zero coefficient count";
+        return false;
+    }
+
+    int target_segs = 1;
+    if (mode == GpuEntropyMode::ParallelAdaptive) {
+        target_segs = DetermineAdaptiveSegmentCount(payload_bytes, desc.coefficient_count);
+    } else if (mode == GpuEntropyMode::ParallelConfigurable) {
+        target_segs = (fixed_segments_per_band > 0) ? fixed_segments_per_band : 1;
+    } else {
+        target_segs = 1;
+    }
+
+    if (target_segs <= 1 || payload_bytes == 0) {
+        GpuEntropySegmentDescriptor seg{};
+        seg.band_index = band_index;
+        seg.byte_offset = 0;
+        seg.nibble_idx = 0;
+        seg.initial_state = desc.initial_fsm_state;
+        seg.out_coeff_pos = 0;
+        seg.end_byte_offset = payload_bytes;
+        seg.end_nibble_idx = 0;
+        seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
+        out_segments.push_back(seg);
+        return true;
+    }
+
+    size_t codebook_base = (desc.codebook_id == 1) ? CS17_BASE_OFFSET :
+                          ((desc.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
+
+    const uint8_t* src = compressed_sample + desc.payload_offset;
+    uint32_t target_nibbles_per_seg = (payload_bytes * 2 + target_segs - 1) / target_segs;
+    if (target_nibbles_per_seg < 16) target_nibbles_per_seg = 16;
+
+    GpuEntropySegmentDescriptor initial_seg{};
+    initial_seg.band_index = band_index;
+    initial_seg.byte_offset = 0;
+    initial_seg.nibble_idx = 0;
+    initial_seg.initial_state = desc.initial_fsm_state;
+    initial_seg.out_coeff_pos = 0;
+    initial_seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
+    out_segments.push_back(initial_seg);
+
+    uint32_t byte_idx = 0;
+    uint32_t out_pos = 0;
+    uint16_t state = desc.initial_fsm_state;
+    uint32_t seg_start_nibble = 0;
+    uint32_t curr_nibble_global = 0;
+    int current_seg_count = 1;
+    bool terminated = false;
+
+    while (byte_idx < payload_bytes && !terminated) {
+        uint8_t byte = src[byte_idx];
+
+        for (int nib_in_byte = 0; nib_in_byte < 2; ++nib_in_byte) {
+            uint8_t nibble = (nib_in_byte == 0) ? (byte >> 4) : (byte & 0x0f);
+            size_t entry_idx = codebook_base + state * 16 + nibble;
+            if (entry_idx >= fsm_tables_size) {
+                if (out_error) *out_error = "fsm table index out of bounds";
+                return false;
+            }
+            const auto& entry = fsm_tables[entry_idx];
+
+            if (entry.value0 == BAND_END_MARKER) {
+                terminated = true;
+                out_segments.back().end_byte_offset = byte_idx;
+                out_segments.back().end_nibble_idx = static_cast<uint8_t>(nib_in_byte);
+                break;
+            }
+
+            uint32_t pre = entry.pre_post_skip & 0x1ff;
+            uint32_t post = (entry.pre_post_skip >> 12) & 0x7;
+            out_pos += pre + post;
+            if (out_pos > desc.coefficient_count + 8) {
+                if (out_error) *out_error = "coefficient overflow during indexing";
+                return false;
+            }
+
+            state = entry.next_state;
+            curr_nibble_global++;
+
+            if ((curr_nibble_global - seg_start_nibble) >= target_nibbles_per_seg &&
+                current_seg_count < target_segs) {
+                uint32_t next_byte = (nib_in_byte == 0) ? byte_idx : (byte_idx + 1);
+                uint8_t next_nib = (nib_in_byte == 0) ? 1 : 0;
+
+                out_segments.back().end_byte_offset = next_byte;
+                out_segments.back().end_nibble_idx = next_nib;
+
+                GpuEntropySegmentDescriptor next_seg{};
+                next_seg.band_index = band_index;
+                next_seg.byte_offset = next_byte;
+                next_seg.nibble_idx = next_nib;
+                next_seg.initial_state = state;
+                next_seg.out_coeff_pos = out_pos;
+                next_seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
+                out_segments.push_back(next_seg);
+
+                seg_start_nibble = curr_nibble_global;
+                current_seg_count++;
+            }
+        }
+        byte_idx++;
+    }
+
+    if (!terminated) {
+        out_segments.back().end_byte_offset = payload_bytes;
+        out_segments.back().end_nibble_idx = 0;
+    }
+
+    return true;
+}
+
 bool GenerateBandCheckpointsCpu(
     const uint8_t* compressed_sample,
     size_t compressed_size,
@@ -565,111 +713,26 @@ bool GenerateBandCheckpointsCpu(
         return false;
     }
 
+    std::vector<GpuEntropySegmentDescriptor> band_segs;
     for (size_t b = 0; b < vlc_bands.size(); ++b) {
         const auto& desc = vlc_bands[b];
         if (desc.payload_offset >= compressed_size) {
             continue;
         }
-        uint32_t payload_bytes = desc.payload_bytes;
-        if (desc.payload_offset + payload_bytes > compressed_size) {
-            payload_bytes = static_cast<uint32_t>(compressed_size - desc.payload_offset);
-        }
-
-        int target_segs = 1;
-        if (mode == GpuEntropyMode::ParallelAdaptive) {
-            target_segs = DetermineAdaptiveSegmentCount(payload_bytes, desc.coefficient_count);
-        } else if (mode == GpuEntropyMode::ParallelConfigurable) {
-            target_segs = (fixed_segments_per_band > 0) ? fixed_segments_per_band : 1;
-        } else {
-            target_segs = 1;
-        }
-
-        if (target_segs <= 1 || payload_bytes == 0) {
-            GpuEntropySegmentDescriptor seg{};
-            seg.band_index = static_cast<int>(b);
-            seg.byte_offset = 0;
-            seg.nibble_idx = 0;
-            seg.initial_state = desc.initial_fsm_state;
-            seg.out_coeff_pos = 0;
-            seg.end_byte_offset = payload_bytes;
-            seg.end_nibble_idx = 0;
-            seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
-            out_segments.push_back(seg);
-            continue;
-        }
-
-        size_t codebook_base = (desc.codebook_id == 1) ? CS17_BASE_OFFSET :
-                              ((desc.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
-
-        const uint8_t* src = compressed_sample + desc.payload_offset;
-        uint32_t target_nibbles_per_seg = (payload_bytes * 2 + target_segs - 1) / target_segs;
-        if (target_nibbles_per_seg < 16) target_nibbles_per_seg = 16;
-
-        GpuEntropySegmentDescriptor initial_seg{};
-        initial_seg.band_index = static_cast<int>(b);
-        initial_seg.byte_offset = 0;
-        initial_seg.nibble_idx = 0;
-        initial_seg.initial_state = desc.initial_fsm_state;
-        initial_seg.out_coeff_pos = 0;
-        initial_seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
-        out_segments.push_back(initial_seg);
-
-        uint32_t byte_idx = 0;
-        uint32_t out_pos = 0;
-        uint16_t state = desc.initial_fsm_state;
-        uint32_t seg_start_nibble = 0;
-        uint32_t curr_nibble_global = 0;
-        int current_seg_count = 1;
-        bool terminated = false;
-
-        while (byte_idx < payload_bytes && !terminated) {
-            uint8_t byte = src[byte_idx];
-
-            for (int nib_in_byte = 0; nib_in_byte < 2; ++nib_in_byte) {
-                uint8_t nibble = (nib_in_byte == 0) ? (byte >> 4) : (byte & 0x0f);
-                size_t entry_idx = codebook_base + state * 16 + nibble;
-                const auto& entry = fsm_tables[entry_idx];
-
-                if (entry.value0 == BAND_END_MARKER) {
-                    terminated = true;
-                    out_segments.back().end_byte_offset = byte_idx;
-                    out_segments.back().end_nibble_idx = static_cast<uint8_t>(nib_in_byte);
-                    break;
-                }
-
-                uint32_t pre = entry.pre_post_skip & 0x1ff;
-                uint32_t post = (entry.pre_post_skip >> 12) & 0x7;
-                out_pos += pre + post;
-                state = entry.next_state;
-                curr_nibble_global++;
-
-                if ((curr_nibble_global - seg_start_nibble) >= target_nibbles_per_seg &&
-                    current_seg_count < target_segs) {
-                    uint32_t next_byte = (nib_in_byte == 0) ? byte_idx : (byte_idx + 1);
-                    uint8_t next_nib = (nib_in_byte == 0) ? 1 : 0;
-
-                    out_segments.back().end_byte_offset = next_byte;
-                    out_segments.back().end_nibble_idx = next_nib;
-
-                    GpuEntropySegmentDescriptor next_seg{};
-                    next_seg.band_index = static_cast<int>(b);
-                    next_seg.byte_offset = next_byte;
-                    next_seg.nibble_idx = next_nib;
-                    next_seg.initial_state = state;
-                    next_seg.out_coeff_pos = out_pos;
-                    next_seg.max_coeff_pos = static_cast<uint32_t>(desc.coefficient_count);
-                    out_segments.push_back(next_seg);
-
-                    seg_start_nibble = curr_nibble_global;
-                    current_seg_count++;
-                }
-            }
-            byte_idx++;
-        }
-
-        if (!terminated) {
-            out_segments.back().end_byte_offset = payload_bytes;
-            out_segments.back().end_nibble_idx = 0;
+        band_segs.clear();
+        if (GenerateSingleBandCheckpointsCpu(
+                compressed_sample,
+                compressed_size,
+                desc,
+                static_cast<int>(b),
+                fsm_tables.data(),
+                fsm_tables.size(),
+                mode,
+                fixed_segments_per_band,
+                band_segs,
+                nullptr
+            )) {
+            out_segments.insert(out_segments.end(), band_segs.begin(), band_segs.end());
         }
     }
 
