@@ -1,0 +1,92 @@
+{
+  "base_commit": "3e24e7da42bdde5f5c59237c7ae1de38a2749637",
+  "branch": "decode-phase2fa",
+  "hardware_correction_commit": "9496ff7e31e700bb9431253647edc6f4993d6075",
+  "main_ref": "51435890ba5853e87e8cf1ddc7cc747954bd9e80",
+  "frozen_upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+  "working_upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+  "production_encoder_changed": false,
+  "compiler": "MSVC 19.44 / Visual Studio 2022",
+  "cuda_toolkit": "12.8",
+  "source_hashes": [
+    {
+      "path": "benchmarks/benchmark_codec.cpp",
+      "sha256": "6b00b815f847d4d709ec2e81a4a8d5373d39c4c51d29559055092c4eaaf57345"
+    },
+    {
+      "path": "benchmarks/benchmark_decode_phase2fa.cpp",
+      "sha256": "7ae3b4f3f2205993d403bb34bebaf507b826fa0d3ccaa72025e1257a0cdacc5c"
+    },
+    {
+      "path": "benchmarks/CMakeLists.txt",
+      "sha256": "6ae0ed3d52b61b5c304324d437e783dbbdb5bcd30211288d78d70d854a3af29b"
+    },
+    {
+      "path": "include/hypercine/decode_color_cuda.h",
+      "sha256": "328bda4ca5e8d72b2af5c0320c943ddac50cd55d91306e4d18f9ab3fb3414df4"
+    },
+    {
+      "path": "include/hypercine/decode_entropy_cuda.h",
+      "sha256": "807296b6d9cb39bac7b0b7540d308d5d9a7871c3171e20be5d0da8a29d764d9a"
+    },
+    {
+      "path": "include/hypercine/decode_gpu_index.h",
+      "sha256": "ac2d8ab8441332f82adf57b548567f8eddd12836ab9b2badd8473a6f145adae7"
+    },
+    {
+      "path": "include/hypercine/decode_phase2e.h",
+      "sha256": "42f57c7a650d07c2cb30d76eb40add9393b433c85f699904ae80377078cdc545"
+    },
+    {
+      "path": "src/CMakeLists.txt",
+      "sha256": "d6ea1a7cf29c62f72c91c4a086609346e5f4550d4ee8ab6ca040ef1fe72522d3"
+    },
+    {
+      "path": "src/cuda/decode_color_cuda.cu",
+      "sha256": "0f56e55be89a4494886b9cbef4618f27be4dd30d654487f63669c1162011d721"
+    },
+    {
+      "path": "src/cuda/decode_entropy_cuda.cu",
+      "sha256": "bfcada54ec63b1947023d0cf9aa4a4118bc1a590b002479c15e651baffa835d2"
+    },
+    {
+      "path": "src/cuda/decode_error_guard.cuh",
+      "sha256": "64d27d3ae47166833d4807c891b561d27e2dd832f67a108b148229a75ae2cf98"
+    },
+    {
+      "path": "src/cuda/decode_gpu_index_stub.cpp",
+      "sha256": "242823c8316c05e7224cf18479ef5201a4973401a01a29b9ea09455e8e11b2ad"
+    },
+    {
+      "path": "src/cuda/decode_gpu_index.cu",
+      "sha256": "d5ebcbd344df4ed0f64b66ba06d7e367333475279427a27569b4e740b8e84a61"
+    },
+    {
+      "path": "src/cuda/decode_inverse_kernels.cuh",
+      "sha256": "73a34474c2156c0a12afab7ebabeb89bcc732b1b256746bcbd27c6996c0d20a9"
+    },
+    {
+      "path": "src/cuda/decode_phase2e_pipeline.cu",
+      "sha256": "412fdb40a5bd60dae4f262f9ab4e1f7c8c559ab37cde88fb496cee88fc888d17"
+    },
+    {
+      "path": "src/cuda/decode_phase2e_stub.cpp",
+      "sha256": "28279789121fe2446d295a37aad455f6d79a6d095324082e6ad267f58e31b22e"
+    },
+    {
+      "path": "tests/CMakeLists.txt",
+      "sha256": "ccfdc93e00f61d41854a2459bce88610c18b9c234659ecba3ae74cce183a5f71"
+    },
+    {
+      "path": "tests/test_decode_gpu_index.cu",
+      "sha256": "73b8fdce704801a790c2f348c214264d1a4908ad617d5911570ef952efa28453"
+    },
+    {
+      "path": "tests/test_decode_phase2fa.cpp",
+      "sha256": "480d9668e7a4e155c6c4476be7fae6a3230371316eb136e41c4174a31c20e9a8"
+    }
+  ],
+  "license": "MIT OR Apache-2.0",
+  "nvidia_driver": "610.62",
+  "golden_manifest_sha256": "dbe8d97f5bcfcd709c7b1994cba0b8c2e7d0fa89130e2ace775cf8d704d0c026"
+}

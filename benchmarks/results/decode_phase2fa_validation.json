@@ -1,0 +1,105 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "branch": "decode-phase2fa",
+  "source_base": "3e24e7d",
+  "cpu_ctest_passed": true,
+  "cpu_ctest_tests": 5,
+  "cpu_ctest_seconds": 4.77,
+  "cuda_ctest_passed": true,
+  "cuda_ctest_tests": 27,
+  "cuda_ctest_seconds": 636.34,
+  "all_sanitizers_passed": true,
+  "sanitizer_checks": [
+    {
+      "tool": "memcheck",
+      "scope": "index",
+      "passed": true,
+      "corpus_vectors": 0,
+      "synthetic_cases": 20,
+      "excluded_kernel": null
+    },
+    {
+      "tool": "racecheck",
+      "scope": "index",
+      "passed": true,
+      "corpus_vectors": 0,
+      "synthetic_cases": 20,
+      "excluded_kernel": null
+    },
+    {
+      "tool": "initcheck",
+      "scope": "index",
+      "passed": true,
+      "corpus_vectors": 0,
+      "synthetic_cases": 20,
+      "excluded_kernel": null
+    },
+    {
+      "tool": "synccheck",
+      "scope": "index",
+      "passed": true,
+      "corpus_vectors": 0,
+      "synthetic_cases": 20,
+      "excluded_kernel": null
+    },
+    {
+      "tool": "memcheck",
+      "scope": "corpus",
+      "passed": true,
+      "corpus_vectors": 11,
+      "synthetic_cases": 0,
+      "excluded_kernel": null
+    },
+    {
+      "tool": "racecheck",
+      "scope": "corpus",
+      "passed": true,
+      "corpus_vectors": 11,
+      "synthetic_cases": 0,
+      "excluded_kernel": "IndexBand (single lane; separately checked in focused suite)"
+    },
+    {
+      "tool": "initcheck",
+      "scope": "corpus",
+      "passed": true,
+      "corpus_vectors": 11,
+      "synthetic_cases": 0,
+      "excluded_kernel": null
+    },
+    {
+      "tool": "synccheck",
+      "scope": "corpus",
+      "passed": true,
+      "corpus_vectors": 11,
+      "synthetic_cases": 0,
+      "excluded_kernel": "IndexBand (single lane; separately checked in focused suite)"
+    }
+  ],
+  "golden_vectors": 11,
+  "checkpoint_field_mismatches": 0,
+  "coefficient_bands_exact": 30,
+  "max_coefficient_error": 0,
+  "ll_exact": true,
+  "planar_exact": true,
+  "bgra_byte_exact": true,
+  "golden_hashes_unchanged": true,
+  "stress_runs": {
+    "noise1080": 200,
+    "noise4k": 100,
+    "flat8k": 20
+  },
+  "memcheck_stress_repeats": 2,
+  "artificial_reordering_schedules": 5,
+  "malformed_output_blocked": true,
+  "slot_reclaim_and_pending_release_passed": true,
+  "upstream_pristine": true,
+  "production_encoder_unchanged": true,
+  "main_unchanged": true,
+  "tags_moved": false,
+  "pushed": false,
+  "merged": false,
+  "release_created": false,
+  "max_observed_benchmark_index_body_ms": 59.8333435,
+  "outcome": "D",
+  "promote_gpu_index_default": false
+}

@@ -1,0 +1,240 @@
+# Copyright (c) 2026 HyperCine Contributors. MIT OR Apache-2.0.
+# Phase 2F-A validation
+
+## index / memcheck
+========= COMPUTE-SANITIZER
+[PASS] zero band
+[PASS] tiny payload
+[PASS] long zero runs
+[PASS] dense symbols and byte boundary
+[PASS] alternating signs and odd nibble
+[PASS] checkpoint near FSM transition
+[PASS] checkpoint before marker
+[PASS] maximum segment count
+[PASS] bounded continuation across launches
+[PASS] truncated payload
+[PASS] missing marker
+[PASS] empty payload
+[PASS] invalid codebook
+[PASS] invalid FSM transition
+[PASS] outside sample / address overflow
+[PASS] coefficient overflow attempt
+[PASS] invalid incoming FSM
+[PASS] coefficient address overflow
+[PASS] checkpoint capacity overflow
+[PASS] unexpected early termination
+20/20 synthetic cases passed
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors
+
+## index / racecheck
+========= COMPUTE-SANITIZER
+[PASS] zero band
+[PASS] tiny payload
+[PASS] long zero runs
+[PASS] dense symbols and byte boundary
+[PASS] alternating signs and odd nibble
+[PASS] checkpoint near FSM transition
+[PASS] checkpoint before marker
+[PASS] maximum segment count
+[PASS] bounded continuation across launches
+[PASS] truncated payload
+[PASS] missing marker
+[PASS] empty payload
+[PASS] invalid codebook
+[PASS] invalid FSM transition
+[PASS] outside sample / address overflow
+[PASS] coefficient overflow attempt
+[PASS] invalid incoming FSM
+[PASS] coefficient address overflow
+[PASS] checkpoint capacity overflow
+[PASS] unexpected early termination
+20/20 synthetic cases passed
+========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)
+
+## index / initcheck
+========= COMPUTE-SANITIZER
+[PASS] zero band
+[PASS] tiny payload
+[PASS] long zero runs
+[PASS] dense symbols and byte boundary
+[PASS] alternating signs and odd nibble
+[PASS] checkpoint near FSM transition
+[PASS] checkpoint before marker
+[PASS] maximum segment count
+[PASS] bounded continuation across launches
+[PASS] truncated payload
+[PASS] missing marker
+[PASS] empty payload
+[PASS] invalid codebook
+[PASS] invalid FSM transition
+[PASS] outside sample / address overflow
+[PASS] coefficient overflow attempt
+[PASS] invalid incoming FSM
+[PASS] coefficient address overflow
+[PASS] checkpoint capacity overflow
+[PASS] unexpected early termination
+20/20 synthetic cases passed
+========= ERROR SUMMARY: 0 errors
+
+## index / synccheck
+========= COMPUTE-SANITIZER
+[PASS] zero band
+[PASS] tiny payload
+[PASS] long zero runs
+[PASS] dense symbols and byte boundary
+[PASS] alternating signs and odd nibble
+[PASS] checkpoint near FSM transition
+[PASS] checkpoint before marker
+[PASS] maximum segment count
+[PASS] bounded continuation across launches
+[PASS] truncated payload
+[PASS] missing marker
+[PASS] empty payload
+[PASS] invalid codebook
+[PASS] invalid FSM transition
+[PASS] outside sample / address overflow
+[PASS] coefficient overflow attempt
+[PASS] invalid incoming FSM
+[PASS] coefficient address overflow
+[PASS] checkpoint capacity overflow
+[PASS] unexpected early termination
+20/20 synthetic cases passed
+========= ERROR SUMMARY: 0 errors
+
+## corpus / memcheck
+========= COMPUTE-SANITIZER
+[PASS] 1920x1080 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 7680x4320 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 5 artificial reordering schedules
+[PASS] device failure, no valid output, slot reclamation, pending release
+[PASS] 1920 stress 2/2 output and checkpoints exact
+[PASS] 3840 stress 2/2 output and checkpoints exact
+[PASS] 7680 stress 2/2 output and checkpoints exact
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors
+
+## corpus / racecheck
+========= COMPUTE-SANITIZER
+[PASS] 1920x1080 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 7680x4320 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 5 artificial reordering schedules
+[PASS] device failure, no valid output, slot reclamation, pending release
+========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)
+
+## corpus / initcheck
+========= COMPUTE-SANITIZER
+[PASS] 1920x1080 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 7680x4320 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 5 artificial reordering schedules
+[PASS] device failure, no valid output, slot reclamation, pending release
+========= ERROR SUMMARY: 0 errors
+
+## corpus / synccheck
+========= COMPUTE-SANITIZER
+[PASS] 1920x1080 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 1920x1080 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 3840x2160 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 7680x4320 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+[PASS] 5 artificial reordering schedules
+[PASS] device failure, no valid output, slot reclamation, pending release
+========= ERROR SUMMARY: 0 errors
+
+## CPU CTest
+Internal ctest changing into directory: C:/Users/User/Documents/GitHub/HyperCine-public/build_cpu
+Test project C:/Users/User/Documents/GitHub/HyperCine-public/build_cpu
+    Start 1: test_transform_wavelet
+1/5 Test #1: test_transform_wavelet ...........   Passed    0.02 sec
+    Start 2: test_codec_roundtrip
+2/5 Test #2: test_codec_roundtrip .............   Passed    0.04 sec
+    Start 3: test_yuy2_stability
+3/5 Test #3: test_yuy2_stability ..............   Passed    1.17 sec
+    Start 4: test_decode_phase0
+4/5 Test #4: test_decode_phase0 ...............   Passed    3.34 sec
+    Start 5: test_avi_sample
+5/5 Test #5: test_avi_sample ..................   Passed    0.18 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   4.77 sec
+
+## CUDA CTest: ctest --test-dir build -C Release --output-on-failure -V
+ 1/27 Test  #1: test_transform_wavelet .............   Passed    0.50 sec
+ 2/27 Test  #2: test_codec_roundtrip ...............   Passed    0.56 sec
+ 3/27 Test  #3: test_yuy2_stability ................   Passed    1.67 sec
+ 4/27 Test  #4: test_decode_phase0 .................   Passed    3.30 sec
+ 5/27 Test  #5: test_avi_sample ....................   Passed    0.46 sec
+6: [PASS] 1920x1080 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 1920x1080 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 1920x1080 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 1920x1080 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 1920x1080 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 3840x2160 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 3840x2160 gradient checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 3840x2160 noise checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 3840x2160 texture checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 3840x2160 edges checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 7680x4320 flat checkpoints=0 mismatches; coefficients=30/30; LL/planar/BGRA error=0
+6: [PASS] 5 artificial reordering schedules
+6: [PASS] device failure, no valid output, slot reclamation, pending release
+6: [PASS] 1920 stress 200/200 output and checkpoints exact
+6: [PASS] 3840 stress 100/100 output and checkpoints exact
+6: [PASS] 7680 stress 20/20 output and checkpoints exact
+ 6/27 Test  #6: test_decode_phase2fa ...............   Passed  460.74 sec
+ 7/27 Test  #7: test_decode_gpu_index ..............   Passed    0.88 sec
+ 8/27 Test  #8: test_cuda_wavelet ..................   Passed    2.36 sec
+ 9/27 Test  #9: test_cuda_pyramid ..................   Passed    0.14 sec
+10/27 Test #10: test_entropy_parallel ..............   Passed    0.12 sec
+11/27 Test #11: test_hybrid_roundtrip ..............   Passed    0.18 sec
+12/27 Test #12: test_phase2a .......................   Passed    0.61 sec
+13/27 Test #13: test_phase2b .......................   Passed    0.58 sec
+14/27 Test #14: test_phase2c .......................   Passed    9.45 sec
+15/27 Test #15: test_phase2d .......................   Passed   15.32 sec
+16/27 Test #16: test_entropy_capacity ..............   Passed    0.15 sec
+17/27 Test #17: test_phase3a .......................   Passed   40.10 sec
+18/27 Test #18: test_decode_inverse_wavelet_cuda ...   Passed    1.35 sec
+19/27 Test #19: test_decode_phase1 .................   Passed    1.81 sec
+20/27 Test #20: test_color_conversion_cuda .........   Passed    0.70 sec
+21/27 Test #21: test_decode_phase2a ................   Passed    2.41 sec
+22/27 Test #22: test_decode_entropy_cuda ...........   Passed    0.13 sec
+23/27 Test #23: test_decode_phase2b ................   Passed    7.80 sec
+24/27 Test #24: test_decode_entropy_phase2c ........   Passed    0.16 sec
+25/27 Test #25: test_decode_phase2c ................   Passed   25.97 sec
+26/27 Test #26: test_decode_phase2d ................   Passed   31.67 sec
+27/27 Test #27: test_decode_phase2e ................   Passed   27.16 sec
+100% tests passed, 0 tests failed out of 27
+Total Test time (real) = 636.34 sec
