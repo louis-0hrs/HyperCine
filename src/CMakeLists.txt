@@ -28,6 +28,7 @@ if(HYPERCINE_ENABLE_CUDA)
         cuda/decode_phase2b_pipeline.cu
         cuda/decode_phase2c_pipeline.cu
         cuda/decode_phase2d_pipeline.cu
+        cuda/decode_phase2e_pipeline.cu
     )
     set_target_properties(hypercine_wavelet PROPERTIES
         CUDA_STANDARD 17
@@ -50,6 +51,7 @@ else()
         cuda/decode_phase2b_stub.cpp
         cuda/decode_phase2c_stub.cpp
         cuda/decode_phase2d_stub.cpp
+        cuda/decode_phase2e_stub.cpp
     )
     target_include_directories(hypercine_wavelet PUBLIC
         ${CMAKE_SOURCE_DIR}/include
