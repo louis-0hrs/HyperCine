@@ -387,6 +387,6 @@ The remaining dominant bottleneck is strictly **GPU Intra-Band VLC Entropy Repla
 
 ### Phase 2F Recommendation: Choice A (GPU FSM Entropy Parser)
 
-Based on Amdahl's critical-path analysis, **Choice A** is recommended:
+Based on the measured critical path, **Choice A** warrants an experiment:
 - **Rationale**: Currently, host CPU threads must parse the sequential VLC bitstream to identify restart checkpoints before the parallel GPU replay kernel can launch. While Phase 2E successfully overlaps this with other bands, the single largest Luma band takes $24.5\text{ ms}$ on the CPU and $27.3\text{ ms}$ on the GPU.
-- By implementing a **GPU-native FSM bitstream scanner** (Choice A), the bitstream can be scanned directly in GPU high-bandwidth memory (GDDR6X, $> 1000\text{ GB/s}$), eliminating the CPU round-trip, the pinned memory transfer, and enabling multi-thousand-thread parallel prefix parsing directly on the device.
+- A **GPU-native FSM bitstream scanner** (Choice A) can remove CPU checkpoint traversal and pinned checkpoint publication. The benchmark GPU is an **RTX 4090 Laptop GPU**; desktop RTX 4090 memory type and bandwidth specifications do not describe this machine. No measured device-memory bandwidth supports a latency prediction here. Scanning remains serial within a band, and moving already-overlapped CPU work onto the GPU can compete with replay. Exactness, CPU cost, latency and throughput must be measured before promotion; stronger intra-band FSM parallelism is a separate algorithmic investigation.
