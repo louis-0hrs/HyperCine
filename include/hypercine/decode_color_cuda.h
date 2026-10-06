@@ -86,7 +86,8 @@ bool LaunchYuv422ToBgra8(
     ColorMatrix matrix = ColorMatrix::BT709,
     ColorRange range = ColorRange::CG,
     RowOrientation orientation = RowOrientation::BottomUp,
-    cudaStream_t stream = nullptr
+    cudaStream_t stream = nullptr,
+    uint32_t* frame_error = nullptr
 );
 
 } // namespace HyperCine

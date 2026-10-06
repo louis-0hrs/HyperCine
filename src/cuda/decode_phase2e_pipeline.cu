@@ -17,6 +17,12 @@
 #include <thread>
 #include <sstream>
 #include <iomanip>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 
 namespace HyperCine {
 
@@ -26,6 +32,18 @@ bool ExtractCineFormBaseFsmTables(std::vector<GpuFsmEntry>& out_tables);
 namespace {
 
 using Clock = std::chrono::steady_clock;
+double ThreadCpuMs() {
+#ifdef _WIN32
+    FILETIME created, exited, kernel, user;
+    if (GetThreadTimes(GetCurrentThread(), &created, &exited, &kernel, &user)) {
+        ULARGE_INTEGER k, u;
+        k.LowPart = kernel.dwLowDateTime; k.HighPart = kernel.dwHighDateTime;
+        u.LowPart = user.dwLowDateTime; u.HighPart = user.dwHighDateTime;
+        return (k.QuadPart + u.QuadPart) * 1e-4;
+    }
+#endif
+    return 0;
+}
 constexpr int kMaxVlcBands = 27;
 constexpr int kMaxReplayStreams = 8;
 constexpr int kMaxSegmentsPerBand = 64;
@@ -72,6 +90,7 @@ struct TaskStat {
     Clock::time_point end{};
     float duration_ms = 0.0f;
     int worker_id = -1;
+    float thread_cpu_ms = 0;
 };
 
 struct DecodeSlot2E {
@@ -117,6 +136,12 @@ struct DecodeSlot2E {
     GpuEntropySegmentDescriptor* host_pinned_segments = nullptr;
     GpuEntropySegmentDescriptor* d_segments = nullptr;
     GpuSegmentDecodeResult* d_seg_results = nullptr;
+    GpuCheckpointIndexResult* d_index_results = nullptr;
+    uint32_t* d_frame_error = nullptr;
+    uint32_t* host_frame_error = nullptr;
+    cudaEvent_t ev_index_start[kMaxVlcBands] = {}, ev_index_done[kMaxVlcBands] = {};
+    bool GpuIndex() const { return pipeline_mode == Phase2EPipelineMode::Phase2FAGpuIndexBatch; }
+    uint32_t* ErrorGuard() const { return GpuIndex() ? d_frame_error : nullptr; }
 
     // Reusable per-band host checkpoint buffers
     std::vector<GpuEntropySegmentDescriptor> band_segments[kMaxVlcBands];
@@ -165,6 +190,8 @@ struct DecodeSlot2E {
     bool color_enqueued = false;
 
     std::atomic<bool> has_error{false};
+    std::atomic<int> active_index_workers{0}, peak_index_workers{0};
+    double host_dispatch_cpu_ms = 0;
     std::string error_msg;
 
     // Host timing captures
@@ -182,6 +209,18 @@ struct DecodeSlot2E {
     Phase2eSlotStageTimings timings{};
 
     void FreeBuffers() {
+        // Drain before freeing memory, including early destruction/rejected jobs.
+        if (copy_stream) cudaStreamSynchronize(copy_stream);
+        for (auto s : replay_streams) if (s) cudaStreamSynchronize(s);
+        for (auto s : channel_streams) if (s) cudaStreamSynchronize(s);
+        if (main_stream) cudaStreamSynchronize(main_stream);
+        if (d_index_results) { cudaFree(d_index_results); d_index_results = nullptr; }
+        if (d_frame_error) { cudaFree(d_frame_error); d_frame_error = nullptr; }
+        if (host_frame_error) { cudaFreeHost(host_frame_error); host_frame_error = nullptr; }
+        for (int i = 0; i < kMaxVlcBands; ++i) {
+            if (ev_index_start[i]) cudaEventDestroy(ev_index_start[i]);
+            if (ev_index_done[i]) cudaEventDestroy(ev_index_done[i]);
+        }
         for (int ch = 0; ch < 3; ++ch) {
             auto& c = channels[ch];
             for (int b = 0; b < 4; ++b) {
@@ -265,7 +304,7 @@ struct DecodeSlot2E {
             c.d_l2_band[3], int(c.l2_pitch),
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
-            w_l2, h_l2, 0
+            w_l2, h_l2, 0, ErrorGuard()
         );
 
         dim3 block_h(64, 4);
@@ -274,7 +313,7 @@ struct DecodeSlot2E {
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
             c.d_ll1, int(c.ll1_pitch),
-            w_l2, 2 * h_l2, 0
+            w_l2, 2 * h_l2, 0, ErrorGuard()
         );
     }
 
@@ -294,7 +333,7 @@ struct DecodeSlot2E {
             c.d_l1_band[3], int(c.l1_pitch),
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
-            w_l1, h_l1, 2
+            w_l1, h_l1, 2, ErrorGuard()
         );
 
         dim3 block_h(64, 4);
@@ -303,7 +342,7 @@ struct DecodeSlot2E {
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
             c.d_ll0, int(c.ll0_pitch),
-            w_l1, 2 * h_l1, 2
+            w_l1, 2 * h_l1, 2, ErrorGuard()
         );
     }
 
@@ -323,7 +362,7 @@ struct DecodeSlot2E {
             c.d_l0_band[3], int(c.l0_pitch),
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
-            w_l0, h_l0, 0
+            w_l0, h_l0, 0, ErrorGuard()
         );
 
         dim3 block_h(64, 4);
@@ -332,7 +371,7 @@ struct DecodeSlot2E {
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
             c.d_final_plane, int(c.final_plane_pitch),
-            w_l0, 2 * h_l0, 0
+            w_l0, 2 * h_l0, 0, ErrorGuard()
         );
     }
 
@@ -427,14 +466,45 @@ struct DecodeSlot2E {
                     d_bgra, bgra_pitch,
                     width, height,
                     matrix, range, orientation,
-                    main_stream
+                    main_stream, ErrorGuard()
                 );
                 cudaEventRecord(ev_color_stop, main_stream);
             }
 
+            if (GpuIndex())
+                cudaMemcpyAsync(host_frame_error, d_frame_error, sizeof(uint32_t), cudaMemcpyDeviceToHost, main_stream);
             cudaEventRecord(ev_ready, main_stream);
             color_enqueued = true;
         }
+    }
+
+    bool DispatchGpuIndex(int b) {
+        std::lock_guard<std::mutex> lock(dispatch_mutex);
+        const int stream_id = next_replay_stream++ % num_replay_streams;
+        band_assigned_stream[b] = stream_id;
+        const auto stream = replay_streams[stream_id];
+        if (cudaStreamWaitEvent(stream, ev_compressed_h2d_ready, 0) != cudaSuccess) return false;
+        cudaEventRecord(ev_index_start[b], stream);
+        auto err = LaunchGenerateBandCheckpointsGpu(d_compressed_sample, current_compressed_size,
+            d_vlc_descriptors + b, b, d_fsm_tables, 18752, entropy_mode, fixed_segments_per_band,
+            d_segments + b * kMaxSegmentsPerBand, kMaxSegmentsPerBand, d_index_results + b,
+            d_frame_error, vlc_descs[b].payload_bytes, stream);
+        if (err != cudaSuccess) return false;
+        cudaEventRecord(ev_index_done[b], stream);
+        cudaEventRecord(ev_band_start[b], stream);
+        err = LaunchZeroVlcBandsGpu(d_vlc_descriptors + b, 1, stream);
+        if (err != cudaSuccess) return false;
+        err = LaunchDecodeEntropyParallelGpu(d_compressed_sample, current_compressed_size,
+            d_vlc_descriptors, kMaxVlcBands, d_segments + b * kMaxSegmentsPerBand,
+            kMaxSegmentsPerBand, d_fsm_tables, d_seg_results + b * kMaxSegmentsPerBand,
+            stream, d_index_results + b, d_frame_error);
+        if (err != cudaSuccess) return false;
+        if (vlc_descs[b].difference_coding)
+            LaunchCooperativeDifferenceCodingGpu(d_vlc_descriptors + b, 1, stream, d_frame_error);
+        cudaEventRecord(ev_band_done[b], stream);
+        band_state[b] = BandState::GpuQueued;
+        CheckAdvanceInverseDag(vlc_descs[b].channel);
+        return cudaGetLastError() == cudaSuccess;
     }
 
     void DispatchBandGpu(int band_idx, int worker_id) {
@@ -443,6 +513,7 @@ struct DecodeSlot2E {
 
         std::lock_guard<std::mutex> lock(dispatch_mutex);
         if (has_error.load(std::memory_order_relaxed)) return;
+        const double dispatch_cpu_start = ThreadCpuMs();
 
         int s_idx = next_replay_stream % num_replay_streams;
         next_replay_stream++;
@@ -503,6 +574,7 @@ struct DecodeSlot2E {
         if (pipeline_mode == Phase2EPipelineMode::Phase2EFullOverlap) {
             CheckAdvanceInverseDag(vlc_descs[band_idx].channel);
         }
+        host_dispatch_cpu_ms += ThreadCpuMs() - dispatch_cpu_start;
     }
 };
 
@@ -535,6 +607,7 @@ struct CudaDecoderPipelinePhase2E::Impl {
 
     void AbandonSlot(DecodeSlot2E* s) {
         if (!s) return;
+        if (s->copy_stream) cudaStreamSynchronize(s->copy_stream);
         if (s->main_stream) cudaStreamSynchronize(s->main_stream);
         for (int i = 0; i < s->num_replay_streams; ++i) {
             if (s->replay_streams[i]) cudaStreamSynchronize(s->replay_streams[i]);
@@ -562,6 +635,8 @@ struct CudaDecoderPipelinePhase2E::Impl {
                 s->delay_hook = delay_hook;
                 s->d_fsm_tables = fsm_table_mgr.GetDeviceTable();
                 s->has_error.store(false);
+                s->active_index_workers = 0; s->peak_index_workers = 0;
+                s->host_dispatch_cpu_ms = 0;
                 s->error_msg.clear();
                 s->next_replay_stream = 0;
                 s->color_enqueued = false;
@@ -716,6 +791,9 @@ bool CudaDecoderPipelinePhase2E::Initialize(
         cudaMalloc(&slot->d_segments, kTotalSegmentCapacity * sizeof(GpuEntropySegmentDescriptor));
         cudaMalloc(&slot->d_seg_results, kTotalSegmentCapacity * sizeof(GpuSegmentDecodeResult));
 
+        if (cudaMalloc(&slot->d_index_results, kMaxVlcBands * sizeof(GpuCheckpointIndexResult)) != cudaSuccess ||
+            cudaMalloc(&slot->d_frame_error, sizeof(uint32_t)) != cudaSuccess ||
+            cudaMallocHost(&slot->host_frame_error, sizeof(uint32_t)) != cudaSuccess) return false;
         // Create streams
         cudaStreamCreateWithFlags(&slot->copy_stream, cudaStreamNonBlocking);
         for (int s = 0; s < kMaxReplayStreams; ++s) {
@@ -741,6 +819,8 @@ bool CudaDecoderPipelinePhase2E::Initialize(
         cudaEventCreate(&slot->ev_ll_ready);
 
         for (int b = 0; b < kMaxVlcBands; ++b) {
+            cudaEventCreate(&slot->ev_index_start[b]);
+            cudaEventCreate(&slot->ev_index_done[b]);
             cudaEventCreate(&slot->ev_band_start[b]);
             cudaEventCreate(&slot->ev_band_done[b]);
         }
@@ -757,7 +837,7 @@ bool CudaDecoderPipelinePhase2E::Initialize(
 }
 
 void CudaDecoderPipelinePhase2E::Release() {
-    if (!impl_ || !impl_->initialized) return;
+    if (!impl_) return;
 
     {
         std::lock_guard<std::mutex> lock(impl_->mutex);
@@ -897,9 +977,22 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
 
     int frame_width = parsed_bands[7].width * 2;
     int frame_height = parsed_bands[7].height * 2;
+    if (frame_width > slot->max_width || frame_height > slot->max_height) {
+        impl_->AbandonSlot(slot);
+        return 0;
+    }
     slot->width = frame_width;
     slot->height = frame_height;
 
+    // Reuse maximum-size allocations with this frame's compact band strides.
+    for (int ch = 0; ch < 3; ++ch) {
+        auto& c = slot->channels[ch];
+        int w = ch == 0 ? frame_width : frame_width / 2;
+        c.l2_pitch = (size_t(w / 8) * 2 + 15) & ~size_t(15);
+        c.l1_pitch = (size_t(w / 4) * 2 + 15) & ~size_t(15);
+        c.l0_pitch = (size_t(w / 2) * 2 + 15) & ~size_t(15);
+        c.ll1_pitch = c.l1_pitch; c.ll0_pitch = c.l0_pitch;
+    }
     // Partition into 3 LL bands and 27 VLC bands and bind destination pointers
     slot->ll_descs.clear();
     slot->vlc_descs.clear();
@@ -1043,6 +1136,31 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
     );
     cudaEventRecord(slot->ev_ll_ready, slot->copy_stream);
 
+    if (slot->GpuIndex()) {
+        *slot->host_frame_error = 0;
+        if (cudaMemsetAsync(slot->d_frame_error, 0, sizeof(uint32_t), slot->copy_stream) != cudaSuccess) {
+            impl_->AbandonSlot(slot); return 0;
+        }
+        // Re-record compressed dependency after frame error reset.
+        cudaEventRecord(slot->ev_compressed_h2d_ready, slot->copy_stream);
+        slot->t_batch_submit = Clock::now();
+        const double schedule_cpu_start = ThreadCpuMs();
+        slot->timings.active_workers = 0;
+        slot->timings.active_streams = slot->num_replay_streams;
+        for (int i = 0; i < kMaxVlcBands; ++i) {
+            int b = task_indices[i];
+            if (slot->delay_hook) {
+                const auto& d = slot->vlc_descs[b];
+                slot->delay_hook(b, d.channel, d.level, d.band);
+            }
+            if (!slot->DispatchGpuIndex(b)) { impl_->AbandonSlot(slot); return 0; }
+        }
+        slot->t_batch_return = Clock::now();
+        slot->host_dispatch_cpu_ms = ThreadCpuMs() - schedule_cpu_start;
+        if (caller_stream) cudaStreamWaitEvent(caller_stream, slot->ev_ready, 0);
+        return slot->ticket;
+    }
+
     // 2. Parallel Host Checkpoint Indexing & Streaming GPU Replay (Section 6, 9, 11, 14, 24, 25)
     slot->timings.active_workers = impl_->worker_pool.WorkerCount();
     slot->timings.active_streams = slot->num_replay_streams;
@@ -1053,6 +1171,10 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
     auto task_fn = [&](int task_idx, int worker_id) {
         const int band_idx = task_indices[task_idx];
         const auto t0 = Clock::now();
+        const double cpu0 = ThreadCpuMs();
+        const int active = slot->active_index_workers.fetch_add(1) + 1;
+        int peak = slot->peak_index_workers.load();
+        while (active > peak && !slot->peak_index_workers.compare_exchange_weak(peak, active)) {}
 
         std::string err;
         bool ok = false;
@@ -1068,11 +1190,14 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
         }
 
         const auto t1 = Clock::now();
-        TaskStat& ts = slot->task_stats[task_idx];
+        slot->active_index_workers.fetch_sub(1);
+        const double cpu1 = ThreadCpuMs();
+        TaskStat& ts = slot->task_stats[band_idx];
         ts.start = t0;
         ts.end = t1;
         ts.duration_ms = std::chrono::duration<float, std::milli>(t1 - t0).count();
         ts.worker_id = worker_id;
+        ts.thread_cpu_ms = float(cpu1 - cpu0);
 
         if (!ok) {
             bool expected = false;
@@ -1273,8 +1398,9 @@ DecodeTicketStatus CudaDecoderPipelinePhase2E::PollDecode(uint64_t ticket) {
 
     cudaError_t err = cudaEventQuery(slot->ev_ready);
     if (err == cudaSuccess) {
-        slot->status = DecodeTicketStatus::Complete;
-        return DecodeTicketStatus::Complete;
+        slot->status = (slot->GpuIndex() && *slot->host_frame_error) ?
+            DecodeTicketStatus::Failed : DecodeTicketStatus::Complete;
+        return slot->status;
     } else if (err == cudaErrorNotReady) {
         return DecodeTicketStatus::Pending;
     } else {
@@ -1302,8 +1428,9 @@ bool CudaDecoderPipelinePhase2E::WaitForDecode(uint64_t ticket) {
     slot->timings.ready_overhead_ms = std::chrono::duration<float, std::milli>(t1 - t0).count();
 
     if (err == cudaSuccess) {
-        slot->status = DecodeTicketStatus::Complete;
-        return true;
+        slot->status = (slot->GpuIndex() && *slot->host_frame_error) ?
+            DecodeTicketStatus::Failed : DecodeTicketStatus::Complete;
+        return slot->status == DecodeTicketStatus::Complete;
     }
     slot->status = DecodeTicketStatus::Failed;
     return false;
@@ -1381,6 +1508,7 @@ bool CudaDecoderPipelinePhase2E::ReleaseOutput(uint64_t ticket) {
     DecodeSlot2E* slot = impl_->FindSlot(ticket);
     if (!slot) return false;
 
+    if (slot->status == DecodeTicketStatus::Pending) cudaEventSynchronize(slot->ev_ready);
     slot->in_use = false;
     slot->ticket = 0;
     slot->status = DecodeTicketStatus::Invalid;
@@ -1461,6 +1589,7 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
     }
     if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
 
+    *timings = Phase2eSlotStageTimings{};
     auto ms_rel = [&](Clock::time_point tp) {
         return std::chrono::duration<float, std::milli>(tp - slot->t_frame_start).count();
     };
@@ -1505,6 +1634,10 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
         }
     }
 
+    timings->host_schedule_cpu_ms = float(slot->host_dispatch_cpu_ms);
+    timings->host_index_thread_cpu_ms = 0;
+    for (const auto& ts : slot->task_stats) timings->host_index_thread_cpu_ms += ts.thread_cpu_ms;
+    timings->peak_index_workers = slot->peak_index_workers.load();
     timings->host_index_cpu_work_ms = sum_index_work;
     timings->slowest_task_ms = slowest_task;
     timings->slowest_worker_id = slowest_worker;
@@ -1521,6 +1654,16 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
     timings->barrier_wait_ms = slot->t_batch_return > last_idx_end ?
         std::chrono::duration<float, std::milli>(slot->t_batch_return - last_idx_end).count() : 0.0f;
 
+    if (slot->GpuIndex()) {
+        timings->host_index_cpu_work_ms = timings->host_index_wall_ms = 0;
+        timings->t_first_index_start_ms = timings->t_final_index_end_ms = 0;
+        timings->queue_overhead_ms = timings->barrier_wait_ms = 0;
+        timings->host_schedule_wall_ms = std::chrono::duration<float, std::milli>(
+            slot->t_batch_return - slot->t_batch_submit).count();
+    }
+    std::vector<GpuCheckpointIndexResult> gpu_index;
+    if (slot->GpuIndex() && !GetGpuIndexResults(ticket, gpu_index)) return false;
+    float earliest_index = 1e9f, latest_index = 0;
     // Per-Band Replay Timings
     timings->band_records.clear();
     timings->band_records.reserve(kMaxVlcBands);
@@ -1539,9 +1682,7 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
 
         // Find which task index processed this band
         for (int ti = 0; ti < kMaxVlcBands; ++ti) {
-            if (slot->task_stats[ti].worker_id >= 0 &&
-                slot->vlc_descs[slot->band_map[rec.channel][rec.level][rec.band]].payload_bytes == slot->vlc_descs[b].payload_bytes &&
-                slot->band_assigned_stream[b] >= 0)
+            if (ti == b && slot->task_stats[ti].worker_id >= 0)
             {
                 rec.host_index_start_ms = ms_rel(slot->task_stats[ti].start);
                 rec.host_index_end_ms = ms_rel(slot->task_stats[ti].end);
@@ -1552,6 +1693,18 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
         }
 
         rec.gpu_stream_id = slot->band_assigned_stream[b];
+        if (slot->GpuIndex()) {
+            cudaEventElapsedTime(&rec.gpu_index_start_ms, slot->ev_frame_start, slot->ev_index_start[b]);
+            cudaEventElapsedTime(&rec.gpu_index_end_ms, slot->ev_frame_start, slot->ev_index_done[b]);
+            cudaEventElapsedTime(&rec.gpu_index_duration_ms, slot->ev_index_start[b], slot->ev_index_done[b]);
+            rec.gpu_index_work_ms = float(gpu_index[b].total_ns * 1e-6);
+            rec.max_index_kernel_ms = float(gpu_index[b].max_launch_ns * 1e-6);
+            rec.segment_count = gpu_index[b].segment_count;
+            timings->gpu_index_work_ms += rec.gpu_index_work_ms;
+            timings->max_index_kernel_ms = std::max(timings->max_index_kernel_ms, rec.max_index_kernel_ms);
+            earliest_index = std::min(earliest_index, rec.gpu_index_start_ms);
+            latest_index = std::max(latest_index, rec.gpu_index_end_ms);
+        }
 
         float g_start = 0.0f, g_end = 0.0f, g_dur = 0.0f;
         cudaEventElapsedTime(&g_start, slot->ev_frame_start, slot->ev_band_start[b]);
@@ -1569,6 +1722,11 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
         timings->band_records.push_back(rec);
     }
 
+    if (slot->GpuIndex()) {
+        timings->gpu_index_wall_ms = latest_index - earliest_index;
+        timings->t_first_index_start_ms = earliest_index;
+        timings->t_final_index_end_ms = latest_index;
+    }
     timings->t_first_gpu_launch_ms = (earliest_gpu_start < 1e8f) ? earliest_gpu_start : 0.0f;
     timings->t_final_replay_end_ms = latest_gpu_end;
     timings->gpu_replay_work_ms = sum_replay_work;
@@ -1639,6 +1797,7 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
                                  timings->host_index_cpu_work_ms + timings->gpu_replay_work_ms +
                                  timings->inverse_wavelet_work_ms + timings->color_convert_ms;
 
+    timings->total_work_sum_ms += timings->gpu_index_work_ms;
     // Overlap Metrics (Section 29)
     float serialized_work = timings->host_index_wall_ms + timings->gpu_replay_wall_ms;
     float comb_end = std::max(timings->t_final_replay_end_ms, timings->t_final_index_end_ms);
@@ -1665,6 +1824,17 @@ bool CudaDecoderPipelinePhase2E::GetBandDecodeResults(uint64_t ticket, std::vect
     if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
 
     results.clear();
+    if (slot->GpuIndex()) {
+        std::vector<GpuCheckpointIndexResult> index;
+        if (!GetGpuIndexResults(ticket, index)) return false;
+        for (const auto& i : index) {
+            GpuBandDecodeResult r{};
+            r.status = i.status; r.consumed_bytes = (i.next_nibble + 1) / 2;
+            r.final_fsm_state = i.state; r.final_coeff_pos = i.out_coeff_pos;
+            results.push_back(r);
+        }
+        return true;
+    }
     for (int b = 0; b < kMaxVlcBands; ++b) {
         GpuBandDecodeResult r{};
         r.status = GpuBandDecodeStatus::Complete;
@@ -1682,8 +1852,11 @@ bool CudaDecoderPipelinePhase2E::GetSegmentDecodeResults(uint64_t ticket, std::v
     }
     if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
 
+    std::vector<GpuCheckpointIndexResult> index;
+    if (slot->GpuIndex() && !GetGpuIndexResults(ticket, index)) return false;
+    auto count = [&](int b) -> size_t { return slot->GpuIndex() ? index[b].segment_count : slot->band_segments[b].size(); };
     size_t total_segs = 0;
-    for (int b = 0; b < kMaxVlcBands; ++b) total_segs += slot->band_segments[b].size();
+    for (int b = 0; b < kMaxVlcBands; ++b) total_segs += count(b);
     if (total_segs == 0) {
         results.clear();
         return true;
@@ -1692,7 +1865,7 @@ bool CudaDecoderPipelinePhase2E::GetSegmentDecodeResults(uint64_t ticket, std::v
     results.resize(total_segs);
     size_t cur = 0;
     for (int b = 0; b < kMaxVlcBands; ++b) {
-        size_t n = slot->band_segments[b].size();
+        size_t n = count(b);
         if (n > 0) {
             cudaMemcpy(
                 results.data() + cur,
@@ -1712,6 +1885,7 @@ bool CudaDecoderPipelinePhase2E::GetHostCheckpoints(uint64_t ticket, std::vector
     DecodeSlot2E* slot = impl_->FindSlot(ticket);
     if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
 
+    if (slot->GpuIndex()) return false;
     out_segments.clear();
     for (int b = 0; b < kMaxVlcBands; ++b) {
         out_segments.insert(out_segments.end(), slot->band_segments[b].begin(), slot->band_segments[b].end());
@@ -1754,6 +1928,45 @@ bool CudaDecoderPipelinePhase2E::DownloadBandCoefficientsToHost(
     return (err == cudaSuccess);
 }
 
+bool CudaDecoderPipelinePhase2E::GetGpuIndexResults(uint64_t ticket, std::vector<GpuCheckpointIndexResult>& out) {
+    if (!impl_) return false;
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    auto slot = impl_->FindSlot(ticket);
+    if (!slot || !slot->GpuIndex() || slot->status == DecodeTicketStatus::Pending) return false;
+    out.resize(kMaxVlcBands);
+    return cudaMemcpy(out.data(), slot->d_index_results, out.size() * sizeof(out[0]), cudaMemcpyDeviceToHost) == cudaSuccess;
+}
+bool CudaDecoderPipelinePhase2E::GetGpuCheckpoints(uint64_t ticket, std::vector<GpuEntropySegmentDescriptor>& out) {
+    if (!impl_) return false;
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    auto slot = impl_->FindSlot(ticket);
+    if (!slot || !slot->GpuIndex() || slot->status != DecodeTicketStatus::Complete) return false;
+    GpuCheckpointIndexResult results[kMaxVlcBands];
+    if (cudaMemcpy(results, slot->d_index_results, sizeof(results), cudaMemcpyDeviceToHost) != cudaSuccess) return false;
+    out.clear();
+    for (int b = 0; b < kMaxVlcBands; ++b) {
+        size_t n = results[b].segment_count;
+        if (n > kMaxSegmentsPerBand || results[b].status != GpuBandDecodeStatus::Complete) return false;
+        size_t cur = out.size();
+        out.resize(cur + n);
+        if (n && cudaMemcpy(out.data() + cur, slot->d_segments + b * kMaxSegmentsPerBand,
+            n * sizeof(out[0]), cudaMemcpyDeviceToHost) != cudaSuccess) return false;
+    }
+    return true;
+}
+bool CudaDecoderPipelinePhase2E::DownloadIntermediateLl(uint64_t ticket, int ch, int level, std::vector<int16_t>& out) {
+    if (!impl_ || ch < 0 || ch >= 3 || level < 0 || level > 1) return false;
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    auto slot = impl_->FindSlot(ticket);
+    if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
+    auto& c = slot->channels[ch];
+    int w = (ch == 0 ? slot->width : slot->width / 2) / (level ? 4 : 2);
+    int h = slot->height / (level ? 4 : 2);
+    out.resize(size_t(w) * h);
+    return cudaMemcpy2D(out.data(), w * sizeof(int16_t), level ? c.d_ll1 : c.d_ll0,
+        level ? c.ll1_pitch : c.ll0_pitch, w * sizeof(int16_t), h, cudaMemcpyDeviceToHost) == cudaSuccess;
+}
+
 std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t ticket) {
     Phase2eSlotStageTimings t{};
     if (!GetStageTimings(ticket, &t)) return "{}";
@@ -1762,6 +1975,10 @@ std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t ticket) {
     ss << "{\n";
     ss << "  \"total_critical_path_ms\": " << t.total_critical_path_ms << ",\n";
     ss << "  \"total_work_sum_ms\": " << t.total_work_sum_ms << ",\n";
+    ss << "  \"gpu_index_wall_ms\": " << t.gpu_index_wall_ms << ",\n";
+    ss << "  \"gpu_index_work_ms\": " << t.gpu_index_work_ms << ",\n";
+    ss << "  \"max_index_kernel_ms\": " << t.max_index_kernel_ms << ",\n";
+    ss << "  \"host_schedule_wall_ms\": " << t.host_schedule_wall_ms << ",\n";
     ss << "  \"host_parse_ms\": " << t.host_parse_ms << ",\n";
     ss << "  \"task_prep_ms\": " << t.task_prep_ms << ",\n";
     ss << "  \"compressed_h2d_ms\": " << t.compressed_h2d_ms << ",\n";
@@ -1778,6 +1995,9 @@ std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t ticket) {
     ss << "  \"active_workers\": " << t.active_workers << ",\n";
     ss << "  \"active_streams\": " << t.active_streams << ",\n";
     ss << "  \"markers\": {\n";
+    ss << "    \"parse_complete_ms\": " << t.t_parse_end_ms << ",\n";
+    ss << "    \"h2d_start_ms\": " << t.t_h2d_start_ms << ",\n";
+    ss << "    \"h2d_end_ms\": " << t.t_h2d_end_ms << ",\n";
     ss << "    \"first_index_start_ms\": " << t.t_first_index_start_ms << ",\n";
     ss << "    \"first_gpu_launch_ms\": " << t.t_first_gpu_launch_ms << ",\n";
     ss << "    \"final_index_end_ms\": " << t.t_final_index_end_ms << ",\n";
@@ -1800,6 +2020,10 @@ std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t ticket) {
            << "\"stream\": " << b.gpu_stream_id << ", "
            << "\"idx_start\": " << b.host_index_start_ms << ", "
            << "\"idx_end\": " << b.host_index_end_ms << ", "
+           << "\"gpu_index_start\": " << b.gpu_index_start_ms << ", "
+           << "\"gpu_index_end\": " << b.gpu_index_end_ms << ", "
+           << "\"gpu_index_work_ms\": " << b.gpu_index_work_ms << ", "
+           << "\"max_index_kernel_ms\": " << b.max_index_kernel_ms << ", "
            << "\"gpu_start\": " << b.gpu_replay_start_ms << ", "
            << "\"gpu_end\": " << b.gpu_replay_end_ms
            << "}" << (i + 1 < t.band_records.size() ? ",\n" : "\n");

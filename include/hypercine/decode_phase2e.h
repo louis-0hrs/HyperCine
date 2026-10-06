@@ -22,6 +22,7 @@ typedef int cudaError_t;
 #include "hypercine/decode_phase2a.h"
 #include "hypercine/decode_entropy_cuda.h"
 #include "hypercine/decode_phase2d.h"
+#include "hypercine/decode_gpu_index.h"
 
 namespace HyperCine {
 
@@ -29,7 +30,11 @@ namespace HyperCine {
 enum class Phase2EPipelineMode : uint32_t {
     Phase2DFrameBarrier = 0,   // Existing Phase 2D barrier baseline (parallel index -> barrier -> GPU replay)
     Phase2EEntropyOverlap = 1, // Variant A: Host index + GPU replay overlap, inverse barrier retained
-    Phase2EFullOverlap = 2     // Variant B: Host index + GPU replay + inverse DAG overlap
+    Phase2EFullOverlap = 2,    // Variant B: Host index + GPU replay + inverse DAG overlap
+    Phase2FAGpuIndexBatch = 3, // Complete-band GPU checkpoint scan -> device replay -> inverse DAG
+    Phase2DBarrier = Phase2DFrameBarrier,
+    Phase2EHostStreaming = Phase2EFullOverlap,
+    Phase2FAGpuIndex = Phase2FAGpuIndexBatch
 };
 
 // Phase 2E Scheduling Policies (Section 12, 13)
@@ -52,6 +57,9 @@ struct BandTimelineRecord {
     float host_index_end_ms = 0.0f;
     float host_index_duration_ms = 0.0f;
     int host_worker_id = -1;
+    float gpu_index_start_ms = 0.0f, gpu_index_end_ms = 0.0f;
+    float gpu_index_duration_ms = 0.0f;
+    float gpu_index_work_ms = 0.0f, max_index_kernel_ms = 0.0f;
     float gpu_replay_start_ms = 0.0f;
     float gpu_replay_end_ms = 0.0f;
     float gpu_replay_duration_ms = 0.0f;
@@ -80,6 +88,12 @@ struct Phase2eSlotStageTimings {
     float queue_overhead_ms = 0.0f;         // Batch submit -> first task start
     float barrier_wait_ms = 0.0f;           // Join latency (if barrier mode)
 
+    float gpu_index_wall_ms = 0.0f, gpu_index_work_ms = 0.0f;
+    float max_index_kernel_ms = 0.0f;
+    float host_schedule_wall_ms = 0.0f;
+    float host_index_thread_cpu_ms = 0.0f;
+    float host_schedule_cpu_ms = 0.0f;
+    int peak_index_workers = 0;
     // GPU VLC replay metrics
     float gpu_replay_wall_ms = 0.0f;        // Earliest GPU replay start to latest replay end
     float gpu_replay_work_ms = 0.0f;        // Sum of per-band GPU replay durations
@@ -226,6 +240,10 @@ public:
     // Diagnostics: canonical-order (band 0..26) host checkpoint records used for GPU replay
     bool GetHostCheckpoints(uint64_t ticket, std::vector<GpuEntropySegmentDescriptor>& out_segments);
 
+    // Diagnostics only: D2H after completion, never part of replay dispatch.
+    bool GetGpuCheckpoints(uint64_t ticket, std::vector<GpuEntropySegmentDescriptor>& out);
+    bool GetGpuIndexResults(uint64_t ticket, std::vector<GpuCheckpointIndexResult>& out);
+    bool DownloadIntermediateLl(uint64_t ticket, int channel, int level, std::vector<int16_t>& out);
     // Direct access to decoded signed-16 coefficient bands in VRAM (for bit-exact verification)
     bool DownloadBandCoefficientsToHost(
         uint64_t ticket,

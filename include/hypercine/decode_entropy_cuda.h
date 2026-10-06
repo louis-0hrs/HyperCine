@@ -20,6 +20,7 @@ constexpr cudaError_t cudaErrorNotSupported = 801;
 #endif
 
 namespace HyperCine {
+struct GpuCheckpointIndexResult;
 
 enum class GpuBandDecodeStatus : uint32_t {
     Complete = 0,
@@ -29,7 +30,9 @@ enum class GpuBandDecodeStatus : uint32_t {
     MissingEndMarker = 4,
     CoefficientOverflow = 5,
     UnsupportedBandMethod = 6,
-    CUDAFailure = 7
+    CUDAFailure = 7,
+    CheckpointCapacityOverflow = 8,
+    InvalidFsmTransition = 9
 };
 
 enum class BandEncodingMethod : uint32_t {
@@ -255,14 +258,17 @@ cudaError_t LaunchDecodeEntropyParallelGpu(
     int num_segments,
     const GpuFsmEntry* d_fsm_tables,
     GpuSegmentDecodeResult* d_seg_results,
-    cudaStream_t stream
+    cudaStream_t stream,
+    const GpuCheckpointIndexResult* d_index_result = nullptr,
+    uint32_t* d_frame_error = nullptr
 );
 
 // Launch GPU cooperative difference coding kernel across all difference-coded bands (Rule 10)
 cudaError_t LaunchCooperativeDifferenceCodingGpu(
     const GpuEntropyBandDescriptor* d_band_descriptors,
     int num_vlc_bands,
-    cudaStream_t stream
+    cudaStream_t stream,
+    uint32_t* d_frame_error = nullptr
 );
 
 // Diagnostic launch for symbol-level verification (Phase 2B reference)
@@ -291,4 +297,3 @@ cudaError_t LaunchDecodeEntropyParallelDiagnosticGpu(
 );
 
 } // namespace HyperCine
-

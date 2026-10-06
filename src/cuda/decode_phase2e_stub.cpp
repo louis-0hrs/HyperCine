@@ -51,4 +51,7 @@ bool CudaDecoderPipelinePhase2E::GetHostCheckpoints(uint64_t, std::vector<GpuEnt
 bool CudaDecoderPipelinePhase2E::DownloadBandCoefficientsToHost(uint64_t, int, std::vector<int16_t>&, int*, int*, int*) { return false; }
 std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t) { return "{}"; }
 
+bool CudaDecoderPipelinePhase2E::GetGpuCheckpoints(uint64_t, std::vector<GpuEntropySegmentDescriptor>&) { return false; }
+bool CudaDecoderPipelinePhase2E::GetGpuIndexResults(uint64_t, std::vector<GpuCheckpointIndexResult>&) { return false; }
+bool CudaDecoderPipelinePhase2E::DownloadIntermediateLl(uint64_t, int, int, std::vector<int16_t>&) { return false; }
 } // namespace HyperCine

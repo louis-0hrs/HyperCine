@@ -25,6 +25,7 @@ if(HYPERCINE_ENABLE_CUDA)
         core/decode_fsm_tables.cpp
         core/decode_thread_pool.cpp
         cuda/decode_entropy_cuda.cu
+        cuda/decode_gpu_index.cu
         cuda/decode_phase2b_pipeline.cu
         cuda/decode_phase2c_pipeline.cu
         cuda/decode_phase2d_pipeline.cu
@@ -52,6 +53,7 @@ else()
         cuda/decode_phase2c_stub.cpp
         cuda/decode_phase2d_stub.cpp
         cuda/decode_phase2e_stub.cpp
+        cuda/decode_gpu_index_stub.cpp
     )
     target_include_directories(hypercine_wavelet PUBLIC
         ${CMAKE_SOURCE_DIR}/include

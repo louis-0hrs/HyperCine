@@ -72,6 +72,12 @@ if(WIN32)
 endif()
 
 if(HYPERCINE_ENABLE_CUDA)
+    add_executable(benchmark_decode_phase2fa benchmark_decode_phase2fa.cpp)
+    target_link_libraries(benchmark_decode_phase2fa PRIVATE hypercine_wavelet CFHDCodecStatic)
+    target_compile_definitions(benchmark_decode_phase2fa PRIVATE _ALLOCATOR=1)
+    if(WIN32)
+        target_link_libraries(benchmark_decode_phase2fa PRIVATE psapi)
+    endif()
     add_executable(benchmark_wavelet
         benchmark_wavelet.cpp
     )

@@ -3,7 +3,9 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 
 #include "hypercine/decode_entropy_cuda.h"
+#include "hypercine/decode_gpu_index.h"
 #include <cuda_runtime.h>
+#include "decode_error_guard.cuh"
 #include <device_launch_parameters.h>
 #include <vector>
 #include <stdexcept>
@@ -765,9 +767,15 @@ __global__ void DecodeHighpassVlcParallelCudaKernel(
     const GpuEntropySegmentDescriptor* __restrict__ d_segments,
     int num_segments,
     const GpuFsmEntry* __restrict__ d_fsm_tables,
-    GpuSegmentDecodeResult* __restrict__ d_seg_results
+    GpuSegmentDecodeResult* __restrict__ d_seg_results,
+    const GpuCheckpointIndexResult* d_index_result,
+    uint32_t* d_frame_error
 ) {
     int seg_idx = blockIdx.x;
+    if (d_index_result && (!d_index_result->finished ||
+        d_index_result->status != GpuBandDecodeStatus::Complete ||
+        seg_idx >= d_index_result->segment_count)) return;
+    if (DecoderFrameFailed(d_frame_error)) return;
     if (seg_idx >= num_segments) return;
 
     const GpuEntropySegmentDescriptor seg = d_segments[seg_idx];
@@ -857,6 +865,8 @@ __global__ void DecodeHighpassVlcParallelCudaKernel(
         }
 
         uint64_t end_clk = clock64();
+        if (d_frame_error && status != GpuBandDecodeStatus::Complete)
+            atomicCAS(d_frame_error, 0u, static_cast<uint32_t>(status));
 
         if (d_seg_results) {
             d_seg_results[seg_idx].status = status;
@@ -871,12 +881,13 @@ __global__ void DecodeHighpassVlcParallelCudaKernel(
 
 __global__ void CooperativeDifferenceCodingAllBandsKernel(
     const GpuEntropyBandDescriptor* __restrict__ d_descriptors,
-    int num_vlc_bands
+    int num_vlc_bands, uint32_t* d_frame_error
 ) {
     int band_idx = blockIdx.x;
     if (band_idx >= num_vlc_bands) return;
 
     const GpuEntropyBandDescriptor desc = d_descriptors[band_idx];
+    if (DecoderFrameFailed(d_frame_error)) return;
     if (!desc.difference_coding || !desc.d_destination) return;
 
     int width = desc.width;
@@ -997,7 +1008,9 @@ cudaError_t LaunchDecodeEntropyParallelGpu(
     int num_segments,
     const GpuFsmEntry* d_fsm_tables,
     GpuSegmentDecodeResult* d_seg_results,
-    cudaStream_t stream
+    cudaStream_t stream,
+    const GpuCheckpointIndexResult* d_index_result,
+    uint32_t* d_frame_error
 ) {
     if (!d_compressed_sample || !d_band_descriptors || num_vlc_bands <= 0 ||
         !d_segments || num_segments <= 0 || !d_fsm_tables) {
@@ -1012,7 +1025,7 @@ cudaError_t LaunchDecodeEntropyParallelGpu(
         d_segments,
         num_segments,
         d_fsm_tables,
-        d_seg_results
+        d_seg_results, d_index_result, d_frame_error
     );
 
     return cudaGetLastError();
@@ -1021,13 +1034,13 @@ cudaError_t LaunchDecodeEntropyParallelGpu(
 cudaError_t LaunchCooperativeDifferenceCodingGpu(
     const GpuEntropyBandDescriptor* d_band_descriptors,
     int num_vlc_bands,
-    cudaStream_t stream
+    cudaStream_t stream, uint32_t* d_frame_error
 ) {
     if (!d_band_descriptors || num_vlc_bands <= 0) return cudaErrorInvalidValue;
 
     CooperativeDifferenceCodingAllBandsKernel<<<num_vlc_bands, 128, 0, stream>>>(
         d_band_descriptors,
-        num_vlc_bands
+        num_vlc_bands, d_frame_error
     );
 
     return cudaGetLastError();
@@ -1061,4 +1074,3 @@ cudaError_t LaunchDecodeEntropyParallelDiagnosticGpu(
 }
 
 } // namespace HyperCine
-

@@ -261,13 +261,18 @@ void WriteResultsJson(const std::string& filepath,
     for (char& c : normPath) {
         if (c == '/') c = '\\';
     }
-    std::ofstream out(normPath);
-    if (!out.is_open()) {
+    std::ofstream file;
+    if (filepath != "-") file.open(normPath);
+    std::ostream& out = filepath == "-" ? std::cout : file;
+    if (!out) {
         std::cerr << "Failed to write JSON output: " << normPath << std::endl;
         perror("Reason");
         return;
     }
 
+    // stdout inherits the console summary's fixed two-decimal formatting.
+    // Match the existing JSON file precision for machine-readable comparisons.
+    out << std::defaultfloat << std::setprecision(6);
     out << "{\n";
     out << "  \"system\": {\n";
     out << "    \"os\": \"Windows x64\",\n";
@@ -315,7 +320,7 @@ void WriteResultsJson(const std::string& filepath,
 
     out << "  ]\n";
     out << "}\n";
-    out.close();
+    if (file.is_open()) file.close();
 
     std::cout << "\n[+] Benchmark results successfully saved to: " << filepath << std::endl;
 }

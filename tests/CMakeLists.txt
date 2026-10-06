@@ -52,6 +52,15 @@ add_test(NAME test_avi_sample
 
 # 4. Phase 1A CUDA wavelet transform test
 if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_decode_phase2fa test_decode_phase2fa.cpp)
+    target_compile_definitions(test_decode_phase2fa PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase2fa PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_decode_phase2fa COMMAND test_decode_phase2fa
+        "${CMAKE_CURRENT_SOURCE_DIR}/decode_phase0_golden.txt")
+    set_tests_properties(test_decode_phase2fa PROPERTIES TIMEOUT 1800)
+    add_executable(test_decode_gpu_index test_decode_gpu_index.cu)
+    target_link_libraries(test_decode_gpu_index PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_decode_gpu_index COMMAND test_decode_gpu_index)
     add_executable(test_cuda_wavelet
         test_cuda_wavelet.cpp
     )

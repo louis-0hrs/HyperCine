@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cuda_runtime.h>
+#include "decode_error_guard.cuh"
 #include <cstdint>
 
 namespace HyperCine {
@@ -33,8 +34,9 @@ __global__ inline void VerticalInverseKernel(
     const int16_t* __restrict__ highhigh, int hh_pitch,
     int16_t* __restrict__ vert_low, int vl_pitch,
     int16_t* __restrict__ vert_high, int vh_pitch,
-    int width, int height, int descale)
+    int width, int height, int descale, uint32_t* frame_error = nullptr)
 {
+    if (DecoderFrameFailed(frame_error)) return;
     int c = blockIdx.x * blockDim.x + threadIdx.x;
     int r = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -133,8 +135,9 @@ __global__ inline void HorizontalInverseKernel(
     const int16_t* __restrict__ vert_low, int vl_pitch,
     const int16_t* __restrict__ vert_high, int vh_pitch,
     int16_t* __restrict__ out, int out_pitch,
-    int width, int height2, int descale)
+    int width, int height2, int descale, uint32_t* frame_error = nullptr)
 {
+    if (DecoderFrameFailed(frame_error)) return;
     int c = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 

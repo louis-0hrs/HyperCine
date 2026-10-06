@@ -4,6 +4,7 @@
 
 #include "hypercine/decode_color_cuda.h"
 #include <cuda_runtime.h>
+#include "decode_error_guard.cuh"
 #include <cstdint>
 
 namespace HyperCine {
@@ -50,8 +51,9 @@ __global__ void Yuv422ToBgra8Kernel(
     int width, int height,
     int post_column_pixels,
     ColorCoefficients coeff,
-    RowOrientation orientation)
+    RowOrientation orientation, uint32_t* frame_error)
 {
+    if (DecoderFrameFailed(frame_error)) return;
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -137,7 +139,7 @@ bool LaunchYuv422ToBgra8(
     ColorMatrix matrix,
     ColorRange range,
     RowOrientation orientation,
-    cudaStream_t stream)
+    cudaStream_t stream, uint32_t* frame_error)
 {
     if (!d_y || !d_v || !d_u || !d_bgra || width <= 0 || height <= 0) {
         return false;
@@ -164,7 +166,7 @@ bool LaunchYuv422ToBgra8(
         width, height,
         post_column_pixels,
         coeff,
-        orientation
+        orientation, frame_error
     );
 
     return cudaGetLastError() == cudaSuccess;
