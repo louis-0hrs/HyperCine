@@ -1,0 +1,55 @@
+{
+  "benchmark": "HyperCine Phase 2F-C Policy vs Oracle Comparison",
+  "analysis": {
+    "policy_description": "StaticHeuristic uses bytes_per_coeff >= 1.05 and payload >= 32KB to select B/F, else Method E",
+    "adaptive_policy": "Monitors correction_ratio > 0.15 or full_corrections > 0.10 to fallback dynamically",
+    "oracle_description": "Per-band minimum latency between Phase 2E and B/F"
+  },
+  "evaluations": [
+    {
+      "pattern": "flat",
+      "method_e_ms": 3.51627,
+      "static_heuristic_ms": 3.50108,
+      "adaptive_dynamic_ms": 3.75038,
+      "oracle_ms": 3.50108,
+      "static_oracle_efficiency": 1,
+      "adaptive_oracle_efficiency": 0.933527
+    },
+    {
+      "pattern": "gradient",
+      "method_e_ms": 7.00947,
+      "static_heuristic_ms": 6.84726,
+      "adaptive_dynamic_ms": 4.0874,
+      "oracle_ms": 4.0874,
+      "static_oracle_efficiency": 0.59694,
+      "adaptive_oracle_efficiency": 1
+    },
+    {
+      "pattern": "noise",
+      "method_e_ms": 66.1439,
+      "static_heuristic_ms": 8.80966,
+      "adaptive_dynamic_ms": 8.43844,
+      "oracle_ms": 8.43844,
+      "static_oracle_efficiency": 0.957862,
+      "adaptive_oracle_efficiency": 1
+    },
+    {
+      "pattern": "texture",
+      "method_e_ms": 20.1383,
+      "static_heuristic_ms": 19.5424,
+      "adaptive_dynamic_ms": 19.8566,
+      "oracle_ms": 19.5424,
+      "static_oracle_efficiency": 1,
+      "adaptive_oracle_efficiency": 0.984178
+    },
+    {
+      "pattern": "edges",
+      "method_e_ms": 12.3149,
+      "static_heuristic_ms": 12.5443,
+      "adaptive_dynamic_ms": 4.99571,
+      "oracle_ms": 4.99571,
+      "static_oracle_efficiency": 0.398246,
+      "adaptive_oracle_efficiency": 1
+    }
+  ]
+}

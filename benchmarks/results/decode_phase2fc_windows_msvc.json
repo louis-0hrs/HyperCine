@@ -1,0 +1,301 @@
+{
+  "benchmark": "HyperCine Decode Phase 2F-C Full-Frame Hybrid Integration",
+  "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+  "compute_capability": "8.9",
+  "total_vram_mb": 16375,
+  "cpu_hardware_concurrency": 16,
+  "chunk_size_default": 256,
+  "memory_footprint": {
+    "scratch_bytes_per_band_256b": 786432,
+    "scratch_bytes_per_slot_27bands_mib": 21.6,
+    "peak_vram_bytes": 1373110272,
+    "peak_working_set_bytes": 764010496
+  },
+  "resolutions": [
+    {
+      "name": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "patterns": [
+        {
+          "pattern": "flat",
+          "cpu_ms": 4.12698,
+          "p2d_ms": 0.88578,
+          "p2e_ms": 2.50236,
+          "p2fc_static_ms": 2.46233,
+          "p2fc_adapt_ms": 2.47363,
+          "p2fc_oracle_ms": 2.46233,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 1.01626,
+          "speedup_vs_2d": 0.359732,
+          "speedup_vs_cpu": 1.67604,
+          "fps": 406.119,
+          "mpps": 842.128
+        },
+        {
+          "pattern": "gradient",
+          "cpu_ms": 4.64208,
+          "p2d_ms": 2.57605,
+          "p2e_ms": 4.79793,
+          "p2fc_static_ms": 4.78913,
+          "p2fc_adapt_ms": 2.73725,
+          "p2fc_oracle_ms": 2.73725,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 1.00184,
+          "speedup_vs_2d": 0.537895,
+          "speedup_vs_cpu": 0.969296,
+          "fps": 208.806,
+          "mpps": 432.981
+        },
+        {
+          "pattern": "noise",
+          "cpu_ms": 21.4858,
+          "p2d_ms": 14.9524,
+          "p2e_ms": 14.6991,
+          "p2fc_static_ms": 5.24403,
+          "p2fc_adapt_ms": 4.52933,
+          "p2fc_oracle_ms": 4.52933,
+          "bf_bands": 9,
+          "method_e_bands": 18,
+          "speedup_vs_2e": 2.80302,
+          "speedup_vs_2d": 2.85131,
+          "speedup_vs_cpu": 4.09718,
+          "fps": 190.693,
+          "mpps": 395.421
+        },
+        {
+          "pattern": "texture",
+          "cpu_ms": 5.75472,
+          "p2d_ms": 6.95957,
+          "p2e_ms": 7.8073,
+          "p2fc_static_ms": 7.89751,
+          "p2fc_adapt_ms": 7.60809,
+          "p2fc_oracle_ms": 7.60809,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 0.988577,
+          "speedup_vs_2d": 0.881236,
+          "speedup_vs_cpu": 0.728675,
+          "fps": 126.622,
+          "mpps": 262.564
+        },
+        {
+          "pattern": "edges",
+          "cpu_ms": 5.92338,
+          "p2d_ms": 3.74883,
+          "p2e_ms": 7.30163,
+          "p2fc_static_ms": 7.66624,
+          "p2fc_adapt_ms": 3.35506,
+          "p2fc_oracle_ms": 3.35506,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 0.952439,
+          "speedup_vs_2d": 0.489005,
+          "speedup_vs_cpu": 0.772658,
+          "fps": 130.442,
+          "mpps": 270.485
+        }
+      ]
+    },
+    {
+      "name": "4k",
+      "width": 3840,
+      "height": 2160,
+      "patterns": [
+        {
+          "pattern": "flat",
+          "cpu_ms": 16.3277,
+          "p2d_ms": 1.66807,
+          "p2e_ms": 3.51627,
+          "p2fc_static_ms": 3.50108,
+          "p2fc_adapt_ms": 3.75038,
+          "p2fc_oracle_ms": 3.50108,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 1.00434,
+          "speedup_vs_2d": 0.476444,
+          "speedup_vs_cpu": 4.66363,
+          "fps": 285.626,
+          "mpps": 2369.1
+        },
+        {
+          "pattern": "gradient",
+          "cpu_ms": 16.5952,
+          "p2d_ms": 4.43778,
+          "p2e_ms": 7.00947,
+          "p2fc_static_ms": 6.84726,
+          "p2fc_adapt_ms": 4.0874,
+          "p2fc_oracle_ms": 4.0874,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 1.02369,
+          "speedup_vs_2d": 0.64811,
+          "speedup_vs_cpu": 2.42363,
+          "fps": 146.044,
+          "mpps": 1211.35
+        },
+        {
+          "pattern": "noise",
+          "cpu_ms": 101.192,
+          "p2d_ms": 67.7852,
+          "p2e_ms": 66.1439,
+          "p2fc_static_ms": 8.80966,
+          "p2fc_adapt_ms": 8.43844,
+          "p2fc_oracle_ms": 8.43844,
+          "bf_bands": 9,
+          "method_e_bands": 18,
+          "speedup_vs_2e": 7.50811,
+          "speedup_vs_2d": 7.69441,
+          "speedup_vs_cpu": 11.4865,
+          "fps": 113.512,
+          "mpps": 941.512
+        },
+        {
+          "pattern": "texture",
+          "cpu_ms": 28.2156,
+          "p2d_ms": 19.4907,
+          "p2e_ms": 20.1383,
+          "p2fc_static_ms": 19.5424,
+          "p2fc_adapt_ms": 19.8566,
+          "p2fc_oracle_ms": 19.5424,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 1.03049,
+          "speedup_vs_2d": 0.997352,
+          "speedup_vs_cpu": 1.44381,
+          "fps": 51.1707,
+          "mpps": 424.43
+        },
+        {
+          "pattern": "edges",
+          "cpu_ms": 23.9934,
+          "p2d_ms": 9.22328,
+          "p2e_ms": 12.3149,
+          "p2fc_static_ms": 12.5443,
+          "p2fc_adapt_ms": 4.99571,
+          "p2fc_oracle_ms": 4.99571,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 0.981714,
+          "speedup_vs_2d": 0.735257,
+          "speedup_vs_cpu": 1.9127,
+          "fps": 79.7175,
+          "mpps": 661.209
+        }
+      ]
+    },
+    {
+      "name": "8k",
+      "width": 7680,
+      "height": 4320,
+      "patterns": [
+        {
+          "pattern": "flat",
+          "cpu_ms": 73.2795,
+          "p2d_ms": 6.24694,
+          "p2e_ms": 8.73706,
+          "p2fc_static_ms": 9.09892,
+          "p2fc_adapt_ms": 8.62566,
+          "p2fc_oracle_ms": 8.62566,
+          "bf_bands": 0,
+          "method_e_bands": 27,
+          "speedup_vs_2e": 0.96023,
+          "speedup_vs_2d": 0.686558,
+          "speedup_vs_cpu": 8.05365,
+          "fps": 109.903,
+          "mpps": 3646.32
+        }
+      ]
+    }
+  ],
+  "chunk_size_sweep": [
+    {
+      "chunk_size": 64,
+      "band6_ms": 0,
+      "band7_ms": 0,
+      "texture_crit_ms": 0.0131,
+      "scratch_bytes_per_band": 3145728
+    },
+    {
+      "chunk_size": 128,
+      "band6_ms": 2.3529,
+      "band7_ms": 2.5141,
+      "texture_crit_ms": 0.0084,
+      "scratch_bytes_per_band": 1572864
+    },
+    {
+      "chunk_size": 256,
+      "band6_ms": 1.8239,
+      "band7_ms": 2.0237,
+      "texture_crit_ms": 0.0054,
+      "scratch_bytes_per_band": 786432
+    },
+    {
+      "chunk_size": 512,
+      "band6_ms": 1.0636,
+      "band7_ms": 2.2102,
+      "texture_crit_ms": 0.0071,
+      "scratch_bytes_per_band": 393216
+    }
+  ],
+  "worker_scaling": [
+    {
+      "workers": 1,
+      "noise_4k_ms": 13.385,
+      "texture_4k_ms": 21.487,
+      "fps": 74.7107
+    },
+    {
+      "workers": 2,
+      "noise_4k_ms": 11.0314,
+      "texture_4k_ms": 19.5809,
+      "fps": 90.6502
+    },
+    {
+      "workers": 4,
+      "noise_4k_ms": 9.23828,
+      "texture_4k_ms": 20.1782,
+      "fps": 108.245
+    },
+    {
+      "workers": 8,
+      "noise_4k_ms": 9.05832,
+      "texture_4k_ms": 22.052,
+      "fps": 110.396
+    },
+    {
+      "workers": 16,
+      "noise_4k_ms": 9.00582,
+      "texture_4k_ms": 20.5409,
+      "fps": 111.039
+    }
+  ],
+  "slot_scaling": [
+    {
+      "slots": 1,
+      "fps": 117.758,
+      "mpps": 976.732,
+      "latency_ms": 8.49199
+    },
+    {
+      "slots": 2,
+      "fps": 131.025,
+      "mpps": 1086.77,
+      "latency_ms": 7.63212
+    },
+    {
+      "slots": 3,
+      "fps": 130.149,
+      "mpps": 1079.51,
+      "latency_ms": 7.68351
+    },
+    {
+      "slots": 4,
+      "fps": 123.563,
+      "mpps": 1024.88,
+      "latency_ms": 8.09302
+    }
+  ]
+}
