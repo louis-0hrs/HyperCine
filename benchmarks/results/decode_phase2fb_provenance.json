@@ -1,0 +1,20 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "base_commit": "773669cbbcccda8aedd5c5b968f7649df0fa5de3",
+  "upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+  "raw_inputs": [
+    "decode_phase2fb_research.json",
+    "decode_phase2fb_idle_repeat2.json",
+    "decode_phase2fb_idle_repeat3.json"
+  ],
+  "source_sha256": {
+    "benchmarks/prototype_decode_phase2fb.cpp": "239b6fb8a7f4d778e89246d86eb24bedee30e9a75f899c72d497fac3e5f3858f",
+    "benchmarks/decode_phase2fb_kernels.cu": "70349d9a29ca4aa9026ca8c45f589f0a08837ffea137223c10392c78976b146f",
+    "benchmarks/decode_phase2fb_gpu.h": "5c6d1aa53595bcb2e5b0928f53133e1db87a21820e7d0acb3405e6f2dd19896e",
+    "tests/decode_phase2fb_support.h": "391b497db84ed1a411726fd40a914c074586763e26146331ed9441aeed596159",
+    "tests/test_decode_phase2fb.cpp": "f499724cb3fc37881c2f39b6992a7a23e179296cd8083284f1e878d7ba5a11b2",
+    "benchmarks/analyze_decode_phase2fb.py": "4324e11d911caf509234764c4054b6cd17463b5dbddbfcd1cf02de9541ac5e43"
+  },
+  "note": "B kernels/timing unchanged after idle rebench; later change is bounded A verification/CLI only.",
+  "implementation_commit": "bc60373c1d9653c5901b94150d3efb853518c2ae"
+}

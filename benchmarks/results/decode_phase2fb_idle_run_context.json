@@ -1,0 +1,32 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "date": "2026-10-08",
+  "sampling_interval_ms": 200,
+  "note": "No project GPU tests/sanitizers ran concurrently. App listings and counters are coarse, not a guarantee against transient external GPU work.",
+  "runs": [
+    {
+      "run": 1,
+      "output": "decode_phase2fb_research.json",
+      "start_unix": 1791470013.365083,
+      "end_unix": 1791470037.460945,
+      "exit_code": 0,
+      "compute_apps_before": "pid, process_name, used_gpu_memory [MiB]\n28480, C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.1002.7124.0_x64__2p2nqsd0c76g0\\app\\ChatGPT.exe, [N/A]\n"
+    },
+    {
+      "run": 2,
+      "output": "decode_phase2fb_idle_repeat2.json",
+      "start_unix": 1791470037.533719,
+      "end_unix": 1791470059.5526989,
+      "exit_code": 0,
+      "compute_apps_before": "pid, process_name, used_gpu_memory [MiB]\n28480, C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.1002.7124.0_x64__2p2nqsd0c76g0\\app\\ChatGPT.exe, [N/A]\n"
+    },
+    {
+      "run": 3,
+      "output": "decode_phase2fb_idle_repeat3.json",
+      "start_unix": 1791470059.631896,
+      "end_unix": 1791470081.8095539,
+      "exit_code": 0,
+      "compute_apps_before": "pid, process_name, used_gpu_memory [MiB]\n28480, C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.1002.7124.0_x64__2p2nqsd0c76g0\\app\\ChatGPT.exe, [N/A]\n"
+    }
+  ]
+}

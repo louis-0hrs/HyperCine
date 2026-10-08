@@ -1,0 +1,16 @@
+Internal ctest changing into directory: C:/Users/User/Documents/GitHub/HyperCine-public/build_cpu
+Test project C:/Users/User/Documents/GitHub/HyperCine-public/build_cpu
+    Start 1: test_transform_wavelet
+1/5 Test #1: test_transform_wavelet ...........   Passed    0.33 sec
+    Start 2: test_codec_roundtrip
+2/5 Test #2: test_codec_roundtrip .............   Passed    0.40 sec
+    Start 3: test_yuy2_stability
+3/5 Test #3: test_yuy2_stability ..............   Passed    1.52 sec
+    Start 4: test_decode_phase0
+4/5 Test #4: test_decode_phase0 ...............   Passed    3.91 sec
+    Start 5: test_avi_sample
+5/5 Test #5: test_avi_sample ..................   Passed    0.63 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   6.82 sec

@@ -1,0 +1,94 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "outcome": "A",
+  "selected": "B/F isolated prototype",
+  "matrix": [
+    {
+      "candidate": "A hierarchical/all-state",
+      "exact": "sampled summaries only; no complete coefficient decode",
+      "gpu_preprocessing_ms": 13.7670078,
+      "total_ms": null,
+      "scratch_bytes": 20396768,
+      "continue": false,
+      "reason": "~13.8 ms and ~19.5 MiB before prefix/replay, versus ~2.6 ms complete B."
+    },
+    {
+      "candidate": "B coarse-to-fine exact correction",
+      "exact": true,
+      "total_ms": 2.635,
+      "scratch_bytes": 851072,
+      "continue": true,
+      "reason": "Dense critical gate passed; texture remains workload dependent."
+    },
+    {
+      "candidate": "C selective state constraints",
+      "exact": "structural over-approximation analysis; no decoder",
+      "total_ms": null,
+      "scratch_bytes": null,
+      "continue": false,
+      "reason": "518 possible initial states; local convergence retains distinct advances and emitted prefixes. No complete low-work solver derived."
+    },
+    {
+      "candidate": "D recursive midpoint",
+      "exact": "not implemented",
+      "total_ms": null,
+      "scratch_bytes": null,
+      "continue": false,
+      "reason": "No midpoint state/position oracle established without prefix work; not an impossibility proof."
+    },
+    {
+      "candidate": "E compact dictionaries",
+      "exact": "structural analysis only",
+      "total_ms": null,
+      "scratch_bytes": null,
+      "continue": false,
+      "reason": "All global output-aware classes remain distinct; local compression does not eliminate construction work."
+    },
+    {
+      "candidate": "F CPU/GPU hybrid",
+      "exact": true,
+      "total_ms": 2.635,
+      "scratch_bytes": 851072,
+      "continue": true,
+      "reason": "Same implementation as B, not a separate additional winner."
+    }
+  ],
+  "hierarchy_storage_models": [
+    {
+      "levels": 2,
+      "fanout": 16,
+      "map_counts": [
+        4905,
+        307
+      ],
+      "summary_map_bytes": 21598528,
+      "status": "storage model; higher-level composition not implemented"
+    },
+    {
+      "levels": 3,
+      "fanout": 16,
+      "map_counts": [
+        4905,
+        307,
+        20
+      ],
+      "summary_map_bytes": 21681408,
+      "status": "storage model; higher-level composition not implemented"
+    },
+    {
+      "levels": 4,
+      "fanout": 16,
+      "map_counts": [
+        4905,
+        307,
+        20,
+        2
+      ],
+      "summary_map_bytes": 21689696,
+      "status": "storage model; higher-level composition not implemented"
+    }
+  ],
+  "best_critical_chunk_bytes_by_median": 128,
+  "production_integrated": false,
+  "phase2fc_warranted": "Separate experimental integration/evaluation; keep D/E defaults."
+}

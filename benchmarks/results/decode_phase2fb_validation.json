@@ -1,0 +1,254 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "full_cuda_ctest": {
+    "passed": 28,
+    "failed": 0,
+    "seconds": 954.83,
+    "log": "decode_phase2fb_ctest.txt"
+  },
+  "cpu_only_ctest": {
+    "passed": 5,
+    "failed": 0,
+    "seconds": 6.82,
+    "log": "decode_phase2fb_cpu_ctest.txt"
+  },
+  "focused_cases": 39,
+  "corpus_bands": 13,
+  "max_coefficient_error": 0,
+  "sanitizers": [
+    {
+      "tool": "memcheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_memcheck_focused.txt",
+      "zero_error_summary": true
+    },
+    {
+      "tool": "memcheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_memcheck_corpus.txt",
+      "zero_error_summary": true
+    },
+    {
+      "tool": "initcheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_initcheck_focused.txt",
+      "zero_error_summary": true
+    },
+    {
+      "tool": "initcheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_initcheck_corpus.txt",
+      "zero_error_summary": true
+    },
+    {
+      "tool": "racecheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_racecheck_focused.txt",
+      "zero_error_summary": true
+    },
+    {
+      "tool": "racecheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_racecheck_corpus.txt",
+      "zero_error_summary": true
+    },
+    {
+      "tool": "synccheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_synccheck_focused.txt",
+      "zero_error_summary": true
+    },
+    {
+      "tool": "synccheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_synccheck_corpus.txt",
+      "zero_error_summary": true
+    }
+  ],
+  "codec_comparisons": [
+    {
+      "name": "1080p",
+      "baseline": {
+        "name": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "frames": 50,
+        "encode": {
+          "fps": 77.6958,
+          "megapixels_per_sec": 161.11,
+          "latency_avg_ms": 12.5634,
+          "latency_min_ms": 11.9338,
+          "latency_max_ms": 14.7025
+        },
+        "decode": {
+          "fps": 394.146,
+          "megapixels_per_sec": 817.301,
+          "latency_avg_ms": 2.5368,
+          "latency_min_ms": 2.0961,
+          "latency_max_ms": 3.0989
+        },
+        "compression": {
+          "avg_bytes": 1186352,
+          "ratio": 6.99152
+        },
+        "peak_memory_bytes": 96985088
+      },
+      "current": {
+        "name": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "frames": 50,
+        "encode": {
+          "fps": 86.4869,
+          "megapixels_per_sec": 179.339,
+          "latency_avg_ms": 11.2673,
+          "latency_min_ms": 10.4977,
+          "latency_max_ms": 12.9872
+        },
+        "decode": {
+          "fps": 470.723,
+          "megapixels_per_sec": 976.091,
+          "latency_avg_ms": 2.12412,
+          "latency_min_ms": 1.889,
+          "latency_max_ms": 2.7124
+        },
+        "compression": {
+          "avg_bytes": 1186352,
+          "ratio": 6.99152
+        },
+        "peak_memory_bytes": 97034240
+      },
+      "decode_fps_change_percent": 19.42858737625144,
+      "encode_fps_change_percent": 11.314768623271787,
+      "peak_memory_change_bytes": 49152
+    },
+    {
+      "name": "4K_UHD",
+      "baseline": {
+        "name": "4K_UHD",
+        "width": 3840,
+        "height": 2160,
+        "frames": 25,
+        "encode": {
+          "fps": 21.8373,
+          "megapixels_per_sec": 181.127,
+          "latency_avg_ms": 44.7897,
+          "latency_min_ms": 42.0681,
+          "latency_max_ms": 49.166
+        },
+        "decode": {
+          "fps": 125.313,
+          "megapixels_per_sec": 1039.4,
+          "latency_avg_ms": 7.97964,
+          "latency_min_ms": 7.3067,
+          "latency_max_ms": 9.0836
+        },
+        "compression": {
+          "avg_bytes": 4673177,
+          "ratio": 7.09958
+        },
+        "peak_memory_bytes": 240435200
+      },
+      "current": {
+        "name": "4K_UHD",
+        "width": 3840,
+        "height": 2160,
+        "frames": 25,
+        "encode": {
+          "fps": 23.7466,
+          "megapixels_per_sec": 196.964,
+          "latency_avg_ms": 41.0786,
+          "latency_min_ms": 38.9039,
+          "latency_max_ms": 43.215
+        },
+        "decode": {
+          "fps": 129.318,
+          "megapixels_per_sec": 1072.61,
+          "latency_avg_ms": 7.73256,
+          "latency_min_ms": 7.0879,
+          "latency_max_ms": 9.3713
+        },
+        "compression": {
+          "avg_bytes": 4673177,
+          "ratio": 7.09958
+        },
+        "peak_memory_bytes": 240472064
+      },
+      "decode_fps_change_percent": 3.1959972229537392,
+      "encode_fps_change_percent": 8.743297019320174,
+      "peak_memory_change_bytes": 36864
+    },
+    {
+      "name": "8K_UHD",
+      "baseline": {
+        "name": "8K_UHD",
+        "width": 7680,
+        "height": 4320,
+        "frames": 10,
+        "encode": {
+          "fps": 4.28232,
+          "megapixels_per_sec": 142.077,
+          "latency_avg_ms": 229.705,
+          "latency_min_ms": 158.417,
+          "latency_max_ms": 266.595
+        },
+        "decode": {
+          "fps": 27.964,
+          "megapixels_per_sec": 927.778,
+          "latency_avg_ms": 35.76,
+          "latency_min_ms": 32.8034,
+          "latency_max_ms": 38.2421
+        },
+        "compression": {
+          "avg_bytes": 17674354,
+          "ratio": 7.50864
+        },
+        "peak_memory_bytes": 644014080
+      },
+      "current": {
+        "name": "8K_UHD",
+        "width": 7680,
+        "height": 4320,
+        "frames": 10,
+        "encode": {
+          "fps": 5.83058,
+          "megapixels_per_sec": 193.445,
+          "latency_avg_ms": 168.3,
+          "latency_min_ms": 148.02,
+          "latency_max_ms": 191.947
+        },
+        "decode": {
+          "fps": 27.6418,
+          "megapixels_per_sec": 917.088,
+          "latency_avg_ms": 36.1767,
+          "latency_min_ms": 33.5849,
+          "latency_max_ms": 38.4985
+        },
+        "compression": {
+          "avg_bytes": 17674354,
+          "ratio": 7.50864
+        },
+        "peak_memory_bytes": 643821568
+      },
+      "decode_fps_change_percent": -1.1521956801602062,
+      "encode_fps_change_percent": 36.15470119000914,
+      "peak_memory_change_bytes": -192512
+    }
+  ],
+  "interpretation": "Production codec source is unchanged. The 8K decode FPS difference is -1.15%, smaller than measured latency spread; no optimization or universal full-frame speedup is claimed.",
+  "timing_scope": "Resident isolated band; excludes allocation, initial payload/table H2D, final diagnostic coefficient D2H. Includes summary D2H, CPU correction, checkpoint H2D and GPU error validation.",
+  "final_focused_ctest": {
+    "passed": 1,
+    "failed": 0,
+    "seconds": 0.19,
+    "deterministic_cases": 39
+  }
+}

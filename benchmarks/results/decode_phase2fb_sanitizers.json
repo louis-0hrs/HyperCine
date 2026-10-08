@@ -1,0 +1,53 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "runs": [
+    {
+      "tool": "memcheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_memcheck_focused.txt"
+    },
+    {
+      "tool": "memcheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_memcheck_corpus.txt"
+    },
+    {
+      "tool": "initcheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_initcheck_focused.txt"
+    },
+    {
+      "tool": "initcheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_initcheck_corpus.txt"
+    },
+    {
+      "tool": "racecheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_racecheck_focused.txt"
+    },
+    {
+      "tool": "racecheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_racecheck_corpus.txt"
+    },
+    {
+      "tool": "synccheck",
+      "target": "focused",
+      "exit_code": 0,
+      "log": "decode_phase2fb_synccheck_focused.txt"
+    },
+    {
+      "tool": "synccheck",
+      "target": "corpus",
+      "exit_code": 0,
+      "log": "decode_phase2fb_synccheck_corpus.txt"
+    }
+  ]
+}

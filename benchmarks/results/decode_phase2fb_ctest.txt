@@ -1,0 +1,62 @@
+Internal ctest changing into directory: C:/Users/User/Documents/GitHub/HyperCine-public/build
+Test project C:/Users/User/Documents/GitHub/HyperCine-public/build
+      Start  1: test_transform_wavelet
+ 1/28 Test  #1: test_transform_wavelet .............   Passed    0.35 sec
+      Start  2: test_codec_roundtrip
+ 2/28 Test  #2: test_codec_roundtrip ...............   Passed    0.34 sec
+      Start  3: test_yuy2_stability
+ 3/28 Test  #3: test_yuy2_stability ................   Passed    1.49 sec
+      Start  4: test_decode_phase0
+ 4/28 Test  #4: test_decode_phase0 .................   Passed    8.21 sec
+      Start  5: test_avi_sample
+ 5/28 Test  #5: test_avi_sample ....................   Passed    0.50 sec
+      Start  6: test_decode_phase2fa
+ 6/28 Test  #6: test_decode_phase2fa ...............   Passed  463.78 sec
+      Start  7: test_decode_gpu_index
+ 7/28 Test  #7: test_decode_gpu_index ..............   Passed    0.95 sec
+      Start  8: test_cuda_wavelet
+ 8/28 Test  #8: test_cuda_wavelet ..................   Passed   14.32 sec
+      Start  9: test_cuda_pyramid
+ 9/28 Test  #9: test_cuda_pyramid ..................   Passed    0.56 sec
+      Start 10: test_entropy_parallel
+10/28 Test #10: test_entropy_parallel ..............   Passed    0.45 sec
+      Start 11: test_hybrid_roundtrip
+11/28 Test #11: test_hybrid_roundtrip ..............   Passed    0.51 sec
+      Start 12: test_phase2a
+12/28 Test #12: test_phase2a .......................   Passed    1.40 sec
+      Start 13: test_phase2b
+13/28 Test #13: test_phase2b .......................   Passed    1.00 sec
+      Start 14: test_phase2c
+14/28 Test #14: test_phase2c .......................   Passed  234.13 sec
+      Start 15: test_phase2d
+15/28 Test #15: test_phase2d .......................   Passed   24.12 sec
+      Start 16: test_entropy_capacity
+16/28 Test #16: test_entropy_capacity ..............   Passed    0.86 sec
+      Start 17: test_phase3a
+17/28 Test #17: test_phase3a .......................   Passed   67.00 sec
+      Start 18: test_decode_inverse_wavelet_cuda
+18/28 Test #18: test_decode_inverse_wavelet_cuda ...   Passed    2.66 sec
+      Start 19: test_decode_phase1
+19/28 Test #19: test_decode_phase1 .................   Passed    3.07 sec
+      Start 20: test_color_conversion_cuda
+20/28 Test #20: test_color_conversion_cuda .........   Passed    0.81 sec
+      Start 21: test_decode_phase2a
+21/28 Test #21: test_decode_phase2a ................   Passed    2.90 sec
+      Start 22: test_decode_entropy_cuda
+22/28 Test #22: test_decode_entropy_cuda ...........   Passed    0.46 sec
+      Start 23: test_decode_phase2b
+23/28 Test #23: test_decode_phase2b ................   Passed    8.42 sec
+      Start 24: test_decode_entropy_phase2c
+24/28 Test #24: test_decode_entropy_phase2c ........   Passed    1.75 sec
+      Start 25: test_decode_phase2c
+25/28 Test #25: test_decode_phase2c ................   Passed   33.76 sec
+      Start 26: test_decode_phase2d
+26/28 Test #26: test_decode_phase2d ................   Passed   34.19 sec
+      Start 27: test_decode_phase2e
+27/28 Test #27: test_decode_phase2e ................   Passed   46.05 sec
+      Start 28: test_decode_phase2fb
+28/28 Test #28: test_decode_phase2fb ...............   Passed    0.68 sec
+
+100% tests passed, 0 tests failed out of 28
+
+Total Test time (real) = 954.83 sec

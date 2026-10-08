@@ -1,0 +1,93 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "system": {
+    "os": "Windows x64",
+    "cpu_model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+    "thread_count": 16,
+    "compiler": "MSVC 19.44 / Visual Studio 2022",
+    "build_type": "Release",
+    "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7"
+  },
+  "configuration": {
+    "pixel_format": "CFHD_PIXEL_FORMAT_BGRA",
+    "encoded_format": "CFHD_ENCODED_FORMAT_YUV_422",
+    "quality": "CFHD_ENCODING_QUALITY_FILM3"
+  },
+  "benchmarks": [
+    {
+      "name": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "frames": 50,
+      "encode": {
+        "fps": 86.4869,
+        "megapixels_per_sec": 179.339,
+        "latency_avg_ms": 11.2673,
+        "latency_min_ms": 10.4977,
+        "latency_max_ms": 12.9872
+      },
+      "decode": {
+        "fps": 470.723,
+        "megapixels_per_sec": 976.091,
+        "latency_avg_ms": 2.12412,
+        "latency_min_ms": 1.889,
+        "latency_max_ms": 2.7124
+      },
+      "compression": {
+        "avg_bytes": 1186352,
+        "ratio": 6.99152
+      },
+      "peak_memory_bytes": 97034240
+    },
+    {
+      "name": "4K_UHD",
+      "width": 3840,
+      "height": 2160,
+      "frames": 25,
+      "encode": {
+        "fps": 23.7466,
+        "megapixels_per_sec": 196.964,
+        "latency_avg_ms": 41.0786,
+        "latency_min_ms": 38.9039,
+        "latency_max_ms": 43.215
+      },
+      "decode": {
+        "fps": 129.318,
+        "megapixels_per_sec": 1072.61,
+        "latency_avg_ms": 7.73256,
+        "latency_min_ms": 7.0879,
+        "latency_max_ms": 9.3713
+      },
+      "compression": {
+        "avg_bytes": 4673177,
+        "ratio": 7.09958
+      },
+      "peak_memory_bytes": 240472064
+    },
+    {
+      "name": "8K_UHD",
+      "width": 7680,
+      "height": 4320,
+      "frames": 10,
+      "encode": {
+        "fps": 5.83058,
+        "megapixels_per_sec": 193.445,
+        "latency_avg_ms": 168.3,
+        "latency_min_ms": 148.02,
+        "latency_max_ms": 191.947
+      },
+      "decode": {
+        "fps": 27.6418,
+        "megapixels_per_sec": 917.088,
+        "latency_avg_ms": 36.1767,
+        "latency_min_ms": 33.5849,
+        "latency_max_ms": 38.4985
+      },
+      "compression": {
+        "avg_bytes": 17674354,
+        "ratio": 7.50864
+      },
+      "peak_memory_bytes": 643821568
+    }
+  ]
+}
