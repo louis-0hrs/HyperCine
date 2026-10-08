@@ -177,3 +177,11 @@ if(HYPERCINE_ENABLE_CUDA)
 endif()
 
 
+
+if(HYPERCINE_ENABLE_CUDA AND HYPERCINE_BUILD_BENCHMARKS)
+    add_executable(test_decode_phase2fb test_decode_phase2fb.cpp)
+    target_compile_definitions(test_decode_phase2fb PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase2fb PRIVATE decode_phase2fb_research)
+    add_test(NAME test_decode_phase2fb COMMAND test_decode_phase2fb)
+    set_tests_properties(test_decode_phase2fb PROPERTIES TIMEOUT 300)
+endif()

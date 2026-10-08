@@ -204,3 +204,13 @@ if(TARGET CFHDCodecThreaded)
     endif()
 endif()
 
+
+# Isolated Phase 2F-B research; never linked into the production library.
+if(HYPERCINE_ENABLE_CUDA)
+    add_library(decode_phase2fb_research STATIC decode_phase2fb_kernels.cu)
+    target_link_libraries(decode_phase2fb_research PUBLIC hypercine_wavelet CFHDCodecStatic)
+    set_target_properties(decode_phase2fb_research PROPERTIES CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON)
+    add_executable(prototype_decode_phase2fb prototype_decode_phase2fb.cpp)
+    target_compile_definitions(prototype_decode_phase2fb PRIVATE _ALLOCATOR=1)
+    target_link_libraries(prototype_decode_phase2fb PRIVATE decode_phase2fb_research)
+endif()
