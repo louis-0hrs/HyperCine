@@ -5,6 +5,7 @@
 #include "hypercine/decode_phase2e.h"
 #include "hypercine/decode_color_cuda.h"
 #include "decode_inverse_kernels.cuh"
+#include "decode_hybrid_entropy.cuh"
 
 #include <cuda_runtime.h>
 #include <vector>
@@ -48,6 +49,18 @@ constexpr int kMaxVlcBands = 27;
 constexpr int kMaxReplayStreams = 8;
 constexpr int kMaxSegmentsPerBand = 64;
 constexpr int kTotalSegmentCapacity = kMaxVlcBands * kMaxSegmentsPerBand; // 1,728
+
+constexpr size_t CS9_NUM_STATES = 136;
+constexpr size_t CS17_NUM_STATES = 518;
+constexpr size_t CS18_NUM_STATES = 518;
+constexpr size_t CS9_ENTRIES = CS9_NUM_STATES * 16;
+constexpr size_t CS17_ENTRIES = CS17_NUM_STATES * 16;
+constexpr size_t CS18_ENTRIES = CS18_NUM_STATES * 16;
+constexpr size_t CS9_BASE_OFFSET = 0;
+constexpr size_t CS17_BASE_OFFSET = CS9_ENTRIES;
+constexpr size_t CS18_BASE_OFFSET = CS9_ENTRIES + CS17_ENTRIES;
+
+using namespace HyperCine::HybridEntropy;
 
 struct SlotChannelBuffers {
     int16_t* d_l2_band[4] = {nullptr, nullptr, nullptr, nullptr};
@@ -152,6 +165,24 @@ struct DecodeSlot2E {
     GpuBandDecodeResult host_vlc_results[kMaxVlcBands];
     std::vector<GpuSegmentDecodeResult> host_seg_results;
 
+    // Phase 2F-C Hybrid Entropy parameters & buffers (Section 7, 8, 15, 27)
+    Phase2FCSelectorPolicy fc_selector_policy = Phase2FCSelectorPolicy::StaticHeuristic;
+    uint32_t fc_chunk_size = 256;
+    std::vector<BandEntropyMethod> fc_oracle_decisions;
+    BandEntropyMethod band_method[kMaxVlcBands] = {};
+    Phase2FCBandRecord fc_band_records[kMaxVlcBands] = {};
+    size_t band_chunk_offset[kMaxVlcBands] = {};
+    size_t band_chunk_count[kMaxVlcBands] = {};
+
+    HyperCine::HybridEntropy::Summary* d_fc_summaries = nullptr;
+    HyperCine::HybridEntropy::Summary* host_pinned_fc_summaries = nullptr;
+    HyperCine::HybridEntropy::Restart* d_fc_checkpoints = nullptr;
+    HyperCine::HybridEntropy::Restart* host_pinned_fc_checkpoints = nullptr;
+    uint32_t* d_fc_errors = nullptr;
+    uint32_t* host_pinned_fc_errors = nullptr;
+    cudaEvent_t ev_summary_start[kMaxVlcBands] = {};
+    cudaEvent_t ev_summary_done[kMaxVlcBands] = {};
+
     // CUDA Streams
     cudaStream_t copy_stream = nullptr;
     cudaStream_t replay_streams[kMaxReplayStreams] = {};
@@ -246,6 +277,17 @@ struct DecodeSlot2E {
         if (d_vlc_results) { cudaFree(d_vlc_results); d_vlc_results = nullptr; }
         if (d_segments) { cudaFree(d_segments); d_segments = nullptr; }
         if (d_seg_results) { cudaFree(d_seg_results); d_seg_results = nullptr; }
+
+        if (d_fc_summaries) { cudaFree(d_fc_summaries); d_fc_summaries = nullptr; }
+        if (host_pinned_fc_summaries) { cudaFreeHost(host_pinned_fc_summaries); host_pinned_fc_summaries = nullptr; }
+        if (d_fc_checkpoints) { cudaFree(d_fc_checkpoints); d_fc_checkpoints = nullptr; }
+        if (host_pinned_fc_checkpoints) { cudaFreeHost(host_pinned_fc_checkpoints); host_pinned_fc_checkpoints = nullptr; }
+        if (d_fc_errors) { cudaFree(d_fc_errors); d_fc_errors = nullptr; }
+        if (host_pinned_fc_errors) { cudaFreeHost(host_pinned_fc_errors); host_pinned_fc_errors = nullptr; }
+        for (int i = 0; i < kMaxVlcBands; ++i) {
+            if (ev_summary_start[i]) { cudaEventDestroy(ev_summary_start[i]); ev_summary_start[i] = nullptr; }
+            if (ev_summary_done[i])  { cudaEventDestroy(ev_summary_done[i]);  ev_summary_done[i] = nullptr; }
+        }
 
         if (copy_stream) { cudaStreamDestroy(copy_stream); copy_stream = nullptr; }
         for (int i = 0; i < kMaxReplayStreams; ++i) {
@@ -570,10 +612,76 @@ struct DecodeSlot2E {
         cudaEventRecord(ev_band_done[band_idx], s);
         band_state[band_idx] = BandState::GpuQueued;
 
-        // 8. In FullOverlap mode, check if inverse DAG can advance
-        if (pipeline_mode == Phase2EPipelineMode::Phase2EFullOverlap) {
+        // 8. In FullOverlap or Hybrid mode, check if inverse DAG can advance
+        if (pipeline_mode == Phase2EPipelineMode::Phase2EFullOverlap ||
+            pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame) {
             CheckAdvanceInverseDag(vlc_descs[band_idx].channel);
         }
+        host_dispatch_cpu_ms += ThreadCpuMs() - dispatch_cpu_start;
+    }
+
+    void DispatchBandHybrid(int band_idx, uint32_t marker_nibble, uint32_t checkpoint_count) {
+        if (has_error.load(std::memory_order_relaxed)) return;
+
+        std::lock_guard<std::mutex> lock(dispatch_mutex);
+        if (has_error.load(std::memory_order_relaxed)) return;
+        const double dispatch_cpu_start = ThreadCpuMs();
+
+        int s_idx = next_replay_stream % num_replay_streams;
+        next_replay_stream++;
+        cudaStream_t s = replay_streams[s_idx];
+        band_assigned_stream[band_idx] = s_idx;
+
+        const auto& d = vlc_descs[band_idx];
+        size_t c_offset = band_chunk_offset[band_idx];
+
+        if (checkpoint_count > 0) {
+            cudaMemcpyAsync(
+                d_fc_checkpoints + c_offset,
+                host_pinned_fc_checkpoints + c_offset,
+                checkpoint_count * sizeof(HyperCine::HybridEntropy::Restart),
+                cudaMemcpyHostToDevice,
+                s
+            );
+        }
+
+        LaunchZeroVlcBandsGpu(d_vlc_descriptors + band_idx, 1, s);
+        cudaEventRecord(ev_band_start[band_idx], s);
+
+        if (checkpoint_count > 0) {
+            size_t codebook_offset = (d.codebook_id == 1) ? CS17_BASE_OFFSET :
+                                    ((d.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
+            const GpuFsmEntry* d_table = d_fsm_tables + codebook_offset;
+            LaunchHybridReplayGpu(
+                d_compressed_sample + d.payload_offset,
+                d_table,
+                d_fc_checkpoints + c_offset,
+                checkpoint_count,
+                marker_nibble,
+                static_cast<uint32_t>(d.coefficient_count),
+                d.quantization,
+                d.d_destination,
+                d_fc_errors + band_idx,
+                s,
+                d.width,
+                d.pitch_samples
+            );
+        }
+
+        if (d.difference_coding) {
+            LaunchHybridDifferenceGpu(
+                d.d_destination,
+                d.width,
+                d.height,
+                d.pitch_samples,
+                s
+            );
+        }
+
+        cudaEventRecord(ev_band_done[band_idx], s);
+        band_state[band_idx] = BandState::GpuQueued;
+
+        CheckAdvanceInverseDag(d.channel);
         host_dispatch_cpu_ms += ThreadCpuMs() - dispatch_cpu_start;
     }
 };
@@ -598,6 +706,11 @@ struct CudaDecoderPipelinePhase2E::Impl {
     DecoderWorkerPool worker_pool;
     GpuFsmTableManager fsm_table_mgr;
     std::vector<GpuFsmEntry> host_fsm_tables;
+
+    // Phase 2F-C parameters
+    Phase2FCSelectorPolicy fc_selector_policy = Phase2FCSelectorPolicy::StaticHeuristic;
+    uint32_t fc_chunk_size = 256;
+    std::vector<BandEntropyMethod> fc_oracle_decisions;
 
     std::vector<std::unique_ptr<DecodeSlot2E>> slots;
     std::mutex mutex;
@@ -634,6 +747,9 @@ struct CudaDecoderPipelinePhase2E::Impl {
                 s->num_replay_streams = num_replay_streams;
                 s->delay_hook = delay_hook;
                 s->d_fsm_tables = fsm_table_mgr.GetDeviceTable();
+                s->fc_selector_policy = fc_selector_policy;
+                s->fc_chunk_size = fc_chunk_size;
+                s->fc_oracle_decisions = fc_oracle_decisions;
                 s->has_error.store(false);
                 s->active_index_workers = 0; s->peak_index_workers = 0;
                 s->host_dispatch_cpu_ms = 0;
@@ -644,6 +760,10 @@ struct CudaDecoderPipelinePhase2E::Impl {
                     s->band_state[b] = BandState::Unindexed;
                     s->band_assigned_stream[b] = -1;
                     s->task_stats[b] = TaskStat{};
+                    s->band_method[b] = BandEntropyMethod::MethodE_HostIndex;
+                    s->fc_band_records[b] = Phase2FCBandRecord{};
+                    s->band_chunk_offset[b] = 0;
+                    s->band_chunk_count[b] = 0;
                 }
                 for (int ch = 0; ch < 3; ++ch) {
                     s->ch_state[ch] = ChannelInverseState{};
@@ -794,6 +914,15 @@ bool CudaDecoderPipelinePhase2E::Initialize(
         if (cudaMalloc(&slot->d_index_results, kMaxVlcBands * sizeof(GpuCheckpointIndexResult)) != cudaSuccess ||
             cudaMalloc(&slot->d_frame_error, sizeof(uint32_t)) != cudaSuccess ||
             cudaMallocHost(&slot->host_frame_error, sizeof(uint32_t)) != cudaSuccess) return false;
+
+        const size_t kMaxFcChunks = 131072;
+        if (cudaMalloc(&slot->d_fc_summaries, kMaxFcChunks * sizeof(HyperCine::HybridEntropy::Summary)) != cudaSuccess ||
+            cudaMallocHost(&slot->host_pinned_fc_summaries, kMaxFcChunks * sizeof(HyperCine::HybridEntropy::Summary)) != cudaSuccess ||
+            cudaMalloc(&slot->d_fc_checkpoints, kMaxFcChunks * sizeof(HyperCine::HybridEntropy::Restart)) != cudaSuccess ||
+            cudaMallocHost(&slot->host_pinned_fc_checkpoints, kMaxFcChunks * sizeof(HyperCine::HybridEntropy::Restart)) != cudaSuccess ||
+            cudaMalloc(&slot->d_fc_errors, kMaxVlcBands * sizeof(uint32_t)) != cudaSuccess ||
+            cudaMallocHost(&slot->host_pinned_fc_errors, kMaxVlcBands * sizeof(uint32_t)) != cudaSuccess) return false;
+
         // Create streams
         cudaStreamCreateWithFlags(&slot->copy_stream, cudaStreamNonBlocking);
         for (int s = 0; s < kMaxReplayStreams; ++s) {
@@ -823,6 +952,8 @@ bool CudaDecoderPipelinePhase2E::Initialize(
             cudaEventCreate(&slot->ev_index_done[b]);
             cudaEventCreate(&slot->ev_band_start[b]);
             cudaEventCreate(&slot->ev_band_done[b]);
+            cudaEventCreate(&slot->ev_summary_start[b]);
+            cudaEventCreate(&slot->ev_summary_done[b]);
         }
 
         cudaEventCreate(&slot->ev_color_start);
@@ -1161,6 +1292,95 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
         return slot->ticket;
     }
 
+    // Phase 2F-C Per-Band Selection & Async Summary Generation (Sections 7, 8, 15, 18, 21)
+    if (slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame) {
+        size_t total_fc_chunks = 0;
+        const size_t kMaxFcChunks = 131072;
+
+        for (int i = 0; i < kMaxVlcBands; ++i) {
+            const auto& d = slot->vlc_descs[i];
+            BandEntropyMethod method = BandEntropyMethod::MethodE_HostIndex;
+
+            if (slot->fc_selector_policy == Phase2FCSelectorPolicy::ForceHybridBF) {
+                method = BandEntropyMethod::MethodBF_Hybrid;
+            } else if (slot->fc_selector_policy == Phase2FCSelectorPolicy::ForcePhase2E) {
+                method = BandEntropyMethod::MethodE_HostIndex;
+            } else if (slot->fc_selector_policy == Phase2FCSelectorPolicy::OraclePerBand) {
+                if (i < static_cast<int>(slot->fc_oracle_decisions.size())) {
+                    method = slot->fc_oracle_decisions[i];
+                } else {
+                    method = BandEntropyMethod::MethodE_HostIndex;
+                }
+            } else if (slot->fc_selector_policy == Phase2FCSelectorPolicy::AdaptiveDynamic) {
+                if (d.payload_bytes >= 16384) {
+                    method = BandEntropyMethod::MethodBF_Hybrid;
+                } else {
+                    method = BandEntropyMethod::MethodE_HostIndex;
+                }
+            } else {
+                // StaticHeuristic:
+                // Rule: dense noise has bytes_per_coeff >= 1.0 (on 4K noise ~2.42)
+                // Texture has bytes_per_coeff ~0.81 (dominated by CPU correction, Method E is faster)
+                float bytes_per_coeff = (d.coefficient_count > 0) ? (float(d.payload_bytes) / float(d.coefficient_count)) : 0.0f;
+                if (d.payload_bytes >= 32768 && bytes_per_coeff >= 1.05f) {
+                    method = BandEntropyMethod::MethodBF_Hybrid;
+                } else {
+                    method = BandEntropyMethod::MethodE_HostIndex;
+                }
+            }
+
+            if (method == BandEntropyMethod::MethodBF_Hybrid) {
+                if (d.payload_bytes == 0 || d.codebook_id < 0 || d.codebook_id > 2) {
+                    method = BandEntropyMethod::MethodE_HostIndex;
+                } else {
+                    size_t chunks = (d.payload_bytes + slot->fc_chunk_size - 1) / slot->fc_chunk_size;
+                    if (total_fc_chunks + chunks > kMaxFcChunks) {
+                        method = BandEntropyMethod::MethodE_HostIndex;
+                    } else {
+                        slot->band_chunk_offset[i] = total_fc_chunks;
+                        slot->band_chunk_count[i] = chunks;
+                        total_fc_chunks += chunks;
+                    }
+                }
+            }
+            slot->band_method[i] = method;
+        }
+
+        // Reset errors and launch summaries on copy_stream
+        cudaMemsetAsync(slot->d_fc_errors, 0, kMaxVlcBands * sizeof(uint32_t), slot->copy_stream);
+        for (int i = 0; i < kMaxVlcBands; ++i) {
+            if (slot->band_method[i] == BandEntropyMethod::MethodBF_Hybrid) {
+                const auto& d = slot->vlc_descs[i];
+                size_t c_offset = slot->band_chunk_offset[i];
+                size_t c_count = slot->band_chunk_count[i];
+                size_t codebook_offset = (d.codebook_id == 1) ? CS17_BASE_OFFSET :
+                                        ((d.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
+                const GpuFsmEntry* d_table = impl_->fsm_table_mgr.GetDeviceTable() + codebook_offset;
+                unsigned states = (d.codebook_id == 0) ? 136 : 518;
+
+                cudaEventRecord(slot->ev_summary_start[i], slot->copy_stream);
+                LaunchHybridSummariesGpu(
+                    slot->d_compressed_sample + d.payload_offset,
+                    d.payload_bytes,
+                    d_table,
+                    states,
+                    slot->fc_chunk_size,
+                    static_cast<uint32_t>(c_count),
+                    slot->d_fc_summaries + c_offset,
+                    slot->copy_stream
+                );
+                cudaMemcpyAsync(
+                    slot->host_pinned_fc_summaries + c_offset,
+                    slot->d_fc_summaries + c_offset,
+                    c_count * sizeof(HyperCine::HybridEntropy::Summary),
+                    cudaMemcpyDeviceToHost,
+                    slot->copy_stream
+                );
+                cudaEventRecord(slot->ev_summary_done[i], slot->copy_stream);
+            }
+        }
+    }
+
     // 2. Parallel Host Checkpoint Indexing & Streaming GPU Replay (Section 6, 9, 11, 14, 24, 25)
     slot->timings.active_workers = impl_->worker_pool.WorkerCount();
     slot->timings.active_streams = slot->num_replay_streams;
@@ -1178,15 +1398,130 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
 
         std::string err;
         bool ok = false;
-        try {
-            ok = GenerateSingleBandCheckpointsCpu(
-                compressed_sample, compressed_size, slot->vlc_descs[band_idx], band_idx,
-                impl_->host_fsm_tables.data(), impl_->host_fsm_tables.size(),
-                slot->entropy_mode, slot->fixed_segments_per_band,
-                slot->band_segments[band_idx], &err
-            );
-        } catch (const std::exception& e) {
-            err = std::string("band ") + std::to_string(band_idx) + ": " + e.what();
+
+        if (slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame &&
+            slot->band_method[band_idx] == BandEntropyMethod::MethodBF_Hybrid)
+        {
+            // Method B/F Hybrid Path
+            cudaEventSynchronize(slot->ev_summary_done[band_idx]);
+
+            const auto& d = slot->vlc_descs[band_idx];
+            const uint8_t* p = compressed_sample + d.payload_offset;
+            uint32_t bytes = d.payload_bytes;
+            size_t codebook_offset = (d.codebook_id == 1) ? CS17_BASE_OFFSET :
+                                    ((d.codebook_id == 2) ? CS18_BASE_OFFSET : CS9_BASE_OFFSET);
+            const GpuFsmEntry* host_table = impl_->host_fsm_tables.data() + codebook_offset;
+            unsigned states = (d.codebook_id == 0) ? 136 : 518;
+            uint16_t initial_state = d.initial_fsm_state;
+            uint32_t cap = static_cast<uint32_t>(d.coefficient_count);
+            size_t c_offset = slot->band_chunk_offset[band_idx];
+            size_t c_count = slot->band_chunk_count[band_idx];
+            auto* summaries = slot->host_pinned_fc_summaries + c_offset;
+
+            HyperCine::HybridEntropy::Resolved resolved;
+            bool fallback = false;
+            try {
+                float threshold = (slot->fc_selector_policy == Phase2FCSelectorPolicy::AdaptiveDynamic) ? 0.05f : 1.0f;
+                resolved = HyperCine::HybridEntropy::Resolve(
+                    p, bytes, host_table, initial_state, cap, slot->fc_chunk_size, summaries, c_count, threshold
+                );
+                if (resolved.fallback_triggered) {
+                    fallback = true;
+                }
+            } catch (const std::exception& e) {
+                fallback = true;
+            }
+
+            if (fallback) {
+                // Adaptive Fallback to Method E
+                auto& rec = slot->fc_band_records[band_idx];
+                rec.band_index = band_idx;
+                rec.channel = d.channel;
+                rec.level = d.level;
+                rec.orientation = d.band;
+                rec.payload_bytes = d.payload_bytes;
+                rec.coefficient_count = d.coefficient_count;
+                rec.chosen_method = BandEntropyMethod::MethodE_HostIndex;
+                rec.fell_back = true;
+
+                slot->band_method[band_idx] = BandEntropyMethod::MethodE_HostIndex;
+                try {
+                    ok = GenerateSingleBandCheckpointsCpu(
+                        compressed_sample, compressed_size, slot->vlc_descs[band_idx], band_idx,
+                        impl_->host_fsm_tables.data(), impl_->host_fsm_tables.size(),
+                        slot->entropy_mode, slot->fixed_segments_per_band,
+                        slot->band_segments[band_idx], &err
+                    );
+                } catch (const std::exception& e) {
+                    err = std::string("band ") + std::to_string(band_idx) + " fallback: " + e.what();
+                }
+                if (ok) {
+                    if (slot->delay_hook) slot->delay_hook(band_idx, d.channel, d.level, d.band);
+                    slot->DispatchBandGpu(band_idx, worker_id);
+                }
+            } else {
+                // Hybrid B/F Succeeded
+                ok = true;
+                if (!resolved.checkpoints.empty()) {
+                    std::memcpy(
+                        slot->host_pinned_fc_checkpoints + c_offset,
+                        resolved.checkpoints.data(),
+                        resolved.checkpoints.size() * sizeof(HyperCine::HybridEntropy::Restart)
+                    );
+                }
+
+                auto& rec = slot->fc_band_records[band_idx];
+                rec.band_index = band_idx;
+                rec.channel = d.channel;
+                rec.level = d.level;
+                rec.orientation = d.band;
+                rec.payload_bytes = d.payload_bytes;
+                rec.coefficient_count = d.coefficient_count;
+                rec.chosen_method = BandEntropyMethod::MethodBF_Hybrid;
+                rec.chunk_size = slot->fc_chunk_size;
+                rec.chunk_count = static_cast<uint32_t>(c_count);
+                rec.checkpoint_count = static_cast<uint32_t>(resolved.checkpoints.size());
+                rec.corrected_nibbles = resolved.corrections;
+                rec.correction_ratio = (c_count > 0 && slot->fc_chunk_size > 0) ?
+                    float(resolved.corrections) / float(c_count * slot->fc_chunk_size * 2) : 0.0f;
+                rec.full_chunk_corrections = resolved.full_chunks;
+                rec.max_correction_nibbles = resolved.longest;
+                rec.cpu_resolve_ms = resolved.cpu_resolve_ms;
+                rec.fell_back = false;
+
+                if (slot->delay_hook) slot->delay_hook(band_idx, d.channel, d.level, d.band);
+                slot->DispatchBandHybrid(band_idx, resolved.marker, static_cast<uint32_t>(resolved.checkpoints.size()));
+            }
+        } else {
+            // Method E Host Index Path
+            const auto& d = slot->vlc_descs[band_idx];
+            auto& rec = slot->fc_band_records[band_idx];
+            rec.band_index = band_idx;
+            rec.channel = d.channel;
+            rec.level = d.level;
+            rec.orientation = d.band;
+            rec.payload_bytes = d.payload_bytes;
+            rec.coefficient_count = d.coefficient_count;
+            rec.chosen_method = BandEntropyMethod::MethodE_HostIndex;
+            rec.fell_back = false;
+
+            try {
+                ok = GenerateSingleBandCheckpointsCpu(
+                    compressed_sample, compressed_size, slot->vlc_descs[band_idx], band_idx,
+                    impl_->host_fsm_tables.data(), impl_->host_fsm_tables.size(),
+                    slot->entropy_mode, slot->fixed_segments_per_band,
+                    slot->band_segments[band_idx], &err
+                );
+            } catch (const std::exception& e) {
+                err = std::string("band ") + std::to_string(band_idx) + ": " + e.what();
+            }
+
+            if (ok) {
+                if (slot->delay_hook) slot->delay_hook(band_idx, d.channel, d.level, d.band);
+                if (slot->pipeline_mode != Phase2EPipelineMode::Phase2DFrameBarrier) {
+                    slot->DispatchBandGpu(band_idx, worker_id);
+                }
+            }
         }
 
         const auto t1 = Clock::now();
@@ -1207,16 +1542,6 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
                 slot->has_error.store(true);
             }
             return;
-        }
-
-        if (slot->delay_hook) {
-            const auto& d = slot->vlc_descs[band_idx];
-            slot->delay_hook(band_idx, d.channel, d.level, d.band);
-        }
-
-        // As soon as this band's checkpoints are generated, stream to GPU (Variants A & B)
-        if (slot->pipeline_mode != Phase2EPipelineMode::Phase2DFrameBarrier) {
-            slot->DispatchBandGpu(band_idx, worker_id);
         }
     };
 
@@ -1398,8 +1723,18 @@ DecodeTicketStatus CudaDecoderPipelinePhase2E::PollDecode(uint64_t ticket) {
 
     cudaError_t err = cudaEventQuery(slot->ev_ready);
     if (err == cudaSuccess) {
-        slot->status = (slot->GpuIndex() && *slot->host_frame_error) ?
-            DecodeTicketStatus::Failed : DecodeTicketStatus::Complete;
+        if (slot->GpuIndex() && *slot->host_frame_error) {
+            slot->status = DecodeTicketStatus::Failed;
+        } else if (slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame) {
+            cudaMemcpy(slot->host_pinned_fc_errors, slot->d_fc_errors, kMaxVlcBands * sizeof(uint32_t), cudaMemcpyDeviceToHost);
+            bool fc_err = false;
+            for (int b = 0; b < kMaxVlcBands; ++b) {
+                if (slot->host_pinned_fc_errors[b] != 0) { fc_err = true; break; }
+            }
+            slot->status = fc_err ? DecodeTicketStatus::Failed : DecodeTicketStatus::Complete;
+        } else {
+            slot->status = DecodeTicketStatus::Complete;
+        }
         return slot->status;
     } else if (err == cudaErrorNotReady) {
         return DecodeTicketStatus::Pending;
@@ -1428,8 +1763,18 @@ bool CudaDecoderPipelinePhase2E::WaitForDecode(uint64_t ticket) {
     slot->timings.ready_overhead_ms = std::chrono::duration<float, std::milli>(t1 - t0).count();
 
     if (err == cudaSuccess) {
-        slot->status = (slot->GpuIndex() && *slot->host_frame_error) ?
-            DecodeTicketStatus::Failed : DecodeTicketStatus::Complete;
+        if (slot->GpuIndex() && *slot->host_frame_error) {
+            slot->status = DecodeTicketStatus::Failed;
+        } else if (slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame) {
+            cudaMemcpy(slot->host_pinned_fc_errors, slot->d_fc_errors, kMaxVlcBands * sizeof(uint32_t), cudaMemcpyDeviceToHost);
+            bool fc_err = false;
+            for (int b = 0; b < kMaxVlcBands; ++b) {
+                if (slot->host_pinned_fc_errors[b] != 0) { fc_err = true; break; }
+            }
+            slot->status = fc_err ? DecodeTicketStatus::Failed : DecodeTicketStatus::Complete;
+        } else {
+            slot->status = DecodeTicketStatus::Complete;
+        }
         return slot->status == DecodeTicketStatus::Complete;
     }
     slot->status = DecodeTicketStatus::Failed;
@@ -1811,6 +2156,34 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
     timings->overlap_saved_ms = overlap_saved;
     timings->overlap_efficiency = overlap_eff;
 
+    if (slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame) {
+        timings->fc_band_records.assign(slot->fc_band_records, slot->fc_band_records + kMaxVlcBands);
+        float fc_summary_work = 0.0f;
+        float fc_cpu_resolve_work = 0.0f;
+        int hybrid_bands = 0, method_e_bands = 0, fallback_bands = 0;
+
+        for (int b = 0; b < kMaxVlcBands; ++b) {
+            const auto& rec = slot->fc_band_records[b];
+            if (rec.fell_back) {
+                fallback_bands++;
+                method_e_bands++;
+            } else if (rec.chosen_method == BandEntropyMethod::MethodBF_Hybrid) {
+                hybrid_bands++;
+                float s_dur = 0.0f;
+                cudaEventElapsedTime(&s_dur, slot->ev_summary_start[b], slot->ev_summary_done[b]);
+                fc_summary_work += s_dur;
+                fc_cpu_resolve_work += rec.cpu_resolve_ms;
+            } else {
+                method_e_bands++;
+            }
+        }
+        timings->fc_summary_work_ms = fc_summary_work;
+        timings->fc_cpu_resolve_ms = fc_cpu_resolve_work;
+        timings->fc_bf_band_count = hybrid_bands;
+        timings->fc_phase2e_band_count = method_e_bands;
+        timings->fc_fallback_band_count = fallback_bands;
+    }
+
     return true;
 }
 
@@ -2044,6 +2417,44 @@ std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t ticket) {
     ss << "}\n";
 
     return ss.str();
+}
+
+void CudaDecoderPipelinePhase2E::SetPhase2FCSelectorPolicy(Phase2FCSelectorPolicy policy) {
+    if (impl_) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        impl_->fc_selector_policy = policy;
+    }
+}
+
+Phase2FCSelectorPolicy CudaDecoderPipelinePhase2E::GetPhase2FCSelectorPolicy() const {
+    return impl_ ? impl_->fc_selector_policy : Phase2FCSelectorPolicy::StaticHeuristic;
+}
+
+void CudaDecoderPipelinePhase2E::SetPhase2FCChunkSize(uint32_t chunk_size) {
+    if (impl_) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        impl_->fc_chunk_size = chunk_size ? chunk_size : 256;
+    }
+}
+
+uint32_t CudaDecoderPipelinePhase2E::GetPhase2FCChunkSize() const {
+    return impl_ ? impl_->fc_chunk_size : 256;
+}
+
+void CudaDecoderPipelinePhase2E::SetPhase2FCOracleDecisions(const std::vector<BandEntropyMethod>& decisions) {
+    if (impl_) {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        impl_->fc_oracle_decisions = decisions;
+    }
+}
+
+bool CudaDecoderPipelinePhase2E::GetPhase2FCBandRecords(uint64_t ticket, std::vector<Phase2FCBandRecord>& out_records) const {
+    if (!impl_) return false;
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    DecodeSlot2E* slot = impl_->FindSlot(ticket);
+    if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
+    out_records.assign(slot->fc_band_records, slot->fc_band_records + kMaxVlcBands);
+    return true;
 }
 
 } // namespace HyperCine

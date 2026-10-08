@@ -32,9 +32,52 @@ enum class Phase2EPipelineMode : uint32_t {
     Phase2EEntropyOverlap = 1, // Variant A: Host index + GPU replay overlap, inverse barrier retained
     Phase2EFullOverlap = 2,    // Variant B: Host index + GPU replay + inverse DAG overlap
     Phase2FAGpuIndexBatch = 3, // Complete-band GPU checkpoint scan -> device replay -> inverse DAG
+    Phase2FCHybridFullFrame = 4, // Full-frame adaptive hybrid entropy (Phase 2F-C)
     Phase2DBarrier = Phase2DFrameBarrier,
     Phase2EHostStreaming = Phase2EFullOverlap,
-    Phase2FAGpuIndex = Phase2FAGpuIndexBatch
+    Phase2FAGpuIndex = Phase2FAGpuIndexBatch,
+    Phase2FCHybrid = Phase2FCHybridFullFrame
+};
+
+// Phase 2F-C Selector Policies (Section 7, 8, 10, 11, 35)
+enum class Phase2FCSelectorPolicy : uint32_t {
+    StaticHeuristic = 0,    // Deterministic rule: payload size + density
+    AdaptiveDynamic = 1,    // Static selection + runtime early convergence check & fallback
+    ForceHybridBF = 2,      // Force Method B/F on all eligible highpass bands
+    ForcePhase2E = 3,       // Force Method E on all bands (Phase 2E baseline)
+    OraclePerBand = 4       // Offline oracle: chooses fastest measured method per band
+};
+
+// Method selected per highpass band (Section 7)
+enum class BandEntropyMethod : uint32_t {
+    MethodE_HostIndex = 0,  // Existing Phase 2E host checkpoint scan + GPU replay
+    MethodBF_Hybrid = 1,    // Phase 2F-B GPU summaries + CPU exact correction + GPU replay
+    MethodTrivial = 2       // Small-band / trivial single segment
+};
+
+// Phase 2F-C per-band diagnostic and exactness record (Section 9, 27)
+struct Phase2FCBandRecord {
+    int band_index = -1;
+    int channel = -1;
+    int level = -1;
+    int orientation = -1;
+    uint32_t payload_bytes = 0;
+    uint32_t coefficient_count = 0;
+    BandEntropyMethod chosen_method = BandEntropyMethod::MethodE_HostIndex;
+    uint32_t chunk_size = 256;
+    uint32_t chunk_count = 0;
+    uint32_t checkpoint_count = 0;
+    uint64_t coefficient_hash = 0;
+    float correction_ratio = 0.0f;
+    uint32_t corrected_nibbles = 0;
+    uint32_t max_correction_nibbles = 0;
+    uint32_t full_chunk_corrections = 0;
+    float gpu_summary_ms = 0.0f;
+    float cpu_resolve_ms = 0.0f;
+    float gpu_replay_ms = 0.0f;
+    size_t scratch_bytes = 0;
+    uint32_t final_error = 0;
+    bool fell_back = false;
 };
 
 // Phase 2E Scheduling Policies (Section 12, 13)
@@ -136,6 +179,18 @@ struct Phase2eSlotStageTimings {
 
     std::vector<BandTimelineRecord> band_records;
     std::vector<InverseTimelineRecord> inverse_records;
+
+    // Phase 2F-C Hybrid metrics (Section 9, 17, 27, 40)
+    float fc_selector_ms = 0.0f;
+    float fc_summary_wall_ms = 0.0f;
+    float fc_summary_work_ms = 0.0f;
+    float fc_cpu_resolve_ms = 0.0f;
+    int fc_bf_band_count = 0;
+    int fc_phase2e_band_count = 0;
+    int fc_trivial_band_count = 0;
+    int fc_fallback_band_count = 0;
+    size_t fc_peak_scratch_bytes = 0;
+    std::vector<Phase2FCBandRecord> fc_band_records;
 };
 
 // Phase 2E Accelerated CUDA Decoder Pipeline with Asynchronous Band Streaming & Overlap
@@ -257,9 +312,23 @@ public:
     // Export machine-readable timeline artifact in JSON format (Section 23)
     std::string ExportTimelineJson(uint64_t ticket);
 
+    // Phase 2F-C Configuration & Diagnostics (Section 7, 8, 13, 27, 35)
+    void SetPhase2FCSelectorPolicy(Phase2FCSelectorPolicy policy);
+    Phase2FCSelectorPolicy GetPhase2FCSelectorPolicy() const;
+
+    void SetPhase2FCChunkSize(uint32_t chunk_size);
+    uint32_t GetPhase2FCChunkSize() const;
+
+    void SetPhase2FCOracleDecisions(const std::vector<BandEntropyMethod>& decisions);
+
+    bool GetPhase2FCBandRecords(uint64_t ticket, std::vector<Phase2FCBandRecord>& out_records) const;
+
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
+
+// Convenience alias for Phase 2F-C pipeline
+using CudaDecoderPipelinePhase2FC = CudaDecoderPipelinePhase2E;
 
 } // namespace HyperCine

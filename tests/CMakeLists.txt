@@ -174,6 +174,13 @@ if(HYPERCINE_ENABLE_CUDA)
     add_test(NAME test_decode_phase2e COMMAND test_decode_phase2e
         "${CMAKE_CURRENT_SOURCE_DIR}/decode_phase0_golden.txt")
     set_tests_properties(test_decode_phase2e PROPERTIES TIMEOUT 300)
+
+    add_executable(test_decode_phase2fc test_decode_phase2fc.cpp)
+    target_compile_definitions(test_decode_phase2fc PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase2fc PRIVATE hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_decode_phase2fc COMMAND test_decode_phase2fc
+        "${CMAKE_CURRENT_SOURCE_DIR}/decode_phase0_golden.txt")
+    set_tests_properties(test_decode_phase2fc PROPERTIES TIMEOUT 400)
 endif()
 
 

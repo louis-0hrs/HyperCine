@@ -30,6 +30,7 @@ if(HYPERCINE_ENABLE_CUDA)
         cuda/decode_phase2c_pipeline.cu
         cuda/decode_phase2d_pipeline.cu
         cuda/decode_phase2e_pipeline.cu
+        cuda/decode_hybrid_entropy.cu
     )
     set_target_properties(hypercine_wavelet PROPERTIES
         CUDA_STANDARD 17

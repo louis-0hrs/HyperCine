@@ -54,4 +54,12 @@ std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t) { return "{
 bool CudaDecoderPipelinePhase2E::GetGpuCheckpoints(uint64_t, std::vector<GpuEntropySegmentDescriptor>&) { return false; }
 bool CudaDecoderPipelinePhase2E::GetGpuIndexResults(uint64_t, std::vector<GpuCheckpointIndexResult>&) { return false; }
 bool CudaDecoderPipelinePhase2E::DownloadIntermediateLl(uint64_t, int, int, std::vector<int16_t>&) { return false; }
+
+void CudaDecoderPipelinePhase2E::SetPhase2FCSelectorPolicy(Phase2FCSelectorPolicy) {}
+Phase2FCSelectorPolicy CudaDecoderPipelinePhase2E::GetPhase2FCSelectorPolicy() const { return Phase2FCSelectorPolicy::StaticHeuristic; }
+void CudaDecoderPipelinePhase2E::SetPhase2FCChunkSize(uint32_t) {}
+uint32_t CudaDecoderPipelinePhase2E::GetPhase2FCChunkSize() const { return 256; }
+void CudaDecoderPipelinePhase2E::SetPhase2FCOracleDecisions(const std::vector<BandEntropyMethod>&) {}
+bool CudaDecoderPipelinePhase2E::GetPhase2FCBandRecords(uint64_t, std::vector<Phase2FCBandRecord>&) const { return false; }
+
 } // namespace HyperCine
