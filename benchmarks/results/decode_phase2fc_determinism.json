@@ -1,0 +1,44 @@
+{
+  "determinism_audit": [
+    {
+      "case": "1080p_noise",
+      "required_runs": 200,
+      "completed_runs": 200,
+      "hash": "058be9bce809b0b1",
+      "determinism_rate_pct": 100.0,
+      "status": "PASS"
+    },
+    {
+      "case": "4k_noise",
+      "required_runs": 100,
+      "completed_runs": 100,
+      "hash": "b191ab3a11b9f0ae",
+      "determinism_rate_pct": 100.0,
+      "status": "PASS"
+    },
+    {
+      "case": "4k_texture",
+      "required_runs": 100,
+      "completed_runs": 100,
+      "hash": "451113f6f72d6046",
+      "determinism_rate_pct": 100.0,
+      "status": "PASS"
+    },
+    {
+      "case": "8k_flat",
+      "required_runs": 20,
+      "completed_runs": 20,
+      "hash": "33348afbca7c2325",
+      "determinism_rate_pct": 100.0,
+      "status": "PASS"
+    },
+    {
+      "case": "4k_noise_adaptive_fallback",
+      "required_runs": 100,
+      "completed_runs": 100,
+      "hash": "b191ab3a11b9f0ae",
+      "determinism_rate_pct": 100.0,
+      "status": "PASS"
+    }
+  ]
+}

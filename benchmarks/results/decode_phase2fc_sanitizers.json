@@ -1,28 +1,44 @@
 {
   "license": "MIT OR Apache-2.0",
+  "sanitizer_suite": "NVIDIA Compute-Sanitizer 2025.1.0.0 (build 35351055)",
   "runs": [
     {
-      "tool": "memcheck",
+      "tool": "initcheck",
+      "command": "compute-sanitizer --tool initcheck --log-file benchmarks/sanitizer_logs/initcheck.log .\\build\\tests\\Release\\test_decode_phase2fc.exe tests/decode_phase0_golden.txt",
       "target": "test_decode_phase2fc",
       "exit_code": 0,
       "errors": 0,
-      "status": "PASS"
+      "status": "PASS",
+      "log_file": "benchmarks/sanitizer_logs/initcheck.log"
+    },
+    {
+      "tool": "memcheck",
+      "command": "compute-sanitizer --tool memcheck --log-file benchmarks/sanitizer_logs/memcheck.log .\\build\\tests\\Release\\test_decode_phase2fc.exe tests/decode_phase0_golden.txt",
+      "target": "test_decode_phase2fc",
+      "exit_code": 0,
+      "errors": 0,
+      "status": "PASS",
+      "log_file": "benchmarks/sanitizer_logs/memcheck.log"
     },
     {
       "tool": "synccheck",
+      "command": "compute-sanitizer --tool synccheck --log-file benchmarks/sanitizer_logs/synccheck.log .\\build\\tests\\Release\\test_decode_phase2fc.exe tests/decode_phase0_golden.txt",
       "target": "test_decode_phase2fc",
       "exit_code": 0,
       "errors": 0,
-      "status": "PASS"
+      "status": "PASS",
+      "log_file": "benchmarks/sanitizer_logs/synccheck.log"
     },
     {
       "tool": "racecheck",
+      "command": "compute-sanitizer --tool racecheck --log-file benchmarks/sanitizer_logs/racecheck.log .\\build\\tests\\Release\\test_decode_phase2fc.exe tests/decode_phase0_golden.txt",
       "target": "test_decode_phase2fc",
       "exit_code": 0,
       "hazards": 0,
       "errors": 0,
       "warnings": 0,
-      "status": "PASS"
+      "status": "PASS",
+      "log_file": "benchmarks/sanitizer_logs/racecheck.log"
     }
   ]
 }

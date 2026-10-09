@@ -1,0 +1,114 @@
+{
+  "golden_validation": [
+    {
+      "vector": 1,
+      "resolution": "1920x1080",
+      "pattern": "flat",
+      "golden_hash": "2733f8198c87c325",
+      "calc_hash": "2733f8198c87c325",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 2,
+      "resolution": "1920x1080",
+      "pattern": "gradient",
+      "golden_hash": "2af324f0b68219f7",
+      "calc_hash": "2af324f0b68219f7",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 3,
+      "resolution": "1920x1080",
+      "pattern": "noise",
+      "golden_hash": "058be9bce809b0b1",
+      "calc_hash": "058be9bce809b0b1",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 4,
+      "resolution": "1920x1080",
+      "pattern": "texture",
+      "golden_hash": "8ee3a24e862c8651",
+      "calc_hash": "8ee3a24e862c8651",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 5,
+      "resolution": "1920x1080",
+      "pattern": "edges",
+      "golden_hash": "d0db7e8f533deada",
+      "calc_hash": "d0db7e8f533deada",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 6,
+      "resolution": "3840x2160",
+      "pattern": "flat",
+      "golden_hash": "d4e9364295b8a325",
+      "calc_hash": "d4e9364295b8a325",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 7,
+      "resolution": "3840x2160",
+      "pattern": "gradient",
+      "golden_hash": "16cefe43e46f2082",
+      "calc_hash": "16cefe43e46f2082",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 8,
+      "resolution": "3840x2160",
+      "pattern": "noise",
+      "golden_hash": "b191ab3a11b9f0ae",
+      "calc_hash": "b191ab3a11b9f0ae",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 9,
+      "resolution": "3840x2160",
+      "pattern": "texture",
+      "golden_hash": "451113f6f72d6046",
+      "calc_hash": "451113f6f72d6046",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 10,
+      "resolution": "3840x2160",
+      "pattern": "edges",
+      "golden_hash": "ca361685f26c9563",
+      "calc_hash": "ca361685f26c9563",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    },
+    {
+      "vector": 11,
+      "resolution": "7680x4320",
+      "pattern": "flat",
+      "golden_hash": "33348afbca7c2325",
+      "calc_hash": "33348afbca7c2325",
+      "coeff_error_max": 0,
+      "intermediate_ll_exact": true,
+      "status": "PASS"
+    }
+  ]
+}

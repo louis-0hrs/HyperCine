@@ -1,0 +1,266 @@
+{
+  "benchmark": "HyperCine Phase 2F-C Audit Reproduction Pass",
+  "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU (CC 8.9, 16375 MB VRAM)",
+  "headline_cases": [
+    {
+      "case": "1080p_noise",
+      "width": 1920,
+      "height": 1080,
+      "runs": [
+        {
+          "run_index": 1,
+          "p2d_ms": 17.1,
+          "p2e_ms": 15.31,
+          "p2fc_static_ms": 5.53,
+          "speedup_vs_2e": 2.77,
+          "speedup_vs_2d": 3.092
+        },
+        {
+          "run_index": 2,
+          "p2d_ms": 14.83,
+          "p2e_ms": 16.16,
+          "p2fc_static_ms": 5.58,
+          "speedup_vs_2e": 2.896,
+          "speedup_vs_2d": 2.658
+        },
+        {
+          "run_index": 3,
+          "p2d_ms": 14.95,
+          "p2e_ms": 14.88,
+          "p2fc_static_ms": 5.65,
+          "speedup_vs_2e": 2.631,
+          "speedup_vs_2d": 2.646
+        }
+      ],
+      "p2e_median_ms": 15.313,
+      "p2fc_static_median_ms": 5.58,
+      "speedup_vs_2e": 2.744
+    },
+    {
+      "case": "4k_noise",
+      "width": 3840,
+      "height": 2160,
+      "runs": [
+        {
+          "run_index": 1,
+          "p2d_ms": 61.58,
+          "p2e_ms": 56.38,
+          "p2fc_static_ms": 10.16,
+          "speedup_vs_2e": 5.551,
+          "speedup_vs_2d": 6.061
+        },
+        {
+          "run_index": 2,
+          "p2d_ms": 61.59,
+          "p2e_ms": 55.01,
+          "p2fc_static_ms": 10.07,
+          "speedup_vs_2e": 5.46,
+          "speedup_vs_2d": 6.116
+        },
+        {
+          "run_index": 3,
+          "p2d_ms": 59.98,
+          "p2e_ms": 54.26,
+          "p2fc_static_ms": 10.14,
+          "speedup_vs_2e": 5.353,
+          "speedup_vs_2d": 5.915
+        }
+      ],
+      "p2e_median_ms": 55.013,
+      "p2fc_static_median_ms": 10.137,
+      "speedup_vs_2e": 5.427
+    },
+    {
+      "case": "4k_texture",
+      "width": 3840,
+      "height": 2160,
+      "runs": [
+        {
+          "run_index": 1,
+          "p2d_ms": 18.39,
+          "p2e_ms": 18.04,
+          "p2fc_static_ms": 18.88,
+          "speedup_vs_2e": 0.955,
+          "speedup_vs_2d": 0.974
+        },
+        {
+          "run_index": 2,
+          "p2d_ms": 18.93,
+          "p2e_ms": 18.31,
+          "p2fc_static_ms": 19.09,
+          "speedup_vs_2e": 0.959,
+          "speedup_vs_2d": 0.992
+        },
+        {
+          "run_index": 3,
+          "p2d_ms": 19.11,
+          "p2e_ms": 18.56,
+          "p2fc_static_ms": 19.05,
+          "speedup_vs_2e": 0.975,
+          "speedup_vs_2d": 1.003
+        }
+      ],
+      "p2e_median_ms": 18.309,
+      "p2fc_static_median_ms": 19.045,
+      "speedup_vs_2e": 0.961
+    }
+  ],
+  "five_pattern_evaluations": [
+    {
+      "resolution": "1080p",
+      "pattern": "flat",
+      "p2d_ms": 0.76,
+      "p2e_ms": 2.28,
+      "p2fc_static_ms": 2.33,
+      "p2fc_adapt_ms": 2.4,
+      "oracle_ms": 2.28,
+      "static_regret_ms": 0.047,
+      "adapt_regret_ms": 0.115,
+      "static_efficiency_pct": 97.85,
+      "adapt_efficiency_pct": 95.0
+    },
+    {
+      "resolution": "1080p",
+      "pattern": "gradient",
+      "p2d_ms": 2.59,
+      "p2e_ms": 4.7,
+      "p2fc_static_ms": 4.84,
+      "p2fc_adapt_ms": 2.87,
+      "oracle_ms": 2.87,
+      "static_regret_ms": 1.976,
+      "adapt_regret_ms": 0.0,
+      "static_efficiency_pct": 59.3,
+      "adapt_efficiency_pct": 100.0
+    },
+    {
+      "resolution": "1080p",
+      "pattern": "noise",
+      "p2d_ms": 16.05,
+      "p2e_ms": 15.56,
+      "p2fc_static_ms": 5.12,
+      "p2fc_adapt_ms": 4.61,
+      "oracle_ms": 4.61,
+      "static_regret_ms": 0.514,
+      "adapt_regret_ms": 0.0,
+      "static_efficiency_pct": 90.04,
+      "adapt_efficiency_pct": 100.0
+    },
+    {
+      "resolution": "1080p",
+      "pattern": "texture",
+      "p2d_ms": 7.34,
+      "p2e_ms": 7.9,
+      "p2fc_static_ms": 8.0,
+      "p2fc_adapt_ms": 7.52,
+      "oracle_ms": 7.52,
+      "static_regret_ms": 0.477,
+      "adapt_regret_ms": 0.0,
+      "static_efficiency_pct": 94.0,
+      "adapt_efficiency_pct": 100.0
+    },
+    {
+      "resolution": "1080p",
+      "pattern": "edges",
+      "p2d_ms": 3.81,
+      "p2e_ms": 7.35,
+      "p2fc_static_ms": 7.82,
+      "p2fc_adapt_ms": 3.55,
+      "oracle_ms": 3.55,
+      "static_regret_ms": 4.272,
+      "adapt_regret_ms": 0.0,
+      "static_efficiency_pct": 45.4,
+      "adapt_efficiency_pct": 100.0
+    },
+    {
+      "resolution": "4k",
+      "pattern": "flat",
+      "p2d_ms": 1.72,
+      "p2e_ms": 3.4,
+      "p2fc_static_ms": 3.47,
+      "p2fc_adapt_ms": 3.45,
+      "oracle_ms": 3.4,
+      "static_regret_ms": 0.079,
+      "adapt_regret_ms": 0.055,
+      "static_efficiency_pct": 97.98,
+      "adapt_efficiency_pct": 98.55
+    },
+    {
+      "resolution": "4k",
+      "pattern": "gradient",
+      "p2d_ms": 4.79,
+      "p2e_ms": 7.42,
+      "p2fc_static_ms": 7.1,
+      "p2fc_adapt_ms": 4.33,
+      "oracle_ms": 4.33,
+      "static_regret_ms": 2.772,
+      "adapt_regret_ms": 0.0,
+      "static_efficiency_pct": 60.99,
+      "adapt_efficiency_pct": 100.0
+    },
+    {
+      "resolution": "4k",
+      "pattern": "noise",
+      "p2d_ms": 66.29,
+      "p2e_ms": 62.31,
+      "p2fc_static_ms": 8.45,
+      "p2fc_adapt_ms": 8.09,
+      "oracle_ms": 8.09,
+      "static_regret_ms": 0.362,
+      "adapt_regret_ms": 0.0,
+      "static_efficiency_pct": 95.74,
+      "adapt_efficiency_pct": 100.0
+    },
+    {
+      "resolution": "4k",
+      "pattern": "texture",
+      "p2d_ms": 18.41,
+      "p2e_ms": 18.29,
+      "p2fc_static_ms": 19.1,
+      "p2fc_adapt_ms": 18.71,
+      "oracle_ms": 18.29,
+      "static_regret_ms": 0.817,
+      "adapt_regret_ms": 0.424,
+      "static_efficiency_pct": 95.76,
+      "adapt_efficiency_pct": 97.76
+    },
+    {
+      "resolution": "4k",
+      "pattern": "edges",
+      "p2d_ms": 9.08,
+      "p2e_ms": 13.71,
+      "p2fc_static_ms": 14.36,
+      "p2fc_adapt_ms": 4.71,
+      "oracle_ms": 4.71,
+      "static_regret_ms": 9.652,
+      "adapt_regret_ms": 0.0,
+      "static_efficiency_pct": 32.8,
+      "adapt_efficiency_pct": 100.0
+    }
+  ],
+  "slot_scaling": [
+    {
+      "slots": 1,
+      "fps": 118.5,
+      "mpps": 982.8,
+      "latency_ms": 8.44
+    },
+    {
+      "slots": 2,
+      "fps": 133.4,
+      "mpps": 1106.6,
+      "latency_ms": 7.5
+    },
+    {
+      "slots": 3,
+      "fps": 137.9,
+      "mpps": 1143.9,
+      "latency_ms": 7.25
+    },
+    {
+      "slots": 4,
+      "fps": 134.2,
+      "mpps": 1112.7,
+      "latency_ms": 7.45
+    }
+  ]
+}
