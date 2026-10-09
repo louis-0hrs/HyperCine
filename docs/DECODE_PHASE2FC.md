@@ -12,7 +12,7 @@ The isolated-band acceleration demonstrated in Phase 2F-B **survives and dominat
   - Phase 2E Full Overlap: **66.14 ms** (15.12 FPS)
   - **Phase 2F-C Static Heuristic**: **8.64 – 8.81 ms** (**113.5 – 115.7 FPS**)
   - **Speedup vs Phase 2E**: **7.51× – 7.75×**
-  - **Pipeline Multi-Slot Throughput**: **131.0 FPS** (**1,086.8 Megapixels/sec**)
+  - **Pipeline Multi-Slot Throughput (4K Noise, 2 Slots)**: **131.0 FPS** (**1,086.8 Megapixels/sec**)
 - **1080p Noise**:
   - Phase 2E: **14.70 ms**
   - **Phase 2F-C**: **5.24 ms** (**2.80× speedup**)
@@ -27,6 +27,7 @@ The isolated-band acceleration demonstrated in Phase 2F-B **survives and dominat
   - Real difference-coded bands verified exact against Phase 2E reference (max error 0).
   - Malformed bitstream handling safe (zero crashes, clean error status).
 - **Sanitizers**:
+  - NVIDIA Compute-Sanitizer `initcheck`: **0 errors**.
   - NVIDIA Compute-Sanitizer `memcheck`: **0 errors**.
   - NVIDIA Compute-Sanitizer `synccheck`: **0 errors**.
   - NVIDIA Compute-Sanitizer `racecheck`: **0 hazards, 0 warnings**.
@@ -155,12 +156,13 @@ Evaluated with payload up to 5.03 MB on Band 6 (Channel 0, Level 0, LH) and Band
 
 *Decision*: **256 bytes** is established as the default production chunk size. It achieves the best balance between root summary generation, fast CPU correction, and minimal memory overhead (~20 MiB per slot).
 
-### 5.2 Memory Budget Summary
-- Pre-allocated per-slot pinned summary buffer: ~1.2 MiB.
-- Pre-allocated per-slot device summary buffer: ~1.2 MiB.
-- Pre-allocated per-slot checkpoint host/device buffers: ~2.4 MiB.
-- Total incremental VRAM per slot over Phase 2E: **~21.6 MiB**.
-- Peak working set during 4-slot 4K streaming: **~112 MiB**.
+*Note on Texture Crit Band (0.01 ms)*: The 0.01 ms measurement represents the CPU resolution time of 83 small chunks on Level 0 Bands 6 and 7 (~21 KB each), rather than full B/F decode on the primary Level 1 texture band (Band 5, 1.68 MB). In production Phase 2F-C, 4K Texture selects Method E across all 27 bands, completely avoiding B/F execution.
+
+### 5.2 Memory Budget Summary & Accounting
+- Actual pre-allocated device VRAM per slot: **2.50 MiB** (1.0 MiB device summaries + 1.5 MiB device checkpoints + error flags).
+- Actual pre-allocated host pinned memory per slot: **2.50 MiB** (1.0 MiB host summaries + 1.5 MiB host checkpoints + error flags).
+- Theoretical worst-case 27-band metadata capacity model: **~20.3 – 21.6 MiB** (representing hypothetical 27-band dense frame metadata combining host and device buffers, not actual allocated VRAM).
+- Peak host working set during 4-slot 4K streaming: **~112 MiB**.
 
 ---
 
@@ -198,11 +200,11 @@ Evaluated with payload up to 5.03 MB on Band 6 (Channel 0, Level 0, LH) and Band
 
 ## 7. Timeline Breakdown (`timeline_phase2fc_4k_noise.json`)
 
-Total Critical Path: **8.64 – 8.81 ms** (vs 66.14 ms Phase 2E)
+Total Critical Path: **8.64 ms** (single-frame reconstructed critical path) / **8.81 ms** (benchmark loop average latency; vs 66.14 ms Phase 2E)
 
 ```
 0.00 ms: Frame Enqueue & Tag Parse (0.02 ms)
-0.02 ms: Compressed D2H & LL GPU Decode (0.41 ms)
+0.02 ms: Compressed H2D & LL GPU Decode (0.41 ms)
 0.43 ms: Async GPU Root Summaries Launched (copy_stream)
 0.95 ms: First D2H Summary Complete -> Worker Resolve Start
 1.50 ms: Level 2 Band Replays Queued
