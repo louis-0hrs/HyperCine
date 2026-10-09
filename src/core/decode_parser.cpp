@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 
 #include "hypercine/decode_entropy_cuda.h"
+#include "decoder_backend.h"
 #include <cstring>
 #include <sstream>
 
@@ -84,14 +85,17 @@ constexpr uint32_t HIGHPASS_TRAILER_WORD = 0x00003800;
 
 } // anonymous namespace
 
-bool ParseCineFormSample(
+static bool ParseSample(
     const uint8_t* compressed_data,
     size_t compressed_size,
     int pixel_format_channeloffset,
     std::vector<GpuEntropyBandDescriptor>& out_bands,
-    std::string* out_error
+    std::string* out_error,
+    bool strict,
+    DecodeError* status = nullptr
 ) {
     out_bands.clear();
+    if (status) *status = DecodeError::InvalidSample;
 
     if (!compressed_data || compressed_size < 32) {
         if (out_error) *out_error = "compressed sample is null or too small";
@@ -104,7 +108,7 @@ bool ParseCineFormSample(
     int frame_height = 0;
     int frame_channels = 3;
     int precision = 10;
-    bool is_progressive = true;
+    bool is_progressive = !strict;
 
     int current_channel = 0;
     int current_level = 2;
@@ -126,6 +130,7 @@ bool ParseCineFormSample(
 
     bool has_peak_table = false;
     uint32_t peak_offset = 0;
+    size_t peak_base = 0;
     int peak_level = 0;
 
     while (pos + 4 <= compressed_size) {
@@ -150,7 +155,7 @@ bool ParseCineFormSample(
         // Subband size chunk tag
         if ((tag & 0xff00) == TAG_SUBBAND_SIZE) {
             size_t chunk_bytes = ((static_cast<size_t>(tag & 0xff) << 16) | val) * 4;
-            if (pos + chunk_bytes > compressed_size) {
+            if (chunk_bytes < 4 || chunk_bytes > compressed_size - pos) {
                 if (out_error) *out_error = "TAG_SUBBAND_SIZE exceeds sample bounds";
                 return false;
             }
@@ -183,6 +188,10 @@ bool ParseCineFormSample(
                 desc.coefficient_count = static_cast<size_t>(lowpass_height) * desc.pitch_samples;
 
                 size_t expected_ll_bytes = static_cast<size_t>(lowpass_width) * lowpass_height * sizeof(int16_t);
+                if (strict && expected_ll_bytes > chunk_bytes - 4) {
+                    if (out_error) *out_error = "lowpass dimensions exceed declared chunk";
+                    return false;
+                }
                 desc.payload_bytes = static_cast<uint32_t>(expected_ll_bytes);
                 desc.safe_upper_bound = static_cast<uint32_t>(chunk_bytes - 4);
                 desc.method = BandEncodingMethod::LowPass16S;
@@ -201,6 +210,10 @@ bool ParseCineFormSample(
                 pos += (chunk_bytes - 4);
             }
             else if (sub_tag == TAG_BAND_HEADER) {
+                if (strict && band_encoding != 3) {
+                    if (out_error) *out_error = "unsupported highpass encoding";
+                    return false;
+                }
                 // Highpass VLC band (subband 1..9)
                 if (chunk_bytes < 8) {
                     if (out_error) *out_error = "subband chunk size too small for highpass band";
@@ -272,8 +285,28 @@ bool ParseCineFormSample(
                 desc.difference_coding = diff_coding;
 
                 desc.has_peaks = has_peak_table;
-                desc.peak_offset = peak_offset;
+                desc.peak_offset = 0;
                 desc.peak_level = peak_level;
+                if (has_peak_table && peak_level > 0) {
+                    if (peak_base > compressed_size || peak_offset > compressed_size - peak_base) {
+                        if (out_error) *out_error = "peak table offset outside sample";
+                        return false;
+                    }
+                    const size_t peak_data = peak_base + peak_offset;
+                    const auto peak_raw = peak_data >= 4 && peak_data <= compressed_size ? int16_t(ReadBE16(compressed_data + peak_data - 4)) : int16_t(0);
+                    const auto peak_tag = uint16_t(peak_raw < 0 ? -int(peak_raw) : int(peak_raw));
+                    if (peak_data < 4 || peak_data > compressed_size || peak_tag != TAG_PEAK_TABLE) {
+                        if (out_error) *out_error = "invalid peak table header";
+                        return false;
+                    }
+                    const size_t peak_bytes = size_t(ReadBE16(compressed_data + peak_data - 2)) * 4;
+                    if (!peak_bytes || peak_bytes > compressed_size - peak_data) {
+                        if (out_error) *out_error = "peak table size outside sample";
+                        return false;
+                    }
+                    desc.peak_offset = peak_data;
+                    desc.peak_count = int(peak_bytes / 2);
+                }
 
                 out_bands.push_back(desc);
                 current_subband++;
@@ -306,10 +339,28 @@ bool ParseCineFormSample(
 
         // Parse individual tags
         switch (tag) {
+        case TAG_TRANSFORM_TYPE:
+        case TAG_NUM_FRAMES:
+            if (strict && ((tag == TAG_TRANSFORM_TYPE && val != 0) || (tag == TAG_NUM_FRAMES && val != 1))) {
+                if (status) *status = DecodeError::UnsupportedEncodingMode;
+                if (out_error) *out_error = "unsupported temporal/field transform";
+                return false;
+            }
+            break;
+        case TAG_NUM_CHANNELS:
+            frame_channels = val;
+            break;
+        case TAG_FRAME_FORMAT:
+            if (strict && val != 2) {
+                if (out_error) *out_error = "unsupported frame format";
+                return false;
+            }
+            break;
         case TAG_SAMPLE_FLAGS:
             is_progressive = (val & 0x0001) != 0;
             if (!is_progressive) {
-                if (out_error) *out_error = "interlaced format not supported in Phase 2B initial scope";
+                if (status) *status = DecodeError::UnsupportedEncodingMode;
+                if (out_error) *out_error = "unsupported interlaced output reconstruction";
                 return false;
             }
             break;
@@ -370,11 +421,16 @@ bool ParseCineFormSample(
             break;
 
         case TAG_BAND_CODING_FLAGS:
+            if (strict && (val & ~0x001fu)) {
+                if (out_error) *out_error = "invalid band coding flags";
+                return false;
+            }
             active_codebook = val & 0x0f;
             diff_coding = ((val >> 4) & 1) != 0;
             break;
 
         case TAG_PEAK_TABLE_OFFSET_L:
+            peak_base = pos;
             peak_offset = (peak_offset & ~0xffffu) | static_cast<uint32_t>(val);
             break;
 
@@ -406,7 +462,46 @@ bool ParseCineFormSample(
         return false;
     }
 
+    if (strict) {
+        if (!is_progressive) {
+            if (status) *status = DecodeError::UnsupportedEncodingMode;
+            if (out_error) *out_error = "unsupported interlaced output reconstruction";
+            return false;
+        }
+        auto reject = [&] (const char* message) {
+            if (out_error) *out_error = message;
+            return false;
+        };
+        if (pos != compressed_size || frame_channels != 3 || precision != 10 ||
+            frame_width < 64 || frame_height < 64 || frame_width > 7680 || frame_height > 4320 ||
+            (frame_width % 16) || (frame_height % 8))
+            return reject("unsupported or inconsistent frame geometry/precision");
+        static constexpr int levels[10] = {2,2,2,2,1,1,1,0,0,0};
+        static constexpr int bands[10] = {0,1,2,3,1,2,3,1,2,3};
+        for (size_t i = 0; i < out_bands.size(); ++i) {
+            const auto& d = out_bands[i];
+            const int ch = int(i / 10), sb = int(i % 10);
+            const int divisor = 1 << (levels[sb] + 1);
+            const int w = (ch == 0 ? frame_width : frame_width / 2) / divisor;
+            if (d.channel != ch || d.subband != sb || d.level != levels[sb] || d.band != bands[sb] ||
+                d.width != w || d.height != frame_height / divisor ||
+                d.precision != 10 || d.quantization <= 0 || d.codebook_id < 0 || d.codebook_id > 2 ||
+                !d.payload_bytes || d.payload_offset > compressed_size ||
+                d.payload_bytes > compressed_size - d.payload_offset)
+                return reject("invalid or unsupported band descriptor");
+        }
+    }
+    if (status) *status = DecodeError::None;
     return true;
+}
+
+bool ParseCineFormSample(const uint8_t* p, size_t n, int offset,
+    std::vector<GpuEntropyBandDescriptor>& bands, std::string* error) {
+    return ParseSample(p, n, offset, bands, error, false);
+}
+bool ParseCineFormSampleValidated(const uint8_t* p, size_t n, int offset,
+    std::vector<GpuEntropyBandDescriptor>& bands, std::string* error, DecodeError* status) {
+    return ParseSample(p, n, offset, bands, error, true, status);
 }
 
 } // namespace HyperCine

@@ -31,6 +31,7 @@ if(HYPERCINE_ENABLE_CUDA)
         cuda/decode_phase2d_pipeline.cu
         cuda/decode_phase2e_pipeline.cu
         cuda/decode_hybrid_entropy.cu
+        cuda/decode_peaks_cuda.cu
     )
     set_target_properties(hypercine_wavelet PROPERTIES
         CUDA_STANDARD 17
@@ -60,6 +61,16 @@ else()
         ${CMAKE_SOURCE_DIR}/include
     )
 endif()
+
+# Stable decoder facade. Historical entry points remain in the implementation
+# archive; consumers include decoder.h and need no research declarations.
+add_library(hypercine_decoder STATIC core/decoder.cpp core/decode_dispatch.cpp)
+target_include_directories(hypercine_decoder PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(hypercine_decoder PRIVATE hypercine_wavelet)
+if(HYPERCINE_ENABLE_CUDA)
+    target_include_directories(hypercine_decoder PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+endif()
+add_library(HyperCine::Decoder ALIAS hypercine_decoder)
 
 if(TARGET hypercine_core)
     target_link_libraries(hypercine_core INTERFACE hypercine_wavelet)

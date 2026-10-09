@@ -131,7 +131,8 @@ inline Resolved Resolve(
     size_t root_count,
     uint32_t max_full_chunks_fallback = UINT32_MAX,
     float max_correction_ratio_fallback = 1.0f,
-    bool* fell_back = nullptr
+    bool* fell_back = nullptr,
+    Resolved* reusable = nullptr
 ) {
     if (fell_back) *fell_back = false;
     if (!chunk || chunk > 1024 || !roots || root_count != (bytes + chunk - 1) / chunk) {
@@ -140,6 +141,8 @@ inline Resolved Resolve(
 
     const auto t_start = std::chrono::steady_clock::now();
     Resolved out;
+    if (reusable) out.checkpoints.swap(reusable->checkpoints);
+    out.checkpoints.clear();
     uint16_t state = initial;
     uint64_t pos = 0;
     out.checkpoints.reserve(root_count);

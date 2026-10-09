@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 
 #include "hypercine/decode_entropy_cuda.h"
+#include "../core/decoder_backend.h"
 #include "hypercine/decode_gpu_index.h"
 #include <cuda_runtime.h>
 #include "decode_error_guard.cuh"
@@ -553,7 +554,7 @@ int DetermineAdaptiveSegmentCount(size_t payload_bytes, size_t coeff_count) {
     return 64;
 }
 
-bool GenerateSingleBandCheckpointsCpu(
+static bool GenerateCheckpoints(
     const uint8_t* compressed_sample,
     size_t compressed_size,
     const GpuEntropyBandDescriptor& desc,
@@ -563,7 +564,8 @@ bool GenerateSingleBandCheckpointsCpu(
     GpuEntropyMode mode,
     int fixed_segments_per_band,
     std::vector<GpuEntropySegmentDescriptor>& out_segments,
-    std::string* out_error
+    std::string* out_error,
+    bool strict
 ) {
     out_segments.clear();
     if (!compressed_sample || !fsm_tables || fsm_tables_size == 0) {
@@ -601,7 +603,7 @@ bool GenerateSingleBandCheckpointsCpu(
         target_segs = 1;
     }
 
-    if (target_segs <= 1 || payload_bytes == 0) {
+    if (!strict && (target_segs <= 1 || payload_bytes == 0)) {
         GpuEntropySegmentDescriptor seg{};
         seg.band_index = band_index;
         seg.byte_offset = 0;
@@ -694,11 +696,26 @@ bool GenerateSingleBandCheckpointsCpu(
     }
 
     if (!terminated) {
+        if (strict) {
+            if (out_error) *out_error = "missing end marker / truncated entropy";
+            return false;
+        }
         out_segments.back().end_byte_offset = payload_bytes;
         out_segments.back().end_nibble_idx = 0;
     }
 
     return true;
+}
+
+bool GenerateSingleBandCheckpointsCpu(const uint8_t* p, size_t n,
+    const GpuEntropyBandDescriptor& d, int b, const GpuFsmEntry* t, size_t count,
+    GpuEntropyMode mode, int segments, std::vector<GpuEntropySegmentDescriptor>& out, std::string* error) {
+    return GenerateCheckpoints(p,n,d,b,t,count,mode,segments,out,error,false);
+}
+bool GenerateSingleBandCheckpointsValidated(const uint8_t* p, size_t n,
+    const GpuEntropyBandDescriptor& d, int b, const GpuFsmEntry* t, size_t count,
+    GpuEntropyMode mode, int segments, std::vector<GpuEntropySegmentDescriptor>& out, std::string* error) {
+    return GenerateCheckpoints(p,n,d,b,t,count,mode,segments,out,error,true);
 }
 
 bool GenerateBandCheckpointsCpu(

@@ -36,6 +36,11 @@ int CudaDecoderPipelinePhase2E::GetFixedSegmentsPerBand() const { return 32; }
 void CudaDecoderPipelinePhase2E::SetTestDelayHook(DelayHookFn) {}
 
 uint64_t CudaDecoderPipelinePhase2E::QueueDecode(const uint8_t*, size_t, DeviceSurfaceType, ColorMatrix, ColorRange, RowOrientation, cudaStream_t) { return 0; }
+uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t*, size_t,
+    const std::vector<GpuEntropyBandDescriptor>&, DeviceSurfaceType, ColorMatrix,
+    ColorRange, RowOrientation, bool, float) { return 0; }
+DecoderMemoryStats CudaDecoderPipelinePhase2E::GetMemoryStats() const { return {}; }
+void CudaDecoderPipelinePhase2E::PrepareProductionScratch() {}
 DecodeTicketStatus CudaDecoderPipelinePhase2E::PollDecode(uint64_t) { return DecodeTicketStatus::Invalid; }
 bool CudaDecoderPipelinePhase2E::WaitForDecode(uint64_t) { return false; }
 bool CudaDecoderPipelinePhase2E::StreamWait(uint64_t, cudaStream_t) { return false; }
