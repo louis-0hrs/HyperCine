@@ -1,0 +1,443 @@
+{
+  "provenance": {
+    "base_commit": "dded4d8ae61800241164499fa875c0cb104281a4",
+    "branch": "decode-phase3a",
+    "copyright": "2026 HyperCine Contributors",
+    "license": "MIT OR Apache-2.0",
+    "recorded_at_utc": "2026-10-09T12:21:15.426285+00:00",
+    "os": "Windows x64",
+    "cpu": "AMD Ryzen 9 7940HS, 16 logical processors",
+    "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+    "cuda_toolkit": "12.8",
+    "compiler": "MSVC 19.44 / Visual Studio 2022",
+    "configuration": "Release, sm_89",
+    "seed": "0x1337BEEF",
+    "matrix_measured_frames": {
+      "1920": 120,
+      "3840": 60,
+      "7680": 30
+    },
+    "matrix_warmup_frames": 5,
+    "measured_code_sha256": {
+      "benchmarks/CMakeLists.txt": "ed1030b6b0ae4d6189887954e0cded438ea21f88f8c114f7ebd52d3c481c9d02",
+      "benchmarks/benchmark_decoder.cpp": "abb802cee8cdce90930e82d0336898c1ed4e741f79955deb5746b8cbfb077489",
+      "include/hypercine/decode_gpu_index.h": "4be8c925524128a8245686c20730a93b6e819b417e3254e3560b09cb64eff22a",
+      "include/hypercine/decode_phase2a.h": "6bf4b9e8178d78ed9af2232712b5879a1e8ab55a59f1df50e6e0ea9512d28f82",
+      "include/hypercine/decode_phase2b.h": "0876ce6386d2f4224388b58400f2f5f47af2506400a40c11ae46613541232de0",
+      "include/hypercine/decode_phase2c.h": "c8a7353687276ef89da946553de2e66a3765adca0af488bb9a0093db493c37f6",
+      "include/hypercine/decode_phase2d.h": "634d0cb4110d1855a36b57e2849f2d143422a883c2b73a3b7d1e105e67fc45bd",
+      "include/hypercine/decode_phase2e.h": "1a4361b659d2d8dac64aa39ebf649679da357887ddeaf864bca1b13ea4743bbe",
+      "include/hypercine/decoder.h": "ba08cb41d6c841a15138788511ce1068154210dd705034fcb65496ee84d07ad9",
+      "include/hypercine/decoder_cuda.h": "44e5829cdc5ffe0daa3d5b4ad5ae15f12f137a8177a8931d6b6cb4af22d8e5d4",
+      "include/hypercine/research/decode_gpu_index.h": "ac2d8ab8441332f82adf57b548567f8eddd12836ab9b2badd8473a6f145adae7",
+      "include/hypercine/research/decode_phase2a.h": "1df6909cebe963a1d58a3d43d7fc238558aca71e50abb3042459e58afd07ec75",
+      "include/hypercine/research/decode_phase2b.h": "21d2ae7837345ceb5fc4ae1f02a1aead0d4e86bc64e2425d7998738ba8340ec1",
+      "include/hypercine/research/decode_phase2c.h": "83a86b7c683fc064c780a58e4c1ca38c0298eacc9a282841a467ac37d3c5dd36",
+      "include/hypercine/research/decode_phase2d.h": "12135f8b84b044cdb23cad1bb0e55150e705bc1042b697ff43f6fd240cdd87eb",
+      "include/hypercine/research/decode_phase2e.h": "5ab790e8ad61a6d9d7be014f6bb700c03ec327f7b17247162c6aa7c7ec53dcf8",
+      "include/hypercine/research/decoder_diagnostics.h": "59ff5c435cb47f7744e221aee28cf0c56fc6904f5b260f42c5ecf6b1ecc025c6",
+      "src/CMakeLists.txt": "867f25bcf0d382b6bca267ee3fda9e3eccd834b53ea088d96ac64c28302b4e1b",
+      "src/core/decode_dispatch.cpp": "c4977433b268fe8ccf6156d5641711acc79906c21bf72c4dddd8cc78a72c5e9b",
+      "src/core/decode_parser.cpp": "34891050767c95f35f3037e5bd63947e364742ac194f18be5f02556376c4cbba",
+      "src/core/decoder.cpp": "10f3c5689b7d96b9506c04639264c8664603e3bbe20100fcba9b8d57b4bb78a0",
+      "src/core/decoder_backend.h": "d615a70757dae85390e900509e6f229e07afd2e58e0a51787ac15802b0779bb9",
+      "src/cuda/decode_entropy_cuda.cu": "b371efd751b198f9fc264ae5178bb0c6f9e7cc45d7afc2616f05512ba8dd323b",
+      "src/cuda/decode_hybrid_entropy.cuh": "770352864a6243f1e0ff0feb3af6d530c294a973cd9187f7c741c9c28694e9fc",
+      "src/cuda/decode_peaks_cuda.cu": "cdad581de04103d2e8e6e0a1a0ed0bcb7f6e13c22eaa568a1b05a8ca0eb88621",
+      "src/cuda/decode_phase2e_pipeline.cu": "7dbf1765fdff4a02896b93d470e614e604a53bf9e08437384dfa6146917d6ef1",
+      "src/cuda/decode_phase2e_stub.cpp": "d2292520457f0904e6ccb993d906c2aa9b7526ee6496350c29765137e1e3bc30",
+      "tests/CMakeLists.txt": "18980b72c73d2f982cb65ae268435cd5c86b4563e80dd93dbcfaf13fda8dcc51",
+      "tests/decoder_support.h": "50bb0033f6114dd96ea486d31fd95761e8e1fb767c4bd4cad0f5d77a870937ee",
+      "tests/test_decoder.cpp": "c3f47e90a18f1362c4452ac3792cb5bb756e77dbcef1822e808f11e2cbb202a2",
+      "tests/test_decoder_cpu.cpp": "fa1c78841dc71016f080464652177a73ab5bb4cec66dda34d0ac4cc9285c6bf3"
+    },
+    "golden_manifest_sha256": "dbe8d97f5bcfcd709c7b1994cba0b8c2e7d0fa89130e2ace775cf8d704d0c026",
+    "implementation_commits": [
+      "d24325f test(decoder): add production stress and oracle benchmarks",
+      "2f5314a feat(decoder): consolidate production API and deterministic dispatch"
+    ],
+    "benchmark_slots": "matrix explicit 1; sweeps explicit 2/3/4; LowLatency default 1; HighThroughput default 3; longrun explicit 3",
+    "post_matrix_configuration_change": "Auto zero-slot default changed from 3 to 2 from sweep evidence; all measured configurations unchanged",
+    "upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+    "encoder_sources_unchanged": true,
+    "historical_results_unchanged": true
+  },
+  "files_changed": [
+    "benchmarks/CMakeLists.txt",
+    "benchmarks/benchmark_decoder.cpp",
+    "benchmarks/results/decode_phase3a_auto_selector.json",
+    "benchmarks/results/decode_phase3a_codec_reference.json",
+    "benchmarks/results/decode_phase3a_completion.json",
+    "benchmarks/results/decode_phase3a_cpu_ctest.txt",
+    "benchmarks/results/decode_phase3a_cuda_ctest.txt",
+    "benchmarks/results/decode_phase3a_initcheck.txt",
+    "benchmarks/results/decode_phase3a_longrun.json",
+    "benchmarks/results/decode_phase3a_memcheck.txt",
+    "benchmarks/results/decode_phase3a_memory.json",
+    "benchmarks/results/decode_phase3a_mixed_workload.json",
+    "benchmarks/results/decode_phase3a_oracle.json",
+    "benchmarks/results/decode_phase3a_racecheck.txt",
+    "benchmarks/results/decode_phase3a_sanitizers.json",
+    "benchmarks/results/decode_phase3a_synccheck.txt",
+    "benchmarks/results/decode_phase3a_validation.json",
+    "benchmarks/results/decode_phase3a_windows_msvc.json",
+    "benchmarks/summarize_decode_phase3a.py",
+    "docs/DECODE_PHASE3A.md",
+    "include/hypercine/decode_gpu_index.h",
+    "include/hypercine/decode_phase2a.h",
+    "include/hypercine/decode_phase2b.h",
+    "include/hypercine/decode_phase2c.h",
+    "include/hypercine/decode_phase2d.h",
+    "include/hypercine/decode_phase2e.h",
+    "include/hypercine/decoder.h",
+    "include/hypercine/decoder_cuda.h",
+    "include/hypercine/research/decode_gpu_index.h",
+    "include/hypercine/research/decode_phase2a.h",
+    "include/hypercine/research/decode_phase2b.h",
+    "include/hypercine/research/decode_phase2c.h",
+    "include/hypercine/research/decode_phase2d.h",
+    "include/hypercine/research/decode_phase2e.h",
+    "include/hypercine/research/decoder_diagnostics.h",
+    "src/CMakeLists.txt",
+    "src/core/decode_dispatch.cpp",
+    "src/core/decode_parser.cpp",
+    "src/core/decoder.cpp",
+    "src/core/decoder_backend.h",
+    "src/cuda/decode_entropy_cuda.cu",
+    "src/cuda/decode_hybrid_entropy.cuh",
+    "src/cuda/decode_peaks_cuda.cu",
+    "src/cuda/decode_phase2e_pipeline.cu",
+    "src/cuda/decode_phase2e_stub.cpp",
+    "tests/CMakeLists.txt",
+    "tests/decoder_support.h",
+    "tests/test_decoder.cpp",
+    "tests/test_decoder_cpu.cpp"
+  ],
+  "completion_items": [
+    {
+      "number": 1,
+      "item": "Branch",
+      "result": "decode-phase3a"
+    },
+    {
+      "number": 2,
+      "item": "Base commit",
+      "result": "dded4d8ae61800241164499fa875c0cb104281a4"
+    },
+    {
+      "number": 3,
+      "item": "Commits created",
+      "result": "d24325f test(decoder): add production stress and oracle benchmarks; 2f5314a feat(decoder): consolidate production API and deterministic dispatch; docs(decoder): document Phase 3A production architecture and evidence (contains this report)"
+    },
+    {
+      "number": 4,
+      "item": "Files changed",
+      "result": "49 files; see decode_phase3a_completion.json for the complete path list"
+    },
+    {
+      "number": 5,
+      "item": "Upstream status",
+      "result": "Pristine; tree equals the frozen upstream baseline; status empty"
+    },
+    {
+      "number": 6,
+      "item": "Encoder status",
+      "result": "Sources, headers and behavior unchanged; benchmark_codec baseline preserved"
+    },
+    {
+      "number": 7,
+      "item": "Production API",
+      "result": "HyperCine::Decoder, HyperCine::Decoder CMake target"
+    },
+    {
+      "number": 8,
+      "item": "Public headers added",
+      "result": "decoder.h, decoder_cuda.h"
+    },
+    {
+      "number": 9,
+      "item": "Research headers internalized",
+      "result": "Six decoder/index declarations under research/, old paths compatible"
+    },
+    {
+      "number": 10,
+      "item": "Research headers still public",
+      "result": "Low-level entropy/color/inverse CUDA; encoder phase2 prototypes; compatibility forwarders"
+    },
+    {
+      "number": 11,
+      "item": "DeviceOutput contract",
+      "result": "Borrowed pointers/pitches/geometry/format/orientation/ticket/event; valid until explicit release"
+    },
+    {
+      "number": 12,
+      "item": "Ticket lifecycle",
+      "result": "Queued -> Running -> Ready/Failed -> Released; generation identity; Busy consumes no slot"
+    },
+    {
+      "number": 13,
+      "item": "Error lifecycle",
+      "result": "First terminal error retained; no output on failure; drain/reuse; UnsupportedEncodingMode for interlaced/temporal"
+    },
+    {
+      "number": 14,
+      "item": "Default slots",
+      "result": "Auto 2; LowLatency 1; HighThroughput 3; explicit 1..4"
+    },
+    {
+      "number": 15,
+      "item": "Memory per slot",
+      "result": "1080p/4K VRAM 69.77/174.22 MiB; pinned 34.55 MiB; known pageable ~40.61 MiB"
+    },
+    {
+      "number": 16,
+      "item": "VRAM per Auto decoder",
+      "result": "1080p/4K 139.69/348.58 MiB"
+    },
+    {
+      "number": 17,
+      "item": "Pinned memory per Auto decoder",
+      "result": "69.09 MiB"
+    },
+    {
+      "number": 18,
+      "item": "Auto classifier design",
+      "result": "Fixed integer dense/distributed/concentrated rule; no runtime learning"
+    },
+    {
+      "number": 19,
+      "item": "Classifier inputs",
+      "result": "27 header descriptors: payload sizes, coefficient counts and level distribution"
+    },
+    {
+      "number": 20,
+      "item": "Classifier cost",
+      "result": "100..300 ns observed"
+    },
+    {
+      "number": 21,
+      "item": "Decisions by pattern",
+      "result": "1080p: Flat/Gradient/Texture L, Noise/Edges H; 4K: Flat/Texture L, Gradient/Noise/Edges H; 8K Flat L"
+    },
+    {
+      "number": 22,
+      "item": "Adaptive band policy",
+      "result": "Audited AdaptiveDynamic E/BF retained, including content-derived fallback and effective call boundary"
+    },
+    {
+      "number": 23,
+      "item": "Oracle methodology",
+      "result": "Minimum same-session mean of forced production L/H, not a runtime decision"
+    },
+    {
+      "number": 24,
+      "item": "Oracle improvement capture",
+      "result": "100.00%; Auto wall 101.42%"
+    },
+    {
+      "number": 25,
+      "item": "Worst regret",
+      "result": "0.000000 ms; mean 0.000000; 0/11 misses"
+    },
+    {
+      "number": 26,
+      "item": "1920 flat",
+      "result": "0.992 ms, 1008.32 FPS, lightweight"
+    },
+    {
+      "number": 27,
+      "item": "1920 gradient",
+      "result": "2.714 ms, 368.51 FPS, lightweight"
+    },
+    {
+      "number": 28,
+      "item": "1920 noise",
+      "result": "4.587 ms, 218.02 FPS, hybrid"
+    },
+    {
+      "number": 29,
+      "item": "1920 texture",
+      "result": "7.454 ms, 134.16 FPS, lightweight"
+    },
+    {
+      "number": 30,
+      "item": "1920 edges",
+      "result": "3.532 ms, 283.09 FPS, hybrid"
+    },
+    {
+      "number": 31,
+      "item": "3840 flat",
+      "result": "1.543 ms, 648.21 FPS, lightweight"
+    },
+    {
+      "number": 32,
+      "item": "3840 gradient",
+      "result": "4.121 ms, 242.67 FPS, hybrid"
+    },
+    {
+      "number": 33,
+      "item": "3840 noise",
+      "result": "8.229 ms, 121.53 FPS, hybrid"
+    },
+    {
+      "number": 34,
+      "item": "3840 texture",
+      "result": "19.947 ms, 50.13 FPS, lightweight"
+    },
+    {
+      "number": 35,
+      "item": "3840 edges",
+      "result": "5.063 ms, 197.50 FPS, hybrid"
+    },
+    {
+      "number": 36,
+      "item": "7680 flat",
+      "result": "4.324 ms, 231.28 FPS, lightweight"
+    },
+    {
+      "number": 37,
+      "item": "1080p mixed Auto (2 slots)",
+      "result": "272.20 FPS, 7.343 ms ready latency, 14.28 process CPU ms/frame"
+    },
+    {
+      "number": 38,
+      "item": "4K mixed Auto (2 slots)",
+      "result": "133.90 FPS, 14.934 ms ready latency, 32.50 process CPU ms/frame"
+    },
+    {
+      "number": 39,
+      "item": "4K Noise sustained",
+      "result": "132.33 FPS, 22.646 ms ready latency, 36.83 process CPU ms/frame"
+    },
+    {
+      "number": 40,
+      "item": "Optimal slot count",
+      "result": "2 highest 1080p sweep FPS; 3 highest 4K sweep FPS; balanced Auto 2"
+    },
+    {
+      "number": 41,
+      "item": "LowLatency",
+      "result": "1080p 258.89 FPS, 3.861 ms ready latency, 7.19 process CPU ms/frame; 4K 127.86 FPS, 7.819 ms ready latency, 15.94 process CPU ms/frame"
+    },
+    {
+      "number": 42,
+      "item": "HighThroughput",
+      "result": "1080p 271.71 FPS, 11.034 ms ready latency, 15.66 process CPU ms/frame; 4K 135.11 FPS, 22.197 ms ready latency, 33.00 process CPU ms/frame"
+    },
+    {
+      "number": 43,
+      "item": "CPU ms/frame",
+      "result": "Process-wide CPU time, matrix and mixed rows above; throughput policies have higher CPU cost than LowLatency"
+    },
+    {
+      "number": 44,
+      "item": "Long-run 1920",
+      "result": "10000 fully byte-verified frames PASS; 206.87 verified FPS"
+    },
+    {
+      "number": 45,
+      "item": "Long-run 3840",
+      "result": "5000 fully byte-verified frames PASS; 87.28 verified FPS"
+    },
+    {
+      "number": 46,
+      "item": "Long-run 7680",
+      "result": "1000 fully byte-verified frames PASS; 43.55 verified FPS"
+    },
+    {
+      "number": 47,
+      "item": "Random access",
+      "result": "Seeded independent selection and periodic seek-like substitutions PASS"
+    },
+    {
+      "number": 48,
+      "item": "Two decoders",
+      "result": "2 x 100 independent random requests, CPU-exact PASS"
+    },
+    {
+      "number": 49,
+      "item": "Four decoders",
+      "result": "4 x 100 independent random requests, CPU-exact PASS"
+    },
+    {
+      "number": 50,
+      "item": "Output lifetime",
+      "result": "Delayed/out-of-order/pending/failed/double release, reinit and destruction; two consumer streams PASS"
+    },
+    {
+      "number": 51,
+      "item": "Queue saturation",
+      "result": "Busy, held output unchanged, released slot reusable PASS"
+    },
+    {
+      "number": 52,
+      "item": "Real difference coding",
+      "result": "Interlaced fixture: 30/30 CPU/E/Hybrid coefficients exact, max error 0; production deliberately rejects; interlaced output deferred"
+    },
+    {
+      "number": 53,
+      "item": "Malformed corpus",
+      "result": "1005 rejected submissions; explicit coefficient-overflow and LL bounds checks PASS"
+    },
+    {
+      "number": 54,
+      "item": "Mutation stress",
+      "result": "1000 seeded bounded mutations; no false Ready, first failure retained, release/reuse PASS"
+    },
+    {
+      "number": 55,
+      "item": "initcheck",
+      "result": "Exit 0; zero errors/hazards"
+    },
+    {
+      "number": 56,
+      "item": "memcheck",
+      "result": "Exit 0; zero errors/hazards"
+    },
+    {
+      "number": 57,
+      "item": "racecheck",
+      "result": "Exit 0; zero errors/hazards"
+    },
+    {
+      "number": 58,
+      "item": "synccheck",
+      "result": "Exit 0; zero errors/hazards"
+    },
+    {
+      "number": 59,
+      "item": "CUDA CTest",
+      "result": "31/31 PASS in 688.74 s"
+    },
+    {
+      "number": 60,
+      "item": "CPU-only CTest",
+      "result": "6/6 PASS in 4.58 s"
+    },
+    {
+      "number": 61,
+      "item": "Determinism",
+      "result": "200 Noise1080 / 100 Noise4K / 100 Texture4K / 20 Flat8K; bytes and frame/band decisions identical"
+    },
+    {
+      "number": 62,
+      "item": "Memory growth/leaks",
+      "result": "Owned capacities/free VRAM stable; working set snapshots plateau; zero steady-state C++ and owned CUDA allocations"
+    },
+    {
+      "number": 63,
+      "item": "Recommended policy",
+      "result": "Auto with 2 slots; LowLatency interactive; HighThroughput 3 slots when throughput justifies memory/CPU/latency"
+    },
+    {
+      "number": 64,
+      "item": "Ready for main",
+      "result": "Recommend review for progressive YUV422 promotion; all Phase 3A gates pass within stated corpus/scope; no merge/tag/push performed"
+    },
+    {
+      "number": 65,
+      "item": "Phase 3B",
+      "result": "Field-aware interlaced inverse and profile capability matrix, then 8/10/12-bit and RGB/RGBA coverage with frozen vectors"
+    }
+  ]
+}
