@@ -13,6 +13,15 @@ add_executable(benchmark_codec
     benchmark_codec.cpp
 )
 
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(benchmark_decoder benchmark_decoder.cpp)
+    target_compile_definitions(benchmark_decoder PRIVATE _ALLOCATOR=1)
+    target_link_libraries(benchmark_decoder PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(benchmark_decoder PRIVATE psapi)
+    endif()
+endif()
+
 target_link_libraries(benchmark_codec PRIVATE CFHDCodecStatic)
 
 # Decode Phase 0 is independent of all encoder benchmark contracts.

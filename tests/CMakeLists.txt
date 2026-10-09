@@ -11,6 +11,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+if(NOT HYPERCINE_ENABLE_CUDA)
+    add_executable(test_decoder_cpu test_decoder_cpu.cpp)
+    target_link_libraries(test_decoder_cpu PRIVATE HyperCine::Decoder)
+    add_test(NAME test_decoder_cpu COMMAND test_decoder_cpu)
+endif()
+
 # 1. Transform-level test
 add_executable(test_transform_wavelet
     test_transform_wavelet.cpp
@@ -52,6 +58,14 @@ add_test(NAME test_avi_sample
 
 # 4. Phase 1A CUDA wavelet transform test
 if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_decoder test_decoder.cpp)
+    target_compile_definitions(test_decoder PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decoder PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_decoder PRIVATE psapi)
+    endif()
+    add_test(NAME test_decoder COMMAND test_decoder "${CMAKE_CURRENT_SOURCE_DIR}/decode_phase0_golden.txt")
+    set_tests_properties(test_decoder PROPERTIES TIMEOUT 600)
     add_executable(test_decode_phase2fa test_decode_phase2fa.cpp)
     target_compile_definitions(test_decode_phase2fa PRIVATE _ALLOCATOR=1)
     target_link_libraries(test_decode_phase2fa PRIVATE hypercine_wavelet CFHDCodecStatic)
