@@ -17,6 +17,21 @@ if(NOT HYPERCINE_ENABLE_CUDA)
     add_test(NAME test_decoder_cpu COMMAND test_decoder_cpu)
 endif()
 
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_decode_phase3a_rc test_decode_phase3a_rc.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/fileio.cpp)
+    target_compile_definitions(test_decode_phase3a_rc PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase3a_rc PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_decode_phase3a_rc PRIVATE psapi)
+    endif()
+    add_test(NAME test_decode_phase3a_rc COMMAND test_decode_phase3a_rc --validate
+        "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/rc-results")
+    set_tests_properties(test_decode_phase3a_rc PROPERTIES TIMEOUT 600)
+endif()
+
 # 1. Transform-level test
 add_executable(test_transform_wavelet
     test_transform_wavelet.cpp

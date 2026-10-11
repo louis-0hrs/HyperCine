@@ -1,0 +1,317 @@
+{
+  "copyright": "2026 HyperCine Contributors",
+  "license": "MIT OR Apache-2.0",
+  "phase3a_head": "e6e9cb905aee848808682942d13f07f2ff505a2d",
+  "declaration": "Frozen before primary Oracle timing. Do not select, remove or alter families after timing. No threshold tuning.",
+  "seed": "0x6A09E667",
+  "development_exclusion": "All 11 Phase 0 source and normalized compressed identities; new generator and independent seed. External clips were CPU validation fixtures, not threshold selection data.",
+  "generated_cases": [
+    {
+      "id": "1920_foliage_proxy",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "foliage_proxy"
+    },
+    {
+      "id": "1920_water_proxy",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "water_proxy"
+    },
+    {
+      "id": "1920_architecture_graphics",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "architecture_graphics"
+    },
+    {
+      "id": "1920_text_ui",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "text_ui"
+    },
+    {
+      "id": "1920_cgi_geometry",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "cgi_geometry"
+    },
+    {
+      "id": "1920_dark_noise",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "dark_noise"
+    },
+    {
+      "id": "1920_clean_sky",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "clean_sky"
+    },
+    {
+      "id": "1920_heavy_grain",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "heavy_grain"
+    },
+    {
+      "id": "1920_curved_gradient",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "curved_gradient"
+    },
+    {
+      "id": "1920_diagonal_edges",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "diagonal_edges"
+    },
+    {
+      "id": "1920_woven_fabric",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "woven_fabric"
+    },
+    {
+      "id": "1920_skin_proxy",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "skin_proxy"
+    },
+    {
+      "id": "1920_mixed_detail",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "mixed_detail"
+    },
+    {
+      "id": "1920_motion_blur_proxy",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "motion_blur_proxy"
+    },
+    {
+      "id": "1920_low_quality_detail",
+      "width": 1920,
+      "height": 1080,
+      "quality_enum": 1,
+      "input": "YUY2",
+      "category": "low_quality_detail"
+    },
+    {
+      "id": "3840_foliage_proxy",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "foliage_proxy"
+    },
+    {
+      "id": "3840_water_proxy",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "water_proxy"
+    },
+    {
+      "id": "3840_architecture_graphics",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "architecture_graphics"
+    },
+    {
+      "id": "3840_text_ui",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "text_ui"
+    },
+    {
+      "id": "3840_cgi_geometry",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "cgi_geometry"
+    },
+    {
+      "id": "3840_dark_noise",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "dark_noise"
+    },
+    {
+      "id": "3840_clean_sky",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "clean_sky"
+    },
+    {
+      "id": "3840_heavy_grain",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "heavy_grain"
+    },
+    {
+      "id": "3840_curved_gradient",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "curved_gradient"
+    },
+    {
+      "id": "3840_diagonal_edges",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "diagonal_edges"
+    },
+    {
+      "id": "3840_woven_fabric",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "woven_fabric"
+    },
+    {
+      "id": "3840_skin_proxy",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "skin_proxy"
+    },
+    {
+      "id": "3840_mixed_detail",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "mixed_detail"
+    },
+    {
+      "id": "3840_motion_blur_proxy",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "motion_blur_proxy"
+    },
+    {
+      "id": "3840_low_quality_detail",
+      "width": 3840,
+      "height": 2160,
+      "quality_enum": 1,
+      "input": "YUY2",
+      "category": "low_quality_detail"
+    },
+    {
+      "id": "7680_clean_sky",
+      "width": 7680,
+      "height": 4320,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "clean_sky"
+    },
+    {
+      "id": "7680_curved_gradient",
+      "width": 7680,
+      "height": 4320,
+      "quality_enum": 6,
+      "input": "YUY2",
+      "category": "curved_gradient"
+    }
+  ],
+  "external_cases": [
+    {
+      "source": "upstream/Example/videos/CFHDsample422.AVI",
+      "frame": 0,
+      "category": "bundled external video; camera acquisition unknown"
+    },
+    {
+      "source": "upstream/Example/videos/CFHDsample422.AVI",
+      "frame": 12,
+      "category": "bundled external video; camera acquisition unknown"
+    },
+    {
+      "source": "upstream/Example/videos/CFHDsample422.AVI",
+      "frame": 23,
+      "category": "bundled external video; camera acquisition unknown"
+    },
+    {
+      "source": "upstream/Example/videos/CFHDsample444.AVI",
+      "frame": 0,
+      "category": "unsupported 12-bit RGB444 control"
+    }
+  ],
+  "primary_window": {
+    "warmups": 5,
+    "1080p_frames": 120,
+    "4k_frames": 60,
+    "8k_frames": 30,
+    "strategies": [
+      "lightweight",
+      "hybrid",
+      "auto"
+    ],
+    "slots": 2
+  },
+  "source_sha256_before_primary_timing": {
+    "src/core/decode_dispatch.cpp": "c4977433b268fe8ccf6156d5641711acc79906c21bf72c4dddd8cc78a72c5e9b",
+    "src/cuda/decode_peaks_cuda.cu": "cdad581de04103d2e8e6e0a1a0ed0bcb7f6e13c22eaa568a1b05a8ca0eb88621",
+    "tests/decode_phase3a_rc_support.h": "7ac5a72067a25194057ed62741341760263870f2ec223b32d79ef44d101faa15",
+    "tests/decode_phase3a_rc_peaks.h": "0d6f3110672bacda915e8dc7989733a114deb04d9ad16a164f6053159b12037e",
+    "tests/test_decode_phase3a_rc.cpp": "24f7c7834bd656b9a3196326843a64190d64de0c5b039867542cd3b294690dd4"
+  },
+  "external_source_sha256": {
+    "upstream/Example/videos/CFHDsample422.AVI": "18baa60e401a9ebddddb5691d1c23c48ab1e26bc6f6cbc1aaa5b00869a2ccb44",
+    "upstream/Example/videos/CFHDsample444.AVI": "ce018f56f9b1aa29d8844722be506315837d948eaa5da3d5c7e4cbd53818c5ea"
+  },
+  "primary_timing_freeze_utc": "2026-10-10T21:15:44.371177+00:00",
+  "post_timing_peak_unit_only_revision": {
+    "path": "tests/decode_phase3a_rc_peaks.h",
+    "sha256": "acb4c9b91e3c4154d8f4e95fef72f9338e86a1bc34e4f5dd455fb580c8869b66",
+    "reason": "Refine isolated metadata unit to use three actual escapes plus one zero pad, matching even wire table counts. The original hash above is retained. The repaired PeakUnits function is not executed during benchmark mode; corpus generation, measurements, classifier and production are unchanged."
+  }
+}
