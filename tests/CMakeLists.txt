@@ -91,6 +91,23 @@ if(HYPERCINE_ENABLE_CUDA)
     endif()
     add_test(NAME test_decoder COMMAND test_decoder "${CMAKE_CURRENT_SOURCE_DIR}/decode_phase0_golden.txt")
     set_tests_properties(test_decoder PROPERTIES TIMEOUT 600)
+
+    add_executable(test_decode_phase3b0
+        test_decode_phase3b0.cpp
+        seh_guard.c
+        ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/fileio.cpp)
+    target_compile_definitions(test_decode_phase3b0 PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase3b0 PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_decode_phase3b0 PRIVATE psapi)
+    endif()
+    add_test(NAME test_decode_phase3b0 COMMAND test_decode_phase3b0
+        "${CMAKE_SOURCE_DIR}/benchmarks/results"
+        "${CMAKE_SOURCE_DIR}/tests/fixtures/phase3b0"
+        "${CMAKE_SOURCE_DIR}")
+    set_tests_properties(test_decode_phase3b0 PROPERTIES TIMEOUT 1800)
     add_executable(test_decode_phase2fa test_decode_phase2fa.cpp)
     target_compile_definitions(test_decode_phase2fa PRIVATE _ALLOCATOR=1)
     target_link_libraries(test_decode_phase2fa PRIVATE hypercine_wavelet CFHDCodecStatic)
