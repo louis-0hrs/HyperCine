@@ -1,0 +1,26 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "outcome": "HOLD",
+  "merge": false,
+  "tag": false,
+  "push": false,
+  "production_decoder_changed": false,
+  "source_equivalent_to": "e6e9cb905aee848808682942d13f07f2ff505a2d",
+  "frozen_candidate": "phase3ad_baseline",
+  "frozen_before_holdout_commit": "59631d4",
+  "validation_capture": 0.2954,
+  "holdout_capture": 0.1439,
+  "holdout_cases": 42,
+  "holdout_matches": 28,
+  "holdout_misses": 14,
+  "holdout_catastrophic": 10,
+  "holdout_worst_regret_ms": 4.854,
+  "holdout_worst_case": "h2_1920_night_traffic_filmscan1",
+  "holdout_exact_pass": 39,
+  "holdout_bgra_failures": ["photo_holdout_brick", "photo_holdout_grass", "photo_holdout_handwriting"],
+  "phase_3b": "blocked",
+  "helper_tests_after_yu64_fix": {
+    "test_decoder": "PASS 16.70s",
+    "test_decode_phase1": "PASS 1.87s"
+  }
+}

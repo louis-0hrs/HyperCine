@@ -1,0 +1,8 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "production_sources_changed": false,
+  "source_equivalent_to": "e6e9cb905aee848808682942d13f07f2ff505a2d",
+  "rerun": false,
+  "reason": "Phase 3A-D did not change decoder production sources. The four Compute Sanitizer logs and the CUDA and CPU-only CTest results from Phase 3A-RC remain the evidence for those bytes. They are not presented as a new run.",
+  "prior_evidence": "docs/DECODE_PHASE3A_RC.md and benchmarks/results/decode_phase3a_rc_validation.json"
+}
