@@ -115,3 +115,17 @@ A lower wavelet with completed highpasses but no parent-produced LL can have bot
 The existing Phase 3A verification wrapper and new Phase 0 reference harness set `TAG_CPU_MAX = 1` before the first decode and clamp the typed native decoder capability/limit fields. The Phase 0 harness also verifies that entropy workers remain zero and any output pool has at most one worker. No upstream file is changed. A future GPU decoder must require all four input-band completions and explicit level dependencies; queue claim does not establish input readiness.
 
 See [DECODE_PHASE0.md](DECODE_PHASE0.md) for the call graph, exact predicates, scheduling analysis and deterministic BGRA/YU64 reference. YUY2 final-strip dither remains a separate repeatability limitation, including when a persistent output worker has its own CRT RNG state.
+
+### RC extreme-input encoder capacity probe
+
+The Phase 3A-RC test generator observed an upstream access violation (Windows
+exit `0xC0000005`) while encoding deterministic full-range binary noise at
+1920x1080, YUY2, FilmScan2, with `CFHD_ENCODING_FLAGS_NONE`. One hundred preceding
+progressive configurations completed; the logged 101st configuration failed.
+Repeating the bounded 144-configuration search with the existing public
+`CFHD_ENCODING_FLAGS_LARGER_OUTPUT` flag completed successfully. This flag is
+used only by the extreme-input regression generator and preserves progressive
+coding and the requested quality. The observation is consistent with an output
+capacity limitation; the exact memory-fault mechanism was not established.
+No upstream source or encoder algorithm was changed. See
+[DECODE_PHASE3A_RC.md](DECODE_PHASE3A_RC.md) for the retained probe evidence.

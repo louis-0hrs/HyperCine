@@ -1,0 +1,99 @@
+Internal ctest changing into directory: C:/Users/User/Documents/GitHub/HyperCine-public/build
+Test project C:/Users/User/Documents/GitHub/HyperCine-public/build
+      Start  1: test_transform_wavelet
+ 1/31 Test  #1: test_transform_wavelet .............   Passed    0.03 sec
+      Start  2: test_codec_roundtrip
+ 2/31 Test  #2: test_codec_roundtrip ...............   Passed    0.05 sec
+      Start  3: test_yuy2_stability
+ 3/31 Test  #3: test_yuy2_stability ................   Passed    1.19 sec
+      Start  4: test_decode_phase0
+ 4/31 Test  #4: test_decode_phase0 .................   Passed    3.25 sec
+      Start  5: test_avi_sample
+ 5/31 Test  #5: test_avi_sample ....................   Passed    0.17 sec
+      Start  6: test_decoder
+ 6/31 Test  #6: test_decoder .......................   Passed   18.77 sec
+      Start  7: test_decode_phase2fa
+ 7/31 Test  #7: test_decode_phase2fa ...............   Passed  461.77 sec
+      Start  8: test_decode_gpu_index
+ 8/31 Test  #8: test_decode_gpu_index ..............   Passed    0.28 sec
+      Start  9: test_cuda_wavelet
+ 9/31 Test  #9: test_cuda_wavelet ..................   Passed    2.28 sec
+      Start 10: test_cuda_pyramid
+10/31 Test #10: test_cuda_pyramid ..................   Passed    0.16 sec
+      Start 11: test_entropy_parallel
+11/31 Test #11: test_entropy_parallel ..............   Passed    0.14 sec
+      Start 12: test_hybrid_roundtrip
+12/31 Test #12: test_hybrid_roundtrip ..............   Passed    0.31 sec
+      Start 13: test_phase2a
+13/31 Test #13: test_phase2a .......................***Failed    1.91 sec
+external int8/int16 entropy matches EncodeQuantizedGroup
+host full int16 ok fps=115.315 latency=8.5628 d2h_bytes=8294400 int8_bands=0
+host int16 stream ok fps=137.186 latency=7.1735 d2h_bytes=8294400 int8_bands=0
+host compact stream ok fps=135.67 latency=7.2447 d2h_bytes=4212000 int8_bands=27
+device compact stream ok fps=183.803 latency=5.3072 d2h_bytes=4212000 int8_bands=27
+device-resident decode differs from host compact (1 bitstream bytes)
+
+      Start 14: test_phase2b
+14/31 Test #14: test_phase2b .......................***Failed    0.32 sec
+zero tokens 2 bits 60 payload 56 coeff 0x7da144b97d054b25 hash 0x470296b9e16eb13c scan 0.390144 ms token 0.242688 book 0.079872 prefix 0.21504 pack 0.069632
+single_pos tokens 3 bits 62 payload 56 coeff 0xc01cd06959834324 hash 0xfcf2916e57b2cca7 scan 0.058432 ms token 0.094208 book 0.006144 prefix 0.024576 pack 0.02048
+single_neg tokens 3 bits 62 payload 56 coeff 0x7cd8b5b97c5ada9b hash 0x1980d7c7215db92a scan 0.057888 ms token 0.049152 book 0.009216 prefix 0.019456 pack 0.01024
+alternating tokens 256 bits 538 payload 116 coeff 0x35e68edaff0c2725 hash 0xc841660dcda29954 scan 0.049248 ms token 0.193536 book 0.00512 prefix 0.022528 pack 0.034816
+short_runs tokens 103 bits 549 payload 120 coeff 0xd213ad3d875702d6 hash 0x28aeea93f39b1856 scan 0.048928 ms token 0.05632 book 0.00512 prefix 0.036864 pack 0.012288
+block_boundary tokens 4 bits 68 payload 60 coeff 0xca7d885c757ef51 hash 0xf4eb29458e5eab95 scan 0.055808 ms token 0.029696 book 0.041984 prefix 0.020576 pack 0.007072
+extremes tokens 5 bits 160 payload 68 coeff 0xaf8a74caa57295e2 hash 0xa7ad3fa33ca519f6 scan 0.04736 ms token 0.055296 book 0.00512 prefix 0.054272 pack 0.01024
+random tokens 121 bits 744 payload 144 coeff 0x1af081c389d9590f hash 0x3c1c1f07d2fd4bb scan 0.09712 ms token 0.06656 book 0.00512 prefix 0.03072 pack 0.013312
+real_Y_L3_1 tokens 39 bits 243 payload 80 coeff 0xd49aeb23504f31c6 hash 0x5c0fb7446478157f scan 0.057056 ms token 0.029696 book 0.038912 prefix 0.02048 pack 0.023552
+real_Y_L3_2 tokens 37 bits 227 payload 80 coeff 0xdd74243f0648c740 hash 0xd3140891eb7125cb scan 0.04832 ms token 0.057344 book 0.00512 prefix 0.034816 pack 0.029696
+real_Y_L3_3 tokens 168 bits 494 payload 112 coeff 0xf53d481e0a1166eb hash 0xf15d109eda1063a9 scan 0.048992 ms token 0.054272 book 0.00512 prefix 0.036864 pack 0.014336
+real_Y_L2_1 tokens 577 bits 1756 payload 268 coeff 0x717b61c3de5cdd01 hash 0x651c0fbf47349f3e scan 0.062464 ms token 0.03072 book 0.0432 prefix 0.021312 pack 0.012288
+real_Y_L2_2 tokens 547 bits 1705 payload 264 coeff 0x5ed84a6ba251c72f hash 0x4b18c7569fc9a25b scan 0.058656 ms token 0.028672 book 0.039968 prefix 0.020512 pack 0.012224
+real_Y_L2_3 tokens 823 bits 2467 payload 360 coeff 0xb28bba578d0fbfbe hash 0xb16b76513685537e scan 0.052224 ms token 0.055296 book 0.00512 prefix 0.033792 pack 0.031744
+real_Y_L1_1 tokens 2457 bits 7321 payload 964 coeff 0x6c55bd6863a163f6 hash 0x58a4f1f3367be416 scan 0.0768 ms token 0.058368 book 0.011264 prefix 0.024576 pack 0.018432
+real_Y_L1_2 tokens 2471 bits 7338 payload 968 coeff 0xaef22117943dcd41 hash 0x4f294bd41866442b scan 0.056288 ms token 0.05632 book 0.00512 prefix 0.03072 pack 0.016384
+real_Y_L1_3 tokens 1570 bits 5550 payload 744 coeff 0x42747c5817a4cfc5 hash 0x4cc67a60e906599b scan 0.072352 ms token 0.055296 book 0.011264 prefix 0.046176 pack 0.017312
+1080p decode PSNR is below 35 dB
+
+      Start 15: test_phase2c
+15/31 Test #15: test_phase2c .......................   Passed    9.50 sec
+      Start 16: test_phase2d
+16/31 Test #16: test_phase2d .......................   Passed   14.58 sec
+      Start 17: test_entropy_capacity
+17/31 Test #17: test_entropy_capacity ..............   Passed    0.19 sec
+      Start 18: test_phase3a
+18/31 Test #18: test_phase3a .......................   Passed   37.84 sec
+      Start 19: test_decode_inverse_wavelet_cuda
+19/31 Test #19: test_decode_inverse_wavelet_cuda ...   Passed    1.48 sec
+      Start 20: test_decode_phase1
+20/31 Test #20: test_decode_phase1 .................   Passed    2.09 sec
+      Start 21: test_color_conversion_cuda
+21/31 Test #21: test_color_conversion_cuda .........   Passed    0.34 sec
+      Start 22: test_decode_phase2a
+22/31 Test #22: test_decode_phase2a ................   Passed    2.81 sec
+      Start 23: test_decode_entropy_cuda
+23/31 Test #23: test_decode_entropy_cuda ...........   Passed    0.15 sec
+      Start 24: test_decode_phase2b
+24/31 Test #24: test_decode_phase2b ................   Passed    7.93 sec
+      Start 25: test_decode_entropy_phase2c
+25/31 Test #25: test_decode_entropy_phase2c ........   Passed    0.18 sec
+      Start 26: test_decode_phase2c
+26/31 Test #26: test_decode_phase2c ................   Passed   21.97 sec
+      Start 27: test_decode_phase2d
+27/31 Test #27: test_decode_phase2d ................   Passed   28.64 sec
+      Start 28: test_decode_phase2e
+28/31 Test #28: test_decode_phase2e ................   Passed   25.28 sec
+      Start 29: test_decode_phase2fc
+29/31 Test #29: test_decode_phase2fc ...............   Passed    3.27 sec
+      Start 30: test_decode_phase2fc_audit
+30/31 Test #30: test_decode_phase2fc_audit .........   Passed   33.36 sec
+      Start 31: test_decode_phase2fb
+31/31 Test #31: test_decode_phase2fb ...............   Passed    0.19 sec
+
+94% tests passed, 2 tests failed out of 31
+
+Total Test time (real) = 680.54 sec
+
+The following tests FAILED:
+	 13 - test_phase2a (Failed)
+	 14 - test_phase2b (Failed)
+Errors while running CTest

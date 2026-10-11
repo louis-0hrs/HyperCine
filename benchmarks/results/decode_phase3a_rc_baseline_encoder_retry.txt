@@ -1,0 +1,10 @@
+Internal ctest changing into directory: C:/Users/User/Documents/GitHub/HyperCine-public/build
+Test project C:/Users/User/Documents/GitHub/HyperCine-public/build
+    Start 13: test_phase2a
+1/2 Test #13: test_phase2a .....................   Passed    1.45 sec
+    Start 14: test_phase2b
+2/2 Test #14: test_phase2b .....................   Passed    0.58 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   2.04 sec
