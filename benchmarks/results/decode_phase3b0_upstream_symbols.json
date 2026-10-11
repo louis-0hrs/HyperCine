@@ -1,0 +1,106 @@
+{
+  "source": "upstream baseline 11574d0295771edccadd17af14af74a539f924c7, read-only",
+  "note": "Two encoded-format enums exist. Bitstream tag 84 and codec.encoded_format use the internal ENCODED_FORMAT values. CFHD_PrepareToEncode uses CFHD_EncodedFormat. They are not the same numbers.",
+  "enums": [
+    {
+      "name": "CFHD_EncodedFormat",
+      "file": "upstream/Common/CFHDTypes.h",
+      "values": [
+        {"name": "YUV_422", "value": 0},
+        {"name": "RGB_444", "value": 1},
+        {"name": "RGBA_4444", "value": 2},
+        {"name": "BAYER", "value": 3},
+        {"name": "YUVA_4444", "value": 4, "note": "commented not implemented"}
+      ]
+    },
+    {
+      "name": "ENCODED_FORMAT",
+      "file": "upstream/Codec/codec.h",
+      "values": [
+        {"name": "UNKNOWN", "value": 0},
+        {"name": "YUV_422", "value": 1},
+        {"name": "BAYER", "value": 2},
+        {"name": "RGB_444", "value": 3},
+        {"name": "RGBA_4444", "value": 4},
+        {"name": "YUVA_4444", "value": 5}
+      ]
+    },
+    {
+      "name": "TRANSFORM_TYPE",
+      "file": "upstream/Codec/wavelet.h",
+      "values": [
+        {"name": "SPATIAL", "value": 0, "implemented": true},
+        {"name": "FIELD", "value": 1, "implemented": true},
+        {"name": "FIELDPLUS", "value": 2, "implemented": true, "note": "TRANSFORM_TYPE_LAST. Default fieldplus constants are 6 wavelets, 3 spatial, 17 subbands."},
+        {"name": "FRAME", "value": 3, "implemented": false},
+        {"name": "INTERLACED", "value": 4, "implemented": false}
+      ]
+    },
+    {
+      "name": "FRAME_FORMAT",
+      "file": "upstream/Codec/frame.h",
+      "values": [
+        {"name": "NONE", "value": 0},
+        {"name": "GRAY", "value": 1},
+        {"name": "YUV", "value": 2},
+        {"name": "RGB", "value": 3},
+        {"name": "RGBA", "value": 4}
+      ]
+    },
+    {
+      "name": "CODEC_PRECISION",
+      "file": "upstream/Codec/codec.h",
+      "values": [
+        {"name": "8BIT", "value": 8, "note": "CODEC_PRECISION_DEFAULT"},
+        {"name": "10BIT", "value": 10},
+        {"name": "12BIT", "value": 12}
+      ]
+    }
+  ],
+  "sample_flags": [
+    {"name": "SAMPLE_FLAGS_PROGRESSIVE", "value": 1, "file": "upstream/Codec/codec.h", "meaning": "First transform is spatial. PutVideoSampleFlags omits the tag entirely when flags are zero, so an interlaced GOP-1 sample has no progressive bit rather than an explicit interlaced tag."}
+  ],
+  "encoding_flags": [
+    {"name": "YUV_INTERLACED", "value": 1, "scope": "YUV 4:2:2 only"},
+    {"name": "YUV_2FRAME_GOP", "value": 2, "scope": "YUV 4:2:2 only"},
+    {"name": "YUV_601", "value": 4, "scope": "YUV 4:2:2 only"},
+    {"name": "RGB_STUDIO", "value": 256, "scope": "RGB 4:4:4 only"}
+  ],
+  "tags": [
+    {"tag": 10, "name": "TRANSFORM_TYPE", "hypercine_production": "strict parser rejects any value other than 0"},
+    {"tag": 11, "name": "NUM_FRAMES", "hypercine_production": "strict parser rejects any value other than 1"},
+    {"tag": 12, "name": "NUM_CHANNELS", "hypercine_production": "requires 3"},
+    {"tag": 13, "name": "NUM_WAVELETS", "hypercine_production": "recorded by the research walker only"},
+    {"tag": 14, "name": "NUM_SUBBANDS", "hypercine_production": "recorded by the research walker only"},
+    {"tag": 15, "name": "NUM_SPATIAL", "hypercine_production": "recorded by the research walker only"},
+    {"tag": 20, "name": "FRAME_WIDTH", "hypercine_production": "must be 64..7680 and divisible by 16"},
+    {"tag": 21, "name": "FRAME_HEIGHT", "hypercine_production": "must be 64..4320 and divisible by 8"},
+    {"tag": 22, "name": "FRAME_FORMAT", "hypercine_production": "strict parser requires 2 (YUV); other values stay InvalidSample"},
+    {"tag": 35, "name": "PIXEL_DEPTH", "hypercine_production": "not a production gate"},
+    {"tag": 62, "name": "CHANNEL", "hypercine_production": "selects the active channel while walking subbands"},
+    {"tag": 63, "name": "INTERLACED_FLAGS", "hypercine_production": "not a production gate"},
+    {"tag": 68, "name": "SAMPLE_FLAGS", "hypercine_production": "bit 0 required; missing tag is treated as not progressive"},
+    {"tag": 70, "name": "PRECISION", "hypercine_production": "requires 10"},
+    {"tag": 72, "name": "BAND_CODING_FLAGS", "hypercine_production": "low 4 bits are the codebook; bit 4 is difference coding. Production entropy accepts the progressive codebook set."},
+    {"tag": 74, "name": "PEAK_LEVEL", "hypercine_production": "parser records the level; production decode does not reconstruct Peak-Escape tables"},
+    {"tag": 84, "name": "ENCODED_FORMAT", "hypercine_production": "not compared. Internal enum, not CFHD_EncodedFormat."},
+    {"tag": 91, "name": "ENCODED_COLORSPACE", "hypercine_production": "not a production gate"},
+    {"tag": 8192, "name": "SUBBAND_SIZE", "hypercine_production": "chunk size tag 0x2000. Production requires exactly 30 bands in the YUV422 3-level layout."},
+    {"tag": 16385, "name": "PEAK_TABLE", "hypercine_production": "chunk 0x4001. Skipped by a research walker; not reconstructed."}
+  ],
+  "reconstruction": [
+    {"symbol": "TransformForwardInterlacedIntraFrameRecursiveYUV", "file": "upstream/Codec/recursive.c", "meaning": "GOP-1 interlaced forward path. Pairs rows and calls FilterInterlacedRecursiveStrip. Does not change TRANSFORM_TYPE away from SPATIAL when GOP length is 1."},
+    {"symbol": "TransformInverseFrameToYUV", "file": "upstream/Codec/decoder.c", "meaning": "Full-resolution YUYV inverse used when codec->progressive is false. Inverts horizontal bands, then a field/temporal step with field_pitch = 2 * output_pitch."},
+    {"symbol": "ConvertPlanarYUVToYU64", "file": "upstream/Codec/convert.c", "meaning": "For precision other than 16: shift by (16-precision), then saturate to 0..65535. Word order is little-endian Y0, V, Y1, U. U is read from planar channel 2 and V from planar channel 1."},
+    {"symbol": "ConvertPlanarYUVToYR16", "file": "upstream/Codec/convert.c", "meaning": "Different packing. Saturates in the coded domain before the shift."},
+    {"symbol": "SetCodingFlags", "file": "upstream/Codec/encoder.c", "meaning": "Interlaced GOP-1 marks subband 8 with difference coding, codebook 2, and peaks when DIFFERENCE_CODING is enabled. Progressive GOP-1 does not."},
+    {"symbol": "IsFrameTransformable", "file": "upstream/Codec/codec.c", "meaning": "GOP-1 spatial divisor is 8 on chroma, which is frame width divisible by 16 and height divisible by 8."}
+  ],
+  "hypercine_gaps": [
+    "DecoderCapabilities.interlaced_output stays false.",
+    "No capability bit distinguishes RGB444 from RGBA4444.",
+    "No capability reports the coded-precision set.",
+    "Non-strict ParseCineFormSample still requires exactly 30 bands, so it cannot describe RGB, RGBA, Bayer, or 17-subband fieldplus samples.",
+    "QueueDecode rejects payloads above 32 MiB with SampleTooLarge. That limit is HyperCine policy, not a CineForm sample limit."
+  ]
+}
