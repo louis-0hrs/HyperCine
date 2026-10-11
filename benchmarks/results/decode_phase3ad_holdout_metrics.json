@@ -1,0 +1,261 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "label": "NOT a second model fit. Metrics of the frozen baseline on the single completed hold-out file.",
+  "candidate": "phase3ad_baseline",
+  "status": "PASS",
+  "classifier_batch_mean_ns": 53.1428571,
+  "supported_cases": 42,
+  "synthetic_cases": 32,
+  "reencoded_photograph_cases": 10,
+  "exact_pass": 39,
+  "exact_fail": [
+    {
+      "id": "photo_holdout_brick",
+      "exact_error": "RC BGRA exact strategy=1 gpu=8294400 ref=8294400 byte_diffs=1341 first=18204 max_abs=255 ch=447,447,447,0 around=255/0 255/0 255/5 255/255 0/0 0/0 13/13 255/255  plane=240,565,455 xy=711,2"
+    },
+    {
+      "id": "photo_holdout_grass",
+      "exact_error": "RC BGRA exact strategy=1 gpu=8294400 ref=8294400 byte_diffs=279 first=3336 max_abs=255 ch=93,93,93,0 around=255/0 255/2 255/0 255/255 89/89 108/108 104/104 255/255  plane=566,532,382 xy=834,0"
+    },
+    {
+      "id": "photo_holdout_handwriting",
+      "exact_error": "RC BGRA exact strategy=1 gpu=8294400 ref=8294400 byte_diffs=99 first=7332 max_abs=255 ch=33,33,33,0 around=255/4 255/1 255/0 255/255 2/2 1/1 0/0 255/255  plane=812,533,243 xy=1833,0"
+    }
+  ],
+  "metrics": {
+    "cases": 42,
+    "capture": 0.14391378956420176,
+    "total_regret_ms": 32.09130332999996,
+    "mean_regret_ms": 0.7640786507142847,
+    "median_regret_ms": 0.0,
+    "p95_regret_ms": 3.65654167,
+    "worst_regret_ms": 4.853850839999999,
+    "matches": 28,
+    "misses": 14,
+    "miss_list": [
+      {
+        "id": "h2_1920_brick_masonry_filmscan1",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.6327841700000003,
+        "relative": 0.7466882448614897,
+        "width": 1920,
+        "family": "brick_masonry"
+      },
+      {
+        "id": "h2_1920_brick_masonry_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.7191933299999995,
+        "relative": 0.38879547564421624,
+        "width": 1920,
+        "family": "brick_masonry"
+      },
+      {
+        "id": "h2_1920_circuit_board_filmscan1",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.81208167,
+        "relative": 1.0118056960626818,
+        "width": 1920,
+        "family": "circuit_board"
+      },
+      {
+        "id": "h2_1920_circuit_board_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.6391783299999996,
+        "relative": 0.7348878745336948,
+        "width": 1920,
+        "family": "circuit_board"
+      },
+      {
+        "id": "h2_1920_handwriting_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.65654167,
+        "relative": 1.0677577255690969,
+        "width": 1920,
+        "family": "handwriting"
+      },
+      {
+        "id": "h2_1920_night_traffic_filmscan1",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 4.853850839999999,
+        "relative": 1.0441154506832562,
+        "width": 1920,
+        "family": "night_traffic"
+      },
+      {
+        "id": "h2_1920_night_traffic_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.4506349700000003,
+        "relative": 0.4350418646266644,
+        "width": 1920,
+        "family": "night_traffic"
+      },
+      {
+        "id": "h2_1920_stained_glass_filmscan1",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 0.0969141699999998,
+        "relative": 0.02389760058119931,
+        "width": 1920,
+        "family": "stained_glass"
+      },
+      {
+        "id": "photo_holdout_clouds",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.9294008400000004,
+        "relative": 0.5231293414392011,
+        "width": 1920,
+        "family": "holdout_clouds"
+      },
+      {
+        "id": "photo_holdout_foliage",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 0.25834000000000046,
+        "relative": 0.047950931715428816,
+        "width": 1920,
+        "family": "holdout_foliage"
+      },
+      {
+        "id": "h2_3840_brick_masonry_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.1717467,
+        "relative": 0.10717117041573833,
+        "width": 3840,
+        "family": "brick_masonry"
+      },
+      {
+        "id": "h2_3840_circuit_board_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.8949716700000003,
+        "relative": 0.21672662842540005,
+        "width": 3840,
+        "family": "circuit_board"
+      },
+      {
+        "id": "h2_3840_handwriting_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.6263616700000005,
+        "relative": 0.337865314307134,
+        "width": 3840,
+        "family": "handwriting"
+      },
+      {
+        "id": "h2_3840_night_traffic_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.349303299999999,
+        "relative": 0.06515336087282977,
+        "width": 3840,
+        "family": "night_traffic"
+      }
+    ],
+    "catastrophic_count": 10,
+    "catastrophic": [
+      {
+        "id": "h2_1920_brick_masonry_filmscan1",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.6327841700000003,
+        "relative": 0.7466882448614897,
+        "width": 1920,
+        "family": "brick_masonry"
+      },
+      {
+        "id": "h2_1920_brick_masonry_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.7191933299999995,
+        "relative": 0.38879547564421624,
+        "width": 1920,
+        "family": "brick_masonry"
+      },
+      {
+        "id": "h2_1920_circuit_board_filmscan1",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.81208167,
+        "relative": 1.0118056960626818,
+        "width": 1920,
+        "family": "circuit_board"
+      },
+      {
+        "id": "h2_1920_circuit_board_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.6391783299999996,
+        "relative": 0.7348878745336948,
+        "width": 1920,
+        "family": "circuit_board"
+      },
+      {
+        "id": "h2_1920_handwriting_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.65654167,
+        "relative": 1.0677577255690969,
+        "width": 1920,
+        "family": "handwriting"
+      },
+      {
+        "id": "h2_1920_night_traffic_filmscan1",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 4.853850839999999,
+        "relative": 1.0441154506832562,
+        "width": 1920,
+        "family": "night_traffic"
+      },
+      {
+        "id": "h2_1920_night_traffic_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.4506349700000003,
+        "relative": 0.4350418646266644,
+        "width": 1920,
+        "family": "night_traffic"
+      },
+      {
+        "id": "photo_holdout_clouds",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.9294008400000004,
+        "relative": 0.5231293414392011,
+        "width": 1920,
+        "family": "holdout_clouds"
+      },
+      {
+        "id": "h2_3840_circuit_board_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.8949716700000003,
+        "relative": 0.21672662842540005,
+        "width": 3840,
+        "family": "circuit_board"
+      },
+      {
+        "id": "h2_3840_handwriting_filmscan3",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.6263616700000005,
+        "relative": 0.337865314307134,
+        "width": 3840,
+        "family": "handwriting"
+      }
+    ],
+    "sum_lightweight_ms": 448.0917167400001,
+    "sum_hybrid_ms": 298.38889903999996,
+    "sum_selected_ms": 292.99413737,
+    "sum_oracle_ms": 260.90283404
+  }
+}

@@ -172,6 +172,14 @@ inline void ConvertPlanarToYU64(
     uint8_t* out_yu64, int out_pitch)
 {
     int upshift = 16 - precision;
+    // Upstream saturates to the active precision, then shifts. Clamping after
+    // the shift maps 1024 to 65535 instead of the upstream value 65472.
+    const int limit = precision >= 16 ? 65535 : (1 << precision) - 1;
+    auto expand = [&](int value) {
+        if (value < 0) value = 0;
+        else if (value > limit) value = limit;
+        return value << upshift;
+    };
     int y_stride = y_pitch / sizeof(int16_t);
     int v_stride = v_pitch / sizeof(int16_t);
     int u_stride = u_pitch / sizeof(int16_t);
@@ -183,17 +191,10 @@ inline void ConvertPlanarToYU64(
         uint16_t* out_row = reinterpret_cast<uint16_t*>(out_yu64 + y * out_pitch);
 
         for (int x = 0; x < width; x += 2) {
-            int y0 = row_y[x] << upshift;
-            if (y0 < 0) y0 = 0; else if (y0 > 65535) y0 = 65535;
-
-            int y1 = row_y[x + 1] << upshift;
-            if (y1 < 0) y1 = 0; else if (y1 > 65535) y1 = 65535;
-
-            int v = row_v[x / 2] << upshift;
-            if (v < 0) v = 0; else if (v > 65535) v = 65535;
-
-            int u = row_u[x / 2] << upshift;
-            if (u < 0) u = 0; else if (u > 65535) u = 65535;
+            int y0 = expand(row_y[x]);
+            int y1 = expand(row_y[x + 1]);
+            int v = expand(row_v[x / 2]);
+            int u = expand(row_u[x / 2]);
 
             // YU64 native little-endian words: Y0, V, Y1, U
             out_row[x * 2 + 0] = static_cast<uint16_t>(y0);

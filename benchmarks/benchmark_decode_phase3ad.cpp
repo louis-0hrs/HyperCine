@@ -490,10 +490,20 @@ void RunCorpus(const std::filesystem::path& root, const std::filesystem::path& o
                 const auto got = Phase3adFrozenCandidate(ComputePhase3adFeatures(bands));
                 Require(got == chosen, "candidate determinism");
             }
-            const std::string bgra = Exact(sample, *decoder);
-            json << ",\"exact\":true,\"bgra_hash\":\"" << bgra << "\",\"coefficients_exact\":30,\"max_coefficient_error\":0,"
-                 << "\"ll_exact\":true,\"planar_exact\":true,\"bgra_exact\":true,"
-                 << "\"validated_strategies\":[\"lightweight\",\"hybrid\",\"auto\",\"host_streaming\"]";
+            try {
+                const std::string bgra = Exact(sample, *decoder);
+                json << ",\"exact\":true,\"bgra_hash\":\"" << bgra << "\",\"coefficients_exact\":30,\"max_coefficient_error\":0,"
+                     << "\"ll_exact\":true,\"planar_exact\":true,\"bgra_exact\":true,"
+                     << "\"validated_strategies\":[\"lightweight\",\"hybrid\",\"auto\",\"host_streaming\"]";
+            } catch (const std::exception& ex) {
+                // Keep the measured oracle. Record the exactness failure and reset the decoder
+                // so a failed ticket cannot affect the next frame. Do not retune dispatch from it.
+                json << ",\"exact\":false,\"exact_error\":\"" << Escape(ex.what()) << "\"";
+                std::cout << spec.id << " exact fail " << ex.what() << '\n' << std::flush;
+                decoder.reset();
+                dw = 0;
+                dh = 0;
+            }
         }
         json << '}';
         json.flush();

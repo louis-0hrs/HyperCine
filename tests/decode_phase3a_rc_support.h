@@ -110,7 +110,42 @@ inline std::string Exact(Sample& s, Decoder& d) {
             Require(DecoderInspector::DownloadIntermediate(d, t, ch, l, ll), "RC LL download");
             Require(ll == (l ? intermediate.ll1[ch] : intermediate.ll0[ch]), "RC LL exact");
         }
-        Require(Image(d, t, s) == cpu.output, "RC BGRA exact"); Require(d.ReleaseOutput(t), "RC BGRA release");
+        const auto bgra = Image(d, t, s);
+        if (bgra != cpu.output) {
+            const size_t n = std::min(bgra.size(), cpu.output.size());
+            size_t bytes = 0, first = n;
+            int max_abs = 0;
+            for (size_t i = 0; i < n; ++i) {
+                if (bgra[i] == cpu.output[i]) continue;
+                if (first == n) first = i;
+                ++bytes;
+                const int delta = bgra[i] > cpu.output[i] ? bgra[i] - cpu.output[i] : cpu.output[i] - bgra[i];
+                if (delta > max_abs) max_abs = delta;
+            }
+            int channel_diffs[4] = {};
+            for (size_t i = 0; i < n; ++i) if (bgra[i] != cpu.output[i]) ++channel_diffs[i & 3];
+            std::string around;
+            for (size_t i = first; i < n && i < first + 8; ++i)
+                around += std::to_string(int(bgra[i])) + "/" + std::to_string(int(cpu.output[i])) + " ";
+            const int row = int(first / (size_t(s.width) * 4));
+            const int px = int((first % (size_t(s.width) * 4)) / 4);
+            std::string planes;
+            for (int ch = 0; ch < 3; ++ch) {
+                const int cw = planar_reference.plane_width[ch];
+                const int sx = ch == 0 ? px : px / 2;
+                const auto sample = planar_reference.plane[ch][size_t(row) * cw + sx];
+                planes += std::to_string(int(sample)) + (ch == 2 ? "" : ",");
+            }
+            throw std::runtime_error(
+                "RC BGRA exact strategy=" + std::to_string(int(strategy)) +
+                " gpu=" + std::to_string(bgra.size()) + " ref=" + std::to_string(cpu.output.size()) +
+                " byte_diffs=" + std::to_string(bytes) + " first=" + std::to_string(first) +
+                " max_abs=" + std::to_string(max_abs) +
+                " ch=" + std::to_string(channel_diffs[0]) + "," + std::to_string(channel_diffs[1]) + "," +
+                std::to_string(channel_diffs[2]) + "," + std::to_string(channel_diffs[3]) +
+                " around=" + around + " plane=" + planes + " xy=" + std::to_string(px) + "," + std::to_string(row));
+        }
+        Require(d.ReleaseOutput(t), "RC BGRA release");
         request.format = DecodePixelFormat::PlanarYUV422Signed16; t = Begin(d, s, request);
         DeviceOutput out; Require(d.GetDeviceOutput(t, &out) && out.plane_count == 3, "RC planar output");
         std::array<HyperCineTest::AlignedVector<int16_t>, 3> planes;
@@ -124,7 +159,29 @@ inline std::string Exact(Sample& s, Decoder& d) {
         Bytes packed(size_t(s.width) * s.height * 4);
         ConvertPlanarToYU64(planes[0].data(), s.width * 2, planes[2].data(), s.width,
             planes[1].data(), s.width, s.width, s.height, 10, packed.data(), s.width * 4);
-        Require(packed == yu64.output, "RC YU64 exact"); Require(d.ReleaseOutput(t), "RC planar release");
+        if (packed != yu64.output) {
+            const size_t n = std::min(packed.size(), yu64.output.size());
+            size_t words = 0, first = n;
+            int max_abs = 0;
+            for (size_t i = 0; i + 1 < n; i += 2) {
+                const int a = int(packed[i]) | (int(packed[i + 1]) << 8);
+                const int b = int(yu64.output[i]) | (int(yu64.output[i + 1]) << 8);
+                if (a == b) continue;
+                if (first == n) first = i;
+                ++words;
+                const int delta = a > b ? a - b : b - a;
+                if (delta > max_abs) max_abs = delta;
+            }
+            const int a0 = int(packed[first]) | (int(packed[first + 1]) << 8);
+            const int b0 = int(yu64.output[first]) | (int(yu64.output[first + 1]) << 8);
+            throw std::runtime_error(
+                "RC YU64 exact strategy=" + std::to_string(int(strategy)) +
+                " packed=" + std::to_string(packed.size()) + " ref=" + std::to_string(yu64.output.size()) +
+                " pitch=" + std::to_string(yu64.pitch) + " word_diffs=" + std::to_string(words) +
+                " first_byte=" + std::to_string(first) + " max_abs=" + std::to_string(max_abs) +
+                " packed_word=" + std::to_string(a0) + " ref_word=" + std::to_string(b0));
+        }
+        Require(d.ReleaseOutput(t), "RC planar release");
     }
     return Hash(cpu.output.data(), cpu.output.size());
 }
