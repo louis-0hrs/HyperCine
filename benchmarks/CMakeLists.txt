@@ -46,6 +46,20 @@ if(HYPERCINE_ENABLE_CUDA)
     if(WIN32)
         target_link_libraries(benchmark_decode_phase3ad PRIVATE psapi)
     endif()
+
+    add_executable(benchmark_decode_phase3af benchmark_decode_phase3af.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/fileio.cpp)
+    target_compile_definitions(benchmark_decode_phase3af PRIVATE _ALLOCATOR=1)
+    target_include_directories(benchmark_decode_phase3af PRIVATE
+        ${CMAKE_SOURCE_DIR}/tests
+        ${CMAKE_SOURCE_DIR}/upstream/Example
+        ${CMAKE_SOURCE_DIR}/src)
+    target_link_libraries(benchmark_decode_phase3af PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(benchmark_decode_phase3af PRIVATE psapi)
+    endif()
 endif()
 
 target_link_libraries(benchmark_codec PRIVATE CFHDCodecStatic)
