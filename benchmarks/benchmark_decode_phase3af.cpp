@@ -5,6 +5,7 @@
 // thresholds, features, or either decode algorithm.
 #include "../tests/decode_phase3a_rc_support.h"
 #include "mp4reader.h"
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -553,10 +554,257 @@ void RunGate(const std::filesystem::path& root, const std::filesystem::path& cor
           << ",\"status\":\"" << (exact_fail ? "FAIL" : "PASS") << "\"}\n";
     exact.close(); std::filesystem::rename(partial_correct, correctness);
 }
+// Continues every stage of Lightweight, Hybrid, Auto, and HostStreaming.
+// Exact() stops at the first throw, so a Lightweight YU64 difference never
+// reaches Hybrid. This mode does not time frames and does not change the corpus.
+const char* AuditName(DiagnosticDecodeStrategy strategy) {
+    if (strategy == DiagnosticDecodeStrategy::Lightweight) return "lightweight";
+    if (strategy == DiagnosticDecodeStrategy::Hybrid) return "hybrid";
+    if (strategy == DiagnosticDecodeStrategy::Automatic) return "auto";
+    return "host_streaming";
+}
+int PlaneSampleForWord(const std::array<std::vector<int16_t>, 3>& planes, const std::array<int, 3>& widths,
+                       int frame_width, size_t byte_index) {
+    if ((byte_index & 1u) || frame_width <= 0) return -32768;
+    const size_t word = byte_index / 2;
+    const int words_per_row = frame_width * 2;
+    const int row = int(word / size_t(words_per_row));
+    const int col = int(word % size_t(words_per_row));
+    const int slot = col % 4;
+    const int pair = col / 4;
+    int channel = 0;
+    int x = pair;
+    if (slot == 0) { channel = 0; x = pair * 2; }
+    else if (slot == 2) { channel = 0; x = pair * 2 + 1; }
+    else if (slot == 1) channel = 2;
+    else channel = 1;
+    if (x < 0 || x >= widths[size_t(channel)]) return -32768;
+    const size_t index = size_t(row) * size_t(widths[size_t(channel)]) + size_t(x);
+    if (index >= planes[size_t(channel)].size()) return -32768;
+    return planes[size_t(channel)][index];
+}
+void RunStageAudit(const std::filesystem::path& root, const std::filesystem::path& corpus,
+                   const std::filesystem::path& correctness, const std::filesystem::path& output) {
+    Require(!std::filesystem::exists(output), "stage audit already exists");
+    auto frozen = LoadFrozen(corpus);
+    std::map<std::string, Spec> by_id;
+    for (const auto& spec : BuildSpecs(root)) by_id.emplace(spec.id, spec);
+    std::ifstream in(correctness); Require(bool(in), "phase3af correctness open");
+    std::vector<std::string> failed;
+    size_t declared_failures = 0;
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.find("\"checked_failures\"") != std::string::npos)
+            declared_failures = NumberField(line, "checked_failures");
+        if (line.find("\"exact\":false") == std::string::npos) continue;
+        const auto id = Field(line, "id");
+        Require(!id.empty(), "correctness failure id");
+        failed.push_back(id);
+    }
+    Require(failed.size() == declared_failures, "correctness failure count mismatch");
+    const auto cache = root / "build" / "phase3af_cache";
+    std::filesystem::create_directories(output.parent_path());
+    const auto partial = output.string() + ".partial";
+    std::ofstream json(partial); Require(bool(json), "phase3af stage audit");
+    json << std::boolalpha;
+    json << "{\"license\":\"MIT OR Apache-2.0\",\"phase\":\"3A-F\","
+         << "\"purpose\":\"Follow-up to the gate checker. Exact() throws on the first failing stage, and Lightweight runs first, so Hybrid was not stage-checked on these frames. This audit runs Lightweight, Hybrid, Auto, and HostStreaming independently through coefficients, both LL levels, BGRA, signed planar planes, and packed YU64.\","
+         << "\"yu64_convention\":\"ConvertPlanarToYU64 saturates to 1023 at 10-bit and then shifts, producing 65472. The CPU YU64 buffer can store 65535 for the same full-scale sample. A difference is the known pack convention only when every differing word is packed 65472 versus reference 65535 and the GPU plane sample is above 1023.\","
+         << "\"timing_performed\":false,\"cases\":[\n";
+    const DiagnosticDecodeStrategy strategies[] = {
+        DiagnosticDecodeStrategy::Lightweight, DiagnosticDecodeStrategy::Hybrid,
+        DiagnosticDecodeStrategy::Automatic, DiagnosticDecodeStrategy::HostStreaming};
+    std::unique_ptr<Decoder> decoder;
+    int dw = 0, dh = 0, written = 0;
+    int image_exact = 0, convention_only = 0, path_dependent = 0;
+    for (const auto& id : failed) {
+        const auto spec_found = by_id.find(id);
+        if (spec_found == by_id.end()) throw std::runtime_error("stage audit missing spec " + id);
+        const auto& spec = spec_found->second;
+        const auto frozen_found = frozen.find(id);
+        if (frozen_found == frozen.end()) throw std::runtime_error("stage audit missing manifest " + id);
+        if (written++) json << ",\n";
+        json << "{\"id\":\"" << id << "\"";
+        bool case_image_exact = false;
+        bool case_convention = false;
+        bool case_path_dependent = true;
+        try {
+            auto sample = ReadCache(cache / (id + ".cfhd"), spec, frozen_found->second.source_hash);
+            Require(Hash(sample.compressed.data(), sample.compressed.size()) == frozen_found->second.sample_hash, "stage audit cache hash");
+            ReferenceDecoder cpu(sample, CFHD_PIXEL_FORMAT_BGRA); cpu.Decode(sample);
+            auto bands = ExtractBandsFromNative(cpu.GetNative());
+            auto intermediate = ComputeCpuReferenceIntermediates(cpu.GetNative());
+            ReferenceDecoder yu64(sample, CFHD_PIXEL_FORMAT_YU64); yu64.Decode(sample);
+            const auto planar_reference = ComputeCpuReferenceIntermediates(yu64.GetNative());
+            struct Row {
+                bool ran = false, coefficients = false, ll = false, bgra = false, planar = false;
+                int coefficient_mismatches = 0, max_coefficient_abs = 0, ll_mismatches = 0, bgra_max_abs = 0, yu64_max_abs = 0;
+                int first_packed = 0, first_ref = 0, first_plane_sample = 0;
+                size_t bgra_byte_diffs = 0, planar_diffs = 0, yu64_word_diffs = 0, yu64_fullscale = 0, yu64_other = 0;
+                size_t yu64_plane_above_1023 = 0, yu64_plane_not_above_1023 = 0;
+                std::string bgra_hash, packed_hash, error;
+            };
+            std::map<std::string, Row> rows;
+            for (auto strategy : strategies) {
+                Row row;
+                try {
+                    EnsureDecoder(decoder, dw, dh, spec);
+                    DecodeRequest request; request.diagnostic_strategy = strategy;
+                    auto ticket = Begin(*decoder, sample, request);
+                    bool geometry = true;
+                    for (int b = 0; b < 30; ++b) {
+                        std::vector<int16_t> actual; int w = 0, h = 0, pitch = 0;
+                        Require(DecoderInspector::DownloadBand(*decoder, ticket, b, actual, &w, &h, &pitch), "audit band download");
+                        const auto& ref = bands[size_t(b)];
+                        if (w != ref.width || h != ref.height) { geometry = false; continue; }
+                        for (int y = 0; y < h; ++y) for (int x = 0; x < w; ++x) {
+                            const int a = actual[size_t(y) * (pitch / 2) + x];
+                            const int r = ref.host_data[size_t(y) * (ref.pitch / 2) + x];
+                            if (a == r) continue;
+                            ++row.coefficient_mismatches;
+                            row.max_coefficient_abs = (std::max)(row.max_coefficient_abs, std::abs(a - r));
+                        }
+                    }
+                    row.coefficients = geometry && row.coefficient_mismatches == 0;
+                    for (int ch = 0; ch < 3; ++ch) for (int level = 0; level < 2; ++level) {
+                        std::vector<int16_t> ll;
+                        Require(DecoderInspector::DownloadIntermediate(*decoder, ticket, ch, level, ll), "audit LL download");
+                        if (ll != (level ? intermediate.ll1[ch] : intermediate.ll0[ch])) ++row.ll_mismatches;
+                    }
+                    row.ll = row.ll_mismatches == 0;
+                    const auto bgra = Image(*decoder, ticket, sample);
+                    row.bgra_hash = Hash(bgra.data(), bgra.size());
+                    if (bgra.size() == cpu.output.size()) {
+                        for (size_t i = 0; i < bgra.size(); ++i) if (bgra[i] != cpu.output[i]) {
+                            ++row.bgra_byte_diffs;
+                            row.bgra_max_abs = (std::max)(row.bgra_max_abs, std::abs(int(bgra[i]) - int(cpu.output[i])));
+                        }
+                        row.bgra = row.bgra_byte_diffs == 0;
+                    }
+                    Require(decoder->ReleaseOutput(ticket), "audit BGRA release");
+                    request.format = DecodePixelFormat::PlanarYUV422Signed16;
+                    ticket = Begin(*decoder, sample, request);
+                    DeviceOutput out; Require(decoder->GetDeviceOutput(ticket, &out) && out.plane_count == 3, "audit planar output");
+                    std::array<std::vector<int16_t>, 3> planes;
+                    std::array<int, 3> widths{};
+                    bool planar_sizes = true;
+                    for (int ch = 0; ch < 3; ++ch) {
+                        const auto& plane = out.planes[size_t(ch)];
+                        widths[size_t(ch)] = plane.width;
+                        planes[size_t(ch)].resize(size_t(plane.width) * plane.height);
+                        GpuCheck(cudaMemcpy2D(planes[size_t(ch)].data(), size_t(plane.width) * 2, plane.device_pointer,
+                            plane.pitch_bytes, size_t(plane.width) * 2, plane.height, cudaMemcpyDeviceToHost));
+                        const int native = ch == 1 ? 2 : ch == 2 ? 1 : 0;
+                        const auto& ref = planar_reference.plane[native];
+                        if (planes[size_t(ch)].size() != ref.size()) { planar_sizes = false; row.planar_diffs += planes[size_t(ch)].size() + ref.size(); continue; }
+                        for (size_t i = 0; i < ref.size(); ++i) if (planes[size_t(ch)][i] != ref[i]) ++row.planar_diffs;
+                    }
+                    row.planar = planar_sizes && row.planar_diffs == 0;
+                    Bytes packed(size_t(sample.width) * sample.height * 4);
+                    ConvertPlanarToYU64(planes[0].data(), sample.width * 2, planes[2].data(), sample.width,
+                        planes[1].data(), sample.width, sample.width, sample.height, 10, packed.data(), sample.width * 4);
+                    row.packed_hash = Hash(packed.data(), packed.size());
+                    if (packed.size() == yu64.output.size()) {
+                        bool first = true;
+                        for (size_t i = 0; i + 1 < packed.size(); i += 2) {
+                            const int a = int(packed[i]) | (int(packed[i + 1]) << 8);
+                            const int b = int(yu64.output[i]) | (int(yu64.output[i + 1]) << 8);
+                            if (a == b) continue;
+                            if (first) {
+                                first = false; row.first_packed = a; row.first_ref = b;
+                                row.first_plane_sample = PlaneSampleForWord(planes, widths, sample.width, i);
+                            }
+                            ++row.yu64_word_diffs;
+                            row.yu64_max_abs = (std::max)(row.yu64_max_abs, std::abs(a - b));
+                            const int sample_value = PlaneSampleForWord(planes, widths, sample.width, i);
+                            if (sample_value > 1023) ++row.yu64_plane_above_1023;
+                            else ++row.yu64_plane_not_above_1023;
+                            if (a == 65472 && b == 65535) ++row.yu64_fullscale;
+                            else ++row.yu64_other;
+                        }
+                    } else row.error = "packed size does not match the CPU YU64 buffer";
+                    Require(decoder->ReleaseOutput(ticket), "audit planar release");
+                    row.ran = row.error.empty();
+                } catch (const std::exception& ex) {
+                    row.error = ex.what();
+                    decoder.reset(); dw = 0; dh = 0;
+                }
+                rows.emplace(AuditName(strategy), std::move(row));
+            }
+            json << ",\"strategies\":{";
+            bool first_strategy = true;
+            bool hashes_agree = true;
+            bool pixels_agree = true;
+            bool convention = true;
+            std::string bgra_hash, packed_hash;
+            for (auto strategy : strategies) {
+                const auto& row = rows.at(AuditName(strategy));
+                if (!first_strategy) json << ',';
+                first_strategy = false;
+                json << '"' << AuditName(strategy) << "\":{\"ran\":" << row.ran
+                     << ",\"coefficients_exact\":" << row.coefficients
+                     << ",\"coefficient_mismatches\":" << row.coefficient_mismatches
+                     << ",\"max_coefficient_abs\":" << row.max_coefficient_abs
+                     << ",\"ll_exact\":" << row.ll << ",\"ll_mismatches\":" << row.ll_mismatches
+                     << ",\"bgra_exact\":" << row.bgra << ",\"bgra_byte_diffs\":" << row.bgra_byte_diffs
+                     << ",\"bgra_max_abs\":" << row.bgra_max_abs << ",\"bgra_hash\":\"" << row.bgra_hash
+                     << "\",\"planar_exact\":" << row.planar << ",\"planar_sample_diffs\":" << row.planar_diffs
+                     << ",\"yu64_word_diffs\":" << row.yu64_word_diffs
+                     << ",\"yu64_fullscale_65472_vs_65535\":" << row.yu64_fullscale
+                     << ",\"yu64_other_diffs\":" << row.yu64_other
+                     << ",\"yu64_max_abs\":" << row.yu64_max_abs
+                     << ",\"yu64_plane_samples_above_1023\":" << row.yu64_plane_above_1023
+                     << ",\"yu64_plane_samples_not_above_1023\":" << row.yu64_plane_not_above_1023
+                     << ",\"first_packed_word\":" << row.first_packed << ",\"first_ref_word\":" << row.first_ref
+                     << ",\"first_plane_sample\":" << row.first_plane_sample
+                     << ",\"packed_hash\":\"" << row.packed_hash << "\"";
+                if (!row.error.empty()) json << ",\"error\":\"" << Escape(row.error) << '"';
+                json << '}';
+                const bool row_pixels = row.ran && row.coefficients && row.ll && row.bgra && row.planar && row.error.empty();
+                if (!row_pixels) pixels_agree = false;
+                const bool row_convention = row_pixels && row.yu64_other == 0 && row.yu64_plane_not_above_1023 == 0
+                    && row.yu64_word_diffs == row.yu64_fullscale;
+                if (!row_convention) convention = false;
+                if (bgra_hash.empty()) bgra_hash = row.bgra_hash;
+                else if (bgra_hash != row.bgra_hash || row.bgra_hash.empty()) hashes_agree = false;
+                if (packed_hash.empty()) packed_hash = row.packed_hash;
+                else if (packed_hash != row.packed_hash || row.packed_hash.empty()) hashes_agree = false;
+            }
+            json << "},\"bgra_and_packed_hashes_agree\":" << hashes_agree
+                 << ",\"coefficients_ll_bgra_planar_exact\":" << pixels_agree
+                 << ",\"yu64_only_fullscale_pack_convention\":" << convention
+                 << ",\"path_dependent_pixel_difference\":" << (!pixels_agree || !hashes_agree) << '}';
+            case_image_exact = pixels_agree && hashes_agree;
+            case_convention = convention && hashes_agree;
+            case_path_dependent = !case_image_exact;
+        } catch (const std::exception& ex) {
+            json << ",\"error\":\"" << Escape(ex.what()) << "\",\"path_dependent_pixel_difference\":true}";
+            decoder.reset(); dw = 0; dh = 0;
+        }
+        if (case_path_dependent) ++path_dependent;
+        else ++image_exact;
+        if (case_convention && !case_path_dependent) ++convention_only;
+        std::cout << id << " image_exact=" << case_image_exact << " convention=" << case_convention
+                  << " path_dependent=" << case_path_dependent << '\n' << std::flush;
+        json.flush();
+    }
+    const char* status = "FAIL_PATH_DEPENDENT";
+    if (failed.empty()) status = "FAIL_NO_CASES";
+    else if (path_dependent == 0 && convention_only == int(failed.size()))
+        status = "PASS_IMAGE_EXACT_WITH_FULLSCALE_YU64_PACK_CONVENTION";
+    else if (path_dependent == 0) status = "PASS_IMAGE_EXACT";
+    json << "\n],\"audited_cases\":" << failed.size() << ",\"image_exact_cases\":" << image_exact
+         << ",\"fullscale_pack_convention_cases\":" << convention_only
+         << ",\"path_dependent_cases\":" << path_dependent << ",\"status\":\"" << status << "\"}\n";
+    json.close(); std::filesystem::rename(partial, output);
+    std::cout << "stage-audit cases=" << failed.size() << " image_exact=" << image_exact
+              << " convention=" << convention_only << " path_dependent=" << path_dependent
+              << " status=" << status << '\n' << std::flush;
+}
 } // namespace
 int main(int argc, char** argv) {
     try {
-        Require(argc >= 2, "usage: benchmark_decode_phase3af --count root | --manifest root out | --gate root corpus measurements correctness");
+        Require(argc >= 2, "usage: benchmark_decode_phase3af --count root | --manifest root out | --gate root corpus measurements correctness | --stage-audit root corpus correctness output");
         const std::string mode = argv[1];
         if (mode == "--count") {
             Require(argc == 3, "count root");
@@ -579,6 +827,10 @@ int main(int argc, char** argv) {
         if (mode == "--gate") {
             Require(argc == 6, "gate root corpus measurements correctness");
             RunGate(argv[2], argv[3], argv[4], argv[5]); return 0;
+        }
+        if (mode == "--stage-audit") {
+            Require(argc == 6, "stage-audit root corpus correctness output");
+            RunStageAudit(argv[2], argv[3], argv[4], argv[5]); return 0;
         }
         throw std::runtime_error("unknown phase3af mode");
     } catch (const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }

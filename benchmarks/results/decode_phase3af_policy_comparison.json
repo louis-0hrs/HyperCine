@@ -1,0 +1,232 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "phase": "3A-F",
+  "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+  "machine_scope": "single measured machine; not a frame-rate guarantee",
+  "unweighted_primary": {
+    "population": "primary untouched supported frames, one each",
+    "always_lightweight": {
+      "frames": 230,
+      "mean_ms": 7.110196108365217,
+      "p95_ms": 21.5539437,
+      "p99_ms": 41.0756656,
+      "worst_ms": 59.013175,
+      "fps": 140.64309686528756,
+      "megapixels_per_second": 717.6819109716563,
+      "exceed_8_33_ms": 58,
+      "exceed_16_67_ms": 17,
+      "exceed_33_33_ms": 5
+    },
+    "always_hybrid": {
+      "frames": 230,
+      "mean_ms": 5.453063729782609,
+      "p95_ms": 9.53391875,
+      "p99_ms": 13.90095,
+      "worst_ms": 23.1044219,
+      "fps": 183.3831492814528,
+      "megapixels_per_second": 935.778377678746,
+      "exceed_8_33_ms": 22,
+      "exceed_16_67_ms": 2,
+      "exceed_33_33_ms": 0
+    },
+    "auto": {
+      "frames": 230,
+      "mean_ms": 4.995865360669566,
+      "p95_ms": 9.63542812,
+      "p99_ms": 13.6314469,
+      "worst_ms": 23.7367688,
+      "fps": 200.16552244834233,
+      "megapixels_per_second": 1021.4164638237725,
+      "exceed_8_33_ms": 18,
+      "exceed_16_67_ms": 2,
+      "exceed_33_33_ms": 0
+    }
+  },
+  "workloads": {
+    "weighting": "Predeclared. Equal weight is one copy of each primary frame, shuffled with seed 0x3AF0BEEF. Photo-heavy repeats re-encoded photographs four times. High-entropy-heavy and sparse-heavy repeat the manifest workload tag four times. Tags were assigned from the generator class or the photograph query, not from measured speed.",
+    "equal_weight": {
+      "label": "equal_weight",
+      "frames_in_sequence": 230,
+      "always_lightweight": {
+        "frames": 230,
+        "mean_ms": 7.110196108365216,
+        "p95_ms": 21.5539437,
+        "p99_ms": 41.0756656,
+        "worst_ms": 59.013175,
+        "fps": 140.64309686528762,
+        "megapixels_per_second": 717.6819109716558,
+        "exceed_8_33_ms": 58,
+        "exceed_16_67_ms": 17,
+        "exceed_33_33_ms": 5
+      },
+      "always_hybrid": {
+        "frames": 230,
+        "mean_ms": 5.453063729782607,
+        "p95_ms": 9.53391875,
+        "p99_ms": 13.90095,
+        "worst_ms": 23.1044219,
+        "fps": 183.38314928145286,
+        "megapixels_per_second": 935.7783776787464,
+        "exceed_8_33_ms": 22,
+        "exceed_16_67_ms": 2,
+        "exceed_33_33_ms": 0
+      },
+      "auto": {
+        "frames": 230,
+        "mean_ms": 4.995865360669567,
+        "p95_ms": 9.63542812,
+        "p99_ms": 13.6314469,
+        "worst_ms": 23.7367688,
+        "fps": 200.1655224483423,
+        "megapixels_per_second": 1021.4164638237725,
+        "exceed_8_33_ms": 18,
+        "exceed_16_67_ms": 2,
+        "exceed_33_33_ms": 0
+      }
+    },
+    "natural_photo_heavy": {
+      "label": "natural_photo_heavy",
+      "frames_in_sequence": 446,
+      "always_lightweight": {
+        "frames": 446,
+        "mean_ms": 6.481518123932737,
+        "p95_ms": 16.9481938,
+        "p99_ms": 34.7142781,
+        "worst_ms": 59.013175,
+        "fps": 154.28484205074446,
+        "megapixels_per_second": 612.5919089660675,
+        "exceed_8_33_ms": 97,
+        "exceed_16_67_ms": 23,
+        "exceed_33_33_ms": 5
+      },
+      "always_hybrid": {
+        "frames": 446,
+        "mean_ms": 5.517041739304932,
+        "p95_ms": 8.59158125,
+        "p99_ms": 13.1035094,
+        "worst_ms": 23.1044219,
+        "fps": 181.2565587234411,
+        "megapixels_per_second": 719.6837994266009,
+        "exceed_8_33_ms": 28,
+        "exceed_16_67_ms": 2,
+        "exceed_33_33_ms": 0
+      },
+      "auto": {
+        "frames": 446,
+        "mean_ms": 5.169338029291478,
+        "p95_ms": 8.64804688,
+        "p99_ms": 13.3824188,
+        "worst_ms": 23.7367688,
+        "fps": 193.44836695406866,
+        "megapixels_per_second": 768.0916856354863,
+        "exceed_8_33_ms": 24,
+        "exceed_16_67_ms": 2,
+        "exceed_33_33_ms": 0
+      }
+    },
+    "high_entropy_heavy": {
+      "label": "high_entropy_heavy",
+      "frames_in_sequence": 461,
+      "always_lightweight": {
+        "frames": 461,
+        "mean_ms": 8.694465257405644,
+        "p95_ms": 26.1216469,
+        "p99_ms": 50.3491688,
+        "worst_ms": 59.013175,
+        "fps": 115.01569911366713,
+        "megapixels_per_second": 500.79102812206764,
+        "exceed_8_33_ms": 160,
+        "exceed_16_67_ms": 50,
+        "exceed_33_33_ms": 17
+      },
+      "always_hybrid": {
+        "frames": 461,
+        "mean_ms": 5.538997678655094,
+        "p95_ms": 9.08648125,
+        "p99_ms": 17.6099406,
+        "worst_ms": 23.1044219,
+        "fps": 180.53807891156342,
+        "megapixels_per_second": 786.0826900156721,
+        "exceed_8_33_ms": 37,
+        "exceed_16_67_ms": 5,
+        "exceed_33_33_ms": 0
+      },
+      "auto": {
+        "frames": 461,
+        "mean_ms": 5.274082823544472,
+        "p95_ms": 9.21449375,
+        "p99_ms": 17.8165969,
+        "worst_ms": 23.7367688,
+        "fps": 189.60642702382617,
+        "megapixels_per_second": 825.5672769851516,
+        "exceed_8_33_ms": 33,
+        "exceed_16_67_ms": 5,
+        "exceed_33_33_ms": 0
+      }
+    },
+    "sparse_structured_heavy": {
+      "label": "sparse_structured_heavy",
+      "frames_in_sequence": 587,
+      "always_lightweight": {
+        "frames": 587,
+        "mean_ms": 5.870947961339012,
+        "p95_ms": 16.2649563,
+        "p99_ms": 28.7399844,
+        "worst_ms": 59.013175,
+        "fps": 170.33024421015745,
+        "megapixels_per_second": 1026.4969867742345,
+        "exceed_8_33_ms": 106,
+        "exceed_16_67_ms": 29,
+        "exceed_33_33_ms": 5
+      },
+      "always_hybrid": {
+        "frames": 587,
+        "mean_ms": 5.537392472419076,
+        "p95_ms": 11.2982781,
+        "p99_ms": 13.90095,
+        "worst_ms": 23.1044219,
+        "fps": 180.59041416711034,
+        "megapixels_per_second": 1088.3300076416779,
+        "exceed_8_33_ms": 73,
+        "exceed_16_67_ms": 5,
+        "exceed_33_33_ms": 0
+      },
+      "auto": {
+        "frames": 587,
+        "mean_ms": 4.897549561339016,
+        "p95_ms": 11.7310469,
+        "p99_ms": 13.6314469,
+        "worst_ms": 23.7367688,
+        "fps": 204.1837428035327,
+        "megapixels_per_second": 1230.5154478467707,
+        "exceed_8_33_ms": 57,
+        "exceed_16_67_ms": 5,
+        "exceed_33_33_ms": 0
+      }
+    }
+  },
+  "oracle_capture_secondary": {
+    "secondary_context_only": true,
+    "oracle_capture": 0.5010822257475877,
+    "sum_lightweight_ms": 1635.345104924,
+    "sum_hybrid_ms": 1254.20465785,
+    "sum_selected_forced_ms": 1148.4992734340005,
+    "sum_oracle_ms": 1043.250489084
+  },
+  "correctness_failures": [
+    "real_books_1920_low",
+    "real_brick_wall_1920_low",
+    "real_concrete_1920_medium",
+    "real_night_city_1920_high",
+    "real_painting_1920_filmscan1",
+    "real_painting_1920_low",
+    "real_snow_1920_low",
+    "syn_1920_noise_field_filmscan1",
+    "syn_1920_noise_field_filmscan3",
+    "syn_1920_noise_field_high",
+    "syn_1920_noise_field_low",
+    "syn_1920_noise_field_medium",
+    "syn_3840_noise_field_filmscan3",
+    "syn_3840_noise_field_medium"
+  ]
+}
