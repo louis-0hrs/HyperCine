@@ -1,0 +1,1612 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "phase": "3A-E",
+  "production_modified": false,
+  "cases": [
+    {
+      "frame": "photo_holdout_brick",
+      "source_fnv1a64": "1252b69a6e689d6a",
+      "sample_fnv1a64": "1fad1210cf321a16",
+      "sample_bytes": 3180804,
+      "repeats": 100,
+      "identical_counts_coordinates_values": true,
+      "bgra_mismatching_pixels": 447,
+      "gpu_bgra_fnv1a64": "5eacb90cd4e27c00",
+      "cpu_bgra_fnv1a64": "4de9f89e08b4eade",
+      "matrix": "BT709",
+      "range": "CG",
+      "orientation": "bottom_up",
+      "width": 1920,
+      "height": 1080,
+      "bgra_pitch": 7680,
+      "strategy": "lightweight",
+      "ticket": 1,
+      "first32": [
+        {
+          "x": 711,
+          "output_row": 2,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            5,
+            255
+          ]
+        },
+        {
+          "x": 1456,
+          "output_row": 62,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 1443,
+          "output_row": 66,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 186,
+          "output_row": 96,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 974,
+          "output_row": 109,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 780,
+          "output_row": 196,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 378,
+          "output_row": 236,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 379,
+          "output_row": 236,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 380,
+          "output_row": 236,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 380,
+          "output_row": 237,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 381,
+          "output_row": 237,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 381,
+          "output_row": 238,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 382,
+          "output_row": 238,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 369,
+          "output_row": 242,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            2,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 219,
+          "output_row": 269,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 226,
+          "output_row": 278,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 228,
+          "output_row": 278,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 373,
+          "output_row": 326,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 374,
+          "output_row": 326,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 1357,
+          "output_row": 330,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1372,
+          "output_row": 330,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1375,
+          "output_row": 330,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1339,
+          "output_row": 331,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1338,
+          "output_row": 332,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1339,
+          "output_row": 332,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1468,
+          "output_row": 332,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1339,
+          "output_row": 333,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1341,
+          "output_row": 333,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 863,
+          "output_row": 337,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 685,
+          "output_row": 343,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 86,
+          "output_row": 347,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 94,
+          "output_row": 347,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        }
+      ],
+      "slot": 0,
+      "slot_evidence": "same-input matching first ticket in independently initialized inspector audit"
+    },
+    {
+      "frame": "photo_holdout_grass",
+      "source_fnv1a64": "df9a67919f22f7b1",
+      "sample_fnv1a64": "262eddc0bd80b320",
+      "sample_bytes": 4255116,
+      "repeats": 100,
+      "identical_counts_coordinates_values": true,
+      "bgra_mismatching_pixels": 93,
+      "gpu_bgra_fnv1a64": "13ea87c372378a7f",
+      "cpu_bgra_fnv1a64": "d73383d27a5c2cfd",
+      "matrix": "BT709",
+      "range": "CG",
+      "orientation": "bottom_up",
+      "width": 1920,
+      "height": 1080,
+      "bgra_pitch": 7680,
+      "strategy": "lightweight",
+      "ticket": 1,
+      "first32": [
+        {
+          "x": 834,
+          "output_row": 0,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            2,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 955,
+          "output_row": 9,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            7,
+            255
+          ]
+        },
+        {
+          "x": 1002,
+          "output_row": 9,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            8,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 322,
+          "output_row": 13,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            5,
+            255
+          ]
+        },
+        {
+          "x": 964,
+          "output_row": 32,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 1180,
+          "output_row": 33,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            4,
+            255
+          ]
+        },
+        {
+          "x": 1000,
+          "output_row": 34,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1033,
+          "output_row": 37,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            5,
+            255
+          ]
+        },
+        {
+          "x": 1015,
+          "output_row": 55,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            7,
+            255
+          ]
+        },
+        {
+          "x": 465,
+          "output_row": 70,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            2,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1246,
+          "output_row": 73,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            4,
+            255
+          ]
+        },
+        {
+          "x": 468,
+          "output_row": 77,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            4,
+            255
+          ]
+        },
+        {
+          "x": 655,
+          "output_row": 80,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            11,
+            255
+          ]
+        },
+        {
+          "x": 717,
+          "output_row": 84,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            3,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 329,
+          "output_row": 102,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 1104,
+          "output_row": 109,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            9,
+            255
+          ]
+        },
+        {
+          "x": 1018,
+          "output_row": 115,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 882,
+          "output_row": 119,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            4,
+            255
+          ]
+        },
+        {
+          "x": 1133,
+          "output_row": 124,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 743,
+          "output_row": 128,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            7,
+            255
+          ]
+        },
+        {
+          "x": 849,
+          "output_row": 130,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            5,
+            255
+          ]
+        },
+        {
+          "x": 457,
+          "output_row": 134,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            2,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 700,
+          "output_row": 140,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 980,
+          "output_row": 143,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1220,
+          "output_row": 143,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            4,
+            255
+          ]
+        },
+        {
+          "x": 1102,
+          "output_row": 144,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            4,
+            255
+          ]
+        },
+        {
+          "x": 782,
+          "output_row": 145,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            2,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1430,
+          "output_row": 151,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            5,
+            255
+          ]
+        },
+        {
+          "x": 973,
+          "output_row": 152,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            2,
+            255
+          ]
+        },
+        {
+          "x": 655,
+          "output_row": 154,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            3,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 927,
+          "output_row": 164,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            2,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 956,
+          "output_row": 171,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            4,
+            255
+          ]
+        }
+      ],
+      "slot": 0,
+      "slot_evidence": "same-input matching first ticket in independently initialized inspector audit"
+    },
+    {
+      "frame": "photo_holdout_handwriting",
+      "source_fnv1a64": "4500cf86ac819d0c",
+      "sample_fnv1a64": "80955c5750f8ef94",
+      "sample_bytes": 1569836,
+      "repeats": 100,
+      "identical_counts_coordinates_values": true,
+      "bgra_mismatching_pixels": 33,
+      "gpu_bgra_fnv1a64": "81235b3971df6b35",
+      "cpu_bgra_fnv1a64": "b445bab7e09395cb",
+      "matrix": "BT709",
+      "range": "CG",
+      "orientation": "bottom_up",
+      "width": 1920,
+      "height": 1080,
+      "bgra_pitch": 7680,
+      "strategy": "lightweight",
+      "ticket": 1,
+      "first32": [
+        {
+          "x": 1833,
+          "output_row": 0,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1399,
+          "output_row": 4,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1446,
+          "output_row": 4,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1911,
+          "output_row": 8,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1878,
+          "output_row": 26,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1391,
+          "output_row": 35,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1337,
+          "output_row": 38,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1483,
+          "output_row": 64,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            6,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1729,
+          "output_row": 64,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            8,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 435,
+          "output_row": 85,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1857,
+          "output_row": 88,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1858,
+          "output_row": 88,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 620,
+          "output_row": 95,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1883,
+          "output_row": 103,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1773,
+          "output_row": 105,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            6,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1269,
+          "output_row": 108,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1345,
+          "output_row": 128,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1879,
+          "output_row": 133,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1411,
+          "output_row": 247,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            1,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1425,
+          "output_row": 249,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            2,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1711,
+          "output_row": 325,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1502,
+          "output_row": 349,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 867,
+          "output_row": 352,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1745,
+          "output_row": 424,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1872,
+          "output_row": 426,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1835,
+          "output_row": 430,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1441,
+          "output_row": 435,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 84,
+          "output_row": 437,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            0,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1803,
+          "output_row": 531,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            4,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1869,
+          "output_row": 577,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            2,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1441,
+          "output_row": 585,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            2,
+            0,
+            0,
+            255
+          ]
+        },
+        {
+          "x": 1441,
+          "output_row": 586,
+          "gpu_bgra": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "cpu_bgra": [
+            2,
+            0,
+            0,
+            255
+          ]
+        }
+      ],
+      "slot": 0,
+      "slot_evidence": "same-input matching first ticket in independently initialized inspector audit"
+    }
+  ]
+}

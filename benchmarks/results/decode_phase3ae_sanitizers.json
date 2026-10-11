@@ -1,0 +1,111 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "phase": "3A-E",
+  "runs": [
+    {
+      "phase": "pre",
+      "tool": "memcheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": null,
+      "warnings": null,
+      "leak_check_full": false,
+      "leaked_bytes": null,
+      "log": "benchmarks/results/decode_phase3ae_pre_native_memcheck.txt",
+      "sha256": "adba10db853bd67fe9009b776eefe7b61210d2cbe3eee029ba6fa188978b5832"
+    },
+    {
+      "phase": "pre",
+      "tool": "initcheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": null,
+      "warnings": null,
+      "leak_check_full": false,
+      "leaked_bytes": null,
+      "log": "benchmarks/results/decode_phase3ae_pre_native_initcheck.txt",
+      "sha256": "adba10db853bd67fe9009b776eefe7b61210d2cbe3eee029ba6fa188978b5832"
+    },
+    {
+      "phase": "pre",
+      "tool": "racecheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": 0,
+      "warnings": 0,
+      "leak_check_full": false,
+      "leaked_bytes": null,
+      "log": "benchmarks/results/decode_phase3ae_pre_native_racecheck.txt",
+      "sha256": "c69d09b31a66173faf98f267db57c7eb988035ce364fa0f0f184ffc933c541a7"
+    },
+    {
+      "phase": "pre",
+      "tool": "synccheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": null,
+      "warnings": null,
+      "leak_check_full": false,
+      "leaked_bytes": null,
+      "log": "benchmarks/results/decode_phase3ae_pre_native_synccheck.txt",
+      "sha256": "adba10db853bd67fe9009b776eefe7b61210d2cbe3eee029ba6fa188978b5832"
+    },
+    {
+      "phase": "post",
+      "tool": "memcheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": null,
+      "warnings": null,
+      "leak_check_full": true,
+      "leaked_bytes": 0,
+      "log": "benchmarks/results/decode_phase3ae_post_native_memcheck.txt",
+      "sha256": "3ef41833580c07952672569330729d3a908130c68e7a514d721c5b0a3ddbd7d6"
+    },
+    {
+      "phase": "post",
+      "tool": "initcheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": null,
+      "warnings": null,
+      "leak_check_full": false,
+      "leaked_bytes": null,
+      "log": "benchmarks/results/decode_phase3ae_post_native_initcheck.txt",
+      "sha256": "adba10db853bd67fe9009b776eefe7b61210d2cbe3eee029ba6fa188978b5832"
+    },
+    {
+      "phase": "post",
+      "tool": "racecheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": 0,
+      "warnings": 0,
+      "leak_check_full": false,
+      "leaked_bytes": null,
+      "log": "benchmarks/results/decode_phase3ae_post_native_racecheck.txt",
+      "sha256": "c69d09b31a66173faf98f267db57c7eb988035ce364fa0f0f184ffc933c541a7"
+    },
+    {
+      "phase": "post",
+      "tool": "synccheck",
+      "exit_code": 0,
+      "errors": 0,
+      "hazards": null,
+      "warnings": null,
+      "leak_check_full": false,
+      "leaked_bytes": null,
+      "log": "benchmarks/results/decode_phase3ae_post_native_synccheck.txt",
+      "sha256": "adba10db853bd67fe9009b776eefe7b61210d2cbe3eee029ba6fa188978b5832"
+    }
+  ],
+  "coverage": "synthetic direct/encoded plus 3 photos x4 strategies all stages and poisoned slot/consumer reuse",
+  "runner_modes": {
+    "pre": "saved baseline.exe --focused-pre",
+    "post": "test_decode_phase3ae.exe --sanitizer"
+  },
+  "failed_attach_attempt": {
+    "log": "benchmarks/results/decode_phase3ae_pre_memcheck.txt",
+    "result": "sandbox attach timed out; attempt terminated, native rerun succeeded; not counted as pass"
+  }
+}

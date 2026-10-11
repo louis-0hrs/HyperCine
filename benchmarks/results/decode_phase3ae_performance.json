@@ -1,0 +1,1312 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "phase": "3A-E",
+  "method": "sequential ABBA, 15 warmups and 120 measured frames per case/strategy/window; Queue through Ready+Release without download",
+  "same_session": true,
+  "old_binary_sha256": "8b27c606a1f94a77b33c79e92ba108fc70b58ab12fe464c5713db6605a373057",
+  "windows": {
+    "perf-old-1": {
+      "cases": [
+        {
+          "frame": "1920_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 1.18117,
+          "min_ms": 1.0626,
+          "max_ms": 1.405,
+          "fps": 846.618,
+          "megapixels_per_second": 1755.55,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205504512
+        },
+        {
+          "frame": "1920_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 2.25304,
+          "min_ms": 1.923,
+          "max_ms": 3.7835,
+          "fps": 443.845,
+          "megapixels_per_second": 920.356,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205557760
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 14.7565,
+          "min_ms": 13.8783,
+          "max_ms": 17.5443,
+          "fps": 67.7669,
+          "megapixels_per_second": 140.521,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206082048
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 4.45538,
+          "min_ms": 4.0728,
+          "max_ms": 5.6373,
+          "fps": 224.448,
+          "megapixels_per_second": 465.415,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206348288
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 1.53223,
+          "min_ms": 1.3675,
+          "max_ms": 1.6863,
+          "fps": 652.645,
+          "megapixels_per_second": 5413.3,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 3.19786,
+          "min_ms": 2.8784,
+          "max_ms": 3.5781,
+          "fps": 312.709,
+          "megapixels_per_second": 2593.74,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 63.9773,
+          "min_ms": 57.1575,
+          "max_ms": 68.9998,
+          "fps": 15.6305,
+          "megapixels_per_second": 129.646,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 8.06559,
+          "min_ms": 7.3609,
+          "max_ms": 9.1374,
+          "fps": 123.983,
+          "megapixels_per_second": 1028.37,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 10.0719,
+          "min_ms": 9.2555,
+          "max_ms": 11.241,
+          "fps": 99.2866,
+          "megapixels_per_second": 205.881,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.75949,
+          "min_ms": 6.0471,
+          "max_ms": 8.2798,
+          "fps": 147.94,
+          "megapixels_per_second": 306.769,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 11.0682,
+          "min_ms": 10.1148,
+          "max_ms": 12.3939,
+          "fps": 90.3491,
+          "megapixels_per_second": 187.348,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.90782,
+          "min_ms": 6.3505,
+          "max_ms": 7.2348,
+          "fps": 144.764,
+          "megapixels_per_second": 300.182,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 6.62278,
+          "min_ms": 6.101,
+          "max_ms": 7.0389,
+          "fps": 150.994,
+          "megapixels_per_second": 313.101,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 5.06361,
+          "min_ms": 4.6309,
+          "max_ms": 5.5281,
+          "fps": 197.487,
+          "megapixels_per_second": 409.51,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        }
+      ]
+    },
+    "perf-new-1": {
+      "cases": [
+        {
+          "frame": "1920_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 1.03096,
+          "min_ms": 0.8417,
+          "max_ms": 1.5214,
+          "fps": 969.97,
+          "megapixels_per_second": 2011.33,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205557760
+        },
+        {
+          "frame": "1920_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 2.2311,
+          "min_ms": 1.804,
+          "max_ms": 3.8854,
+          "fps": 448.209,
+          "megapixels_per_second": 929.407,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205602816
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 14.9697,
+          "min_ms": 13.6183,
+          "max_ms": 18.1178,
+          "fps": 66.8016,
+          "megapixels_per_second": 138.52,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206139392
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 4.52037,
+          "min_ms": 3.9526,
+          "max_ms": 5.9368,
+          "fps": 221.221,
+          "megapixels_per_second": 458.724,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206413824
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 1.62362,
+          "min_ms": 1.4339,
+          "max_ms": 3.039,
+          "fps": 615.909,
+          "megapixels_per_second": 5108.59,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 3.18437,
+          "min_ms": 2.807,
+          "max_ms": 3.5685,
+          "fps": 314.034,
+          "megapixels_per_second": 2604.72,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 64.8722,
+          "min_ms": 56.6012,
+          "max_ms": 69.7932,
+          "fps": 15.4149,
+          "megapixels_per_second": 127.857,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 7.9918,
+          "min_ms": 7.1042,
+          "max_ms": 9.3839,
+          "fps": 125.128,
+          "megapixels_per_second": 1037.86,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 10.0555,
+          "min_ms": 9.2273,
+          "max_ms": 11.0167,
+          "fps": 99.4479,
+          "megapixels_per_second": 206.215,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.59807,
+          "min_ms": 5.8416,
+          "max_ms": 7.1159,
+          "fps": 151.559,
+          "megapixels_per_second": 314.274,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 10.9685,
+          "min_ms": 9.6034,
+          "max_ms": 12.5947,
+          "fps": 91.1706,
+          "megapixels_per_second": 189.051,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.89483,
+          "min_ms": 6.2611,
+          "max_ms": 8.3798,
+          "fps": 145.036,
+          "megapixels_per_second": 300.747,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 6.77797,
+          "min_ms": 6.206,
+          "max_ms": 8.0252,
+          "fps": 147.537,
+          "megapixels_per_second": 305.932,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 5.09037,
+          "min_ms": 4.6635,
+          "max_ms": 5.5826,
+          "fps": 196.449,
+          "megapixels_per_second": 407.357,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224497664
+        }
+      ]
+    },
+    "perf-new-2": {
+      "cases": [
+        {
+          "frame": "1920_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 0.980407,
+          "min_ms": 0.847,
+          "max_ms": 1.1116,
+          "fps": 1019.98,
+          "megapixels_per_second": 2115.04,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205479936
+        },
+        {
+          "frame": "1920_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 2.18442,
+          "min_ms": 1.8563,
+          "max_ms": 4.0091,
+          "fps": 457.787,
+          "megapixels_per_second": 949.268,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205520896
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 14.9589,
+          "min_ms": 13.7843,
+          "max_ms": 17.955,
+          "fps": 66.85,
+          "megapixels_per_second": 138.62,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206077952
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 4.35372,
+          "min_ms": 3.8031,
+          "max_ms": 5.9701,
+          "fps": 229.689,
+          "megapixels_per_second": 476.282,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206344192
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 1.58305,
+          "min_ms": 1.368,
+          "max_ms": 1.7176,
+          "fps": 631.693,
+          "megapixels_per_second": 5239.51,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 3.1896,
+          "min_ms": 2.7795,
+          "max_ms": 3.5385,
+          "fps": 313.519,
+          "megapixels_per_second": 2600.46,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 64.2689,
+          "min_ms": 55.3432,
+          "max_ms": 68.754,
+          "fps": 15.5596,
+          "megapixels_per_second": 129.058,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 8.00171,
+          "min_ms": 7.2108,
+          "max_ms": 9.4341,
+          "fps": 124.973,
+          "megapixels_per_second": 1036.58,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 10.0562,
+          "min_ms": 9.2225,
+          "max_ms": 10.8497,
+          "fps": 99.4411,
+          "megapixels_per_second": 206.201,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.67024,
+          "min_ms": 5.9919,
+          "max_ms": 8.6915,
+          "fps": 149.92,
+          "megapixels_per_second": 310.873,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 10.9694,
+          "min_ms": 9.9538,
+          "max_ms": 11.6707,
+          "fps": 91.163,
+          "megapixels_per_second": 189.036,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.83516,
+          "min_ms": 6.1566,
+          "max_ms": 8.2985,
+          "fps": 146.302,
+          "megapixels_per_second": 303.373,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 6.63984,
+          "min_ms": 6.1096,
+          "max_ms": 7.1303,
+          "fps": 150.606,
+          "megapixels_per_second": 312.297,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 5.18027,
+          "min_ms": 4.5972,
+          "max_ms": 6.7818,
+          "fps": 193.04,
+          "megapixels_per_second": 400.288,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        }
+      ]
+    },
+    "perf-old-2": {
+      "cases": [
+        {
+          "frame": "1920_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 0.983947,
+          "min_ms": 0.8773,
+          "max_ms": 1.0752,
+          "fps": 1016.32,
+          "megapixels_per_second": 2107.43,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205484032
+        },
+        {
+          "frame": "1920_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 2.26409,
+          "min_ms": 1.909,
+          "max_ms": 3.8077,
+          "fps": 441.679,
+          "megapixels_per_second": 915.866,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 205574144
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 14.8133,
+          "min_ms": 13.8078,
+          "max_ms": 17.914,
+          "fps": 67.507,
+          "megapixels_per_second": 139.983,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206098432
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 4.32865,
+          "min_ms": 3.9397,
+          "max_ms": 5.9169,
+          "fps": 231.019,
+          "megapixels_per_second": 479.04,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 206372864
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 1.57797,
+          "min_ms": 1.3894,
+          "max_ms": 1.8233,
+          "fps": 633.726,
+          "megapixels_per_second": 5256.37,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 3.2823,
+          "min_ms": 2.9431,
+          "max_ms": 4.5124,
+          "fps": 304.664,
+          "megapixels_per_second": 2527.01,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 64.1987,
+          "min_ms": 55.3731,
+          "max_ms": 68.6727,
+          "fps": 15.5766,
+          "megapixels_per_second": 129.199,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 8.09256,
+          "min_ms": 7.5299,
+          "max_ms": 9.1953,
+          "fps": 123.57,
+          "megapixels_per_second": 1024.94,
+          "device_bytes": 365514576,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 9.97128,
+          "min_ms": 8.8398,
+          "max_ms": 11.024,
+          "fps": 100.288,
+          "megapixels_per_second": 207.957,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.79213,
+          "min_ms": 6.1633,
+          "max_ms": 7.589,
+          "fps": 147.229,
+          "megapixels_per_second": 305.295,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 11.0246,
+          "min_ms": 10.1639,
+          "max_ms": 12.2077,
+          "fps": 90.7065,
+          "megapixels_per_second": 188.089,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 6.97946,
+          "min_ms": 6.1792,
+          "max_ms": 8.1816,
+          "fps": 143.278,
+          "megapixels_per_second": 297.1,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 1,
+          "frames": 120,
+          "mean_ms": 6.59999,
+          "min_ms": 6.1951,
+          "max_ms": 7.039,
+          "fps": 151.515,
+          "megapixels_per_second": 314.182,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 2,
+          "frames": 120,
+          "mean_ms": 5.12489,
+          "min_ms": 4.657,
+          "max_ms": 6.5662,
+          "fps": 195.126,
+          "megapixels_per_second": 404.614,
+          "device_bytes": 146473296,
+          "pinned_bytes": 72448736,
+          "cuda_allocation_calls": 127,
+          "peak_working_set": 224288768
+        }
+      ]
+    }
+  },
+  "comparison": [
+    {
+      "frame": "1920_flat",
+      "strategy": 1,
+      "before_ms": 1.0825585,
+      "after_ms": 1.0056835,
+      "latency_change_percent": -7.101232866399365,
+      "paired_changes_percent": [
+        -12.717051736837204,
+        -0.35977547571159896
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "1920_flat",
+      "strategy": 2,
+      "before_ms": 2.258565,
+      "after_ms": 2.20776,
+      "latency_change_percent": -2.2494371426104665,
+      "paired_changes_percent": [
+        -0.9737954053190334,
+        -3.5188530491279124
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "1920_noise",
+      "strategy": 1,
+      "before_ms": 14.7849,
+      "after_ms": 14.9643,
+      "latency_change_percent": 1.2134001582695841,
+      "paired_changes_percent": [
+        1.444787042997997,
+        0.9829005015762782
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "1920_noise",
+      "strategy": 2,
+      "before_ms": 4.392015,
+      "after_ms": 4.4370449999999995,
+      "latency_change_percent": 1.0252697224394591,
+      "paired_changes_percent": [
+        1.4586859033348443,
+        0.5791644046065247
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "3840_flat",
+      "strategy": 1,
+      "before_ms": 1.5551,
+      "after_ms": 1.603335,
+      "latency_change_percent": 3.101729792296326,
+      "paired_changes_percent": [
+        5.964509244695648,
+        0.3219326096186803
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "3840_flat",
+      "strategy": 2,
+      "before_ms": 3.24008,
+      "after_ms": 3.186985,
+      "latency_change_percent": -1.6386941063183613,
+      "paired_changes_percent": [
+        -0.42184460858198936,
+        -2.8242391006306655
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "3840_noise",
+      "strategy": 1,
+      "before_ms": 64.088,
+      "after_ms": 64.57055,
+      "latency_change_percent": 0.7529490700287189,
+      "paired_changes_percent": [
+        1.3987773788515678,
+        0.1093480086045373
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "3840_noise",
+      "strategy": 2,
+      "before_ms": 8.079075,
+      "after_ms": 7.996754999999999,
+      "latency_change_percent": -1.0189285283278116,
+      "paired_changes_percent": [
+        -0.9148741753548184,
+        -1.1226361003193186
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "photo_holdout_brick",
+      "strategy": 1,
+      "before_ms": 10.02159,
+      "after_ms": 10.05585,
+      "latency_change_percent": 0.34186192011447236,
+      "paired_changes_percent": [
+        -0.1628292576375756,
+        0.8516459271026511
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "photo_holdout_brick",
+      "strategy": 2,
+      "before_ms": 6.77581,
+      "after_ms": 6.634155,
+      "latency_change_percent": -2.090598762361995,
+      "paired_changes_percent": [
+        -2.388049986019658,
+        -1.7945769589215788
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "photo_holdout_grass",
+      "strategy": 1,
+      "before_ms": 11.046399999999998,
+      "after_ms": 10.96895,
+      "latency_change_percent": -0.7011334009269898,
+      "paired_changes_percent": [
+        -0.9007788077555423,
+        -0.5006984380385604
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "photo_holdout_grass",
+      "strategy": 2,
+      "before_ms": 6.94364,
+      "after_ms": 6.864995,
+      "latency_change_percent": -1.1326192026084314,
+      "paired_changes_percent": [
+        -0.18804774878327102,
+        -2.0674951930378604
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "photo_holdout_handwriting",
+      "strategy": 1,
+      "before_ms": 6.611385,
+      "after_ms": 6.708905,
+      "latency_change_percent": 1.4750313285340377,
+      "paired_changes_percent": [
+        2.343275784489296,
+        0.6037887936193975
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    },
+    {
+      "frame": "photo_holdout_handwriting",
+      "strategy": 2,
+      "before_ms": 5.09425,
+      "after_ms": 5.13532,
+      "latency_change_percent": 0.806203072091094,
+      "paired_changes_percent": [
+        0.5284767191786166,
+        1.08060855940324
+      ],
+      "repeatable_over_5_percent": false,
+      "memory_unchanged": true
+    }
+  ],
+  "initial_pre_fix_window": {
+    "cases": [
+      {
+        "frame": "1920_flat",
+        "strategy": 1,
+        "frames": 120,
+        "mean_ms": 1.04877,
+        "min_ms": 0.8512,
+        "max_ms": 1.2218,
+        "fps": 953.502,
+        "megapixels_per_second": 1977.18,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 205602816
+      },
+      {
+        "frame": "1920_flat",
+        "strategy": 2,
+        "frames": 120,
+        "mean_ms": 2.36233,
+        "min_ms": 1.9831,
+        "max_ms": 2.9389,
+        "fps": 423.311,
+        "megapixels_per_second": 877.778,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 205643776
+      },
+      {
+        "frame": "1920_noise",
+        "strategy": 1,
+        "frames": 120,
+        "mean_ms": 15.0173,
+        "min_ms": 14.2091,
+        "max_ms": 17.0119,
+        "fps": 66.5897,
+        "megapixels_per_second": 138.081,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 206217216
+      },
+      {
+        "frame": "1920_noise",
+        "strategy": 2,
+        "frames": 120,
+        "mean_ms": 4.8196,
+        "min_ms": 3.9674,
+        "max_ms": 5.772,
+        "fps": 207.486,
+        "megapixels_per_second": 430.244,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 206483456
+      },
+      {
+        "frame": "3840_flat",
+        "strategy": 1,
+        "frames": 120,
+        "mean_ms": 1.5251,
+        "min_ms": 1.3648,
+        "max_ms": 1.7218,
+        "fps": 655.696,
+        "megapixels_per_second": 5438.61,
+        "device_bytes": 365514576,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "3840_flat",
+        "strategy": 2,
+        "frames": 120,
+        "mean_ms": 3.29093,
+        "min_ms": 2.9238,
+        "max_ms": 3.758,
+        "fps": 303.866,
+        "megapixels_per_second": 2520.38,
+        "device_bytes": 365514576,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "3840_noise",
+        "strategy": 1,
+        "frames": 120,
+        "mean_ms": 57.3358,
+        "min_ms": 54.509,
+        "max_ms": 66.3486,
+        "fps": 17.4411,
+        "megapixels_per_second": 144.663,
+        "device_bytes": 365514576,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "3840_noise",
+        "strategy": 2,
+        "frames": 120,
+        "mean_ms": 8.53042,
+        "min_ms": 7.3415,
+        "max_ms": 10.6363,
+        "fps": 117.228,
+        "megapixels_per_second": 972.332,
+        "device_bytes": 365514576,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "photo_holdout_brick",
+        "strategy": 1,
+        "frames": 120,
+        "mean_ms": 9.63417,
+        "min_ms": 9.148,
+        "max_ms": 10.4208,
+        "fps": 103.797,
+        "megapixels_per_second": 215.234,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "photo_holdout_brick",
+        "strategy": 2,
+        "frames": 120,
+        "mean_ms": 7.07131,
+        "min_ms": 6.1487,
+        "max_ms": 7.7786,
+        "fps": 141.417,
+        "megapixels_per_second": 293.241,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "photo_holdout_grass",
+        "strategy": 1,
+        "frames": 120,
+        "mean_ms": 10.5151,
+        "min_ms": 9.8674,
+        "max_ms": 11.953,
+        "fps": 95.1015,
+        "megapixels_per_second": 197.203,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "photo_holdout_grass",
+        "strategy": 2,
+        "frames": 120,
+        "mean_ms": 7.44883,
+        "min_ms": 6.5881,
+        "max_ms": 8.3793,
+        "fps": 134.249,
+        "megapixels_per_second": 278.379,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "photo_holdout_handwriting",
+        "strategy": 1,
+        "frames": 120,
+        "mean_ms": 6.77234,
+        "min_ms": 6.2155,
+        "max_ms": 7.6262,
+        "fps": 147.66,
+        "megapixels_per_second": 306.187,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      },
+      {
+        "frame": "photo_holdout_handwriting",
+        "strategy": 2,
+        "frames": 120,
+        "mean_ms": 5.49772,
+        "min_ms": 4.6589,
+        "max_ms": 6.1945,
+        "fps": 181.894,
+        "megapixels_per_second": 377.175,
+        "device_bytes": 146473296,
+        "pinned_bytes": 72448736,
+        "cuda_allocation_calls": 127,
+        "peak_working_set": 225296384
+      }
+    ]
+  },
+  "benchmark_codec_current": {
+    "system": {
+      "os": "Windows x64",
+      "cpu_model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+      "thread_count": 16,
+      "compiler": "MSVC 19.44 / Visual Studio 2022",
+      "build_type": "Release",
+      "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7"
+    },
+    "configuration": {
+      "pixel_format": "CFHD_PIXEL_FORMAT_BGRA",
+      "encoded_format": "CFHD_ENCODED_FORMAT_YUV_422",
+      "quality": "CFHD_ENCODING_QUALITY_FILM3"
+    },
+    "benchmarks": [
+      {
+        "name": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "frames": 50,
+        "encode": {
+          "fps": 88.2631,
+          "megapixels_per_sec": 183.022,
+          "latency_avg_ms": 11.0644,
+          "latency_min_ms": 10.5273,
+          "latency_max_ms": 13.3831
+        },
+        "decode": {
+          "fps": 510.681,
+          "megapixels_per_sec": 1058.95,
+          "latency_avg_ms": 1.95799,
+          "latency_min_ms": 1.8109,
+          "latency_max_ms": 2.2122
+        },
+        "compression": {
+          "avg_bytes": 1186352,
+          "ratio": 6.99152
+        },
+        "peak_memory_bytes": 96206848
+      },
+      {
+        "name": "4K_UHD",
+        "width": 3840,
+        "height": 2160,
+        "frames": 25,
+        "encode": {
+          "fps": 24.5976,
+          "megapixels_per_sec": 204.022,
+          "latency_avg_ms": 39.8285,
+          "latency_min_ms": 37.8771,
+          "latency_max_ms": 40.8744
+        },
+        "decode": {
+          "fps": 128.572,
+          "megapixels_per_sec": 1066.43,
+          "latency_avg_ms": 7.77742,
+          "latency_min_ms": 7.0472,
+          "latency_max_ms": 8.2539
+        },
+        "compression": {
+          "avg_bytes": 4673177,
+          "ratio": 7.09958
+        },
+        "peak_memory_bytes": 239599616
+      },
+      {
+        "name": "8K_UHD",
+        "width": 7680,
+        "height": 4320,
+        "frames": 10,
+        "encode": {
+          "fps": 6.4531,
+          "megapixels_per_sec": 214.098,
+          "latency_avg_ms": 151.135,
+          "latency_min_ms": 144.523,
+          "latency_max_ms": 157.844
+        },
+        "decode": {
+          "fps": 31.0971,
+          "megapixels_per_sec": 1031.73,
+          "latency_avg_ms": 32.1569,
+          "latency_min_ms": 30.6734,
+          "latency_max_ms": 33.6621
+        },
+        "compression": {
+          "avg_bytes": 17674354,
+          "ratio": 7.50864
+        },
+        "peak_memory_bytes": 642977792
+      }
+    ]
+  },
+  "historical_reference_comparison": [
+    {
+      "name": "1080p",
+      "historical_decode_ms": 2.5368,
+      "current_decode_ms": 1.95799,
+      "decode_latency_change_percent": -22.816540523494165,
+      "historical_peak_memory_bytes": 96985088,
+      "current_peak_memory_bytes": 96206848
+    },
+    {
+      "name": "4K_UHD",
+      "historical_decode_ms": 7.97964,
+      "current_decode_ms": 7.77742,
+      "decode_latency_change_percent": -2.534199537823756,
+      "historical_peak_memory_bytes": 240435200,
+      "current_peak_memory_bytes": 239599616
+    },
+    {
+      "name": "8K_UHD",
+      "historical_decode_ms": 35.76,
+      "current_decode_ms": 32.1569,
+      "decode_latency_change_percent": -10.075782997762861,
+      "historical_peak_memory_bytes": 644014080,
+      "current_peak_memory_bytes": 642977792
+    }
+  ],
+  "historical_comparison_is_cross_session_cpu_only": true
+}

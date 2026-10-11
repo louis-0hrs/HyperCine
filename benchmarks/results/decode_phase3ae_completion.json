@@ -1,0 +1,746 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "phase": "3A-E",
+  "branch": "decode-phase3ae",
+  "base_commit": "9f63cfa191671175a2a34991a3084631332f90bd",
+  "commits": [
+    "5f839527b67a94aa5c48e5a7c7d50d0e3c1ee2e7 fix(decoder): preserve signed inverse samples in BGRA conversion"
+  ],
+  "commit_list_scope": "implementation commits at evidence generation; the evidence commit is the commit containing this file (git log BASE..HEAD)",
+  "files_changed": [
+    "benchmarks/CMakeLists.txt",
+    "benchmarks/audit_decode_phase3ae_corpus.cpp",
+    "benchmarks/results/decode_phase3ae_completion.json",
+    "benchmarks/results/decode_phase3ae_corpus.txt",
+    "benchmarks/results/decode_phase3ae_cpu_ctest.txt",
+    "benchmarks/results/decode_phase3ae_cuda_ctest.txt",
+    "benchmarks/results/decode_phase3ae_cuda_ctest_first.txt",
+    "benchmarks/results/decode_phase3ae_performance.json",
+    "benchmarks/results/decode_phase3ae_pixels.json",
+    "benchmarks/results/decode_phase3ae_post_native_initcheck.txt",
+    "benchmarks/results/decode_phase3ae_post_native_initcheck_stdout.txt",
+    "benchmarks/results/decode_phase3ae_post_native_memcheck.txt",
+    "benchmarks/results/decode_phase3ae_post_native_memcheck_stdout.txt",
+    "benchmarks/results/decode_phase3ae_post_native_racecheck.txt",
+    "benchmarks/results/decode_phase3ae_post_native_racecheck_stdout.txt",
+    "benchmarks/results/decode_phase3ae_post_native_synccheck.txt",
+    "benchmarks/results/decode_phase3ae_post_native_synccheck_stdout.txt",
+    "benchmarks/results/decode_phase3ae_pre_memcheck.txt",
+    "benchmarks/results/decode_phase3ae_pre_native_initcheck.txt",
+    "benchmarks/results/decode_phase3ae_pre_native_memcheck.txt",
+    "benchmarks/results/decode_phase3ae_pre_native_racecheck.txt",
+    "benchmarks/results/decode_phase3ae_pre_native_synccheck.txt",
+    "benchmarks/results/decode_phase3ae_reproduction.json",
+    "benchmarks/results/decode_phase3ae_root_cause.json",
+    "benchmarks/results/decode_phase3ae_sanitizers.json",
+    "benchmarks/results/decode_phase3ae_stage_compare.json",
+    "benchmarks/results/decode_phase3ae_validation.json",
+    "benchmarks/summarize_decode_phase3ae.py",
+    "docs/DECODE_PHASE3AE.md",
+    "include/hypercine/research/decode_phase2e.h",
+    "include/hypercine/research/decoder_diagnostics.h",
+    "src/core/decoder.cpp",
+    "src/cuda/decode_color_cuda.cu",
+    "src/cuda/decode_phase2e_pipeline.cu",
+    "src/cuda/decode_phase2e_stub.cpp",
+    "tests/CMakeLists.txt",
+    "tests/decode_phase3ae_color_reference.h",
+    "tests/decode_phase3ae_photos.json",
+    "tests/test_color_conversion_cuda.cu",
+    "tests/test_decode_phase3ae.cpp"
+  ],
+  "production_files_changed": [
+    "include/hypercine/research/decode_phase2e.h",
+    "include/hypercine/research/decoder_diagnostics.h",
+    "src/core/decoder.cpp",
+    "src/cuda/decode_color_cuda.cu",
+    "src/cuda/decode_phase2e_pipeline.cu",
+    "src/cuda/decode_phase2e_stub.cpp"
+  ],
+  "integrity": {
+    "upstream_pristine": true,
+    "main_unchanged": "51435890ba5853e87e8cf1ddc7cc747954bd9e80",
+    "encoder_unchanged": true,
+    "historical_reports_and_results_unchanged": true,
+    "golden_manifest_sha256": "dbe8d97f5bcfcd709c7b1994cba0b8c2e7d0fa89130e2ace775cf8d704d0c026",
+    "history_sha256": {
+      "docs/DECODE_PHASE3A.md": "1e2a2088f5fd6f1e000bbb200dde43aa780e268fe6de4e28d773116171995f2b",
+      "docs/DECODE_PHASE3A_RC.md": "88d826dd414030c350d6065e0112eb526d342a72033da0ca13762774b39e4e9d",
+      "docs/DECODE_PHASE3AD.md": "b813a7228877f9c674deb93d7232e8ad68f7e2f70496f644ddb7484e238d932f",
+      "benchmarks/results/decode_phase3ad_holdout.json": "97023fe78f1421231abe7128a8538fe2195e81d43268c17001b6a07e3caa9baf"
+    },
+    "repaired_binary_sha256": "68b0b5ac5e99cafa6db3b996dca9911de7cc82a13909a0023d478dfbe21746f3",
+    "color_source_sha256": "b1550206397c0257dc51de571f642d8315e4f694f43f60948f9e09141336a59d"
+  },
+  "completion_fields": [
+    {
+      "number": 1,
+      "field": "branch",
+      "value": "decode-phase3ae"
+    },
+    {
+      "number": 2,
+      "field": "base commit",
+      "value": "9f63cfa191671175a2a34991a3084631332f90bd"
+    },
+    {
+      "number": 3,
+      "field": "commits",
+      "value": [
+        "5f839527b67a94aa5c48e5a7c7d50d0e3c1ee2e7 fix(decoder): preserve signed inverse samples in BGRA conversion"
+      ]
+    },
+    {
+      "number": 4,
+      "field": "files changed",
+      "value": [
+        "benchmarks/CMakeLists.txt",
+        "benchmarks/audit_decode_phase3ae_corpus.cpp",
+        "benchmarks/results/decode_phase3ae_completion.json",
+        "benchmarks/results/decode_phase3ae_corpus.txt",
+        "benchmarks/results/decode_phase3ae_cpu_ctest.txt",
+        "benchmarks/results/decode_phase3ae_cuda_ctest.txt",
+        "benchmarks/results/decode_phase3ae_cuda_ctest_first.txt",
+        "benchmarks/results/decode_phase3ae_performance.json",
+        "benchmarks/results/decode_phase3ae_pixels.json",
+        "benchmarks/results/decode_phase3ae_post_native_initcheck.txt",
+        "benchmarks/results/decode_phase3ae_post_native_initcheck_stdout.txt",
+        "benchmarks/results/decode_phase3ae_post_native_memcheck.txt",
+        "benchmarks/results/decode_phase3ae_post_native_memcheck_stdout.txt",
+        "benchmarks/results/decode_phase3ae_post_native_racecheck.txt",
+        "benchmarks/results/decode_phase3ae_post_native_racecheck_stdout.txt",
+        "benchmarks/results/decode_phase3ae_post_native_synccheck.txt",
+        "benchmarks/results/decode_phase3ae_post_native_synccheck_stdout.txt",
+        "benchmarks/results/decode_phase3ae_pre_memcheck.txt",
+        "benchmarks/results/decode_phase3ae_pre_native_initcheck.txt",
+        "benchmarks/results/decode_phase3ae_pre_native_memcheck.txt",
+        "benchmarks/results/decode_phase3ae_pre_native_racecheck.txt",
+        "benchmarks/results/decode_phase3ae_pre_native_synccheck.txt",
+        "benchmarks/results/decode_phase3ae_reproduction.json",
+        "benchmarks/results/decode_phase3ae_root_cause.json",
+        "benchmarks/results/decode_phase3ae_sanitizers.json",
+        "benchmarks/results/decode_phase3ae_stage_compare.json",
+        "benchmarks/results/decode_phase3ae_validation.json",
+        "benchmarks/summarize_decode_phase3ae.py",
+        "docs/DECODE_PHASE3AE.md",
+        "include/hypercine/research/decode_phase2e.h",
+        "include/hypercine/research/decoder_diagnostics.h",
+        "src/core/decoder.cpp",
+        "src/cuda/decode_color_cuda.cu",
+        "src/cuda/decode_phase2e_pipeline.cu",
+        "src/cuda/decode_phase2e_stub.cpp",
+        "tests/CMakeLists.txt",
+        "tests/decode_phase3ae_color_reference.h",
+        "tests/decode_phase3ae_photos.json",
+        "tests/test_color_conversion_cuda.cu",
+        "tests/test_decode_phase3ae.cpp"
+      ]
+    },
+    {
+      "number": 5,
+      "field": "production files changed",
+      "value": [
+        "include/hypercine/research/decode_phase2e.h",
+        "include/hypercine/research/decoder_diagnostics.h",
+        "src/core/decoder.cpp",
+        "src/cuda/decode_color_cuda.cu",
+        "src/cuda/decode_phase2e_pipeline.cu",
+        "src/cuda/decode_phase2e_stub.cpp"
+      ]
+    },
+    {
+      "number": 6,
+      "field": "upstream status",
+      "value": "pristine"
+    },
+    {
+      "number": 7,
+      "field": "encoder status",
+      "value": "unchanged"
+    },
+    {
+      "number": 8,
+      "field": "main status",
+      "value": "51435890ba5853e87e8cf1ddc7cc747954bd9e80"
+    },
+    {
+      "number": 9,
+      "field": "original brick mismatch count",
+      "value": 447
+    },
+    {
+      "number": 10,
+      "field": "original grass mismatch count",
+      "value": 93
+    },
+    {
+      "number": 11,
+      "field": "original handwriting mismatch count",
+      "value": 33
+    },
+    {
+      "number": 12,
+      "field": "repeatability before fix",
+      "value": "100 per photo; complete images identical"
+    },
+    {
+      "number": 13,
+      "field": "coefficients status",
+      "value": "30/30 bands exact"
+    },
+    {
+      "number": 14,
+      "field": "LL status",
+      "value": "6/6 checkpoints exact"
+    },
+    {
+      "number": 15,
+      "field": "planar status",
+      "value": "BGRA ticket and public planar request exact"
+    },
+    {
+      "number": 16,
+      "field": "YU64 status",
+      "value": "bit-exact words"
+    },
+    {
+      "number": 17,
+      "field": "BGRA status",
+      "value": "original 447/93/33; now zero"
+    },
+    {
+      "number": 18,
+      "field": "first divergent stage",
+      "value": "DeviceBGRA8 precision reduction"
+    },
+    {
+      "number": 19,
+      "field": "first divergent frame",
+      "value": "photo_holdout_brick"
+    },
+    {
+      "number": 20,
+      "field": "first divergent coordinate",
+      "value": {
+        "x": 711,
+        "bottom_up_output_row": 2,
+        "plane_row": 1077
+      }
+    },
+    {
+      "number": 21,
+      "field": "CPU YUV there",
+      "value": [
+        -1,
+        495,
+        524
+      ]
+    },
+    {
+      "number": 22,
+      "field": "GPU YUV there",
+      "value": [
+        -1,
+        495,
+        524
+      ]
+    },
+    {
+      "number": 23,
+      "field": "CPU BGRA there",
+      "value": [
+        0,
+        0,
+        5,
+        255
+      ]
+    },
+    {
+      "number": 24,
+      "field": "GPU BGRA there",
+      "value": [
+        255,
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "number": 25,
+      "field": "pitch/address calculation",
+      "value": [
+        {
+          "base": "0000000B0D800000",
+          "pitch": 4096,
+          "row": 1077,
+          "column": 711,
+          "byte_offset": 4412814,
+          "allocation_bytes": 4423680
+        },
+        {
+          "base": "0000000B0EE00000",
+          "pitch": 2048,
+          "row": 1077,
+          "column": 355,
+          "byte_offset": 2206406,
+          "allocation_bytes": 2211840
+        },
+        {
+          "base": "0000000B0E400000",
+          "pitch": 2048,
+          "row": 1077,
+          "column": 355,
+          "byte_offset": 2206406,
+          "allocation_bytes": 2211840
+        },
+        {
+          "base": "0000000B0F200000",
+          "pitch": 7680,
+          "row": 2,
+          "column": 711,
+          "byte_offset": 18204,
+          "allocation_bytes": 8294400
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "field": "root cause class",
+      "value": "signedness"
+    },
+    {
+      "number": 27,
+      "field": "exact root cause",
+      "value": "uint16_t reinterprets negative reconstructed samples before precision reduction"
+    },
+    {
+      "number": 28,
+      "field": "deterministic vs race",
+      "value": "deterministic logic"
+    },
+    {
+      "number": 29,
+      "field": "previous-frame contamination",
+      "value": false
+    },
+    {
+      "number": 30,
+      "field": "slot reuse involvement",
+      "value": false
+    },
+    {
+      "number": 31,
+      "field": "stream/event involvement",
+      "value": false
+    },
+    {
+      "number": 32,
+      "field": "color math involvement",
+      "value": "input signedness; matrix formula unchanged"
+    },
+    {
+      "number": 33,
+      "field": "bounds involvement",
+      "value": false
+    },
+    {
+      "number": 34,
+      "field": "signedness/overflow involvement",
+      "value": "unsigned reinterpretation before clamp; no inverse overflow"
+    },
+    {
+      "number": 35,
+      "field": "minimal reproducer",
+      "value": "64x64 encoded undershoot plus literal signed-plane vectors"
+    },
+    {
+      "number": 36,
+      "field": "repair summary",
+      "value": "remove uint16 casts from Y/V/U precision reduction"
+    },
+    {
+      "number": 37,
+      "field": "why repair is correct",
+      "value": "preserves negative overshoots for upstream-compatible limiter; positive values unchanged"
+    },
+    {
+      "number": 38,
+      "field": "why previous corpus missed it",
+      "value": "frozen generators missed negative values; direct test CPU oracle copied the unsigned defect; D checker stopped early"
+    },
+    {
+      "number": 39,
+      "field": "post-fix brick mismatches",
+      "value": 0
+    },
+    {
+      "number": 40,
+      "field": "post-fix grass mismatches",
+      "value": 0
+    },
+    {
+      "number": 41,
+      "field": "post-fix handwriting mismatches",
+      "value": 0
+    },
+    {
+      "number": 42,
+      "field": "500 repeat result",
+      "value": "500 per photo, slots 1/2, all full images exact"
+    },
+    {
+      "number": 43,
+      "field": "Lightweight vs Hybrid equality",
+      "value": true
+    },
+    {
+      "number": 44,
+      "field": "HostStreaming equality",
+      "value": true
+    },
+    {
+      "number": 45,
+      "field": "11/11 Golden result",
+      "value": "11/11, four strategies, unchanged frozen hashes"
+    },
+    {
+      "number": 46,
+      "field": "broader correctness corpus result",
+      "value": {
+        "passed": 156,
+        "unsupported_controls": 2,
+        "failed": 0
+      }
+    },
+    {
+      "number": 47,
+      "field": "CUDA CTest",
+      "value": {
+        "total": 33,
+        "passed": 33,
+        "failed": 0,
+        "elapsed_seconds": 700.21,
+        "log": "benchmarks/results/decode_phase3ae_cuda_ctest.txt",
+        "sha256": "fe2cc67a95a39de5c591241ab24d6ce826b5567d964f1044a9717912c86801dc"
+      }
+    },
+    {
+      "number": 48,
+      "field": "CPU-only CTest",
+      "value": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "elapsed_seconds": 4.85,
+        "log": "benchmarks/results/decode_phase3ae_cpu_ctest.txt",
+        "sha256": "bac9cf9e68f6f044d1051c9bc6fbc0957ede636d6ff41b440262800ee3add545"
+      }
+    },
+    {
+      "number": 49,
+      "field": "initcheck",
+      "value": "zero errors"
+    },
+    {
+      "number": 50,
+      "field": "memcheck",
+      "value": "zero errors"
+    },
+    {
+      "number": 51,
+      "field": "racecheck",
+      "value": "zero hazards/errors/warnings"
+    },
+    {
+      "number": 52,
+      "field": "synccheck",
+      "value": "zero errors"
+    },
+    {
+      "number": 53,
+      "field": "mixed 2000-frame smoke",
+      "value": {
+        "frames": 2000,
+        "cases": 9,
+        "slots": 2,
+        "exact_every_frame": true,
+        "non_fifo_release": true,
+        "owned_capacities_stable": true,
+        "free_vram_before": 15634268160,
+        "free_vram_after": 15634268160,
+        "working_set_before": 295849984,
+        "working_set_after": 297213952
+      }
+    },
+    {
+      "number": 54,
+      "field": "two-instance result",
+      "value": {
+        "instances": 2,
+        "frames_per_instance": 100,
+        "real_photo_output_exact": true
+      }
+    },
+    {
+      "number": 55,
+      "field": "four-instance result",
+      "value": {
+        "instances": 4,
+        "frames_per_instance": 100,
+        "real_photo_output_exact": true
+      }
+    },
+    {
+      "number": 56,
+      "field": "output lifetime result",
+      "value": "held/non-FIFO/consumer reuse; existing completed/failed output checks and destruction/drain pass"
+    },
+    {
+      "number": 57,
+      "field": "allocation change",
+      "value": "zero steady-state C++ allocations; CUDA calls unchanged"
+    },
+    {
+      "number": 58,
+      "field": "VRAM change",
+      "value": "owned bytes unchanged"
+    },
+    {
+      "number": 59,
+      "field": "pinned-memory change",
+      "value": "owned bytes unchanged"
+    },
+    {
+      "number": 60,
+      "field": "1080p performance impact",
+      "value": [
+        {
+          "frame": "1920_flat",
+          "strategy": 1,
+          "before_ms": 1.0825585,
+          "after_ms": 1.0056835,
+          "latency_change_percent": -7.101232866399365,
+          "paired_changes_percent": [
+            -12.717051736837204,
+            -0.35977547571159896
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "1920_flat",
+          "strategy": 2,
+          "before_ms": 2.258565,
+          "after_ms": 2.20776,
+          "latency_change_percent": -2.2494371426104665,
+          "paired_changes_percent": [
+            -0.9737954053190334,
+            -3.5188530491279124
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 1,
+          "before_ms": 14.7849,
+          "after_ms": 14.9643,
+          "latency_change_percent": 1.2134001582695841,
+          "paired_changes_percent": [
+            1.444787042997997,
+            0.9829005015762782
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "1920_noise",
+          "strategy": 2,
+          "before_ms": 4.392015,
+          "after_ms": 4.4370449999999995,
+          "latency_change_percent": 1.0252697224394591,
+          "paired_changes_percent": [
+            1.4586859033348443,
+            0.5791644046065247
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        }
+      ]
+    },
+    {
+      "number": 61,
+      "field": "4K performance impact",
+      "value": [
+        {
+          "frame": "3840_flat",
+          "strategy": 1,
+          "before_ms": 1.5551,
+          "after_ms": 1.603335,
+          "latency_change_percent": 3.101729792296326,
+          "paired_changes_percent": [
+            5.964509244695648,
+            0.3219326096186803
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "3840_flat",
+          "strategy": 2,
+          "before_ms": 3.24008,
+          "after_ms": 3.186985,
+          "latency_change_percent": -1.6386941063183613,
+          "paired_changes_percent": [
+            -0.42184460858198936,
+            -2.8242391006306655
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 1,
+          "before_ms": 64.088,
+          "after_ms": 64.57055,
+          "latency_change_percent": 0.7529490700287189,
+          "paired_changes_percent": [
+            1.3987773788515678,
+            0.1093480086045373
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "3840_noise",
+          "strategy": 2,
+          "before_ms": 8.079075,
+          "after_ms": 7.996754999999999,
+          "latency_change_percent": -1.0189285283278116,
+          "paired_changes_percent": [
+            -0.9148741753548184,
+            -1.1226361003193186
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        }
+      ]
+    },
+    {
+      "number": 62,
+      "field": "failing-photo performance impact",
+      "value": [
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 1,
+          "before_ms": 10.02159,
+          "after_ms": 10.05585,
+          "latency_change_percent": 0.34186192011447236,
+          "paired_changes_percent": [
+            -0.1628292576375756,
+            0.8516459271026511
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "photo_holdout_brick",
+          "strategy": 2,
+          "before_ms": 6.77581,
+          "after_ms": 6.634155,
+          "latency_change_percent": -2.090598762361995,
+          "paired_changes_percent": [
+            -2.388049986019658,
+            -1.7945769589215788
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 1,
+          "before_ms": 11.046399999999998,
+          "after_ms": 10.96895,
+          "latency_change_percent": -0.7011334009269898,
+          "paired_changes_percent": [
+            -0.9007788077555423,
+            -0.5006984380385604
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "photo_holdout_grass",
+          "strategy": 2,
+          "before_ms": 6.94364,
+          "after_ms": 6.864995,
+          "latency_change_percent": -1.1326192026084314,
+          "paired_changes_percent": [
+            -0.18804774878327102,
+            -2.0674951930378604
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 1,
+          "before_ms": 6.611385,
+          "after_ms": 6.708905,
+          "latency_change_percent": 1.4750313285340377,
+          "paired_changes_percent": [
+            2.343275784489296,
+            0.6037887936193975
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        },
+        {
+          "frame": "photo_holdout_handwriting",
+          "strategy": 2,
+          "before_ms": 5.09425,
+          "after_ms": 5.13532,
+          "latency_change_percent": 0.806203072091094,
+          "paired_changes_percent": [
+            0.5284767191786166,
+            1.08060855940324
+          ],
+          "repeatable_over_5_percent": false,
+          "memory_unchanged": true
+        }
+      ]
+    },
+    {
+      "number": 63,
+      "field": "final outcome",
+      "value": "A \u2014 FIXED"
+    },
+    {
+      "number": 64,
+      "field": "remaining correctness blockers",
+      "value": []
+    },
+    {
+      "number": 65,
+      "field": "dispatcher blocker status",
+      "value": "Phase 3A-D HOLD remains"
+    },
+    {
+      "number": 66,
+      "field": "merge recommendation",
+      "value": "review minimal fix separately; no automatic merge"
+    },
+    {
+      "number": 67,
+      "field": "recommended next step",
+      "value": "human review; keep Phase 3B dispatcher promotion blocked"
+    }
+  ],
+  "outcome": "A \u2014 FIXED",
+  "output_correctness_blocker_cleared": true,
+  "dispatcher_status": "Phase 3A-D HOLD remains",
+  "remaining_correctness_blockers_in_supported_scope": [],
+  "merge_recommendation": "review evidence and minimal repair separately; do not promote dispatcher",
+  "next_step": "human review; Phase 3B remains blocked by independent Auto-dispatch HOLD",
+  "merge_tag_push_performed": false
+}
