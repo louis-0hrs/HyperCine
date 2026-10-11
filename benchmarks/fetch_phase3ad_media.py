@@ -8,6 +8,7 @@ and are not downloaded here. Re-encoded frames are not native camera CineForm.
 """
 import json
 import sys
+import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -46,6 +47,18 @@ def get(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=60) as response:
         return response.read()
+
+
+def thumbnail(url):
+    base = url.split("?", 1)[0]
+    marker = "/wikipedia/commons/"
+    pos = base.find(marker)
+    if pos < 0 or "/thumb/" in base:
+        return None
+    rest = base[pos + len(marker):]
+    name = rest.rsplit("/", 1)[-1]
+    thumb_name = name + ".jpg" if name.lower().endswith((".tif", ".tiff")) else name
+    return base[:pos] + "/wikipedia/commons/thumb/" + rest + "/1920px-" + thumb_name
 
 
 def license_name(meta):
@@ -130,9 +143,10 @@ def download_recorded_holdout():
     manifest = MEDIA / "holdout_manifest.tsv"
     if not titles.exists():
         raise SystemExit("hold-out titles were not recorded")
-    if manifest.exists():
-        raise SystemExit("hold-out manifest already exists and must not be rebuilt")
-    rows = []
+    header = "id\tsplit\tfamily\twidth\theight\tpath\tlicense\tsource_url\tsource_identity\n"
+    existing = manifest.read_text(encoding="utf-8") if manifest.exists() else header
+    rows = [line for line in existing.splitlines()[1:] if line.strip()]
+    have = {line.split("\t", 1)[0] for line in rows}
     for line in titles.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
@@ -147,22 +161,33 @@ def download_recorded_holdout():
         hid = f"photo_holdout_{family}"
         dest = MEDIA / f"{hid}.yuv"
         src = MEDIA / f"{hid}.download"
-        try:
-            src.write_bytes(get(url))
-            to_yuy2(src, dest, 1920, 1080)
-            src.unlink(missing_ok=True)
-        except Exception as error:
-            print(f"hold-out download failed {hid}: {error}")
-            try:
-                src.unlink(missing_ok=True)
-            except OSError:
-                pass
+        if hid in have and dest.exists():
             continue
+        time.sleep(4)
+        used = None
+        for candidate in (url, thumbnail(url)):
+            if not candidate:
+                continue
+            try:
+                src.write_bytes(get(candidate))
+                to_yuy2(src, dest, 1920, 1080)
+                src.unlink(missing_ok=True)
+                used = candidate
+                break
+            except Exception as error:
+                print(f"hold-out download failed {hid}: {error}")
+                try:
+                    src.unlink(missing_ok=True)
+                except OSError:
+                    pass
+        if used is None:
+            continue
+        identity = title if used == url else title + " [1920px thumbnail; original rate-limited]"
         rows.append("\t".join([
             hid, "holdout", f"holdout_{family}", "1920", "1080",
-            f"benchmarks/phase3ad_media/{hid}.yuv", license, url, title,
+            f"benchmarks/phase3ad_media/{hid}.yuv", license, url, identity,
         ]))
-        print("hold-out", hid, license)
+        print("hold-out", hid, "thumb" if used != url else "original", license)
     if not rows:
         raise SystemExit("no hold-out images were downloaded")
     manifest.write_text(
