@@ -13,11 +13,19 @@ struct DecoderBandDecision {
     uint32_t corrected_nibbles = 0;
     uint32_t full_chunk_corrections = 0;
 };
+// Borrowed final inverse surfaces from the same ticket, including BGRA tickets.
+// Research inspection only; does not change the public DeviceOutput contract.
+struct DecoderReconstruction {
+    std::array<DeviceOutputPlane, 3> planes{}; // Y/U/V, always top-down
+    std::array<size_t, 3> allocation_bytes{};
+    int slot_index = -1;
+};
 class DecoderInspector {
 public:
     static bool BandDecisions(Decoder&, DecodeTicket, std::array<DecoderBandDecision, 27>*);
     static bool DownloadBand(Decoder&, DecodeTicket, int, std::vector<int16_t>&,
                              int* width = nullptr, int* height = nullptr, int* pitch = nullptr);
     static bool DownloadIntermediate(Decoder&, DecodeTicket, int channel, int level, std::vector<int16_t>&);
+    static bool Reconstruction(Decoder&, DecodeTicket, DecoderReconstruction*);
 };
 } // namespace HyperCine

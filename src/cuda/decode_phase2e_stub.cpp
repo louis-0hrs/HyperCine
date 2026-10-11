@@ -46,6 +46,7 @@ bool CudaDecoderPipelinePhase2E::WaitForDecode(uint64_t) { return false; }
 bool CudaDecoderPipelinePhase2E::StreamWait(uint64_t, cudaStream_t) { return false; }
 bool CudaDecoderPipelinePhase2E::GetDeviceBgraOutput(uint64_t, DeviceBgraSurfaceDescriptor*) { return false; }
 bool CudaDecoderPipelinePhase2E::GetDevicePlanarOutput(uint64_t, DevicePlanarSurfaceDescriptor*) { return false; }
+bool CudaDecoderPipelinePhase2E::InspectReconstruction(uint64_t, DecoderReconstruction*) { return false; }
 bool CudaDecoderPipelinePhase2E::ReleaseOutput(uint64_t) { return false; }
 bool CudaDecoderPipelinePhase2E::DownloadBgraToHost(uint64_t, uint8_t*, size_t) { return false; }
 bool CudaDecoderPipelinePhase2E::DownloadPlanarToHost(uint64_t, int16_t*, size_t, int16_t*, size_t, int16_t*, size_t) { return false; }

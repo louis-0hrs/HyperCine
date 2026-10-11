@@ -18,6 +18,16 @@ if(NOT HYPERCINE_ENABLE_CUDA)
 endif()
 
 if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_decode_phase3ae test_decode_phase3ae.cpp)
+    target_compile_definitions(test_decode_phase3ae PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase3ae PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_decode_phase3ae PRIVATE psapi)
+    endif()
+    add_test(NAME test_decode_phase3ae COMMAND test_decode_phase3ae --unit
+        "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/phase3ae-unit")
+    set_tests_properties(test_decode_phase3ae PROPERTIES TIMEOUT 120)
+
     add_executable(test_decode_phase3a_rc test_decode_phase3a_rc.cpp
         ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
         ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp

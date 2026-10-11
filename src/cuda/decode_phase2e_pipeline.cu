@@ -7,6 +7,7 @@
 #include "decode_inverse_kernels.cuh"
 #include "decode_hybrid_entropy.cuh"
 #include "../core/decoder_backend.h"
+#include "hypercine/research/decoder_diagnostics.h"
 
 #include <cuda_runtime.h>
 #include <vector>
@@ -1957,6 +1958,22 @@ bool CudaDecoderPipelinePhase2E::GetDevicePlanarOutput(uint64_t ticket, DevicePl
     out_desc->ticket = slot->ticket;
     out_desc->slot_index = slot->slot_index;
 
+    return true;
+}
+
+bool CudaDecoderPipelinePhase2E::InspectReconstruction(uint64_t ticket, DecoderReconstruction* out) {
+    if (!impl_ || !out) return false;
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    auto* slot = impl_->FindSlot(ticket);
+    if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
+    *out = {};
+    out->slot_index = slot->slot_index;
+    for (int ch = 0; ch < 3; ++ch) {
+        const int native = ch == 1 ? 2 : ch == 2 ? 1 : 0;
+        const auto& c = slot->channels[native];
+        out->planes[ch] = {c.d_final_plane, c.final_plane_pitch, ch ? slot->width / 2 : slot->width, slot->height};
+        out->allocation_bytes[ch] = c.final_plane_pitch * slot->max_height;
+    }
     return true;
 }
 

@@ -284,4 +284,11 @@ bool DecoderInspector::DownloadIntermediate(Decoder& decoder, DecodeTicket t, in
     auto* s = d.Find(t);
     return d.Update(s, true).state == DecodeState::Ready && d.backend.DownloadIntermediateLl(s->backend_ticket, channel, level, out);
 }
+bool DecoderInspector::Reconstruction(Decoder& decoder, DecodeTicket t, DecoderReconstruction* out) {
+    if (!out) return false;
+    *out = {};
+    auto& d = *decoder.impl_; std::lock_guard<std::mutex> lock(d.mutex); d.SelectDevice();
+    auto* s = d.Find(t);
+    return d.Update(s, true).state == DecodeState::Ready && d.backend.InspectReconstruction(s->backend_ticket, out);
+}
 } // namespace HyperCine

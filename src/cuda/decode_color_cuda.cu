@@ -70,9 +70,11 @@ __global__ void Yuv422ToBgra8Kernel(
     int16_t raw_v = v_row[x / 2];
     int16_t raw_u = u_row[x / 2];
 
-    int16_t y8 = static_cast<int16_t>(static_cast<uint16_t>(raw_y) >> 2);
-    int16_t v8 = static_cast<int16_t>(static_cast<uint16_t>(raw_v) >> 2);
-    int16_t u8 = static_cast<int16_t>(static_cast<uint16_t>(raw_u) >> 2);
+    // Inverse reconstruction can undershoot zero. Preserve its sign while
+    // reducing precision; unsigned shifts turn dark overshoots into highlights.
+    int16_t y8 = static_cast<int16_t>(raw_y >> 2);
+    int16_t v8 = static_cast<int16_t>(raw_v >> 2);
+    int16_t u8 = static_cast<int16_t>(raw_u >> 2);
 
     uint8_t b_out = 0, g_out = 0, r_out = 0;
 

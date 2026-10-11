@@ -26,6 +26,7 @@ typedef int cudaError_t;
 #include "hypercine/decoder.h"
 
 namespace HyperCine {
+struct DecoderReconstruction;
 
 // Phase 2E Pipeline Overlap Execution Mode (Section 2, 24, 25, 26)
 enum class Phase2EPipelineMode : uint32_t {
@@ -277,6 +278,7 @@ public:
     // Retrieve published DeviceOutput surface descriptors
     bool GetDeviceBgraOutput(uint64_t ticket, DeviceBgraSurfaceDescriptor* out_desc);
     bool GetDevicePlanarOutput(uint64_t ticket, DevicePlanarSurfaceDescriptor* out_desc);
+    bool InspectReconstruction(uint64_t ticket, DecoderReconstruction* out);
 
     // Release ticket ownership, returning slot to reusable pool
     bool ReleaseOutput(uint64_t ticket);
