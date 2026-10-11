@@ -1,0 +1,191 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+  "cases": [
+    {
+      "width": 1920,
+      "pattern": "noise",
+      "frames": 120,
+      "hybrid": {
+        "mean_ms": 4.91379917,
+        "minimum_ms": 4.1717,
+        "maximum_ms": 6.2826,
+        "process_cpu_ms_per_frame": 17.0572917
+      },
+      "lightweight": {
+        "mean_ms": 15.3398958,
+        "minimum_ms": 13.7851,
+        "maximum_ms": 18.4008,
+        "process_cpu_ms_per_frame": 32.5520833
+      }
+    },
+    {
+      "width": 3840,
+      "pattern": "noise",
+      "frames": 60,
+      "hybrid": {
+        "mean_ms": 8.47739333,
+        "minimum_ms": 7.4769,
+        "maximum_ms": 10.8993,
+        "process_cpu_ms_per_frame": 35.6770833
+      },
+      "lightweight": {
+        "mean_ms": 66.7594133,
+        "minimum_ms": 58.1193,
+        "maximum_ms": 71.9256,
+        "process_cpu_ms_per_frame": 152.864583
+      }
+    }
+  ],
+  "sustained_4k_noise": {
+    "frames": 1000,
+    "slots": 3,
+    "strategy": "hybrid",
+    "fps": 129.654067,
+    "process_cpu_ms_per_frame": 36.359375
+  },
+  "historical_phase3a": {
+    "hybrid_1080_ms": 4.593265,
+    "hybrid_4k_ms": 8.29706333,
+    "sustained_4k_fps": 132.33338
+  },
+  "historical_rc_auto": {
+    "noise_1080_ms": 5.06,
+    "noise_4k_ms": 9.702,
+    "sustained_4k_fps_change": -0.173
+  },
+  "status": "PASS",
+  "environment": {
+    "window": "2026-10-11T16:03:38+02:00 to 2026-10-11T16:03:55+02:00",
+    "windows_power_scheme": "Turbo 6fecc5ae-f350-48a5-b669-b472cb895ccf",
+    "competing_compute_processes": [],
+    "idle_before": {
+      "sm_mhz": 1455,
+      "util_pct": 0,
+      "power_w": 25.52,
+      "temp_c": 56,
+      "vram_mib": 0,
+      "pstate": "P0",
+      "power_limit": "N/A"
+    },
+    "under_load": {
+      "sm_mhz": {
+        "min": 1455.0,
+        "max": 1995.0,
+        "mean": 1927.5,
+        "samples": 8
+      },
+      "util_pct": {
+        "min": 0.0,
+        "max": 84.0,
+        "mean": 53.0,
+        "samples": 8
+      },
+      "power_w": {
+        "min": 25.55,
+        "max": 55.38,
+        "mean": 43.03,
+        "samples": 8
+      },
+      "temp_c": {
+        "min": 56.0,
+        "max": 60.0,
+        "mean": 58.125,
+        "samples": 8
+      },
+      "vram_mib": {
+        "min": 208.0,
+        "max": 778.0,
+        "mean": 537.5,
+        "samples": 8
+      }
+    },
+    "pstates_observed": [
+      "P0",
+      "P2"
+    ],
+    "samples": [
+      {
+        "timestamp": "2026/10/11 16:03:39.564",
+        "sm_mhz": 1455.0,
+        "util_pct": 0.0,
+        "power_w": 25.55,
+        "temp_c": 56.0,
+        "vram_mib": 208.0,
+        "pstate": "P0"
+      },
+      {
+        "timestamp": "2026/10/11 16:03:41.643",
+        "sm_mhz": 1995.0,
+        "util_pct": 54.0,
+        "power_w": 37.72,
+        "temp_c": 57.0,
+        "vram_mib": 372.0,
+        "pstate": "P2"
+      },
+      {
+        "timestamp": "2026/10/11 16:03:43.694",
+        "sm_mhz": 1995.0,
+        "util_pct": 52.0,
+        "power_w": 43.03,
+        "temp_c": 57.0,
+        "vram_mib": 588.0,
+        "pstate": "P2"
+      },
+      {
+        "timestamp": "2026/10/11 16:03:45.733",
+        "sm_mhz": 1995.0,
+        "util_pct": 37.0,
+        "power_w": 36.54,
+        "temp_c": 58.0,
+        "vram_mib": 588.0,
+        "pstate": "P2"
+      },
+      {
+        "timestamp": "2026/10/11 16:03:47.796",
+        "sm_mhz": 1995.0,
+        "util_pct": 37.0,
+        "power_w": 37.04,
+        "temp_c": 58.0,
+        "vram_mib": 210.0,
+        "pstate": "P2"
+      },
+      {
+        "timestamp": "2026/10/11 16:03:49.855",
+        "sm_mhz": 1995.0,
+        "util_pct": 80.0,
+        "power_w": 54.5,
+        "temp_c": 59.0,
+        "vram_mib": 778.0,
+        "pstate": "P2"
+      },
+      {
+        "timestamp": "2026/10/11 16:03:51.924",
+        "sm_mhz": 1995.0,
+        "util_pct": 84.0,
+        "power_w": 55.38,
+        "temp_c": 60.0,
+        "vram_mib": 778.0,
+        "pstate": "P2"
+      },
+      {
+        "timestamp": "2026/10/11 16:03:53.992",
+        "sm_mhz": 1995.0,
+        "util_pct": 80.0,
+        "power_w": 54.48,
+        "temp_c": 60.0,
+        "vram_mib": 778.0,
+        "pstate": "P2"
+      }
+    ],
+    "source_equivalent_to": "e6e9cb905aee848808682942d13f07f2ff505a2d",
+    "source_diff_src_include": "empty",
+    "note": "Same-session forced Hybrid on the source-equivalent decoder. Phase 3A figures are the recorded historical session, not a second binary rebuilt for this window."
+  },
+  "comparison_vs_phase3a_forced_hybrid": {
+    "hybrid_1080_change": 0.06978351347026575,
+    "hybrid_4k_change": 0.02173419592302903,
+    "sustained_4k_fps_change": -0.02024669059310665
+  },
+  "conclusion": "No decoder source change. Same-session forced Hybrid is within about 7 percent of the historical Phase 3A Hybrid means and about 2 percent of the sustained rate. The larger Phase 3A-RC Auto gaps are not reproduced here and are treated as benchmark variance."
+}

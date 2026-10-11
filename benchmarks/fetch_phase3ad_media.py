@@ -7,6 +7,7 @@ Writes YUV422 raw frames and a provenance manifest. Hold-out titles are recorded
 and are not downloaded here. Re-encoded frames are not native camera CineForm.
 """
 import json
+import sys
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -123,7 +124,57 @@ def to_yuy2(src, dest, width, height):
     dest.write_bytes(out)
 
 
+def download_recorded_holdout():
+    """Download titles recorded before any oracle measurement. Does not touch validation."""
+    titles = MEDIA / "holdout_titles.txt"
+    manifest = MEDIA / "holdout_manifest.tsv"
+    if not titles.exists():
+        raise SystemExit("hold-out titles were not recorded")
+    if manifest.exists():
+        raise SystemExit("hold-out manifest already exists and must not be rebuilt")
+    rows = []
+    for line in titles.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("\t")
+        if len(parts) < 4:
+            print("skip malformed hold-out title")
+            continue
+        family, title, license, url = parts[0], parts[1], parts[2], parts[3]
+        if not acceptable(license):
+            print("reject hold-out license", title)
+            continue
+        hid = f"photo_holdout_{family}"
+        dest = MEDIA / f"{hid}.yuv"
+        src = MEDIA / f"{hid}.download"
+        try:
+            src.write_bytes(get(url))
+            to_yuy2(src, dest, 1920, 1080)
+            src.unlink(missing_ok=True)
+        except Exception as error:
+            print(f"hold-out download failed {hid}: {error}")
+            try:
+                src.unlink(missing_ok=True)
+            except OSError:
+                pass
+            continue
+        rows.append("\t".join([
+            hid, "holdout", f"holdout_{family}", "1920", "1080",
+            f"benchmarks/phase3ad_media/{hid}.yuv", license, url, title,
+        ]))
+        print("hold-out", hid, license)
+    if not rows:
+        raise SystemExit("no hold-out images were downloaded")
+    manifest.write_text(
+        "id\tsplit\tfamily\twidth\theight\tpath\tlicense\tsource_url\tsource_identity\n" + "\n".join(rows) + "\n",
+        encoding="utf-8")
+    print(f"hold-out images: {len(rows)}")
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "--holdout":
+        download_recorded_holdout()
+        return
     MEDIA.mkdir(parents=True, exist_ok=True)
     manifest = MEDIA / "validation_manifest.tsv"
     titles = MEDIA / "holdout_titles.txt"

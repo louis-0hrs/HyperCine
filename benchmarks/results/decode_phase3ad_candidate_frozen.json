@@ -1,0 +1,479 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "frozen": true,
+  "candidate_name": "phase3ad_baseline",
+  "model": "baseline",
+  "features": [
+    "highpass",
+    "level1_share",
+    "maximum_band",
+    "dense_count"
+  ],
+  "hyperparameters": {
+    "rule": "phase3a fixed thresholds"
+  },
+  "satisfactory_for_production_change": false,
+  "measurement_sha256": "80ed27952342706b10172b1118424bde1cf9512cdf674c2c477affe667dea07d",
+  "analyzer_sha256": "1aed7caff058f1c30c669fd34afb2aa0733ce12bc78ac28dc58f1e34f88b363f",
+  "selection_rule": "Regret-oriented comparison of metadata-only frame dispatch models.\n\nSelection is fixed before the measured corpus is inspected:\n1. Fit rules on development regret. Choose tree and linear hyperparameters by\n   leave-one-family-out regret on development only.\n2. Refit the chosen configuration on all development cases.\n3. A class is eligible when a 1080p-only refit reaches 70 percent capture on\n   validation 4K, or beats the baseline there, and when novel validation\n   families are no worse than the baseline in mean regret or reach 80 percent\n   capture.\n4. Among eligible classes, minimize validation total regret. Models within\n   max(2 ms, 2 percent) of the best regret yield to the simpler model.\n5. Hold-out rows are rejected. This script never reads them.",
+  "development_ids": [
+    {
+      "id": "1920_architecture_graphics",
+      "sample_hash": "179776b23f9546d4"
+    },
+    {
+      "id": "1920_cgi_geometry",
+      "sample_hash": "f8e25d128b886093"
+    },
+    {
+      "id": "1920_clean_sky",
+      "sample_hash": "2b960c6c710ba117"
+    },
+    {
+      "id": "1920_curved_gradient",
+      "sample_hash": "08afef6c04e406a0"
+    },
+    {
+      "id": "1920_dark_noise",
+      "sample_hash": "d1e7d0d37ea14c1f"
+    },
+    {
+      "id": "1920_diagonal_edges",
+      "sample_hash": "02eefcc1e1ec43bb"
+    },
+    {
+      "id": "1920_foliage_proxy",
+      "sample_hash": "2c77689634672cbc"
+    },
+    {
+      "id": "1920_heavy_grain",
+      "sample_hash": "0b812fb6ab4c516d"
+    },
+    {
+      "id": "1920_low_quality_detail",
+      "sample_hash": "edfacd49e3f20aff"
+    },
+    {
+      "id": "1920_mixed_detail",
+      "sample_hash": "1a57fcb0362ec74c"
+    },
+    {
+      "id": "1920_motion_blur_proxy",
+      "sample_hash": "c7d9cf9af46a2280"
+    },
+    {
+      "id": "1920_skin_proxy",
+      "sample_hash": "84bbd35345f3aa0c"
+    },
+    {
+      "id": "1920_text_ui",
+      "sample_hash": "4e7f90d622bd23ce"
+    },
+    {
+      "id": "1920_water_proxy",
+      "sample_hash": "b893d56c03e4160a"
+    },
+    {
+      "id": "1920_woven_fabric",
+      "sample_hash": "7c95c17fce6caa19"
+    },
+    {
+      "id": "CFHDsample422.AVI:frame0",
+      "sample_hash": "00c6200414510412"
+    },
+    {
+      "id": "CFHDsample422.AVI:frame12",
+      "sample_hash": "938927c49179827e"
+    },
+    {
+      "id": "CFHDsample422.AVI:frame23",
+      "sample_hash": "e8695e62b315a76a"
+    },
+    {
+      "id": "p3a_1920_edges",
+      "sample_hash": "4fe33f8b19bd20d9"
+    },
+    {
+      "id": "p3a_1920_edges_medium",
+      "sample_hash": "3d1d8734ee8de905"
+    },
+    {
+      "id": "p3a_1920_flat",
+      "sample_hash": "95b06b63ffcdce70"
+    },
+    {
+      "id": "p3a_1920_flat_medium",
+      "sample_hash": "f16dc21718564495"
+    },
+    {
+      "id": "p3a_1920_gradient",
+      "sample_hash": "fe622f7164071989"
+    },
+    {
+      "id": "p3a_1920_gradient_medium",
+      "sample_hash": "32c8736af0d6061d"
+    },
+    {
+      "id": "p3a_1920_noise",
+      "sample_hash": "d5cdfed98902761d"
+    },
+    {
+      "id": "p3a_1920_noise_medium",
+      "sample_hash": "549b9e8edcbd1860"
+    },
+    {
+      "id": "p3a_1920_texture",
+      "sample_hash": "4f7bac2184ffc14b"
+    },
+    {
+      "id": "p3a_1920_texture_medium",
+      "sample_hash": "1ec097dac4df57e8"
+    },
+    {
+      "id": "r1_1920_clouds_filmscan3",
+      "sample_hash": "7951a64ad7333b52"
+    },
+    {
+      "id": "r1_1920_defocus_filmscan3",
+      "sample_hash": "7197546efa9c3318"
+    },
+    {
+      "id": "r1_1920_fine_textile_filmscan3",
+      "sample_hash": "fcbc642d04663a8f"
+    },
+    {
+      "id": "r1_1920_fine_textile_medium",
+      "sample_hash": "303237edc457898d"
+    },
+    {
+      "id": "r1_1920_geometric_lines_filmscan3",
+      "sample_hash": "79c4f1040410fd5d"
+    },
+    {
+      "id": "r1_1920_grass_filmscan3",
+      "sample_hash": "fcbcc667df89cbdf"
+    },
+    {
+      "id": "r1_1920_grass_medium",
+      "sample_hash": "a10be83c15e5f43c"
+    },
+    {
+      "id": "r1_1920_high_contrast_filmscan3",
+      "sample_hash": "a1285d4b0d9dbb0d"
+    },
+    {
+      "id": "r1_1920_high_contrast_medium",
+      "sample_hash": "b9169ebfd15a1459"
+    },
+    {
+      "id": "r1_1920_repeating_pattern_filmscan3",
+      "sample_hash": "c1a3e0f9bb3ed3cc"
+    },
+    {
+      "id": "r1_1920_saturated_chroma_filmscan3",
+      "sample_hash": "ff2ec6506268b7ae"
+    },
+    {
+      "id": "r1_1920_saturated_chroma_medium",
+      "sample_hash": "14e9e791c6097caf"
+    },
+    {
+      "id": "r1_1920_sensor_noise_filmscan3",
+      "sample_hash": "cbe7793cc3d66fe6"
+    },
+    {
+      "id": "r1_1920_shadows_filmscan3",
+      "sample_hash": "1e333e10a8942e8b"
+    },
+    {
+      "id": "r1_1920_skin_pores_filmscan3",
+      "sample_hash": "963738033bf39e8b"
+    },
+    {
+      "id": "r1_1920_skin_pores_medium",
+      "sample_hash": "0788b2cc22c8c0f8"
+    },
+    {
+      "id": "r1_1920_sparse_graphics_filmscan3",
+      "sample_hash": "eaf6a98f9dd66373"
+    },
+    {
+      "id": "r1_1920_sparse_graphics_medium",
+      "sample_hash": "471ad5790823b91c"
+    },
+    {
+      "id": "3840_architecture_graphics",
+      "sample_hash": "6676cd15d543bc8e"
+    },
+    {
+      "id": "3840_cgi_geometry",
+      "sample_hash": "0019978ab0525b28"
+    },
+    {
+      "id": "3840_clean_sky",
+      "sample_hash": "85b8dcf0a13d63a3"
+    },
+    {
+      "id": "3840_curved_gradient",
+      "sample_hash": "e428bdf3193c09d6"
+    },
+    {
+      "id": "3840_dark_noise",
+      "sample_hash": "3036eea8c7d5c427"
+    },
+    {
+      "id": "3840_diagonal_edges",
+      "sample_hash": "dd9441c9e373263b"
+    },
+    {
+      "id": "3840_foliage_proxy",
+      "sample_hash": "4fbc23ea2afc4dec"
+    },
+    {
+      "id": "3840_heavy_grain",
+      "sample_hash": "01b4aa142a975a17"
+    },
+    {
+      "id": "3840_low_quality_detail",
+      "sample_hash": "c3f5a3c75e8ec45e"
+    },
+    {
+      "id": "3840_mixed_detail",
+      "sample_hash": "a16f57f959881307"
+    },
+    {
+      "id": "3840_motion_blur_proxy",
+      "sample_hash": "eba2522fd0bda8c8"
+    },
+    {
+      "id": "3840_skin_proxy",
+      "sample_hash": "fdc86882ecbe66fb"
+    },
+    {
+      "id": "3840_text_ui",
+      "sample_hash": "e94c08902790b719"
+    },
+    {
+      "id": "3840_water_proxy",
+      "sample_hash": "9b5a0643d40850fc"
+    },
+    {
+      "id": "3840_woven_fabric",
+      "sample_hash": "f49b54b7ced6b07f"
+    },
+    {
+      "id": "p3a_3840_edges",
+      "sample_hash": "1ab5662142060c40"
+    },
+    {
+      "id": "p3a_3840_flat",
+      "sample_hash": "7183481dffb2ddc8"
+    },
+    {
+      "id": "p3a_3840_gradient",
+      "sample_hash": "f1cef188c8c3d978"
+    },
+    {
+      "id": "p3a_3840_noise",
+      "sample_hash": "6b12d20527760fc6"
+    },
+    {
+      "id": "p3a_3840_texture",
+      "sample_hash": "89a091e0609b03a8"
+    },
+    {
+      "id": "7680_clean_sky",
+      "sample_hash": "41a9174772a2d8d1"
+    },
+    {
+      "id": "7680_curved_gradient",
+      "sample_hash": "07450d7050fdbb7c"
+    },
+    {
+      "id": "p3a_7680_flat",
+      "sample_hash": "e175e4a3798e6bba"
+    }
+  ],
+  "validation_ids": [
+    {
+      "id": "photo_architecture",
+      "sample_hash": "313bebcc00a671a7"
+    },
+    {
+      "id": "photo_city",
+      "sample_hash": "1dc8c434519813fc"
+    },
+    {
+      "id": "photo_foliage",
+      "sample_hash": "9b5461d5a9380579"
+    },
+    {
+      "id": "photo_grass",
+      "sample_hash": "3702fb8e16e839fb"
+    },
+    {
+      "id": "photo_skin",
+      "sample_hash": "4eda169aaaf152fc"
+    },
+    {
+      "id": "photo_water",
+      "sample_hash": "80a2aab68b8fa90c"
+    },
+    {
+      "id": "r1b_1920_clouds_filmscan3",
+      "sample_hash": "d5b75f36ac86da66"
+    },
+    {
+      "id": "r1b_1920_defocus_filmscan3",
+      "sample_hash": "284513e8bdef578e"
+    },
+    {
+      "id": "r1b_1920_fine_textile_filmscan3",
+      "sample_hash": "c590087767ab000b"
+    },
+    {
+      "id": "r1b_1920_geometric_lines_filmscan3",
+      "sample_hash": "79c4f1040410fd5d"
+    },
+    {
+      "id": "r1b_1920_grass_filmscan3",
+      "sample_hash": "ac23765cbddcc667"
+    },
+    {
+      "id": "r1b_1920_high_contrast_filmscan3",
+      "sample_hash": "a1285d4b0d9dbb0d"
+    },
+    {
+      "id": "r1b_1920_repeating_pattern_filmscan3",
+      "sample_hash": "c1a3e0f9bb3ed3cc"
+    },
+    {
+      "id": "r1b_1920_saturated_chroma_filmscan3",
+      "sample_hash": "0bbed44be5dadb3b"
+    },
+    {
+      "id": "r1b_1920_sensor_noise_filmscan3",
+      "sample_hash": "535507995ab6f1a7"
+    },
+    {
+      "id": "r1b_1920_shadows_filmscan3",
+      "sample_hash": "1addfac6eaaefe4f"
+    },
+    {
+      "id": "r1b_1920_skin_pores_filmscan3",
+      "sample_hash": "c83fe3e0a0196a44"
+    },
+    {
+      "id": "r1b_1920_sparse_graphics_filmscan3",
+      "sample_hash": "eaf6a98f9dd66373"
+    },
+    {
+      "id": "r1v_1920_bokeh_filmscan1",
+      "sample_hash": "e9f0049bdc70b867"
+    },
+    {
+      "id": "r1v_1920_bokeh_filmscan3",
+      "sample_hash": "154969d025c9583d"
+    },
+    {
+      "id": "r1v_1920_halftone_filmscan1",
+      "sample_hash": "3c19f4aeb6e63e26"
+    },
+    {
+      "id": "r1v_1920_halftone_filmscan3",
+      "sample_hash": "1215b6f120ebec64"
+    },
+    {
+      "id": "r1v_1920_starfield_filmscan1",
+      "sample_hash": "29e183edf155ee7c"
+    },
+    {
+      "id": "r1v_1920_starfield_filmscan3",
+      "sample_hash": "cded39c7643205ee"
+    },
+    {
+      "id": "r1v_1920_window_blinds_filmscan1",
+      "sample_hash": "fe9a2781509a332e"
+    },
+    {
+      "id": "r1v_1920_window_blinds_filmscan3",
+      "sample_hash": "3e6a086c49d12d4f"
+    },
+    {
+      "id": "r1_3840_clouds_filmscan3",
+      "sample_hash": "9d125f92e6e0da86"
+    },
+    {
+      "id": "r1_3840_defocus_filmscan3",
+      "sample_hash": "4480143b61d66aad"
+    },
+    {
+      "id": "r1_3840_fine_textile_filmscan3",
+      "sample_hash": "62cb17ee1156bcda"
+    },
+    {
+      "id": "r1_3840_geometric_lines_filmscan3",
+      "sample_hash": "3f49f813b4b1a552"
+    },
+    {
+      "id": "r1_3840_grass_filmscan3",
+      "sample_hash": "0799d2deb584a0ee"
+    },
+    {
+      "id": "r1_3840_high_contrast_filmscan3",
+      "sample_hash": "4341bd8bdb23fb6c"
+    },
+    {
+      "id": "r1_3840_repeating_pattern_filmscan3",
+      "sample_hash": "55a295e639ba620e"
+    },
+    {
+      "id": "r1_3840_saturated_chroma_filmscan3",
+      "sample_hash": "604b60b75488b4b8"
+    },
+    {
+      "id": "r1_3840_sensor_noise_filmscan3",
+      "sample_hash": "e1737166519cc12a"
+    },
+    {
+      "id": "r1_3840_shadows_filmscan3",
+      "sample_hash": "a21c7dbb535e474f"
+    },
+    {
+      "id": "r1_3840_skin_pores_filmscan3",
+      "sample_hash": "3d57f8f6c98d7d86"
+    },
+    {
+      "id": "r1_3840_sparse_graphics_filmscan3",
+      "sample_hash": "c5a340f5fddf5d5a"
+    },
+    {
+      "id": "r1v_3840_bokeh_filmscan3",
+      "sample_hash": "8e4cc1c766c1fc82"
+    },
+    {
+      "id": "r1v_3840_halftone_filmscan3",
+      "sample_hash": "c6af91298f7527da"
+    },
+    {
+      "id": "r1v_3840_starfield_filmscan3",
+      "sample_hash": "617e52b561c32c07"
+    },
+    {
+      "id": "r1v_3840_window_blinds_filmscan3",
+      "sample_hash": "6ca99037c5218ea3"
+    },
+    {
+      "id": "p3a_7680_edges",
+      "sample_hash": "47eec0162401f414"
+    },
+    {
+      "id": "p3a_7680_gradient",
+      "sample_hash": "15942a87fae03028"
+    },
+    {
+      "id": "p3a_7680_texture",
+      "sample_hash": "a78b401beaa2b1aa"
+    }
+  ]
+}

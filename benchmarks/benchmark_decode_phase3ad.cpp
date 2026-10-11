@@ -425,7 +425,11 @@ void RunCorpus(const std::filesystem::path& root, const std::filesystem::path& o
         }
         auto sample = Materialize(root, spec, cache);
         std::vector<GpuEntropyBandDescriptor> bands; std::string reason; DecodeError error = DecodeError::None;
-        const bool ok = ParseCineFormSampleValidated(sample.compressed.data(), sample.compressed.size(), 24, bands, &reason, &error);
+        const bool parsed = ParseCineFormSampleValidated(sample.compressed.data(), sample.compressed.size(), 24, bands, &reason, &error);
+        // QueueDecode rejects samples above 32 MiB. That production limit stays frozen.
+        constexpr size_t kProductionSampleLimit = 32u * 1024u * 1024u;
+        const bool within_limit = sample.compressed.size() <= kProductionSampleLimit;
+        const bool ok = parsed && within_limit;
         if (written++) json << ",\n";
         json << "{\"id\":\"" << spec.id << "\",\"split\":\"" << spec.split << "\",\"origin\":\"" << spec.origin
              << "\",\"family\":\"" << spec.family << "\",\"generator\":\"" << spec.generator << "\",\"sibling\":\"" << spec.sibling
@@ -435,9 +439,13 @@ void RunCorpus(const std::filesystem::path& root, const std::filesystem::path& o
              << "\",\"sample_hash\":\"" << Hash(sample.compressed.data(), sample.compressed.size())
              << "\",\"source_hash\":\"" << sample.input_hash << "\",\"sample_bytes\":" << sample.compressed.size()
              << ",\"supported\":" << ok;
-        if (!ok) {
+        if (!parsed) {
             json << ",\"rejection\":\"" << Escape(reason) << "\"}";
             std::cout << spec.id << " unsupported " << reason << '\n' << std::flush; continue;
+        }
+        if (!within_limit) {
+            json << ",\"rejection\":\"production decoder rejects samples above 32 MiB\"}";
+            std::cout << spec.id << " unsupported sample " << sample.compressed.size() << " bytes exceeds 32 MiB\n" << std::flush; continue;
         }
         DecodeFrameInfo info; const auto baseline = ClassifyDecodeFrame(bands, info);
         const auto expected = ExpectedHighpass(spec.id);
@@ -467,8 +475,12 @@ void RunCorpus(const std::filesystem::path& root, const std::filesystem::path& o
         }
         const int runs = RunsFor(spec.w);
         Timed light, hybrid;
-        if (index % 2) { light = Measure(*decoder, sample, DiagnosticDecodeStrategy::Lightweight, runs); hybrid = Measure(*decoder, sample, DiagnosticDecodeStrategy::Hybrid, runs); }
-        else { hybrid = Measure(*decoder, sample, DiagnosticDecodeStrategy::Hybrid, runs); light = Measure(*decoder, sample, DiagnosticDecodeStrategy::Lightweight, runs); }
+        try {
+            if (index % 2) { light = Measure(*decoder, sample, DiagnosticDecodeStrategy::Lightweight, runs); hybrid = Measure(*decoder, sample, DiagnosticDecodeStrategy::Hybrid, runs); }
+            else { hybrid = Measure(*decoder, sample, DiagnosticDecodeStrategy::Hybrid, runs); light = Measure(*decoder, sample, DiagnosticDecodeStrategy::Lightweight, runs); }
+        } catch (const std::exception& ex) {
+            throw std::runtime_error(spec.id + " " + ex.what());
+        }
         json << "],\"measured_frames\":" << runs << ",\"lightweight\":"; WriteTimed(json, light);
         json << ",\"hybrid\":"; WriteTimed(json, hybrid);
         json << ",\"compiled_candidate_strategy\":\"" << StrategyName(chosen) << '"';

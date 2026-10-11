@@ -1,0 +1,349 @@
+{
+  "cases": [],
+  "selected_model": "baseline",
+  "satisfactory_for_production_change": false,
+  "selection_rule": "Regret-oriented comparison of metadata-only frame dispatch models.\n\nSelection is fixed before the measured corpus is inspected:\n1. Fit rules on development regret. Choose tree and linear hyperparameters by\n   leave-one-family-out regret on development only.\n2. Refit the chosen configuration on all development cases.\n3. A class is eligible when a 1080p-only refit reaches 70 percent capture on\n   validation 4K, or beats the baseline there, and when novel validation\n   families are no worse than the baseline in mean regret or reach 80 percent\n   capture.\n4. Among eligible classes, minimize validation total regret. Models within\n   max(2 ms, 2 percent) of the best regret yield to the simpler model.\n5. Hold-out rows are rejected. This script never reads them.",
+  "measurement_sha256": "80ed27952342706b10172b1118424bde1cf9512cdf674c2c477affe667dea07d",
+  "analyzer_sha256": "1aed7caff058f1c30c669fd34afb2aa0733ce12bc78ac28dc58f1e34f88b363f",
+  "development_cases": 69,
+  "validation_cases": 45,
+  "selected_validation": {
+    "cases": 45,
+    "capture": 0.29535072826256736,
+    "total_regret_ms": 25.937655810000024,
+    "mean_regret_ms": 0.5763923513333339,
+    "median_regret_ms": 0.0,
+    "p95_regret_ms": 3.21851167,
+    "worst_regret_ms": 5.586537470000001,
+    "matches": 36,
+    "misses": 9,
+    "miss_list": [
+      {
+        "id": "photo_city",
+        "family": "city",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 0.36885167000000063,
+        "delta_ms": 0.36885167000000063,
+        "width": 1920
+      },
+      {
+        "id": "photo_skin",
+        "family": "skin",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 0.6986950000000007,
+        "delta_ms": 0.6986950000000007,
+        "width": 1920
+      },
+      {
+        "id": "r1b_1920_high_contrast_filmscan3",
+        "family": "high_contrast",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.7771158299999996,
+        "delta_ms": 2.7771158299999996,
+        "width": 1920
+      },
+      {
+        "id": "r1v_1920_halftone_filmscan1",
+        "family": "halftone",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 5.586537470000001,
+        "delta_ms": 5.586537470000001,
+        "width": 1920
+      },
+      {
+        "id": "r1v_1920_halftone_filmscan3",
+        "family": "halftone",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 5.494249199999999,
+        "delta_ms": 5.494249199999999,
+        "width": 1920
+      },
+      {
+        "id": "r1v_1920_window_blinds_filmscan3",
+        "family": "window_blinds",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.044115,
+        "delta_ms": 3.044115,
+        "width": 1920
+      },
+      {
+        "id": "r1_3840_high_contrast_filmscan3",
+        "family": "high_contrast",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.21851167,
+        "delta_ms": 3.21851167,
+        "width": 3840
+      },
+      {
+        "id": "r1v_3840_halftone_filmscan3",
+        "family": "halftone",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.2358182999999983,
+        "delta_ms": 2.2358182999999983,
+        "width": 3840
+      },
+      {
+        "id": "r1v_3840_window_blinds_filmscan3",
+        "family": "window_blinds",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.51376167,
+        "delta_ms": 2.51376167,
+        "width": 3840
+      }
+    ],
+    "catastrophic": [
+      {
+        "id": "r1b_1920_high_contrast_filmscan3",
+        "family": "high_contrast",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.7771158299999996,
+        "delta_ms": 2.7771158299999996,
+        "width": 1920
+      },
+      {
+        "id": "r1v_1920_halftone_filmscan1",
+        "family": "halftone",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 5.586537470000001,
+        "delta_ms": 5.586537470000001,
+        "width": 1920
+      },
+      {
+        "id": "r1v_1920_halftone_filmscan3",
+        "family": "halftone",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 5.494249199999999,
+        "delta_ms": 5.494249199999999,
+        "width": 1920
+      },
+      {
+        "id": "r1v_1920_window_blinds_filmscan3",
+        "family": "window_blinds",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.044115,
+        "delta_ms": 3.044115,
+        "width": 1920
+      },
+      {
+        "id": "r1_3840_high_contrast_filmscan3",
+        "family": "high_contrast",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.21851167,
+        "delta_ms": 3.21851167,
+        "width": 3840
+      },
+      {
+        "id": "r1v_3840_halftone_filmscan3",
+        "family": "halftone",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.2358182999999983,
+        "delta_ms": 2.2358182999999983,
+        "width": 3840
+      },
+      {
+        "id": "r1v_3840_window_blinds_filmscan3",
+        "family": "window_blinds",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.51376167,
+        "delta_ms": 2.51376167,
+        "width": 3840
+      }
+    ],
+    "catastrophic_count": 7,
+    "sum_selected_ms": 368.85597084000005,
+    "sum_oracle_ms": 342.91831503000003,
+    "sum_lightweight_ms": 643.6747766699998,
+    "sum_hybrid_ms": 379.7276283300001
+  },
+  "selected_development": {
+    "cases": 69,
+    "capture": 0.5644434574268202,
+    "total_regret_ms": 21.96234669000006,
+    "mean_regret_ms": 0.3182948795652183,
+    "median_regret_ms": 0.0,
+    "p95_regret_ms": 2.9768875,
+    "worst_regret_ms": 5.336135,
+    "matches": 59,
+    "misses": 10,
+    "miss_list": [
+      {
+        "id": "1920_architecture_graphics",
+        "family": "architecture_graphics",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 5.336135,
+        "delta_ms": 5.336135,
+        "width": 1920
+      },
+      {
+        "id": "1920_mixed_detail",
+        "family": "mixed_detail",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.0016,
+        "delta_ms": 3.0016,
+        "width": 1920
+      },
+      {
+        "id": "1920_text_ui",
+        "family": "text_ui",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 4.392565,
+        "delta_ms": 4.392565,
+        "width": 1920
+      },
+      {
+        "id": "r1_1920_fine_textile_medium",
+        "family": "fine_textile",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 0.7207591600000001,
+        "delta_ms": 0.7207591600000001,
+        "width": 1920
+      },
+      {
+        "id": "r1_1920_high_contrast_filmscan3",
+        "family": "high_contrast",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.9768875,
+        "delta_ms": 2.9768875,
+        "width": 1920
+      },
+      {
+        "id": "r1_1920_skin_pores_medium",
+        "family": "skin_pores",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 0.43412333000000025,
+        "delta_ms": 0.43412333000000025,
+        "width": 1920
+      },
+      {
+        "id": "3840_architecture_graphics",
+        "family": "architecture_graphics",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.0079583000000003,
+        "delta_ms": 1.0079583000000003,
+        "width": 3840
+      },
+      {
+        "id": "3840_cgi_geometry",
+        "family": "cgi_geometry",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 0.22235340000000292,
+        "delta_ms": 0.22235340000000292,
+        "width": 3840
+      },
+      {
+        "id": "3840_clean_sky",
+        "family": "clean_sky",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.0226950000000006,
+        "delta_ms": 2.0226950000000006,
+        "width": 3840
+      },
+      {
+        "id": "3840_curved_gradient",
+        "family": "curved_gradient",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.84727,
+        "delta_ms": 1.84727,
+        "width": 3840
+      }
+    ],
+    "catastrophic": [
+      {
+        "id": "1920_architecture_graphics",
+        "family": "architecture_graphics",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 5.336135,
+        "delta_ms": 5.336135,
+        "width": 1920
+      },
+      {
+        "id": "1920_mixed_detail",
+        "family": "mixed_detail",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 3.0016,
+        "delta_ms": 3.0016,
+        "width": 1920
+      },
+      {
+        "id": "1920_text_ui",
+        "family": "text_ui",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 4.392565,
+        "delta_ms": 4.392565,
+        "width": 1920
+      },
+      {
+        "id": "r1_1920_high_contrast_filmscan3",
+        "family": "high_contrast",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.9768875,
+        "delta_ms": 2.9768875,
+        "width": 1920
+      },
+      {
+        "id": "3840_clean_sky",
+        "family": "clean_sky",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 2.0226950000000006,
+        "delta_ms": 2.0226950000000006,
+        "width": 3840
+      },
+      {
+        "id": "3840_curved_gradient",
+        "family": "curved_gradient",
+        "choice": "hybrid",
+        "oracle": "lightweight",
+        "regret_ms": 1.84727,
+        "delta_ms": 1.84727,
+        "width": 3840
+      }
+    ],
+    "catastrophic_count": 6,
+    "sum_selected_ms": 435.62875747000015,
+    "sum_oracle_ms": 413.6664107800001,
+    "sum_lightweight_ms": 766.5373923400001,
+    "sum_hybrid_ms": 464.0900516700002
+  },
+  "novel_validation_families": [
+    "architecture",
+    "bokeh",
+    "city",
+    "foliage",
+    "halftone",
+    "skin",
+    "starfield",
+    "water",
+    "window_blinds"
+  ]
+}
