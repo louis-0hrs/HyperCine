@@ -104,10 +104,33 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(test_decode_phase3b0 PRIVATE psapi)
     endif()
     add_test(NAME test_decode_phase3b0 COMMAND test_decode_phase3b0
-        "${CMAKE_SOURCE_DIR}/benchmarks/results"
-        "${CMAKE_SOURCE_DIR}/tests/fixtures/phase3b0"
+        "${CMAKE_CURRENT_BINARY_DIR}/phase3b0-regression/results"
+        "${CMAKE_CURRENT_BINARY_DIR}/phase3b0-regression/fixtures"
         "${CMAKE_SOURCE_DIR}")
     set_tests_properties(test_decode_phase3b0 PROPERTIES TIMEOUT 1800)
+
+    add_executable(test_decode_phase3b1 test_decode_phase3b1.cpp)
+    target_compile_definitions(test_decode_phase3b1 PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase3b1 PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_decode_phase3b1 PRIVATE psapi)
+    endif()
+    add_test(NAME test_decode_phase3b1 COMMAND test_decode_phase3b1
+        "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/benchmarks/results")
+    set_tests_properties(test_decode_phase3b1 PROPERTIES TIMEOUT 1800)
+
+    add_executable(test_decode_phase3b1_acceptance test_decode_phase3b1_acceptance.cpp)
+    target_compile_definitions(test_decode_phase3b1_acceptance PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase3b1_acceptance PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_decode_phase3b1_acceptance PRIVATE psapi)
+    endif()
+    add_test(NAME test_decode_phase3b1_acceptance COMMAND test_decode_phase3b1_acceptance
+        "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/phase3b1-acceptance" --matrix)
+    add_test(NAME test_decode_phase3b1_stress COMMAND test_decode_phase3b1_acceptance
+        "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/phase3b1-stress" --stress)
+    set_tests_properties(test_decode_phase3b1_acceptance test_decode_phase3b1_stress PROPERTIES TIMEOUT 1800)
+
     add_executable(test_decode_phase2fa test_decode_phase2fa.cpp)
     target_compile_definitions(test_decode_phase2fa PRIVATE _ALLOCATOR=1)
     target_link_libraries(test_decode_phase2fa PRIVATE hypercine_wavelet CFHDCodecStatic)

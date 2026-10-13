@@ -1337,7 +1337,7 @@ int main(int argc, char** argv) {
     });
     const bool yuv_i = std::any_of(done.begin(), done.end(), [](const Attempt& item) {
         return item.id == "yuy2_interlaced_reconfirm" && item.sample_bytes > 0 && item.upstream_ok &&
-               !item.production_ok && item.production_status == "UnsupportedEncodingMode";
+               item.production_ok && item.production_status == "None";
     });
     std::ofstream completion(results / "decode_phase3b0_completion.json");
     completion << "{\"attempts\":" << done.size() << ",\"encoded\":" << success << ",\"not_encoded\":" << failed

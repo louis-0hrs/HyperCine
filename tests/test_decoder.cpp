@@ -231,8 +231,8 @@ void Malformed(const std::vector<Sample>& samples, int count) {
     t = d.QueueDecode(s.compressed.data(), 32u * 1024 * 1024 + 1);
     Require(d.WaitForDecode(t).error == DecodeError::SampleTooLarge, "bounded scratch/sample capacity"); d.ReleaseOutput(t);
     for(int bad=0;bad<3;++bad){auto bytes=s.compressed;
-        if(bad==0)SetTag(bytes,72,0x8000);else if(bad==1)SetTag(bytes,68,0);else{const size_t p=descriptors[0].payload_offset-8;bytes[p+2]=0;bytes[p+3]=1;}
-        t=d.QueueDecode(bytes.data(),bytes.size());Require(d.WaitForDecode(t).state==DecodeState::Failed,"reserved flags, interlaced and corrupted LL chunk rejection");
+        if(bad==0)SetTag(bytes,72,0x8000);else if(bad==1)SetTag(bytes,11,2);else{const size_t p=descriptors[0].payload_offset-8;bytes[p+2]=0;bytes[p+3]=1;}
+        t=d.QueueDecode(bytes.data(),bytes.size());Require(d.WaitForDecode(t).state==DecodeState::Failed,"reserved flags, frame-count and corrupted LL chunk rejection");
         DeviceOutput unavailable;Require(!d.GetDeviceOutput(t,&unavailable),"malformed no output");d.ReleaseOutput(t);}
     std::cout << "deterministic malformed mutations " << count << " PASS\n" << std::flush;
 }
@@ -263,10 +263,10 @@ void Difference() {
     std::vector<GpuEntropyBandDescriptor> parsed; Require(ParseCineFormSample(sample.compressed.data(),n,24,parsed), "real difference parse");
     Require(std::any_of(parsed.begin(),parsed.end(),[](const auto& d){return d.difference_coding;}), "real difference flags");
     Decoder d; Require(d.Initialize() == DecodeError::None, "difference init");
-    auto rejected = d.QueueDecode(sample.compressed.data(),n);
-    Require(d.WaitForDecode(rejected).state==DecodeState::Failed && d.PollDecode(rejected).error==DecodeError::UnsupportedEncodingMode,"deliberate unsupported interlaced output status");
-    DeviceOutput unpublished;Require(!d.GetDeviceOutput(rejected,&unpublished),"unsupported interlaced output unpublished");d.ReleaseOutput(rejected);
     ReferenceDecoder cpu(sample,CFHD_PIXEL_FORMAT_BGRA);cpu.Decode(sample);
+    auto accepted = Begin(d, sample);
+    Require(Image(d, accepted, sample) == cpu.output, "interlaced GOP-1 production BGRA exact");
+    d.ReleaseOutput(accepted);
     const auto cpu_bands=ExtractBandsFromNative(cpu.GetNative());
     CudaDecoderPipelinePhase2E ref; Require(ref.Initialize(1920,1080,1,10,8,4), "difference legacy init");
     auto rt = ref.QueueDecode(sample.compressed.data(),n); Require(rt && ref.WaitForDecode(rt), "difference legacy decode");
@@ -278,7 +278,7 @@ void Difference() {
         const auto& r=cpu_bands[size_t(b)];Require(bw==r.width&&bh==r.height,"difference CPU geometry");
         for(int y=0;y<bh;++y)for(int x=0;x<bw;++x)Require(a[size_t(y)*(pitch/2)+x]==r.host_data[size_t(y)*(r.pitch/2)+x],"difference CPU coefficient max error 0"); }
     hybrid.ReleaseOutput(ht);ref.ReleaseOutput(rt);
-    std::cout << "real difference-coded entropy/coefficient validation -- interlaced output reconstruction deferred: 30/30 CPU/E/hybrid exact, max error 0 PASS\n" << std::flush;
+    std::cout << "real difference-coded entropy/coefficient validation and interlaced GOP-1 BGRA exact: 30/30 CPU/E/hybrid, max error 0 PASS\n" << std::flush;
     // Optional unchanged-encoder search: progressive YUY2 Noise. Failure to
     // find difference coding does not widen or block the production scope.
     void* progressive_raw=nullptr;Check(CFHD_OpenEncoder(&progressive_raw,nullptr),"progressive probe encoder");Encoder progressive_encoder(progressive_raw);
@@ -382,7 +382,7 @@ int main(int argc,char** argv) {
         const auto steady=allocations.load()-before;
         Require(steady==0,"steady-state C++ heap allocations");
         json << "\"malformed_cases\":" << (sanitizer?41:1005) << ",\"coefficient_overflow_rejected\":true,\"two_instances\":true,\"four_instances\":true,\"random_access\":true,"
-             << "\"output_lifetime\":true,\"queue_saturation\":true,\"real_difference_coded_coefficients_exact\":30,\"real_difference_max_error\":0,\"interlaced_production_rejected\":true,\"interlaced_output_reconstruction\":\"deferred\",\"determinism\":true,\"steady_state_cpp_allocations\":" << steady << ",\"status\":\"PASS\"}\n";
+             << "\"output_lifetime\":true,\"queue_saturation\":true,\"real_difference_coded_coefficients_exact\":30,\"real_difference_max_error\":0,\"interlaced_production_rejected\":false,\"interlaced_output_reconstruction\":\"exact\",\"determinism\":true,\"steady_state_cpp_allocations\":" << steady << ",\"status\":\"PASS\"}\n";
         std::cout << "production decoder validation PASS; C++ allocations after warm-up=" << steady << '\n';
         return 0;
     } catch(const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
