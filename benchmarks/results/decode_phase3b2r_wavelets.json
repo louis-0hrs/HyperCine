@@ -1,0 +1,129 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "schema_version": "1.0",
+  "evidence": {
+    "generated_probe": "tests/test_decode_phase3b2r.cpp",
+    "canonical_fixtures": "tests/fixtures/phase3b0",
+    "encoded_transform": "FIELDPLUS / GOP-2",
+    "precision": 10,
+    "num_frames": 2,
+    "num_spatial": 3,
+    "channels": [
+      "Y",
+      "V",
+      "U"
+    ],
+    "num_wavelets": 6,
+    "source_image": "YUV 4:2:2"
+  },
+  "wavelets": [
+    {
+      "index": 0,
+      "name": "frame0 base transform",
+      "progressive_role": "first input frame spatial wavelet",
+      "interlaced_role": "first input frame horizontal plus intra-frame field temporal wavelet",
+      "temporal_role": "frame0",
+      "band_count": 4,
+      "dimensions_64": {
+        "u": "16x32",
+        "luma": "32x32",
+        "v": "16x32"
+      },
+      "dimensions_1080": {
+        "u": "480x540",
+        "luma": "960x540",
+        "v": "480x540"
+      }
+    },
+    {
+      "index": 1,
+      "name": "frame1 base transform",
+      "progressive_role": "second input frame spatial wavelet",
+      "interlaced_role": "second input frame horizontal plus intra-frame field temporal wavelet",
+      "temporal_role": "frame1",
+      "band_count": 4,
+      "dimensions_64": {
+        "u": "16x32",
+        "luma": "32x32",
+        "v": "16x32"
+      },
+      "dimensions_1080": {
+        "u": "480x540",
+        "luma": "960x540",
+        "v": "480x540"
+      }
+    },
+    {
+      "index": 2,
+      "name": "GOP temporal wavelet",
+      "progressive_role": "coefficient-wise temporal transform of wavelet0 LL and wavelet1 LL",
+      "interlaced_role": "same GOP transform applied after each frame field-horizontal transform",
+      "temporal_role": "GOP lowpass sum in band0; GOP highpass difference in band1",
+      "band_count": 2,
+      "dimensions_64": {
+        "u": "16x32",
+        "luma": "32x32",
+        "v": "16x32"
+      },
+      "dimensions_1080": {
+        "u": "480x540",
+        "luma": "960x540",
+        "v": "480x540"
+      }
+    },
+    {
+      "index": 3,
+      "name": "temporal highpass spatial branch",
+      "progressive_role": "one spatial transform of wavelet2 band1",
+      "interlaced_role": "same branch after per-frame field-horizontal transforms",
+      "temporal_role": "GOP temporal highpass",
+      "band_count": 4,
+      "dimensions_64": {
+        "u": "8x16",
+        "luma": "16x16",
+        "v": "8x16"
+      },
+      "dimensions_1080": {
+        "u": "240x270",
+        "luma": "480x270",
+        "v": "240x270"
+      }
+    },
+    {
+      "index": 4,
+      "name": "temporal lowpass spatial branch level1",
+      "progressive_role": "first spatial transform of wavelet2 band0",
+      "interlaced_role": "same branch after per-frame field-horizontal transforms",
+      "temporal_role": "GOP temporal lowpass",
+      "band_count": 4,
+      "dimensions_64": {
+        "u": "8x16",
+        "luma": "16x16",
+        "v": "8x16"
+      },
+      "dimensions_1080": {
+        "u": "240x270",
+        "luma": "480x270",
+        "v": "240x270"
+      }
+    },
+    {
+      "index": 5,
+      "name": "temporal lowpass spatial branch level2",
+      "progressive_role": "second spatial transform of wavelet4 band0; final lowpass image",
+      "interlaced_role": "same lowpass branch",
+      "temporal_role": "GOP temporal lowpass",
+      "band_count": 4,
+      "dimensions_64": {
+        "u": "4x8",
+        "luma": "8x8",
+        "v": "4x8"
+      },
+      "dimensions_1080": {
+        "u": "120x135",
+        "luma": "240x135",
+        "v": "120x135"
+      }
+    }
+  ]
+}

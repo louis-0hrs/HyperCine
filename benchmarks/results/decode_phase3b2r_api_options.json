@@ -1,0 +1,63 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "schema_version": "1.0",
+  "selected": "C",
+  "recommendation": "Explicit frame_index on decode request/retrieval; keep default index 0 for current one-frame profiles.",
+  "timestamp": "CFHD sample sequence/frame number is not PTS/DTS; no presentation time is stored in the sample. Container timing supplies both frame times.",
+  "random_access": "Both output frames are reconstructed from one self-contained sample; random access is available at sample/GOP boundary.",
+  "options": [
+    {
+      "option": "A",
+      "name": "one call returns two outputs",
+      "ownership": "two output surfaces returned together",
+      "pros": [
+        "natural GOP decode result"
+      ],
+      "cons": [
+        "changes return shape and lifetime rules",
+        "container timestamps must map to both surfaces"
+      ],
+      "recommendation": "not selected"
+    },
+    {
+      "option": "B",
+      "name": "one sample creates two tickets",
+      "ownership": "tickets share sample and decode resource lifetime",
+      "pros": [
+        "fits one-output ticket shape"
+      ],
+      "cons": [
+        "shared lifetime and cancellation complexity",
+        "duplicate scheduling/accounting"
+      ],
+      "recommendation": "not selected"
+    },
+    {
+      "option": "C",
+      "name": "caller requests frame index",
+      "ownership": "explicit sample plus requested index; may render sequentially",
+      "pros": [
+        "clear seek/frame-step behavior",
+        "preserves default frame 0 for GOP-1",
+        "container associates per-output timestamps"
+      ],
+      "cons": [
+        "requires frame_index API/retrieval extension"
+      ],
+      "recommendation": "selected"
+    },
+    {
+      "option": "D",
+      "name": "internal GOP queue yields sequential frames",
+      "ownership": "stateful decoder queue",
+      "pros": [
+        "sequential streaming convenience"
+      ],
+      "cons": [
+        "hidden order and reset/seek complexity",
+        "less direct NLE access"
+      ],
+      "recommendation": "not selected"
+    }
+  ]
+}

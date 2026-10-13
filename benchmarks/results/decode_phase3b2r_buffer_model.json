@@ -1,0 +1,43 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "schema_version": "1.0",
+  "basis": "active coefficient and output storage only; excludes alignment, entropy state, scratch, color buffers and allocator overhead",
+  "coefficient_model": {
+    "formula": "Y 3.0625 coefficient samples per full-area pixel + U/V each at half width",
+    "bytes_per_luma_pixel": 12.25,
+    "signed_i16_words_per_luma_pixel": 6.125
+  },
+  "resolutions": [
+    {
+      "name": "1920x1080",
+      "two_bgra_bytes": 16588800,
+      "two_bgra_MiB": 15.82,
+      "coefficient_MiB": 24.22,
+      "combined_bytes": 41990400,
+      "pixels": 2073600,
+      "coefficient_bytes": 25401600,
+      "combined_MiB": 40.04
+    },
+    {
+      "name": "3840x2160",
+      "two_bgra_bytes": 66355200,
+      "two_bgra_MiB": 63.28,
+      "coefficient_MiB": 96.9,
+      "combined_bytes": 167961600,
+      "pixels": 8294400,
+      "coefficient_bytes": 101606400,
+      "combined_MiB": 160.18
+    }
+  ],
+  "topology": {
+    "physical_chunks_per_sample": 54,
+    "wavelets_per_channel": 6,
+    "temporal_low_high_bands": 2,
+    "outputs": "one or two BGRA surfaces depending on API ownership",
+    "coefficient_storage_lifetime": "through both frame reconstruction requests",
+    "output_frames_per_sample": 2,
+    "logical_subbands_per_channel": 17,
+    "channels": 3
+  },
+  "per_slot": "Lower-bound active bytes; add aligned pitches, parser/entropy state, temporal/spatial scratch and color conversion buffers."
+}

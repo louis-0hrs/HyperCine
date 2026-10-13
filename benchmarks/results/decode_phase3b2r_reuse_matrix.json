@@ -1,0 +1,66 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "schema_version": "1.0",
+  "rows": [
+    {
+      "detail": "Represent six wavelets, 17 logical bands/channel, 54 chunks and empty temporal-high controls; do not force into existing 30-band ParsedFrame.",
+      "component": "Parser",
+      "classification": "reuse with redesign"
+    },
+    {
+      "detail": "Observed codebooks 0, 1 and 2 decode through existing CPU primitives; route payloads to wavelet/band storage.",
+      "component": "VLC/FSM entropy",
+      "classification": "reusable with descriptor routing"
+    },
+    {
+      "detail": "Keep entropy checkpoint work after dependencies are keyed by channel/wavelet/band.",
+      "component": "Checkpoint machinery",
+      "classification": "reuse with parameterization"
+    },
+    {
+      "detail": "Codebook 2 with Peak coding observed on interlaced subbands 12/15; pass table and level.",
+      "component": "Peak restoration",
+      "classification": "reusable with descriptor parameterization"
+    },
+    {
+      "detail": "Restore subband 12 and 15 for every channel before inverse transform.",
+      "component": "Difference restoration",
+      "classification": "reusable with descriptor parameterization"
+    },
+    {
+      "detail": "Existing inverse kernels can serve w3, w4, w5 and per-frame base transforms.",
+      "component": "Spatial inverse kernels",
+      "classification": "reusable with a new dependency schedule"
+    },
+    {
+      "detail": "Run independently for each restored frame; validate row parity and chroma geometry.",
+      "component": "GOP-1 field inverse",
+      "classification": "reusable after GOP temporal inverse"
+    },
+    {
+      "detail": "Implement sat16 low/high sum-difference inverse, vector rounding and defined tail behavior.",
+      "component": "GOP temporal inverse",
+      "classification": "new implementation required"
+    },
+    {
+      "detail": "Validate planar output, lowpass bias and BGRA hashes for FIELDPLUS before wiring.",
+      "component": "Color conversion",
+      "classification": "likely reusable after validation"
+    },
+    {
+      "detail": "Accommodate two-frame six-wavelet coefficient storage, stage scratch and output lifetime.",
+      "component": "Slot buffers",
+      "classification": "redesign/resize"
+    },
+    {
+      "detail": "Both GOP branches gate reconstruction of both frame lowpasses; outputs then progress independently.",
+      "component": "Scheduler",
+      "classification": "reuse with dependency parameterization"
+    },
+    {
+      "detail": "Recommend explicit frame_index; research phase leaves API unchanged.",
+      "component": "Ticket API",
+      "classification": "requires public API design"
+    }
+  ]
+}

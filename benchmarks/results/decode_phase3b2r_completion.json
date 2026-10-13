@@ -1,0 +1,30 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "schema_version": "1.0",
+  "phase": "Decode Phase 3B-2R",
+  "branch": "decode-phase3b2r",
+  "base_commit": "f1d0fe4",
+  "outcome": "A",
+  "production_files_changed": false,
+  "production_behavior_changed": false,
+  "encoder_changed": false,
+  "upstream_status": "pristine",
+  "merge_push_tag": "none",
+  "profile_matrix": "10 probes: 5 qualities x progressive/interlaced",
+  "fixtures": "4 frozen 64x64 generated stress vectors; two canonical 64x64 Phase 3B-0 fixtures used unchanged; two generated 1080 references retained in ignored build output",
+  "reference": "Upstream CPU output oracle has per-frame BGRA and Y/U/V output-word hashes and decoded signed coefficient-band hashes",
+  "limitations": [
+    "No direct final signed reconstructed-plane or GOP low/high array capture in current upstream hook.",
+    "FIELDPLUS lowpass output bias must be proven at the final lowpass stage during production integration.",
+    "Upstream scalar tail divides negative odd values toward zero while SIMD path arithmetic-shifts toward negative infinity; future CUDA tail must be tested explicitly."
+  ],
+  "implementation_recommendation": "Plan 2: implement progressive FIELDPLUS in 3B-2A, then interlaced FIELDPLUS in 3B-2B.",
+  "full_ctest": "Attempted: ctest --test-dir build -C Release --output-on-failure. Tests 1-11 passed; test 12 test_decode_phase3b1_stress timed out at 2306.07 s after progress through 4995/5000; tests 13-14 passed. A supplementary -I 15,39 run stalled on test_decode_phase2fa without log progress and was interrupted after >6 minutes (prior CTest cost 32.9147 s). No clean full-suite result.",
+  "focused_tests": [
+    "test_decode_phase3ae passed",
+    "test_decode_phase3b1 passed",
+    "test_decode_phase3b1_acceptance passed, including current FIELDPLUS/RGB444/RGBA4444/Bayer rejection checks",
+    "test_decode_phase3b2r_math passed",
+    "test_decode_phase3b2r_reference passed"
+  ]
+}

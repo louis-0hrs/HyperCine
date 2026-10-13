@@ -1,0 +1,109 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "schema_version": "1.0",
+  "precision": "signed 16-bit coefficients",
+  "forward": {
+    "quantization": {
+      "high": 1,
+      "low": 1
+    },
+    "high": "sat16(frame1 - frame0)",
+    "low": "sat16(frame0 + frame1)"
+  },
+  "inverse": {
+    "frame0": "arithmetic_shift_right_1(sat16(low - high))",
+    "vector_rounding": "arithmetic floor for negative odd values",
+    "tail_note": "upstream scalar tail divides by 2 with C truncation toward zero, unlike SIMD arithmetic shift for negative odd values",
+    "boundary": "two input frames per sample; no neighbor-frame endpoint",
+    "frame1": "arithmetic_shift_right_1(sat16(low + high))",
+    "clamp": "signed int16 saturation before shift; no 10-bit clamp at temporal stage"
+  },
+  "test_cases": [
+    {
+      "name": "zero",
+      "high": 0,
+      "frame0": 0,
+      "low": 0,
+      "frame1": 0
+    },
+    {
+      "name": "positive",
+      "high": 2,
+      "frame0": 3,
+      "low": 8,
+      "frame1": 5
+    },
+    {
+      "name": "negative",
+      "high": -2,
+      "frame0": -3,
+      "low": -8,
+      "frame1": -5
+    },
+    {
+      "name": "negative_odd_round_down",
+      "high": 0,
+      "frame0": -1,
+      "low": -1,
+      "frame1": -1
+    },
+    {
+      "name": "negative_half_boundary",
+      "high": 1,
+      "frame0": -1,
+      "low": 0,
+      "frame1": 0
+    },
+    {
+      "name": "positive_half_boundary",
+      "high": 0,
+      "frame0": 0,
+      "low": 1,
+      "frame1": 0
+    },
+    {
+      "name": "subtraction_saturates",
+      "high": -30000,
+      "frame0": 16383,
+      "low": 30000,
+      "frame1": 0
+    },
+    {
+      "name": "addition_saturates",
+      "high": 30000,
+      "frame0": 0,
+      "low": 30000,
+      "frame1": 16383
+    },
+    {
+      "name": "negative_addition_saturates",
+      "high": -30000,
+      "frame0": 0,
+      "low": -30000,
+      "frame1": -16384
+    },
+    {
+      "name": "negative_subtraction_saturates",
+      "high": 30000,
+      "frame0": -16384,
+      "low": -30000,
+      "frame1": 0
+    },
+    {
+      "name": "near_limit",
+      "high": -1,
+      "frame0": 16383,
+      "low": 32767,
+      "frame1": 16383
+    }
+  ],
+  "roundtrip_vector": {
+    "high": 2000,
+    "source_frame0": 12000,
+    "source_frame1": 14000,
+    "low": 26000,
+    "reconstructed_frame1": 14000,
+    "reconstructed_frame0": 12000
+  },
+  "test_case_count": 11
+}
