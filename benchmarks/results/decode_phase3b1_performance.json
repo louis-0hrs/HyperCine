@@ -1,0 +1,919 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "power": "AC verified before and after each timed A/B block; battery period excluded",
+  "measurement_order": "baseline,current,baseline,current; 3 repeats x 100 frames per block",
+  "progressive_comparison": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "flat",
+      "diagnostic_strategy": 0,
+      "baseline_median_ms": 1.05468,
+      "current_median_ms": 1.052985,
+      "latency_change_percent": -0.16071225395380973,
+      "baseline_repeats_ms": [
+        1.00609,
+        1.0557,
+        1.01561,
+        1.07147,
+        1.05573,
+        1.05366
+      ],
+      "current_repeats_ms": [
+        1.02502,
+        1.05342,
+        1.05255,
+        1.05353,
+        1.11158,
+        1.013
+      ],
+      "sample_hash": "95b06b63ffcdce70"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "flat",
+      "diagnostic_strategy": 1,
+      "baseline_median_ms": 1.10361,
+      "current_median_ms": 1.06836,
+      "latency_change_percent": -3.1940631201239578,
+      "baseline_repeats_ms": [
+        1.22522,
+        1.09503,
+        1.07428,
+        1.12571,
+        1.07725,
+        1.11219
+      ],
+      "current_repeats_ms": [
+        1.03838,
+        1.03166,
+        1.09128,
+        1.08854,
+        1.06023,
+        1.07649
+      ],
+      "sample_hash": "95b06b63ffcdce70"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "flat",
+      "diagnostic_strategy": 2,
+      "baseline_median_ms": 2.41148,
+      "current_median_ms": 2.371735,
+      "latency_change_percent": -1.648157977673459,
+      "baseline_repeats_ms": [
+        2.38696,
+        2.436,
+        2.34716,
+        2.37293,
+        2.50422,
+        2.4996
+      ],
+      "current_repeats_ms": [
+        2.32999,
+        2.2902,
+        2.29754,
+        2.41348,
+        2.50334,
+        2.47347
+      ],
+      "sample_hash": "95b06b63ffcdce70"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "noise",
+      "diagnostic_strategy": 0,
+      "baseline_median_ms": 4.698555,
+      "current_median_ms": 4.7564150000000005,
+      "latency_change_percent": 1.2314424328330853,
+      "baseline_repeats_ms": [
+        4.71624,
+        4.72812,
+        4.65305,
+        4.68087,
+        4.72108,
+        4.67617
+      ],
+      "current_repeats_ms": [
+        4.76086,
+        4.75197,
+        4.70869,
+        4.98413,
+        4.87466,
+        4.73598
+      ],
+      "sample_hash": "d5cdfed98902761d"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "noise",
+      "diagnostic_strategy": 1,
+      "baseline_median_ms": 17.14445,
+      "current_median_ms": 16.990099999999998,
+      "latency_change_percent": -0.9002913479289276,
+      "baseline_repeats_ms": [
+        15.8857,
+        17.4304,
+        17.1655,
+        16.0608,
+        18.1263,
+        17.1234
+      ],
+      "current_repeats_ms": [
+        15.6281,
+        17.355,
+        17.3741,
+        15.9928,
+        16.6252,
+        20.9767
+      ],
+      "sample_hash": "d5cdfed98902761d"
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "noise",
+      "diagnostic_strategy": 2,
+      "baseline_median_ms": 4.734515,
+      "current_median_ms": 4.79134,
+      "latency_change_percent": 1.2002285344961505,
+      "baseline_repeats_ms": [
+        4.67699,
+        4.69493,
+        4.71668,
+        4.85657,
+        4.75235,
+        4.82378
+      ],
+      "current_repeats_ms": [
+        4.77,
+        4.89742,
+        4.79629,
+        4.83923,
+        4.78639,
+        4.74688
+      ],
+      "sample_hash": "d5cdfed98902761d"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "flat",
+      "diagnostic_strategy": 0,
+      "baseline_median_ms": 1.6280700000000001,
+      "current_median_ms": 1.66978,
+      "latency_change_percent": 2.5619291553802936,
+      "baseline_repeats_ms": [
+        1.64129,
+        1.59534,
+        1.60182,
+        1.61586,
+        1.64879,
+        1.64028
+      ],
+      "current_repeats_ms": [
+        1.62027,
+        1.57652,
+        1.57221,
+        1.82653,
+        1.71929,
+        1.84283
+      ],
+      "sample_hash": "7183481dffb2ddc8"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "flat",
+      "diagnostic_strategy": 1,
+      "baseline_median_ms": 1.601485,
+      "current_median_ms": 1.631625,
+      "latency_change_percent": 1.8820032657190122,
+      "baseline_repeats_ms": [
+        1.62251,
+        1.60766,
+        1.58181,
+        1.64988,
+        1.59145,
+        1.59531
+      ],
+      "current_repeats_ms": [
+        1.62026,
+        1.6145,
+        1.63237,
+        1.64781,
+        1.65301,
+        1.63088
+      ],
+      "sample_hash": "7183481dffb2ddc8"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "flat",
+      "diagnostic_strategy": 2,
+      "baseline_median_ms": 3.4460100000000002,
+      "current_median_ms": 3.4289199999999997,
+      "latency_change_percent": -0.4959358794664137,
+      "baseline_repeats_ms": [
+        3.43545,
+        3.46659,
+        3.48099,
+        3.44348,
+        3.44854,
+        3.44316
+      ],
+      "current_repeats_ms": [
+        3.42098,
+        3.43686,
+        3.41297,
+        3.37698,
+        3.46822,
+        3.53857
+      ],
+      "sample_hash": "7183481dffb2ddc8"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "noise",
+      "diagnostic_strategy": 0,
+      "baseline_median_ms": 8.569725,
+      "current_median_ms": 8.43817,
+      "latency_change_percent": -1.5351134371289654,
+      "baseline_repeats_ms": [
+        8.58796,
+        8.55149,
+        8.69624,
+        8.54727,
+        8.52946,
+        8.67075
+      ],
+      "current_repeats_ms": [
+        8.62509,
+        8.37668,
+        8.44006,
+        8.51668,
+        8.43628,
+        8.26552
+      ],
+      "sample_hash": "6b12d20527760fc6"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "noise",
+      "diagnostic_strategy": 1,
+      "baseline_median_ms": 67.30760000000001,
+      "current_median_ms": 67.10165,
+      "latency_change_percent": -0.3059832767770665,
+      "baseline_repeats_ms": [
+        66.696,
+        67.3482,
+        66.9412,
+        67.4919,
+        68.0787,
+        67.267
+      ],
+      "current_repeats_ms": [
+        67.0991,
+        67.4126,
+        67.1042,
+        69.8227,
+        66.1102,
+        60.7286
+      ],
+      "sample_hash": "6b12d20527760fc6"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "noise",
+      "diagnostic_strategy": 2,
+      "baseline_median_ms": 8.584389999999999,
+      "current_median_ms": 8.41863,
+      "latency_change_percent": -1.930946753351126,
+      "baseline_repeats_ms": [
+        8.57892,
+        8.54364,
+        8.58755,
+        8.58123,
+        8.65553,
+        8.65884
+      ],
+      "current_repeats_ms": [
+        8.59781,
+        8.49753,
+        8.36245,
+        8.45258,
+        8.38468,
+        8.32582
+      ],
+      "sample_hash": "6b12d20527760fc6"
+    }
+  ],
+  "current_latency": [
+    {
+      "id": "frozen1080_interlaced",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "2d12a276f3594b09",
+      "sample_hash": "356ad5c204104b7d",
+      "strategy": "Lightweight",
+      "frames": 100,
+      "latency_avg_ms": 60.2528,
+      "latency_min_ms": 50.7358,
+      "latency_max_ms": 138.822,
+      "fps": 16.5967,
+      "megapixels_per_second": 34.415,
+      "peak_working_set_bytes": 205283328,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "frozen1080_interlaced",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "2d12a276f3594b09",
+      "sample_hash": "356ad5c204104b7d",
+      "strategy": "Hybrid",
+      "frames": 100,
+      "latency_avg_ms": 39.1784,
+      "latency_min_ms": 38.3836,
+      "latency_max_ms": 41.3659,
+      "fps": 25.5243,
+      "megapixels_per_second": 52.9271,
+      "peak_working_set_bytes": 205684736,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "frozen1080_interlaced",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "2d12a276f3594b09",
+      "sample_hash": "356ad5c204104b7d",
+      "strategy": "Auto",
+      "frames": 100,
+      "latency_avg_ms": 39.25,
+      "latency_min_ms": 38.6757,
+      "latency_max_ms": 40.4095,
+      "fps": 25.4777,
+      "megapixels_per_second": 52.8306,
+      "peak_working_set_bytes": 205684736,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "progressive_flat",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "b847140c65359825",
+      "sample_hash": "634ec0c1c5f0ee6d",
+      "strategy": "Lightweight",
+      "frames": 100,
+      "latency_avg_ms": 2.10344,
+      "latency_min_ms": 1.8948,
+      "latency_max_ms": 2.3639,
+      "fps": 475.411,
+      "megapixels_per_second": 985.812,
+      "peak_working_set_bytes": 205733888,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "progressive_flat",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "b847140c65359825",
+      "sample_hash": "634ec0c1c5f0ee6d",
+      "strategy": "Hybrid",
+      "frames": 100,
+      "latency_avg_ms": 2.70851,
+      "latency_min_ms": 2.1377,
+      "latency_max_ms": 3.3996,
+      "fps": 369.207,
+      "megapixels_per_second": 765.587,
+      "peak_working_set_bytes": 205733888,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "progressive_flat",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "b847140c65359825",
+      "sample_hash": "634ec0c1c5f0ee6d",
+      "strategy": "Auto",
+      "frames": 100,
+      "latency_avg_ms": 2.06207,
+      "latency_min_ms": 1.8176,
+      "latency_max_ms": 2.3445,
+      "fps": 484.948,
+      "megapixels_per_second": 1005.59,
+      "peak_working_set_bytes": 205733888,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "progressive_noise",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "a9693af0e8228960",
+      "sample_hash": "51c8062b63540f0b",
+      "strategy": "Lightweight",
+      "frames": 100,
+      "latency_avg_ms": 15.1731,
+      "latency_min_ms": 13.7683,
+      "latency_max_ms": 17.0256,
+      "fps": 65.906,
+      "megapixels_per_second": 136.663,
+      "peak_working_set_bytes": 205819904,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "progressive_noise",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "a9693af0e8228960",
+      "sample_hash": "51c8062b63540f0b",
+      "strategy": "Hybrid",
+      "frames": 100,
+      "latency_avg_ms": 4.83619,
+      "latency_min_ms": 3.924,
+      "latency_max_ms": 5.6417,
+      "fps": 206.774,
+      "megapixels_per_second": 428.767,
+      "peak_working_set_bytes": 206036992,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "progressive_noise",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "a9693af0e8228960",
+      "sample_hash": "51c8062b63540f0b",
+      "strategy": "Auto",
+      "frames": 100,
+      "latency_avg_ms": 4.83658,
+      "latency_min_ms": 4.1485,
+      "latency_max_ms": 5.4378,
+      "fps": 206.758,
+      "megapixels_per_second": 428.733,
+      "peak_working_set_bytes": 206036992,
+      "device_bytes": 164168016
+    },
+    {
+      "id": "progressive_flat",
+      "width": 3840,
+      "height": 2160,
+      "source_hash": "98a3bc9ec7af7f25",
+      "sample_hash": "e29f6428d18d9994",
+      "strategy": "Lightweight",
+      "frames": 100,
+      "latency_avg_ms": 2.42545,
+      "latency_min_ms": 2.2015,
+      "latency_max_ms": 2.7142,
+      "fps": 412.294,
+      "megapixels_per_second": 3419.73,
+      "peak_working_set_bytes": 206036992,
+      "device_bytes": 431869776
+    },
+    {
+      "id": "progressive_flat",
+      "width": 3840,
+      "height": 2160,
+      "source_hash": "98a3bc9ec7af7f25",
+      "sample_hash": "e29f6428d18d9994",
+      "strategy": "Hybrid",
+      "frames": 100,
+      "latency_avg_ms": 3.99504,
+      "latency_min_ms": 3.5164,
+      "latency_max_ms": 4.7106,
+      "fps": 250.311,
+      "megapixels_per_second": 2076.18,
+      "peak_working_set_bytes": 206036992,
+      "device_bytes": 431869776
+    },
+    {
+      "id": "progressive_flat",
+      "width": 3840,
+      "height": 2160,
+      "source_hash": "98a3bc9ec7af7f25",
+      "sample_hash": "e29f6428d18d9994",
+      "strategy": "Auto",
+      "frames": 100,
+      "latency_avg_ms": 2.42123,
+      "latency_min_ms": 2.255,
+      "latency_max_ms": 2.8052,
+      "fps": 413.013,
+      "megapixels_per_second": 3425.7,
+      "peak_working_set_bytes": 206036992,
+      "device_bytes": 431869776
+    },
+    {
+      "id": "progressive_noise",
+      "width": 3840,
+      "height": 2160,
+      "source_hash": "f73572a6632d817b",
+      "sample_hash": "1466d768b757fa11",
+      "strategy": "Lightweight",
+      "frames": 100,
+      "latency_avg_ms": 60.2709,
+      "latency_min_ms": 53.3894,
+      "latency_max_ms": 67.9497,
+      "fps": 16.5918,
+      "megapixels_per_second": 137.619,
+      "peak_working_set_bytes": 221679616,
+      "device_bytes": 431869776
+    },
+    {
+      "id": "progressive_noise",
+      "width": 3840,
+      "height": 2160,
+      "source_hash": "f73572a6632d817b",
+      "sample_hash": "1466d768b757fa11",
+      "strategy": "Hybrid",
+      "frames": 100,
+      "latency_avg_ms": 8.04223,
+      "latency_min_ms": 7.3315,
+      "latency_max_ms": 9.3979,
+      "fps": 124.344,
+      "megapixels_per_second": 1031.36,
+      "peak_working_set_bytes": 221679616,
+      "device_bytes": 431869776
+    },
+    {
+      "id": "progressive_noise",
+      "width": 3840,
+      "height": 2160,
+      "source_hash": "f73572a6632d817b",
+      "sample_hash": "1466d768b757fa11",
+      "strategy": "Auto",
+      "frames": 100,
+      "latency_avg_ms": 8.0803,
+      "latency_min_ms": 7.2413,
+      "latency_max_ms": 9.6114,
+      "fps": 123.758,
+      "megapixels_per_second": 1026.5,
+      "peak_working_set_bytes": 221679616,
+      "device_bytes": 431869776
+    }
+  ],
+  "kernel_times": {
+    "license": "MIT OR Apache-2.0",
+    "sample_hash": "356ad5c204104b7d",
+    "field_timing": "sum of three channel kernels",
+    "cases": [
+      {
+        "strategy": "Lightweight",
+        "actual_strategy": "lightweight",
+        "frames": 100,
+        "field_combine_avg_ms": 0.919003,
+        "color_convert_avg_ms": 0.0311792,
+        "pipeline_critical_path_avg_ms": 52.0917,
+        "ac_line_status": 1,
+        "bgra_exact": true
+      },
+      {
+        "strategy": "Hybrid",
+        "actual_strategy": "hybrid",
+        "frames": 100,
+        "field_combine_avg_ms": 0.194624,
+        "color_convert_avg_ms": 0.0726307,
+        "pipeline_critical_path_avg_ms": 38.8306,
+        "ac_line_status": 1,
+        "bgra_exact": true
+      },
+      {
+        "strategy": "Auto",
+        "actual_strategy": "hybrid",
+        "frames": 100,
+        "field_combine_avg_ms": 0.160909,
+        "color_convert_avg_ms": 0.121907,
+        "pipeline_critical_path_avg_ms": 45.8644,
+        "ac_line_status": 1,
+        "bgra_exact": true
+      }
+    ]
+  },
+  "kernel_time_method": "100 timed frames per strategy, CUDA events, AC checked every frame; field-combine time sums three channel kernels",
+  "repeatable_progressive_over_5_percent": [],
+  "codec_reference_current": {
+    "system": {
+      "os": "Windows x64",
+      "cpu_model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+      "thread_count": 16,
+      "compiler": "MSVC 19.44 / Visual Studio 2022",
+      "build_type": "Release",
+      "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7"
+    },
+    "configuration": {
+      "pixel_format": "CFHD_PIXEL_FORMAT_BGRA",
+      "encoded_format": "CFHD_ENCODED_FORMAT_YUV_422",
+      "quality": "CFHD_ENCODING_QUALITY_FILM3"
+    },
+    "benchmarks": [
+      {
+        "name": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "frames": 50,
+        "encode": {
+          "fps": 67.7182,
+          "megapixels_per_sec": 140.421,
+          "latency_avg_ms": 14.3828,
+          "latency_min_ms": 12.1466,
+          "latency_max_ms": 18.379
+        },
+        "decode": {
+          "fps": 439.425,
+          "megapixels_per_sec": 911.192,
+          "latency_avg_ms": 2.27538,
+          "latency_min_ms": 2.0702,
+          "latency_max_ms": 2.7502
+        },
+        "compression": {
+          "avg_bytes": 1186352,
+          "ratio": 6.99152
+        },
+        "peak_memory_bytes": 96264192
+      },
+      {
+        "name": "4K_UHD",
+        "width": 3840,
+        "height": 2160,
+        "frames": 25,
+        "encode": {
+          "fps": 21.4689,
+          "megapixels_per_sec": 178.071,
+          "latency_avg_ms": 45.4926,
+          "latency_min_ms": 43.8222,
+          "latency_max_ms": 50.2441
+        },
+        "decode": {
+          "fps": 120.31,
+          "megapixels_per_sec": 997.899,
+          "latency_avg_ms": 8.3115,
+          "latency_min_ms": 7.6577,
+          "latency_max_ms": 8.8922
+        },
+        "compression": {
+          "avg_bytes": 4673177,
+          "ratio": 7.09958
+        },
+        "peak_memory_bytes": 239648768
+      },
+      {
+        "name": "8K_UHD",
+        "width": 7680,
+        "height": 4320,
+        "frames": 10,
+        "encode": {
+          "fps": 5.88217,
+          "megapixels_per_sec": 195.156,
+          "latency_avg_ms": 166.331,
+          "latency_min_ms": 163.126,
+          "latency_max_ms": 168.944
+        },
+        "decode": {
+          "fps": 31.1841,
+          "megapixels_per_sec": 1034.61,
+          "latency_avg_ms": 32.0672,
+          "latency_min_ms": 29.9835,
+          "latency_max_ms": 33.23
+        },
+        "compression": {
+          "avg_bytes": 17674354,
+          "ratio": 7.50864
+        },
+        "peak_memory_bytes": 643022848
+      }
+    ]
+  },
+  "codec_reference_baseline": "reference_windows_msvc.json (historical encoder/CPU context only)",
+  "codec_same_session_comparison": [
+    {
+      "name": "1080p",
+      "encode": {
+        "baseline_fps": 82.5921,
+        "current_fps": 83.5059,
+        "throughput_change_percent": 1.1064012175498572
+      },
+      "decode": {
+        "baseline_fps": 495.103,
+        "current_fps": 490.37,
+        "throughput_change_percent": -0.955962698670787
+      }
+    },
+    {
+      "name": "4K_UHD",
+      "encode": {
+        "baseline_fps": 23.0385,
+        "current_fps": 23.4952,
+        "throughput_change_percent": 1.9823339193089984
+      },
+      "decode": {
+        "baseline_fps": 130.18,
+        "current_fps": 129.981,
+        "throughput_change_percent": -0.15286526348133878
+      }
+    },
+    {
+      "name": "8K_UHD",
+      "encode": {
+        "baseline_fps": 5.70058,
+        "current_fps": 6.31675,
+        "throughput_change_percent": 10.808900147002575
+      },
+      "decode": {
+        "baseline_fps": 29.4064,
+        "current_fps": 34.2669,
+        "throughput_change_percent": 16.528714837586378
+      }
+    }
+  ],
+  "codec_same_session_baseline": {
+    "system": {
+      "os": "Windows x64",
+      "cpu_model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+      "thread_count": 16,
+      "compiler": "MSVC 19.44 / Visual Studio 2022",
+      "build_type": "Release",
+      "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7"
+    },
+    "configuration": {
+      "pixel_format": "CFHD_PIXEL_FORMAT_BGRA",
+      "encoded_format": "CFHD_ENCODED_FORMAT_YUV_422",
+      "quality": "CFHD_ENCODING_QUALITY_FILM3"
+    },
+    "benchmarks": [
+      {
+        "name": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "frames": 50,
+        "encode": {
+          "fps": 82.5921,
+          "megapixels_per_sec": 171.263,
+          "latency_avg_ms": 11.7589,
+          "latency_min_ms": 11.0596,
+          "latency_max_ms": 12.5459
+        },
+        "decode": {
+          "fps": 495.103,
+          "megapixels_per_sec": 1026.65,
+          "latency_avg_ms": 2.01957,
+          "latency_min_ms": 1.8449,
+          "latency_max_ms": 2.5242
+        },
+        "compression": {
+          "avg_bytes": 1186352,
+          "ratio": 6.99152
+        },
+        "peak_memory_bytes": 96927744
+      },
+      {
+        "name": "4K_UHD",
+        "width": 3840,
+        "height": 2160,
+        "frames": 25,
+        "encode": {
+          "fps": 23.0385,
+          "megapixels_per_sec": 191.091,
+          "latency_avg_ms": 42.1545,
+          "latency_min_ms": 40.1374,
+          "latency_max_ms": 45.4264
+        },
+        "decode": {
+          "fps": 130.18,
+          "megapixels_per_sec": 1079.76,
+          "latency_avg_ms": 7.68137,
+          "latency_min_ms": 7.2911,
+          "latency_max_ms": 8.2613
+        },
+        "compression": {
+          "avg_bytes": 4673177,
+          "ratio": 7.09958
+        },
+        "peak_memory_bytes": 240345088
+      },
+      {
+        "name": "8K_UHD",
+        "width": 7680,
+        "height": 4320,
+        "frames": 10,
+        "encode": {
+          "fps": 5.70058,
+          "megapixels_per_sec": 189.132,
+          "latency_avg_ms": 172.148,
+          "latency_min_ms": 153.377,
+          "latency_max_ms": 258.205
+        },
+        "decode": {
+          "fps": 29.4064,
+          "megapixels_per_sec": 975.634,
+          "latency_avg_ms": 34.0058,
+          "latency_min_ms": 30.5417,
+          "latency_max_ms": 39.7153
+        },
+        "compression": {
+          "avg_bytes": 17674354,
+          "ratio": 7.50864
+        },
+        "peak_memory_bytes": 643837952
+      }
+    ]
+  },
+  "codec_same_session_current": {
+    "system": {
+      "os": "Windows x64",
+      "cpu_model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+      "thread_count": 16,
+      "compiler": "MSVC 19.44 / Visual Studio 2022",
+      "build_type": "Release",
+      "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7"
+    },
+    "configuration": {
+      "pixel_format": "CFHD_PIXEL_FORMAT_BGRA",
+      "encoded_format": "CFHD_ENCODED_FORMAT_YUV_422",
+      "quality": "CFHD_ENCODING_QUALITY_FILM3"
+    },
+    "benchmarks": [
+      {
+        "name": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "frames": 50,
+        "encode": {
+          "fps": 83.5059,
+          "megapixels_per_sec": 173.158,
+          "latency_avg_ms": 11.6359,
+          "latency_min_ms": 10.9138,
+          "latency_max_ms": 12.5632
+        },
+        "decode": {
+          "fps": 490.37,
+          "megapixels_per_sec": 1016.83,
+          "latency_avg_ms": 2.03899,
+          "latency_min_ms": 1.8393,
+          "latency_max_ms": 2.4683
+        },
+        "compression": {
+          "avg_bytes": 1186352,
+          "ratio": 6.99152
+        },
+        "peak_memory_bytes": 96227328
+      },
+      {
+        "name": "4K_UHD",
+        "width": 3840,
+        "height": 2160,
+        "frames": 25,
+        "encode": {
+          "fps": 23.4952,
+          "megapixels_per_sec": 194.879,
+          "latency_avg_ms": 41.4989,
+          "latency_min_ms": 39.4918,
+          "latency_max_ms": 46.853
+        },
+        "decode": {
+          "fps": 129.981,
+          "megapixels_per_sec": 1078.11,
+          "latency_avg_ms": 7.69306,
+          "latency_min_ms": 7.2536,
+          "latency_max_ms": 8.1822
+        },
+        "compression": {
+          "avg_bytes": 4673177,
+          "ratio": 7.09958
+        },
+        "peak_memory_bytes": 239603712
+      },
+      {
+        "name": "8K_UHD",
+        "width": 7680,
+        "height": 4320,
+        "frames": 10,
+        "encode": {
+          "fps": 6.31675,
+          "megapixels_per_sec": 209.575,
+          "latency_avg_ms": 155.324,
+          "latency_min_ms": 150.567,
+          "latency_max_ms": 159.917
+        },
+        "decode": {
+          "fps": 34.2669,
+          "megapixels_per_sec": 1136.89,
+          "latency_avg_ms": 29.1823,
+          "latency_min_ms": 27.2007,
+          "latency_max_ms": 31.0641
+        },
+        "compression": {
+          "avg_bytes": 17674354,
+          "ratio": 7.50864
+        },
+        "peak_memory_bytes": 643092480
+      }
+    ]
+  },
+  "codec_historical_variation": "The first current 1080p encoder observation was slower than the historical record. The unchanged pre-3B-1 and current codec benchmarks were rerun in the same session; encode/decode throughput has no material negative delta there."
+}

@@ -1,0 +1,23 @@
+{"license":"MIT OR Apache-2.0","seed":"0x1337BEEF","cases":[
+{"profile":"BAYER-p12-ch4-spatial-prog-f1-bands40-fmt-1","expected":6,"actual":6,"output_published":false,"sample_hash":"e513e61938beca3f","status":"PASS"},
+{"profile":"RGB444-p12-ch3-spatial-prog-f1-bands30-fmt-1","expected":6,"actual":6,"output_published":false,"sample_hash":"75d4c52c5a99849f","status":"PASS"},
+{"profile":"RGBA4444-p12-ch4-spatial-prog-f1-bands40-fmt-1","expected":6,"actual":6,"output_published":false,"sample_hash":"e69ae613acc6ef37","status":"PASS"},
+{"profile":"YUV422-p10-ch3-fieldplus-field-f2-bands54-fmt-1","expected":11,"actual":11,"output_published":false,"sample_hash":"766c61a035dea429","status":"PASS"},
+{"profile":"YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1","expected":11,"actual":11,"output_published":false,"sample_hash":"09cdbfd3ce79cae9","status":"PASS"},
+{"profile":"bad_tag_70_8","expected":6,"actual":6,"output_published":false,"sample_hash":"2f469c48f857de91","status":"PASS"},
+{"profile":"bad_tag_70_12","expected":6,"actual":6,"output_published":false,"sample_hash":"8c1de64f9940bfed","status":"PASS"},
+{"profile":"bad_tag_20_63","expected":6,"actual":6,"output_published":false,"sample_hash":"16bbd5a22ed325aa","status":"PASS"},
+{"profile":"bad_tag_21_65","expected":6,"actual":6,"output_published":false,"sample_hash":"209c5cd51668e73c","status":"PASS"},
+{"profile":"bad_tag_12_4","expected":6,"actual":6,"output_published":false,"sample_hash":"042115318adee1ba","status":"PASS"},
+{"profile":"bad_tag_62_4","expected":6,"actual":6,"output_published":false,"sample_hash":"f6671887efb27a8c","status":"PASS"},
+{"profile":"bad_tag_8192_65535","expected":6,"actual":6,"output_published":false,"sample_hash":"15dd59c854ac0363","status":"PASS"},
+{"profile":"truncated_1","expected":6,"actual":6,"output_published":false,"sample_hash":"af63bd4c8601b7df","status":"PASS"},
+{"profile":"truncated_7","expected":6,"actual":6,"output_published":false,"sample_hash":"3b1335a76d17b625","status":"PASS"},
+{"profile":"truncated_4270","expected":6,"actual":6,"output_published":false,"sample_hash":"e495fb627eda112b","status":"PASS"},
+{"profile":"truncated_8532","expected":6,"actual":6,"output_published":false,"sample_hash":"5e98e1d814835dcf","status":"PASS"},
+{"profile":"missing_frame_trailer_upstream","sample_hash":"24a77da1f97ba5bb","upstream_error":2048,"status":"PASS"},
+{"profile":"truncated_8536","expected":6,"actual":6,"output_published":false,"sample_hash":"24a77da1f97ba5bb","status":"PASS"},
+{"profile":"29_bands","expected":6,"actual":6,"output_published":false,"sample_hash":"8d0a11bfa34915b9","status":"PASS"},
+{"profile":"inconsistent_frame_format","expected":6,"actual":6,"output_published":false,"sample_hash":"a5f6177306390d3c","status":"PASS"},
+{"profile":"inconsistent_encoded_format_RGB","expected":6,"actual":0,"output_published":true,"sample_hash":"1e28a228abde8539","status":"FAIL"}
+]}

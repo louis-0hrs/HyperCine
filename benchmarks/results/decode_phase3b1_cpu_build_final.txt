@@ -1,0 +1,34 @@
+CMake is re-running because C:/Users/User/Documents/GitHub/HyperCine-public/build-cpu/tests/CMakeFiles/generate.stamp is out-of-date.
+  the file 'C:/Users/User/Documents/GitHub/HyperCine-public/tests/CMakeLists.txt'
+  is newer than 'C:/Users/User/Documents/GitHub/HyperCine-public/build-cpu/tests/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+CMake Deprecation Warning at upstream/CMakeLists.txt:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Configuring done (0.1s)
+-- Generating done (0.9s)
+-- Build files have been written to: C:/Users/User/Documents/GitHub/HyperCine-public/build-cpu
+MSBuild-Version 17.14.51+25f168cee für .NET Framework
+
+  Checking File Globs
+  CFHDCodecStatic.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\upstream\Release\CFHDCodecStatic.lib
+  TestCFHD.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\upstream\Release\TestCFHD.exe
+  WaveletDemo.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\upstream\Release\WaveletDemo.exe
+  benchmark_codec.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\benchmarks\Release\benchmark_codec.exe
+  benchmark_decode_phase0.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\benchmarks\Release\benchmark_decode_phase0.exe
+  decode_parser.cpp
+  hypercine_wavelet.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\src\Release\hypercine_wavelet.lib
+  hypercine_decoder.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\src\Release\hypercine_decoder.lib
+  test_avi_sample.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\tests\Release\test_avi_sample.exe
+  test_codec_roundtrip.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\tests\Release\test_codec_roundtrip.exe
+  test_decode_phase0.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\tests\Release\test_decode_phase0.exe
+  test_decoder_cpu.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\tests\Release\test_decoder_cpu.exe
+  test_transform_wavelet.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\tests\Release\test_transform_wavelet.exe
+  test_yuy2_stability.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build-cpu\tests\Release\test_yuy2_stability.exe

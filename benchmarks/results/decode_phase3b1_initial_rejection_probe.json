@@ -1,0 +1,135 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "seed": "0x1337BEEF",
+  "cases": [
+    {
+      "profile": "BAYER-p12-ch4-spatial-prog-f1-bands40-fmt-1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "e513e61938beca3f",
+      "status": "PASS"
+    },
+    {
+      "profile": "RGB444-p12-ch3-spatial-prog-f1-bands30-fmt-1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "75d4c52c5a99849f",
+      "status": "PASS"
+    },
+    {
+      "profile": "RGBA4444-p12-ch4-spatial-prog-f1-bands40-fmt-1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "e69ae613acc6ef37",
+      "status": "PASS"
+    },
+    {
+      "profile": "YUV422-p10-ch3-fieldplus-field-f2-bands54-fmt-1",
+      "expected": 11,
+      "actual": 11,
+      "output_published": false,
+      "sample_hash": "766c61a035dea429",
+      "status": "PASS"
+    },
+    {
+      "profile": "YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1",
+      "expected": 11,
+      "actual": 11,
+      "output_published": false,
+      "sample_hash": "09cdbfd3ce79cae9",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_70_8",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "fac2d388a8452111",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_70_12",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "4758aec9b765eb6d",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_20_63",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "3c2335ce2cc3492a",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_21_65",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "8cb4ad8c1b5253bc",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_12_4",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "8987f7b1673c893a",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_62_4",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "432e7876ed4d5a0c",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_8192_65535",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "7956aff3197afae3",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "af63bd4c8601b7df",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_7",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "3b1335a76d17b625",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_4270",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "e495fb627eda112b",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_8536",
+      "expected": 6,
+      "actual": 0,
+      "sample_hash": "fd0bf00a0c6b9f3b",
+      "status": "FAIL",
+      "output_publication_checked": false
+    }
+  ],
+  "audit_note": "The initial missing-trailer case had a Ready ticket. Its output_published=false value was a harness default, not a publication measurement; that unmeasured field is removed below. The later encoded-format probe measures publication directly."
+}

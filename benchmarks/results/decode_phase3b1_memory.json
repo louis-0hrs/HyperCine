@@ -1,0 +1,86 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "before_after": [
+    {
+      "maximum_width": 1920,
+      "slots": 2,
+      "device_bytes": {
+        "before": 146473296,
+        "after": 164168016,
+        "delta": 17694720
+      },
+      "pinned_bytes": {
+        "before": 72448736,
+        "after": 72448736,
+        "delta": 0
+      },
+      "pageable_bytes": {
+        "before": 85323704,
+        "after": 85323816,
+        "delta": 112
+      },
+      "cuda_allocations": {
+        "before": 127,
+        "after": 127,
+        "delta": 0
+      },
+      "streams_per_slot_before": 9,
+      "streams_per_slot_after": 9,
+      "events_per_slot_before": 191,
+      "events_per_slot_after": 197,
+      "stream_event_count_method": "source audit of owned initialization/destruction calls",
+      "new_permanent_full_frame_buffers": 0
+    },
+    {
+      "maximum_width": 3840,
+      "slots": 2,
+      "device_bytes": {
+        "before": 365514576,
+        "after": 431869776,
+        "delta": 66355200
+      },
+      "pinned_bytes": {
+        "before": 72448736,
+        "after": 72448736,
+        "delta": 0
+      },
+      "pageable_bytes": {
+        "before": 85323704,
+        "after": 85323816,
+        "delta": 112
+      },
+      "cuda_allocations": {
+        "before": 127,
+        "after": 127,
+        "delta": 0
+      },
+      "streams_per_slot_before": 9,
+      "streams_per_slot_after": 9,
+      "events_per_slot_before": 191,
+      "events_per_slot_after": 197,
+      "stream_event_count_method": "source audit of owned initialization/destruction calls",
+      "new_permanent_full_frame_buffers": 0
+    }
+  ],
+  "three_slot_stress": {
+    "license": "MIT OR Apache-2.0",
+    "seed": "0x1337BEEF",
+    "cases": [
+      {
+        "slots": 3,
+        "device_bytes": 246177016,
+        "pinned_bytes": 108673104,
+        "pageable_bytes": 127907128,
+        "cuda_allocation_calls": 190,
+        "steady_state_cpp_allocations": 0,
+        "status": "PASS"
+      }
+    ]
+  },
+  "new_events_per_slot": 6,
+  "new_streams_per_slot": 0,
+  "new_cuda_buffer_allocations": 0,
+  "steady_state_cpp_allocations_per_frame": 0,
+  "per_frame_stream_event_creation": 0,
+  "status": "PASS"
+}

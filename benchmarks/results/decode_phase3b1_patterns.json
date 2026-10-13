@@ -1,0 +1,2827 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "seed": "0x1337BEEF",
+  "unique_samples": 313,
+  "small_matrix": "17 patterns x 6 qualities x 3 geometries = 306 samples",
+  "additional_samples": "2 frozen references and 5 representative 1080p FilmScan3 cases",
+  "cases": [
+    {
+      "id": "frozen64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "a13b32dde7191100",
+      "sample_hash": "7aa6e151c0620073",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "frozen1080",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "2d12a276f3594b09",
+      "sample_hash": "356ad5c204104b7d",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4574d1216280a325",
+      "sample_hash": "6c864f1b1329d673",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8d04821bc3e0825",
+      "sample_hash": "753999a05ae0995e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "c77fc26480a674e5",
+      "sample_hash": "fc09fee551bfbbde",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3304805a178aa82b",
+      "sample_hash": "a2406fb777650ebb",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "62a0c4955a4eb725",
+      "sample_hash": "9159df41e2038ea1",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "8208a8956883d525",
+      "sample_hash": "e4be6f6dcfa07120",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "43b3e19ad43ef525",
+      "sample_hash": "f6d00a34d1c6aa92",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "86b05053b0ac3edd",
+      "sample_hash": "d218cc3d8283b016",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4e4c1abc4609c31d",
+      "sample_hash": "3b8963cd088ffc48",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e461a6a46170d725",
+      "sample_hash": "41b0a088b6b64b4f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3f7046d95e2c05e5",
+      "sample_hash": "eb49305a95232298",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "ab3107a6e4671725",
+      "sample_hash": "f016c98a1793e78b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8a90cf21e5ae325",
+      "sample_hash": "882fa761fa7adcc7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfb9c764044c4825",
+      "sample_hash": "99d59b559d2d4031",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfe716b32d0e2825",
+      "sample_hash": "c2391c3d88a41d96",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e0d2c797ba5dadad",
+      "sample_hash": "1107e1a6b363e2b0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_Low_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dd9f4b39cdba9019",
+      "sample_hash": "19a2bf7c5599960d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4574d1216280a325",
+      "sample_hash": "1647d140fcaf9c21",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8d04821bc3e0825",
+      "sample_hash": "65d9b042ba5450bd",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "c77fc26480a674e5",
+      "sample_hash": "90d51978f7aaa438",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3304805a178aa82b",
+      "sample_hash": "6e0bf48e55cf6867",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "62a0c4955a4eb725",
+      "sample_hash": "16fcaa232b39f43e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "8208a8956883d525",
+      "sample_hash": "af62eab26f81b7d0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "43b3e19ad43ef525",
+      "sample_hash": "cbbb9b5f3d665340",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "86b05053b0ac3edd",
+      "sample_hash": "c5371043db34bd6e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4e4c1abc4609c31d",
+      "sample_hash": "a87ebe93b9baebdb",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e461a6a46170d725",
+      "sample_hash": "68c145f92f1174bc",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3f7046d95e2c05e5",
+      "sample_hash": "2825f1637f54b0bc",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "ab3107a6e4671725",
+      "sample_hash": "35c8457f8373fd6f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8a90cf21e5ae325",
+      "sample_hash": "2ef7172d09f475e7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfb9c764044c4825",
+      "sample_hash": "c38644464ceb1348",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfe716b32d0e2825",
+      "sample_hash": "2c0fe53d1ed4712a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e0d2c797ba5dadad",
+      "sample_hash": "7c86bb4a20f3718c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_Medium_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dd9f4b39cdba9019",
+      "sample_hash": "7aa96dbc6445eab2",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4574d1216280a325",
+      "sample_hash": "07542a0948920308",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8d04821bc3e0825",
+      "sample_hash": "8d3812a0f60880bc",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "c77fc26480a674e5",
+      "sample_hash": "b95d4cfcd1d975f7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3304805a178aa82b",
+      "sample_hash": "577718e1299f89a0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "62a0c4955a4eb725",
+      "sample_hash": "6955a31aaaca6e90",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "8208a8956883d525",
+      "sample_hash": "3ab33f27ced387d9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "43b3e19ad43ef525",
+      "sample_hash": "330a31f88b52b913",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "86b05053b0ac3edd",
+      "sample_hash": "4f0b6ba132dec5c5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4e4c1abc4609c31d",
+      "sample_hash": "8bf0a831fc96c534",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e461a6a46170d725",
+      "sample_hash": "297bd6a3cfb55f56",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3f7046d95e2c05e5",
+      "sample_hash": "c3edddc75523bd8a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "ab3107a6e4671725",
+      "sample_hash": "d6762522b574885c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8a90cf21e5ae325",
+      "sample_hash": "1ef8b39addb5d955",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfb9c764044c4825",
+      "sample_hash": "0816435501e7f00a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfe716b32d0e2825",
+      "sample_hash": "21d0f6f00a538957",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e0d2c797ba5dadad",
+      "sample_hash": "578b70ab7b52023f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_High_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dd9f4b39cdba9019",
+      "sample_hash": "681a9c997c5e6042",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4574d1216280a325",
+      "sample_hash": "f6f35dde58d8b4e3",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8d04821bc3e0825",
+      "sample_hash": "263cc367ba4dab6a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "c77fc26480a674e5",
+      "sample_hash": "1879282afa27515d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3304805a178aa82b",
+      "sample_hash": "97baaeb69bdf4538",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "62a0c4955a4eb725",
+      "sample_hash": "33133aab37023f64",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "8208a8956883d525",
+      "sample_hash": "155fa1e2f2675ccf",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "43b3e19ad43ef525",
+      "sample_hash": "a3582f712ef4ebce",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "86b05053b0ac3edd",
+      "sample_hash": "2c55af603e5e9d59",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4e4c1abc4609c31d",
+      "sample_hash": "0234314d5e0d50d9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e461a6a46170d725",
+      "sample_hash": "56ef1e527f237a80",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3f7046d95e2c05e5",
+      "sample_hash": "db4b2bf3b5ef11ac",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "ab3107a6e4671725",
+      "sample_hash": "07035cff74628f40",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8a90cf21e5ae325",
+      "sample_hash": "77d91a92ca587972",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfb9c764044c4825",
+      "sample_hash": "f0bd1a00c3727862",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfe716b32d0e2825",
+      "sample_hash": "1fc310bb771edb45",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e0d2c797ba5dadad",
+      "sample_hash": "080cd9241f8cd567",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan1_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dd9f4b39cdba9019",
+      "sample_hash": "285a8df713f0c820",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4574d1216280a325",
+      "sample_hash": "f7ea32fb3030d62f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8d04821bc3e0825",
+      "sample_hash": "81560dd9d95fffa9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "c77fc26480a674e5",
+      "sample_hash": "69a13294c6d5e9e0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3304805a178aa82b",
+      "sample_hash": "3b2fcd3356f20ff4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "62a0c4955a4eb725",
+      "sample_hash": "d0e0086e47e08203",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "8208a8956883d525",
+      "sample_hash": "177276dbe0e29561",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "43b3e19ad43ef525",
+      "sample_hash": "69da0df9ee5baa4e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "86b05053b0ac3edd",
+      "sample_hash": "f7ec419974f75867",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4e4c1abc4609c31d",
+      "sample_hash": "017b8c2146439708",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e461a6a46170d725",
+      "sample_hash": "c0fb9dc0c238a3f7",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3f7046d95e2c05e5",
+      "sample_hash": "9e5005b089f39f08",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "ab3107a6e4671725",
+      "sample_hash": "2a71fb2813b02b08",
+      "peak_bands": 2,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8a90cf21e5ae325",
+      "sample_hash": "23b724903f9e6e57",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfb9c764044c4825",
+      "sample_hash": "b3c9c724c39cc841",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfe716b32d0e2825",
+      "sample_hash": "fdb0bcff4993b2c6",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e0d2c797ba5dadad",
+      "sample_hash": "8818f06a01bf41d8",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan2_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dd9f4b39cdba9019",
+      "sample_hash": "0274f9c52928f8bb",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4574d1216280a325",
+      "sample_hash": "cef4900d6788eb90",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8d04821bc3e0825",
+      "sample_hash": "5c53e3b2b8fe4a50",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "c77fc26480a674e5",
+      "sample_hash": "3bc678e3b23bf6f6",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3304805a178aa82b",
+      "sample_hash": "859bb5bcc3d381f4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "62a0c4955a4eb725",
+      "sample_hash": "60d89dce84b8fb80",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "8208a8956883d525",
+      "sample_hash": "16ba1cf4d13dcf6c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "43b3e19ad43ef525",
+      "sample_hash": "4c85d7d4d39d06c5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "86b05053b0ac3edd",
+      "sample_hash": "36ae24ab7d6fb1d5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "4e4c1abc4609c31d",
+      "sample_hash": "c17f06d2aa218b43",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e461a6a46170d725",
+      "sample_hash": "751e9b1274f734a9",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "3f7046d95e2c05e5",
+      "sample_hash": "34bd6fe26858895b",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "ab3107a6e4671725",
+      "sample_hash": "e8f052d9aa56ca7a",
+      "peak_bands": 2,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e8a90cf21e5ae325",
+      "sample_hash": "4af449ac553147c9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfb9c764044c4825",
+      "sample_hash": "76d889b2fb27ec74",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dfe716b32d0e2825",
+      "sample_hash": "0b9b6269ce8d32d9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "e0d2c797ba5dadad",
+      "sample_hash": "356e5df92c7bc739",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan3_64x64",
+      "width": 64,
+      "height": 64,
+      "source_hash": "dd9f4b39cdba9019",
+      "sample_hash": "b16493e142d3749c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6ae6e65126440d25",
+      "sample_hash": "cc3097ee47466160",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "7f946fbd44ee1525",
+      "sample_hash": "79c9edcfdebe3420",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0ceb226cf20c53a5",
+      "sample_hash": "312eeca185a60f60",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "c0d7764735935f18",
+      "sample_hash": "b161f487079aedb7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "543d8bef7dd50a25",
+      "sample_hash": "5a921927957f48d6",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "b84d1ff357d35625",
+      "sample_hash": "f9b4b89b1eb4bba4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6704d7ccd58eff25",
+      "sample_hash": "3396921bdfba6b08",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "eeb7543d0f7b0f39",
+      "sample_hash": "026e4ec4276026c9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "25f4c9c35eb400d9",
+      "sample_hash": "4d1ec2673c9e0279",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "e797741a8071ed25",
+      "sample_hash": "d1ecaa7104478db5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9fb97a88dfc276a5",
+      "sample_hash": "6099a4df1d28d9c2",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "16e73c7bd41c6c25",
+      "sample_hash": "cee2a59393172514",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "3ab06f417308a325",
+      "sample_hash": "89c80731c21c3dc8",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "2518efbdbfed0825",
+      "sample_hash": "e2c93cf8e53014d8",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0fb457ad54c588a5",
+      "sample_hash": "95cbd432ab932a58",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "90642ec96993ce01",
+      "sample_hash": "b735ce3e97745744",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_Low_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9b32b78de8ba6889",
+      "sample_hash": "e281c4ed3fae4653",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6ae6e65126440d25",
+      "sample_hash": "402cf763917c4ca5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "7f946fbd44ee1525",
+      "sample_hash": "c2044baf55f2aca5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0ceb226cf20c53a5",
+      "sample_hash": "cf04a780deca0a60",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "c0d7764735935f18",
+      "sample_hash": "93bf9479601ccf1b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "543d8bef7dd50a25",
+      "sample_hash": "4b84be41591178f4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "b84d1ff357d35625",
+      "sample_hash": "60bde01d5c8e8415",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6704d7ccd58eff25",
+      "sample_hash": "32041a9c8d4a8a92",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "eeb7543d0f7b0f39",
+      "sample_hash": "be6731c79b1cb989",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "25f4c9c35eb400d9",
+      "sample_hash": "e31d96c77925c501",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "e797741a8071ed25",
+      "sample_hash": "0f9ef2fe0c33dc54",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9fb97a88dfc276a5",
+      "sample_hash": "5ebbf1d229ab3c94",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "16e73c7bd41c6c25",
+      "sample_hash": "a19b2fa79b648e9b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "3ab06f417308a325",
+      "sample_hash": "ba352b3e42c07f0c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "2518efbdbfed0825",
+      "sample_hash": "1cde109139c45c78",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0fb457ad54c588a5",
+      "sample_hash": "a7b8faa51d0762f8",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "90642ec96993ce01",
+      "sample_hash": "12cfa5d5927d12bd",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_Medium_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9b32b78de8ba6889",
+      "sample_hash": "863b352999e05b04",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6ae6e65126440d25",
+      "sample_hash": "bb33f788f4890da1",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "7f946fbd44ee1525",
+      "sample_hash": "3a26b84614f855e1",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0ceb226cf20c53a5",
+      "sample_hash": "229deab982dc2b3c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "c0d7764735935f18",
+      "sample_hash": "e22d6ef7cd1a0e0b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "543d8bef7dd50a25",
+      "sample_hash": "5e42a12fc91af229",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "b84d1ff357d35625",
+      "sample_hash": "3c5a5b4fa221030d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6704d7ccd58eff25",
+      "sample_hash": "db42eeba8dc3cc65",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "eeb7543d0f7b0f39",
+      "sample_hash": "db8fe8a9fb9aa5ca",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "25f4c9c35eb400d9",
+      "sample_hash": "be544f00417e88d7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "e797741a8071ed25",
+      "sample_hash": "61ede06e28fb1a0f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9fb97a88dfc276a5",
+      "sample_hash": "a826f8db8dc42371",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "16e73c7bd41c6c25",
+      "sample_hash": "bdde2c9c912ca0e2",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "3ab06f417308a325",
+      "sample_hash": "4598f4811200fa30",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "2518efbdbfed0825",
+      "sample_hash": "612051097e91c1d4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0fb457ad54c588a5",
+      "sample_hash": "9635cc42c227d754",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "90642ec96993ce01",
+      "sample_hash": "60e11dc20421cae0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_High_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9b32b78de8ba6889",
+      "sample_hash": "3508d18532351226",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6ae6e65126440d25",
+      "sample_hash": "8a0ffbb23869b5d9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "7f946fbd44ee1525",
+      "sample_hash": "dbc5e864975024d9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0ceb226cf20c53a5",
+      "sample_hash": "2d156e63062929cb",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "c0d7764735935f18",
+      "sample_hash": "e7d9b11559839153",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "543d8bef7dd50a25",
+      "sample_hash": "402b68073857ee2f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "b84d1ff357d35625",
+      "sample_hash": "b62bb3164c4216a7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6704d7ccd58eff25",
+      "sample_hash": "83737ab34c46806d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "eeb7543d0f7b0f39",
+      "sample_hash": "708ee5dbc37c0aa8",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "25f4c9c35eb400d9",
+      "sample_hash": "27a7c0bded19e61f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "e797741a8071ed25",
+      "sample_hash": "e11cb5f03758ec2c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9fb97a88dfc276a5",
+      "sample_hash": "2a959294d0ac41c3",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "16e73c7bd41c6c25",
+      "sample_hash": "9dffe5904aa554fb",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "3ab06f417308a325",
+      "sample_hash": "c7e3daba69b74713",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "2518efbdbfed0825",
+      "sample_hash": "f21cb320416f9b50",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0fb457ad54c588a5",
+      "sample_hash": "76c0782070a57ed0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "90642ec96993ce01",
+      "sample_hash": "b6c314583689542c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan1_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9b32b78de8ba6889",
+      "sample_hash": "238513e0e7d4e4f7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6ae6e65126440d25",
+      "sample_hash": "836520636246a7e8",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "7f946fbd44ee1525",
+      "sample_hash": "e40b9ba9329e5379",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0ceb226cf20c53a5",
+      "sample_hash": "061cff9a48a0cd52",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "c0d7764735935f18",
+      "sample_hash": "a5bd85f33939b9e9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "543d8bef7dd50a25",
+      "sample_hash": "5914ee9cc7d104f1",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "b84d1ff357d35625",
+      "sample_hash": "34e2a3d6893f13b5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6704d7ccd58eff25",
+      "sample_hash": "ddebd8080effd1be",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "eeb7543d0f7b0f39",
+      "sample_hash": "8167d574b78f351f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "25f4c9c35eb400d9",
+      "sample_hash": "a74cf51d02106857",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "e797741a8071ed25",
+      "sample_hash": "e3d61955524cb84a",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9fb97a88dfc276a5",
+      "sample_hash": "a30425fc5d5482a9",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "16e73c7bd41c6c25",
+      "sample_hash": "b1d608a0773a1986",
+      "peak_bands": 2,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "3ab06f417308a325",
+      "sample_hash": "78421ba2848161c3",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "2518efbdbfed0825",
+      "sample_hash": "f389dbb0f4cc2c71",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0fb457ad54c588a5",
+      "sample_hash": "4d84212fc11a91f1",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "90642ec96993ce01",
+      "sample_hash": "b9cb0eb93c7e71f3",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan2_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9b32b78de8ba6889",
+      "sample_hash": "f7ab55366d892cea",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6ae6e65126440d25",
+      "sample_hash": "f69f58ce12631f4d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "7f946fbd44ee1525",
+      "sample_hash": "36a31293d764a6e9",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0ceb226cf20c53a5",
+      "sample_hash": "8d5a5bc03ae10a69",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "c0d7764735935f18",
+      "sample_hash": "f629803582db3cb0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "543d8bef7dd50a25",
+      "sample_hash": "f89a4498919dc1da",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "b84d1ff357d35625",
+      "sample_hash": "74a6ef153a674c50",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "6704d7ccd58eff25",
+      "sample_hash": "a4b5f2c09bde4f37",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "eeb7543d0f7b0f39",
+      "sample_hash": "b6487330a124352c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "25f4c9c35eb400d9",
+      "sample_hash": "aad84a6de773d56f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "e797741a8071ed25",
+      "sample_hash": "ed0d1dfa9824b916",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9fb97a88dfc276a5",
+      "sample_hash": "d73b711c4280feac",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "16e73c7bd41c6c25",
+      "sample_hash": "25449354c81bb0ce",
+      "peak_bands": 2,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "3ab06f417308a325",
+      "sample_hash": "bb22e318839e7361",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "2518efbdbfed0825",
+      "sample_hash": "2f119a454ce26611",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "0fb457ad54c588a5",
+      "sample_hash": "6de6de45ac1fc791",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "90642ec96993ce01",
+      "sample_hash": "5ceb714f7e983e90",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan3_128x64",
+      "width": 128,
+      "height": 64,
+      "source_hash": "9b32b78de8ba6889",
+      "sample_hash": "6197e5e54fa05c02",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "39de956a5e9d6125",
+      "sample_hash": "0893199df00f01db",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "394ffcb42112c5a5",
+      "sample_hash": "8a60d67f61be81db",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "52ccb85d14baa925",
+      "sample_hash": "ef6ef9866bd4b15b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "85da8d29e53c4c02",
+      "sample_hash": "2a07d6fd55a3c01c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8b32d1c6b44e4325",
+      "sample_hash": "bb058912a1b4c63f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "62499d5d19082125",
+      "sample_hash": "0972b44947bb22ec",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "34bbfb9365d97125",
+      "sample_hash": "1ece05e157edb6ff",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "38bbcdf49029df41",
+      "sample_hash": "9b86df3593b4b2c1",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3885966b69b47c9a",
+      "sample_hash": "016a8566bb0bafe4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "9433ed455eb19d25",
+      "sample_hash": "326da192788e8f6f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "2c4255ba08616e25",
+      "sample_hash": "002a22ecbf4503b6",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "bf25b7ebad16b525",
+      "sample_hash": "e0565e38d25d8c6c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "4f306824e1ef2325",
+      "sample_hash": "363bbf6241a96748",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "dccfa611f74c0025",
+      "sample_hash": "322efd84f7f0385d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8c32e9ae12bb75a5",
+      "sample_hash": "08b963fb616dd35d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "6a58aff87c202e14",
+      "sample_hash": "d9d159f99f1b0222",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_Low_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3d2c1c0a30dc126d",
+      "sample_hash": "26704493ed2734a3",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "39de956a5e9d6125",
+      "sample_hash": "dbc664e7d5401b2a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "394ffcb42112c5a5",
+      "sample_hash": "7e8801ec895b18aa",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "52ccb85d14baa925",
+      "sample_hash": "02f8c343b9976b2a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "85da8d29e53c4c02",
+      "sample_hash": "5500cfd4a6ae594d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8b32d1c6b44e4325",
+      "sample_hash": "de1d06776de6f8b3",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "62499d5d19082125",
+      "sample_hash": "4e747228b179e4bc",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "34bbfb9365d97125",
+      "sample_hash": "06bbf1b0bab1df71",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "38bbcdf49029df41",
+      "sample_hash": "db34c0722e0531c3",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3885966b69b47c9a",
+      "sample_hash": "687f444f04e3d753",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "9433ed455eb19d25",
+      "sample_hash": "d3a32a9a65eaae8e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "2c4255ba08616e25",
+      "sample_hash": "73b2d0b940b31a4b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "bf25b7ebad16b525",
+      "sample_hash": "c9a18bea35d0d50f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "4f306824e1ef2325",
+      "sample_hash": "d742699f851b79f6",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "dccfa611f74c0025",
+      "sample_hash": "3dd24cfc1140d782",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8c32e9ae12bb75a5",
+      "sample_hash": "e05750268ccd4a82",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "6a58aff87c202e14",
+      "sample_hash": "48b1b422ed552a7a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_Medium_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3d2c1c0a30dc126d",
+      "sample_hash": "93bd97744fa162d4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "39de956a5e9d6125",
+      "sample_hash": "a1345eb2364afcb2",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "394ffcb42112c5a5",
+      "sample_hash": "9c2260ca3e514932",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "52ccb85d14baa925",
+      "sample_hash": "2bf800fc3e54a46a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "85da8d29e53c4c02",
+      "sample_hash": "6b1d03698909340d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8b32d1c6b44e4325",
+      "sample_hash": "05ddd1bb7d83ab98",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "62499d5d19082125",
+      "sample_hash": "db065c43cbdf6fb0",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "34bbfb9365d97125",
+      "sample_hash": "a7bd837c435ddd85",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "38bbcdf49029df41",
+      "sample_hash": "10f773001ca1837e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3885966b69b47c9a",
+      "sample_hash": "adc998678e1ef562",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "9433ed455eb19d25",
+      "sample_hash": "60be461ed4e073a3",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "2c4255ba08616e25",
+      "sample_hash": "3faddbe01946dd5c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "bf25b7ebad16b525",
+      "sample_hash": "e767b12e08a2c852",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "4f306824e1ef2325",
+      "sample_hash": "b556accaf0780532",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "dccfa611f74c0025",
+      "sample_hash": "ea7c37c89934f5f2",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8c32e9ae12bb75a5",
+      "sample_hash": "feec4b0852b334f2",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "6a58aff87c202e14",
+      "sample_hash": "9aa238215774bbca",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_High_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3d2c1c0a30dc126d",
+      "sample_hash": "61b9c6d517e7278e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "39de956a5e9d6125",
+      "sample_hash": "e26920b1635ad00c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "394ffcb42112c5a5",
+      "sample_hash": "f28b53a940ae338c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "52ccb85d14baa925",
+      "sample_hash": "d4765bf50d75ef5d",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "85da8d29e53c4c02",
+      "sample_hash": "4575818c15278937",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8b32d1c6b44e4325",
+      "sample_hash": "f26a41ef64765f6b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "62499d5d19082125",
+      "sample_hash": "47f44c59a8cd1d14",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "34bbfb9365d97125",
+      "sample_hash": "ef4c5f312bee33b7",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "38bbcdf49029df41",
+      "sample_hash": "f714f1880206d1cc",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3885966b69b47c9a",
+      "sample_hash": "e80cb676f7dfe314",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "9433ed455eb19d25",
+      "sample_hash": "4fd75846bed0b503",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "2c4255ba08616e25",
+      "sample_hash": "d2fc3ba8ac3d0d12",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "bf25b7ebad16b525",
+      "sample_hash": "7fc04deed614ea8b",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "4f306824e1ef2325",
+      "sample_hash": "a76341ae364e7bbf",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "dccfa611f74c0025",
+      "sample_hash": "b08077ceb5948579",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8c32e9ae12bb75a5",
+      "sample_hash": "9482d932471c6079",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "6a58aff87c202e14",
+      "sample_hash": "c71b1148c8565455",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan1_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3d2c1c0a30dc126d",
+      "sample_hash": "097df84e5b747b0c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "39de956a5e9d6125",
+      "sample_hash": "003f3ef0a942463c",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "394ffcb42112c5a5",
+      "sample_hash": "a5923a651f602d70",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "52ccb85d14baa925",
+      "sample_hash": "d7cc32d5ec4941f4",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "85da8d29e53c4c02",
+      "sample_hash": "e178cee58d7beaac",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8b32d1c6b44e4325",
+      "sample_hash": "eb5d271bb22d48f5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "62499d5d19082125",
+      "sample_hash": "4882215db8989bc6",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "34bbfb9365d97125",
+      "sample_hash": "22f6c292e19082df",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "38bbcdf49029df41",
+      "sample_hash": "c4a52ba640bc7037",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3885966b69b47c9a",
+      "sample_hash": "3d6dd51f903a6630",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "9433ed455eb19d25",
+      "sample_hash": "1c42934f49ff72d4",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "2c4255ba08616e25",
+      "sample_hash": "d59ae1c7e3f536c9",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "bf25b7ebad16b525",
+      "sample_hash": "cc6ec73144b43e54",
+      "peak_bands": 2,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "4f306824e1ef2325",
+      "sample_hash": "f99e8fca51361267",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "dccfa611f74c0025",
+      "sample_hash": "0c2bb55afeed81e5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8c32e9ae12bb75a5",
+      "sample_hash": "daa1a587824204e5",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "6a58aff87c202e14",
+      "sample_hash": "5ec78a5bdb5262b7",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan2_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3d2c1c0a30dc126d",
+      "sample_hash": "0774260c9f019f4f",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "39de956a5e9d6125",
+      "sample_hash": "b609eec77878a0ca",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_gradient_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "394ffcb42112c5a5",
+      "sample_hash": "0bfe1755af864209",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_gradient_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "52ccb85d14baa925",
+      "sample_hash": "27331846fa770624",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "diagonal_gradient_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "85da8d29e53c4c02",
+      "sample_hash": "e503b713e12ea68a",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "horizontal_edges_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8b32d1c6b44e4325",
+      "sample_hash": "2a9265b4b25c2553",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "vertical_edges_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "62499d5d19082125",
+      "sample_hash": "9e751b39ac955500",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "checkerboard_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "34bbfb9365d97125",
+      "sample_hash": "c5f9461564cac092",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "thin_lines_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "38bbcdf49029df41",
+      "sample_hash": "8bc99a981ba6e39e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "sparse_marks_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3885966b69b47c9a",
+      "sample_hash": "edfd4c00a0d55f60",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "alternating_fields_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "9433ed455eb19d25",
+      "sample_hash": "956678d7d1f3b217",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "2c4255ba08616e25",
+      "sample_hash": "128ebf6463c0a7be",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "bf25b7ebad16b525",
+      "sample_hash": "2069b64b4867e022",
+      "peak_bands": 2,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "4f306824e1ef2325",
+      "sample_hash": "4bfa60b4c27d6a89",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_black_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "dccfa611f74c0025",
+      "sample_hash": "5b293e7221d36365",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "near_white_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "8c32e9ae12bb75a5",
+      "sample_hash": "0487827f1c007165",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "noise_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "6a58aff87c202e14",
+      "sample_hash": "0462354296eccf06",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan3_128x128",
+      "width": 128,
+      "height": 128,
+      "source_hash": "3d2c1c0a30dc126d",
+      "sample_hash": "2ce264ce267b22dd",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "flat_FilmScan3_1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "b847140c65359825",
+      "sample_hash": "3a01f48e4328972e",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_luma_FilmScan3_1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "d69f56912fcee765",
+      "sample_hash": "74f17192c1a26437",
+      "peak_bands": 1,
+      "difference_bands": 3
+    },
+    {
+      "id": "field_chroma_FilmScan3_1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "e29b2bf1af90cef5",
+      "sample_hash": "00abb7de2a20b679",
+      "peak_bands": 2,
+      "difference_bands": 3
+    },
+    {
+      "id": "saturated_yuv_FilmScan3_1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "03a0e477f5cb7325",
+      "sample_hash": "b3cb0f602cc0c9f1",
+      "peak_bands": 0,
+      "difference_bands": 3
+    },
+    {
+      "id": "texture_FilmScan3_1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_hash": "bea2fa449d63ff99",
+      "sample_hash": "139bf9f11ef03c33",
+      "peak_bands": 0,
+      "difference_bands": 3
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,28 @@
+=========================================================
+ HyperCine Reference Baseline Benchmark Framework       
+=========================================================
+CPU:          AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     
+Cores/Threads:16
+Compiler:     MSVC 19.44 (Visual Studio 2022)
+Configuration:BGRA -> 4:2:2 Film3 (Reference CPU)
+
+>>> Benchmarking 1080p (1920x1080, 50 frames)...
+  Encode:   67.72 fps |  140.42 MP/s | Avg Lat:  14.38 ms [12.15 - 18.38 ms]
+  Decode:  439.43 fps |  911.19 MP/s | Avg Lat:   2.28 ms [2.07 - 2.75 ms]
+  Comp:   1158 KB/frame (6.99:1) | Peak RAM: 91 MB
+
+>>> Benchmarking 4K_UHD (3840x2160, 25 frames)...
+  Encode:   21.47 fps |  178.07 MP/s | Avg Lat:  45.49 ms [43.82 - 50.24 ms]
+  Decode:  120.31 fps |  997.90 MP/s | Avg Lat:   8.31 ms [7.66 - 8.89 ms]
+  Comp:   4563 KB/frame (7.10:1) | Peak RAM: 228 MB
+
+>>> Benchmarking 8K_UHD (7680x4320, 10 frames)...
+  Encode:    5.88 fps |  195.16 MP/s | Avg Lat: 166.33 ms [163.13 - 168.94 ms]
+  Decode:   31.18 fps | 1034.61 MP/s | Avg Lat:  32.07 ms [29.98 - 33.23 ms]
+  Comp:   17260 KB/frame (7.51:1) | Peak RAM: 613 MB
+
+[+] Benchmark results successfully saved to: benchmarks/results/decode_phase3b1_codec_reference.json
+
+=========================================================
+ Benchmark Run Completed Successfully                    
+=========================================================

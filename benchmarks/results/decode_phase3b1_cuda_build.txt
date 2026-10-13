@@ -1,0 +1,258 @@
+MSBuild-Version 17.14.51+25f168cee für .NET Framework
+
+  Checking File Globs
+  CFHDCodecStatic.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\upstream\Release\CFHDCodecStatic.lib
+  TestCFHD.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\upstream\Release\TestCFHD.exe
+  WaveletDemo.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\upstream\Release\WaveletDemo.exe
+  decode_parser.cpp
+  hypercine_wavelet.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\src\Release\hypercine_wavelet.lib
+  hypercine_decoder.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\src\Release\hypercine_decoder.lib
+  audit_decode_phase3ae_corpus.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/audit_decode_phase3ae_corpus.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/audit_decode_phase3ae_corpus.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\audit_decode_phase3ae_corpus.vcxproj]
+  audit_decode_phase3ae_corpus.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\audit_decode_phase3ae_corpus.exe
+  benchmark_codec.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_codec.exe
+  benchmark_decode_phase0.cpp
+  benchmark_decode_phase0.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase0.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase1.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase1.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase1.vcxproj]
+  benchmark_decode_phase1.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase1.exe
+  benchmark_decode_phase2a.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2a.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2a.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2a.vcxproj]
+  benchmark_decode_phase2a.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2a.exe
+  benchmark_decode_phase2b.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2b.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2b.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2b.vcxproj]
+  benchmark_decode_phase2b.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2b.exe
+  benchmark_decode_phase2c.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2c.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2c.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2c.vcxproj]
+  benchmark_decode_phase2c.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2c.exe
+  benchmark_decode_phase2d.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2d.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2d.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2d.vcxproj]
+  benchmark_decode_phase2d.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2d.exe
+  benchmark_decode_phase2e.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2e.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2e.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2e.vcxproj]
+  benchmark_decode_phase2e.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2e.exe
+  benchmark_decode_phase2fa.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2fa.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2fa.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2fa.vcxproj]
+  benchmark_decode_phase2fa.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2fa.exe
+  benchmark_decode_phase2fc.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2fc.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2fc.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2fc.vcxproj]
+  benchmark_decode_phase2fc.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2fc.exe
+  benchmark_decode_phase2fc_reproduction.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2fc_reproduction.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase2fc_reproduction.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase2fc_reproduction.vcxproj]
+  benchmark_decode_phase2fc_reproduction.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase2fc_reproduction.exe
+  benchmark_decode_phase3ad.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase3ad.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase3ad.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase3ad.vcxproj]
+  benchmark_decode_phase3ad.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase3ad.exe
+  benchmark_decode_phase3af.cpp
+  readavi.cpp
+  mp4reader.cpp
+  fileio.cpp
+  Code wird generiert...
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase3af.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase3af.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase3af.vcxproj]
+  benchmark_decode_phase3af.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase3af.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase3b1_progressive.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decode_phase3b1_progressive.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decode_phase3b1_progressive.vcxproj]
+  benchmark_decode_phase3b1_progressive.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decode_phase3b1_progressive.exe
+  benchmark_decoder.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decoder.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_decoder.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_decoder.vcxproj]
+  benchmark_decoder.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_decoder.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase1b.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase1b.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase1b.vcxproj]
+  benchmark_phase1b.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase1b.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase1c.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase1c.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase1c.vcxproj]
+  benchmark_phase1c.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase1c.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2a.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2a.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase2a.vcxproj]
+  benchmark_phase2a.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase2a.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2b.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2b.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase2b.vcxproj]
+  benchmark_phase2b.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase2b.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2c.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2c.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase2c.vcxproj]
+  benchmark_phase2c.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase2c.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2d.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase2d.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase2d.vcxproj]
+  benchmark_phase2d.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase2d.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase3a.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase3a.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase3a.vcxproj]
+  benchmark_phase3a.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase3a.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase3a1.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_phase3a1.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_phase3a1.vcxproj]
+  benchmark_phase3a1.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_phase3a1.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_wavelet.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/benchmark_wavelet.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\benchmark_wavelet.vcxproj]
+  benchmark_wavelet.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\benchmark_wavelet.exe
+  decode_phase2fb_research.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\decode_phase2fb_research.lib
+  benchmark_decode_phase0.cpp
+  decode_profile_hooks.cpp
+  lutpath.cpp
+  Code wird generiert...
+  decoder.c
+  bayer.c
+  convert.c
+  quantize.c
+  frame.c
+  spatial.c
+  Code wird generiert...
+  profile_decode_phase0.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\profile_decode_phase0.exe
+  profile_encoder.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\profile_encoder.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/prototype_decode_phase2fb.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/benchmarks/Release/prototype_decode_phase2fb.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\prototype_decode_phase2fb.vcxproj]
+  prototype_decode_phase2fb.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\benchmarks\Release\prototype_decode_phase2fb.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/prototype_phase2c_research.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/prototype_phase2c_research.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\prototype_phase2c_research.vcxproj]
+  prototype_phase2c_research.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\prototype_phase2c_research.exe
+  test_avi_sample.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_avi_sample.exe
+  test_codec_roundtrip.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_codec_roundtrip.exe
+  Compiling CUDA source file ..\..\tests\test_color_conversion_cuda.cu...
+  
+  C:\Users\User\Documents\GitHub\HyperCine-public\build\tests>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin\nvcc.exe"  --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64" -x cu   -I"C:\Users\User\Documents\GitHub\HyperCine-public\include" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\Common" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\Codec" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\EncoderSDK" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\DecoderSDK" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\ConvertLib" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\WarpLib" -I"C:\Users\User\Documents\GitHub\HyperCine-public\tests" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\Example" -I"C:\Users\User\Documents\GitHub\HyperCine-public\upstream\Example\WaveletDemo" -I"C:\Users\User\Documents\GitHub\HyperCine-public\src\cuda" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include"     --keep-dir test_col.135FBE37\x64\Release  -maxrregcount=0    --machine 64 --compile -cudart static -std=c++17 --generate-code=arch=compute_89,code=[compute_89,sm_89] -Xcompiler="/EHsc -Ob2"   -D_WINDOWS -DNDEBUG -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -DHYPERCINE_CUDA_AVAILABLE=1 -D"CMAKE_INTDIR=\"Release\"" -D_MBCS -DWIN32 -D_WINDOWS -DNDEBUG -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -DHYPERCINE_CUDA_AVAILABLE=1 -D"CMAKE_INTDIR=\"Release\"" -Xcompiler "/EHsc /W1 /nologo /O2 /FS   /MD " -Xcompiler "/Fdtest_color_conversion_cuda.dir\Release\vc143.pdb" -o test_color_conversion_cuda.dir\Release\test_color_conversion_cuda.obj "C:\Users\User\Documents\GitHub\HyperCine-public\tests\test_color_conversion_cuda.cu" 
+  test_color_conversion_cuda.cu
+  tmpxft_00006af8_00000000-7_test_color_conversion_cuda.cudafe1.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_color_conversion_cuda.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_color_conversion_cuda.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_color_conversion_cuda.vcxproj]
+  test_color_conversion_cuda.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_color_conversion_cuda.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_cuda_pyramid.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_cuda_pyramid.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_cuda_pyramid.vcxproj]
+  test_cuda_pyramid.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_cuda_pyramid.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_cuda_wavelet.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_cuda_wavelet.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_cuda_wavelet.vcxproj]
+  test_cuda_wavelet.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_cuda_wavelet.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_entropy_cuda.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_entropy_cuda.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_entropy_cuda.vcxproj]
+  test_decode_entropy_cuda.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_entropy_cuda.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_entropy_phase2c.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_entropy_phase2c.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_entropy_phase2c.vcxproj]
+  test_decode_entropy_phase2c.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_entropy_phase2c.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_gpu_index.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_gpu_index.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_gpu_index.vcxproj]
+  test_decode_gpu_index.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_gpu_index.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_inverse_wavelet_cuda.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_inverse_wavelet_cuda.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_inverse_wavelet_cuda.vcxproj]
+  test_decode_inverse_wavelet_cuda.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_inverse_wavelet_cuda.exe
+  test_decode_phase0.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase0.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase1.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase1.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase1.vcxproj]
+  test_decode_phase1.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase1.exe
+  test_decode_phase2a.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2a.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2a.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2a.vcxproj]
+  test_decode_phase2a.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2a.exe
+  test_decode_phase2b.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2b.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2b.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2b.vcxproj]
+  test_decode_phase2b.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2b.exe
+  test_decode_phase2c.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2c.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2c.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2c.vcxproj]
+  test_decode_phase2c.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2c.exe
+  test_decode_phase2d.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2d.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2d.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2d.vcxproj]
+  test_decode_phase2d.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2d.exe
+  test_decode_phase2e.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2e.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2e.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2e.vcxproj]
+  test_decode_phase2e.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2e.exe
+  test_decode_phase2fa.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fa.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fa.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2fa.vcxproj]
+  test_decode_phase2fa.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2fa.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fb.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fb.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2fb.vcxproj]
+  test_decode_phase2fb.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2fb.exe
+  test_decode_phase2fc.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fc.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fc.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2fc.vcxproj]
+  test_decode_phase2fc.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2fc.exe
+  test_decode_phase2fc_audit.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fc_audit.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase2fc_audit.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase2fc_audit.vcxproj]
+  test_decode_phase2fc_audit.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase2fc_audit.exe
+  test_decode_phase3a_rc.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3a_rc.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3a_rc.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase3a_rc.vcxproj]
+  test_decode_phase3a_rc.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase3a_rc.exe
+  Building Custom Rule C:/Users/User/Documents/GitHub/HyperCine-public/tests/CMakeLists.txt
+  CMake is re-running because C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/CMakeFiles/generate.stamp is out-of-date.
+    the file 'C:/Users/User/Documents/GitHub/HyperCine-public/tests/CMakeLists.txt'
+    is newer than 'C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/CMakeFiles/generate.stamp.depend'
+    result='-1'
+  -- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+  -- CUDA enabled. Compiler: C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.8/bin/nvcc.exe (Version: 12.8.61, Architectures: 89)
+  CMake Deprecation Warning at upstream/CMakeLists.txt:2 (cmake_minimum_required):
+    Compatibility with CMake < 3.10 will be removed from a future version of
+    CMake.
+  
+    Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+    to tell CMake that the project requires at least <min> but has been updated
+    to work with policies introduced by <max> or earlier.
+  
+  
+  -- Could NOT find OpenMP_CUDA (missing: OpenMP_CUDA_FLAGS OpenMP_CUDA_LIB_NAMES) 
+  -- Could NOT find OpenMP (missing: OpenMP_CUDA_FOUND) (found version "2.0")
+  -- Configuring done (3.2s)
+  -- Generating done (4.6s)
+  -- Build files have been written to: C:/Users/User/Documents/GitHub/HyperCine-public/build
+  test_decode_phase3ae.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3ae.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3ae.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase3ae.vcxproj]
+  test_decode_phase3ae.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase3ae.exe
+  test_decode_phase3b0.cpp
+  readavi.cpp
+  mp4reader.cpp
+  fileio.cpp
+  Code wird generiert...
+  seh_guard.c
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3b0.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3b0.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase3b0.vcxproj]
+  test_decode_phase3b0.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase3b0.exe
+  test_decode_phase3b1.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3b1.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3b1.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase3b1.vcxproj]
+  test_decode_phase3b1.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase3b1.exe
+  test_decode_phase3b1_acceptance.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3b1_acceptance.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decode_phase3b1_acceptance.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decode_phase3b1_acceptance.vcxproj]
+  test_decode_phase3b1_acceptance.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decode_phase3b1_acceptance.exe
+  test_decoder.cpp
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decoder.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_decoder.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_decoder.vcxproj]
+  test_decoder.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_decoder.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_entropy_capacity.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_entropy_capacity.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_entropy_capacity.vcxproj]
+  test_entropy_capacity.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_entropy_capacity.exe
+  test_entropy_parallel.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_entropy_parallel.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_hybrid_roundtrip.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_hybrid_roundtrip.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_hybrid_roundtrip.vcxproj]
+  test_hybrid_roundtrip.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_hybrid_roundtrip.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2a.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2a.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_phase2a.vcxproj]
+  test_phase2a.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_phase2a.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2b.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2b.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_phase2b.vcxproj]
+  test_phase2b.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_phase2b.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2c.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2c.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_phase2c.vcxproj]
+  test_phase2c.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_phase2c.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2d.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase2d.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_phase2d.vcxproj]
+  test_phase2d.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_phase2d.exe
+     Bibliothek "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase3a.lib" und Objekt "C:/Users/User/Documents/GitHub/HyperCine-public/build/tests/Release/test_phase3a.exp" werden erstellt.
+LINK : warning LNK4098: Standardbibliothek "LIBCMT" steht in Konflikt mit anderen Bibliotheken; /NODEFAULTLIB:Bibliothek verwenden. [C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\test_phase3a.vcxproj]
+  test_phase3a.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_phase3a.exe
+  test_transform_wavelet.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_transform_wavelet.exe
+  test_yuy2_stability.vcxproj -> C:\Users\User\Documents\GitHub\HyperCine-public\build\tests\Release\test_yuy2_stability.exe

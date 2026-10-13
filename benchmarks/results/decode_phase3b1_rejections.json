@@ -1,0 +1,248 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "cases": [
+    {
+      "profile": "BAYER-p12-ch4-spatial-prog-f1-bands40-fmt-1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "e513e61938beca3f",
+      "status": "PASS"
+    },
+    {
+      "profile": "RGB444-p12-ch3-spatial-prog-f1-bands30-fmt-1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "75d4c52c5a99849f",
+      "status": "PASS"
+    },
+    {
+      "profile": "RGBA4444-p12-ch4-spatial-prog-f1-bands40-fmt-1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "e69ae613acc6ef37",
+      "status": "PASS"
+    },
+    {
+      "profile": "YUV422-p10-ch3-fieldplus-field-f2-bands54-fmt-1",
+      "expected": 11,
+      "actual": 11,
+      "output_published": false,
+      "sample_hash": "766c61a035dea429",
+      "status": "PASS"
+    },
+    {
+      "profile": "YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1",
+      "expected": 11,
+      "actual": 11,
+      "output_published": false,
+      "sample_hash": "09cdbfd3ce79cae9",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_70_8",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "3380f86c430ef4f4",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_70_12",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "d2dfc088b3107d48",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_20_63",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "70ef2c92c1f279b7",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_21_65",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "9e5e59375f95f879",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_12_4",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "2cea25533da9f947",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_62_4",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "8fc63fcc93e57e49",
+      "status": "PASS"
+    },
+    {
+      "profile": "bad_tag_8192_65535",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "abdcbb22de1d2c3e",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_1",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "af63bd4c8601b7df",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_7",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "3b1335a76d17b625",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_4270",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "81ea801efce2fa7e",
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_8532",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "9d781320401bbf12",
+      "status": "PASS"
+    },
+    {
+      "profile": "missing_frame_trailer_upstream",
+      "sample_hash": "727eccd7372deec6",
+      "upstream_error": 2048,
+      "status": "PASS"
+    },
+    {
+      "profile": "truncated_8536",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "727eccd7372deec6",
+      "status": "PASS"
+    },
+    {
+      "profile": "29_bands",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "60a6e3cebd30375c",
+      "status": "PASS"
+    },
+    {
+      "profile": "inconsistent_frame_format",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "868f088ad47c59cd",
+      "status": "PASS"
+    },
+    {
+      "profile": "inconsistent_encoded_format_RGB",
+      "expected": 6,
+      "actual": 6,
+      "output_published": false,
+      "sample_hash": "fba83456a22756dc",
+      "status": "PASS"
+    },
+    {
+      "profile": "oversized",
+      "expected": 7,
+      "actual": 7,
+      "output_published": false,
+      "sample_hash": "8db9bb697e01b7df",
+      "status": "PASS"
+    }
+  ],
+  "profile_matrix": [
+    {
+      "profile": "YUV422 progressive p10 GOP-1",
+      "expected": "PASS",
+      "actual": "PASS"
+    },
+    {
+      "profile": "YUV422 interlaced p10 GOP-1",
+      "expected": "PASS",
+      "actual": "PASS"
+    },
+    {
+      "profile": "YUV422 fieldplus progressive",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 11,
+      "evidence_case": "YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1"
+    },
+    {
+      "profile": "YUV422 fieldplus interlaced",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 11,
+      "evidence_case": "YUV422-p10-ch3-fieldplus-field-f2-bands54-fmt-1"
+    },
+    {
+      "profile": "RGB444 p12",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 6,
+      "evidence_case": "RGB444-p12-ch3-spatial-prog-f1-bands30-fmt-1"
+    },
+    {
+      "profile": "RGBA4444 p12",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 6,
+      "evidence_case": "RGBA4444-p12-ch4-spatial-prog-f1-bands40-fmt-1"
+    },
+    {
+      "profile": "Bayer p12",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 6,
+      "evidence_case": "BAYER-p12-ch4-spatial-prog-f1-bands40-fmt-1"
+    },
+    {
+      "profile": "invalid precision YUV p8",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 6,
+      "evidence_case": "bad_tag_70_8"
+    },
+    {
+      "profile": "invalid precision YUV p12",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 6,
+      "evidence_case": "bad_tag_70_12"
+    },
+    {
+      "profile": "oversized sample",
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "decode_error_enum": 7,
+      "evidence_case": "oversized"
+    }
+  ],
+  "status": "PASS"
+}

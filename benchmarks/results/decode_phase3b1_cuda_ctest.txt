@@ -1,0 +1,660 @@
+Internal ctest changing into directory: C:/Users/User/Documents/GitHub/HyperCine-public/build
+Test project C:/Users/User/Documents/GitHub/HyperCine-public/build
+      Start  1: test_decode_phase3ae
+ 1/37 Test  #1: test_decode_phase3ae ...............   Passed    0.99 sec
+      Start  2: test_decode_phase3a_rc
+ 2/37 Test  #2: test_decode_phase3a_rc .............   Passed   35.52 sec
+      Start  3: test_transform_wavelet
+ 3/37 Test  #3: test_transform_wavelet .............   Passed    0.05 sec
+      Start  4: test_codec_roundtrip
+ 4/37 Test  #4: test_codec_roundtrip ...............   Passed    0.07 sec
+      Start  5: test_yuy2_stability
+ 5/37 Test  #5: test_yuy2_stability ................   Passed    1.21 sec
+      Start  6: test_decode_phase0
+ 6/37 Test  #6: test_decode_phase0 .................   Passed    5.20 sec
+      Start  7: test_avi_sample
+ 7/37 Test  #7: test_avi_sample ....................   Passed    0.24 sec
+      Start  8: test_decoder
+ 8/37 Test  #8: test_decoder .......................***Failed   15.70 sec
+integer classifier boundaries PASS
+golden 1920 flat 30/30 LL/planar/BGRA/YU64 exact
+golden 1920 gradient 30/30 LL/planar/BGRA/YU64 exact
+golden 1920 noise 30/30 LL/planar/BGRA/YU64 exact
+golden 1920 texture 30/30 LL/planar/BGRA/YU64 exact
+golden 1920 edges 30/30 LL/planar/BGRA/YU64 exact
+golden 3840 flat 30/30 LL/planar/BGRA/YU64 exact
+golden 3840 gradient 30/30 LL/planar/BGRA/YU64 exact
+golden 3840 noise 30/30 LL/planar/BGRA/YU64 exact
+golden 3840 texture 30/30 LL/planar/BGRA/YU64 exact
+golden 3840 edges 30/30 LL/planar/BGRA/YU64 exact
+golden 7680 flat 30/30 LL/planar/BGRA/YU64 exact
+lifetime/backpressure/consumer streams/destruction PASS
+deterministic malformed mutations 1000 PASS
+2 decoder instances x 100 random access exact PASS
+4 decoder instances x 100 random access exact PASS
+queue valid sample
+
+      Start  9: test_decode_phase3b0
+ 9/37 Test  #9: test_decode_phase3b0 ...............***Failed    1.92 sec
+begin yuy2_yuv_prog_64_low_gradient
+end yuy2_yuv_prog_64_low_gradient encode=0 bytes=3248
+begin yuy2_yuv_prog_64_medium_gradient
+end yuy2_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin yuy2_yuv_prog_64_high_gradient
+end yuy2_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin yuy2_yuv_prog_64_filmscan1_gradient
+end yuy2_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin yuy2_yuv_prog_64_filmscan2_gradient
+end yuy2_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin yuy2_yuv_prog_64_filmscan3_gradient
+end yuy2_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin yuy2_yuv_intl_64_low_gradient
+end yuy2_yuv_intl_64_low_gradient encode=0 bytes=3280
+begin yuy2_yuv_intl_64_medium_gradient
+end yuy2_yuv_intl_64_medium_gradient encode=0 bytes=3296
+begin yuy2_yuv_intl_64_high_gradient
+end yuy2_yuv_intl_64_high_gradient encode=0 bytes=3300
+begin yuy2_yuv_intl_64_filmscan1_gradient
+end yuy2_yuv_intl_64_filmscan1_gradient encode=0 bytes=3364
+begin yuy2_yuv_intl_64_filmscan2_gradient
+end yuy2_yuv_intl_64_filmscan2_gradient encode=0 bytes=3416
+begin yuy2_yuv_intl_64_filmscan3_gradient
+end yuy2_yuv_intl_64_filmscan3_gradient encode=0 bytes=3420
+begin yuy2_yuv_gop2_64_low_gradient
+end yuy2_yuv_gop2_64_low_gradient encode=0 bytes=6068
+begin yuy2_yuv_gop2_64_medium_gradient
+end yuy2_yuv_gop2_64_medium_gradient encode=0 bytes=6084
+begin yuy2_yuv_gop2_64_high_gradient
+end yuy2_yuv_gop2_64_high_gradient encode=0 bytes=6088
+begin yuy2_yuv_gop2_64_filmscan1_gradient
+end yuy2_yuv_gop2_64_filmscan1_gradient encode=0 bytes=6132
+begin yuy2_yuv_gop2_64_filmscan2_gradient
+end yuy2_yuv_gop2_64_filmscan2_gradient encode=0 bytes=6176
+begin yuy2_yuv_gop2_64_filmscan3_gradient
+end yuy2_yuv_gop2_64_filmscan3_gradient encode=0 bytes=6176
+begin yuy2_yuv_intl_gop2_64_low_gradient
+end yuy2_yuv_intl_gop2_64_low_gradient encode=0 bytes=6136
+begin yuy2_yuv_intl_gop2_64_medium_gradient
+end yuy2_yuv_intl_gop2_64_medium_gradient encode=0 bytes=6152
+begin yuy2_yuv_intl_gop2_64_high_gradient
+end yuy2_yuv_intl_gop2_64_high_gradient encode=0 bytes=6156
+begin yuy2_yuv_intl_gop2_64_filmscan1_gradient
+end yuy2_yuv_intl_gop2_64_filmscan1_gradient encode=0 bytes=6296
+begin yuy2_yuv_intl_gop2_64_filmscan2_gradient
+end yuy2_yuv_intl_gop2_64_filmscan2_gradient encode=0 bytes=6340
+begin yuy2_yuv_intl_gop2_64_filmscan3_gradient
+end yuy2_yuv_intl_gop2_64_filmscan3_gradient encode=0 bytes=6348
+begin yuy2_yuv_601_64_low_gradient
+end yuy2_yuv_601_64_low_gradient encode=0 bytes=3248
+probed 25/297
+begin yuy2_yuv_601_64_medium_gradient
+end yuy2_yuv_601_64_medium_gradient encode=0 bytes=3264
+begin yuy2_yuv_601_64_high_gradient
+end yuy2_yuv_601_64_high_gradient encode=0 bytes=3268
+begin yuy2_yuv_601_64_filmscan1_gradient
+end yuy2_yuv_601_64_filmscan1_gradient encode=0 bytes=3284
+begin yuy2_yuv_601_64_filmscan2_gradient
+end yuy2_yuv_601_64_filmscan2_gradient encode=0 bytes=3336
+begin yuy2_yuv_601_64_filmscan3_gradient
+end yuy2_yuv_601_64_filmscan3_gradient encode=0 bytes=3336
+begin 2vuy_yuv_prog_64_low_gradient
+end 2vuy_yuv_prog_64_low_gradient encode=0 bytes=3248
+begin 2vuy_yuv_prog_64_medium_gradient
+end 2vuy_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin 2vuy_yuv_prog_64_high_gradient
+end 2vuy_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin 2vuy_yuv_prog_64_filmscan1_gradient
+end 2vuy_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin 2vuy_yuv_prog_64_filmscan2_gradient
+end 2vuy_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin 2vuy_yuv_prog_64_filmscan3_gradient
+end 2vuy_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin yu64_yuv_prog_64_low_gradient
+end yu64_yuv_prog_64_low_gradient encode=0 bytes=3248
+begin yu64_yuv_prog_64_medium_gradient
+end yu64_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin yu64_yuv_prog_64_high_gradient
+end yu64_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin yu64_yuv_prog_64_filmscan1_gradient
+end yu64_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin yu64_yuv_prog_64_filmscan2_gradient
+end yu64_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin yu64_yuv_prog_64_filmscan3_gradient
+end yu64_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin yu64_yuv_intl_64_low_gradient
+end yu64_yuv_intl_64_low_gradient encode=0 bytes=3280
+begin yu64_yuv_intl_64_medium_gradient
+end yu64_yuv_intl_64_medium_gradient encode=0 bytes=3296
+begin yu64_yuv_intl_64_high_gradient
+end yu64_yuv_intl_64_high_gradient encode=0 bytes=3300
+begin yu64_yuv_intl_64_filmscan1_gradient
+end yu64_yuv_intl_64_filmscan1_gradient encode=0 bytes=3364
+begin yu64_yuv_intl_64_filmscan2_gradient
+end yu64_yuv_intl_64_filmscan2_gradient encode=0 bytes=3416
+begin yu64_yuv_intl_64_filmscan3_gradient
+end yu64_yuv_intl_64_filmscan3_gradient encode=0 bytes=3420
+begin v210_yuv_prog_64_low_gradient
+end v210_yuv_prog_64_low_gradient encode=0 bytes=3248
+begin v210_yuv_prog_64_medium_gradient
+end v210_yuv_prog_64_medium_gradient encode=0 bytes=3264
+probed 50/297
+begin v210_yuv_prog_64_high_gradient
+end v210_yuv_prog_64_high_gradient encode=0 bytes=3324
+begin v210_yuv_prog_64_filmscan1_gradient
+end v210_yuv_prog_64_filmscan1_gradient encode=0 bytes=3352
+begin v210_yuv_prog_64_filmscan2_gradient
+end v210_yuv_prog_64_filmscan2_gradient encode=0 bytes=3504
+begin v210_yuv_prog_64_filmscan3_gradient
+end v210_yuv_prog_64_filmscan3_gradient encode=0 bytes=3516
+begin v210_yuv_intl_64_low_gradient
+end v210_yuv_intl_64_low_gradient encode=0 bytes=3280
+begin v210_yuv_intl_64_medium_gradient
+end v210_yuv_intl_64_medium_gradient encode=0 bytes=3296
+begin v210_yuv_intl_64_high_gradient
+end v210_yuv_intl_64_high_gradient encode=0 bytes=3300
+begin v210_yuv_intl_64_filmscan1_gradient
+end v210_yuv_intl_64_filmscan1_gradient encode=0 bytes=3368
+begin v210_yuv_intl_64_filmscan2_gradient
+end v210_yuv_intl_64_filmscan2_gradient encode=0 bytes=3484
+begin v210_yuv_intl_64_filmscan3_gradient
+end v210_yuv_intl_64_filmscan3_gradient encode=0 bytes=3576
+begin nv12_yuv_prog_64_filmscan1_gradient
+end nv12_yuv_prog_64_filmscan1_gradient encode=-1 bytes=0
+begin yv12_yuv_prog_64_filmscan1_gradient
+end yv12_yuv_prog_64_filmscan1_gradient encode=-1 bytes=0
+begin ct_yuv_prog_64_low_gradient
+end ct_yuv_prog_64_low_gradient encode=0 bytes=3248
+begin ct_yuv_prog_64_medium_gradient
+end ct_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin ct_yuv_prog_64_high_gradient
+end ct_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin ct_yuv_prog_64_filmscan1_gradient
+end ct_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin ct_yuv_prog_64_filmscan2_gradient
+end ct_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin ct_yuv_prog_64_filmscan3_gradient
+end ct_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin rg24_rgb_64_low_gradient
+end rg24_rgb_64_low_gradient encode=0 bytes=3368
+begin rg24_rgb_64_medium_gradient
+end rg24_rgb_64_medium_gradient encode=0 bytes=3376
+begin rg24_rgb_64_high_gradient
+end rg24_rgb_64_high_gradient encode=0 bytes=3384
+begin rg24_rgb_64_filmscan1_gradient
+end rg24_rgb_64_filmscan1_gradient encode=0 bytes=3388
+begin rg24_rgb_64_filmscan2_gradient
+end rg24_rgb_64_filmscan2_gradient encode=0 bytes=3428
+begin rg24_rgb_64_filmscan3_gradient
+end rg24_rgb_64_filmscan3_gradient encode=0 bytes=3428
+begin rg24_yuv_64_low_gradient
+end rg24_yuv_64_low_gradient encode=0 bytes=3272
+probed 75/297
+begin rg24_yuv_64_medium_gradient
+end rg24_yuv_64_medium_gradient encode=0 bytes=3296
+begin rg24_yuv_64_high_gradient
+end rg24_yuv_64_high_gradient encode=0 bytes=3296
+begin rg24_yuv_64_filmscan1_gradient
+end rg24_yuv_64_filmscan1_gradient encode=0 bytes=3304
+begin rg24_yuv_64_filmscan2_gradient
+end rg24_yuv_64_filmscan2_gradient encode=0 bytes=3332
+begin rg24_yuv_64_filmscan3_gradient
+end rg24_yuv_64_filmscan3_gradient encode=0 bytes=3332
+begin rg24_rgba_64_low_gradient
+end rg24_rgba_64_low_gradient encode=-3 bytes=0
+begin rg24_rgba_64_medium_gradient
+end rg24_rgba_64_medium_gradient encode=-3 bytes=0
+begin rg24_rgba_64_high_gradient
+end rg24_rgba_64_high_gradient encode=-3 bytes=0
+begin rg24_rgba_64_filmscan1_gradient
+end rg24_rgba_64_filmscan1_gradient encode=-3 bytes=0
+begin rg24_rgba_64_filmscan2_gradient
+end rg24_rgba_64_filmscan2_gradient encode=-3 bytes=0
+begin rg24_rgba_64_filmscan3_gradient
+end rg24_rgba_64_filmscan3_gradient encode=-3 bytes=0
+begin bgra_rgb_64_low_gradient
+end bgra_rgb_64_low_gradient encode=0 bytes=3368
+begin bgra_rgb_64_medium_gradient
+end bgra_rgb_64_medium_gradient encode=0 bytes=3376
+begin bgra_rgb_64_high_gradient
+end bgra_rgb_64_high_gradient encode=0 bytes=3384
+begin bgra_rgb_64_filmscan1_gradient
+end bgra_rgb_64_filmscan1_gradient encode=0 bytes=3388
+begin bgra_rgb_64_filmscan2_gradient
+end bgra_rgb_64_filmscan2_gradient encode=0 bytes=3428
+begin bgra_rgb_64_filmscan3_gradient
+end bgra_rgb_64_filmscan3_gradient encode=0 bytes=3428
+begin bgra_rgba_64_low_gradient
+end bgra_rgba_64_low_gradient encode=0 bytes=4260
+begin bgra_rgba_64_medium_gradient
+end bgra_rgba_64_medium_gradient encode=0 bytes=4268
+begin bgra_rgba_64_high_gradient
+end bgra_rgba_64_high_gradient encode=0 bytes=4280
+begin bgra_rgba_64_filmscan1_gradient
+end bgra_rgba_64_filmscan1_gradient encode=0 bytes=4284
+begin bgra_rgba_64_filmscan2_gradient
+end bgra_rgba_64_filmscan2_gradient encode=0 bytes=4356
+begin bgra_rgba_64_filmscan3_gradient
+end bgra_rgba_64_filmscan3_gradient encode=0 bytes=4356
+begin bgra_rgba_64_keying_alpha
+end bgra_rgba_64_keying_alpha encode=0 bytes=4268
+begin bgra_yuv_64_low_gradient
+end bgra_yuv_64_low_gradient encode=0 bytes=3272
+probed 100/297
+begin bgra_yuv_64_medium_gradient
+end bgra_yuv_64_medium_gradient encode=0 bytes=3284
+begin bgra_yuv_64_high_gradient
+end bgra_yuv_64_high_gradient encode=0 bytes=3284
+begin bgra_yuv_64_filmscan1_gradient
+end bgra_yuv_64_filmscan1_gradient encode=0 bytes=3300
+begin bgra_yuv_64_filmscan2_gradient
+end bgra_yuv_64_filmscan2_gradient encode=0 bytes=3336
+begin bgra_yuv_64_filmscan3_gradient
+end bgra_yuv_64_filmscan3_gradient encode=0 bytes=3336
+begin bgra_rgb_studio_64_low_gradient
+end bgra_rgb_studio_64_low_gradient encode=0 bytes=3372
+begin bgra_rgb_studio_64_medium_gradient
+end bgra_rgb_studio_64_medium_gradient encode=0 bytes=3380
+begin bgra_rgb_studio_64_high_gradient
+end bgra_rgb_studio_64_high_gradient encode=0 bytes=3388
+begin bgra_rgb_studio_64_filmscan1_gradient
+end bgra_rgb_studio_64_filmscan1_gradient encode=0 bytes=3392
+begin bgra_rgb_studio_64_filmscan2_gradient
+end bgra_rgb_studio_64_filmscan2_gradient encode=0 bytes=3432
+begin bgra_rgb_studio_64_filmscan3_gradient
+end bgra_rgb_studio_64_filmscan3_gradient encode=0 bytes=3432
+begin bgra_rgb_intl_flag_64_low_gradient
+end bgra_rgb_intl_flag_64_low_gradient encode=0 bytes=3368
+begin bgra_rgb_intl_flag_64_medium_gradient
+end bgra_rgb_intl_flag_64_medium_gradient encode=0 bytes=3376
+begin bgra_rgb_intl_flag_64_high_gradient
+end bgra_rgb_intl_flag_64_high_gradient encode=0 bytes=3384
+begin bgra_rgb_intl_flag_64_filmscan1_gradient
+end bgra_rgb_intl_flag_64_filmscan1_gradient encode=0 bytes=3388
+begin bgra_rgb_intl_flag_64_filmscan2_gradient
+end bgra_rgb_intl_flag_64_filmscan2_gradient encode=0 bytes=3428
+begin bgra_rgb_intl_flag_64_filmscan3_gradient
+end bgra_rgb_intl_flag_64_filmscan3_gradient encode=0 bytes=3428
+begin bgra_bayer_64_low_gradient
+end bgra_bayer_64_low_gradient encode=-3 bytes=0
+begin bgra_bayer_64_medium_gradient
+end bgra_bayer_64_medium_gradient encode=-3 bytes=0
+begin bgra_bayer_64_high_gradient
+end bgra_bayer_64_high_gradient encode=-3 bytes=0
+begin bgra_bayer_64_filmscan1_gradient
+end bgra_bayer_64_filmscan1_gradient encode=-3 bytes=0
+begin bgra_bayer_64_filmscan2_gradient
+end bgra_bayer_64_filmscan2_gradient encode=-3 bytes=0
+begin bgra_bayer_64_filmscan3_gradient
+end bgra_bayer_64_filmscan3_gradient encode=-3 bytes=0
+begin bgra_yuva_64_low_gradient
+end bgra_yuva_64_low_gradient encode=-1 bytes=0
+begin bgra_yuva_64_medium_gradient
+end bgra_yuva_64_medium_gradient encode=-1 bytes=0
+probed 125/297
+begin bgra_yuva_64_high_gradient
+end bgra_yuva_64_high_gradient encode=-1 bytes=0
+begin bgra_yuva_64_filmscan1_gradient
+end bgra_yuva_64_filmscan1_gradient encode=-1 bytes=0
+begin bgra_yuva_64_filmscan2_gradient
+end bgra_yuva_64_filmscan2_gradient encode=-1 bytes=0
+begin bgra_yuva_64_filmscan3_gradient
+end bgra_yuva_64_filmscan3_gradient encode=-1 bytes=0
+begin rg48_rgb_64_low_gradient
+end rg48_rgb_64_low_gradient encode=0 bytes=3364
+begin rg48_rgb_64_medium_gradient
+end rg48_rgb_64_medium_gradient encode=0 bytes=3372
+begin rg48_rgb_64_high_gradient
+end rg48_rgb_64_high_gradient encode=0 bytes=3384
+begin rg48_rgb_64_filmscan1_gradient
+end rg48_rgb_64_filmscan1_gradient encode=0 bytes=3388
+begin rg48_rgb_64_filmscan2_gradient
+end rg48_rgb_64_filmscan2_gradient encode=0 bytes=3428
+begin rg48_rgb_64_filmscan3_gradient
+end rg48_rgb_64_filmscan3_gradient encode=0 bytes=3428
+begin rg48_yuv_64_low_gradient
+end rg48_yuv_64_low_gradient encode=0 bytes=3272
+begin rg48_yuv_64_medium_gradient
+end rg48_yuv_64_medium_gradient encode=0 bytes=3284
+begin rg48_yuv_64_high_gradient
+end rg48_yuv_64_high_gradient encode=0 bytes=3284
+begin rg48_yuv_64_filmscan1_gradient
+end rg48_yuv_64_filmscan1_gradient encode=0 bytes=3300
+begin rg48_yuv_64_filmscan2_gradient
+end rg48_yuv_64_filmscan2_gradient encode=0 bytes=3332
+begin rg48_yuv_64_filmscan3_gradient
+end rg48_yuv_64_filmscan3_gradient encode=0 bytes=3332
+begin b64a_rgba_64_low_gradient
+end b64a_rgba_64_low_gradient encode=0 bytes=4256
+begin b64a_rgba_64_medium_gradient
+end b64a_rgba_64_medium_gradient encode=0 bytes=4264
+begin b64a_rgba_64_high_gradient
+end b64a_rgba_64_high_gradient encode=0 bytes=4268
+begin b64a_rgba_64_filmscan1_gradient
+end b64a_rgba_64_filmscan1_gradient encode=0 bytes=4284
+begin b64a_rgba_64_filmscan2_gradient
+end b64a_rgba_64_filmscan2_gradient encode=0 bytes=4356
+begin b64a_rgba_64_filmscan3_gradient
+end b64a_rgba_64_filmscan3_gradient encode=0 bytes=4356
+begin b64a_rgb_64_low_gradient
+end b64a_rgb_64_low_gradient encode=0 bytes=3364
+begin b64a_rgb_64_medium_gradient
+end b64a_rgb_64_medium_gradient encode=0 bytes=3372
+begin b64a_rgb_64_high_gradient
+end b64a_rgb_64_high_gradient encode=0 bytes=3376
+probed 150/297
+begin b64a_rgb_64_filmscan1_gradient
+end b64a_rgb_64_filmscan1_gradient encode=0 bytes=3388
+begin b64a_rgb_64_filmscan2_gradient
+end b64a_rgb_64_filmscan2_gradient encode=0 bytes=3428
+begin b64a_rgb_64_filmscan3_gradient
+end b64a_rgb_64_filmscan3_gradient encode=0 bytes=3428
+begin b64a_yuv_64_low_gradient
+end b64a_yuv_64_low_gradient encode=0 bytes=3272
+begin b64a_yuv_64_medium_gradient
+end b64a_yuv_64_medium_gradient encode=0 bytes=3284
+begin b64a_yuv_64_high_gradient
+end b64a_yuv_64_high_gradient encode=0 bytes=3284
+begin b64a_yuv_64_filmscan1_gradient
+end b64a_yuv_64_filmscan1_gradient encode=0 bytes=3300
+begin b64a_yuv_64_filmscan2_gradient
+end b64a_yuv_64_filmscan2_gradient encode=0 bytes=3332
+begin b64a_yuv_64_filmscan3_gradient
+end b64a_yuv_64_filmscan3_gradient encode=0 bytes=3332
+begin byr4_bayer_64_low_gradient
+end byr4_bayer_64_low_gradient encode=0 bytes=6848
+begin byr4_bayer_64_medium_gradient
+end byr4_bayer_64_medium_gradient encode=0 bytes=7544
+begin byr4_bayer_64_high_gradient
+end byr4_bayer_64_high_gradient encode=0 bytes=8476
+begin byr4_bayer_64_filmscan1_gradient
+end byr4_bayer_64_filmscan1_gradient encode=0 bytes=9044
+begin byr4_bayer_64_filmscan2_gradient
+end byr4_bayer_64_filmscan2_gradient encode=0 bytes=10896
+begin byr4_bayer_64_filmscan3_gradient
+end byr4_bayer_64_filmscan3_gradient encode=0 bytes=11368
+begin byr5_bayer_64_low_gradient
+end byr5_bayer_64_low_gradient encode=0 bytes=11976
+begin byr5_bayer_64_medium_gradient
+end byr5_bayer_64_medium_gradient encode=0 bytes=14452
+begin byr5_bayer_64_high_gradient
+end byr5_bayer_64_high_gradient encode=0 bytes=16952
+begin byr5_bayer_64_filmscan1_gradient
+end byr5_bayer_64_filmscan1_gradient encode=0 bytes=18760
+begin byr5_bayer_64_filmscan2_gradient
+end byr5_bayer_64_filmscan2_gradient encode=0 bytes=24352
+begin byr5_bayer_64_filmscan3_gradient
+end byr5_bayer_64_filmscan3_gradient encode=0 bytes=25868
+begin yuy2_rgb_64_low_gradient
+end yuy2_rgb_64_low_gradient encode=0 bytes=3248
+begin yuy2_rgb_64_medium_gradient
+end yuy2_rgb_64_medium_gradient encode=0 bytes=3264
+begin yuy2_rgb_64_high_gradient
+end yuy2_rgb_64_high_gradient encode=0 bytes=3268
+begin yuy2_rgb_64_filmscan1_gradient
+end yuy2_rgb_64_filmscan1_gradient encode=0 bytes=3284
+probed 175/297
+begin yuy2_rgb_64_filmscan2_gradient
+end yuy2_rgb_64_filmscan2_gradient encode=0 bytes=3336
+begin yuy2_rgb_64_filmscan3_gradient
+end yuy2_rgb_64_filmscan3_gradient encode=0 bytes=3336
+begin rg30_rgb_skipped_64_filmscan1_gradient
+end rg30_rgb_skipped_64_filmscan1_gradient encode=-1 bytes=0
+begin r210_rgb_skipped_64_filmscan1_gradient
+end r210_rgb_skipped_64_filmscan1_gradient encode=-1 bytes=0
+begin rg64_rgba_skipped_64_filmscan1_gradient
+end rg64_rgba_skipped_64_filmscan1_gradient encode=-1 bytes=0
+begin yuy2_yuv_prog_64_filmscan1_flat
+end yuy2_yuv_prog_64_filmscan1_flat encode=0 bytes=3200
+begin yuy2_yuv_prog_64_filmscan3_flat
+end yuy2_yuv_prog_64_filmscan3_flat encode=0 bytes=3208
+begin yuy2_yuv_prog_64_filmscan1_checker
+end yuy2_yuv_prog_64_filmscan1_checker encode=0 bytes=9904
+begin yuy2_yuv_prog_64_filmscan3_checker
+end yuy2_yuv_prog_64_filmscan3_checker encode=0 bytes=12972
+begin yuy2_yuv_prog_64_filmscan1_edges
+end yuy2_yuv_prog_64_filmscan1_edges encode=0 bytes=4136
+begin yuy2_yuv_prog_64_filmscan3_edges
+end yuy2_yuv_prog_64_filmscan3_edges encode=0 bytes=4380
+begin yuy2_yuv_prog_64_filmscan1_noise
+end yuy2_yuv_prog_64_filmscan1_noise encode=0 bytes=14112
+begin yuy2_yuv_prog_64_filmscan3_noise
+end yuy2_yuv_prog_64_filmscan3_noise encode=0 bytes=19460
+begin yuy2_yuv_prog_64_filmscan1_saturated
+end yuy2_yuv_prog_64_filmscan1_saturated encode=0 bytes=6116
+begin yuy2_yuv_prog_64_filmscan3_saturated
+end yuy2_yuv_prog_64_filmscan3_saturated encode=0 bytes=7252
+begin yuy2_yuv_prog_64_filmscan1_alpha
+end yuy2_yuv_prog_64_filmscan1_alpha encode=0 bytes=3200
+begin yuy2_yuv_prog_64_filmscan3_alpha
+end yuy2_yuv_prog_64_filmscan3_alpha encode=0 bytes=3208
+begin yuy2_yuv_intl_64_filmscan1_flat
+end yuy2_yuv_intl_64_filmscan1_flat encode=0 bytes=3232
+begin yuy2_yuv_intl_64_filmscan3_flat
+end yuy2_yuv_intl_64_filmscan3_flat encode=0 bytes=3240
+begin yuy2_yuv_intl_64_filmscan1_checker
+end yuy2_yuv_intl_64_filmscan1_checker encode=0 bytes=8068
+begin yuy2_yuv_intl_64_filmscan3_checker
+end yuy2_yuv_intl_64_filmscan3_checker encode=0 bytes=9496
+begin yuy2_yuv_intl_64_filmscan1_edges
+end yuy2_yuv_intl_64_filmscan1_edges encode=0 bytes=4144
+begin yuy2_yuv_intl_64_filmscan3_edges
+end yuy2_yuv_intl_64_filmscan3_edges encode=0 bytes=4340
+begin yuy2_yuv_intl_64_filmscan1_noise
+end yuy2_yuv_intl_64_filmscan1_noise encode=0 bytes=14688
+begin yuy2_yuv_intl_64_filmscan3_noise
+end yuy2_yuv_intl_64_filmscan3_noise encode=0 bytes=20868
+probed 200/297
+begin yuy2_yuv_intl_64_filmscan1_saturated
+end yuy2_yuv_intl_64_filmscan1_saturated encode=0 bytes=5972
+begin yuy2_yuv_intl_64_filmscan3_saturated
+end yuy2_yuv_intl_64_filmscan3_saturated encode=0 bytes=6900
+begin yuy2_yuv_intl_64_filmscan1_alpha
+end yuy2_yuv_intl_64_filmscan1_alpha encode=0 bytes=3232
+begin yuy2_yuv_intl_64_filmscan3_alpha
+end yuy2_yuv_intl_64_filmscan3_alpha encode=0 bytes=3240
+begin bgra_rgb_64_filmscan1_flat
+end bgra_rgb_64_filmscan1_flat encode=0 bytes=3340
+begin bgra_rgb_64_filmscan3_flat
+end bgra_rgb_64_filmscan3_flat encode=0 bytes=3340
+begin bgra_rgb_64_filmscan1_checker
+end bgra_rgb_64_filmscan1_checker encode=0 bytes=12576
+begin bgra_rgb_64_filmscan3_checker
+end bgra_rgb_64_filmscan3_checker encode=0 bytes=15576
+begin bgra_rgb_64_filmscan1_edges
+end bgra_rgb_64_filmscan1_edges encode=0 bytes=4220
+begin bgra_rgb_64_filmscan3_edges
+end bgra_rgb_64_filmscan3_edges encode=0 bytes=4400
+begin bgra_rgb_64_filmscan1_noise
+end bgra_rgb_64_filmscan1_noise encode=0 bytes=18124
+begin bgra_rgb_64_filmscan3_noise
+end bgra_rgb_64_filmscan3_noise encode=0 bytes=25264
+begin bgra_rgb_64_filmscan1_saturated
+end bgra_rgb_64_filmscan1_saturated encode=0 bytes=8000
+begin bgra_rgb_64_filmscan3_saturated
+end bgra_rgb_64_filmscan3_saturated encode=0 bytes=10304
+begin bgra_rgb_64_filmscan1_alpha
+end bgra_rgb_64_filmscan1_alpha encode=0 bytes=3340
+begin bgra_rgb_64_filmscan3_alpha
+end bgra_rgb_64_filmscan3_alpha encode=0 bytes=3340
+begin bgra_rgba_64_filmscan1_flat
+end bgra_rgba_64_filmscan1_flat encode=0 bytes=4216
+begin bgra_rgba_64_filmscan3_flat
+end bgra_rgba_64_filmscan3_flat encode=0 bytes=4216
+begin bgra_rgba_64_filmscan1_checker
+end bgra_rgba_64_filmscan1_checker encode=0 bytes=16656
+begin bgra_rgba_64_filmscan3_checker
+end bgra_rgba_64_filmscan3_checker encode=0 bytes=20536
+begin bgra_rgba_64_filmscan1_edges
+end bgra_rgba_64_filmscan1_edges encode=0 bytes=5396
+begin bgra_rgba_64_filmscan3_edges
+end bgra_rgba_64_filmscan3_edges encode=0 bytes=5628
+begin bgra_rgba_64_filmscan1_noise
+end bgra_rgba_64_filmscan1_noise encode=0 bytes=23400
+begin bgra_rgba_64_filmscan3_noise
+end bgra_rgba_64_filmscan3_noise encode=0 bytes=32680
+begin bgra_rgba_64_filmscan1_saturated
+end bgra_rgba_64_filmscan1_saturated encode=0 bytes=8876
+probed 225/297
+begin bgra_rgba_64_filmscan3_saturated
+end bgra_rgba_64_filmscan3_saturated encode=0 bytes=11180
+begin bgra_rgba_64_filmscan1_alpha
+end bgra_rgba_64_filmscan1_alpha encode=0 bytes=4236
+begin bgra_rgba_64_filmscan3_alpha
+end bgra_rgba_64_filmscan3_alpha encode=0 bytes=4268
+begin rg48_rgb_64_filmscan1_flat
+end rg48_rgb_64_filmscan1_flat encode=0 bytes=3340
+begin rg48_rgb_64_filmscan3_flat
+end rg48_rgb_64_filmscan3_flat encode=0 bytes=3340
+begin rg48_rgb_64_filmscan1_checker
+end rg48_rgb_64_filmscan1_checker encode=0 bytes=13236
+begin rg48_rgb_64_filmscan3_checker
+end rg48_rgb_64_filmscan3_checker encode=0 bytes=16240
+begin rg48_rgb_64_filmscan1_edges
+end rg48_rgb_64_filmscan1_edges encode=0 bytes=4256
+begin rg48_rgb_64_filmscan3_edges
+end rg48_rgb_64_filmscan3_edges encode=0 bytes=4448
+begin rg48_rgb_64_filmscan1_noise
+end rg48_rgb_64_filmscan1_noise encode=0 bytes=18176
+begin rg48_rgb_64_filmscan3_noise
+end rg48_rgb_64_filmscan3_noise encode=0 bytes=25376
+begin rg48_rgb_64_filmscan1_saturated
+end rg48_rgb_64_filmscan1_saturated encode=0 bytes=8384
+begin rg48_rgb_64_filmscan3_saturated
+end rg48_rgb_64_filmscan3_saturated encode=0 bytes=10688
+begin rg48_rgb_64_filmscan1_alpha
+end rg48_rgb_64_filmscan1_alpha encode=0 bytes=3340
+begin rg48_rgb_64_filmscan3_alpha
+end rg48_rgb_64_filmscan3_alpha encode=0 bytes=3340
+begin yu64_yuv_prog_64_filmscan1_flat
+end yu64_yuv_prog_64_filmscan1_flat encode=0 bytes=3200
+begin yu64_yuv_prog_64_filmscan3_flat
+end yu64_yuv_prog_64_filmscan3_flat encode=0 bytes=3208
+begin yu64_yuv_prog_64_filmscan1_checker
+end yu64_yuv_prog_64_filmscan1_checker encode=0 bytes=10480
+begin yu64_yuv_prog_64_filmscan3_checker
+end yu64_yuv_prog_64_filmscan3_checker encode=0 bytes=13484
+begin yu64_yuv_prog_64_filmscan1_edges
+end yu64_yuv_prog_64_filmscan1_edges encode=0 bytes=4188
+begin yu64_yuv_prog_64_filmscan3_edges
+end yu64_yuv_prog_64_filmscan3_edges encode=0 bytes=4436
+begin yu64_yuv_prog_64_filmscan1_noise
+end yu64_yuv_prog_64_filmscan1_noise encode=0 bytes=14140
+begin yu64_yuv_prog_64_filmscan3_noise
+end yu64_yuv_prog_64_filmscan3_noise encode=0 bytes=19480
+begin yu64_yuv_prog_64_filmscan1_saturated
+end yu64_yuv_prog_64_filmscan1_saturated encode=0 bytes=6260
+begin yu64_yuv_prog_64_filmscan3_saturated
+end yu64_yuv_prog_64_filmscan3_saturated encode=0 bytes=7380
+probed 250/297
+begin yu64_yuv_prog_64_filmscan1_alpha
+end yu64_yuv_prog_64_filmscan1_alpha encode=0 bytes=3200
+begin yu64_yuv_prog_64_filmscan3_alpha
+end yu64_yuv_prog_64_filmscan3_alpha encode=0 bytes=3208
+begin byr4_bayer_64_filmscan1_flat
+end byr4_bayer_64_filmscan1_flat encode=0 bytes=8976
+begin byr4_bayer_64_filmscan3_flat
+end byr4_bayer_64_filmscan3_flat encode=0 bytes=11324
+begin byr4_bayer_64_filmscan1_checker
+end byr4_bayer_64_filmscan1_checker encode=0 bytes=9080
+begin byr4_bayer_64_filmscan3_checker
+end byr4_bayer_64_filmscan3_checker encode=0 bytes=11404
+begin byr4_bayer_64_filmscan1_edges
+end byr4_bayer_64_filmscan1_edges encode=0 bytes=8984
+begin byr4_bayer_64_filmscan3_edges
+end byr4_bayer_64_filmscan3_edges encode=0 bytes=11324
+begin byr4_bayer_64_filmscan1_noise
+end byr4_bayer_64_filmscan1_noise encode=0 bytes=8932
+begin byr4_bayer_64_filmscan3_noise
+end byr4_bayer_64_filmscan3_noise encode=0 bytes=11148
+begin byr4_bayer_64_filmscan1_saturated
+end byr4_bayer_64_filmscan1_saturated encode=0 bytes=8868
+begin byr4_bayer_64_filmscan3_saturated
+end byr4_bayer_64_filmscan3_saturated encode=0 bytes=11080
+begin byr4_bayer_64_filmscan1_alpha
+end byr4_bayer_64_filmscan1_alpha encode=0 bytes=8680
+begin byr4_bayer_64_filmscan3_alpha
+end byr4_bayer_64_filmscan3_alpha encode=0 bytes=10864
+begin yuy2_yuv_prog_128x64
+end yuy2_yuv_prog_128x64 encode=0 bytes=3516
+begin yuy2_yuv_intl_128x64
+end yuy2_yuv_intl_128x64 encode=0 bytes=3628
+begin bgra_rgb_128x64
+end bgra_rgb_128x64 encode=0 bytes=3904
+begin bgra_rgba_128x64
+end bgra_rgba_128x64 encode=0 bytes=5024
+begin yuy2_yuv_prog_128x128
+end yuy2_yuv_prog_128x128 encode=0 bytes=4144
+begin yuy2_yuv_intl_128x128
+end yuy2_yuv_intl_128x128 encode=0 bytes=4176
+begin bgra_rgb_128x128
+end bgra_rgb_128x128 encode=0 bytes=4900
+begin bgra_rgba_128x128
+end bgra_rgba_128x128 encode=0 bytes=6408
+begin yuy2_yuv_prog_48x48
+end yuy2_yuv_prog_48x48 encode=0 bytes=3236
+begin yuy2_yuv_intl_48x48
+end yuy2_yuv_intl_48x48 encode=0 bytes=3300
+begin bgra_rgb_48x48
+end bgra_rgb_48x48 encode=0 bytes=3188
+probed 275/297
+begin bgra_rgba_48x48
+end bgra_rgba_48x48 encode=0 bytes=4012
+begin yuy2_yuv_prog_64x40
+end yuy2_yuv_prog_64x40 encode=0 bytes=3148
+begin yuy2_yuv_intl_64x40
+end yuy2_yuv_intl_64x40 encode=0 bytes=3208
+begin bgra_rgb_64x40
+end bgra_rgb_64x40 encode=0 bytes=3184
+begin bgra_rgba_64x40
+end bgra_rgba_64x40 encode=0 bytes=4012
+begin yuy2_yuv_prog_32x32
+end yuy2_yuv_prog_32x32 encode=0 bytes=3184
+begin yuy2_yuv_intl_32x32
+end yuy2_yuv_intl_32x32 encode=0 bytes=3232
+begin bgra_rgb_32x32
+end bgra_rgb_32x32 encode=0 bytes=3092
+begin bgra_rgba_32x32
+end bgra_rgba_32x32 encode=0 bytes=3892
+begin yuy2_yuv_prog_1920x1080_filmscan1_gradient
+end yuy2_yuv_prog_1920x1080_filmscan1_gradient encode=0 bytes=190276
+begin yuy2_yuv_intl_1920x1080_filmscan1_gradient
+end yuy2_yuv_intl_1920x1080_filmscan1_gradient encode=0 bytes=190436
+begin yu64_yuv_prog_1920x1080_filmscan1_gradient
+end yu64_yuv_prog_1920x1080_filmscan1_gradient encode=0 bytes=190276
+begin bgra_rgb_1920x1080_filmscan1_gradient
+end bgra_rgb_1920x1080_filmscan1_gradient encode=0 bytes=274456
+begin bgra_rgba_1920x1080_filmscan1_gradient
+end bgra_rgba_1920x1080_filmscan1_gradient encode=0 bytes=375796
+begin rg48_rgb_1920x1080_filmscan1_gradient
+end rg48_rgb_1920x1080_filmscan1_gradient encode=0 bytes=274456
+begin b64a_rgba_1920x1080_filmscan1_gradient
+end b64a_rgba_1920x1080_filmscan1_gradient encode=0 bytes=375796
+begin v210_yuv_prog_1920x1080_filmscan1_gradient
+end v210_yuv_prog_1920x1080_filmscan1_gradient encode=0 bytes=190308
+begin yu64_overshoot_edges
+end yu64_overshoot_edges encode=0 bytes=4652
+begin yuy2_interlaced_reconfirm
+end yuy2_interlaced_reconfirm encode=0 bytes=4655384
+begin channel_yuy2_chroma
+end channel_yuy2_chroma encode=0 bytes=3196
+begin channel_rg24_red
+end channel_rg24_red encode=0 bytes=3332
+begin channel_bgra_alpha
+end channel_bgra_alpha encode=0 bytes=4236
+
+
+attempts 297 encoded 274 profiles 7 fixtures 7 yuv10 1 interlaced 0
+
+      Start 10: test_decode_phase3b1
+10/37 Test #10: test_decode_phase3b1 ...............***Failed    0.34 sec
+queue valid sample
+
+      Start 11: test_decode_phase3b1_acceptance
+11/37 Test #11: test_decode_phase3b1_acceptance ....***Failed    0.33 sec
+interlaced profile
+
+      Start 12: test_decode_phase3b1_stress
+12/37 Test #12: test_decode_phase3b1_stress ........***Failed    0.44 sec
+queue valid sample
+
+      Start 13: test_decode_phase2fa

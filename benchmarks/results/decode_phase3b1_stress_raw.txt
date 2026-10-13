@@ -1,0 +1,6 @@
+mixed 999/5000
+mixed 1998/5000
+mixed 2997/5000
+mixed 3996/5000
+mixed 4995/5000
+Phase 3B-1 acceptance --stress PASS

@@ -1,0 +1,30 @@
+[
+  {
+    "tool": "memcheck",
+    "exit_code": 0,
+    "elapsed_seconds": 74.9722546,
+    "log": "benchmarks/results/decode_phase3b1_memcheck_accepted.txt",
+    "stdout": "benchmarks/results/decode_phase3b1_memcheck_accepted_stdout.txt"
+  },
+  {
+    "tool": "initcheck",
+    "exit_code": 0,
+    "elapsed_seconds": 81.393202,
+    "log": "benchmarks/results/decode_phase3b1_initcheck_accepted.txt",
+    "stdout": "benchmarks/results/decode_phase3b1_initcheck_accepted_stdout.txt"
+  },
+  {
+    "tool": "racecheck",
+    "exit_code": 0,
+    "elapsed_seconds": 135.4428558,
+    "log": "benchmarks/results/decode_phase3b1_racecheck_accepted.txt",
+    "stdout": "benchmarks/results/decode_phase3b1_racecheck_accepted_stdout.txt"
+  },
+  {
+    "tool": "synccheck",
+    "exit_code": 0,
+    "elapsed_seconds": 9.0887714,
+    "log": "benchmarks/results/decode_phase3b1_synccheck_accepted.txt",
+    "stdout": "benchmarks/results/decode_phase3b1_synccheck_accepted_stdout.txt"
+  }
+]

@@ -1,0 +1,194 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "branch": "decode-phase3b1",
+  "starting_head": "7296f6f3b60ae4d9b902415f1a531f20f4ba70ad",
+  "main_head": "51435890ba5853e87e8cf1ddc7cc747954bd9e80",
+  "upstream_status": "",
+  "encoder_modified": false,
+  "merge_push_tag_release_performed": false,
+  "profile": "YUV422, coded precision 10, 3 channels, 30 bands, spatial transform 0, one frame, progressive flag absent/clear, valid existing geometry, complete trailer",
+  "frozen64_coefficients_exact": 8192,
+  "frozen1080_coefficients_exact": 4147200,
+  "cuda_ctest": {
+    "total": 37,
+    "passed": 37,
+    "failed": 0,
+    "elapsed_seconds": 850.47,
+    "log": "decode_phase3b1_cuda_ctest_final.txt",
+    "status": "PASS"
+  },
+  "cpu_ctest": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "elapsed_seconds": 4.56,
+    "log": "decode_phase3b1_cpu_ctest_final.txt",
+    "status": "PASS"
+  },
+  "sanitizers": [
+    {
+      "tool": "memcheck",
+      "exit_code": 0,
+      "elapsed_seconds": 74.9722546,
+      "log": "benchmarks/results/decode_phase3b1_memcheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_memcheck_accepted_stdout.txt",
+      "summaries": [
+        "ERROR SUMMARY: 0 errors"
+      ],
+      "status": "PASS"
+    },
+    {
+      "tool": "initcheck",
+      "exit_code": 0,
+      "elapsed_seconds": 81.393202,
+      "log": "benchmarks/results/decode_phase3b1_initcheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_initcheck_accepted_stdout.txt",
+      "summaries": [
+        "ERROR SUMMARY: 0 errors"
+      ],
+      "status": "PASS"
+    },
+    {
+      "tool": "racecheck",
+      "exit_code": 0,
+      "elapsed_seconds": 135.4428558,
+      "log": "benchmarks/results/decode_phase3b1_racecheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_racecheck_accepted_stdout.txt",
+      "summaries": [
+        "RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)"
+      ],
+      "status": "PASS"
+    },
+    {
+      "tool": "synccheck",
+      "exit_code": 0,
+      "elapsed_seconds": 9.0887714,
+      "log": "benchmarks/results/decode_phase3b1_synccheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_synccheck_accepted_stdout.txt",
+      "summaries": [
+        "ERROR SUMMARY: 0 errors"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "variable_release_ctest": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "elapsed_seconds": 89.05,
+    "log": "decode_phase3b1_variable_release_ctest.txt",
+    "status": "PASS"
+  },
+  "patterns": 313,
+  "matrix_range_orientation_cases": 1952,
+  "progressive_golden": "11/11",
+  "stress": [
+    {
+      "instances": 2,
+      "frames_per_instance": 60,
+      "status": "PASS"
+    },
+    {
+      "instances": 4,
+      "frames_per_instance": 60,
+      "status": "PASS"
+    },
+    {
+      "determinism_width": 64,
+      "decodes": 200,
+      "coefficients_planes_bgra": "exact",
+      "status": "PASS"
+    },
+    {
+      "determinism_width": 1920,
+      "decodes": 100,
+      "coefficients_planes_bgra": "exact",
+      "status": "PASS"
+    },
+    {
+      "mixed_frames": 5000,
+      "steady_state_cpp_allocations": 0,
+      "cuda_allocation_delta": 0,
+      "release_order": "alternating_FIFO_reverse",
+      "slot_modes": [
+        1,
+        2,
+        0,
+        4
+      ],
+      "lifetime": "PASS",
+      "status": "PASS"
+    }
+  ],
+  "memory_deltas": [
+    {
+      "maximum_width": 1920,
+      "slots": 2,
+      "device_bytes": {
+        "before": 146473296,
+        "after": 164168016,
+        "delta": 17694720
+      },
+      "pinned_bytes": {
+        "before": 72448736,
+        "after": 72448736,
+        "delta": 0
+      },
+      "pageable_bytes": {
+        "before": 85323704,
+        "after": 85323816,
+        "delta": 112
+      },
+      "cuda_allocations": {
+        "before": 127,
+        "after": 127,
+        "delta": 0
+      },
+      "streams_per_slot_before": 9,
+      "streams_per_slot_after": 9,
+      "events_per_slot_before": 191,
+      "events_per_slot_after": 197,
+      "stream_event_count_method": "source audit of owned initialization/destruction calls",
+      "new_permanent_full_frame_buffers": 0
+    },
+    {
+      "maximum_width": 3840,
+      "slots": 2,
+      "device_bytes": {
+        "before": 365514576,
+        "after": 431869776,
+        "delta": 66355200
+      },
+      "pinned_bytes": {
+        "before": 72448736,
+        "after": 72448736,
+        "delta": 0
+      },
+      "pageable_bytes": {
+        "before": 85323704,
+        "after": 85323816,
+        "delta": 112
+      },
+      "cuda_allocations": {
+        "before": 127,
+        "after": 127,
+        "delta": 0
+      },
+      "streams_per_slot_before": 9,
+      "streams_per_slot_after": 9,
+      "events_per_slot_before": 191,
+      "events_per_slot_after": 197,
+      "stream_event_count_method": "source audit of owned initialization/destruction calls",
+      "new_permanent_full_frame_buffers": 0
+    }
+  ],
+  "progressive_performance_flags": [],
+  "capability_interlaced_output": true,
+  "capability_excludes_fieldplus_gop2": true,
+  "outcome": "A",
+  "production_promotion_recommended": true,
+  "next_phase": "Phase 3B-2: define and research FIELDPLUS/GOP-2 temporal reconstruction without expanding the current production contract",
+  "local_commit_listing": "1a2e8df test(decoder): validate interlaced reconstruction and profile isolation\naf48f77 feat(decoder): add exact GOP-1 interlaced YUV422 reconstruction\n7296f6f docs(decoder): establish Phase 3B coverage baseline\n9a4ffa7 test(decoder): add Phase 3B capability vectors\ne8bd658 research(decoder): map CineForm profile and bitstream capabilities",
+  "docs_commit": "the commit containing this completion artifact",
+  "status": "PASS"
+}

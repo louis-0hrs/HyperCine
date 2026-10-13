@@ -1,0 +1,3 @@
+Lightweight field=0.919003 color=0.0311792 ms
+Hybrid field=0.194624 color=0.0726307 ms
+Auto field=0.160909 color=0.121907 ms

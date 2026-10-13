@@ -1,0 +1,52 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "runs": [
+    {
+      "tool": "memcheck",
+      "exit_code": 0,
+      "elapsed_seconds": 74.9722546,
+      "log": "benchmarks/results/decode_phase3b1_memcheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_memcheck_accepted_stdout.txt",
+      "summaries": [
+        "ERROR SUMMARY: 0 errors"
+      ],
+      "status": "PASS"
+    },
+    {
+      "tool": "initcheck",
+      "exit_code": 0,
+      "elapsed_seconds": 81.393202,
+      "log": "benchmarks/results/decode_phase3b1_initcheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_initcheck_accepted_stdout.txt",
+      "summaries": [
+        "ERROR SUMMARY: 0 errors"
+      ],
+      "status": "PASS"
+    },
+    {
+      "tool": "racecheck",
+      "exit_code": 0,
+      "elapsed_seconds": 135.4428558,
+      "log": "benchmarks/results/decode_phase3b1_racecheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_racecheck_accepted_stdout.txt",
+      "summaries": [
+        "RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)"
+      ],
+      "status": "PASS"
+    },
+    {
+      "tool": "synccheck",
+      "exit_code": 0,
+      "elapsed_seconds": 9.0887714,
+      "log": "benchmarks/results/decode_phase3b1_synccheck_accepted.txt",
+      "stdout": "benchmarks/results/decode_phase3b1_synccheck_accepted_stdout.txt",
+      "summaries": [
+        "ERROR SUMMARY: 0 errors"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "scope": "synthetic field/color kernels, 64/1080 references, asymmetric fields/chroma/noise, all strategies, 44 mixed frames, slot reuse, consumers, 2/4 instances and lifetime",
+  "unattached_or_interrupted_initial_runs_are_not_passes": true,
+  "status": "PASS"
+}

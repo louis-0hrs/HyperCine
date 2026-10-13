@@ -1,0 +1,5 @@
+frozen64 PASS peaks=0 difference=3
+frozen1080 PASS peaks=1 difference=3
+field_luma_sanitizer PASS peaks=1 difference=3
+field_chroma_sanitizer PASS peaks=2 difference=3
+noise_sanitizer PASS peaks=1 difference=3

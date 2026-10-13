@@ -129,3 +129,35 @@ coding and the requested quality. The observation is consistent with an output
 capacity limitation; the exact memory-fault mechanism was not established.
 No upstream source or encoder algorithm was changed. See
 [DECODE_PHASE3A_RC.md](DECODE_PHASE3A_RC.md) for the retained probe evidence.
+
+### GOP-1 interlaced reconstruction and inactive-metadata BGRA
+
+Phase 3B-1 keeps the SDK frozen and reproduces the SSE2 sequence in
+`InvertInterlacedRow16sToRow16u`: saturated signed low-minus-high (even row)
+or low-plus-high (odd row), saturated signed addition of 30720, unsigned
+saturated subtraction of 30720, arithmetic right shift by one, then a
+16-bit left shift by six for the upstream output container. Ordinary negative
+10-bit reconstruction values clamp to zero before the right shift. This is
+not equivalent to unsigned reinterpretation before reconstruction or to a
+signed shift followed by output clipping.
+
+At artificial extreme signed-16 inputs, the bias addition can remain negative.
+The subsequent unsigned subtraction then has wrap semantics; replacing the
+instruction sequence with a generic clamp changes those results. The direct
+CUDA regression compares all 225 pairs from fifteen signed boundary values,
+plus repeated first/last-row and padded-pitch coverage, against both an
+independent CPU instruction model and the pristine upstream routine's packed
+output. This quirk is preserved in the wrapper rather than patched upstream.
+
+Inactive-metadata interlaced BGRA uses `ChannelYUYV16toPlanarYUV16`, then
+`PlanarYUV16toPlanarRGB16`, including `TWEAK_YUV2RGB`, followed by
+`ConvertLinesToOutput`. Progressive BGRA retains the separate eight-bit
+conversion. The existing lowpass offsets are +24 for BGRA and +4 for the
+planar/YU64 reference convention. No YU64 production output is added.
+
+An interrupted GOP-1 sample missing its final frame trailer still contains all
+thirty entropy chunks but is rejected by `CFHD_DecodeSample` with error 2048.
+The new production interlaced path now requires a frame/group trailer and
+rejects a contradictory non-YUV encoded-format tag. The progressive parser
+policy remains unchanged. See [DECODE_PHASE3B1.md](DECODE_PHASE3B1.md) for the
+validation and promotion record.

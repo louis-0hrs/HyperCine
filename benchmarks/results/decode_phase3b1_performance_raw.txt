@@ -1,0 +1,16 @@
+interlaced 1920 Lightweight 60.2528 ms
+interlaced 1920 Hybrid 39.1784 ms
+interlaced 1920 Auto 39.25 ms
+progressive 1920 Lightweight 2.10344 ms
+progressive 1920 Hybrid 2.70851 ms
+progressive 1920 Auto 2.06207 ms
+progressive 1920 Lightweight 15.1731 ms
+progressive 1920 Hybrid 4.83619 ms
+progressive 1920 Auto 4.83658 ms
+progressive 3840 Lightweight 2.42545 ms
+progressive 3840 Hybrid 3.99504 ms
+progressive 3840 Auto 2.42123 ms
+progressive 3840 Lightweight 60.2709 ms
+progressive 3840 Hybrid 8.04223 ms
+progressive 3840 Auto 8.0803 ms
+Phase 3B-1 acceptance --performance PASS

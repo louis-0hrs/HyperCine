@@ -1,0 +1,88 @@
+  ll0 ch0=0 ch1=0 ch2=0
+  stored_ll ch0=0 q=1,36,16,36
+  ch0 spatial=238 field=234 swapped=234 gpu0=131 cpu0=131 ll=494 hp=0,0,0
+    diff i=128 gpu=0 cpu=-52
+    diff i=192 gpu=0 cpu=-52
+    diff i=256 gpu=0 cpu=-173
+    diff i=257 gpu=0 cpu=-55
+  stored_ll ch1=0 q=1,36,16,48
+  ch1 spatial=80 field=0 swapped=0 gpu0=590 cpu0=590 ll=2134 hp=0,0,0
+  stored_ll ch2=0 q=1,36,16,48
+  ch2 spatial=53 field=0 swapped=8 gpu0=586 cpu0=586 ll=2112 hp=0,16,0
+  precision=10 chroma_offset=0
+  real!=formula ch0 r=1 c=0 low=-105 high=0 formula=-53,-53 real=0,0 raw=0,0
+  real!=formula ch0 r=2 c=0 low=-347 high=0 formula=-174,-174 real=0,0 raw=0,0
+  real!=formula ch0 r=2 c=1 low=-111 high=0 formula=-56,-56 real=0,0 raw=0,0
+  real!=formula ch0 r=3 c=0 low=-470 high=0 formula=-235,-235 real=0,0 raw=0,0
+  formula_vs_real=61
+  wavelet bgra-vs-yu64 n=10752 diff=2688 max=20
+  w2ch0 q=1/1 1792:1772 3576:3556 5360:5340 7128:7108 8920:8900 10696:10676 12472:12452 14264:14244 
+  w2ch1 q=1/1 6616:6596 7640:7620 8664:8644 9688:9668 17152:6596 28311:6596 31:6596 388:6596 
+  w2ch2 q=1/1 6392:6372 6392:6372 6392:6372 6392:6372 -17499:6372 884:6372 26:6372 640:6372 
+  gpuLL vs bgra=0 vs yu64=20
+    ch0 w0 b0 32x32 diff=1024 max=6
+    ch0 w1 b0 16x16 diff=256 max=5
+    ch0 w2 b0 8x8 diff=64 max=20
+    ch1 w0 b0 16x32 diff=512 max=8
+    ch1 w1 b0 8x16 diff=128 max=5
+    ch1 w2 b0 4x8 diff=32 max=20
+    ch2 w0 b0 16x32 diff=512 max=8
+    ch2 w1 b0 8x16 diff=128 max=5
+    ch2 w2 b0 4x8 diff=32 max=20
+  yu64_vs_replay=0
+  gpu-vs-row16u n=8192 exact=188 min=0 max=2 out=0 hist 0:188 1:6850 2:1154
+  gpu-vs-row16u-flip n=8192 exact=174 min=-338 max=341 out=2198 hist -8:14 -7:2 -6:4 -5:6 -4:6 -3:4 -2:8 -1:20 0:174 1:4972 2:720 3:28 4:12 5:10 6:2 7:6 8:6
+  yu64 y=0 x=0 got=130,588,114,585 gpu=131,590,115,586 raw=8320,37632,7296,37440
+  yu64 y=0 x=2 got=103,474,97,460 gpu=104,476,98,461 raw=6592,30336,6208,29440
+  color15 ymult=9535 rv=14688 gv=4374 gu=1744 bu=17326 gpu=1934 yu64=229 /4096
+  bgra_replay_vs_gpu exact=8192/8192
+  meta format=8 outfmt=8 cs=2 wp=16 active=0 apply=0 path=0xffff curves=88577/88577 cube=0
+  realcolor gpu bottom=4096 top=128 /4096
+  realcolor bgra-replay bottom=4096 top=128 /4096
+  real yu64 x=0 got=49,9,0 cpu=50,9,0 flags=127 wp=16
+  real yu64 x=1 got=49,9,0 cpu=50,9,0 flags=127 wp=16
+  real yu64 x=2 got=59,7,0 cpu=60,8,0 flags=127 wp=16
+  realcolor yu64 bottom=534 top=12 /4096
+  yu64 words=2048 same=0 flip=0 outliers=0 dgot-gpu -2:1154 -1:6850 0:188
+  bgra diffs bottom-vs-cpu=0 bottom-vs-flip=3968 top-vs-cpu=3968 top-vs-flip=0
+64x64 FilmScan1 exact BGRA and 8192 coefficients
+  ll0 ch0=0 ch1=0 ch2=0
+  stored_ll ch0=0 q=1,9,4,9
+  ch0 spatial=1029 field=0 swapped=873 gpu0=192 cpu0=192 ll=1806 hp=243,132,360
+  stored_ll ch1=0 q=1,9,4,12
+  ch1 spatial=0 field=0 swapped=0 gpu0=513 cpu0=513 ll=2054 hp=0,0,0
+  stored_ll ch2=0 q=1,9,4,12
+  ch2 spatial=0 field=0 swapped=0 gpu0=513 cpu0=513 ll=2054 hp=0,0,0
+  precision=10 chroma_offset=0
+  formula_vs_real=0
+  wavelet bgra-vs-yu64 n=5443200 diff=1360800 max=20
+  w2ch0 q=1/1 8080:8060 7171:7151 6461:6441 7502:7482 7492:7472 6103:6083 7121:7101 7348:7328 
+  w2ch1 q=1/1 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 
+  w2ch2 q=1/1 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 8216:8196 
+  gpuLL vs bgra=0 vs yu64=20
+    ch0 w0 b0 960x540 diff=518400 max=8
+    ch0 w1 b0 480x270 diff=129600 max=5
+    ch0 w2 b0 240x135 diff=32400 max=20
+    ch1 w0 b0 480x540 diff=259200 max=6
+    ch1 w1 b0 240x270 diff=64800 max=5
+    ch1 w2 b0 120x135 diff=16200 max=20
+    ch2 w0 b0 480x540 diff=259200 max=6
+    ch2 w1 b0 240x270 diff=64800 max=5
+    ch2 w2 b0 120x135 diff=16200 max=20
+  yu64_vs_replay=0
+  gpu-vs-row16u n=4147200 exact=34346 min=0 max=3 out=0 hist 0:34346 1:3563442 2:549270 3:142
+  gpu-vs-row16u-flip n=4147200 exact=2630 min=-872 max=876 out=2029362 hist -8:2534 -7:2556 -6:2573 -5:2619 -4:2491 -3:2631 -2:2685 -1:2621 0:2630 1:2076256 2:2479 3:2707 4:2595 5:2717 6:2549 7:2587 8:2608
+  yu64 y=0 x=0 got=191,512,643,512 gpu=192,513,644,513 raw=12224,32768,41152,32768
+  yu64 y=0 x=2 got=928,512,773,512 gpu=929,513,774,513 raw=59392,32768,49472,32768
+  color15 ymult=9535 rv=14688 gv=4374 gu=1744 bu=17326 gpu=938902 yu64=267347 /2073600
+  bgra_replay_vs_gpu exact=4147200/4147200
+  realcolor gpu bottom=2073600 top=5964 /2073600
+  realcolor bgra-replay bottom=2073600 top=5964 /2073600
+  real yu64 x=0 got=223,224,224 cpu=224,224,224 flags=127 wp=16
+  real yu64 x=1 got=13,14,13 cpu=14,14,14 flags=127 wp=16
+  real yu64 x=2 got=36,36,36 cpu=37,36,37 flags=127 wp=16
+  realcolor yu64 bottom=334879 top=3806 /2073600
+  yu64 words=1036800 same=0 flip=0 outliers=0 dgot-gpu -3:142 -2:549270 -1:3563442 0:34346
+  bgra diffs bottom-vs-cpu=0 bottom-vs-flip=2067636 top-vs-cpu=2067636 top-vs-flip=0
+1920x1080 FilmScan3 exact BGRA and 4147200 coefficients
+phase 3b1 smoke PASS
