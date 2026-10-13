@@ -119,13 +119,14 @@ use physical channel index `j = subband`; the control is index 11; subbands
 11–16 use physical channel index `subband + 1`.
 
 Each index-255 record is an 8-byte chunk with zero entropy payload. It is placed
-after subband 10 in its channel and represents the empty highpass band 1 of the
-wavelet-2 temporal object. The upstream writer emits it with
-`EncodeEmptyQuantBand`; the reader recognizes index 255, validates that the
-destination is the temporal highpass band, allocates/marks that band as empty,
-and continues at logical subband 11. It is structural stream content, not
-padding or a coefficient payload. It contributes no samples but is required for
-the upstream stream grammar and band-validity/reconstruction flow.
+after subband 10 in its channel and targets band 1 of the wavelet-2 temporal
+object. The upstream writer emits it with `EncodeEmptyQuantBand`; the reader
+recognizes index 255, validates the temporal highpass destination, establishes
+the wavelet/band metadata, reads scale and quantization, consumes the empty band
+trailer, and advances to logical subband 11. It does not decode coefficient
+values. Those highpass coefficients are reconstructed by inverse spatial w3
+from coded subbands 7–10. The index-255 record is structural transform
+bookkeeping, not padding or the encoded GOP highpass coefficient payload.
 
 `decode_phase3b2r_chunks.json` contains the exact 54 parsed chunk records for
 each of the ten profile/quality probes, including physical order, payload bytes,
@@ -318,7 +319,7 @@ managed.
 Estimated active signed-i16 coefficient storage is 6.125 words per luma pixel
 for YUV422, or 12.25 bytes/pixel: 25,401,600 B (24.22 MiB) at 1080p and
 101,606,400 B (96.90 MiB) at 4K. Two BGRA output surfaces add 15.82 MiB / 63.28
-MiB, for 40.04 MiB / 160.18 MiB combined active storage. This is a lower bound:
+MiB, for 40.05 MiB / 160.18 MiB combined active storage. This is a lower bound:
 it excludes row alignment, entropy/checkpoint state, temporary inverse buffers,
 color scratch and allocator overhead. It is not a production allocation plan.
 
