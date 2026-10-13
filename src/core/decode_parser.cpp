@@ -66,6 +66,7 @@ constexpr uint16_t TAG_BAND_TRAILER = 56;
 constexpr uint16_t TAG_CHANNEL = 62;
 constexpr uint16_t TAG_SAMPLE_FLAGS = 68;
 constexpr uint16_t TAG_PRECISION = 70;
+constexpr uint16_t TAG_ENCODED_FORMAT = 84;
 constexpr uint16_t TAG_BAND_CODING_FLAGS = 72;
 constexpr uint16_t TAG_PEAK_LEVEL = 74;
 constexpr uint16_t TAG_PEAK_TABLE_OFFSET_L = 75;
@@ -92,10 +93,12 @@ static bool ParseSample(
     std::vector<GpuEntropyBandDescriptor>& out_bands,
     std::string* out_error,
     bool strict,
-    DecodeError* status = nullptr
+    DecodeError* status = nullptr,
+    FrameReconstruction* mode = nullptr
 ) {
     out_bands.clear();
     if (status) *status = DecodeError::InvalidSample;
+    if (mode) *mode = FrameReconstruction::Progressive;
 
     if (!compressed_data || compressed_size < 32) {
         if (out_error) *out_error = "compressed sample is null or too small";
@@ -108,7 +111,9 @@ static bool ParseSample(
     int frame_height = 0;
     int frame_channels = 3;
     int precision = 10;
+    int encoded_format = 1; // Upstream's default is YUV 4:2:2.
     bool is_progressive = !strict;
+    bool has_frame_or_group_trailer = false;
 
     int current_channel = 0;
     int current_level = 2;
@@ -357,12 +362,9 @@ static bool ParseSample(
             }
             break;
         case TAG_SAMPLE_FLAGS:
+            // Bit 0 clear is GOP-1 interlaced. Acceptance is decided after the
+            // YUV422 precision-10 contract, so FIELDPLUS still dies on tag 10/11.
             is_progressive = (val & 0x0001) != 0;
-            if (!is_progressive) {
-                if (status) *status = DecodeError::UnsupportedEncodingMode;
-                if (out_error) *out_error = "unsupported interlaced output reconstruction";
-                return false;
-            }
             break;
 
         case TAG_FRAME_WIDTH:
@@ -375,6 +377,10 @@ static bool ParseSample(
 
         case TAG_PRECISION:
             precision = val;
+            break;
+
+        case TAG_ENCODED_FORMAT:
+            encoded_format = val;
             break;
 
         case TAG_CHANNEL:
@@ -445,6 +451,7 @@ static bool ParseSample(
 
         case TAG_FRAME_TRAILER:
         case TAG_GROUP_TRAILER:
+            has_frame_or_group_trailer = true;
             // End of frame/group reached
             break;
 
@@ -463,15 +470,17 @@ static bool ParseSample(
     }
 
     if (strict) {
-        if (!is_progressive) {
-            if (status) *status = DecodeError::UnsupportedEncodingMode;
-            if (out_error) *out_error = "unsupported interlaced output reconstruction";
-            return false;
-        }
         auto reject = [&] (const char* message) {
             if (out_error) *out_error = message;
             return false;
         };
+        // A complete entropy payload is insufficient for an interrupted GOP-1
+        // interlaced frame: upstream rejects a missing frame/group trailer. Preserve
+        // the established progressive parser policy while closing this new path.
+        if (!is_progressive && !has_frame_or_group_trailer)
+            return reject("interrupted interlaced frame: missing frame/group trailer");
+        if (!is_progressive && encoded_format != 1)
+            return reject("interlaced encoded format is not YUV 4:2:2");
         if (pos != compressed_size || frame_channels != 3 || precision != 10 ||
             frame_width < 64 || frame_height < 64 || frame_width > 7680 || frame_height > 4320 ||
             (frame_width % 16) || (frame_height % 8))
@@ -490,6 +499,12 @@ static bool ParseSample(
                 d.payload_bytes > compressed_size - d.payload_offset)
                 return reject("invalid or unsupported band descriptor");
         }
+        // The contract above is 30-band 10-bit YUV 4:2:2. A missing or clear
+        // progressive flag on that contract is GOP-1 interlaced. FIELDPLUS
+        // already returned UnsupportedEncodingMode. RGB/RGBA/Bayer fail the
+        // band or precision checks and stay rejected.
+        if (mode) *mode = is_progressive ? FrameReconstruction::Progressive
+                                         : FrameReconstruction::InterlacedGop1;
     }
     if (status) *status = DecodeError::None;
     return true;
@@ -500,8 +515,9 @@ bool ParseCineFormSample(const uint8_t* p, size_t n, int offset,
     return ParseSample(p, n, offset, bands, error, false);
 }
 bool ParseCineFormSampleValidated(const uint8_t* p, size_t n, int offset,
-    std::vector<GpuEntropyBandDescriptor>& bands, std::string* error, DecodeError* status) {
-    return ParseSample(p, n, offset, bands, error, true, status);
+    std::vector<GpuEntropyBandDescriptor>& bands, std::string* error, DecodeError* status,
+    FrameReconstruction* mode) {
+    return ParseSample(p, n, offset, bands, error, true, status, mode);
 }
 
 } // namespace HyperCine

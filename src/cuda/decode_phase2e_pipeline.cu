@@ -211,7 +211,10 @@ struct DecodeSlot2E {
     cudaEvent_t ev_inv_l1_stop[3] = {};
     cudaEvent_t ev_inv_l0_start[3] = {};
     cudaEvent_t ev_inv_l0_stop[3] = {};
+    cudaEvent_t ev_field_start[3] = {};
+    cudaEvent_t ev_field_stop[3] = {};
     cudaEvent_t ev_ch_done[3] = {};
+    bool interlaced_gop1 = false;
 
     cudaEvent_t ev_color_start = nullptr;
     cudaEvent_t ev_color_stop = nullptr;
@@ -308,6 +311,8 @@ struct DecodeSlot2E {
             if (ev_inv_l1_stop[ch])  { cudaEventDestroy(ev_inv_l1_stop[ch]);  ev_inv_l1_stop[ch] = nullptr; }
             if (ev_inv_l0_start[ch]) { cudaEventDestroy(ev_inv_l0_start[ch]); ev_inv_l0_start[ch] = nullptr; }
             if (ev_inv_l0_stop[ch])  { cudaEventDestroy(ev_inv_l0_stop[ch]);  ev_inv_l0_stop[ch] = nullptr; }
+            if (ev_field_start[ch]) { cudaEventDestroy(ev_field_start[ch]); ev_field_start[ch] = nullptr; }
+            if (ev_field_stop[ch])  { cudaEventDestroy(ev_field_stop[ch]);  ev_field_stop[ch] = nullptr; }
         }
         if (main_stream) { cudaStreamDestroy(main_stream); main_stream = nullptr; }
 
@@ -400,6 +405,38 @@ struct DecodeSlot2E {
         int ch_h = height;
         int w_l0 = ch_w / 2;
         int h_l0 = ch_h / 2;
+
+        // Progressive: spatial vertical, then spatial horizontal, then output.
+        // Interlaced GOP-1: horizontal inverse of the temporal bands, then the
+        // field combine. The field kernel is not inserted into the progressive
+        // schedule. Levels 2 and 1 stay on the spatial kernels either way.
+        if (interlaced_gop1) {
+            dim3 block_h(64, 4);
+            dim3 grid_h((w_l0 + block_h.x - 1) / block_h.x, (h_l0 + block_h.y - 1) / block_h.y);
+            HorizontalInverseKernel<<<grid_h, block_h, 0, s>>>(
+                c.d_ll0, int(c.ll0_pitch),
+                c.d_l0_band[1], int(c.l0_pitch),
+                c.d_vert_low, int(c.vert_low_pitch),
+                w_l0, h_l0, 0, ErrorGuard()
+            );
+            HorizontalInverseKernel<<<grid_h, block_h, 0, s>>>(
+                c.d_l0_band[2], int(c.l0_pitch),
+                c.d_l0_band[3], int(c.l0_pitch),
+                c.d_vert_high, int(c.vert_high_pitch),
+                w_l0, h_l0, 0, ErrorGuard()
+            );
+            cudaEventRecord(ev_field_start[ch], s);
+            dim3 block(32, 8);
+            dim3 grid((ch_w + block.x - 1) / block.x, (h_l0 + block.y - 1) / block.y);
+            FieldCombineKernel<<<grid, block, 0, s>>>(
+                c.d_vert_low, int(c.vert_low_pitch),
+                c.d_vert_high, int(c.vert_high_pitch),
+                c.d_final_plane, int(c.final_plane_pitch),
+                ch_w, h_l0, ErrorGuard()
+            );
+            cudaEventRecord(ev_field_stop[ch], s);
+            return;
+        }
 
         dim3 block(16, 16);
         dim3 grid_v((w_l0 + block.x - 1) / block.x, (h_l0 + block.y - 1) / block.y);
@@ -514,7 +551,7 @@ struct DecodeSlot2E {
                     d_bgra, bgra_pitch,
                     width, height,
                     matrix, range, orientation,
-                    main_stream, ErrorGuard()
+                    main_stream, ErrorGuard(), interlaced_gop1
                 );
                 cudaEventRecord(ev_color_stop, main_stream);
             }
@@ -904,9 +941,13 @@ bool CudaDecoderPipelinePhase2E::Initialize(
             if (err != cudaSuccess) return false;
             c.d_l0_band[0] = c.d_ll0;
 
-            err = cudaMallocPitch(&c.d_vert_low, &c.vert_low_pitch, w_l0 * sizeof(int16_t), 2 * h_l0);
+            // Full channel width so the interlaced horizontal inverse can park
+            // temporal low/high here (full width, half height) without a second
+            // frame buffer. Progressive vertical writes only the left half.
+            // Height stays the full frame, which the spatial vertical kernel needs.
+            err = cudaMallocPitch(&c.d_vert_low, &c.vert_low_pitch, ch_max_w * sizeof(int16_t), 2 * h_l0);
             if (err != cudaSuccess) return false;
-            err = cudaMallocPitch(&c.d_vert_high, &c.vert_high_pitch, w_l0 * sizeof(int16_t), 2 * h_l0);
+            err = cudaMallocPitch(&c.d_vert_high, &c.vert_high_pitch, ch_max_w * sizeof(int16_t), 2 * h_l0);
             if (err != cudaSuccess) return false;
 
             err = cudaMallocPitch(&c.d_final_plane, &c.final_plane_pitch, ch_max_w * sizeof(int16_t), ch_max_h);
@@ -951,6 +992,8 @@ bool CudaDecoderPipelinePhase2E::Initialize(
             cudaEventCreate(&slot->ev_inv_l1_stop[ch]);
             cudaEventCreate(&slot->ev_inv_l0_start[ch]);
             cudaEventCreate(&slot->ev_inv_l0_stop[ch]);
+            cudaEventCreate(&slot->ev_field_start[ch]);
+            cudaEventCreate(&slot->ev_field_stop[ch]);
         }
         cudaStreamCreateWithFlags(&slot->main_stream, cudaStreamNonBlocking);
 
@@ -983,7 +1026,8 @@ bool CudaDecoderPipelinePhase2E::Initialize(
             if (!slot->channel_streams[ch] || !slot->ev_ch_done[ch] ||
                 !slot->ev_inv_l2_start[ch] || !slot->ev_inv_l2_stop[ch] ||
                 !slot->ev_inv_l1_start[ch] || !slot->ev_inv_l1_stop[ch] ||
-                !slot->ev_inv_l0_start[ch] || !slot->ev_inv_l0_stop[ch]) return false;
+                !slot->ev_inv_l0_start[ch] || !slot->ev_inv_l0_stop[ch] ||
+                !slot->ev_field_start[ch] || !slot->ev_field_stop[ch]) return false;
         for (int b = 0; b < kMaxVlcBands; ++b)
             if (!slot->ev_index_start[b] || !slot->ev_index_done[b] || !slot->ev_band_start[b] ||
                 !slot->ev_band_done[b] || !slot->ev_summary_start[b] || !slot->ev_summary_done[b]) return false;
@@ -1166,7 +1210,7 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(
 uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed_sample,
     size_t compressed_size, const std::vector<GpuEntropyBandDescriptor>& input_bands,
     DeviceSurfaceType requested_surface, ColorMatrix matrix, ColorRange range,
-    RowOrientation orientation, bool production_guard, float host_parse_ms) {
+    RowOrientation orientation, bool production_guard, float host_parse_ms, bool interlaced_gop1) {
     if (!impl_ || !impl_->initialized || input_bands.size() != 30) return 0;
     auto t_parse_end = Clock::now();
     auto t_frame_start = t_parse_end - std::chrono::duration_cast<Clock::duration>(
@@ -1194,6 +1238,7 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed
     slot->matrix = matrix;
     slot->range = range;
     slot->orientation = orientation;
+    slot->interlaced_gop1 = interlaced_gop1;
     slot->t_frame_start = t_frame_start;
     slot->t_parse_end = t_parse_end;
 
@@ -1746,7 +1791,7 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed
                 slot->d_bgra, slot->bgra_pitch,
                 frame_width, frame_height,
                 matrix, range, orientation,
-                slot->main_stream, slot->ErrorGuard()
+                slot->main_stream, slot->ErrorGuard(), slot->interlaced_gop1
             );
             cudaEventRecord(slot->ev_color_stop, slot->main_stream);
         }
@@ -1792,7 +1837,7 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed
                 slot->d_bgra, slot->bgra_pitch,
                 frame_width, frame_height,
                 matrix, range, orientation,
-                slot->main_stream
+                slot->main_stream, nullptr, slot->interlaced_gop1
             );
             cudaEventRecord(slot->ev_color_stop, slot->main_stream);
         }
@@ -2249,6 +2294,14 @@ bool CudaDecoderPipelinePhase2E::GetStageTimings(uint64_t ticket, Phase2eSlotSta
     timings->t_first_inverse_start_ms = (earliest_inv_start < 1e8f) ? earliest_inv_start : 0.0f;
     timings->inverse_wavelet_work_ms = sum_inv_work;
     timings->inverse_wavelet_wall_ms = (latest_inv_end > earliest_inv_start) ? (latest_inv_end - earliest_inv_start) : 0.0f;
+    timings->field_combine_ms = 0.0f;
+    if (slot->interlaced_gop1) {
+        for (int ch = 0; ch < 3; ++ch) {
+            float field_ms = 0.0f;
+            cudaEventElapsedTime(&field_ms, slot->ev_field_start[ch], slot->ev_field_stop[ch]);
+            timings->field_combine_ms += field_ms;
+        }
+    }
 
     // Color Conversion
     float color_s = 0.0f, color_e = 0.0f, color_d = 0.0f;
@@ -2470,6 +2523,49 @@ bool CudaDecoderPipelinePhase2E::DownloadIntermediateLl(uint64_t ticket, int ch,
         level ? c.ll1_pitch : c.ll0_pitch, w * sizeof(int16_t), h, cudaMemcpyDeviceToHost) == cudaSuccess;
 }
 
+bool CudaDecoderPipelinePhase2E::DownloadInterlacedFieldStage(
+    uint64_t ticket, int channel,
+    std::vector<int16_t>& temporal_low, std::vector<int16_t>& temporal_high,
+    std::vector<int16_t>& reconstructed, int* width, int* field_rows,
+    int* low_pitch, int* out_pitch) {
+    if (!impl_ || channel < 0 || channel > 2) return false;
+    DecodeSlot2E* slot = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        slot = impl_->FindSlot(ticket);
+    }
+    if (!slot || !slot->interlaced_gop1 || slot->status != DecodeTicketStatus::Complete) return false;
+    const int ch_w = channel == 0 ? slot->width : slot->width / 2;
+    const int rows = slot->height / 2;
+    if (width) *width = ch_w;
+    if (field_rows) *field_rows = rows;
+    const auto& c = slot->channels[channel];
+    if (low_pitch) *low_pitch = int(c.vert_low_pitch);
+    if (out_pitch) *out_pitch = int(c.final_plane_pitch);
+    temporal_low.resize(size_t(ch_w) * rows);
+    temporal_high.resize(size_t(ch_w) * rows);
+    reconstructed.resize(size_t(ch_w) * slot->height);
+    const size_t row_bytes = size_t(ch_w) * sizeof(int16_t);
+    if (cudaMemcpy2D(temporal_low.data(), row_bytes, c.d_vert_low, c.vert_low_pitch,
+            row_bytes, rows, cudaMemcpyDeviceToHost) != cudaSuccess) return false;
+    if (cudaMemcpy2D(temporal_high.data(), row_bytes, c.d_vert_high, c.vert_high_pitch,
+            row_bytes, rows, cudaMemcpyDeviceToHost) != cudaSuccess) return false;
+    return cudaMemcpy2D(reconstructed.data(), row_bytes, c.d_final_plane, c.final_plane_pitch,
+        row_bytes, slot->height, cudaMemcpyDeviceToHost) == cudaSuccess;
+}
+
+bool LaunchInterlacedFieldCombine(const int16_t* low, size_t low_pitch,
+    const int16_t* high, size_t high_pitch, int16_t* output, size_t output_pitch,
+    int width, int field_rows, cudaStream_t stream, uint32_t* frame_error) {
+    if (!low || !high || !output || width <= 0 || field_rows <= 0) return false;
+    dim3 block(32, 8);
+    dim3 grid((width + block.x - 1) / block.x, (field_rows + block.y - 1) / block.y);
+    FieldCombineKernel<<<grid, block, 0, stream>>>(
+        low, int(low_pitch), high, int(high_pitch), output, int(output_pitch),
+        width, field_rows, frame_error);
+    return cudaGetLastError() == cudaSuccess;
+}
+
 std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t ticket) {
     Phase2eSlotStageTimings t{};
     if (!GetStageTimings(ticket, &t)) return "{}";
@@ -2492,6 +2588,7 @@ std::string CudaDecoderPipelinePhase2E::ExportTimelineJson(uint64_t ticket) {
     ss << "  \"gpu_replay_work_ms\": " << t.gpu_replay_work_ms << ",\n";
     ss << "  \"inverse_wavelet_wall_ms\": " << t.inverse_wavelet_wall_ms << ",\n";
     ss << "  \"inverse_wavelet_work_ms\": " << t.inverse_wavelet_work_ms << ",\n";
+    ss << "  \"field_combine_ms\": " << t.field_combine_ms << ",\n";
     ss << "  \"color_convert_ms\": " << t.color_convert_ms << ",\n";
     ss << "  \"overlap_saved_ms\": " << t.overlap_saved_ms << ",\n";
     ss << "  \"overlap_efficiency\": " << t.overlap_efficiency << ",\n";

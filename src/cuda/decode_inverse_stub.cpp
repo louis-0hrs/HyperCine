@@ -37,7 +37,9 @@ bool LaunchYuv422ToBgra8(
     ColorMatrix,
     ColorRange,
     RowOrientation,
-    cudaStream_t)
+    cudaStream_t,
+    uint32_t*,
+    bool)
 {
     return false;
 }

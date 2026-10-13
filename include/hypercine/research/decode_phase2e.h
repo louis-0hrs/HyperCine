@@ -147,6 +147,9 @@ struct Phase2eSlotStageTimings {
     // Inverse wavelet metrics
     float inverse_wavelet_wall_ms = 0.0f;   // Earliest inverse start to latest inverse end
     float inverse_wavelet_work_ms = 0.0f;   // Sum of inverse level durations
+    // GOP-1 field combine, summed across channels. Nested inside level 0, so it
+    // is not added again to total_work_sum_ms. Zero on a progressive frame.
+    float field_combine_ms = 0.0f;
 
     // Final color & completion metrics
     float color_convert_ms = 0.0f;
@@ -262,7 +265,7 @@ public:
     uint64_t QueueDecodeParsed(const uint8_t*, size_t,
         const std::vector<GpuEntropyBandDescriptor>&,
         DeviceSurfaceType, ColorMatrix, ColorRange, RowOrientation,
-        bool production_guard, float host_parse_ms = 0);
+        bool production_guard, float host_parse_ms = 0, bool interlaced_gop1 = false);
     DecoderMemoryStats GetMemoryStats() const;
     void PrepareProductionScratch();
 
@@ -310,6 +313,14 @@ public:
     bool GetGpuCheckpoints(uint64_t ticket, std::vector<GpuEntropySegmentDescriptor>& out);
     bool GetGpuIndexResults(uint64_t ticket, std::vector<GpuCheckpointIndexResult>& out);
     bool DownloadIntermediateLl(uint64_t ticket, int channel, int level, std::vector<int16_t>& out);
+    // Test/research only. Tight host rows of the temporal low/high pair (the
+    // horizontal inverse immediately before the field kernel) and the
+    // reconstructed plane. Wavelet channel 0=Y, 1=V, 2=U. Device pitches are
+    // returned in bytes. Fails unless this ticket took the GOP-1 path.
+    bool DownloadInterlacedFieldStage(uint64_t ticket, int channel,
+        std::vector<int16_t>& temporal_low, std::vector<int16_t>& temporal_high,
+        std::vector<int16_t>& reconstructed, int* width = nullptr, int* field_rows = nullptr,
+        int* low_pitch = nullptr, int* out_pitch = nullptr);
     // Direct access to decoded signed-16 coefficient bands in VRAM (for bit-exact verification)
     bool DownloadBandCoefficientsToHost(
         uint64_t ticket,
@@ -341,5 +352,12 @@ private:
 
 // Convenience alias for Phase 2F-C pipeline
 using CudaDecoderPipelinePhase2FC = CudaDecoderPipelinePhase2E;
+
+#if defined(HYPERCINE_CUDA_AVAILABLE) || defined(__CUDACC__)
+// Device pointers. Runs only the field combine, for the kernel unit test.
+bool LaunchInterlacedFieldCombine(const int16_t* low, size_t low_pitch,
+    const int16_t* high, size_t high_pitch, int16_t* output, size_t output_pitch,
+    int width, int field_rows, cudaStream_t stream, uint32_t* frame_error = nullptr);
+#endif
 
 } // namespace HyperCine

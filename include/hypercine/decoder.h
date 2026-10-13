@@ -76,6 +76,8 @@ struct DecoderCapabilities {
     bool device_backend_available = false;
     bool device_bgra8 = false;
     bool planar_yuv422_signed16 = false;
+    // GOP-1 interlaced YUV 4:2:2 at coded precision 10. This is not FIELDPLUS,
+    // GOP-2, RGB, or any other temporal profile.
     bool interlaced_output = false;
     int maximum_slots = 4;
 };

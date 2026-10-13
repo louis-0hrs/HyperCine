@@ -43,6 +43,64 @@ __device__ __forceinline__ uint8_t packus8_gpu(int32_t v) {
     return static_cast<uint8_t>(v);
 }
 
+// PlanarYUV16toPlanarRGB16 coefficients, BITSUSED 13, plus the upstream
+// TWEAK_YUV2RGB table. The inactive-metadata interlaced BGRA path uses these.
+struct Row16Coefficients {
+    int16_t y_offset;
+    int16_t ymult;
+    int16_t r_vmult;
+    int16_t g_vmult;
+    int16_t g_umult;
+    int16_t b_umult;
+    int16_t u_offset;
+    int16_t v_offset;
+};
+
+__device__ __forceinline__ int16_t mulhi_epi16_gpu(int16_t a, int16_t b) {
+    return static_cast<int16_t>((int32_t(a) * int32_t(b)) >> 16);
+}
+
+__device__ __forceinline__ int16_t slli2_gpu(int16_t v) {
+    return static_cast<int16_t>(static_cast<uint16_t>(v) << 2);
+}
+
+// adds_epi16(v, 16384), unsigned sat-sub 16384, then << 2. Result >> 8 is the 8-bit channel.
+__device__ __forceinline__ uint8_t limit14_to_u8(int16_t v) {
+    int32_t add = int32_t(v) + 16384;
+    if (add > 32767) add = 32767;
+    if (add < -32768) add = -32768;
+    uint16_t u = static_cast<uint16_t>(static_cast<int16_t>(add));
+    if (u < 16384) u = 0;
+    else u = static_cast<uint16_t>(u - 16384);
+    return static_cast<uint8_t>(static_cast<uint16_t>(u << 2) >> 8);
+}
+
+__device__ __forceinline__ void Row16YuvToBgra(
+    int16_t raw_y, int16_t raw_u, int16_t raw_v, Row16Coefficients coeff,
+    uint8_t& b_out, uint8_t& g_out, uint8_t& r_out)
+{
+    const uint16_t y16 = static_cast<uint16_t>(static_cast<uint16_t>(raw_y) << 6);
+    const uint16_t u16 = static_cast<uint16_t>(static_cast<uint16_t>(raw_u) << 6);
+    const uint16_t v16 = static_cast<uint16_t>(static_cast<uint16_t>(raw_v) << 6);
+    int16_t y = sat_sub16_gpu(static_cast<int16_t>(y16 >> 1), coeff.y_offset);
+    int16_t u = sat_sub16_gpu(static_cast<int16_t>(u16 >> 1), coeff.u_offset);
+    int16_t v = sat_sub16_gpu(static_cast<int16_t>(v16 >> 1), coeff.v_offset);
+    y = mulhi_epi16_gpu(y, coeff.ymult);
+
+    int16_t r = sat_add16_gpu(mulhi_epi16_gpu(v, coeff.r_vmult), y);
+    r = slli2_gpu(r);
+    int16_t g = sat_add16_gpu(y, mulhi_epi16_gpu(u, static_cast<int16_t>(-coeff.g_umult)));
+    g = sat_add16_gpu(g, mulhi_epi16_gpu(v, static_cast<int16_t>(-coeff.g_vmult)));
+    g = slli2_gpu(g);
+    int16_t b = sat_add16_gpu(mulhi_epi16_gpu(u, coeff.b_umult), y);
+    b = slli2_gpu(b);
+
+    b_out = limit14_to_u8(b);
+    g_out = limit14_to_u8(g);
+    r_out = limit14_to_u8(r);
+}
+
+template <bool InterlacedRow16>
 __global__ void Yuv422ToBgra8Kernel(
     const int16_t* __restrict__ d_y, size_t y_pitch,
     const int16_t* __restrict__ d_v, size_t v_pitch,
@@ -51,6 +109,7 @@ __global__ void Yuv422ToBgra8Kernel(
     int width, int height,
     int post_column_pixels,
     ColorCoefficients coeff,
+    Row16Coefficients row16,
     RowOrientation orientation, uint32_t* frame_error)
 {
     if (DecoderFrameFailed(frame_error)) return;
@@ -69,6 +128,16 @@ __global__ void Yuv422ToBgra8Kernel(
     int16_t raw_y = y_row[x];
     int16_t raw_v = v_row[x / 2];
     int16_t raw_u = u_row[x / 2];
+
+    if constexpr (InterlacedRow16) {
+        uint8_t b_out = 0, g_out = 0, r_out = 0;
+        Row16YuvToBgra(raw_y, raw_u, raw_v, row16, b_out, g_out, r_out);
+        out_row[4 * x + 0] = b_out;
+        out_row[4 * x + 1] = g_out;
+        out_row[4 * x + 2] = r_out;
+        out_row[4 * x + 3] = 255;
+        return;
+    }
 
     // Inverse reconstruction can undershoot zero. Preserve its sign while
     // reducing precision; unsigned shifts turn dark overshoots into highlights.
@@ -130,6 +199,64 @@ __global__ void Yuv422ToBgra8Kernel(
     out_row[4 * x + 3] = 255;
 }
 
+Row16Coefficients Row16ColorCoefficients(ColorMatrix matrix, ColorRange range) {
+    const float scale = float(1 << 13);
+    int y_offset = 0, ymult = 0, rv = 0, gv = 0, gu = 0, bu = 0;
+    int u_offset = 1 << 14;
+    int v_offset = 1 << 14;
+    const int* tweak = nullptr;
+    static const int cg709[8] = {-32, 11, 6, -17, -6, 0, 22, 22};
+    static const int vs709[8] = {-35, 9, -8, -3, 2, 2, 18, 15};
+    static const int cg601[8] = {-28, 14, 6, 1, 7, 3, 23, 23};
+    static const int vs601[8] = {-26, 12, 9, -8, 1, -6, 15, 14};
+    if (range == ColorRange::CG) {
+        y_offset = 2048;
+        ymult = int(scale * 1.164f);
+        if (matrix == ColorMatrix::BT709) {
+            rv = int(scale * 1.793f);
+            gv = int(scale * 0.534f);
+            gu = int(scale * 0.213f);
+            bu = int(scale * 2.115f);
+            tweak = cg709;
+        } else {
+            rv = int(scale * 1.596f);
+            gv = int(scale * 0.813f);
+            gu = int(scale * 0.391f);
+            bu = int(scale * 2.018f);
+            tweak = cg601;
+        }
+    } else {
+        y_offset = 0;
+        ymult = int(scale * 1.0f);
+        if (matrix == ColorMatrix::BT709) {
+            rv = int(scale * 1.540f);
+            gv = int(scale * 0.459f);
+            gu = int(scale * 0.183f);
+            bu = int(scale * 1.816f);
+            tweak = vs709;
+        } else {
+            rv = int(scale * 1.371f);
+            gv = int(scale * 0.698f);
+            gu = int(scale * 0.336f);
+            bu = int(scale * 1.732f);
+            tweak = vs601;
+        }
+    }
+    y_offset += tweak[0];
+    ymult += tweak[1];
+    rv += tweak[2];
+    gv += tweak[3];
+    gu += tweak[4];
+    bu += tweak[5];
+    u_offset += tweak[6];
+    v_offset += tweak[7];
+    return Row16Coefficients{
+        static_cast<int16_t>(y_offset), static_cast<int16_t>(ymult),
+        static_cast<int16_t>(rv), static_cast<int16_t>(gv),
+        static_cast<int16_t>(gu), static_cast<int16_t>(bu),
+        static_cast<int16_t>(u_offset), static_cast<int16_t>(v_offset)};
+}
+
 } // anonymous namespace
 
 bool LaunchYuv422ToBgra8(
@@ -141,13 +268,15 @@ bool LaunchYuv422ToBgra8(
     ColorMatrix matrix,
     ColorRange range,
     RowOrientation orientation,
-    cudaStream_t stream, uint32_t* frame_error)
+    cudaStream_t stream, uint32_t* frame_error,
+    bool interlaced_row16)
 {
     if (!d_y || !d_v || !d_u || !d_bgra || width <= 0 || height <= 0) {
         return false;
     }
 
     ColorCoefficients coeff = GetColorCoefficients(matrix, range);
+    Row16Coefficients row16 = Row16ColorCoefficients(matrix, range);
 
     // Compute exact border column where upstream switches from SIMD to scalar fallback
     int lowpass_width = width / 2;
@@ -160,16 +289,15 @@ bool LaunchYuv422ToBgra8(
     dim3 block(32, 8);
     dim3 grid((width + block.x - 1) / block.x, (height + block.y - 1) / block.y);
 
-    Yuv422ToBgra8Kernel<<<grid, block, 0, stream>>>(
-        d_y, y_pitch,
-        d_v, v_pitch,
-        d_u, u_pitch,
-        d_bgra, bgra_pitch,
-        width, height,
-        post_column_pixels,
-        coeff,
-        orientation, frame_error
-    );
+    if (interlaced_row16) {
+        Yuv422ToBgra8Kernel<true><<<grid, block, 0, stream>>>(
+            d_y, y_pitch, d_v, v_pitch, d_u, u_pitch, d_bgra, bgra_pitch,
+            width, height, post_column_pixels, coeff, row16, orientation, frame_error);
+    } else {
+        Yuv422ToBgra8Kernel<false><<<grid, block, 0, stream>>>(
+            d_y, y_pitch, d_v, v_pitch, d_u, u_pitch, d_bgra, bgra_pitch,
+            width, height, post_column_pixels, coeff, row16, orientation, frame_error);
+    }
 
     return cudaGetLastError() == cudaSuccess;
 }

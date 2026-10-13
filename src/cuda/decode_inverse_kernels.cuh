@@ -202,4 +202,42 @@ __global__ inline void HorizontalInverseKernel(
     row_out[2 * c + 1] = out_odd;
 }
 
+// GOP-1 field combine. Upstream InvertInterlacedRow16sToRow16u SSE2, without the
+// final << 6. The 16-bit color converter applies that scale itself.
+//   biased = sat_add(sat_sub/add(low, high), 30720)
+//   limited = unsigned_sat_sub(biased, 30720)   // clamps the sum/diff to [0, 2047]
+//   code = arithmetic_shift(limited, 1)
+// even is frame row 2*r. odd is row 2*r+1.
+__device__ __forceinline__ int16_t FieldCodeSse2(int16_t sum_or_diff) {
+    constexpr int kBias = 32767 - 2047;
+    int32_t biased = int32_t(sum_or_diff) + kBias;
+    if (biased > 32767) biased = 32767;
+    if (biased < -32768) biased = -32768;
+    const uint16_t bits = static_cast<uint16_t>(static_cast<int16_t>(biased));
+    const uint16_t limited = bits < static_cast<uint16_t>(kBias)
+        ? 0 : static_cast<uint16_t>(bits - static_cast<uint16_t>(kBias));
+    const int16_t signed_bits = static_cast<int16_t>(limited);
+    return static_cast<int16_t>(int32_t(signed_bits) >> 1);
+}
+
+__global__ inline void FieldCombineKernel(
+    const int16_t* __restrict__ low, int low_pitch,
+    const int16_t* __restrict__ high, int high_pitch,
+    int16_t* __restrict__ output, int output_pitch,
+    int width, int field_rows, uint32_t* frame_error = nullptr)
+{
+    if (DecoderFrameFailed(frame_error)) return;
+    int c = blockIdx.x * blockDim.x + threadIdx.x;
+    int r = blockIdx.y * blockDim.y + threadIdx.y;
+    if (c >= width || r >= field_rows) return;
+
+    const int low_stride = low_pitch / int(sizeof(int16_t));
+    const int high_stride = high_pitch / int(sizeof(int16_t));
+    const int out_stride = output_pitch / int(sizeof(int16_t));
+    const int16_t lo = low[r * low_stride + c];
+    const int16_t hi = high[r * high_stride + c];
+    output[(2 * r) * out_stride + c] = FieldCodeSse2(sat16_sub_gpu(lo, hi));
+    output[(2 * r + 1) * out_stride + c] = FieldCodeSse2(sat16_add_gpu(lo, hi));
+}
+
 } // namespace HyperCine
