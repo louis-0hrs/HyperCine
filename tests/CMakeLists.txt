@@ -131,6 +131,17 @@ if(HYPERCINE_ENABLE_CUDA)
         "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/phase3b1-stress" --stress)
     set_tests_properties(test_decode_phase3b1_acceptance test_decode_phase3b1_stress PROPERTIES TIMEOUT 1800)
 
+    add_executable(test_decode_phase3b2r test_decode_phase3b2r.cpp)
+    target_compile_definitions(test_decode_phase3b2r PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_decode_phase3b2r PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    if(WIN32)
+        target_link_libraries(test_decode_phase3b2r PRIVATE psapi)
+    endif()
+    add_test(NAME test_decode_phase3b2r_math COMMAND test_decode_phase3b2r --math)
+    add_test(NAME test_decode_phase3b2r_reference COMMAND test_decode_phase3b2r --reference-smoke
+        "${CMAKE_SOURCE_DIR}")
+    set_tests_properties(test_decode_phase3b2r_reference PROPERTIES TIMEOUT 180)
+
     add_executable(test_decode_phase2fa test_decode_phase2fa.cpp)
     target_compile_definitions(test_decode_phase2fa PRIVATE _ALLOCATOR=1)
     target_link_libraries(test_decode_phase2fa PRIVATE hypercine_wavelet CFHDCodecStatic)
