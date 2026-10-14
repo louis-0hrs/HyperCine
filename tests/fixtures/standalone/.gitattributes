@@ -1,0 +1,6 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+*.cfhd binary
+*.p10 binary
+*.input-p10 binary
+*.bgra binary

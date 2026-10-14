@@ -51,6 +51,8 @@ and requires actual 128x128 format, padded 512-byte stride, success and nonzero
 output. Input and output storage use aligned RAII vectors; decoder, encoder and
 metadata handles have custom deleters. `TAG_PROCESS_PATH=0xffff`, explicit BT.709,
 computer RGB and disabled SDK chroma filtering are applied with checked statuses.
+`TAG_CPU_MAX=1` requests the documented single-worker oracle mitigation. This
+does not certify the frozen SDK's unrestricted multi-worker behavior.
 
 YU64 is little-endian unsigned p16 `Y0,Cr,Y1,Cb`, top-down. The test converts it to
 FFmpeg planar Y/Cb/Cr p10 by right shifting six bits, without hiding any pixel or
@@ -110,3 +112,18 @@ unused `half_h` warning in the reused scalar wavelet source was observed.
 Windows full reference CTest, SDK statuses and triangular control results must
 be filled from actual CI, with run links. CUDA, Adobe and Resolve are NOT RUN.
 No throughput/latency optimization or performance milestone is claimed.
+
+## First actual Windows attempt — failure retained
+
+[Push run 38627148629](https://github.com/louis-0hrs/HyperCine/actions/runs/38627148629),
+commit `a61fc4a`: Windows MSVC build PASS; reference + new CTest **5/6 PASS**,
+`standalone_sdk_decode_3_packets` **FAIL**. All prepare/decode API calls return
+success and correct geometry. Unrestricted SDK workers produce unstable channel
+planes across fresh opens, including flat Y/Cr corruption (max p10 error 512)
+and canonical/gradient mismatches, while some opens are close to FFmpeg.
+No pixels are masked and the failing output is retained in the run log.
+The Windows-generated GoPro control really decodes in independent Mac FFmpeg;
+its SDK-vs-FFmpeg p10 PSNR is 62.75 dB for the captured build output. This first
+run is not a compatibility pass. The next attempt requests the documented
+`TAG_CPU_MAX=1` oracle mitigation. See `docs/UPSTREAM.md` section 9 for the
+frozen SDK's worker races; upstream sources remain untouched.

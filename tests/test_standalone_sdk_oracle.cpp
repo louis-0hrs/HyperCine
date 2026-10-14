@@ -63,11 +63,14 @@ Bytes Decode(Bytes packet, CFHD_PixelFormat requested, const std::string& label)
     CFHD_MetadataRef mr=nullptr;status=CFHD_OpenMetadata(&mr);Metadata metadata(mr);
     Check(status,label+" OpenMetadata");
     Check(CFHD_InitSampleMetadata(metadata.get(),METADATATYPE_ORIGINAL,packet.data(),packet.size()),label+" InitMetadata");
-    unsigned process=0xffff, yuv=2, rgb=1, filter=0;
+    unsigned process=0xffff, yuv=2, rgb=1, filter=0, cpu=1;
     Check(CFHD_SetActiveMetadata(decoder.get(),metadata.get(),TAG_PROCESS_PATH,METADATATYPE_UINT32,&process,sizeof(process)),label+" PRCS");
     Check(CFHD_SetActiveMetadata(decoder.get(),metadata.get(),TAG_COLORSPACE_YUV,METADATATYPE_UINT32,&yuv,sizeof(yuv)),label+" BT709");
     Check(CFHD_SetActiveMetadata(decoder.get(),metadata.get(),TAG_COLORSPACE_RGB,METADATATYPE_UINT32,&rgb,sizeof(rgb)),label+" fullRGB");
     Check(CFHD_SetActiveMetadata(decoder.get(),metadata.get(),TAG_COLORSPACE_FTR,METADATATYPE_UINT32,&filter,sizeof(filter)),label+" chromaFilterOff");
+    // Documented oracle mitigation for the frozen SDK's worker races. This is
+    // an actual decoder setting; every returned pixel is still compared.
+    Check(CFHD_SetActiveMetadata(decoder.get(),metadata.get(),TAG_CPU_MAX,METADATATYPE_HIDDEN,&cpu,sizeof(cpu)),label+" CPU_MAX=1");
     Bytes output(size_t(pitch)*h,0);
     Check(CFHD_DecodeSample(decoder.get(),packet.data(),packet.size(),output.data(),pitch),label+" DecodeSample");
     Require(std::any_of(output.begin(),output.end(),[](uint8_t v){return v!=0;}),"All-zero decode");
