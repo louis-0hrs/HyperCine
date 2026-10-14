@@ -29,7 +29,7 @@ if(HYPERCINE_BUILD_STANDALONE)
         enable_testing()
         add_executable(test_standalone tests/test_standalone.cpp)
         target_link_libraries(test_standalone PRIVATE hypercine_standalone)
-        foreach(stage color wavelet quantization entropy sample)
+        foreach(stage color wavelet quantization entropy sample geometry)
             add_test(NAME standalone_${stage} COMMAND test_standalone ${stage})
         endforeach()
         find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
@@ -42,6 +42,21 @@ if(HYPERCINE_BUILD_STANDALONE)
                 --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
                 --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
                 --output-dir "${CMAKE_CURRENT_BINARY_DIR}/samples")
+            foreach(geometry 256x256 1920x1080 128x24 384x40 4096x24 128x4096 2048x1024)
+                string(REPLACE "x" ";" dimensions "${geometry}")
+                list(GET dimensions 0 width)
+                list(GET dimensions 1 height)
+                set(patterns flat canonical)
+                if(geometry STREQUAL "256x256" OR geometry STREQUAL "1920x1080")
+                    set(patterns flat gradient canonical noise checker edges impulse)
+                endif()
+                add_test(NAME standalone_external_${geometry} COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_standalone.py"
+                    --encoder $<TARGET_FILE:hypercine_encode_smoke>
+                    --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}" --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
+                    --width ${width} --height ${height} --patterns ${patterns}
+                    --output-dir "${CMAKE_CURRENT_BINARY_DIR}/samples-${geometry}")
+            endforeach()
         else()
             message(STATUS "Optional standalone external decode test not registered: FFmpeg/ffprobe unavailable")
         endif()

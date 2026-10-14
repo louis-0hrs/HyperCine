@@ -10,25 +10,38 @@
 namespace hypercine { namespace standalone {
 namespace {
 void Validate(const Plane& p) {
-    if (p.width < 1 || p.height < 1 || p.stride < p.width || p.stride % 8 ||
+    if (p.width < 1 || p.height < 1 || p.width > kMaxDimension || p.height > kMaxDimension || p.stride < p.width || p.stride % 8 ||
+        static_cast<std::size_t>(p.stride) * p.height > kMaxPixels ||
         p.pixels.size() < static_cast<std::size_t>(p.stride) * p.height)
         throw std::invalid_argument("invalid plane storage");
 }
 // Explicit floor division: negative right shifts are implementation-defined in C++17.
 int RoundChroma(int v) { v += 16384; return v >= 0 ? v / 32768 : -((-v + 32767) / 32768); }
 }
+void ValidateGeometry(int w, int h) {
+    if (w < 128 || w > kMaxDimension || w % 128)
+        throw std::invalid_argument("frame width must be a multiple of 128 in [128,4096]");
+    if (h < 24 || h > kMaxDimension || h % 8)
+        throw std::invalid_argument("frame height must be a multiple of 8 in [24,4096]");
+    if (static_cast<std::size_t>(w) * h > kMaxPixels)
+        throw std::length_error("frame exceeds 2097152-pixel allocation budget");
+}
 Plane::Plane(int w, int h) : width(w), height(h), stride(0) {
-    if (w < 1 || h < 1 || w > 128 || h > 128) throw std::invalid_argument("plane exceeds fixed profile");
+    if (w < 1 || h < 1 || w > kMaxDimension || h > kMaxDimension) throw std::invalid_argument("plane dimensions out of bounds");
     stride = (w + 7) & ~7;
+    if (static_cast<std::size_t>(stride) * h > kMaxPixels)
+        throw std::length_error("plane exceeds allocation budget");
     pixels.resize(static_cast<std::size_t>(stride) * h);
 }
-Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride) {
-    if (!data || reinterpret_cast<std::uintptr_t>(data) % 16 || stride < 512 || stride % 16 ||
-        stride > (std::numeric_limits<std::size_t>::max() - 512) / 127 || bytes < stride * 127 + 512)
-        throw std::invalid_argument("BGRA128 requires aligned pointer, padded stride and complete storage");
-    Planes out{Plane(128,128), Plane(64,128), Plane(64,128)};
-    for (int y = 0; y < 128; ++y) {
-        for (int x = 0; x < 128; x += 2) {
+Planes ConvertBgra(const uint8_t* data, std::size_t bytes, int width, int height, std::size_t stride) {
+    ValidateGeometry(width,height);
+    const auto row = static_cast<std::size_t>(width)*4;
+    if (!data || reinterpret_cast<std::uintptr_t>(data) % 16 || stride < row || stride % 16 ||
+        stride > (std::numeric_limits<std::size_t>::max() - row) / (height-1) || bytes < stride * (height-1) + row)
+        throw std::invalid_argument("BGRA requires aligned pointer, padded stride and complete storage");
+    Planes out{Plane(width,height), Plane(width/2,height), Plane(width/2,height)};
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; x += 2) {
             int cr = 0, cb = 0;
             for (int k = 0; k < 2; ++k) {
                 const auto* p = data + stride * y + 4 * (x + k);
@@ -46,6 +59,9 @@ Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride
         }
     }
     return out;
+}
+Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride) {
+    return ConvertBgra(data,bytes,128,128,stride);
 }
 WaveletLevel ForwardLevel(const Plane& in, int prescale) {
     Validate(in);
