@@ -380,6 +380,16 @@ void CompareFieldPlusBands(HyperCine::Decoder& decoder, HyperCine::DecodeTicket 
     if (!first_mismatch.empty()) throw std::runtime_error(first_mismatch);
 }
 
+size_t CountOffsetlessBaseLlDifferences(const UpstreamFieldPlusCapture& reference, int removed_offset) {
+    size_t differences = 0;
+    for (int channel = 0; channel < 3; ++channel) {
+        const auto& base_ll = reference.bands[size_t(channel * 17)];
+        for (int16_t expected : base_ll)
+            differences += (int32_t(expected) - removed_offset) != int32_t(expected);
+    }
+    return differences;
+}
+
 void CompareTemporalStages(HyperCine::Decoder& decoder, HyperCine::DecodeTicket ticket, int frame,
     const UpstreamTemporalStages& reference) {
     for (int ch = 0; ch < 3; ++ch) {
@@ -451,10 +461,14 @@ std::string DecodeFrame(HyperCine::Decoder& decoder, const std::vector<uint8_t>&
 }
 
 std::string DecodeBgraHash(HyperCine::Decoder& decoder, const std::vector<uint8_t>& sample,
-    int frame, int width, int height, HyperCine::DecodeOrientation orientation) {
+    int frame, int width, int height, HyperCine::DecodeOrientation orientation,
+    HyperCine::DecodeMatrix matrix = HyperCine::DecodeMatrix::BT709,
+    HyperCine::DecodeRange range = HyperCine::DecodeRange::ComputerGraphics) {
     HyperCine::DecodeRequest request{};
     request.frame_index = frame;
     request.orientation = orientation;
+    request.matrix = matrix;
+    request.range = range;
     HyperCine::DecodeError error = HyperCine::DecodeError::None;
     const auto ticket = decoder.QueueDecode(sample.data(), sample.size(), request, &error);
     if (!ticket) throw std::runtime_error("FIELDPLUS fixture queue failed with error " + std::to_string(unsigned(error)));
@@ -688,7 +702,9 @@ std::vector<uint8_t> DecodeUpstreamYuv(const std::vector<uint8_t>& sample, int f
 }
 
 std::string DecodeUpstreamBgraHash(const std::vector<uint8_t>& sample, int frame,
-    int expected_width, int expected_height) {
+    int expected_width, int expected_height,
+    HyperCine::DecodeMatrix matrix = HyperCine::DecodeMatrix::BT709,
+    HyperCine::DecodeRange range = HyperCine::DecodeRange::ComputerGraphics) {
     void* raw = nullptr;
     DecodePhase0::Check(CFHD_OpenDecoder(&raw, nullptr), "open upstream BGRA decoder");
     DecodePhase0::DecoderHandle handle(raw);
@@ -699,6 +715,17 @@ std::string DecodeUpstreamBgraHash(const std::vector<uint8_t>& sample, int frame
         const_cast<uint8_t*>(sample.data()), sample.size(), &width, &height, &format), "prepare upstream BGRA");
     Require(width == expected_width && height == expected_height && format == CFHD_PIXEL_FORMAT_BGRA,
         "upstream BGRA profile");
+    void* metadata_raw = nullptr;
+    DecodePhase0::Check(CFHD_OpenMetadata(&metadata_raw), "open upstream color metadata");
+    DecodePhase0::Metadata metadata(metadata_raw);
+    DecodePhase0::Check(CFHD_InitSampleMetadata(metadata_raw, METADATATYPE_ORIGINAL,
+        const_cast<uint8_t*>(sample.data()), uint32_t(sample.size())), "init upstream color metadata");
+    uint32_t matrix_value = matrix == HyperCine::DecodeMatrix::BT709 ? 2u : 1u;
+    uint32_t range_value = range == HyperCine::DecodeRange::ComputerGraphics ? 1u : 2u;
+    DecodePhase0::Check(CFHD_SetActiveMetadata(raw, metadata_raw, TAG_COLORSPACE_YUV,
+        METADATATYPE_UINT32, &matrix_value, sizeof(matrix_value)), "set upstream FIELDPLUS matrix");
+    DecodePhase0::Check(CFHD_SetActiveMetadata(raw, metadata_raw, TAG_COLORSPACE_RGB,
+        METADATATYPE_UINT32, &range_value, sizeof(range_value)), "set upstream FIELDPLUS range");
     int32_t pitch = 0;
     DecodePhase0::Check(CFHD_GetImagePitch(width, format, &pitch), "get upstream BGRA pitch");
     std::vector<uint8_t> output(size_t(pitch) * size_t(height));
@@ -891,6 +918,43 @@ void Run1080Performance(const std::filesystem::path& root, const std::filesystem
         << " ms; frame1 mean=" << frame1[0] << " ms p95=" << frame1[2] << " ms\n";
 }
 
+void RunMatrixRange(const std::filesystem::path& root, const std::filesystem::path& output_path) {
+    constexpr int width = 64, height = 64;
+    const auto sample = ReadFile(root /
+        "tests/fixtures/phase3b0/YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1.cfhd");
+    HyperCine::DecoderConfig config{};
+    config.maximum_width = width; config.maximum_height = height;
+    HyperCine::Decoder decoder(config);
+    Require(decoder.Initialize() == HyperCine::DecodeError::None, "initialize matrix/range decoder");
+    std::filesystem::create_directories(output_path.parent_path());
+    std::ofstream out(output_path, std::ios::trunc);
+    Require(bool(out), "open matrix/range JSON");
+    out << "{\n  \"license\": \"MIT OR Apache-2.0\",\n  \"status\": \"PASS\",\n"
+        << "  \"fixture\": \"tests/fixtures/phase3b0/YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1.cfhd\",\n"
+        << "  \"cases\": [\n";
+    bool comma = false;
+    for (const auto matrix : {HyperCine::DecodeMatrix::BT601, HyperCine::DecodeMatrix::BT709}) {
+        for (const auto range : {HyperCine::DecodeRange::ComputerGraphics, HyperCine::DecodeRange::VideoSystems}) {
+            for (int frame : {0, 1}) {
+                const auto expected = DecodeUpstreamBgraHash(sample, frame, width, height, matrix, range);
+                const auto actual = DecodeBgraHash(decoder, sample, frame, width, height,
+                    HyperCine::DecodeOrientation::BottomUp, matrix, range);
+                Require(actual == expected, "FIELDPLUS matrix/range BGRA exactness");
+                if (comma) out << ",\n";
+                comma = true;
+                out << "    {\"matrix\":\"" << (matrix == HyperCine::DecodeMatrix::BT601 ? "BT601" : "BT709")
+                    << "\",\"range\":\"" << (range == HyperCine::DecodeRange::ComputerGraphics ? "CG" : "VS")
+                    << "\",\"frame\":" << frame << ",\"upstream_bgra_fnv1a64\":\"" << expected
+                    << "\",\"hypercine_bgra_fnv1a64\":\"" << actual << "\",\"exact\":true}";
+            }
+        }
+    }
+    out << "\n  ]\n}\n";
+    Require(bool(out), "write matrix/range evidence");
+    decoder.Release();
+    std::cout << "FIELDPLUS BT.601/BT.709 x CG/VS matched upstream for both frames\n";
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -903,12 +967,23 @@ int main(int argc, char** argv) {
             Run1080Performance(std::filesystem::path(argv[2]), std::filesystem::path(argv[3]));
             return 0;
         }
+        if (argc == 4 && std::string(argv[1]) == "--matrix-range") {
+            RunMatrixRange(std::filesystem::path(argv[2]), std::filesystem::path(argv[3]));
+            return 0;
+        }
         if (argc != 2) throw std::runtime_error("usage: test_decode_phase3b2a_reconstruction <repo-root>");
         const std::filesystem::path root(argv[1]);
         const auto sample = ReadFile(root /
             "tests/fixtures/phase3b0/YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1.cfhd");
         const auto bgra_coefficients = CaptureUpstreamFieldPlusBands(sample, CFHD_PIXEL_FORMAT_BGRA);
         const auto planar_coefficients = CaptureUpstreamFieldPlusBands(sample, CFHD_PIXEL_FORMAT_YU64);
+        const auto bgra_offsetless_differences = CountOffsetlessBaseLlDifferences(bgra_coefficients, 24);
+        const auto planar_offsetless_differences = CountOffsetlessBaseLlDifferences(planar_coefficients, 10);
+        Require(bgra_offsetless_differences > 0, "BGRA base-LL fixture discriminates missing +24 bias");
+        Require(planar_offsetless_differences > 0, "signed planar base-LL fixture discriminates missing +10 bias");
+        std::cout << "base-LL offset discrimination: BGRA missing +24 changes "
+            << bgra_offsetless_differences << " coefficients; signed planar missing +10 changes "
+            << planar_offsetless_differences << " coefficients\n";
         const auto temporal_stages = CaptureUpstreamTemporalStages(bgra_coefficients);
         const auto planar_temporal_stages = CaptureUpstreamTemporalStages(planar_coefficients);
         HyperCine::Decoder decoder;

@@ -1,0 +1,163 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PARTIAL_ONE_CASE_ABOVE_5_PERCENT_THRESHOLD",
+  "ordering": "A-B-B-A; A is phase3b1 baseline, B is current 3b2a branch",
+  "requests_per_measurement": 100,
+  "repeats_per_case_per_build": 6,
+  "cases": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "flat",
+      "strategy_id": 0,
+      "baseline_median_ms": 1.055935,
+      "current_median_ms": 1.110255,
+      "regression_percent": 5.144,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "flat",
+      "strategy_id": 1,
+      "baseline_median_ms": 1.21474,
+      "current_median_ms": 1.20249,
+      "regression_percent": -1.008,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "flat",
+      "strategy_id": 2,
+      "baseline_median_ms": 2.481065,
+      "current_median_ms": 2.52713,
+      "regression_percent": 1.857,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "noise",
+      "strategy_id": 0,
+      "baseline_median_ms": 4.8513,
+      "current_median_ms": 4.96657,
+      "regression_percent": 2.376,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "noise",
+      "strategy_id": 1,
+      "baseline_median_ms": 15.27485,
+      "current_median_ms": 15.99235,
+      "regression_percent": 4.697,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "noise",
+      "strategy_id": 2,
+      "baseline_median_ms": 4.906205,
+      "current_median_ms": 4.863275,
+      "regression_percent": -0.875,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "flat",
+      "strategy_id": 0,
+      "baseline_median_ms": 1.58327,
+      "current_median_ms": 1.61311,
+      "regression_percent": 1.885,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "flat",
+      "strategy_id": 1,
+      "baseline_median_ms": 1.600625,
+      "current_median_ms": 1.59136,
+      "regression_percent": -0.579,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "flat",
+      "strategy_id": 2,
+      "baseline_median_ms": 3.44936,
+      "current_median_ms": 3.434595,
+      "regression_percent": -0.428,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "noise",
+      "strategy_id": 0,
+      "baseline_median_ms": 8.44261,
+      "current_median_ms": 8.48804,
+      "regression_percent": 0.538,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "noise",
+      "strategy_id": 1,
+      "baseline_median_ms": 62.40175,
+      "current_median_ms": 63.0538,
+      "regression_percent": 1.045,
+      "repetitions_per_build": 6
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "pattern": "noise",
+      "strategy_id": 2,
+      "baseline_median_ms": 8.46233,
+      "current_median_ms": 8.36091,
+      "regression_percent": -1.198,
+      "repetitions_per_build": 6
+    }
+  ],
+  "mean_case_regression_percent": 1.121,
+  "maximum_case_regression_percent": 5.144,
+  "threshold_percent": 5.0,
+  "above_threshold_cases": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "pattern": "flat",
+      "strategy_id": 0,
+      "baseline_median_ms": 1.055935,
+      "current_median_ms": 1.110255,
+      "regression_percent": 5.144,
+      "repetitions_per_build": 6
+    }
+  ],
+  "raw_runs": [
+    {
+      "file": "decode_phase3b2a_gop1_baseline_same_session.json",
+      "build": "baseline"
+    },
+    {
+      "file": "decode_phase3b2a_gop1_baseline_abba2.json",
+      "build": "baseline"
+    },
+    {
+      "file": "decode_phase3b2a_gop1_current_same_session.json",
+      "build": "current"
+    },
+    {
+      "file": "decode_phase3b2a_gop1_current_abba2.json",
+      "build": "current"
+    }
+  ],
+  "interpretation": "Eleven of twelve medians are within the 5% gate. The 1920x1080 flat Automatic case is +5.14% (about 0.05 ms absolute) and requires resolution before claiming this gate passes."
+}

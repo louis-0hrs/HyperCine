@@ -5,7 +5,8 @@
   "phase3b2r_base": "f1d0fe4",
   "commits_created": [
     "9cf74a0 feat(decoder): add progressive FIELDPLUS GOP-2 decode",
-    "3a62ec9 test(decoder): qualify FIELDPLUS frame reconstruction"
+    "3a62ec9 test(decoder): qualify FIELDPLUS frame reconstruction",
+    "702653f docs(decoder): record FIELDPLUS promotion qualification"
   ],
   "files_changed": [
     "docs/UPSTREAM.md",
@@ -366,7 +367,7 @@
     },
     {
       "id": 67,
-      "result": "Final CUDA CTest after mixed multi-quality stress changes passed 44/44, zero skipped, 773.83 seconds."
+      "result": "Continuation verification: full CTest retry passed 44/44, zero skipped, 749.68 seconds; Phase2FA took 460.40 seconds. The first attempt had one transient test_decode_phase3b0 heap-corruption exit; isolated repeat passed and the full retry passed."
     },
     {
       "id": 68,
@@ -486,11 +487,11 @@
     },
     {
       "id": 97,
-      "result": "Outcome D: qualification infrastructure blocker. Sanitizer cannot attach even to a native-passing minimal CUDA target; no production promotion recommended. 4K, resource, performance, matrix/range, and lowpass gates remain open."
+      "result": "Outcome D: qualification infrastructure blocker. Sanitizer cannot attach even to a native-passing minimal CUDA target; no production promotion recommended. 4K, resource, end-to-end performance, matrix/range, and lowpass discrimination gates pass. Stage timing, the isolated GOP-1 case above threshold, and sanitizer gates remain open."
     },
     {
       "id": 98,
-      "result": "Remaining limitations: Compute Sanitizer attach failure, FIELDPLUS stage timing, same-session GOP-1 regression benchmark, matrix/range cross-product, and lowpass-offset proof."
+      "result": "Remaining limitations: Compute Sanitizer attach failure, FIELDPLUS stage timing, and one same-session GOP-1 flat 1080p Automatic median at +5.14%, just over the 5% limit."
     },
     {
       "id": 99,
@@ -499,6 +500,22 @@
     {
       "id": 100,
       "result": "After 3B-2A gates pass, Phase 3B-2B should add interlaced FIELDPLUS with independent references and preserve this progressive path."
+    },
+    {
+      "id": 101,
+      "result": "FIELDPLUS BT.601/BT.709 × CG/VS BGRA cross-product passed against upstream for both frames; all eight FNV-1a hashes match. See decode_phase3b2a_matrix_range.json."
+    },
+    {
+      "id": 102,
+      "result": "Frozen 64x64 fixture discriminates omitted base-LL bias: 128 coefficients differ for BGRA +24 and 128 for signed-planar +10. GPU output and temporal stages match upstream exactly; evidence in decode_phase3b2a_lowpass_offsets.json."
+    },
+    {
+      "id": 103,
+      "result": "Same-session A-B-B-A GOP-1 benchmark ran six 100-request measurements per case/build. Eleven of twelve case medians meet the 5% gate; 1920x1080 flat Automatic is +5.14% (+0.05 ms), so mark partial. See decode_phase3b2a_gop1_regression.json."
+    },
+    {
+      "id": 104,
+      "result": "Full CTest retry completed after the transient phase3b0 failure: 44/44 passed, zero skipped, in 749.68 seconds. The production reconstruction test including the new matrix/range and lowpass-discrimination checks passed."
     }
   ]
 }
