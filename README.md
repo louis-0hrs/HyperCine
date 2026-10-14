@@ -131,6 +131,22 @@ ctest --test-dir build-release-sm89 -C Release --output-on-failure
 ```
 *Expected result: 14 / 14 CTest suites pass (`100%`), including `test_entropy_capacity` and `test_phase3a`.*
 
+### Option C: Experimental SDK-free Apple Silicon encoder
+
+The separate fixed 128x128 FS3-Q2 CPU encoder builds natively on arm64 without
+compiling or linking the SDK or CUDA. It emits real CFHD samples validated with
+an independent FFmpeg decoder. See [the standalone report](docs/MACOS_STANDALONE_ENCODER.md)
+for profile limits, RGB quality results and pending Windows/Adobe/Resolve gates.
+
+```sh
+cmake -S . -B build-standalone -DCMAKE_BUILD_TYPE=Release \
+  -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF \
+  -DHYPERCINE_ENABLE_CUDA=OFF -DHYPERCINE_BUILD_BENCHMARKS=OFF
+cmake --build build-standalone --config Release --parallel
+ctest --test-dir build-standalone -C Release --output-on-failure
+./build-standalone/hypercine_encode_smoke gradient gradient.cfhd
+```
+
 ### Running CUDA Sanitizer Verification
 ```powershell
 compute-sanitizer --tool memcheck .\build-release-sm89\tests\Release\test_entropy_capacity.exe

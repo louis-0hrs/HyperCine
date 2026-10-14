@@ -1,0 +1,118 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "recorded_at_utc": "2026-10-14T19:04:33.031021+00:00",
+  "issue": "https://github.com/louis-0hrs/HyperCine/issues/3",
+  "branch": "codex/macos-sdkfree-encoder",
+  "base_commit": "51435890ba5853e87e8cf1ddc7cc747954bd9e80",
+  "validation_state": "native implementation validated; external compatibility pending",
+  "hardware": {
+    "cpu": "Apple M2 Pro",
+    "architecture": "arm64",
+    "os": "macOS 26.5.2 (25F84)"
+  },
+  "toolchain": {
+    "compiler": "Apple Clang 21.0.0 (clang-2100.1.1.101)",
+    "cmake": "3.31.5",
+    "generator": "Unix Makefiles"
+  },
+  "profile": {
+    "name": "experimental FS3-Q2",
+    "width": 128,
+    "height": 128,
+    "gop": 1,
+    "precision": 10,
+    "format": "YUV422",
+    "matrix": "BT.709",
+    "range": "studio",
+    "input": "top-down BGRA8; alpha ignored",
+    "chroma": "centered horizontal pair average",
+    "prescale": [
+      0,
+      2,
+      0
+    ],
+    "lowpass_quant": 1,
+    "all_highpass_quant": 2,
+    "codebook": "Table17, cubic",
+    "variable_metadata": false,
+    "dynamic_rate_control": false
+  },
+  "decoder": {
+    "name": "FFmpeg",
+    "version": "n8.0",
+    "commit": "140fd653aed8cad774f991ba083e2d01e86420c7",
+    "external_process": true,
+    "cfhd_encoder_enabled": false
+  },
+  "native_checks": {
+    "release_ctest": "PASS 6/6, no skips",
+    "asan_ubsan_ctest": "PASS 6/6, no skips",
+    "binary_architecture": "Mach-O 64-bit executable arm64",
+    "runtime_dependencies": [
+      "/usr/lib/libc++.1.dylib",
+      "/usr/lib/libSystem.B.dylib"
+    ],
+    "sdk_or_cuda_in_compile_database": false,
+    "upstream_modified": false
+  },
+  "quality_gates": {
+    "yuv_p10_psnr_above_35db": "PASS all three patterns; flat exact",
+    "original_rgb_psnr_above_35db": "PASS flat and canonical; FAIL GradientChecker (31.601047 dB)",
+    "gradient_subsampling_baseline_db": 31.733328,
+    "interpretation": "Most GradientChecker RGB loss already exists without wavelet/quantization in the uncompressed YUV422 conversion baseline. No universal RGB quality claim."
+  },
+  "external_gates": {
+    "windows_sdk_decode": "PENDING",
+    "windows_cpu_reference_regression": "PENDING CI after push",
+    "cuda_regression": "NOT RUN: no CUDA hardware",
+    "adobe_premiere_after_effects": "NOT RUN",
+    "davinci_resolve": "NOT RUN",
+    "sdk_byte_identity": "NOT CLAIMED; fixed quantization and frontend conventions differ",
+    "performance_benchmark": "NOT RUN; no performance claim"
+  },
+  "samples": [
+    {
+      "pattern": "flat",
+      "sample_bytes": 3444,
+      "sample_sha256": "236cacbac9c5f39a5fbd1a4b939619276ccfc622ac486bf5a2ba967bcf28392b",
+      "decoded_sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "pattern": "gradient",
+      "sample_bytes": 25604,
+      "sample_sha256": "4086e8c7ec3cc0b287ab637a486354eaa89623d048ac9d79d290291099b767fb",
+      "decoded_sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d",
+      "psnr_yuv_p10_db": 60.731328,
+      "yuv_exact": false,
+      "psnr_rgb_subsampling_baseline_db": 31.733328,
+      "psnr_source_rgb_db": 31.601047,
+      "max_error": 5,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 15416,
+      "sample_sha256": "9cf732846c1b9838c8f5d24f92db0182b82b5b6a05df63ffd5114fc1606db6fd",
+      "decoded_sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f",
+      "psnr_yuv_p10_db": 61.26656,
+      "yuv_exact": false,
+      "psnr_rgb_subsampling_baseline_db": 41.597795,
+      "psnr_source_rgb_db": 40.520486,
+      "max_error": 4,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 128
+    }
+  ]
+}
