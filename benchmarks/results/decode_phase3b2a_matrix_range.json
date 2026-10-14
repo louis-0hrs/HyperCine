@@ -1,0 +1,15 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "fixture": "tests/fixtures/phase3b0/YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1.cfhd",
+  "cases": [
+    {"matrix":"BT601","range":"CG","frame":0,"upstream_bgra_fnv1a64":"0a29e04a5900c9ac","hypercine_bgra_fnv1a64":"0a29e04a5900c9ac","exact":true},
+    {"matrix":"BT601","range":"CG","frame":1,"upstream_bgra_fnv1a64":"077a7afbcb832881","hypercine_bgra_fnv1a64":"077a7afbcb832881","exact":true},
+    {"matrix":"BT601","range":"VS","frame":0,"upstream_bgra_fnv1a64":"308b03893d874d1e","hypercine_bgra_fnv1a64":"308b03893d874d1e","exact":true},
+    {"matrix":"BT601","range":"VS","frame":1,"upstream_bgra_fnv1a64":"fd55b3d66f454c73","hypercine_bgra_fnv1a64":"fd55b3d66f454c73","exact":true},
+    {"matrix":"BT709","range":"CG","frame":0,"upstream_bgra_fnv1a64":"27fd4d3948775018","hypercine_bgra_fnv1a64":"27fd4d3948775018","exact":true},
+    {"matrix":"BT709","range":"CG","frame":1,"upstream_bgra_fnv1a64":"c06ad9438de588c8","hypercine_bgra_fnv1a64":"c06ad9438de588c8","exact":true},
+    {"matrix":"BT709","range":"VS","frame":0,"upstream_bgra_fnv1a64":"5fe889423c073c8e","hypercine_bgra_fnv1a64":"5fe889423c073c8e","exact":true},
+    {"matrix":"BT709","range":"VS","frame":1,"upstream_bgra_fnv1a64":"c120383e765f6ad4","hypercine_bgra_fnv1a64":"c120383e765f6ad4","exact":true}
+  ]
+}

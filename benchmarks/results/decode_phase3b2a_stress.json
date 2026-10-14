@@ -1,0 +1,67 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PARTIAL_REMAINING_SANITIZER_PERFORMANCE_4K",
+  "gop1_legacy_stress": {
+    "mixed_progressive_interlaced_outputs": 5000,
+    "steady_state_allocations": 0,
+    "result": "PASS"
+  },
+  "fieldplus_frame_determinism_200_each": {
+    "canonical_64x64": "PASS",
+    "frame0": 200,
+    "frame1": 200,
+    "exact_hash_each": true
+  },
+  "fieldplus_1080_determinism_100_each": {
+    "frame0": 100,
+    "frame1": 100,
+    "exact_hash_each": true,
+    "status": "PASS"
+  },
+  "fieldplus_steady_state_allocations": {
+    "alternating_requests": 400,
+    "cpp_allocations": 0,
+    "cuda_allocation_delta": 0,
+    "device_pinned_pageable_memory_delta": 0,
+    "status": "PASS"
+  },
+  "fieldplus_slot_reuse_lifetime_2_and_4_instances": "PASS",
+  "mixed_gop1_gop2_5000_outputs": {
+    "outputs": 5000,
+    "fieldplus_frame0": 147,
+    "fieldplus_frame1": 147,
+    "exact_every_output": true,
+    "alternating_fifo_reverse_release": true,
+    "steady_state_cpp_allocations": 0,
+    "cuda_memory_delta": 0,
+    "status": "PASS",
+    "mixed_progressive_interlaced_gop1": true,
+    "multiple_patterns": true,
+    "gop1_qualities": [
+      "Low",
+      "High",
+      "FilmScan3"
+    ]
+  },
+  "fieldplus_slot_modes": {
+    "slots_1": "PASS",
+    "slots_2": "PASS",
+    "default_slots": "PASS",
+    "slots_4": "PASS"
+  },
+  "fieldplus_multi_instance": {
+    "two_instances_frames_each": 60,
+    "four_instances_frames_each": 60,
+    "mixed_gop1_gop2": "PASS",
+    "exact": "PASS"
+  },
+  "fieldplus_lifetime": {
+    "delayed_release": "PASS",
+    "non_fifo_release": "PASS",
+    "held_output": "PASS",
+    "repeated_frame_requests": "PASS",
+    "consumer_stream_wait": "PASS",
+    "failed_ticket_with_success": "PASS",
+    "decoder_drain_destruction": "PASS"
+  }
+}

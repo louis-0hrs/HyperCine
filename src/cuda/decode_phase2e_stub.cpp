@@ -39,6 +39,9 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecode(const uint8_t*, size_t, DeviceS
 uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t*, size_t,
     const std::vector<GpuEntropyBandDescriptor>&, DeviceSurfaceType, ColorMatrix,
     ColorRange, RowOrientation, bool, float, bool) { return 0; }
+uint64_t CudaDecoderPipelinePhase2E::QueueDecodeFieldPlusParsed(const uint8_t*, size_t,
+    const FieldPlusSampleDescriptor&, int, DeviceSurfaceType, ColorMatrix, ColorRange,
+    RowOrientation, bool) { return 0; }
 DecoderMemoryStats CudaDecoderPipelinePhase2E::GetMemoryStats() const { return {}; }
 void CudaDecoderPipelinePhase2E::PrepareProductionScratch() {}
 DecodeTicketStatus CudaDecoderPipelinePhase2E::PollDecode(uint64_t) { return DecodeTicketStatus::Invalid; }
@@ -62,6 +65,11 @@ bool CudaDecoderPipelinePhase2E::GetGpuIndexResults(uint64_t, std::vector<GpuChe
 bool CudaDecoderPipelinePhase2E::DownloadIntermediateLl(uint64_t, int, int, std::vector<int16_t>&) { return false; }
 bool CudaDecoderPipelinePhase2E::DownloadInterlacedFieldStage(uint64_t, int, std::vector<int16_t>&,
     std::vector<int16_t>&, std::vector<int16_t>&, int*, int*, int*, int*) { return false; }
+bool CudaDecoderPipelinePhase2E::DownloadFieldPlusTemporalStages(uint64_t, int,
+    std::vector<int16_t>&, std::vector<int16_t>&, std::vector<int16_t>&,
+    std::vector<int16_t>&, int*, int*) { return false; }
+bool CudaDecoderPipelinePhase2E::DownloadFieldPlusSpatialStages(uint64_t, int,
+    std::vector<int16_t>&, std::vector<int16_t>&, int*, int*) { return false; }
 
 void CudaDecoderPipelinePhase2E::SetPhase2FCSelectorPolicy(Phase2FCSelectorPolicy) {}
 Phase2FCSelectorPolicy CudaDecoderPipelinePhase2E::GetPhase2FCSelectorPolicy() const { return Phase2FCSelectorPolicy::StaticHeuristic; }

@@ -1,0 +1,9 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "canonical_64x64": {"sample": "tests/fixtures/phase3b0/YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1.cfhd", "frame0_bgra_fnv1a64": "27fd4d3948775018", "frame1_bgra_fnv1a64": "c06ad9438de588c8", "exact": true},
+  "motion_1920x1080_filmscan3": {"bytes": 718396, "sample_fnv1a64": "c59a1ca30aa101a9", "sample_sha256": "7FBE3AF9EFDCBCC8DBA8CF904FD21F422FF9608F78AFB8D79C5202015B0DF8B8", "frame0_bgra_fnv1a64": "7f633a5358642abd", "frame1_bgra_fnv1a64": "6d174c1993f61015", "exact": true},
+  "temporal_asymmetric_64x64": {"sample_fnv1a64": "1712cac09821aafc", "frame0_bgra_fnv1a64": "33efa9b37256d867", "frame1_bgra_fnv1a64": "1b7d61cb2c78d5c2", "exact": true},
+  "motion_64x64": {"sample_fnv1a64": "4267d3b3395d22cc", "frame0_bgra_fnv1a64": "1adc1719767c4a0f", "frame1_bgra_fnv1a64": "bc81f05b2cb3c5ab", "exact": true},
+  "chroma_temporal_64x64": {"sample_fnv1a64": "df0487f0a23169d8", "frame0_bgra_fnv1a64": "87278ff765c7ffd1", "frame1_bgra_fnv1a64": "21f33d8701b527ac", "exact": true}
+}

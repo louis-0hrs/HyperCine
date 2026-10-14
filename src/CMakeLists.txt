@@ -22,6 +22,7 @@ if(HYPERCINE_ENABLE_CUDA)
         cuda/decode_color_cuda.cu
         cuda/decode_phase2a_pipeline.cu
         core/decode_parser.cpp
+        core/decode_fieldplus_parser.cpp
         core/decode_fsm_tables.cpp
         core/decode_thread_pool.cpp
         cuda/decode_entropy_cuda.cu
@@ -50,6 +51,7 @@ else()
         cuda/wavelet_cuda_stub.cpp
         cuda/decode_inverse_stub.cpp
         core/decode_parser.cpp
+        core/decode_fieldplus_parser.cpp
         core/decode_thread_pool.cpp
         cuda/decode_phase2b_stub.cpp
         cuda/decode_phase2c_stub.cpp

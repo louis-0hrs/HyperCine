@@ -1,0 +1,10 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS_COUNTERFACTUAL_BASE_LL_DISCRIMINATION",
+  "fixture": "tests/fixtures/phase3b0/YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1.cfhd",
+  "method": "Compare upstream-captured base-LL coefficients with a counterfactual that omits the added format-specific channel offset.",
+  "bgra": {"added_channel_offset": 24, "changed_coefficients_without_offset": 128, "discriminates": true},
+  "signed_planar_yu64": {"added_channel_offset": 10, "changed_coefficients_without_offset": 128, "discriminates": true},
+  "production_output_and_temporal_stages": "Both formats also pass exact GPU coefficient, temporal-stage, and reconstruction comparisons against upstream in test_decode_phase3b2a_reconstruction.",
+  "limitation": "Counterfactual proves coefficient discrimination from the frozen upstream references; no separate production binary was rebuilt with the bias removed."
+}

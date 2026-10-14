@@ -161,3 +161,21 @@ The new production interlaced path now requires a frame/group trailer and
 rejects a contradictory non-YUV encoded-format tag. The progressive parser
 policy remains unchanged. See [DECODE_PHASE3B1.md](DECODE_PHASE3B1.md) for the
 validation and promotion record.
+
+### Progressive FIELDPLUS deepest inverse bottom border
+
+`InvertSpatialQuantOverflowProtected16s` in `upstream/Codec/spatial.c` delays
+advancing its low-low input pointer until the interior-row loop. After that loop,
+the low-low pointer addresses row `height - 2`, while the high-low pointer has
+advanced to row `height - 1`. The final vertical border therefore filters the
+low-low taps from rows `height - 2`, `height - 3`, and `height - 4`, and applies
+the high-pass correction from row `height - 1`. This differs from the nominal
+bottom-border filter and from the low-high boundary row handling.
+
+The Phase 3B-2A 64×64 progressive FIELDPLUS fixture exposed this behavior on its
+narrow U-channel w5 band: using the nominal bottom row changed 16 reconstructed
+values by a constant 256 and propagated into the temporal-low stage. The
+HyperCine CUDA wrapper models the frozen pointer position only for the
+overflow-protected FIELDPLUS inverse. It does not alter upstream source or the
+validated GOP-1 inverse path. The exact w5, w4, temporal, planar YU64 and BGRA
+oracle checks cover this compatibility rule.

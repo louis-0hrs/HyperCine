@@ -1,0 +1,12 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "public_extension": "DecodeRequest.frame_index (default 0)",
+  "fieldplus_frame_indices": {"0": "valid", "1": "valid", "2_or_more": "InvalidRequest", "negative": "InvalidRequest"},
+  "gop1_frame_indices": {"0": "valid", "1": "InvalidRequest"},
+  "ticket_ownership": "one requested frame per ticket",
+  "timestamp_policy": "frame selection does not assign PTS or DTS",
+  "random_access": "frame 1 is requested directly from the sample",
+  "fieldplus_strategy": "fixed Hybrid; explicit diagnostic overrides rejected; GOP-1 Auto classifier bypassed",
+  "capability": "progressive_fieldplus_gop2 true only when CUDA backend is available"
+}

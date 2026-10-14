@@ -25,6 +25,17 @@ public:
     static bool BandDecisions(Decoder&, DecodeTicket, std::array<DecoderBandDecision, 27>*);
     static bool DownloadBand(Decoder&, DecodeTicket, int, std::vector<int16_t>&,
                              int* width = nullptr, int* height = nullptr, int* pitch = nullptr);
+    // FIELDPLUS only: index is channel * 17 + logical_subband in the 51-band model.
+    static bool DownloadFieldPlusBand(Decoder&, DecodeTicket, int channel, int logical_subband,
+                             std::vector<int16_t>&, int* width = nullptr, int* height = nullptr,
+                             int* pitch = nullptr);
+    static bool DownloadFieldPlusTemporalStages(Decoder&, DecodeTicket, int channel,
+                             std::vector<int16_t>& temporal_low, std::vector<int16_t>& temporal_high,
+                             std::vector<int16_t>& wavelet4_ll, std::vector<int16_t>& frame_base_ll,
+                             int* width = nullptr, int* height = nullptr);
+    static bool DownloadFieldPlusSpatialStages(Decoder&, DecodeTicket, int channel,
+                             std::vector<int16_t>& vertical_low, std::vector<int16_t>& vertical_high,
+                             int* width = nullptr, int* height = nullptr);
     static bool DownloadIntermediate(Decoder&, DecodeTicket, int channel, int level, std::vector<int16_t>&);
     static bool Reconstruction(Decoder&, DecodeTicket, DecoderReconstruction*);
 };

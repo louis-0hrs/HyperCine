@@ -1,0 +1,10 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "profile": {"transform": "FIELDPLUS/2", "progressive": true, "precision_bits": 10, "channels": 3, "frames": 2, "wavelets": 6, "logical_bands_per_channel": 17, "physical_chunks": 54, "coefficient_chunks": 51, "control_chunks": 3},
+  "channel_order": ["Y", "V", "U"],
+  "mapping_per_channel": {"logical_0_10": "physical_0_10", "control": "physical_11", "logical_11_16": "physical_12_17"},
+  "control_chunk": {"bytes": 8, "payload_bytes": 0, "wavelet_owner": 2, "band_owner": 1, "entropy_input": false, "count_per_channel": 1},
+  "malformed_tests": ["missing_control", "duplicate_control", "wrong_position", "nonempty_control_payload", "wrong_chunk_count", "missing_logical_band", "wrong_wavelet_owner", "payload_bounds", "truncated_sample", "frame_count", "transform_type", "precision", "channel_count"],
+  "interlaced_fieldplus": "REJECTED"
+}

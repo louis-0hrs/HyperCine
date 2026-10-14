@@ -1,0 +1,12 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "progressive_fieldplus_gop2_p10": "accepted",
+  "interlaced_fieldplus_gop2_p10": "UnsupportedEncodingMode",
+  "rgb444_p12": "rejected by existing profile matrix",
+  "rgba4444_p12": "rejected by existing profile matrix",
+  "bayer_p12": "rejected by existing profile matrix",
+  "malformed_fieldplus": "InvalidSample or UnsupportedEncodingMode according to profile mismatch",
+  "oversized_sample": "SampleTooLarge",
+  "frame_index_out_of_range": "InvalidRequest"
+}
