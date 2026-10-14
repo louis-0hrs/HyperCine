@@ -32,6 +32,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         foreach(stage color wavelet quantization entropy sample)
             add_test(NAME standalone_${stage} COMMAND test_standalone ${stage})
         endforeach()
+        add_test(NAME standalone_oracle_fixtures COMMAND "${CMAKE_COMMAND}"
+            "-DFIXTURES=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/standalone"
+            "-DENCODER=$<TARGET_FILE:hypercine_encode_smoke>"
+            "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
         find_program(HYPERCINE_FFPROBE_EXECUTABLE NAMES ffprobe)
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
