@@ -96,3 +96,12 @@ if(HYPERCINE_ENABLE_CUDA)
     endif()
     add_test(NAME test_phase3a COMMAND test_phase3a)
 endif()
+
+if(HYPERCINE_ENABLE_CUDA AND WIN32)
+    add_executable(hypercine_reference_export ../tools/reference_corpus_export.cpp)
+    target_link_libraries(hypercine_reference_export PRIVATE hypercine_wavelet CFHDCodecStatic bcrypt)
+    target_compile_definitions(hypercine_reference_export PRIVATE
+        HYPERCINE_SOURCE_COMMIT="${HYPERCINE_SOURCE_COMMIT}"
+        HYPERCINE_SOURCE_DIRTY=${HYPERCINE_SOURCE_DIRTY}
+        HYPERCINE_SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
+endif()

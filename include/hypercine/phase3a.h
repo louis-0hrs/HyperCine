@@ -9,6 +9,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -146,6 +147,49 @@ struct Phase3AFrameEquivalenceItem {
     int extracted_frame_index = -1;
 };
 
+struct Phase3ABandReference {
+    int channel = 0;
+    int wavelet = 0;
+    int band = 0;
+    int subband = 0;
+    int width = 0;
+    int height = 0;
+    int quant = 0;
+    int scale = 0;
+    std::string sdk_coeff_fnv64;
+    std::string cuda_coeff_fnv64;
+    std::string sdk_payload_sha256;
+    std::string cuda_payload_sha256;
+};
+
+struct Phase3AReferenceFrameArtifact {
+    int frame_index = 0;
+    std::string pattern_name;
+    int width = 0;
+    int height = 0;
+    int pitch = 0;
+    int fs_rate_limiter = 0;
+    int previous_sample_bytes = 0;
+    int quant[36] = {};
+    int scale[36] = {};
+    std::vector<uint8_t> input_bgra;
+    std::vector<uint8_t> upstream_cfhd;
+    std::vector<uint8_t> cuda_cfhd;
+    std::vector<uint8_t> normalized_upstream_cfhd;
+    std::vector<uint8_t> normalized_cuda_cfhd;
+    std::vector<Phase2DMetadataDiffRange> metadata_mask_ranges;
+    std::vector<Phase3ABandReference> bands;
+    std::string input_sha256;
+    std::string upstream_sha256;
+    std::string cuda_sha256;
+    std::string normalized_upstream_sha256;
+    std::string normalized_cuda_sha256;
+    size_t first_unmasked_difference = static_cast<size_t>(-1);
+};
+
+using Phase3AReferenceFrameCallback =
+    std::function<bool(const Phase3AReferenceFrameArtifact&, std::string*)>;
+
 struct Phase3ASequence120Report {
     bool ok = false;
     int width = 0;
@@ -161,7 +205,7 @@ struct Phase3ASequence120Report {
 
 Phase3ASequence120Report VerifyPhase3ASequence120(
     int width = 1920, int height = 1080, int num_frames = 120,
-    uint32_t seed = 0x1337BEEFu);
+    uint32_t seed = 0x1337BEEFu, const Phase3AReferenceFrameCallback& artifact_callback = {});
 
 // ============================================================================
 // SECTION 4: 300-Frame Distinct-Frame Slot Wrap & Ordering Verification

@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HyperCine Reference Corpus Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generator",
+    "source_files",
+    "sdk",
+    "cuda",
+    "host",
+    "profile",
+    "runs",
+    "frames",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "source_commit",
+        "pattern_generator",
+        "seed"
+      ]
+    },
+    "source_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256"
+        ]
+      }
+    },
+    "sdk": {
+      "type": "object",
+      "required": [
+        "implementation",
+        "upstream_frozen_ref"
+      ]
+    },
+    "cuda": {
+      "type": "object",
+      "required": [
+        "device",
+        "runtime_version",
+        "driver_api_version",
+        "display_driver_version"
+      ]
+    },
+    "host": {
+      "type": "object",
+      "required": [
+        "os",
+        "compiler",
+        "compiler_version"
+      ]
+    },
+    "profile": {
+      "type": "object"
+    },
+    "runs": {
+      "type": "array"
+    },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "input_sha256",
+          "sdk_sha256",
+          "cuda_sha256",
+          "sdk_normalized_sha256",
+          "cuda_normalized_sha256",
+          "bands"
+        ]
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256",
+          "byte_length"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "byte_length": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "artifact_bundle": {
+      "type": "object",
+      "required": [
+        "archive_path",
+        "archive_sha256",
+        "byte_length"
+      ],
+      "properties": {
+        "archive_path": {
+          "type": "string"
+        },
+        "archive_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
