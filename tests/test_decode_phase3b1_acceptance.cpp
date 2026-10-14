@@ -338,7 +338,21 @@ void Rejections(const std::filesystem::path& root, Evidence& e) {
     for (const auto& entry : std::filesystem::directory_iterator(root / "tests/fixtures/phase3b0")) {
         if (entry.path().extension() != ".cfhd") continue;
         const auto name = entry.path().stem().string();
-        if (name.find("fieldplus") != std::string::npos) reject(name, Load(entry.path()), DecodeError::UnsupportedEncodingMode);
+        if (name.find("fieldplus-prog-f2") != std::string::npos) {
+            Sample fieldplus{64, 64, 0, Load(entry.path()), name};
+            const char* expected[] = {"27fd4d3948775018", "c06ad9438de588c8"};
+            for (int frame = 0; frame < 2; ++frame) {
+                DecodeRequest request; request.frame_index = frame;
+                DecodeError error; auto ticket = d.QueueDecode(fieldplus.compressed.data(), fieldplus.compressed.size(), request, &error);
+                Require(bool(ticket) && error == DecodeError::None, "progressive FIELDPLUS supported ticket");
+                Require(d.WaitForDecode(ticket).state == DecodeState::Ready, "progressive FIELDPLUS output ready");
+                const auto image = Image(d, ticket, fieldplus);
+                Require(Hash(image.data(), image.size()) == expected[frame],
+                    "progressive FIELDPLUS canonical frame hash");
+                Require(d.ReleaseOutput(ticket), "progressive FIELDPLUS ticket released");
+            }
+        }
+        else if (name.find("fieldplus") != std::string::npos) reject(name, Load(entry.path()), DecodeError::UnsupportedEncodingMode);
         else if (name.find("YUV422") == std::string::npos) reject(name, Load(entry.path()), DecodeError::InvalidSample);
     }
     auto s = Encode(128, 64, 11, 5);
@@ -392,47 +406,116 @@ void Matrix(const std::filesystem::path& root, Evidence& e, bool sanitizer) {
     Rejections(root, e); Require(pass, "matrix exactness gate; preserved failure samples and JSON");
 }
 
-struct Cached { Sample sample; Bytes bgra; Planes planes; };
+struct Cached {
+    Sample sample;
+    Bytes bgra;
+    Planes planes;
+    int frame_index = 0;
+    bool fieldplus = false;
+};
+bool ExactCachedImage(const Cached& expected, const uint8_t* actual) {
+    const size_t bytes = size_t(expected.sample.width) * size_t(expected.sample.height) * 4;
+    if (expected.fieldplus) {
+        uint64_t hash = 14695981039346656037ULL;
+        for (size_t i = 0; i < bytes; ++i) {
+            hash ^= actual[i];
+            hash *= 1099511628211ULL;
+        }
+        return hash == (expected.frame_index == 0 ? 0x27fd4d3948775018ULL : 0xc06ad9438de588c8ULL);
+    }
+    return expected.bgra.size() == bytes && std::memcmp(actual, expected.bgra.data(), bytes) == 0;
+}
 std::vector<Cached> Corpus(const std::filesystem::path& root) {
     std::vector<Cached> c;
-    for (bool interlaced : {false, true}) for (int p : {0, 10, 11, 15, 16}) {
-        auto s = Encode(128, 64, p, 5, interlaced); ReferenceDecoder cpu(s, CFHD_PIXEL_FORMAT_BGRA); cpu.Decode(s);
+    for (bool interlaced : {false, true}) for (int q : {0, 2, 5}) for (int p : {0, 10, 11, 15, 16}) {
+        auto s = Encode(128, 64, p, q, interlaced); ReferenceDecoder cpu(s, CFHD_PIXEL_FORMAT_BGRA); cpu.Decode(s);
         c.push_back({std::move(s), cpu.output, {}});
     }
     auto s = Frozen1080(); ReferenceDecoder cpu(s, CFHD_PIXEL_FORMAT_BGRA); cpu.Decode(s); c.push_back({std::move(s), cpu.output, {}});
     Sample fixture{64, 64, 0, Load(root / "tests/fixtures/phase3b0/YUV422-p10-ch3-spatial-field-f1-bands30-fmt-1.cfhd"), "committed_phase3b0"};
     ReferenceDecoder small_cpu(fixture, CFHD_PIXEL_FORMAT_BGRA); small_cpu.Decode(fixture); c.push_back({std::move(fixture), small_cpu.output, {}});
+    Sample fieldplus{64, 64, 0, Load(root / "tests/fixtures/phase3b0/YUV422-p10-ch3-fieldplus-prog-f2-bands54-fmt-1.cfhd"), "progressive_fieldplus_gop2"};
+    for (int frame = 0; frame < 2; ++frame) {
+        c.push_back({fieldplus, {}, {}, frame, true});
+    }
     return c;
 }
 void Stress(const std::filesystem::path& root, Evidence& e, bool sanitizer) {
-    auto corpus = Corpus(root); DecoderConfig cfg; cfg.slot_count = 3; Decoder d(cfg); Require(d.Initialize() == DecodeError::None, "stress init");
+    auto corpus = Corpus(root);
+    std::array<int, 2> fieldplus_index{-1, -1};
+    for (size_t i = 0; i < corpus.size(); ++i) {
+        if (corpus[i].fieldplus) fieldplus_index[size_t(corpus[i].frame_index)] = int(i);
+    }
+    Require(fieldplus_index[0] >= 0 && fieldplus_index[1] >= 0, "FIELDPLUS stress corpus frames");
+    DecoderConfig cfg; cfg.slot_count = 3; Decoder d(cfg); Require(d.Initialize() == DecodeError::None, "stress init");
     // Warm all slots, strategies, and content before observing allocation counts.
-    for (auto& c : corpus) for (auto strategy : strategies) for (int slot = 0; slot < 3; ++slot) {
-        DecodeRequest req; req.diagnostic_strategy = strategy; auto t = Begin(d, c.sample, req); Require(Image(d, t, c.sample) == c.bgra, "warm exact");
-        c.planes = ReadPlanes(d, t); d.ReleaseOutput(t);
+    for (size_t corpus_index = 0; corpus_index < corpus.size(); ++corpus_index) {
+      auto& c = corpus[corpus_index];
+      if (c.fieldplus) continue;
+      for (auto strategy : strategies) for (int slot = 0; slot < 3; ++slot) {
+        DecodeRequest req; req.diagnostic_strategy = strategy; req.frame_index = c.frame_index;
+        auto t = Begin(d, c.sample, req); const auto image = Image(d, t, c.sample);
+        Require(ExactCachedImage(c, image.data()), "warm exact");
+        c.planes = ReadPlanes(d, t);
+        d.ReleaseOutput(t);
+      }
+    }
+    // Queue three FIELDPLUS requests before releasing any ticket so each slot
+    // allocates its persistent 51-band scratch before the steady-state gate.
+    for (int frame = 0; frame < 2; ++frame) {
+        const auto& c = corpus[size_t(fieldplus_index[size_t(frame)])];
+        std::array<DecodeTicket, 3> tickets{};
+        for (auto& ticket : tickets) {
+            DecodeRequest req; req.diagnostic_strategy = DiagnosticDecodeStrategy::Automatic;
+            req.frame_index = frame;
+            ticket = d.QueueDecode(c.sample.compressed.data(), c.sample.compressed.size(), req);
+            Require(bool(ticket), "warm FIELDPLUS slot queue");
+        }
+        for (const auto ticket : tickets) {
+            const auto status = d.WaitForDecode(ticket);
+            if (status.state != DecodeState::Ready) {
+                std::cerr << "FIELDPLUS slot warm decode failed frame=" << frame
+                    << " state=" << int(status.state) << " error=" << int(status.error) << '\n';
+            }
+            Require(status.state == DecodeState::Ready, "warm FIELDPLUS slot ready");
+            const auto image = Image(d, ticket, c.sample);
+            Require(ExactCachedImage(c, image.data()), "warm FIELDPLUS slot exact");
+            d.ReleaseOutput(ticket);
+        }
     }
     Bytes scratch(size_t(1920) * 1080 * 4); const auto before = d.MemoryStats(); const auto alloc_before = heap_requests.load();
     const int frames = sanitizer ? 44 : 5000;
+    std::array<int, 2> fieldplus_outputs{};
     int done = 0;
     while (done < frames) {
         DecodeTicket tickets[3]; int content[3]; const int n = (std::min)(3, frames - done);
         for (int k = 0; k < n; ++k) {
             content[k] = (done + k) % int(corpus.size()); auto& s = corpus[content[k]].sample;
-            DecodeRequest req; req.diagnostic_strategy = strategies[(done + k) % 4];
-            tickets[k] = d.QueueDecode(s.compressed.data(), s.compressed.size(), req); Require(bool(tickets[k]), "mixed queue");
+            auto& item = corpus[content[k]];
+            if (item.fieldplus) ++fieldplus_outputs[size_t(item.frame_index)];
+            DecodeRequest req; req.diagnostic_strategy = item.fieldplus ? DiagnosticDecodeStrategy::Automatic : strategies[(done + k) % 4];
+            req.frame_index = item.frame_index;
+            tickets[k] = d.QueueDecode(s.compressed.data(), s.compressed.size(), req);
+            Require(bool(tickets[k]), "mixed queue");
         }
         // Alternate FIFO and reverse release orders deterministically. Reverse
         // batches hold the oldest ticket while newer frames complete/release.
         for (int release_index = 0; release_index < n; ++release_index) {
             const int k = (done / 3) & 1 ? release_index : n - 1 - release_index;
-            auto& c = corpus[content[k]]; Require(d.WaitForDecode(tickets[k]).state == DecodeState::Ready, "mixed ready");
+            auto& c = corpus[content[k]];
+            Require(d.WaitForDecode(tickets[k]).state == DecodeState::Ready, "mixed ready");
             Download(d, tickets[k], scratch.data(), size_t(c.sample.width) * 4);
-            Require(std::memcmp(scratch.data(), c.bgra.data(), c.bgra.size()) == 0, "mixed every BGRA byte exact"); d.ReleaseOutput(tickets[k]);
+            Require(ExactCachedImage(c, scratch.data()), "mixed every BGRA byte/hash exact"); d.ReleaseOutput(tickets[k]);
         }
         done += n;
         if (done % 999 == 0) std::cout << "mixed " << done << '/' << frames << '\n' << std::flush;
     }
     const auto steady_alloc = heap_requests.load() - alloc_before; const auto after = d.MemoryStats();
+    std::cout << "mixed steady-state deltas cpp=" << steady_alloc
+        << " cuda_calls=" << int64_t(after.cuda_allocation_calls) - int64_t(before.cuda_allocation_calls)
+        << " device=" << int64_t(after.device_bytes) - int64_t(before.device_bytes)
+        << " pinned=" << int64_t(after.pinned_host_bytes) - int64_t(before.pinned_host_bytes)
+        << " pageable=" << int64_t(after.pageable_capacity_bytes) - int64_t(before.pageable_capacity_bytes) << '\n';
     Require(steady_alloc == 0 && before.cuda_allocation_calls == after.cuda_allocation_calls && before.device_bytes == after.device_bytes
         && before.pinned_host_bytes == after.pinned_host_bytes && before.pageable_capacity_bytes == after.pageable_capacity_bytes, "zero steady-state allocation gate");
     std::vector<std::string> rows;
@@ -442,8 +525,11 @@ void Stress(const std::filesystem::path& root, Evidence& e, bool sanitizer) {
         std::atomic<bool> failed{false}; std::vector<std::thread> workers;
         for (int i = 0; i < instances; ++i) workers.emplace_back([&, i] {
             try { for (int r = 0; r < (sanitizer ? 4 : 60); ++r) {
-                auto& c = corpus[(r + i) % corpus.size()]; DecodeRequest req; req.diagnostic_strategy = strategies[r % 4];
-                auto t = Begin(*decoders[i], c.sample, req); Require(Image(*decoders[i], t, c.sample) == c.bgra, "concurrent exact"); decoders[i]->ReleaseOutput(t);
+                auto& c = corpus[(r + i) % corpus.size()]; DecodeRequest req;
+                req.diagnostic_strategy = c.fieldplus ? DiagnosticDecodeStrategy::Automatic : strategies[r % 4];
+                req.frame_index = c.frame_index;
+                auto t = Begin(*decoders[i], c.sample, req); const auto image = Image(*decoders[i], t, c.sample);
+                Require(ExactCachedImage(c, image.data()), "concurrent exact"); decoders[i]->ReleaseOutput(t);
             } } catch (...) { failed = true; }
         });
         for (auto& t : workers) t.join(); Require(!failed, "concurrent instance gate");
@@ -452,22 +538,35 @@ void Stress(const std::filesystem::path& root, Evidence& e, bool sanitizer) {
     for (int slots : {1, 2, 0, 4}) {
         cfg.slot_count = slots; cfg.scheduling = slots == 4 ? DecodeSchedulingPolicy::HighThroughput : DecodeSchedulingPolicy::Auto;
         Decoder instance(cfg); Require(instance.Initialize() == DecodeError::None, "slot mode init");
-        for (auto& c : corpus) { auto t = Begin(instance, c.sample); Require(Image(instance, t, c.sample) == c.bgra, "slot mode exact"); instance.ReleaseOutput(t); }
+        for (auto& c : corpus) {
+            DecodeRequest req; req.frame_index = c.frame_index;
+            auto t = Begin(instance, c.sample, req); const auto image = Image(instance, t, c.sample);
+            Require(ExactCachedImage(c, image.data()), "slot mode exact"); instance.ReleaseOutput(t);
+        }
     }
     // Consumer registration, delayed release, mixed failed/successful tickets, drain.
-    auto& c = corpus[6]; Stream consumer;
-    auto held = d.QueueDecode(c.sample.compressed.data(), c.sample.compressed.size()); Require(bool(held), "pending consumer ticket");
+    auto& c = corpus[size_t(fieldplus_index[0])]; Stream consumer;
+    DecodeRequest held_request; held_request.frame_index = c.frame_index;
+    auto held = d.QueueDecode(c.sample.compressed.data(), c.sample.compressed.size(), held_request); Require(bool(held), "pending FIELDPLUS consumer ticket");
     Require(d.StreamWait(held, CudaDecodeConsumer(consumer.handle)), "consumer wait before host wait");
     Require(d.WaitForDecode(held).state == DecodeState::Ready, "consumer producer ready");
     DeviceOutput surface; Require(d.GetDeviceOutput(held, &surface), "held surface");
-    DeviceBuffer<uint8_t> copy(c.bgra.size());
+    const size_t held_bytes = size_t(c.sample.width) * size_t(c.sample.height) * 4;
+    DeviceBuffer<uint8_t> copy(held_bytes);
     GpuCheck(cudaMemcpy2DAsync(copy.p, c.sample.width * 4, surface.planes[0].device_pointer, surface.planes[0].pitch_bytes,
         c.sample.width * 4, c.sample.height, cudaMemcpyDeviceToDevice, consumer.handle));
-    auto good = Begin(d, corpus[0].sample); Bytes bad(7); auto failed = d.QueueDecode(bad.data(), bad.size());
-    Require(d.WaitForDecode(failed).state == DecodeState::Failed && Image(d, good, corpus[0].sample) == corpus[0].bgra && Image(d, held, c.sample) == c.bgra, "held and failed independent");
+    auto& good_fieldplus = corpus[size_t(fieldplus_index[1])]; DecodeRequest good_request; good_request.frame_index = good_fieldplus.frame_index;
+    auto good = Begin(d, good_fieldplus.sample, good_request); Bytes bad(7); auto failed = d.QueueDecode(bad.data(), bad.size());
+    const auto good_image = Image(d, good, good_fieldplus.sample);
+    const auto held_image = Image(d, held, c.sample);
+    Require(d.WaitForDecode(failed).state == DecodeState::Failed &&
+        ExactCachedImage(good_fieldplus, good_image.data()) && ExactCachedImage(c, held_image.data()),
+        "held FIELDPLUS frame and failed ticket independent");
     d.ReleaseOutput(good); d.ReleaseOutput(held); d.ReleaseOutput(failed);
-    Bytes copied(c.bgra.size()); GpuCheck(cudaMemcpy(copied.data(), copy.p, copied.size(), cudaMemcpyDeviceToHost)); Require(copied == c.bgra, "release drains consumer");
-    { Decoder drain(cfg); Require(drain.Initialize() == DecodeError::None, "drain init"); auto t = drain.QueueDecode(c.sample.compressed.data(), c.sample.compressed.size()); Require(bool(t), "destroy in flight"); }
+    Bytes copied(held_bytes); GpuCheck(cudaMemcpy(copied.data(), copy.p, copied.size(), cudaMemcpyDeviceToHost));
+    Require(ExactCachedImage(c, copied.data()), "release drains FIELDPLUS consumer");
+    { Decoder drain(cfg); Require(drain.Initialize() == DecodeError::None, "drain init");
+      auto t = drain.QueueDecode(c.sample.compressed.data(), c.sample.compressed.size(), held_request); Require(bool(t), "destroy with FIELDPLUS in flight"); }
     // Repeated coefficients, planes and image, with independent strategy overrides.
     for (int index : {11, 10}) {
         auto& item = corpus[index]; ReferenceDecoder cpu(item.sample, CFHD_PIXEL_FORMAT_BGRA); cpu.Decode(item.sample);
@@ -478,7 +577,8 @@ void Stress(const std::filesystem::path& root, Evidence& e, bool sanitizer) {
         }
         rows.push_back("{\"determinism_width\":" + std::to_string(item.sample.width) + ",\"decodes\":" + std::to_string(count) + ",\"coefficients_planes_bgra\":\"exact\",\"status\":\"PASS\"}");
     }
-    rows.push_back("{\"mixed_frames\":" + std::to_string(frames) + ",\"steady_state_cpp_allocations\":" + std::to_string(steady_alloc)
+    rows.push_back("{\"mixed_frames\":" + std::to_string(frames) + ",\"fieldplus_frame0_outputs\":" + std::to_string(fieldplus_outputs[0])
+        + ",\"fieldplus_frame1_outputs\":" + std::to_string(fieldplus_outputs[1]) + ",\"steady_state_cpp_allocations\":" + std::to_string(steady_alloc)
         + ",\"cuda_allocation_delta\":0,\"release_order\":\"alternating_FIFO_reverse\",\"slot_modes\":[1,2,0,4],\"lifetime\":\"PASS\",\"status\":\"PASS\"}"); e.Save("stress.json", rows);
     std::ostringstream memory; memory << "{\"slots\":" << before.slot_count << ",\"device_bytes\":" << before.device_bytes << ",\"pinned_bytes\":" << before.pinned_host_bytes
         << ",\"pageable_bytes\":" << before.pageable_capacity_bytes << ",\"cuda_allocation_calls\":" << before.cuda_allocation_calls << ",\"steady_state_cpp_allocations\":" << steady_alloc << ",\"status\":\"PASS\"}";
