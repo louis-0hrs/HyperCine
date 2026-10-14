@@ -1,0 +1,9 @@
+$ file build/macos-cpu/tests/test_transform_wavelet build/macos-cpu/upstream/WaveletDemo build/macos-cpu/src/CMakeFiles/hypercine_wavelet.dir/cpu/wavelet_cpu.cpp.o build/macos-cpu/CMakeFiles/3.31.5/CompilerIdC/a.out build/macos-cpu/CMakeFiles/3.31.5/CompilerIdCXX/a.out upstream/Example/videos/CFHDsample422.AVI
+build/macos-cpu/tests/test_transform_wavelet:                               Mach-O 64-bit executable arm64
+build/macos-cpu/upstream/WaveletDemo:                                       Mach-O 64-bit executable arm64
+build/macos-cpu/src/CMakeFiles/hypercine_wavelet.dir/cpu/wavelet_cpu.cpp.o: Mach-O 64-bit object arm64
+build/macos-cpu/CMakeFiles/3.31.5/CompilerIdC/a.out:                        Mach-O 64-bit executable arm64
+build/macos-cpu/CMakeFiles/3.31.5/CompilerIdCXX/a.out:                      Mach-O 64-bit executable arm64
+upstream/Example/videos/CFHDsample422.AVI:                                  RIFF (little-endian) data, AVI, 1920 x 1080, 23.98 fps, video:
+
+Exit code: 0

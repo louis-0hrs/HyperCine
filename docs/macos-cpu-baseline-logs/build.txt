@@ -1,0 +1,185 @@
+$ cmake --build build/macos-cpu --config Release --parallel 4
+[  0%] Building CXX object src/CMakeFiles/hypercine_wavelet.dir/cpu/wavelet_cpu.cpp.o
+[  0%] Building C object upstream/CMakeFiles/WaveletDemo.dir/Example/WaveletDemo/utils.c.o
+[  1%] Building CXX object tests/CMakeFiles/test_transform_wavelet.dir/test_transform_wavelet.cpp.o
+[  1%] Building CXX object upstream/CMakeFiles/CFHDCodecStatic.dir/Codec/DemoasicFrames.cpp.o
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
+   14 | #error "This header is only meant to be used on x86 and x64 architecture"
+      |  ^
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
+   14 | #error "This header is only meant to be used on x86 and x64 architecture"
+      |  ^
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
+   14 | #error "This header is only meant to be used on x86 and x64 architecture"
+      |  ^
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:74:3: error: use of undeclared identifier '__builtin_ia32_emms'; did you mean '__builtin_isless'?
+   74 |   __builtin_ia32_emms();
+      |   ^~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__math/traits.h:165:10: note: '__builtin_isless' declared here
+  165 |   return __builtin_isless((type)__x, (type)__y);
+      |          ^
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:74:23: error: too few arguments to function call, expected 2, have 0
+   74 |   __builtin_ia32_emms();
+      |   ~~~~~~~~~~~~~~~~~~~~^
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:165:22: error: use of undeclared identifier '__builtin_ia32_packsswb128'
+  165 |     return __trunc64(__builtin_ia32_packsswb128(
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:191:22: error: use of undeclared identifier '__builtin_ia32_packssdw128'
+  191 |     return __trunc64(__builtin_ia32_packssdw128(
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:217:22: error: use of undeclared identifier '__builtin_ia32_packuswb128'
+  217 |     return __trunc64(__builtin_ia32_packuswb128(
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:707:22: error: use of undeclared identifier '__builtin_ia32_pmaddwd128'
+  707 |     return __trunc64(__builtin_ia32_pmaddwd128((__v8hi)__anyext128(__m1),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:729:22: error: use of undeclared identifier '__builtin_ia32_pmulhw128'
+  729 |     return __trunc64(__builtin_ia32_pmulhw128((__v8hi)__anyext128(__m1),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:774:22: error: use of undeclared identifier '__builtin_ia32_psllw128'; did you mean '__builtin_arm_wsr128'?
+  774 |     return __trunc64(__builtin_ia32_psllw128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:774:46: error: cannot initialize a parameter of type 'const char *' with an rvalue of type '__v8hi' (vector of 8 'short' values)
+  774 |     return __trunc64(__builtin_ia32_psllw128((__v8hi)__anyext128(__m),
+      |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+  775 |                                              (__v8hi)__anyext128(__count)));
+      |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:59:44: note: expanded from macro '__trunc64'
+   59 |   (__m64) __builtin_shufflevector((__v2di)(x), __extension__(__v2di){}, 0)
+      |                                            ^
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:797:22: error: use of undeclared identifier '__builtin_ia32_psllwi128'
+  797 |     return __trunc64(__builtin_ia32_psllwi128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:821:22: error: use of undeclared identifier '__builtin_ia32_pslld128'
+  821 |     return __trunc64(__builtin_ia32_pslld128((__v4si)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:844:22: error: use of undeclared identifier '__builtin_ia32_pslldi128'
+  844 |     return __trunc64(__builtin_ia32_pslldi128((__v4si)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:865:22: error: use of undeclared identifier '__builtin_ia32_psllq128'
+  865 |     return __trunc64(__builtin_ia32_psllq128((__v2di)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:886:22: error: use of undeclared identifier '__builtin_ia32_psllqi128'
+  886 |     return __trunc64(__builtin_ia32_psllqi128((__v2di)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:911:22: error: use of undeclared identifier '__builtin_ia32_psraw128'
+  911 |     return __trunc64(__builtin_ia32_psraw128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:935:22: error: use of undeclared identifier '__builtin_ia32_psrawi128'
+  935 |     return __trunc64(__builtin_ia32_psrawi128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+[  3%] Building C object upstream/CMakeFiles/WaveletDemo.dir/Example/WaveletDemo/wavelets.c.o
+20 errors generated.
+make[2]: *** [upstream/CMakeFiles/CFHDCodecStatic.dir/Codec/DemoasicFrames.cpp.o] Error 1
+make[1]: *** [upstream/CMakeFiles/CFHDCodecStatic.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+[  5%] Building CXX object src/CMakeFiles/hypercine_wavelet.dir/cpu/upstream_wrapper.cpp.o
+[  6%] Linking C executable WaveletDemo
+[  8%] Building C object tests/CMakeFiles/test_transform_wavelet.dir/__/upstream/Example/WaveletDemo/utils.c.o
+[  8%] Built target WaveletDemo
+[ 10%] Building CXX object src/CMakeFiles/hypercine_wavelet.dir/cuda/wavelet_cuda_stub.cpp.o
+In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
+   14 | #error "This header is only meant to be used on x86 and x64 architecture"
+      |  ^
+In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
+   14 | #error "This header is only meant to be used on x86 and x64 architecture"
+      |  ^
+In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
+   14 | #error "This header is only meant to be used on x86 and x64 architecture"
+      |  ^
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:74:3: error: use of undeclared identifier '__builtin_ia32_emms'; did you mean '__builtin_isless'?
+   74 |   __builtin_ia32_emms();
+      |   ^~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__math/traits.h:165:10: note: '__builtin_isless' declared here
+  165 |   return __builtin_isless((type)__x, (type)__y);
+      |          ^
+In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
+In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
+In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:74:23: error: too few arguments to function call, expected 2, have 0
+   74 |   __builtin_ia32_emms();
+      |   ~~~~~~~~~~~~~~~~~~~~^
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:165:22: error: use of undeclared identifier '__builtin_ia32_packsswb128'
+  165 |     return __trunc64(__builtin_ia32_packsswb128(
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 10%] Linking CXX executable test_transform_wavelet
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:191:22: error: use of undeclared identifier '__builtin_ia32_packssdw128'
+  191 |     return __trunc64(__builtin_ia32_packssdw128(
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:217:22: error: use of undeclared identifier '__builtin_ia32_packuswb128'
+  217 |     return __trunc64(__builtin_ia32_packuswb128(
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:707:22: error: use of undeclared identifier '__builtin_ia32_pmaddwd128'
+  707 |     return __trunc64(__builtin_ia32_pmaddwd128((__v8hi)__anyext128(__m1),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~
+[ 10%] Built target test_transform_wavelet
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:729:22: error: use of undeclared identifier '__builtin_ia32_pmulhw128'
+  729 |     return __trunc64(__builtin_ia32_pmulhw128((__v8hi)__anyext128(__m1),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:774:22: error: use of undeclared identifier '__builtin_ia32_psllw128'; did you mean '__builtin_arm_wsr128'?
+  774 |     return __trunc64(__builtin_ia32_psllw128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:774:46: error: cannot initialize a parameter of type 'const char *' with an rvalue of type '__v8hi' (vector of 8 'short' values)
+  774 |     return __trunc64(__builtin_ia32_psllw128((__v8hi)__anyext128(__m),
+      |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+  775 |                                              (__v8hi)__anyext128(__count)));
+      |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:59:44: note: expanded from macro '__trunc64'
+   59 |   (__m64) __builtin_shufflevector((__v2di)(x), __extension__(__v2di){}, 0)
+      |                                            ^
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:797:22: error: use of undeclared identifier '__builtin_ia32_psllwi128'
+  797 |     return __trunc64(__builtin_ia32_psllwi128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:821:22: error: use of undeclared identifier '__builtin_ia32_pslld128'
+  821 |     return __trunc64(__builtin_ia32_pslld128((__v4si)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:844:22: error: use of undeclared identifier '__builtin_ia32_pslldi128'
+  844 |     return __trunc64(__builtin_ia32_pslldi128((__v4si)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:865:22: error: use of undeclared identifier '__builtin_ia32_psllq128'
+  865 |     return __trunc64(__builtin_ia32_psllq128((__v2di)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:886:22: error: use of undeclared identifier '__builtin_ia32_psllqi128'
+  886 |     return __trunc64(__builtin_ia32_psllqi128((__v2di)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:911:22: error: use of undeclared identifier '__builtin_ia32_psraw128'
+  911 |     return __trunc64(__builtin_ia32_psraw128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:935:22: error: use of undeclared identifier '__builtin_ia32_psrawi128'
+  935 |     return __trunc64(__builtin_ia32_psrawi128((__v8hi)__anyext128(__m),
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+make[2]: *** [src/CMakeFiles/hypercine_wavelet.dir/cpu/upstream_wrapper.cpp.o] Error 1
+make[1]: *** [src/CMakeFiles/hypercine_wavelet.dir/all] Error 2
+make: *** [all] Error 2
+
+Exit code: 2

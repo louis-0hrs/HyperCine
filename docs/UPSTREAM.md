@@ -1,5 +1,12 @@
 # Upstream CineForm SDK Reference
 
+Native Apple Silicon feasibility was tested on 2026-10-14: configuration succeeds,
+but the SDK and CPU spatial wrapper fail to compile because of unconditional
+x86/SSE2 intrinsic headers. The standalone scalar wavelet test passes as arm64;
+the codec tests remain blocked. See [macOS CPU baseline](MACOS_CPU_BASELINE.md)
+for commands, raw logs, limitations and the proposed separate ARM portability
+investigation. No upstream files or codec behavior were changed.
+
 This document records the exact upstream provenance, licensing, integration rules, and known quirks of the GoPro CineForm SDK reference baseline incorporated into HyperCine.
 
 ---

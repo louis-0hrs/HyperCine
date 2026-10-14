@@ -1,0 +1,4 @@
+$ cmake --build build/macos-cpu --config Release --target test_transform_wavelet
+[100%] Built target test_transform_wavelet
+
+Exit code: 0

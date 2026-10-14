@@ -1,0 +1,6 @@
+$ sysctl -n sysctl.proc_translated
+0
+
+Exit code: 0
+
+Read outside the sandbox; the sandboxed attempt is recorded in toolchain.txt.

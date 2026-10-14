@@ -1,0 +1,54 @@
+$ ctest --test-dir build/macos-cpu -C Release -R ^test_transform_wavelet$ -V
+Internal ctest changing into directory: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu
+UpdateCTestConfiguration  from :/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/DartConfiguration.tcl
+Test project /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: test_transform_wavelet
+
+1: Test command: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_transform_wavelet
+1: Working Directory: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests
+1: Test timeout computed to be: 10000000
+1: =========================================================
+1:  HyperCine Reference Test: 2-6 Wavelet Transform Suite
+1: =========================================================
+1:   Testing Constant Black (64x64)... PASSED (Hash: 0x9c1bda7f8c872325)
+1:   Testing Constant White (64x64, max value)... PASSED (Hash: 0x9288d1df45f02325)
+1:   Testing Corpus Determinism and Recording Reference Hashes:
+1:     [+] constant_black             Hash: 0x9c1bda7f8c872325 (exact equality)
+1:     [+] constant_white             Hash: 0x9288d1df45f02325 (exact equality)
+1:     [+] horizontal_gradient        Hash: 0xfb8c585ebf48db25 (exact equality)
+1:     [+] vertical_gradient          Hash: 0x590ba9586b0ad925 (exact equality)
+1:     [+] checkerboard               Hash: 0xf6e29cd861ab6e50 (exact equality)
+1:     [+] single_pixel_impulse       Hash: 0x97e32c1ee750c3fd (exact equality)
+1:     [+] hard_vertical_edge         Hash: 0xf2c60662c5a27325 (exact equality)
+1:     [+] hard_horizontal_edge       Hash: 0x2643f525d22a7325 (exact equality)
+1:     [+] pseudo_random_noise        Hash: 0x681c36fb201cde96 (exact equality)
+1:   Testing 2-6 Wavelet Forward-Inverse Roundtrip Invertibility...
+1:     [+] constant_black             Max diff after unquantized inverse: 0 LSB
+1:     [+] constant_white             Max diff after unquantized inverse: 0 LSB
+1:     [+] horizontal_gradient        Max diff after unquantized inverse: 0 LSB
+1:     [+] vertical_gradient          Max diff after unquantized inverse: 0 LSB
+1:     [+] checkerboard               Max diff after unquantized inverse: 0 LSB
+1:     [+] single_pixel_impulse       Max diff after unquantized inverse: 0 LSB
+1:     [+] hard_vertical_edge         Max diff after unquantized inverse: 0 LSB
+1:     [+] hard_horizontal_edge       Max diff after unquantized inverse: 0 LSB
+1:     [+] pseudo_random_noise        Max diff after unquantized inverse: 0 LSB
+1: ---------------------------------------------------------
+1: ALL WAVELET TRANSFORM TESTS PASSED SUCCESSFULLY.
+1/1 Test #1: test_transform_wavelet ...........   Passed    0.00 sec
+
+The following tests passed:
+	test_transform_wavelet
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.01 sec
+
+Exit code: 0
