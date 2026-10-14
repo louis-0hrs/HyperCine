@@ -6,6 +6,7 @@
 #include "hypercine/decode_color_cuda.h"
 #include "decode_inverse_kernels.cuh"
 #include "decode_hybrid_entropy.cuh"
+#include "../core/decode_fieldplus.h"
 #include "../core/decoder_backend.h"
 #include "hypercine/research/decoder_diagnostics.h"
 
@@ -48,6 +49,10 @@ double ThreadCpuMs() {
     return 0;
 }
 constexpr int kMaxVlcBands = 27;
+constexpr int kFieldPlusVlcBands = 36;
+constexpr int kMaxBandSegmentScratch = kMaxVlcBands > kFieldPlusVlcBands ? kMaxVlcBands : kFieldPlusVlcBands;
+constexpr int kFieldPlusMaxSegmentsPerBand = 64;
+constexpr int kFieldPlusSegmentCapacity = kFieldPlusVlcBands * kFieldPlusMaxSegmentsPerBand;
 constexpr int kMaxReplayStreams = 8;
 constexpr int kMaxSegmentsPerBand = 64;
 constexpr int kTotalSegmentCapacity = kMaxVlcBands * kMaxSegmentsPerBand; // 1,728
@@ -63,6 +68,21 @@ constexpr size_t CS17_BASE_OFFSET = CS9_ENTRIES;
 constexpr size_t CS18_BASE_OFFSET = CS9_ENTRIES + CS17_ENTRIES;
 
 using namespace HyperCine::HybridEntropy;
+
+static __global__ void DecodeFieldPlusRaw16Kernel(const uint8_t* sample, size_t sample_size,
+    size_t payload_offset, int16_t* destination, int pitch_samples, int width, int height,
+    uint32_t* frame_error) {
+    const int x = blockIdx.x * blockDim.x + threadIdx.x;
+    const int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x >= width || y >= height) return;
+    const size_t source = payload_offset + (size_t(y) * size_t(width) + size_t(x)) * 2;
+    if (!sample || source > sample_size || sample_size - source < 2) {
+        if (frame_error) atomicExch(frame_error, 1u);
+        return;
+    }
+    const uint16_t bits = uint16_t((uint16_t(sample[source]) << 8) | sample[source + 1]);
+    destination[size_t(y) * size_t(pitch_samples) + size_t(x)] = static_cast<int16_t>(bits);
+}
 
 struct SlotChannelBuffers {
     int16_t* d_l2_band[4] = {nullptr, nullptr, nullptr, nullptr};
@@ -83,6 +103,31 @@ struct SlotChannelBuffers {
     size_t vert_low_pitch = 0;
     size_t vert_high_pitch = 0;
     size_t final_plane_pitch = 0;
+};
+
+struct FieldPlusSlotBuffers {
+    // Preserve the w3 high branch until inverse spatial reconstruction; the
+    // existing level-1 buffers are then reused for the independent w4 low branch.
+    int16_t* d_w3_band[3][4] = {};
+    size_t w3_pitch[3] = {};
+    int16_t* d_gop_low[3] = {};
+    int16_t* d_gop_high[3] = {};
+    size_t gop_high_pitch[3] = {};
+    GpuEntropyBandDescriptor* d_ll_descriptors = nullptr;
+    GpuEntropyBandDescriptor* d_vlc_descriptors = nullptr;
+    GpuEntropyBandDescriptor* host_pinned_ll_descriptors = nullptr;
+    GpuEntropyBandDescriptor* host_pinned_vlc_descriptors = nullptr;
+    GpuEntropySegmentDescriptor* d_segments = nullptr;
+    GpuSegmentDecodeResult* d_segment_results = nullptr;
+    GpuEntropySegmentDescriptor* host_pinned_segments = nullptr;
+    std::vector<GpuEntropyBandDescriptor> ll_descriptors;
+    std::vector<GpuEntropyBandDescriptor> vlc_descriptors;
+    std::vector<GpuEntropySegmentDescriptor> segments;
+    std::array<GpuEntropyBandDescriptor, kFieldPlusBandCount> bands{};
+    bool allocated = false;
+    size_t allocated_device_bytes = 0;
+    size_t allocated_pinned_bytes = 0;
+    uint64_t allocation_calls = 0;
 };
 
 enum class BandState : uint32_t {
@@ -138,6 +183,9 @@ struct DecodeSlot2E {
     SlotChannelBuffers channels[3]; // 0: Y, 1: V, 2: U
     uint8_t* d_bgra = nullptr;
     size_t bgra_pitch = 0;
+    FieldPlusSlotBuffers fieldplus;
+    bool fieldplus_mode = false;
+    int frame_index = 0;
 
     // Compressed sample staging
     uint8_t* host_pinned_compressed = nullptr;
@@ -162,7 +210,7 @@ struct DecodeSlot2E {
     uint32_t* ErrorGuard() const { return (GpuIndex() || production_guard) ? d_frame_error : nullptr; }
 
     // Reusable per-band host checkpoint buffers
-    std::vector<GpuEntropySegmentDescriptor> band_segments[kMaxVlcBands];
+    std::vector<GpuEntropySegmentDescriptor> band_segments[kMaxBandSegmentScratch];
     std::vector<GpuEntropyBandDescriptor> host_bands;
     std::vector<GpuEntropyBandDescriptor> vlc_descs;
     std::vector<GpuEntropyBandDescriptor> ll_descs;
@@ -275,6 +323,16 @@ struct DecodeSlot2E {
             if (c.d_vert_low) { cudaFree(c.d_vert_low); c.d_vert_low = nullptr; }
             if (c.d_vert_high) { cudaFree(c.d_vert_high); c.d_vert_high = nullptr; }
             if (c.d_final_plane) { cudaFree(c.d_final_plane); c.d_final_plane = nullptr; }
+            for (int b = 0; b < 4; ++b) {
+                if (fieldplus.d_w3_band[ch][b]) {
+                    cudaFree(fieldplus.d_w3_band[ch][b]);
+                    fieldplus.d_w3_band[ch][b] = nullptr;
+                }
+            }
+            if (fieldplus.d_gop_high[ch]) { cudaFree(fieldplus.d_gop_high[ch]); fieldplus.d_gop_high[ch] = nullptr; }
+            if (fieldplus.d_gop_low[ch]) { cudaFree(fieldplus.d_gop_low[ch]); fieldplus.d_gop_low[ch] = nullptr; }
+            fieldplus.w3_pitch[ch] = 0;
+            fieldplus.gop_high_pitch[ch] = 0;
         }
         if (d_bgra) { cudaFree(d_bgra); d_bgra = nullptr; }
 
@@ -286,6 +344,20 @@ struct DecodeSlot2E {
         if (d_vlc_results) { cudaFree(d_vlc_results); d_vlc_results = nullptr; }
         if (d_segments) { cudaFree(d_segments); d_segments = nullptr; }
         if (d_seg_results) { cudaFree(d_seg_results); d_seg_results = nullptr; }
+        if (fieldplus.d_ll_descriptors) { cudaFree(fieldplus.d_ll_descriptors); fieldplus.d_ll_descriptors = nullptr; }
+        if (fieldplus.d_vlc_descriptors) { cudaFree(fieldplus.d_vlc_descriptors); fieldplus.d_vlc_descriptors = nullptr; }
+        if (fieldplus.host_pinned_ll_descriptors) { cudaFreeHost(fieldplus.host_pinned_ll_descriptors); fieldplus.host_pinned_ll_descriptors = nullptr; }
+        if (fieldplus.host_pinned_vlc_descriptors) { cudaFreeHost(fieldplus.host_pinned_vlc_descriptors); fieldplus.host_pinned_vlc_descriptors = nullptr; }
+        if (fieldplus.d_segments) { cudaFree(fieldplus.d_segments); fieldplus.d_segments = nullptr; }
+        if (fieldplus.d_segment_results) { cudaFree(fieldplus.d_segment_results); fieldplus.d_segment_results = nullptr; }
+        if (fieldplus.host_pinned_segments) { cudaFreeHost(fieldplus.host_pinned_segments); fieldplus.host_pinned_segments = nullptr; }
+        fieldplus.ll_descriptors.clear();
+        fieldplus.vlc_descriptors.clear();
+        fieldplus.segments.clear();
+        fieldplus.allocated = false;
+        fieldplus.allocated_device_bytes = 0;
+        fieldplus.allocated_pinned_bytes = 0;
+        fieldplus.allocation_calls = 0;
 
         if (d_fc_summaries) { cudaFree(d_fc_summaries); d_fc_summaries = nullptr; }
         if (host_pinned_fc_summaries) { cudaFreeHost(host_pinned_fc_summaries); host_pinned_fc_summaries = nullptr; }
@@ -325,6 +397,8 @@ struct DecodeSlot2E {
         for (int b = 0; b < kMaxVlcBands; ++b) {
             if (ev_band_start[b]) { cudaEventDestroy(ev_band_start[b]); ev_band_start[b] = nullptr; }
             if (ev_band_done[b])  { cudaEventDestroy(ev_band_done[b]);  ev_band_done[b] = nullptr; }
+        }
+        for (int b = 0; b < kMaxBandSegmentScratch; ++b) {
             band_segments[b].clear();
         }
 
@@ -334,14 +408,92 @@ struct DecodeSlot2E {
 
         in_use = false;
         ticket = 0;
+        fieldplus_mode = false;
+        frame_index = 0;
         status = DecodeTicketStatus::Invalid;
+    }
+
+    bool EnsureFieldPlusBuffers() {
+        if (fieldplus.allocated) return true;
+        size_t device_bytes = 0;
+        size_t pinned_bytes = 0;
+        uint64_t allocations = 0;
+        auto device_alloc = [&](void** pointer, size_t bytes) {
+            if (cudaMalloc(pointer, bytes) != cudaSuccess) return false;
+            device_bytes += bytes;
+            ++allocations;
+            return true;
+        };
+        auto pinned_alloc = [&](void** pointer, size_t bytes) {
+            if (cudaMallocHost(pointer, bytes) != cudaSuccess) return false;
+            pinned_bytes += bytes;
+            ++allocations;
+            return true;
+        };
+        for (int ch = 0; ch < 3; ++ch) {
+            const int channel_width = ch == 0 ? max_width : max_width / 2;
+            fieldplus.w3_pitch[ch] = (size_t(channel_width / 4) * sizeof(int16_t) + 15) & ~size_t(15);
+            fieldplus.gop_high_pitch[ch] = (size_t(channel_width / 2) * sizeof(int16_t) + 15) & ~size_t(15);
+            for (int band = 0; band < 4; ++band) {
+                if (!device_alloc(reinterpret_cast<void**>(&fieldplus.d_w3_band[ch][band]),
+                    fieldplus.w3_pitch[ch] * size_t(max_height / 4))) goto fail;
+            }
+            if (!device_alloc(reinterpret_cast<void**>(&fieldplus.d_gop_high[ch]),
+                fieldplus.gop_high_pitch[ch] * size_t(max_height / 2))) goto fail;
+            if (!device_alloc(reinterpret_cast<void**>(&fieldplus.d_gop_low[ch]),
+                fieldplus.gop_high_pitch[ch] * size_t(max_height / 2))) goto fail;
+        }
+        if (!device_alloc(reinterpret_cast<void**>(&fieldplus.d_ll_descriptors),
+                3 * sizeof(GpuEntropyBandDescriptor)) ||
+            !device_alloc(reinterpret_cast<void**>(&fieldplus.d_vlc_descriptors),
+                kFieldPlusVlcBands * sizeof(GpuEntropyBandDescriptor)) ||
+            !device_alloc(reinterpret_cast<void**>(&fieldplus.d_segments),
+                kFieldPlusSegmentCapacity * sizeof(GpuEntropySegmentDescriptor)) ||
+            !device_alloc(reinterpret_cast<void**>(&fieldplus.d_segment_results),
+                kFieldPlusSegmentCapacity * sizeof(GpuSegmentDecodeResult)) ||
+            !pinned_alloc(reinterpret_cast<void**>(&fieldplus.host_pinned_ll_descriptors),
+                3 * sizeof(GpuEntropyBandDescriptor)) ||
+            !pinned_alloc(reinterpret_cast<void**>(&fieldplus.host_pinned_vlc_descriptors),
+                kFieldPlusVlcBands * sizeof(GpuEntropyBandDescriptor)) ||
+            !pinned_alloc(reinterpret_cast<void**>(&fieldplus.host_pinned_segments),
+                kFieldPlusSegmentCapacity * sizeof(GpuEntropySegmentDescriptor))) goto fail;
+
+        fieldplus.allocated = true;
+        fieldplus.allocated_device_bytes = device_bytes;
+        fieldplus.allocated_pinned_bytes = pinned_bytes;
+        fieldplus.allocation_calls = allocations;
+        allocated_device_bytes += device_bytes;
+        allocated_pinned_bytes += pinned_bytes;
+        return true;
+
+    fail:
+        for (int ch = 0; ch < 3; ++ch) {
+            for (int band = 0; band < 4; ++band) {
+                if (fieldplus.d_w3_band[ch][band]) {
+                    cudaFree(fieldplus.d_w3_band[ch][band]);
+                    fieldplus.d_w3_band[ch][band] = nullptr;
+                }
+            }
+            if (fieldplus.d_gop_high[ch]) { cudaFree(fieldplus.d_gop_high[ch]); fieldplus.d_gop_high[ch] = nullptr; }
+            if (fieldplus.d_gop_low[ch]) { cudaFree(fieldplus.d_gop_low[ch]); fieldplus.d_gop_low[ch] = nullptr; }
+            fieldplus.w3_pitch[ch] = 0;
+            fieldplus.gop_high_pitch[ch] = 0;
+        }
+        if (fieldplus.d_ll_descriptors) { cudaFree(fieldplus.d_ll_descriptors); fieldplus.d_ll_descriptors = nullptr; }
+        if (fieldplus.d_vlc_descriptors) { cudaFree(fieldplus.d_vlc_descriptors); fieldplus.d_vlc_descriptors = nullptr; }
+        if (fieldplus.d_segments) { cudaFree(fieldplus.d_segments); fieldplus.d_segments = nullptr; }
+        if (fieldplus.d_segment_results) { cudaFree(fieldplus.d_segment_results); fieldplus.d_segment_results = nullptr; }
+        if (fieldplus.host_pinned_ll_descriptors) { cudaFreeHost(fieldplus.host_pinned_ll_descriptors); fieldplus.host_pinned_ll_descriptors = nullptr; }
+        if (fieldplus.host_pinned_vlc_descriptors) { cudaFreeHost(fieldplus.host_pinned_vlc_descriptors); fieldplus.host_pinned_vlc_descriptors = nullptr; }
+        if (fieldplus.host_pinned_segments) { cudaFreeHost(fieldplus.host_pinned_segments); fieldplus.host_pinned_segments = nullptr; }
+        return false;
     }
 
     ~DecodeSlot2E() {
         FreeBuffers();
     }
 
-    void LaunchLevel2Inverse(int ch, cudaStream_t s) {
+    void LaunchLevel2Inverse(int ch, cudaStream_t s, bool overflow_protected = false) {
         auto& c = channels[ch];
         int ch_w = (ch == 0) ? width : (width / 2);
         int ch_h = height;
@@ -357,7 +509,7 @@ struct DecodeSlot2E {
             c.d_l2_band[3], int(c.l2_pitch),
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
-            w_l2, h_l2, 0, ErrorGuard()
+            w_l2, h_l2, overflow_protected ? 3 : 0, ErrorGuard()
         );
 
         dim3 block_h(64, 4);
@@ -366,11 +518,11 @@ struct DecodeSlot2E {
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
             c.d_ll1, int(c.ll1_pitch),
-            w_l2, 2 * h_l2, 0, ErrorGuard()
+            w_l2, 2 * h_l2, overflow_protected ? 4 : 0, ErrorGuard()
         );
     }
 
-    void LaunchLevel1Inverse(int ch, cudaStream_t s) {
+    void LaunchLevel1Inverse(int ch, cudaStream_t s, bool fieldplus_scalar_math = false) {
         auto& c = channels[ch];
         int ch_w = (ch == 0) ? width : (width / 2);
         int ch_h = height;
@@ -391,15 +543,19 @@ struct DecodeSlot2E {
 
         dim3 block_h(64, 4);
         dim3 grid_h((w_l1 + block_h.x - 1) / block_h.x, (2 * h_l1 + block_h.y - 1) / block_h.y);
+        // The FIELDPLUS production path matches upstream's 32-bit scalar
+        // accumulator on narrow chroma bands. Existing GOP-1 paths retain the
+        // saturating 16-bit implementation used by their established vectors.
+        const int horizontal_descale = fieldplus_scalar_math ? 3 : 2;
         HorizontalInverseKernel<<<grid_h, block_h, 0, s>>>(
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
             c.d_ll0, int(c.ll0_pitch),
-            w_l1, 2 * h_l1, 2, ErrorGuard()
+            w_l1, 2 * h_l1, horizontal_descale, ErrorGuard()
         );
     }
 
-    void LaunchLevel0Inverse(int ch, cudaStream_t s) {
+    void LaunchLevel0Inverse(int ch, cudaStream_t s, bool fieldplus_scalar_math = false) {
         auto& c = channels[ch];
         int ch_w = (ch == 0) ? width : (width / 2);
         int ch_h = height;
@@ -447,7 +603,9 @@ struct DecodeSlot2E {
             c.d_l0_band[3], int(c.l0_pitch),
             c.d_vert_low, int(c.vert_low_pitch),
             c.d_vert_high, int(c.vert_high_pitch),
-            w_l0, h_l0, 0, ErrorGuard()
+            // InvertSpatialQuant16s uses 32-bit scalar accumulators for its
+            // vertical pass. Existing GOP-1 vectors retain the 16-bit path.
+            w_l0, h_l0, fieldplus_scalar_math ? 5 : 0, ErrorGuard()
         );
 
         dim3 block_h(64, 4);
@@ -789,6 +947,9 @@ struct CudaDecoderPipelinePhase2E::Impl {
                 s->in_use = true;
                 s->ticket = next_ticket++;
                 s->status = DecodeTicketStatus::Pending;
+                s->fieldplus_mode = false;
+                s->frame_index = 0;
+                s->interlaced_gop1 = false;
                 s->production_guard = false;
                 s->pipeline_mode = pipeline_mode;
                 s->scheduling_policy = scheduling_policy;
@@ -895,13 +1056,16 @@ bool CudaDecoderPipelinePhase2E::Initialize(
         slot->cuda_device = cuda_device;
         slot->num_replay_streams = num_replay_streams;
 
-        for (int b = 0; b < kMaxVlcBands; ++b) {
+        for (int b = 0; b < kMaxBandSegmentScratch; ++b) {
             slot->band_segments[b].reserve(kMaxSegmentsPerBand);
         }
         slot->host_segments.reserve(kTotalSegmentCapacity);
         slot->host_bands.reserve(30);
         slot->ll_descs.reserve(3);
         slot->vlc_descs.reserve(kMaxVlcBands);
+        slot->fieldplus.ll_descriptors.reserve(3);
+        slot->fieldplus.vlc_descriptors.reserve(kFieldPlusVlcBands);
+        slot->fieldplus.segments.reserve(kFieldPlusSegmentCapacity);
 
         for (int ch = 0; ch < 3; ++ch) {
             auto& c = slot->channels[ch];
@@ -952,6 +1116,7 @@ bool CudaDecoderPipelinePhase2E::Initialize(
 
             err = cudaMallocPitch(&c.d_final_plane, &c.final_plane_pitch, ch_max_w * sizeof(int16_t), ch_max_h);
             if (err != cudaSuccess) return false;
+
         }
 
         err = cudaMallocPitch(&slot->d_bgra, &slot->bgra_pitch, max_width * 4, max_height);
@@ -1088,13 +1253,17 @@ DecoderMemoryStats CudaDecoderPipelinePhase2E::GetMemoryStats() const {
     for (const auto& s : impl_->slots) {
         out.device_bytes += s->allocated_device_bytes;
         out.pinned_host_bytes += s->allocated_pinned_bytes;
+        out.cuda_allocation_calls += s->fieldplus.allocation_calls;
         out.pageable_capacity_bytes += sizeof(DecodeSlot2E) +
             (s->host_bands.capacity() + s->vlc_descs.capacity() + s->ll_descs.capacity()) * sizeof(GpuEntropyBandDescriptor) +
-            s->host_segments.capacity() * sizeof(GpuEntropySegmentDescriptor);
-        for (int b = 0; b < kMaxVlcBands; ++b) {
-            out.pageable_capacity_bytes += s->band_segments[b].capacity() * sizeof(GpuEntropySegmentDescriptor) +
-                s->reusable_resolved[b].checkpoints.capacity() * sizeof(Restart);
+            s->host_segments.capacity() * sizeof(GpuEntropySegmentDescriptor) +
+            (s->fieldplus.ll_descriptors.capacity() + s->fieldplus.vlc_descriptors.capacity()) * sizeof(GpuEntropyBandDescriptor) +
+            s->fieldplus.segments.capacity() * sizeof(GpuEntropySegmentDescriptor);
+        for (int b = 0; b < kMaxBandSegmentScratch; ++b) {
+            out.pageable_capacity_bytes += s->band_segments[b].capacity() * sizeof(GpuEntropySegmentDescriptor);
         }
+        for (int b = 0; b < kMaxVlcBands; ++b)
+            out.pageable_capacity_bytes += s->reusable_resolved[b].checkpoints.capacity() * sizeof(Restart);
     }
     return out;
 }
@@ -1868,6 +2037,251 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed
     return slot->ticket;
 }
 
+uint64_t CudaDecoderPipelinePhase2E::QueueDecodeFieldPlusParsed(const uint8_t* compressed_sample,
+    size_t compressed_size, const FieldPlusSampleDescriptor& parsed, int frame_index,
+    DeviceSurfaceType requested_surface, ColorMatrix matrix, ColorRange range,
+    RowOrientation orientation, bool production_guard) {
+    if (!impl_ || !impl_->initialized || !compressed_sample || compressed_size == 0 ||
+        parsed.frame_count != 2 || parsed.width <= 0 || parsed.height <= 0 ||
+        (frame_index != 0 && frame_index != 1)) return 0;
+
+    DecodeSlot2E* slot = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(impl_->mutex);
+        slot = impl_->AcquireSlot();
+    }
+    if (!slot) return 0;
+    if (compressed_size > slot->compressed_capacity || parsed.width > slot->max_width ||
+        parsed.height > slot->max_height || !slot->EnsureFieldPlusBuffers()) {
+        impl_->AbandonSlot(slot);
+        return 0;
+    }
+
+    const auto parse_end = Clock::now();
+    slot->fieldplus_mode = true;
+    slot->frame_index = frame_index;
+    slot->production_guard = production_guard;
+    slot->interlaced_gop1 = false;
+    slot->width = parsed.width;
+    slot->height = parsed.height;
+    slot->precision = parsed.coded_precision;
+    slot->surface_type = requested_surface;
+    slot->matrix = matrix;
+    slot->range = range;
+    slot->orientation = orientation;
+    slot->timings = Phase2eSlotStageTimings{};
+    slot->t_frame_start = parse_end;
+    slot->t_parse_end = parse_end;
+    slot->current_compressed_size = compressed_size;
+
+    auto& fp = slot->fieldplus;
+    fp.ll_descriptors.clear();
+    fp.vlc_descriptors.clear();
+    fp.segments.clear();
+    fp.ll_descriptors.reserve(3);
+    fp.vlc_descriptors.reserve(kFieldPlusVlcBands);
+    fp.segments.reserve(kFieldPlusSegmentCapacity);
+
+    for (int ch = 0; ch < kFieldPlusChannelCount; ++ch) {
+        const int channel_width = ch == 0 ? parsed.width : parsed.width / 2;
+        auto& c = slot->channels[ch];
+        c.l2_pitch = (size_t(channel_width / 8) * sizeof(int16_t) + 15) & ~size_t(15);
+        c.l1_pitch = (size_t(channel_width / 4) * sizeof(int16_t) + 15) & ~size_t(15);
+        c.l0_pitch = (size_t(channel_width / 2) * sizeof(int16_t) + 15) & ~size_t(15);
+        c.ll1_pitch = c.l1_pitch;
+        c.ll0_pitch = c.l0_pitch;
+        fp.w3_pitch[ch] = c.l1_pitch;
+    }
+
+    auto bind_destination = [&](GpuEntropyBandDescriptor& d, int logical) {
+        auto& c = slot->channels[d.channel];
+        if (logical < 4) {
+            d.d_destination = c.d_l2_band[logical];
+            d.pitch_bytes = c.l2_pitch;
+        } else if (logical < 7) {
+            const int band = logical - 3;
+            d.d_destination = c.d_l1_band[band];
+            d.pitch_bytes = c.l1_pitch;
+        } else if (logical < 11) {
+            const int band = logical - 7;
+            d.d_destination = fp.d_w3_band[d.channel][band];
+            d.pitch_bytes = fp.w3_pitch[d.channel];
+        } else {
+            const int band = logical <= 13 ? logical - 10 : logical - 13;
+            d.d_destination = c.d_l0_band[band];
+            d.pitch_bytes = c.l0_pitch;
+        }
+        d.pitch_samples = d.pitch_bytes / sizeof(int16_t);
+        d.coefficient_count = size_t(d.height) * d.pitch_samples;
+    };
+
+    for (int ch = 0; ch < kFieldPlusChannelCount; ++ch) {
+        for (int logical = 0; logical < kFieldPlusLogicalBandsPerChannel; ++logical) {
+            auto d = parsed.bands[size_t(ch * kFieldPlusLogicalBandsPerChannel + logical)].entropy;
+            if (logical == 0) {
+                // The upstream FIELDPLUS base inverse applies format-specific
+                // lowpass biases beyond the values used by the GOP-1 parser:
+                // +24 for BGRA and +10 for YU64, measured against the frozen
+                // progressive fixture's direct coefficient references.
+                d.channel_offset += requested_surface == DeviceSurfaceType::BGRA8 ? 24 : 10;
+            }
+            bind_destination(d, logical);
+            fp.bands[size_t(ch * kFieldPlusLogicalBandsPerChannel + logical)] = d;
+            if (logical == 0) {
+                fp.ll_descriptors.push_back(d);
+            } else if (logical == 7) {
+                // Raw16 temporal-high LL is copied by its dedicated bounded kernel.
+            } else if (logical < 11 || (frame_index == 1 && logical >= 11 && logical <= 13) ||
+                       (frame_index == 0 && logical >= 14 && logical <= 16)) {
+                fp.vlc_descriptors.push_back(d);
+            }
+        }
+    }
+    if (fp.ll_descriptors.size() != 3 || fp.vlc_descriptors.size() != kFieldPlusVlcBands) {
+        impl_->AbandonSlot(slot);
+        return 0;
+    }
+
+    std::string checkpoint_error;
+    for (size_t band = 0; band < fp.vlc_descriptors.size(); ++band) {
+        // Reuse the slot's pre-reserved per-band checkpoint scratch. A local
+        // vector here allocated on every FIELDPLUS request after warm-up.
+        auto& band_segments = slot->band_segments[band];
+        band_segments.clear();
+        const auto& d = fp.vlc_descriptors[band];
+        const bool indexed = (production_guard ? GenerateSingleBandCheckpointsValidated : GenerateSingleBandCheckpointsCpu)(
+            compressed_sample, compressed_size, d, static_cast<int>(band),
+            impl_->host_fsm_tables.data(), impl_->host_fsm_tables.size(),
+            slot->entropy_mode, slot->fixed_segments_per_band, band_segments, &checkpoint_error);
+        if (!indexed || band_segments.empty() || band_segments.size() > kFieldPlusMaxSegmentsPerBand ||
+            fp.segments.size() + band_segments.size() > kFieldPlusSegmentCapacity) {
+            impl_->AbandonSlot(slot);
+            return 0;
+        }
+        fp.segments.insert(fp.segments.end(), band_segments.begin(), band_segments.end());
+    }
+
+    std::memcpy(slot->host_pinned_compressed, compressed_sample, compressed_size);
+    std::memcpy(fp.host_pinned_ll_descriptors, fp.ll_descriptors.data(),
+        fp.ll_descriptors.size() * sizeof(GpuEntropyBandDescriptor));
+    std::memcpy(fp.host_pinned_vlc_descriptors, fp.vlc_descriptors.data(),
+        fp.vlc_descriptors.size() * sizeof(GpuEntropyBandDescriptor));
+    if (!fp.segments.empty())
+        std::memcpy(fp.host_pinned_segments, fp.segments.data(),
+            fp.segments.size() * sizeof(GpuEntropySegmentDescriptor));
+
+    slot->timings.active_workers = 0;
+    slot->timings.active_streams = 1;
+    slot->t_batch_submit = slot->t_batch_return = Clock::now();
+    *slot->host_frame_error = 0;
+    auto fail_gpu = [&]() {
+        impl_->AbandonSlot(slot);
+        return uint64_t(0);
+    };
+    if (cudaMemsetAsync(slot->d_frame_error, 0, sizeof(uint32_t), slot->main_stream) != cudaSuccess)
+        return fail_gpu();
+    cudaEventRecord(slot->ev_frame_start, slot->main_stream);
+    cudaEventRecord(slot->ev_h2d_start, slot->main_stream);
+    if (cudaMemcpyAsync(slot->d_compressed_sample, slot->host_pinned_compressed, compressed_size,
+            cudaMemcpyHostToDevice, slot->main_stream) != cudaSuccess ||
+        cudaMemcpyAsync(fp.d_ll_descriptors, fp.host_pinned_ll_descriptors,
+            fp.ll_descriptors.size() * sizeof(GpuEntropyBandDescriptor), cudaMemcpyHostToDevice, slot->main_stream) != cudaSuccess ||
+        cudaMemcpyAsync(fp.d_vlc_descriptors, fp.host_pinned_vlc_descriptors,
+            fp.vlc_descriptors.size() * sizeof(GpuEntropyBandDescriptor), cudaMemcpyHostToDevice, slot->main_stream) != cudaSuccess ||
+        (!fp.segments.empty() && cudaMemcpyAsync(fp.d_segments, fp.host_pinned_segments,
+            fp.segments.size() * sizeof(GpuEntropySegmentDescriptor), cudaMemcpyHostToDevice, slot->main_stream) != cudaSuccess))
+        return fail_gpu();
+    cudaEventRecord(slot->ev_h2d_stop, slot->main_stream);
+    cudaEventRecord(slot->ev_compressed_h2d_ready, slot->main_stream);
+
+    if (LaunchDecodeLowpassGpu(slot->d_compressed_sample, compressed_size, fp.d_ll_descriptors,
+            static_cast<int>(fp.ll_descriptors.size()), slot->main_stream) != cudaSuccess)
+        return fail_gpu();
+    for (int ch = 0; ch < kFieldPlusChannelCount; ++ch) {
+        const auto& raw = parsed.bands[size_t(ch * kFieldPlusLogicalBandsPerChannel + 7)].entropy;
+        const int raw_pitch = int(fp.w3_pitch[ch] / sizeof(int16_t));
+        const dim3 block(32, 8);
+        const dim3 grid((raw.width + int(block.x) - 1) / int(block.x),
+                        (raw.height + int(block.y) - 1) / int(block.y));
+        DecodeFieldPlusRaw16Kernel<<<grid, block, 0, slot->main_stream>>>(
+            slot->d_compressed_sample, compressed_size, raw.payload_offset,
+            fp.d_w3_band[ch][0], raw_pitch, raw.width, raw.height, slot->ErrorGuard());
+        if (cudaGetLastError() != cudaSuccess) return fail_gpu();
+    }
+    cudaEventRecord(slot->ev_ll_ready, slot->main_stream);
+
+    if (LaunchZeroVlcBandsGpu(fp.d_vlc_descriptors, kFieldPlusVlcBands, slot->main_stream) != cudaSuccess ||
+        LaunchDecodeEntropyParallelGpu(slot->d_compressed_sample, compressed_size,
+            fp.d_vlc_descriptors, kFieldPlusVlcBands, fp.d_segments, static_cast<int>(fp.segments.size()),
+            impl_->fsm_table_mgr.GetDeviceTable(), fp.d_segment_results, slot->main_stream,
+            nullptr, slot->ErrorGuard()) != cudaSuccess)
+        return fail_gpu();
+    if (std::any_of(fp.vlc_descriptors.begin(), fp.vlc_descriptors.end(),
+            [](const auto& d) { return d.has_peaks && d.peak_level > 0; }) &&
+        LaunchRestoreDecodePeaks(slot->d_compressed_sample, compressed_size, fp.d_vlc_descriptors,
+            kFieldPlusVlcBands, slot->main_stream, slot->ErrorGuard()) != cudaSuccess)
+        return fail_gpu();
+    if (LaunchCooperativeDifferenceCodingGpu(fp.d_vlc_descriptors, kFieldPlusVlcBands,
+            slot->main_stream, slot->ErrorGuard()) != cudaSuccess)
+        return fail_gpu();
+
+    for (int ch = 0; ch < kFieldPlusChannelCount; ++ch) {
+        auto& c = slot->channels[ch];
+        const int channel_width = ch == 0 ? parsed.width : parsed.width / 2;
+        const int width_l1 = channel_width / 4;
+        const int height_l1 = parsed.height / 4;
+        const dim3 block_v(16, 16);
+        const dim3 grid_v((width_l1 + int(block_v.x) - 1) / int(block_v.x),
+                          (height_l1 + int(block_v.y) - 1) / int(block_v.y));
+        VerticalInverseKernel<<<grid_v, block_v, 0, slot->main_stream>>>(
+            fp.d_w3_band[ch][0], int(fp.w3_pitch[ch]),
+            fp.d_w3_band[ch][1], int(fp.w3_pitch[ch]),
+            fp.d_w3_band[ch][2], int(fp.w3_pitch[ch]),
+            fp.d_w3_band[ch][3], int(fp.w3_pitch[ch]),
+            c.d_vert_low, int(c.vert_low_pitch), c.d_vert_high, int(c.vert_high_pitch),
+            width_l1, height_l1, 3, slot->ErrorGuard());
+        const dim3 block_h(64, 4);
+        const dim3 grid_h((width_l1 + int(block_h.x) - 1) / int(block_h.x),
+                          (2 * height_l1 + int(block_h.y) - 1) / int(block_h.y));
+        HorizontalInverseKernel<<<grid_h, block_h, 0, slot->main_stream>>>(
+            c.d_vert_low, int(c.vert_low_pitch), c.d_vert_high, int(c.vert_high_pitch),
+            fp.d_gop_high[ch], int(fp.gop_high_pitch[ch]), width_l1, 2 * height_l1, 4, slot->ErrorGuard());
+
+        slot->LaunchLevel2Inverse(ch, slot->main_stream, true); // w5 -> wavelet 4 lowpass
+        slot->LaunchLevel1Inverse(ch, slot->main_stream, true); // w4 -> GOP temporal low
+        if (cudaMemcpy2DAsync(fp.d_gop_low[ch], fp.gop_high_pitch[ch], c.d_ll0, c.ll0_pitch,
+                size_t(channel_width / 2) * sizeof(int16_t), size_t(parsed.height / 2),
+                cudaMemcpyDeviceToDevice, slot->main_stream) != cudaSuccess)
+            return fail_gpu();
+
+        const int temporal_width = channel_width / 2;
+        const int temporal_height = parsed.height / 2;
+        const dim3 temporal_block(128, 1);
+        const dim3 temporal_grid((temporal_width + int(temporal_block.x) - 1) / int(temporal_block.x),
+                                 (temporal_height + int(temporal_block.y) - 1) / int(temporal_block.y));
+        FieldPlusTemporalInverseKernel<<<temporal_grid, temporal_block, 0, slot->main_stream>>>(
+            c.d_ll0, int(c.ll0_pitch), fp.d_gop_high[ch], int(fp.gop_high_pitch[ch]),
+            c.d_ll0, int(c.ll0_pitch), temporal_width, temporal_height, frame_index, 40, slot->ErrorGuard());
+        slot->LaunchLevel0Inverse(ch, slot->main_stream, true); // selected w0/w1 base frame
+        if (cudaGetLastError() != cudaSuccess) return fail_gpu();
+    }
+
+    if (requested_surface == DeviceSurfaceType::BGRA8) {
+        cudaEventRecord(slot->ev_color_start, slot->main_stream);
+        LaunchYuv422ToBgra8(slot->channels[0].d_final_plane, slot->channels[0].final_plane_pitch,
+            slot->channels[1].d_final_plane, slot->channels[1].final_plane_pitch,
+            slot->channels[2].d_final_plane, slot->channels[2].final_plane_pitch,
+            slot->d_bgra, slot->bgra_pitch, parsed.width, parsed.height, matrix, range,
+            orientation, slot->main_stream, slot->ErrorGuard(), false);
+        cudaEventRecord(slot->ev_color_stop, slot->main_stream);
+    }
+    if (production_guard && cudaMemcpyAsync(slot->host_frame_error, slot->d_frame_error,
+            sizeof(uint32_t), cudaMemcpyDeviceToHost, slot->main_stream) != cudaSuccess)
+        return fail_gpu();
+    cudaEventRecord(slot->ev_ready, slot->main_stream);
+    return slot->ticket;
+}
+
 DecodeTicketStatus CudaDecoderPipelinePhase2E::PollDecode(uint64_t ticket) {
     if (!impl_ || !impl_->initialized || ticket == 0) return DecodeTicketStatus::Invalid;
     std::lock_guard<std::mutex> lock(impl_->mutex);
@@ -2464,6 +2878,17 @@ bool CudaDecoderPipelinePhase2E::DownloadBandCoefficientsToHost(
         slot = impl_->FindSlot(ticket);
     }
     if (!slot || slot->status != DecodeTicketStatus::Complete) return false;
+    if (slot->fieldplus_mode) {
+        if (band_index < 0 || band_index >= kFieldPlusBandCount) return false;
+        const auto& desc = slot->fieldplus.bands[size_t(band_index)];
+        if (!desc.d_destination || desc.width <= 0 || desc.height <= 0 || desc.pitch_bytes == 0) return false;
+        if (out_w) *out_w = desc.width;
+        if (out_h) *out_h = desc.height;
+        if (out_pitch) *out_pitch = static_cast<int>(desc.pitch_bytes);
+        out_coeffs.resize((desc.pitch_bytes / sizeof(int16_t)) * size_t(desc.height));
+        return cudaMemcpy(out_coeffs.data(), desc.d_destination, desc.pitch_bytes * size_t(desc.height),
+            cudaMemcpyDeviceToHost) == cudaSuccess;
+    }
     if (band_index < 0 || band_index >= static_cast<int>(slot->host_bands.size())) return false;
 
     const auto& desc = slot->host_bands[band_index];
@@ -2482,6 +2907,62 @@ bool CudaDecoderPipelinePhase2E::DownloadBandCoefficientsToHost(
     );
 
     return (err == cudaSuccess);
+}
+
+bool CudaDecoderPipelinePhase2E::DownloadFieldPlusTemporalStages(uint64_t ticket, int channel,
+    std::vector<int16_t>& temporal_low, std::vector<int16_t>& temporal_high,
+    std::vector<int16_t>& wavelet4_ll, std::vector<int16_t>& frame_base_ll,
+    int* out_width, int* out_height) {
+    if (!impl_ || channel < 0 || channel >= 3) return false;
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    auto* slot = impl_->FindSlot(ticket);
+    if (!slot || slot->status != DecodeTicketStatus::Complete || !slot->fieldplus_mode) return false;
+    const int channel_width = channel == 0 ? slot->width : slot->width / 2;
+    const int width = channel_width / 2;
+    const int height = slot->height / 2;
+    const size_t row_bytes = size_t(width) * sizeof(int16_t);
+    temporal_low.resize(size_t(width) * size_t(height));
+    temporal_high.resize(size_t(width) * size_t(height));
+    wavelet4_ll.resize(size_t(channel_width / 4) * size_t(slot->height / 4));
+    frame_base_ll.resize(size_t(width) * size_t(height));
+    const auto& c = slot->channels[channel];
+    const auto& fp = slot->fieldplus;
+    if (cudaMemcpy2D(temporal_low.data(), row_bytes, fp.d_gop_low[channel], fp.gop_high_pitch[channel],
+            row_bytes, height, cudaMemcpyDeviceToHost) != cudaSuccess ||
+        cudaMemcpy2D(temporal_high.data(), row_bytes, fp.d_gop_high[channel], fp.gop_high_pitch[channel],
+            row_bytes, height, cudaMemcpyDeviceToHost) != cudaSuccess ||
+        cudaMemcpy2D(wavelet4_ll.data(), size_t(channel == 0 ? slot->width / 4 : slot->width / 8) * sizeof(int16_t),
+            c.d_ll1, c.ll1_pitch,
+            size_t(channel == 0 ? slot->width / 4 : slot->width / 8) * sizeof(int16_t),
+            slot->height / 4, cudaMemcpyDeviceToHost) != cudaSuccess ||
+        cudaMemcpy2D(frame_base_ll.data(), row_bytes, c.d_ll0, c.ll0_pitch,
+            row_bytes, height, cudaMemcpyDeviceToHost) != cudaSuccess) return false;
+    if (out_width) *out_width = width;
+    if (out_height) *out_height = height;
+    return true;
+}
+
+bool CudaDecoderPipelinePhase2E::DownloadFieldPlusSpatialStages(uint64_t ticket, int channel,
+    std::vector<int16_t>& vertical_low, std::vector<int16_t>& vertical_high,
+    int* out_width, int* out_height) {
+    if (!impl_ || channel < 0 || channel >= 3) return false;
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    auto* slot = impl_->FindSlot(ticket);
+    if (!slot || slot->status != DecodeTicketStatus::Complete || !slot->fieldplus_mode) return false;
+    const int channel_width = channel == 0 ? slot->width : slot->width / 2;
+    const int width = channel_width / 2;
+    const int height = slot->height;
+    const size_t row_bytes = size_t(width) * sizeof(int16_t);
+    vertical_low.resize(size_t(width) * size_t(height));
+    vertical_high.resize(size_t(width) * size_t(height));
+    const auto& c = slot->channels[channel];
+    if (cudaMemcpy2D(vertical_low.data(), row_bytes, c.d_vert_low, c.vert_low_pitch,
+            row_bytes, height, cudaMemcpyDeviceToHost) != cudaSuccess ||
+        cudaMemcpy2D(vertical_high.data(), row_bytes, c.d_vert_high, c.vert_high_pitch,
+            row_bytes, height, cudaMemcpyDeviceToHost) != cudaSuccess) return false;
+    if (out_width) *out_width = width;
+    if (out_height) *out_height = height;
+    return true;
 }
 
 bool CudaDecoderPipelinePhase2E::GetGpuIndexResults(uint64_t ticket, std::vector<GpuCheckpointIndexResult>& out) {
