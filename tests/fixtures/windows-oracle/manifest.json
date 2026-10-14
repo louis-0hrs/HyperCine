@@ -1,0 +1,50 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "run_url": "https://github.com/louis-0hrs/HyperCine/actions/runs/38627689864",
+  "commit": "b905e5038d947c19d4759f992696678e89d4745c",
+  "log_sha256": "bf6fa81f30c9bb0e5522768cf87790568efcb790271b931fbce356a6659f549f",
+  "oracle": "Pristine frozen GoPro SDK on Windows MSVC, TAG_CPU_MAX=1; five fresh instances per format",
+  "files": [
+    {
+      "file": "flat.sdk-p10",
+      "bytes": 65536,
+      "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+    },
+    {
+      "file": "flat.sdk-bgra",
+      "bytes": 65536,
+      "sha256": "148dee3e8f139487270598699b09f700a00ad8626ec9846a1fcf89f3b947634d"
+    },
+    {
+      "file": "gradient.sdk-p10",
+      "bytes": 65536,
+      "sha256": "969a5e4a7357be89a71455ef5fba38a8ec10dcd953320f654c79c8d2deafd870"
+    },
+    {
+      "file": "gradient.sdk-bgra",
+      "bytes": 65536,
+      "sha256": "d8b1107587966b674b4ee2903671efd0f67209c52b8ab4c6a9bcee24e0c289f5"
+    },
+    {
+      "file": "canonical.sdk-p10",
+      "bytes": 65536,
+      "sha256": "f186174e749b87425cbf905023dc742f167c2d2a3812202189b570c7263ce7f6"
+    },
+    {
+      "file": "canonical.sdk-bgra",
+      "bytes": 65536,
+      "sha256": "81be353499193db34448f1fb747dcb0f215e094ec5ab8a58adb7250df8d3b534"
+    },
+    {
+      "file": "control.cfhd",
+      "bytes": 9184,
+      "sha256": "2d9d57e3bd9334eca6e9a2e26b27df8a05555ee910bc673cdf0bd44a2671e411"
+    },
+    {
+      "file": "control.sdk-p10",
+      "bytes": 65536,
+      "sha256": "816499be6629179393e20af57e066a295c909a03d3dcc9326ab9568dfce48d75"
+    }
+  ]
+}

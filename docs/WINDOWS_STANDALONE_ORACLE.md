@@ -4,8 +4,9 @@
 
 Refs #3, #4, #5. This branch is stacked on `codex/macos-sdkfree-encoder`
 (`a0518c0`). It adds tests and frozen independent-encoder fixtures, without
-changing SDK, CUDA or standalone codec math. SDK compatibility remains **pending**
-until the actual Windows test runs; native Mac FFmpeg acceptance is independent.
+changing SDK, CUDA or standalone codec math. Actual Windows SDK acceptance of
+the three packets is now verified with `TAG_CPU_MAX=1`; native Mac FFmpeg
+acceptance is independently verified. Unrestricted SDK worker safety is not claimed.
 
 ## Inputs and reproduction
 
@@ -100,18 +101,64 @@ GoPro-encoded** control. Thus both decoders consume standalone and GoPro packets
 with explicitly different runtimes. It writes full p10 comparison evidence
 before any failed quality assertion. It never pretends FFmpeg is GoPro.
 
-## Current result
+## Verified result — SDK decode PASS with single-worker oracle setting
 
-Initial harness submission: SDK decode **NOT RUN / pending Windows Actions**.
-Apple M2 Pro / native arm64 / macOS 26.5.2 / Apple Clang 21.0.0 / CMake 3.31.5:
-Release full configured CTest **7/7 PASS**; Debug ASan+UBSan full configured CTest
-**7/7 PASS** (no findings). The SDK harness passes a separate C++17 Clang syntax
-check against actual SDK headers, without claiming native ARM SDK linkage.
-All three packet and FFmpeg plane hashes match PR #4's evidence. Only the existing
-unused `half_h` warning in the reused scalar wavelet source was observed.
-Windows full reference CTest, SDK statuses and triangular control results must
-be filled from actual CI, with run links. CUDA, Adobe and Resolve are NOT RUN.
-No throughput/latency optimization or performance milestone is claimed.
+[Push run 38627689864](https://github.com/louis-0hrs/HyperCine/actions/runs/38627689864)
+and [PR run 38627697818](https://github.com/louis-0hrs/HyperCine/actions/runs/38627697818)
+both PASS on `b905e50`. Windows Server 2025 (`windows-2025-vs2026` image
+`20260925.250.1`), MSVC 19.51.36260.0, native x64 (`Hostx64/x64/cl.exe`). Full reference CTest **6/6 PASS**, including
+`standalone_sdk_decode_3_packets`; all three genuine Mac-produced packets were
+actually prepared and decoded by GoPro into YU64 and BGRA. Each format has one
+distinct output hash across five fresh decoder instances under `TAG_CPU_MAX=1`.
+No private SDK-layout access or SDK source edits were needed.
+
+| Standalone input | SDK vs FFmpeg p10 PSNR | Max p10 error | SDK vs original RGB PSNR |
+| --- | ---: | ---: | ---: |
+| Flat128 | exact | 0 | exact |
+| GradientChecker | 62.7055 dB | 3 | **32.0550 dB** |
+| Canonical seed 0x1337BEEF | 62.8427 dB | 3 | 46.7787 dB |
+
+The nonzero decoder differences are retained, with all per-plane metrics and
+first mismatching coordinates in
+`docs/validation/windows_standalone_oracle_2026-10-14.json`. SDK vs uncompressed
+p10 is exact / 62.5922 / 63.7153 dB respectively. SDK-vs-FFmpeg BGRA is
+42.1102 / 41.9059 / 42.0604 dB, under the declared different chroma reconstruction
+pipelines. The known GradientChecker original-RGB >35 dB gate **still FAILS**;
+this compatibility result does not remove the 4:2:2 quality limitation in PR #4.
+
+The actual Windows GoPro control packet is 9184 bytes, SHA-256
+`2d9d57e3bd9334eca6e9a2e26b27df8a05555ee910bc673cdf0bd44a2671e411`.
+Independent Mac FFmpeg really decodes it as 128x128 yuv422p10le. SDK-vs-FFmpeg
+p10 is 62.7518 dB, max error 3. Control vs original uncompressed source is
+38.8927 dB (SDK) / 38.8811 dB (FFmpeg), with max errors 280/279 and Cb PSNR
+33.2910/33.2843 dB. Both decoders see the large chroma-border differences in the
+GoPro-encoded control; the precise per-plane/first-pixel evidence is retained.
+This is not source-exact GoPro encoding or identical quality between encoders.
+
+`tests/fixtures/windows-oracle/` freezes the actual Windows control packet and
+all seven unmasked SDK output images with run/commit provenance and SHA-256
+manifest. A Mac with external FFmpeg can reproduce the full triangular comparison
+without access to a Windows host or logs:
+
+```sh
+python3 tests/compare_sdk_oracle.py \
+  --windows-fixtures tests/fixtures/windows-oracle \
+  --ffmpeg /absolute/path/to/ffmpeg --ffprobe /absolute/path/to/ffprobe \
+  --output build/windows-oracle-replay
+```
+
+This replay is also registered as `standalone_windows_oracle_replay` when the
+external validator is available. Native Apple M2 Pro arm64 / macOS26.5.2 /
+Apple Clang21.0.0 / CMake3.31.5 full Release CTest **8/8 PASS**; full Debug
+ASan+UBSan CTest **8/8 PASS**, no findings. The new harness separately passed
+C++17 syntax validation against real SDK headers; no native ARM SDK execution
+is claimed. There is only the existing unused `half_h` wavelet warning.
+
+**Compatibility limit:** PASS covers the tested 128x128 fixed profile with
+`TAG_CPU_MAX=1`. Default unrestricted SDK worker decoding failed genuinely in
+the first run below and is not certified. CUDA, Adobe, Resolve and performance
+benchmarks remain **NOT RUN**. SDK encoder byte identity is not expected.
+The PR remains draft; no automatic merge or issue closure.
 
 ## First actual Windows attempt — failure retained
 

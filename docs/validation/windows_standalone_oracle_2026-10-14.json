@@ -1,0 +1,1816 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "windows_run": "https://github.com/louis-0hrs/HyperCine/actions/runs/38627689864",
+  "log_sha256": "bf6fa81f30c9bb0e5522768cf87790568efcb790271b931fbce356a6659f549f",
+  "windows_observations": [
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=0 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=0 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=1 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=1 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=2 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=2 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=3 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=3 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat YU64 repeat=4 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat BGRA repeat=4 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "flat distinctYU64=1 distinctBGRA=1"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=0 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=0 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=1 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=1 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=2 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=2 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=3 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=3 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient YU64 repeat=4 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient BGRA repeat=4 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "gradient distinctYU64=1 distinctBGRA=1"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=0 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=0 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=1 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=1 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=2 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=2 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=3 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=3 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical YU64 repeat=4 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical BGRA repeat=4 DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "canonical distinctYU64=1 distinctBGRA=1"
+    },
+    {
+      "step": "Build Release",
+      "result": "control OpenEncoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "control PrepareToEncode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "control EncodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "control GetSampleData status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control PrepareToDecode status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control GetImagePitch status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control OpenMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control InitMetadata status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control PRCS status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control BT709 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control fullRGB status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control chromaFilterOff status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control CPU_MAX=1 status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "GoPro control DecodeSample status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "invalid OpenDecoder status=0"
+    },
+    {
+      "step": "Build Release",
+      "result": "invalid zero header PrepareToDecode status=5"
+    },
+    {
+      "step": "Build Release",
+      "result": "SDK decode PASS: all three standalone packets"
+    }
+  ],
+  "ffmpeg_version": "ffmpeg version n8.0 Copyright (c) 2000-2025 the FFmpeg developers",
+  "input_contract": "128x128 top-down BT.709 studio YUV422 p10; YU64 LE Y0 Cr Y1 Cb >>6; BGRA SDK bottom-up",
+  "alpha_excluded": true,
+  "samples": [
+    {
+      "pattern": "flat",
+      "sdk_p10_sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a",
+      "sdk_bgra_sha256": "148dee3e8f139487270598699b09f700a00ad8626ec9846a1fcf89f3b947634d",
+      "sdk_vs_ffmpeg_p10": {
+        "overall": {
+          "psnr_db": null,
+          "max_error": 0,
+          "mismatches": 0,
+          "first_index": null,
+          "first_actual": null,
+          "first_reference": null
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cb": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cr": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          }
+        }
+      },
+      "sdk_vs_uncompressed_p10": {
+        "overall": {
+          "psnr_db": null,
+          "max_error": 0,
+          "mismatches": 0,
+          "first_index": null,
+          "first_actual": null,
+          "first_reference": null
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cb": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cr": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          }
+        }
+      },
+      "sdk_vs_ffmpeg_rgb": {
+        "psnr_db": 42.11020369539948,
+        "max_error": 2,
+        "mismatches": 49152,
+        "first_index": 0,
+        "first_actual": 128,
+        "first_reference": 126
+      },
+      "sdk_vs_source_rgb": {
+        "psnr_db": null,
+        "max_error": 0,
+        "mismatches": 0,
+        "first_index": null,
+        "first_actual": null,
+        "first_reference": null
+      }
+    },
+    {
+      "pattern": "gradient",
+      "sdk_p10_sha256": "969a5e4a7357be89a71455ef5fba38a8ec10dcd953320f654c79c8d2deafd870",
+      "sdk_bgra_sha256": "d8b1107587966b674b4ee2903671efd0f67209c52b8ab4c6a9bcee24e0c289f5",
+      "sdk_vs_ffmpeg_p10": {
+        "overall": {
+          "psnr_db": 62.70548631537142,
+          "max_error": 3,
+          "mismatches": 16633,
+          "first_index": 0,
+          "first_actual": 132,
+          "first_reference": 131
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 62.74557495649013,
+            "max_error": 3,
+            "mismatches": 8217,
+            "first_index": 0,
+            "first_actual": 132,
+            "first_reference": 131
+          },
+          "Cb": {
+            "psnr_db": 62.84878805308032,
+            "max_error": 3,
+            "mismatches": 4120,
+            "first_index": 0,
+            "first_actual": 524,
+            "first_reference": 523
+          },
+          "Cr": {
+            "psnr_db": 62.490142854430005,
+            "max_error": 3,
+            "mismatches": 4296,
+            "first_index": 0,
+            "first_actual": 466,
+            "first_reference": 465
+          }
+        }
+      },
+      "sdk_vs_uncompressed_p10": {
+        "overall": {
+          "psnr_db": 62.5922221591689,
+          "max_error": 4,
+          "mismatches": 15350,
+          "first_index": 3,
+          "first_actual": 135,
+          "first_reference": 136
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 62.6335959584754,
+            "max_error": 3,
+            "mismatches": 7809,
+            "first_index": 3,
+            "first_actual": 135,
+            "first_reference": 136
+          },
+          "Cb": {
+            "psnr_db": 63.29888549074429,
+            "max_error": 4,
+            "mismatches": 3488,
+            "first_index": 0,
+            "first_actual": 524,
+            "first_reference": 522
+          },
+          "Cr": {
+            "psnr_db": 61.913595149129094,
+            "max_error": 3,
+            "mismatches": 4053,
+            "first_index": 0,
+            "first_actual": 466,
+            "first_reference": 469
+          }
+        }
+      },
+      "sdk_vs_ffmpeg_rgb": {
+        "psnr_db": 41.90587816615934,
+        "max_error": 5,
+        "mismatches": 47030,
+        "first_index": 0,
+        "first_actual": 26,
+        "first_reference": 24
+      },
+      "sdk_vs_source_rgb": {
+        "psnr_db": 32.05504708325007,
+        "max_error": 102,
+        "mismatches": 36362,
+        "first_index": 0,
+        "first_actual": 26,
+        "first_reference": 25
+      }
+    },
+    {
+      "pattern": "canonical",
+      "sdk_p10_sha256": "f186174e749b87425cbf905023dc742f167c2d2a3812202189b570c7263ce7f6",
+      "sdk_bgra_sha256": "81be353499193db34448f1fb747dcb0f215e094ec5ab8a58adb7250df8d3b534",
+      "sdk_vs_ffmpeg_p10": {
+        "overall": {
+          "psnr_db": 62.842691321839254,
+          "max_error": 3,
+          "mismatches": 16380,
+          "first_index": 0,
+          "first_actual": 62,
+          "first_reference": 61
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 62.80411514986828,
+            "max_error": 3,
+            "mismatches": 8250,
+            "first_index": 0,
+            "first_actual": 62,
+            "first_reference": 61
+          },
+          "Cb": {
+            "psnr_db": 63.17927876254718,
+            "max_error": 3,
+            "mismatches": 3908,
+            "first_index": 0,
+            "first_actual": 513,
+            "first_reference": 512
+          },
+          "Cr": {
+            "psnr_db": 62.60304756884679,
+            "max_error": 2,
+            "mismatches": 4222,
+            "first_index": 6,
+            "first_actual": 528,
+            "first_reference": 527
+          }
+        }
+      },
+      "sdk_vs_uncompressed_p10": {
+        "overall": {
+          "psnr_db": 63.7153304860137,
+          "max_error": 3,
+          "mismatches": 13040,
+          "first_index": 0,
+          "first_actual": 62,
+          "first_reference": 64
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 63.42912589815918,
+            "max_error": 3,
+            "mismatches": 6874,
+            "first_index": 0,
+            "first_actual": 62,
+            "first_reference": 64
+          },
+          "Cb": {
+            "psnr_db": 64.64055911932955,
+            "max_error": 3,
+            "mismatches": 2780,
+            "first_index": 0,
+            "first_actual": 513,
+            "first_reference": 512
+          },
+          "Cr": {
+            "psnr_db": 63.4801902474926,
+            "max_error": 3,
+            "mismatches": 3386,
+            "first_index": 0,
+            "first_actual": 515,
+            "first_reference": 517
+          }
+        }
+      },
+      "sdk_vs_ffmpeg_rgb": {
+        "psnr_db": 42.06036994738558,
+        "max_error": 5,
+        "mismatches": 46516,
+        "first_index": 2,
+        "first_actual": 2,
+        "first_reference": 0
+      },
+      "sdk_vs_source_rgb": {
+        "psnr_db": 46.778731460980595,
+        "max_error": 5,
+        "mismatches": 29507,
+        "first_index": 2,
+        "first_actual": 2,
+        "first_reference": 0
+      }
+    }
+  ],
+  "control": {
+    "packet_bytes": 9184,
+    "packet_sha256": "2d9d57e3bd9334eca6e9a2e26b27df8a05555ee910bc673cdf0bd44a2671e411",
+    "sdk_p10_sha256": "816499be6629179393e20af57e066a295c909a03d3dcc9326ab9568dfce48d75",
+    "ffmpeg_p10_sha256": "110c7e6472ca6d1e77287fc2f6ab8c28672b365d4d701c3afe6b9d45745c734b",
+    "sdk_vs_ffmpeg_p10": {
+      "overall": {
+        "psnr_db": 62.75177541689732,
+        "max_error": 3,
+        "mismatches": 16821,
+        "first_index": 3,
+        "first_actual": 66,
+        "first_reference": 65
+      },
+      "planes": {
+        "Y": {
+          "psnr_db": 62.806047924630505,
+          "max_error": 2,
+          "mismatches": 8185,
+          "first_index": 3,
+          "first_actual": 66,
+          "first_reference": 65
+        },
+        "Cb": {
+          "psnr_db": 62.66904115160272,
+          "max_error": 3,
+          "mismatches": 4436,
+          "first_index": 0,
+          "first_actual": 792,
+          "first_reference": 791
+        },
+        "Cr": {
+          "psnr_db": 62.72750112653608,
+          "max_error": 2,
+          "mismatches": 4200,
+          "first_index": 12,
+          "first_actual": 532,
+          "first_reference": 531
+        }
+      }
+    },
+    "sdk_vs_source_p10": {
+      "overall": {
+        "psnr_db": 38.89268593088381,
+        "max_error": 280,
+        "mismatches": 23143,
+        "first_index": 0,
+        "first_actual": 62,
+        "first_reference": 64
+      },
+      "planes": {
+        "Y": {
+          "psnr_db": 57.42277477927331,
+          "max_error": 7,
+          "mismatches": 11697,
+          "first_index": 0,
+          "first_actual": 62,
+          "first_reference": 64
+        },
+        "Cb": {
+          "psnr_db": 33.290969082654414,
+          "max_error": 280,
+          "mismatches": 5090,
+          "first_index": 0,
+          "first_actual": 792,
+          "first_reference": 512
+        },
+        "Cr": {
+          "psnr_db": 43.58137056093852,
+          "max_error": 231,
+          "mismatches": 6356,
+          "first_index": 0,
+          "first_actual": 748,
+          "first_reference": 517
+        }
+      }
+    },
+    "ffmpeg_vs_source_p10": {
+      "overall": {
+        "psnr_db": 38.88105215743075,
+        "max_error": 279,
+        "mismatches": 24515,
+        "first_index": 0,
+        "first_actual": 62,
+        "first_reference": 64
+      },
+      "planes": {
+        "Y": {
+          "psnr_db": 56.75750661718773,
+          "max_error": 7,
+          "mismatches": 12024,
+          "first_index": 0,
+          "first_actual": 62,
+          "first_reference": 64
+        },
+        "Cb": {
+          "psnr_db": 33.284339195974304,
+          "max_error": 279,
+          "mismatches": 5989,
+          "first_index": 0,
+          "first_actual": 791,
+          "first_reference": 512
+        },
+        "Cr": {
+          "psnr_db": 43.57452368496601,
+          "max_error": 231,
+          "mismatches": 6502,
+          "first_index": 0,
+          "first_actual": 748,
+          "first_reference": 517
+        }
+      }
+    }
+  },
+  "state": "SDK decode PASS with TAG_CPU_MAX=1; not unrestricted worker certification",
+  "commit": "b905e5038d947c19d4759f992696678e89d4745c",
+  "windows_ctest": "PASS 6/6 including actual standalone SDK decode",
+  "windows_os": "Windows Server 2025; windows-2025-vs2026 image 20260925.250.1",
+  "windows_compiler": "MSVC 19.51.36260.0",
+  "native_host": "Apple M2 Pro arm64, macOS26.5.2, Apple Clang21.0.0, CMake3.31.5"
+}

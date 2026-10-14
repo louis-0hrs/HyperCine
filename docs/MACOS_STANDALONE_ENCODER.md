@@ -210,3 +210,16 @@ the same aligned, signed `Plane` / `WaveletLevel` values. Quantized subbands and
 checked host VLC/framing remain the host boundary. Do not pass SDK encoder or
 transform structures through that API. Metal kernels, NEON, a new decoder, larger
 resolutions and production rate control are outside issue #3's implementation.
+
+## Subsequent Windows oracle — issue #5
+
+The original measurement snapshot above predates the Windows oracle. The stacked
+issue #5 branch adds genuine SDK decoding of all three unchanged Mac-produced
+packets, rather than relying on the four legacy regression tests. Windows x64
+MSVC CTest **6/6 PASS** under the documented `TAG_CPU_MAX=1` setting, and a real
+Windows GoPro-encoded control also independently FFmpeg-decodes on Mac. See
+[the oracle report](WINDOWS_STANDALONE_ORACLE.md) and its run-linked JSON for
+returned API statuses, unmasked pixels, hashes and per-plane differences.
+The first unrestricted-worker attempt failed with actual unstable channel
+outputs; no default multi-worker SDK safety claim is made. The known original-RGB
+GradientChecker quality limitation and pending CUDA/Adobe/Resolve gates remain.
