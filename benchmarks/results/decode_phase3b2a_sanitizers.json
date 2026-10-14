@@ -1,0 +1,28 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "BLOCKED_ENVIRONMENT",
+  "environment": {
+    "os": "Windows WDDM",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "driver": "610.62",
+    "cuda_toolkit": "12.8",
+    "compute_sanitizer": "2025.1.0.0 (build 35351055)"
+  },
+  "memcheck": {
+    "status": "BLOCKED_ENVIRONMENT",
+    "attempts": 2,
+    "direct_target_command": "compute-sanitizer --tool memcheck --leak-check full --error-exitcode 99 build/tests/Release/test_decode_phase3b2a_reconstruction.exe .",
+    "direct_target_result": "No attachable process found; timed out before test execution.",
+    "minimal_cuda_target_command": "compute-sanitizer --tool memcheck --launch-timeout 15 --error-exitcode 99 build/tests/Release/test_decode_phase3b2a_temporal.exe",
+    "minimal_cuda_target_result": "No attachable process found; timed out before test execution.",
+    "minimal_cuda_target_native_result": "The same test_decode_phase3b2a_temporal.exe runs natively and passes its CUDA vector test.",
+    "result": "The sanitizer could not attach to either the full production reconstruction executable or the small CUDA temporal-kernel executable. No instrumented target execution occurred."
+  },
+  "initcheck": "BLOCKED_ENVIRONMENT_NOT_RUN_AFTER_MINIMAL_TARGET_ATTACH_FAILURE",
+  "racecheck": "BLOCKED_ENVIRONMENT_NOT_RUN_AFTER_MINIMAL_TARGET_ATTACH_FAILURE",
+  "synccheck": "BLOCKED_ENVIRONMENT_NOT_RUN_AFTER_MINIMAL_TARGET_ATTACH_FAILURE",
+  "leak_check": "BLOCKED_ENVIRONMENT_NOT_RUN_MEMCHECK_COULD_NOT_ATTACH",
+  "fieldplus_frames_0_1_alternation_slot_reuse_mixed_gop": "NOT_VALIDATED_BY_SANITIZER",
+  "qualification_outcome": "D_INFRASTRUCTURE_BLOCKER",
+  "production_promotion": "NOT_RECOMMENDED"
+}

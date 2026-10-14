@@ -1,0 +1,504 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "branch": "decode-phase3b2a",
+  "base_commit": "f433a7491b12b7e053fec0bab48b4ba784e7d3d9",
+  "phase3b2r_base": "f1d0fe4",
+  "commits_created": [
+    "9cf74a0 feat(decoder): add progressive FIELDPLUS GOP-2 decode",
+    "3a62ec9 test(decoder): qualify FIELDPLUS frame reconstruction"
+  ],
+  "files_changed": [
+    "docs/UPSTREAM.md",
+    "include/hypercine/decoder.h",
+    "include/hypercine/research/decode_phase2e.h",
+    "include/hypercine/research/decoder_diagnostics.h",
+    "src/CMakeLists.txt",
+    "src/core/decoder.cpp",
+    "src/core/decode_fieldplus.h",
+    "src/core/decode_fieldplus_parser.cpp",
+    "src/cuda/decode_inverse_kernels.cuh",
+    "src/cuda/decode_phase2e_pipeline.cu",
+    "src/cuda/decode_phase2e_stub.cpp",
+    "tests/CMakeLists.txt",
+    "tests/test_decode_phase3b1_acceptance.cpp",
+    "tests/test_decode_phase3b2a_api.cpp",
+    "tests/test_decode_phase3b2a_parser.cpp",
+    "tests/test_decode_phase3b2a_reconstruction.cpp",
+    "tests/test_decode_phase3b2a_temporal.cu",
+    "tests/test_decode_phase3b2a_upstream_temporal.cpp",
+    "tests/fixtures/phase3b2a/",
+    "docs/DECODE_PHASE3B2A.md",
+    "benchmarks/results/decode_phase3b2a_*.json"
+  ],
+  "encoder_modified": false,
+  "upstream_clean": true,
+  "outcome": "D_QUALIFICATION_INFRASTRUCTURE_BLOCKER",
+  "cuda_ctest": {
+    "status": "PASS",
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0,
+    "total_seconds": 743.71,
+    "phase2fa_seconds": 460.64
+  },
+  "cpu_only": {
+    "status": "PASS",
+    "configured_cuda": false,
+    "built": true,
+    "ctest_passed": 7,
+    "ctest_total": 7,
+    "fieldplus_production_backend": "unavailable as designed",
+    "parser_and_public_api": "compiled"
+  },
+  "sanitizers": {
+    "status": "BLOCKED_ENVIRONMENT",
+    "compute_sanitizer": "2025.1.0.0 (build 35351055)",
+    "memcheck_production_target": "No attachable process found; timed out before test execution",
+    "memcheck_minimal_cuda_target": "No attachable process found; timed out before test execution",
+    "minimal_cuda_target_native": "PASS",
+    "instrumented_execution": false,
+    "other_tools": "not run because even the minimal CUDA target could not be instrumented"
+  },
+  "4k_smoke": {
+    "status": "PASS",
+    "evidence": "benchmarks/results/decode_phase3b2a_4k.json",
+    "source_fnv1a64": "d75570406b9b8381",
+    "sample_fnv1a64": "cc0bd067610e1d02",
+    "sample_bytes": 7584404,
+    "frame0_upstream_and_hypercine_fnv1a64": "8c054bd19cd88cd6",
+    "frame1_upstream_and_hypercine_fnv1a64": "82110fddd98f60c8"
+  },
+  "memory_accounting": {
+    "status": "PASS_MEMORY_AND_SOURCE_LEVEL_STREAM_EVENT_ACCOUNTING",
+    "1080p_device_bytes_per_slot": 85191172,
+    "4k_device_bytes_per_slot": 228373252,
+    "4k_pinned_bytes_total": 72518552,
+    "4k_pageable_owned_capacity_bytes": 85510728,
+    "stream_event_counts": {"per_slot": {"streams": 13, "events": 197}, "default_two_slot_total": {"streams": 26, "events": 394}, "delta_added_by_3b2a": {"streams": 0, "events": 0}, "global_owned": {"streams": 0, "events": 0}, "method": "exact source create/destroy call accounting; no runtime handle counter is exposed"}
+  },
+  "performance": {
+    "status": "PARTIAL_END_TO_END_MEASURED",
+    "evidence": "benchmarks/results/decode_phase3b2a_performance.json",
+    "iterations_per_frame": 120,
+    "frame0_mean_ms": 11.1203,
+    "frame0_median_ms": 10.8342,
+    "frame0_p95_ms": 12.1014,
+    "frame0_min_ms": 10.2912,
+    "frame0_max_ms": 12.4004,
+    "frame0_stddev_ms": 0.640219,
+    "frame0_fps_equivalent": 89.9254,
+    "frame1_mean_ms": 11.479,
+    "frame1_median_ms": 11.6422,
+    "frame1_p95_ms": 12.3695,
+    "frame1_min_ms": 10.389,
+    "frame1_max_ms": 13.2512,
+    "frame1_stddev_ms": 0.676141,
+    "frame1_fps_equivalent": 87.1154,
+    "stage_timing": "not exposed by current diagnostics",
+    "same_session_gop1_regression": "not run"
+  },
+  "production_promotion": "NOT_RECOMMENDED",
+  "phase3b2b": "After all Phase 3B-2A gates pass, add interlaced FIELDPLUS as a separate profile with independent exact references.",
+  "reported_items": [
+    {
+      "id": 1,
+      "result": "Branch decode-phase3b2a."
+    },
+    {
+      "id": 2,
+      "result": "Base f433a7491b12b7e053fec0bab48b4ba784e7d3d9; Phase 3B-2R base f1d0fe4."
+    },
+    {
+      "id": 3,
+      "result": "No commits created; changes remain uncommitted."
+    },
+    {
+      "id": 4,
+      "result": "Changed-file inventory is files_changed."
+    },
+    {
+      "id": 5,
+      "result": "Public API adds DecodeRequest.frame_index and progressive_fieldplus_gop2 capability."
+    },
+    {
+      "id": 6,
+      "result": "upstream/ clean."
+    },
+    {
+      "id": 7,
+      "result": "Encoder unchanged."
+    },
+    {
+      "id": 8,
+      "result": "Main was not modified, merged, or pushed."
+    },
+    {
+      "id": 9,
+      "result": "Progressive FIELDPLUS/GOP-2 YUV422 p10, 3 channels, 2 frames."
+    },
+    {
+      "id": 10,
+      "result": "Separate fixed-array descriptor: 51 coefficient bands and 54 physical chunks."
+    },
+    {
+      "id": 11,
+      "result": "Encoded channels Y,V,U."
+    },
+    {
+      "id": 12,
+      "result": "Six wavelets w0 through w5."
+    },
+    {
+      "id": 13,
+      "result": "17 logical subbands per channel."
+    },
+    {
+      "id": 14,
+      "result": "54 physical chunks per sample."
+    },
+    {
+      "id": 15,
+      "result": "Three index=255 control chunks, one per channel."
+    },
+    {
+      "id": 16,
+      "result": "Each control is 8 bytes, empty payload, targets w2 band1, excluded from entropy."
+    },
+    {
+      "id": 17,
+      "result": "Two output frames."
+    },
+    {
+      "id": 18,
+      "result": "DecodeRequest.frame_index; one output per ticket."
+    },
+    {
+      "id": 19,
+      "result": "GOP-1 defaults to frame 0 and rejects frame 1."
+    },
+    {
+      "id": 20,
+      "result": "FIELDPLUS accepts 0/1, rejects >=2; negative indices reject."
+    },
+    {
+      "id": 21,
+      "result": "Encoded channel order Y,V,U."
+    },
+    {
+      "id": 22,
+      "result": "Device planar order Y,U,V; V/U remap preserved."
+    },
+    {
+      "id": 23,
+      "result": "w3 temporal-high spatial inverse exact to upstream stages."
+    },
+    {
+      "id": 24,
+      "result": "w5 inverse exact to upstream stages."
+    },
+    {
+      "id": 25,
+      "result": "w4 inverse exact to upstream stages."
+    },
+    {
+      "id": 26,
+      "result": "Temporal-low stage exact to upstream-derived array."
+    },
+    {
+      "id": 27,
+      "result": "Temporal-high stage exact to upstream-derived array."
+    },
+    {
+      "id": 28,
+      "result": "frame0=arshift1(sat16(low-high)); frame1=arshift1(sat16(low+high)) on vector prefix."
+    },
+    {
+      "id": 29,
+      "result": "Vector prefix saturates signed 16-bit before arithmetic shift."
+    },
+    {
+      "id": 30,
+      "result": "Observed upstream scalar tail arithmetic-shifts the unsaturated signed sum; /2 hypothesis disproved."
+    },
+    {
+      "id": 31,
+      "result": "Audit covers frame widths 64,80,96,112,128,1920 and 8/40-wide paths; legal tails depend on width modulo 80."
+    },
+    {
+      "id": 32,
+      "result": "Canonical 64 frame0 BGRA hash 27fd4d3948775018."
+    },
+    {
+      "id": 33,
+      "result": "Canonical 64 frame1 BGRA hash c06ad9438de588c8."
+    },
+    {
+      "id": 34,
+      "result": "Canonical 64 frame0/frame1 exact."
+    },
+    {
+      "id": 35,
+      "result": "1080 frame0 BGRA hash 7f633a5358642abd."
+    },
+    {
+      "id": 36,
+      "result": "1080 frame1 BGRA hash 6d174c1993f61015."
+    },
+    {
+      "id": 37,
+      "result": "1080 frame0/frame1 exact for frozen motion sample."
+    },
+    {
+      "id": 38,
+      "result": "All 51 bands compared sample-by-sample to upstream captures; separate frozen per-band hash manifest not emitted."
+    },
+    {
+      "id": 39,
+      "result": "Final signed planar frame0 exact to upstream-derived signed inverse reference."
+    },
+    {
+      "id": 40,
+      "result": "Final signed planar frame1 exact to upstream-derived signed inverse reference."
+    },
+    {
+      "id": 41,
+      "result": "BGRA frame0 exact for tested fixtures."
+    },
+    {
+      "id": 42,
+      "result": "BGRA frame1 exact for tested fixtures."
+    },
+    {
+      "id": 43,
+      "result": "Temporal-asymmetric fixture frame order exact."
+    },
+    {
+      "id": 44,
+      "result": "64x64 moving-box/edge fixture frame0/frame1 exact."
+    },
+    {
+      "id": 45,
+      "result": "Chroma-temporal fixture BGRA and planar Y/U/V exact."
+    },
+    {
+      "id": 46,
+      "result": "Top-down orientation exact for both frames."
+    },
+    {
+      "id": 47,
+      "result": "Bottom-up orientation exact for both frames."
+    },
+    {
+      "id": 48,
+      "result": "BT.601 CG cross-product case not run as a dedicated Phase 3B-2A gate."
+    },
+    {
+      "id": 49,
+      "result": "BT.601 VS cross-product case not run as a dedicated Phase 3B-2A gate."
+    },
+    {
+      "id": 50,
+      "result": "Default BT.709 CG exact fixtures pass; explicit cross-product matrix not run."
+    },
+    {
+      "id": 51,
+      "result": "BT.709 VS cross-product case not run as a dedicated Phase 3B-2A gate."
+    },
+    {
+      "id": 52,
+      "result": "FIELDPLUS uses fixed Hybrid route."
+    },
+    {
+      "id": 53,
+      "result": "GOP-1 Auto classifier is bypassed for FIELDPLUS."
+    },
+    {
+      "id": 54,
+      "result": "Explicit Lightweight override rejected for FIELDPLUS by dispatch policy; dedicated override test not run."
+    },
+    {
+      "id": 55,
+      "result": "Fixed Hybrid is selected internally; explicit override request is unsupported."
+    },
+    {
+      "id": 56,
+      "result": "GOP-1 progressive regression suite passed in full CUDA CTest."
+    },
+    {
+      "id": 57,
+      "result": "GOP-1 interlaced regression suite passed in full CUDA CTest."
+    },
+    {
+      "id": 58,
+      "result": "Interlaced FIELDPLUS rejected with UnsupportedEncodingMode."
+    },
+    {
+      "id": 59,
+      "result": "RGB444 p12 rejected by existing profile matrix."
+    },
+    {
+      "id": 60,
+      "result": "RGBA4444 p12 rejected by existing profile matrix."
+    },
+    {
+      "id": 61,
+      "result": "Bayer p12 rejected by existing profile matrix."
+    },
+    {
+      "id": 62,
+      "result": "Malformed control-chunk cases rejected by parser tests."
+    },
+    {
+      "id": 63,
+      "result": "Wrong/missing physical chunk-count cases rejected."
+    },
+    {
+      "id": 64,
+      "result": "Truncated FIELDPLUS input rejected."
+    },
+    {
+      "id": 65,
+      "result": "Invalid precision rejected."
+    },
+    {
+      "id": 66,
+      "result": "Oversized sample rejected with SampleTooLarge."
+    },
+    {
+      "id": 67,
+      "result": "Final CUDA CTest after mixed multi-quality stress changes passed 44/44, zero skipped, 773.83 seconds."
+    },
+    {
+      "id": 68,
+      "result": "Historical 3B-1 stress timeout did not recur; the full current CUDA suite completed, and the 5,000-frame GOP-1 and mixed GOP-1/GOP-2 stress gates passed."
+    },
+    {
+      "id": 69,
+      "result": "Phase2FA passed in the latest full run at 461.53 seconds, consistent with previous full runs; no stall."
+    },
+    {
+      "id": 70,
+      "result": "CPU-only configure/build and CTest passed 7/7."
+    },
+    {
+      "id": 71,
+      "result": "Direct Compute Sanitizer memcheck failed to attach to both production reconstruction and minimal CUDA temporal test; no instrumented run occurred."
+    },
+    {
+      "id": 72,
+      "result": "initcheck not run after minimal CUDA target attach failure."
+    },
+    {
+      "id": 73,
+      "result": "racecheck not run after minimal CUDA target attach failure."
+    },
+    {
+      "id": 74,
+      "result": "synccheck not run after minimal CUDA target attach failure."
+    },
+    {
+      "id": 75,
+      "result": "Leak check not run because memcheck could not attach."
+    },
+    {
+      "id": 76,
+      "result": "Canonical frame0 repeated 200 times exactly; 1080 frame0 repeated 100 times exactly."
+    },
+    {
+      "id": 77,
+      "result": "Canonical frame1 repeated 200 times exactly; 1080 frame1 repeated 100 times exactly."
+    },
+    {
+      "id": 78,
+      "result": "5,000 mixed GOP-1 progressive/interlaced and FIELDPLUS frame-0/frame-1 output tickets passed exact validation across multiple patterns and GOP-1 Low/High/FilmScan 3 qualities; FIELDPLUS counts were 147 and 147; release alternated FIFO/reverse; steady-state C++ allocation and CUDA/memory deltas were zero."
+    },
+    {
+      "id": 79,
+      "result": "Two concurrent decoder instances each processed 60 mixed GOP-1/FIELDPLUS outputs exactly; PASS."
+    },
+    {
+      "id": 80,
+      "result": "Four concurrent decoder instances each processed 60 mixed GOP-1/FIELDPLUS outputs exactly; PASS."
+    },
+    {
+      "id": 81,
+      "result": "FIELDPLUS delayed/non-FIFO release, held output, repeated frame selection, consumer stream wait, failed-ticket coexistence, and in-flight decoder destruction/drain passed; slot modes 1, 2, default, and 4 passed."
+    },
+    {
+      "id": 82,
+      "result": "FIELDPLUS 400-request alternating steady-state test measured zero C++ allocations and zero CUDA/device/pinned/pageable memory deltas after warm-up."
+    },
+    {
+      "id": 83,
+      "result": "1920x1080 FIELDPLUS device memory measured: 85,191,172 bytes per slot; two slots total 170,532,360 bytes including 150,016 immutable bytes. Corrected 36-band scratch accounting is reflected in pageable capacity."
+    },
+    {
+      "id": 84,
+      "result": "4K FIELDPLUS device memory not measured."
+    },
+    {
+      "id": 85,
+      "result": "1920x1080 pinned memory measured at 36,259,276 bytes per slot (72,518,552 total); pageable capacity 85,510,728 bytes total."
+    },
+    {
+      "id": 86,
+      "result": "FIELDPLUS stream/event count delta not measured."
+    },
+    {
+      "id": 87,
+      "result": "PASS end-to-end latency distribution measured over 120 exact frame0 decodes; see decode_phase3b2a_performance.json. Stage timing and GOP-1 A/B comparison remain open."
+    },
+    {
+      "id": 88,
+      "result": "PASS end-to-end latency distribution measured over 120 exact frame1 decodes; see decode_phase3b2a_performance.json. Stage timing and GOP-1 A/B comparison remain open."
+    },
+    {
+      "id": 89,
+      "result": "w3 stage time not measured."
+    },
+    {
+      "id": 90,
+      "result": "w5/w4 stage time not measured."
+    },
+    {
+      "id": 91,
+      "result": "Temporal-kernel stage time not measured."
+    },
+    {
+      "id": 92,
+      "result": "Selected-frame base-inverse time not measured."
+    },
+    {
+      "id": 93,
+      "result": "Color-conversion time not measured separately."
+    },
+    {
+      "id": 94,
+      "result": "PASS: generated temporally asymmetric 3840x2160 FilmScan3 FIELDPLUS sample; both frames exactly matched upstream BGRA references."
+    },
+    {
+      "id": 95,
+      "result": "Same-session GOP-1 performance regression benchmark not run."
+    },
+    {
+      "id": 96,
+      "result": "Capability flag reports progressive FIELDPLUS GOP-2 only when CUDA backend is available."
+    },
+    {
+      "id": 97,
+      "result": "Outcome D: qualification infrastructure blocker. Sanitizer cannot attach even to a native-passing minimal CUDA target; no production promotion recommended. 4K, resource, performance, matrix/range, and lowpass gates remain open."
+    },
+    {
+      "id": 98,
+      "result": "Remaining limitations: Compute Sanitizer attach failure, FIELDPLUS stage timing, same-session GOP-1 regression benchmark, matrix/range cross-product, and lowpass-offset proof."
+    },
+    {
+      "id": 99,
+      "result": "Do not promote or merge until remaining gates close; no merge/push/tag/release performed."
+    },
+    {
+      "id": 100,
+      "result": "After 3B-2A gates pass, Phase 3B-2B should add interlaced FIELDPLUS with independent references and preserve this progressive path."
+    }
+  ]
+}
