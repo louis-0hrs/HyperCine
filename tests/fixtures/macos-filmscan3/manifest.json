@@ -1,0 +1,66 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "producer": "Native Apple Silicon autonomous FilmScan3Encoder; no reference tables or headers supplied",
+  "base_commit": "cf7a46dda868a4d65bd96eae71460f3a0258b32d",
+  "samples": [
+    {
+      "file": "flat.cfhd",
+      "frame_index": 0,
+      "width": 1920,
+      "height": 1080,
+      "byte_length": 185648,
+      "sha256": "d75e6af7980558e42a520e8ce3bd3513626a854c3210da1c8b78240f4d75d6df",
+      "input_sha256": "760ea8d69feb7f0d9bc12a2ebcc0d4ed037deea9c85391e289021b4ce4bd74b9",
+      "expected_sdk_normalized_sha256": "229dd7c474133b718808236b81796536e05a90d6babaa936e90226abca4313f3"
+    },
+    {
+      "file": "gradient.cfhd",
+      "frame_index": 3,
+      "width": 1920,
+      "height": 1080,
+      "byte_length": 315720,
+      "sha256": "5e8ea4785c00dd6406e85be7ddee426dd093e1007aca7effa9e1aff4f95aa1ca",
+      "input_sha256": "b1a98238671a4911a493c980a7f42edd65ba2c1326e6afa64e6839759071ee57",
+      "expected_sdk_normalized_sha256": "92c69dfed95cc1c6b164a4000a8c7c071f2c07593b9283841093ae3bffc0d33d"
+    }
+  ],
+  "sources": [
+    {
+      "path": "include/hypercine/filmscan3.h",
+      "sha256": "a57222829ba5976aa3a409ed80b12cc97eb3d035228823b4547142472181d132"
+    },
+    {
+      "path": "include/hypercine/standalone.h",
+      "sha256": "108adb160dad6b62a5a5c91c964d3002a6c28d6a2dbb29548bbc21298d76ef3d"
+    },
+    {
+      "path": "src/cpu/filmscan3_frontend.cpp",
+      "sha256": "4ba3601463e7b8668afe7a5584cabb4fefd674797ed02c02c8dc2b4aba1ce284"
+    },
+    {
+      "path": "src/core/filmscan3_encoder.cpp",
+      "sha256": "aa9818667f87199dd51c1acca472b11a7b1a4e74778e96b1ed960d52281bcafe"
+    },
+    {
+      "path": "src/cpu/wavelet_cpu.cpp",
+      "sha256": "2a3afddf41b9d5450c94774f9d32d75eb6eea5a01ee67c09f46f36028dca853e"
+    },
+    {
+      "path": "src/cpu/standalone_frontend.cpp",
+      "sha256": "1ef5e8861ea26053debca53afbddeac1bef8ef01c267db4dff8e860c8bc77e02"
+    },
+    {
+      "path": "src/core/standalone_encoder.cpp",
+      "sha256": "4f8f2bce9a12896f62481c4a116ecedf2d30f16bd46879c73e9e266e655d182d"
+    },
+    {
+      "path": "src/core/standalone_codebook.h",
+      "sha256": "95a1c34b88530acb7d62811ecd0b57f22fdb5b3d783d59573d8406ad2143f906"
+    },
+    {
+      "path": "tools/hypercine_encode_filmscan3.cpp",
+      "sha256": "f8243c34a3021cbe0e052520f287f78b0be873e09a979a785757b77d8511fe04"
+    }
+  ]
+}

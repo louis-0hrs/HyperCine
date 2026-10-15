@@ -88,3 +88,6 @@ Makefile
 !ucm.cmake
 !libcineformsdk.pc.cmake
 
+
+# Source fixture verifier (not a generated CMake artifact)
+!tests/verify_filmscan3_fixtures.cmake

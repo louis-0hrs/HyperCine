@@ -9,6 +9,9 @@
 
 namespace {
 
+// C++17 signed shifts are implementation-defined; use exact floor division.
+inline int32_t FloorDivide8(int32_t value) { return value>=0 ? value/8 : -((-value+7)/8); }
+
 inline int16_t Saturate16S(int32_t val) {
     if (val > 32767) return 32767;
     if (val < -32768) return -32768;
@@ -51,7 +54,7 @@ HyperCineStatus HyperCine_ForwardHorizontal26_CPU(
                             + 4 * static_cast<int32_t>(in_row[3])
                             - 1 * static_cast<int32_t>(in_row[4])
                             - 1 * static_cast<int32_t>(in_row[5]);
-                sum = (sum + 4) >> 3;
+                sum = FloorDivide8(sum + 4);
                 high_row[0] = Saturate16S(sum);
             } else if (c < half_w - 1) {
                 // Interior filter: [-1, -1, 8, -8, 1, 1] / 8
@@ -59,7 +62,7 @@ HyperCineStatus HyperCine_ForwardHorizontal26_CPU(
                                  - static_cast<int32_t>(in_row[x - 1])
                                  + static_cast<int32_t>(in_row[x + 2])
                                  + static_cast<int32_t>(in_row[x + 3]);
-                hp_sum = (hp_sum + 4) >> 3;
+                hp_sum = FloorDivide8(hp_sum + 4);
                 int32_t sum = hp_sum + static_cast<int32_t>(in_row[x]) - static_cast<int32_t>(in_row[x + 1]);
                 high_row[c] = Saturate16S(sum);
             } else {
@@ -70,7 +73,7 @@ HyperCineStatus HyperCine_ForwardHorizontal26_CPU(
                             - 4 * static_cast<int32_t>(in_row[x - 2])
                             + 1 * static_cast<int32_t>(in_row[x - 3])
                             + 1 * static_cast<int32_t>(in_row[x - 4]);
-                sum = (sum + 4) >> 3;
+                sum = FloorDivide8(sum + 4);
                 high_row[c] = Saturate16S(sum);
             }
         }
@@ -112,7 +115,7 @@ HyperCineStatus HyperCine_ForwardVertical26_CPU(
                             + 4 * static_cast<int32_t>(src[3 * src_stride + x])
                             - 1 * static_cast<int32_t>(src[4 * src_stride + x])
                             - 1 * static_cast<int32_t>(src[5 * src_stride + x]);
-                sum = (sum + 4) >> 3;
+                sum = FloorDivide8(sum + 4);
                 high_row[x] = Saturate16S(sum);
             } else if (r < half_h - 1) {
                 // Interior filter
@@ -120,7 +123,7 @@ HyperCineStatus HyperCine_ForwardVertical26_CPU(
                                  - static_cast<int32_t>(src[(y - 1) * src_stride + x])
                                  + static_cast<int32_t>(src[(y + 2) * src_stride + x])
                                  + static_cast<int32_t>(src[(y + 3) * src_stride + x]);
-                hp_sum = (hp_sum + 4) >> 3;
+                hp_sum = FloorDivide8(hp_sum + 4);
                 int32_t sum = hp_sum + static_cast<int32_t>(src[y * src_stride + x])
                                      - static_cast<int32_t>(src[(y + 1) * src_stride + x]);
                 high_row[x] = Saturate16S(sum);
@@ -132,7 +135,7 @@ HyperCineStatus HyperCine_ForwardVertical26_CPU(
                             - 4 * static_cast<int32_t>(src[(y - 2) * src_stride + x])
                             + 1 * static_cast<int32_t>(src[(y - 3) * src_stride + x])
                             + 1 * static_cast<int32_t>(src[(y - 4) * src_stride + x]);
-                sum = (sum + 4) >> 3;
+                sum = FloorDivide8(sum + 4);
                 high_row[x] = Saturate16S(sum);
             }
         }

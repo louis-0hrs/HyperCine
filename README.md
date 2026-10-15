@@ -209,3 +209,10 @@ HyperCine is dual-licensed under the **MIT License** or the **Apache License, Ve
 Original CineForm SDK (`upstream/`): Copyright (c) 2017 GoPro, Inc. (dual-licensed under MIT or Apache-2.0; see [`upstream/LICENSE.txt`](upstream/LICENSE.txt) and [`upstream/LICENSE-APACHE.txt`](upstream/LICENSE-APACHE)).
 
 HyperCine additions: Copyright (c) 2026 HyperCine Contributors.
+
+### Experimental standalone FilmScan3 CPU profile (macOS)
+
+The SDK-free CPU target now includes a separate stateful FilmScan3 profile for
+1920×1080 BGRA8 → YUV422 p10, GOP1. The existing fixed FS3-Q2 mode is retained.
+See [native FilmScan3 CPU validation](docs/MACOS_FILMSCAN3_CPU.md) for profile
+selection, real Windows-corpus byte comparisons, limitations and decoder gates.
