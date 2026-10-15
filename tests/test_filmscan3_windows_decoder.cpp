@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include "test_vectors.h"
 #include "CFHDDecoder.h"
