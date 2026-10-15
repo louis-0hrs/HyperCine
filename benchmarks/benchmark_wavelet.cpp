@@ -3,6 +3,8 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 
 #include "hypercine/wavelet.h"
+
+#include "hypercine/platform_compat.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -362,14 +364,14 @@ int main(int argc, char** argv) {
 
     out << "{\n";
     out << "  \"system\": {\n";
-    out << "    \"os\": \"Windows x64\",\n";
+    out << "    \"os\": \"" HYPERCINE_OS_STRING "\",\n";
     out << "    \"cpu_model\": \"" << cpu_model << "\",\n";
     out << "    \"thread_count\": " << thread_count << ",\n";
     out << "    \"gpu_model\": \"" << dev_info.device_name << "\",\n";
     out << "    \"compute_capability\": \"" << dev_info.major << "." << dev_info.minor << "\",\n";
     out << "    \"cuda_toolkit_version\": \"" << (dev_info.cuda_runtime_version / 1000) << "." << ((dev_info.cuda_runtime_version % 100) / 10) << "\",\n";
     out << "    \"cuda_driver_version\": \"" << (dev_info.cuda_driver_version / 1000) << "." << ((dev_info.cuda_driver_version % 100) / 10) << "\",\n";
-    out << "    \"compiler\": \"MSVC " << _MSC_VER << "\",\n";
+    out << "    \"compiler\": \"" HYPERCINE_COMPILER_STRING "\",\n";
     out << "    \"build_type\": \"" << build_type << "\"\n";
     out << "  },\n";
     out << "  \"benchmarks\": [\n";

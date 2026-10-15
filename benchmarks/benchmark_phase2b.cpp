@@ -29,6 +29,8 @@ extern "C" {
 #undef protected
 
 #include "hypercine/canonical.h"
+
+#include "hypercine/platform_compat.h"
 #include "hypercine/entropy_gpu.h"
 #include "hypercine/entropy_parallel.h"
 #include "hypercine/entropy_stage.h"
@@ -115,11 +117,11 @@ struct UtilProbe {
         active = true;
         worker = std::thread([this] {
             while (active.load()) {
-                FILE* pipe = _popen("nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits", "r");
+                FILE* pipe = HYPERCINE_POPEN("nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits", "r");
                 if (!pipe) break;
                 int value = -1;
                 if (std::fscanf(pipe, "%d", &value) == 1 && value > peak_util.load()) peak_util = value;
-                _pclose(pipe);
+                HYPERCINE_PCLOSE(pipe);
 #ifdef _WIN32
                 Sleep(120);
 #else
