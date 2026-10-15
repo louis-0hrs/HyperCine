@@ -102,7 +102,7 @@ pending and are not inferred from this local run.
 - Release full gate: **25/25 passed**, zero skips, 78.80 seconds.
 - ASan + UBSan full gate with `detect_leaks=0`: **25/25 passed**, zero skips,
   164.67 seconds, no sanitizer findings.
-- Five guardrail unit tests pass: missing external tests, unit-only inventory,
+- Guardrail unit tests pass: missing external tests, unit-only inventory,
   duplicate/missing results, skip/failure/error statuses, and complete passes.
 - Required-decode configuration without FFmpeg/ffprobe fails with the expected
   `External decode gate requires both FFmpeg and ffprobe` error.
@@ -115,3 +115,18 @@ pending and are not inferred from this local run.
 Full local diagnostics are in the ignored `build/local-gate.log` and
 `build-sanitized/local-gate.log`; the failed leak-option run is retained in
 `build-sanitized/unsupported-leak-sanitizer.log`.
+
+## First hosted run and Windows checkout correction
+
+[Initial installed PR run 38783548636](https://github.com/louis-0hrs/HyperCine/actions/runs/38783548636)
+passed native macOS arm64 Release, macOS ASan/UBSan and Linux x64. Windows
+MSVC built successfully and passed 19/25 tests, but six provenance-dependent
+tests failed before arithmetic comparison because Git converted the pinned
+reference generator to CRLF. The original failure is retained in that run.
+
+`tests/.gitattributes` now pins LF only for the three byte-hashed reference
+sources/manifests. The checksums and imported contents are unchanged; no
+normalization or bypass was added to the validators. A guardrail test performs
+a real `git -c core.autocrlf=true checkout-index` into a temporary directory
+and requires all three original hashes to survive checkout. Hosted Windows
+success still requires a new passing matrix run.

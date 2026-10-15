@@ -16,7 +16,7 @@
   },
   "release_ctest_seconds": 78.8,
   "guardrail_tests": {
-    "passed": 5,
+    "passed": 6,
     "failed": 0
   },
   "required_decode_without_ffmpeg": "PASS: configure rejects unavailable FFmpeg/ffprobe",
@@ -49,5 +49,13 @@
   },
   "asan_ubsan_ctest_seconds": 164.67,
   "asan_options": "detect_leaks=0:halt_on_error=1",
-  "ubsan_options": "halt_on_error=1:print_stacktrace=1"
+  "ubsan_options": "halt_on_error=1:print_stacktrace=1",
+  "initial_hosted_run": {
+    "url": "https://github.com/louis-0hrs/HyperCine/actions/runs/38783548636",
+    "macos_arm64_release": "PASS",
+    "macos_arm64_asan_ubsan": "PASS",
+    "linux_x64_release": "PASS",
+    "windows_msvc_x64_release": "FAIL: 19/25 passed; core.autocrlf changed pinned generator bytes"
+  },
+  "windows_checkout_regression": "PASS: actual core.autocrlf=true checkout preserves generator and two imported manifest hashes"
 }

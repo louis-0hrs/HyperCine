@@ -4,6 +4,9 @@
 """Regression checks for false-green CI results, independent of a codec build."""
 from pathlib import Path
 import tempfile
+import hashlib
+import json
+import subprocess
 import unittest
 from run_standalone import REQUIRED, registered_tests, completed_tests
 
@@ -36,6 +39,25 @@ class StandaloneGateTests(unittest.TestCase):
         self.check_xml('<testsuite><testcase name="decode" status="notrun"/></testsuite>', {'decode'}, True)
         self.check_xml('<testsuite/>', {'decode'}, True)
         self.check_xml('<testsuite><testcase name="decode" status="run"/><testcase name="decode" status="run"/></testsuite>', {'decode'}, True)
+
+    def test_windows_autocrlf_preserves_pinned_reference_bytes(self):
+        root = Path(__file__).resolve().parents[1]
+        provenance = json.loads((root/'tests/reference_corpus/import_provenance.json').read_text())
+        # load_manifest verifies these two imported manifests and the generator.
+        # The schema has since evolved for the quality exporter (PR #27).
+        manifests = {'tests/reference_corpus/manifest.json',
+                     'tests/reference_corpus/phase3a_1080p_120_manifest.json'}
+        files = [f for f in provenance['files'] if f['path'] in manifests]
+        self.assertEqual({f['path'] for f in files}, manifests)
+        files += [provenance['portable_generator']]
+        with tempfile.TemporaryDirectory() as directory:
+            prefix = Path(directory).as_posix() + '/'
+            subprocess.run(['git', '-c', 'core.autocrlf=true', 'checkout-index',
+                            '--prefix=' + prefix, '--'] + [f['path'] for f in files],
+                           cwd=root, check=True)
+            for record in files:
+                data = (Path(directory)/record['path']).read_bytes()
+                self.assertEqual(hashlib.sha256(data).hexdigest(), record['sha256'], record['path'])
 
     def test_completed_pass(self):
         self.check_xml('<testsuite><testcase name="decode" status="run"/></testsuite>', {'decode'}, False)
