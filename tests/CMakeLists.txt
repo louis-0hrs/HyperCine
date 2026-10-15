@@ -109,3 +109,12 @@ if(WIN32 AND TARGET CFHDCodecStatic)
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/macos-filmscan3/gradient.cfhd")
     set_tests_properties(test_filmscan3_windows_decoder PROPERTIES DEPENDS filmscan3_fixture_integrity)
 endif()
+
+if(HYPERCINE_ENABLE_CUDA AND WIN32)
+    add_executable(hypercine_reference_export ../tools/reference_corpus_export.cpp)
+    target_link_libraries(hypercine_reference_export PRIVATE hypercine_wavelet CFHDCodecStatic bcrypt)
+    target_compile_definitions(hypercine_reference_export PRIVATE
+        HYPERCINE_SOURCE_COMMIT="${HYPERCINE_SOURCE_COMMIT}"
+        HYPERCINE_SOURCE_DIRTY=${HYPERCINE_SOURCE_DIRTY}
+        HYPERCINE_SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
+endif()
