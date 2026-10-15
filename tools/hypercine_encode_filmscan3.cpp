@@ -2,6 +2,9 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/filmscan3.h"
+#ifdef HYPERCINE_METAL_AUDIT
+#include "../tests/metal_audit.h"
+#endif
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -25,6 +28,11 @@ int main(int argc,char** argv) {
         const fs::path directory=argv[begin++];fs::create_directories(directory);
         std::ofstream trace(directory/"trace.json");trace<<"{\"profile\":\"FilmScan3\",\"frames\":[";
         FilmScan3Encoder encoder;
+#ifdef HYPERCINE_METAL_AUDIT
+        auto audit=std::make_shared<metal_test::Audit>();
+        detail::FrontendAccess::Use(encoder,audit);
+        std::cout<<"Required Metal device: "<<audit->DeviceName()<<'\n';
+#endif
         for(int i=begin;i<argc;++i) {
             AlignedVector<uint8_t> input(1920*1080*4);
             std::ifstream source(argv[i],std::ios::binary);source.read(reinterpret_cast<char*>(input.data()),input.size());
@@ -60,6 +68,9 @@ int main(int argc,char** argv) {
         }
         if(metadata.is_open() && metadata.peek()!=std::char_traits<char>::eof())throw std::runtime_error("excess explicit variable metadata");
         trace<<"]}\n";trace.close();if(!trace)throw std::runtime_error("trace write failed");
+#ifdef HYPERCINE_METAL_AUDIT
+        audit->Report();
+#endif
         return 0;
     }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
 }

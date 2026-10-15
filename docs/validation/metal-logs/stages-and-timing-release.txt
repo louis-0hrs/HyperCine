@@ -1,0 +1,8 @@
+Required Metal device: Apple M2 Pro
+Metal device: Apple M2 Pro; audited frames=39 levels=351 color_gpu_ms=5.10125 wavelet_gpu_ms=18.6639 upload_ms=58.9303 readback_ms=12.9035 submit_ms=3.94726 wait_ms=142.89 peak_shared_buffer_bytes=16606064 peak_device_allocated_bytes=17039360
+CPU complete encode (5 measured after 1 warmup) avg_ms=95.2504 min_ms=93.5957 max_ms=96.844 fps=10.4986 mpix_s=21.77
+Metal complete encode (5 measured after 1 warmup) avg_ms=96.0739 min_ms=94.1464 max_ms=98.115 fps=10.4086 mpix_s=21.5834
+Metal host quant/entropy/framing + orchestration avg_ms=85.339
+All 8 timed/reset GPU frames: color_gpu_ms=2.59717 wavelet_gpu_ms=6.592 upload_ms=31.8961 readback_ms=7.33963 submit_ms=1.16146 wait_ms=44.3019 peak_shared_buffer_bytes=16588800 peak_device_allocated_bytes=17022976
+process_peak_rss_bytes=100761600
+PASS exact full-storage planes, 3 wavelet levels, borders/prescale, packets, repeated encode/reset

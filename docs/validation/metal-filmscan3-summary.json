@@ -1,0 +1,51 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "date": "2026-10-15",
+  "issue": 7,
+  "base_commit": "518ee87204c64c1946904c12a84ea672ca406235",
+  "device": "Apple M2 Pro (16 GPU cores)",
+  "architecture": "arm64",
+  "release": {
+    "passed": 35,
+    "total": 35,
+    "seconds": 174.66
+  },
+  "debug_metal_api_gpu_validation": {
+    "passed": 35,
+    "total": 35,
+    "seconds": 684.76
+  },
+  "asan_ubsan_cpp_objcxx": {
+    "passed": 35,
+    "total": 35,
+    "seconds": 432.59,
+    "asan_options": "detect_leaks=0:halt_on_error=1",
+    "ubsan_options": "halt_on_error=1:print_stacktrace=1"
+  },
+  "cpu_only": {
+    "passed": 26,
+    "total": 26,
+    "seconds": 81.68
+  },
+  "actual_sdk_cuda_corpus": {
+    "tier_a_frames": 16,
+    "sequence_frames": 120,
+    "independent_archive_sha256_verified": true,
+    "input_sha256_checked": true,
+    "all_color_and_unquantized_stages_cpu_metal_equal": true,
+    "quantized_bands_equal_per_frame": 30,
+    "framed_bands_equal_per_frame": 30,
+    "same_input_cpu_metal_raw_packets_equal": true,
+    "raw_sdk_packets_equal_with_matching_metadata": true,
+    "sdk_cuda_normalized_actual_bytes_equal": true
+  },
+  "process_exit_leaks": {
+    "leaks": 0,
+    "bytes": 0
+  },
+  "performance_claim": false,
+  "upstream_modified": false,
+  "sdk_unquantized_stage_dumps": "PENDING #23",
+  "hosted_ci": "See draft PR checks; native Metal was tested locally"
+}

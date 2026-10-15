@@ -1,0 +1,6 @@
+// Copyright (c) 2026 HyperCine Contributors.
+// Dual-licensed under the MIT License or Apache License, Version 2.0.
+// See LICENSE-MIT and LICENSE-APACHE for details.
+#pragma once
+// Embedded from the actual .metal file at configure time; runtime Metal compiler.
+static constexpr const char* kFilmScan3Msl=R"HCMSL(@HYPERCINE_FILMSCAN3_MSL@)HCMSL";

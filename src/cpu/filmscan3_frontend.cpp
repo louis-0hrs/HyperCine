@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/filmscan3.h"
+#include "../core/filmscan3_backend.h"
 #include <algorithm>
 #include <stdexcept>
 namespace hypercine { namespace standalone {
@@ -22,11 +23,7 @@ int ReferenceChannel(int r, int g, int b, int cr, int cg, int cb, int offset) {
     return static_cast<uint16_t>(nonnegative*4u)>>6;
 }
 Planes ConvertFilmScan3Bgra(const uint8_t* input, std::size_t bytes, int width, int height, std::size_t stride) {
-    ValidateGeometry(width,height);
-    const auto row=static_cast<std::size_t>(width)*4;
-    if (!input || reinterpret_cast<std::uintptr_t>(input)%16 || stride<row || stride%16 ||
-        stride>(std::numeric_limits<std::size_t>::max()-row)/(height-1) || bytes<stride*(height-1)+row)
-        throw std::invalid_argument("FilmScan3 BGRA requires aligned complete storage");
+    detail::ValidateFilmScan3Input(input,bytes,width,height,stride);
     Planes out{Plane(width,height),Plane(width/2,height),Plane(width/2,height)};
     for(int y=0;y<height;++y) for(int x=0;x<width;++x) {
         const auto* p=input+static_cast<std::size_t>(height-1-y)*stride+static_cast<std::size_t>(x)*4;
