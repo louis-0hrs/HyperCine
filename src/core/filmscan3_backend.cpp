@@ -3,6 +3,22 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "filmscan3_backend.h"
 namespace hypercine { namespace standalone { namespace detail {
+FrontendFrame Frontend::Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool audit) {
+    FrontendFrame out;
+    out.color=Convert(p,n,w,h,s);
+    for(int c=0;c<3;++c) {
+        auto& levels=out.levels[c];
+        levels[0]=Forward(out.color[c],0);
+        levels[1]=Forward(levels[0].bands[0],2);
+        levels[2]=Forward(levels[1].bands[0],0);
+        if(!audit) {
+            out.color[c].pixels=AlignedVector<int16_t>{};
+            levels[0].bands[0].pixels=AlignedVector<int16_t>{};
+            levels[1].bands[0].pixels=AlignedVector<int16_t>{};
+        }
+    }
+    return out;
+}
 namespace {
 class Cpu final : public Frontend {
     Planes Convert(const uint8_t* p,std::size_t n,int w,int h,std::size_t s) override {
@@ -25,6 +41,7 @@ std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend backend, MetalFactory 
 #ifndef HYPERCINE_METAL_AVAILABLE
 std::shared_ptr<Frontend> MetalFrontend() { throw std::runtime_error("Metal backend not built"); }
 MetalTiming ReadMetalTiming(const Frontend&) { throw std::runtime_error("Metal backend not built"); }
+void FailNextMetalCompletion(Frontend&) { throw std::runtime_error("Metal backend not built"); }
 #endif
 void ValidateFilmScan3Input(const uint8_t* input,std::size_t bytes,int width,int height,std::size_t stride) {
     ValidateGeometry(width,height);

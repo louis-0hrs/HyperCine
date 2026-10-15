@@ -1,0 +1,891 @@
+{
+  "status": "PASS",
+  "schema_version": 1,
+  "same_input_state_full_packet_sha": {
+    "cases_per_process": 232,
+    "processes": 4,
+    "status": "PASS"
+  },
+  "measurement_order": "P1-before, P2-first, P2-second, P1-after; CPU/Metal alternating within each",
+  "percentile_method": "nearest-rank; population standard deviation",
+  "scenarios": [
+    {
+      "name": "flat",
+      "excluded_startup_frames": 2,
+      "processes": [
+        {
+          "file": "p1-before.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 27.788329133333335,
+            "median_ms": 27.7110835,
+            "p95_ms": 28.31075,
+            "stddev_population_ms": 0.24078329930385314,
+            "min_ms": 27.531542,
+            "max_ms": 28.765083,
+            "fps": 35.986330635491704,
+            "megapixels_per_second": 74.62125520575559
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 28.795172233333332,
+            "median_ms": 28.783625,
+            "p95_ms": 29.34675,
+            "stddev_population_ms": 0.3626808496699435,
+            "min_ms": 28.241583,
+            "max_ms": 29.810583,
+            "fps": 34.72804371152184,
+            "megapixels_per_second": 72.01207144021168
+          },
+          "cold_first_cpu_ms": 35.285834,
+          "cold_first_metal_ms": 31.528541,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.965683366666667,
+            "cpu_wavelet_ms": 4.7262154333333335
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 18.478962233333334
+        },
+        {
+          "file": "p1-after.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 27.7717513,
+            "median_ms": 27.7298745,
+            "p95_ms": 28.171625,
+            "stddev_population_ms": 0.284812762954091,
+            "min_ms": 27.577833,
+            "max_ms": 29.185,
+            "fps": 36.00781201004058,
+            "megapixels_per_second": 74.66579898402014
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 28.7971431,
+            "median_ms": 28.756667,
+            "p95_ms": 29.112542,
+            "stddev_population_ms": 0.3142188973939824,
+            "min_ms": 28.414709,
+            "max_ms": 30.020625,
+            "fps": 34.725666936037136,
+            "megapixels_per_second": 72.0071429585666
+          },
+          "cold_first_cpu_ms": 28.621958,
+          "cold_first_metal_ms": 31.279375,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9469346,
+            "cpu_wavelet_ms": 4.7195678333333335
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 18.463179
+        },
+        {
+          "file": "p2-first.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 27.7761639,
+            "median_ms": 27.673083,
+            "p95_ms": 28.329417,
+            "stddev_population_ms": 0.23286820247103288,
+            "min_ms": 27.591541,
+            "max_ms": 28.399958,
+            "fps": 36.00209170712735,
+            "megapixels_per_second": 74.65393736389926
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 20.13149303333333,
+            "median_ms": 20.143124999999998,
+            "p95_ms": 20.415292,
+            "stddev_population_ms": 0.21576736829627177,
+            "min_ms": 19.694666,
+            "max_ms": 20.4695,
+            "fps": 49.67341460189861,
+            "megapixels_per_second": 103.00279251849695
+          },
+          "cold_first_cpu_ms": 35.645125,
+          "cold_first_metal_ms": 26.655333,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9710543,
+            "cpu_wavelet_ms": 4.725926533333333
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.9710543,
+            "cpu_wavelet_ms": 4.725926533333333,
+            "batch_gpu_ms": 0.9029902982733333,
+            "allocation_ms": 0,
+            "upload_ms": 0.18706523333333333,
+            "readback_ms": 0.25866113333333335,
+            "submit_ms": 0.038402733333333335,
+            "wait_ms": 1.5256873666666666,
+            "quant_ms": 4.9112891,
+            "coefficient_hash_ms": 10.740263533333334,
+            "entropy_ms": 2.370564266666667,
+            "framing_ms": 0.09390803333333334
+          }
+        },
+        {
+          "file": "p2-second.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 27.674194466666666,
+            "median_ms": 27.639229,
+            "p95_ms": 27.861708,
+            "stddev_population_ms": 0.14042522025873982,
+            "min_ms": 27.517083,
+            "max_ms": 28.331292,
+            "fps": 36.13474644056909,
+            "megapixels_per_second": 74.92901021916406
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 20.2110958,
+            "median_ms": 20.199416,
+            "p95_ms": 20.420583,
+            "stddev_population_ms": 0.2095480991055754,
+            "min_ms": 19.73,
+            "max_ms": 20.708791,
+            "fps": 49.47777250157807,
+            "megapixels_per_second": 102.59710905927228
+          },
+          "cold_first_cpu_ms": 28.679041,
+          "cold_first_metal_ms": 24.617417,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.932658366666667,
+            "cpu_wavelet_ms": 4.7070346333333335
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.932658366666667,
+            "cpu_wavelet_ms": 4.7070346333333335,
+            "batch_gpu_ms": 1.0002722419966668,
+            "allocation_ms": 0,
+            "upload_ms": 0.18755143333333332,
+            "readback_ms": 0.24632903333333334,
+            "submit_ms": 0.03519046666666667,
+            "wait_ms": 1.6227139,
+            "quant_ms": 4.906468533333333,
+            "coefficient_hash_ms": 10.7450651,
+            "entropy_ms": 2.3716916666666665,
+            "framing_ms": 0.09131776666666666
+          }
+        }
+      ],
+      "mean_process_median_metal_ms": {
+        "p1": 28.770146,
+        "p2": 20.1712705
+      },
+      "p2_reduction_percent": 29.888188610513144
+    },
+    {
+      "name": "gradient",
+      "excluded_startup_frames": 2,
+      "processes": [
+        {
+          "file": "p1-before.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 30.121526433333333,
+            "median_ms": 30.0877915,
+            "p95_ms": 30.694125,
+            "stddev_population_ms": 0.19134293807205313,
+            "min_ms": 29.952625,
+            "max_ms": 30.838125,
+            "fps": 33.19884874404544,
+            "megapixels_per_second": 68.84113275565264
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 30.9346333,
+            "median_ms": 30.8762295,
+            "p95_ms": 31.591666,
+            "stddev_population_ms": 0.31456261180726813,
+            "min_ms": 30.357458,
+            "max_ms": 31.676875,
+            "fps": 32.326227704144145,
+            "megapixels_per_second": 67.03166576731329
+          },
+          "cold_first_cpu_ms": 29.060292,
+          "cold_first_metal_ms": 30.526083,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.946913966666667,
+            "cpu_wavelet_ms": 4.710606633333334
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 20.823911866666666
+        },
+        {
+          "file": "p1-after.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 30.087283366666668,
+            "median_ms": 30.069854499999998,
+            "p95_ms": 30.326709,
+            "stddev_population_ms": 0.12041012600372208,
+            "min_ms": 29.943542,
+            "max_ms": 30.548208,
+            "fps": 33.236633158708095,
+            "megapixels_per_second": 68.91948251789711
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 31.333008266666667,
+            "median_ms": 31.2834165,
+            "p95_ms": 32.191041,
+            "stddev_population_ms": 0.376507872500601,
+            "min_ms": 30.788916,
+            "max_ms": 32.42725,
+            "fps": 31.91522472050157,
+            "megapixels_per_second": 66.17940998043206
+          },
+          "cold_first_cpu_ms": 28.706417,
+          "cold_first_metal_ms": 31.152458,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.931044366666667,
+            "cpu_wavelet_ms": 4.7179944
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 20.8780707
+        },
+        {
+          "file": "p2-first.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 30.098193066666667,
+            "median_ms": 30.018208,
+            "p95_ms": 30.410625,
+            "stddev_population_ms": 0.2395990831690771,
+            "min_ms": 29.886583,
+            "max_ms": 31.198875,
+            "fps": 33.224585867498014,
+            "megapixels_per_second": 68.89450125484387
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 22.666840233333332,
+            "median_ms": 22.655625,
+            "p95_ms": 23.219625,
+            "stddev_population_ms": 0.302691818947224,
+            "min_ms": 22.011083,
+            "max_ms": 23.587709,
+            "fps": 44.11730923701589,
+            "megapixels_per_second": 91.48165243387615
+          },
+          "cold_first_cpu_ms": 28.644875,
+          "cold_first_metal_ms": 25.169292,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.915440266666667,
+            "cpu_wavelet_ms": 4.7521933333333335
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.915440266666667,
+            "cpu_wavelet_ms": 4.7521933333333335,
+            "batch_gpu_ms": 1.05892223461,
+            "allocation_ms": 0,
+            "upload_ms": 0.18607783333333333,
+            "readback_ms": 0.2515944333333333,
+            "submit_ms": 0.0383138,
+            "wait_ms": 1.665325,
+            "quant_ms": 4.9089791,
+            "coefficient_hash_ms": 10.748699833333333,
+            "entropy_ms": 4.766879166666667,
+            "framing_ms": 0.0951864
+          }
+        },
+        {
+          "file": "p2-second.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 30.196315466666668,
+            "median_ms": 30.0183125,
+            "p95_ms": 30.7995,
+            "stddev_population_ms": 0.4312824537824934,
+            "min_ms": 29.919083,
+            "max_ms": 32.097792,
+            "fps": 33.1166231556922,
+            "megapixels_per_second": 68.67062977564335
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 22.514087366666665,
+            "median_ms": 22.5017915,
+            "p95_ms": 22.7835,
+            "stddev_population_ms": 0.24171702501389034,
+            "min_ms": 22.08525,
+            "max_ms": 23.216791,
+            "fps": 44.41663495898815,
+            "megapixels_per_second": 92.10233425095782
+          },
+          "cold_first_cpu_ms": 28.676875,
+          "cold_first_metal_ms": 25.359208,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9725112,
+            "cpu_wavelet_ms": 4.760249733333334
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.9725112,
+            "cpu_wavelet_ms": 4.760249733333334,
+            "batch_gpu_ms": 0.96860279629,
+            "allocation_ms": 0,
+            "upload_ms": 0.18517223333333332,
+            "readback_ms": 0.24746953333333332,
+            "submit_ms": 0.0369541,
+            "wait_ms": 1.5937611333333332,
+            "quant_ms": 4.892936433333333,
+            "coefficient_hash_ms": 10.7259458,
+            "entropy_ms": 4.735709133333334,
+            "framing_ms": 0.09165723333333334
+          }
+        }
+      ],
+      "mean_process_median_metal_ms": {
+        "p1": 31.079823,
+        "p2": 22.57870825
+      },
+      "p2_reduction_percent": 27.352519832561473
+    },
+    {
+      "name": "noise",
+      "excluded_startup_frames": 2,
+      "processes": [
+        {
+          "file": "p1-before.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 92.69285826666666,
+            "median_ms": 92.34789549999999,
+            "p95_ms": 95.108542,
+            "stddev_population_ms": 1.5688008394928037,
+            "min_ms": 91.184584,
+            "max_ms": 99.942416,
+            "fps": 10.7883176622207,
+            "megapixels_per_second": 22.370655504380842
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 93.06532356666666,
+            "median_ms": 92.93422899999999,
+            "p95_ms": 94.221417,
+            "stddev_population_ms": 0.6133860693765225,
+            "min_ms": 91.997375,
+            "max_ms": 94.295792,
+            "fps": 10.7451407428209,
+            "megapixels_per_second": 22.281123844313417
+          },
+          "cold_first_cpu_ms": 98.884542,
+          "cold_first_metal_ms": 101.785709,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9930501,
+            "cpu_wavelet_ms": 4.7758251
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 82.75850096666667
+        },
+        {
+          "file": "p1-after.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 91.64106246666667,
+            "median_ms": 91.5513755,
+            "p95_ms": 92.383625,
+            "stddev_population_ms": 0.43478317243730624,
+            "min_ms": 90.866166,
+            "max_ms": 92.687708,
+            "fps": 10.912138871848391,
+            "megapixels_per_second": 22.627411164664824
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 92.7406583,
+            "median_ms": 92.6105625,
+            "p95_ms": 93.8655,
+            "stddev_population_ms": 0.6261879434763508,
+            "min_ms": 91.781917,
+            "max_ms": 94.146875,
+            "fps": 10.782757189033237,
+            "megapixels_per_second": 22.35912530717932
+          },
+          "cold_first_cpu_ms": 96.268625,
+          "cold_first_metal_ms": 99.130958,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.953220966666667,
+            "cpu_wavelet_ms": 4.713388933333333
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 82.4009234
+        },
+        {
+          "file": "p2-first.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 91.7391584,
+            "median_ms": 91.9771045,
+            "p95_ms": 92.480166,
+            "stddev_population_ms": 0.548304575349661,
+            "min_ms": 90.531625,
+            "max_ms": 92.704833,
+            "fps": 10.900470610813889,
+            "megapixels_per_second": 22.603215858583678
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 84.01072513333334,
+            "median_ms": 84.0757295,
+            "p95_ms": 85.149667,
+            "stddev_population_ms": 0.5872992445046359,
+            "min_ms": 82.950125,
+            "max_ms": 85.210417,
+            "fps": 11.903242096921566,
+            "megapixels_per_second": 24.682562812176556
+          },
+          "cold_first_cpu_ms": 96.449709,
+          "cold_first_metal_ms": 93.289875,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.937293066666666,
+            "cpu_wavelet_ms": 4.792285633333333
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.937293066666666,
+            "cpu_wavelet_ms": 4.792285633333333,
+            "batch_gpu_ms": 1.0837555474966667,
+            "allocation_ms": 0,
+            "upload_ms": 0.20606233333333335,
+            "readback_ms": 0.2764749,
+            "submit_ms": 0.0470458,
+            "wait_ms": 1.773414,
+            "quant_ms": 4.940114833333333,
+            "coefficient_hash_ms": 10.804052833333333,
+            "entropy_ms": 65.6466043,
+            "framing_ms": 0.31192803333333335
+          }
+        },
+        {
+          "file": "p2-second.json",
+          "cpu": {
+            "count": 30,
+            "mean_ms": 91.59269443333334,
+            "median_ms": 91.7150415,
+            "p95_ms": 92.391292,
+            "stddev_population_ms": 0.5891597452654466,
+            "min_ms": 90.60375,
+            "max_ms": 92.819,
+            "fps": 10.917901325938828,
+            "megapixels_per_second": 22.639360189466753
+          },
+          "metal": {
+            "count": 30,
+            "mean_ms": 83.90674026666667,
+            "median_ms": 83.88258400000001,
+            "p95_ms": 84.720083,
+            "stddev_population_ms": 0.4247692325342409,
+            "min_ms": 83.092792,
+            "max_ms": 85.115375,
+            "fps": 11.9179936775266,
+            "megapixels_per_second": 24.713151689719158
+          },
+          "cold_first_cpu_ms": 95.330834,
+          "cold_first_metal_ms": 92.87975,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.937770733333333,
+            "cpu_wavelet_ms": 4.774116533333333
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.937770733333333,
+            "cpu_wavelet_ms": 4.774116533333333,
+            "batch_gpu_ms": 1.0230000208166667,
+            "allocation_ms": 0,
+            "upload_ms": 0.20835263333333334,
+            "readback_ms": 0.2707235333333333,
+            "submit_ms": 0.04792506666666667,
+            "wait_ms": 1.7284903666666667,
+            "quant_ms": 4.936847233333333,
+            "coefficient_hash_ms": 10.798507133333333,
+            "entropy_ms": 65.59337313333333,
+            "framing_ms": 0.31629056666666666
+          }
+        }
+      ],
+      "mean_process_median_metal_ms": {
+        "p1": 92.77239574999999,
+        "p2": 83.97915675
+      },
+      "p2_reduction_percent": 9.478292469341543
+    },
+    {
+      "name": "16-frame-stateful",
+      "excluded_startup_frames": 0,
+      "processes": [
+        {
+          "file": "p1-before.json",
+          "cpu": {
+            "count": 16,
+            "mean_ms": 40.3236249375,
+            "median_ms": 29.4491455,
+            "p95_ms": 97.527166,
+            "stddev_population_ms": 20.36394756320208,
+            "min_ms": 27.641959,
+            "max_ms": 97.527166,
+            "fps": 24.799357735073666,
+            "megapixels_per_second": 51.42394819944875
+          },
+          "metal": {
+            "count": 16,
+            "mean_ms": 40.9026589375,
+            "median_ms": 30.2591255,
+            "p95_ms": 97.588667,
+            "stddev_population_ms": 20.14359675898029,
+            "min_ms": 27.514542,
+            "max_ms": 97.588667,
+            "fps": 24.448288350349497,
+            "megapixels_per_second": 50.69597072328472
+          },
+          "cold_first_cpu_ms": 27.645334,
+          "cold_first_metal_ms": 28.777459,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.94439075,
+            "cpu_wavelet_ms": 4.7373356875
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 30.90896075
+        },
+        {
+          "file": "p1-after.json",
+          "cpu": {
+            "count": 16,
+            "mean_ms": 40.187309875,
+            "median_ms": 29.443354,
+            "p95_ms": 96.457834,
+            "stddev_population_ms": 19.96728238088732,
+            "min_ms": 27.608208,
+            "max_ms": 96.457834,
+            "fps": 24.88347697595173,
+            "megapixels_per_second": 51.5983778573335
+          },
+          "metal": {
+            "count": 16,
+            "mean_ms": 40.8845625,
+            "median_ms": 30.430917,
+            "p95_ms": 97.1785,
+            "stddev_population_ms": 19.796109684584646,
+            "min_ms": 28.005792,
+            "max_ms": 97.1785,
+            "fps": 24.459109718980116,
+            "megapixels_per_second": 50.71840991327716
+          },
+          "cold_first_cpu_ms": 27.690292,
+          "cold_first_metal_ms": 29.625791,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9283568125,
+            "cpu_wavelet_ms": 4.726778625
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 30.775427375
+        },
+        {
+          "file": "p2-first.json",
+          "cpu": {
+            "count": 16,
+            "mean_ms": 39.3320469375,
+            "median_ms": 29.1635415,
+            "p95_ms": 96.764833,
+            "stddev_population_ms": 19.205438561239006,
+            "min_ms": 27.613375,
+            "max_ms": 96.764833,
+            "fps": 25.424560323266036,
+            "megapixels_per_second": 52.72036828632445
+          },
+          "metal": {
+            "count": 16,
+            "mean_ms": 32.125815,
+            "median_ms": 22.2444375,
+            "p95_ms": 88.897,
+            "stddev_population_ms": 18.976654780107314,
+            "min_ms": 20.180791,
+            "max_ms": 88.897,
+            "fps": 31.127614972569564,
+            "megapixels_per_second": 64.54622240712024
+          },
+          "cold_first_cpu_ms": 27.613375,
+          "cold_first_metal_ms": 24.440375,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9514089375,
+            "cpu_wavelet_ms": 4.772875375
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.9514089375,
+            "cpu_wavelet_ms": 4.772875375,
+            "batch_gpu_ms": 1.1248359224375,
+            "allocation_ms": 0.15652575,
+            "upload_ms": 0.1973150625,
+            "readback_ms": 0.2646535,
+            "submit_ms": 0.0429740625,
+            "wait_ms": 1.826034,
+            "quant_ms": 4.93534075,
+            "coefficient_hash_ms": 10.7869095,
+            "entropy_ms": 13.7607943125,
+            "framing_ms": 0.1500074375
+          }
+        },
+        {
+          "file": "p2-second.json",
+          "cpu": {
+            "count": 16,
+            "mean_ms": 39.3040260625,
+            "median_ms": 29.1343125,
+            "p95_ms": 96.7375,
+            "stddev_population_ms": 19.26911536279249,
+            "min_ms": 27.548167,
+            "max_ms": 96.7375,
+            "fps": 25.442686161713613,
+            "megapixels_per_second": 52.75795402492935
+          },
+          "metal": {
+            "count": 16,
+            "mean_ms": 32.080328125,
+            "median_ms": 22.1480835,
+            "p95_ms": 88.955583,
+            "stddev_population_ms": 19.04924827444991,
+            "min_ms": 20.099042,
+            "max_ms": 88.955583,
+            "fps": 31.171750990311917,
+            "megapixels_per_second": 64.63774285351079
+          },
+          "cold_first_cpu_ms": 27.548167,
+          "cold_first_metal_ms": 24.09525,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9225364375,
+            "cpu_wavelet_ms": 4.7487839375
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.9225364375,
+            "cpu_wavelet_ms": 4.7487839375,
+            "batch_gpu_ms": 1.0921796929625,
+            "allocation_ms": 0.14255725,
+            "upload_ms": 0.190773375,
+            "readback_ms": 0.2682135,
+            "submit_ms": 0.0414845,
+            "wait_ms": 1.792656375,
+            "quant_ms": 4.9187843749999995,
+            "coefficient_hash_ms": 10.7864503125,
+            "entropy_ms": 13.783986875,
+            "framing_ms": 0.1505440625
+          }
+        }
+      ],
+      "mean_process_median_metal_ms": {
+        "p1": 30.345021250000002,
+        "p2": 22.1962605
+      },
+      "p2_reduction_percent": 26.85369927035395
+    },
+    {
+      "name": "120-frame-stateful",
+      "excluded_startup_frames": 0,
+      "processes": [
+        {
+          "file": "p1-before.json",
+          "cpu": {
+            "count": 120,
+            "mean_ms": 45.370628825,
+            "median_ms": 30.0828335,
+            "p95_ms": 96.315,
+            "stddev_population_ms": 22.383746492449546,
+            "min_ms": 27.508125,
+            "max_ms": 97.865833,
+            "fps": 22.040690770611114,
+            "megapixels_per_second": 45.7035763819392
+          },
+          "metal": {
+            "count": 120,
+            "mean_ms": 46.03233339166667,
+            "median_ms": 31.256041500000002,
+            "p95_ms": 96.778709,
+            "stddev_population_ms": 22.233941820596794,
+            "min_ms": 27.268542,
+            "max_ms": 98.078375,
+            "fps": 21.72386073700605,
+            "megapixels_per_second": 45.04659762425574
+          },
+          "cold_first_cpu_ms": 27.566167,
+          "cold_first_metal_ms": 29.622958,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.9405410666666665,
+            "cpu_wavelet_ms": 4.729918858333333
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 35.989449475
+        },
+        {
+          "file": "p1-after.json",
+          "cpu": {
+            "count": 120,
+            "mean_ms": 45.388372266666664,
+            "median_ms": 30.093666499999998,
+            "p95_ms": 96.051583,
+            "stddev_population_ms": 22.334523661655812,
+            "min_ms": 27.470583,
+            "max_ms": 96.977791,
+            "fps": 22.0320745173407,
+            "megapixels_per_second": 45.68570971915768
+          },
+          "metal": {
+            "count": 120,
+            "mean_ms": 46.02728019166667,
+            "median_ms": 31.179229,
+            "p95_ms": 96.548,
+            "stddev_population_ms": 22.18693447104428,
+            "min_ms": 27.235208,
+            "max_ms": 97.667916,
+            "fps": 21.726245735915807,
+            "megapixels_per_second": 45.05154315799501
+          },
+          "cold_first_cpu_ms": 27.561666,
+          "cold_first_metal_ms": 30.580792,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.965625333333334,
+            "cpu_wavelet_ms": 4.729309
+          },
+          "p1_host_quant_entropy_framing_orchestration_ms": 36.055274391666664
+        },
+        {
+          "file": "p2-first.json",
+          "cpu": {
+            "count": 120,
+            "mean_ms": 44.10683535,
+            "median_ms": 30.020771,
+            "p95_ms": 96.057042,
+            "stddev_population_ms": 21.419613460389268,
+            "min_ms": 27.507083,
+            "max_ms": 97.349459,
+            "fps": 22.67222284402683,
+            "megapixels_per_second": 47.01312128937403
+          },
+          "metal": {
+            "count": 120,
+            "mean_ms": 36.50282015,
+            "median_ms": 22.5214165,
+            "p95_ms": 88.2595,
+            "stddev_population_ms": 21.317580962038278,
+            "min_ms": 19.581583,
+            "max_ms": 89.212958,
+            "fps": 27.395143605089373,
+            "megapixels_per_second": 56.806569779513325
+          },
+          "cold_first_cpu_ms": 27.65875,
+          "cold_first_metal_ms": 23.956916,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.937445491666667,
+            "cpu_wavelet_ms": 4.741409441666667
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.937445491666667,
+            "cpu_wavelet_ms": 4.741409441666667,
+            "batch_gpu_ms": 1.0195079725041667,
+            "allocation_ms": 0.0183347,
+            "upload_ms": 0.186270825,
+            "readback_ms": 0.25460066666666664,
+            "submit_ms": 0.038018425,
+            "wait_ms": 1.657778125,
+            "quant_ms": 4.926932366666667,
+            "coefficient_hash_ms": 10.7814808,
+            "entropy_ms": 18.470334025,
+            "framing_ms": 0.16377705833333334
+          }
+        },
+        {
+          "file": "p2-second.json",
+          "cpu": {
+            "count": 120,
+            "mean_ms": 43.94456004166667,
+            "median_ms": 30.0064995,
+            "p95_ms": 95.197,
+            "stddev_population_ms": 21.243978946332412,
+            "min_ms": 27.511667,
+            "max_ms": 96.9915,
+            "fps": 22.75594519667134,
+            "megapixels_per_second": 47.18672795981769
+          },
+          "metal": {
+            "count": 120,
+            "mean_ms": 36.493999691666666,
+            "median_ms": 22.603854,
+            "p95_ms": 87.708584,
+            "stddev_population_ms": 21.1413481414858,
+            "min_ms": 19.582458,
+            "max_ms": 89.181042,
+            "fps": 27.401764905159137,
+            "megapixels_per_second": 56.82029970733798
+          },
+          "cold_first_cpu_ms": 27.581417,
+          "cold_first_metal_ms": 24.423,
+          "cpu_stage_mean_ms": {
+            "cpu_conversion_ms": 4.926767333333333,
+            "cpu_wavelet_ms": 4.736055941666667
+          },
+          "stage_mean_ms": {
+            "cpu_conversion_ms": 4.926767333333333,
+            "cpu_wavelet_ms": 4.736055941666667,
+            "batch_gpu_ms": 1.0755833451966668,
+            "allocation_ms": 0.018794474999999998,
+            "upload_ms": 0.18671046666666666,
+            "readback_ms": 0.257317325,
+            "submit_ms": 0.036864925,
+            "wait_ms": 1.7138423916666667,
+            "quant_ms": 4.9210488833333335,
+            "coefficient_hash_ms": 10.775615566666668,
+            "entropy_ms": 18.416152325,
+            "framing_ms": 0.16283291666666666
+          }
+        }
+      ],
+      "mean_process_median_metal_ms": {
+        "p1": 31.21763525,
+        "p2": 22.56263525
+      },
+      "p2_reduction_percent": 27.724713709697156
+    }
+  ],
+  "artifacts": [
+    {
+      "file": "p1-before.json",
+      "sha256": "fefe1284c182b8e29be528fee36647ead3957389e47e264d5fcc2e4419214c51",
+      "peak_process_rss_bytes": 106463232
+    },
+    {
+      "file": "p1-after.json",
+      "sha256": "94e35f5f265eda2dafdf284e8e34eb8c622638d477740a43d2e3f81e888a2b77",
+      "peak_process_rss_bytes": 106332160
+    },
+    {
+      "file": "p2-first.json",
+      "sha256": "4f85ccb96965686edbc113b0fec3112ed7d94897daae8afd62ec5e07286f75dc",
+      "peak_process_rss_bytes": 105578496
+    },
+    {
+      "file": "p2-second.json",
+      "sha256": "2c21dd0374c5e5e64fe393ea2383857043e3c6a5ffe7d4342f8deb92c3e3565a",
+      "peak_process_rss_bytes": 105562112
+    }
+  ],
+  "windows_reference": {
+    "status": "NOT_COMPARABLE",
+    "reason": "Different host, compiler, SDK execution and input workload; no cross-host speedup/regression claim",
+    "path": "benchmarks/results/reference_windows_msvc.json",
+    "sha256": "e28f730ecf7ea359e796c2342f1d59d539affd01079d609d42bb7f2039f8438f",
+    "recorded_1080p": {
+      "name": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "frames": 50,
+      "encode": {
+        "fps": 77.6958,
+        "megapixels_per_sec": 161.11,
+        "latency_avg_ms": 12.5634,
+        "latency_min_ms": 11.9338,
+        "latency_max_ms": 14.7025
+      },
+      "decode": {
+        "fps": 394.146,
+        "megapixels_per_sec": 817.301,
+        "latency_avg_ms": 2.5368,
+        "latency_min_ms": 2.0961,
+        "latency_max_ms": 3.0989
+      },
+      "compression": {
+        "avg_bytes": 1186352,
+        "ratio": 6.99152
+      },
+      "peak_memory_bytes": 96985088
+    }
+  }
+}

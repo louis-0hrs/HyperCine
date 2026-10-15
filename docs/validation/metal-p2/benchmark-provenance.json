@@ -1,0 +1,33 @@
+{
+  "started_utc": "2026-10-15T23:52:23.053974+00:00",
+  "finished_utc": "2026-10-15T23:53:52.948334+00:00",
+  "parent_source_sha": "8631ef591f6e09f97a7551caeaf1c3d460185f9d",
+  "p2_source_snapshot": "tested-source-files.json",
+  "binaries": {
+    "hypercine-benchmark-p1-sha": "ffa0d789ab8440fb7eb3e457488d70a41aba1a753a71d60fc622577fa606c31f",
+    "benchmark_codec": "7194990bd1b6b79300d6487c4387b1ae35320803810c45eb97baeb880a4fdf22"
+  },
+  "p1_library_sha256": "62e3a8520bcb61b6cfc23c8d22cfbdbb536c41abef20bcd98aa5fec17e1aaffc",
+  "p2_library_sha256": "bba3afc1c84267d370a00c38feb4f9fe679e09f6f725b03ff8f8730014b8e9a3",
+  "hardware": {
+    "cpu": "Apple M2 Pro",
+    "cpu_cores": 10,
+    "performance_cores": 6,
+    "efficiency_cores": 4,
+    "gpu": "Apple M2 Pro",
+    "gpu_cores": 16,
+    "ram_bytes": 17179869184,
+    "architecture": "arm64",
+    "os": "macOS 26.5.2 (25F84)",
+    "sdk": "macOS 26.5",
+    "compiler": "AppleClang 21.0.0.21000101",
+    "power": "AC attached; lowpowermode=0",
+    "temperature_clocks_energy": "NOT MEASURED; pmset reports no recorded thermal/performance warning level"
+  },
+  "limits": [
+    "No task-launched tests/builds overlap these four processes; background machine activity not controlled",
+    "One complete GPU batch timestamp; per-kernel P2 timestamps unavailable in this benchmark",
+    "No SDK/CUDA runtime benchmark on this host; Windows reference is not comparable",
+    "1080p progressive GOP1 FilmScan3 only"
+  ]
+}

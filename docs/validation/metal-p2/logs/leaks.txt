@@ -1,0 +1,36 @@
+Required Metal device: Apple M2 Pro
+Metal device: Apple M2 Pro; audited frames=78 levels=702 color_gpu_ms=4.76667 wavelet_gpu_ms=16.3685 upload_ms=65.1523 readback_ms=25.727 submit_ms=6.84533 wait_ms=173.947 peak_shared_buffer_bytes=31639664 peak_device_allocated_bytes=48857088
+PASS 105 sequential changing frames, zero buffer allocations, 1 upload/command/wait and 30 readbacks per frame; completion-failure recovery
+CPU complete encode (5 measured after 1 warmup) avg_ms=96.8976 min_ms=93.7472 max_ms=99.9693 fps=10.3202 mpix_s=21.3999
+Metal complete encode (5 measured after 1 warmup) avg_ms=88.8415 min_ms=85.8272 max_ms=92.1543 fps=11.256 mpix_s=23.3405
+Metal host quant/entropy/framing + orchestration avg_ms=86.5906
+Accumulated production GPU frames: batch_gpu_ms=121.058 upload_ms=21.2483 readback_ms=38.6788 submit_ms=6.99646 wait_ms=213.63 waits=117 buffer_allocations=42 peak_shared_buffer_bytes=31622400 peak_device_allocated_bytes=64012288
+process_peak_rss_bytes=223723520
+PASS exact full-storage planes, 3 wavelet levels, borders/prescale, packets, repeated encode/reset
+Process 14341 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         test_metal_filmscan3 [14341]
+Path:            /private/tmp/*/test_metal_filmscan3
+Load Address:    0x1044c8000
+Identifier:      test_metal_filmscan3
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  leaks [14339]
+Target Type:     live task
+
+Date/Time:       2026-10-16 01:39:05.484 +0200
+Launch Time:     2026-10-16 01:38:53.305 +0200
+OS Version:      macOS 26.5.2 (25F84)
+Report Version:  7
+Analysis Tool:   /usr/bin/leaks
+
+Physical footprint:         98.1M
+Physical footprint (peak):  205.1M
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0, multi-line stacks
+Process 14341: 2778 nodes malloced for 663 KB
+Process 14341: 0 leaks for 0 total leaked bytes.
+

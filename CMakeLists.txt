@@ -64,6 +64,12 @@ if(HYPERCINE_BUILD_STANDALONE)
     target_link_libraries(hypercine_encode_filmscan3 PRIVATE hypercine_standalone)
     add_executable(hypercine_reference_probe tools/hypercine_reference_probe.cpp)
     target_link_libraries(hypercine_reference_probe PRIVATE hypercine_standalone)
+    if(HYPERCINE_BUILD_BENCHMARKS AND HYPERCINE_ENABLE_METAL)
+        # Native SDK-free encode benchmark; legacy SDK benchmark remains below
+        # the standalone early return and is never linked into this target.
+        add_executable(benchmark_codec benchmarks/benchmark_metal_p2.cpp)
+        target_link_libraries(benchmark_codec PRIVATE hypercine_standalone)
+    endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
