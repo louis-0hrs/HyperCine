@@ -14,6 +14,8 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import os
+import shutil
 import struct
 import subprocess
 import tempfile
@@ -202,6 +204,15 @@ def inspect_inventory(manifest, root):
     return result
 
 
+def compiler_info():
+    configured = os.environ.get('HYPERCINE_TEST_COMPILER')
+    if configured:
+        return configured
+    compiler = shutil.which('c++')
+    return (subprocess.check_output([compiler, '--version'], text=True).strip()
+            if compiler else 'NOT RECORDED: run through configured CTest')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--probe', type=Path, required=True)
@@ -215,7 +226,7 @@ def main():
     report = {'copyright': 'Copyright (c) 2026 HyperCine Contributors.',
               'license': 'MIT OR Apache-2.0', 'schema_version': 1, 'machine': platform.platform(), 'architecture': platform.machine(),
               'probe_sha256': sha(args.probe.read_bytes()),
-              'compiler': subprocess.check_output(['c++', '--version'], text=True).strip(),
+              'compiler': compiler_info(),
               'cmake': subprocess.check_output(['cmake', '--version'], text=True).splitlines()[0],
               'command': [sys.executable] + sys.argv,
               'source_files': [{'path': name, 'sha256': sha((ROOT/name).read_bytes())} for name in

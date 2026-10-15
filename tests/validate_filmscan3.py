@@ -11,6 +11,8 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -108,6 +110,15 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
             'variable_metadata_injected': inject, 'frames': results, 'status': 'PASS'}
 
 
+def compiler_info():
+    configured = os.environ.get('HYPERCINE_TEST_COMPILER')
+    if configured:
+        return configured
+    compiler = shutil.which('c++')
+    return (subprocess.check_output([compiler, '--version'], text=True).strip()
+            if compiler else 'NOT RECORDED: run through configured CTest')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--probe', required=True, type=Path)
@@ -135,7 +146,7 @@ def main():
     result.update({'copyright': 'Copyright (c) 2026 HyperCine Contributors.', 'license': 'MIT OR Apache-2.0',
                    'manifest': name, 'inventory': inventory, 'machine': platform.platform(), 'architecture': platform.machine(),
                    'encoder_sha256': gate.sha(args.encoder.read_bytes()),
-                   'compiler': subprocess.check_output(['c++', '--version'], text=True).strip(),
+                   'compiler': compiler_info(),
                    'cmake': subprocess.check_output(['cmake', '--version'], text=True).splitlines()[0],
                    'sources': [{'path': name, 'sha256': gate.sha((gate.ROOT/name).read_bytes())}for name in
                                ['include/hypercine/filmscan3.h','src/cpu/filmscan3_frontend.cpp','src/core/filmscan3_encoder.cpp',
