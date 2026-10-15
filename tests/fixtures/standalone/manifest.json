@@ -1,0 +1,68 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "encoder_commit": "a0518c0f39649056116eba57547fea1b96457dcf",
+  "decoder": "FFmpeg n8.0 140fd653aed8cad774f991ba083e2d01e86420c7",
+  "files": [
+    {
+      "file": "canonical.bgra",
+      "bytes": 65536,
+      "sha256": "3c1bbf2388be81674f261d1574b2642b0e824a2806a4c90f6aaa24bda75031ce"
+    },
+    {
+      "file": "canonical.cfhd",
+      "bytes": 15416,
+      "sha256": "9cf732846c1b9838c8f5d24f92db0182b82b5b6a05df63ffd5114fc1606db6fd"
+    },
+    {
+      "file": "canonical.input-p10",
+      "bytes": 65536,
+      "sha256": "d639417d370f765f7b384dbfeb9645387bbe8420ad7d7f78f319a6afd433f927"
+    },
+    {
+      "file": "canonical.p10",
+      "bytes": 65536,
+      "sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f"
+    },
+    {
+      "file": "flat.bgra",
+      "bytes": 65536,
+      "sha256": "197606a2196fdc4b5dfe2d8b4aeaadcfc4158acdf457c7da620e59c552a7f6b7"
+    },
+    {
+      "file": "flat.cfhd",
+      "bytes": 3444,
+      "sha256": "236cacbac9c5f39a5fbd1a4b939619276ccfc622ac486bf5a2ba967bcf28392b"
+    },
+    {
+      "file": "flat.input-p10",
+      "bytes": 65536,
+      "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+    },
+    {
+      "file": "flat.p10",
+      "bytes": 65536,
+      "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+    },
+    {
+      "file": "gradient.bgra",
+      "bytes": 65536,
+      "sha256": "8f71b3f2528ced3835acee937e223f26b4da5590b780ceae2462497d8785f18e"
+    },
+    {
+      "file": "gradient.cfhd",
+      "bytes": 25604,
+      "sha256": "4086e8c7ec3cc0b287ab637a486354eaa89623d048ac9d79d290291099b767fb"
+    },
+    {
+      "file": "gradient.input-p10",
+      "bytes": 65536,
+      "sha256": "6a45617626d0867912532c194feb36d7d4161ae486354c85d3dcffc05f4033b6"
+    },
+    {
+      "file": "gradient.p10",
+      "bytes": 65536,
+      "sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d"
+    }
+  ]
+}

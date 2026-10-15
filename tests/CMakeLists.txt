@@ -118,3 +118,31 @@ if(HYPERCINE_ENABLE_CUDA AND WIN32)
         HYPERCINE_SOURCE_DIRTY=${HYPERCINE_SOURCE_DIRTY}
         HYPERCINE_SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
 endif()
+
+# Actual GoPro decode of packets produced by the independent SDK-free encoder.
+# Windows CI uses the existing reference workflow; no workflow changes needed.
+if(WIN32 AND TARGET CFHDCodecStatic)
+    add_executable(test_standalone_sdk_oracle test_standalone_sdk_oracle.cpp)
+    target_link_libraries(test_standalone_sdk_oracle PRIVATE CFHDCodecStatic)
+    set(oracle_fixtures "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/standalone")
+    add_test(NAME standalone_oracle_fixture_hashes COMMAND "${CMAKE_COMMAND}"
+        "-DFIXTURES=${oracle_fixtures}" -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_oracle_fixtures.cmake")
+    add_test(NAME standalone_sdk_decode_3_packets COMMAND test_standalone_sdk_oracle
+        "${oracle_fixtures}" "${CMAKE_CURRENT_BINARY_DIR}/oracle-ctest")
+    set_tests_properties(standalone_sdk_decode_3_packets PROPERTIES
+        DEPENDS standalone_oracle_fixture_hashes TIMEOUT 120
+        PASS_REGULAR_EXPRESSION "SDK decode PASS: all three standalone packets"
+        FAIL_REGULAR_EXPRESSION "SDK decode FAIL;control FAIL;Oracle harness error")
+    # Existing CI prints only failed CTest output and uploads no artifacts.
+    # Emit an additional diagnostic report (including binary evidence) into its
+    # build log. The CTest above independently repeats and gates real decoding.
+    option(HYPERCINE_ORACLE_BUILD_REPORT "Print SDK oracle diagnostic/binary evidence during build" ON)
+    if(HYPERCINE_ORACLE_BUILD_REPORT)
+        add_custom_target(standalone_oracle_evidence ALL
+            COMMAND "${CMAKE_COMMAND}" "-DFIXTURES=${oracle_fixtures}"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_oracle_fixtures.cmake"
+            COMMAND $<TARGET_FILE:test_standalone_sdk_oracle> "${oracle_fixtures}"
+                "${CMAKE_CURRENT_BINARY_DIR}/oracle-build" --report
+            DEPENDS test_standalone_sdk_oracle VERBATIM)
+    endif()
+endif()

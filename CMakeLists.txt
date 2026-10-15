@@ -54,6 +54,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         foreach(stage color wavelet quantization entropy sample geometry)
             add_test(NAME standalone_${stage} COMMAND test_standalone ${stage})
         endforeach()
+        add_test(NAME standalone_oracle_fixtures COMMAND "${CMAKE_COMMAND}"
+            "-DFIXTURES=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/standalone"
+            "-DENCODER=$<TARGET_FILE:hypercine_encode_smoke>"
+            "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
@@ -116,6 +121,12 @@ if(HYPERCINE_BUILD_STANDALONE)
                     --width ${width} --height ${height} --patterns ${patterns}
                     --output-dir "${CMAKE_CURRENT_BINARY_DIR}/samples-${geometry}")
             endforeach()
+            add_test(NAME standalone_windows_oracle_replay COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/compare_sdk_oracle.py"
+                --windows-fixtures "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/windows-oracle"
+                --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
+                --output "${CMAKE_CURRENT_BINARY_DIR}/windows-oracle-replay")
         else()
             message(STATUS "Optional standalone external decode test not registered: FFmpeg/ffprobe unavailable")
         endif()

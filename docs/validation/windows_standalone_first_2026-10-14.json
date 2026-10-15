@@ -1,0 +1,396 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "windows_run": "https://github.com/louis-0hrs/HyperCine/actions/runs/38627148629",
+  "log_sha256": "3e04cf3ec54ab16fd22b4926ab92cd6c283995fd8ce141abb0b32739c868904f",
+  "ffmpeg_version": "ffmpeg version n8.0 Copyright (c) 2000-2025 the FFmpeg developers",
+  "input_contract": "128x128 top-down BT.709 studio YUV422 p10; YU64 LE Y0 Cr Y1 Cb >>6; BGRA SDK bottom-up",
+  "alpha_excluded": true,
+  "samples": [
+    {
+      "pattern": "flat",
+      "sdk_p10_sha256": "e83d418d521d42ddddc1c28815d12376f5fb22bcdc02987b1fa0479338c7273e",
+      "sdk_bgra_sha256": "c1d47631a38fdb5e4465a6515e01b8a1359acb6bd52b649d51ffa317f7846b4a",
+      "sdk_vs_ffmpeg_p10": {
+        "overall": {
+          "psnr_db": 27.58726433431923,
+          "max_error": 512,
+          "mismatches": 384,
+          "first_index": 24576,
+          "first_actual": 64,
+          "first_reference": 512
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cb": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cr": {
+            "psnr_db": 21.566664421039604,
+            "max_error": 512,
+            "mismatches": 384,
+            "first_index": 0,
+            "first_actual": 64,
+            "first_reference": 512
+          }
+        }
+      },
+      "sdk_vs_uncompressed_p10": {
+        "overall": {
+          "psnr_db": 27.58726433431923,
+          "max_error": 512,
+          "mismatches": 384,
+          "first_index": 24576,
+          "first_actual": 64,
+          "first_reference": 512
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cb": {
+            "psnr_db": null,
+            "max_error": 0,
+            "mismatches": 0,
+            "first_index": null,
+            "first_actual": null,
+            "first_reference": null
+          },
+          "Cr": {
+            "psnr_db": 21.566664421039604,
+            "max_error": 512,
+            "mismatches": 384,
+            "first_index": 0,
+            "first_actual": 64,
+            "first_reference": 512
+          }
+        }
+      },
+      "sdk_vs_ffmpeg_rgb": {
+        "psnr_db": 16.36229503738929,
+        "max_error": 126,
+        "mismatches": 48864,
+        "first_index": 0,
+        "first_actual": 0,
+        "first_reference": 126
+      }
+    },
+    {
+      "pattern": "gradient",
+      "sdk_p10_sha256": "67bf19046dfdba2a8b9bf8ca593f99bafa1a667962e5e97a351f072d27c94e17",
+      "sdk_bgra_sha256": "d8b1107587966b674b4ee2903671efd0f67209c52b8ab4c6a9bcee24e0c289f5",
+      "sdk_vs_ffmpeg_p10": {
+        "overall": {
+          "psnr_db": 18.989037322432786,
+          "max_error": 383,
+          "mismatches": 24772,
+          "first_index": 0,
+          "first_actual": 514,
+          "first_reference": 131
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 15.978830495078322,
+            "max_error": 383,
+            "mismatches": 16356,
+            "first_index": 0,
+            "first_actual": 514,
+            "first_reference": 131
+          },
+          "Cb": {
+            "psnr_db": 62.84878805308032,
+            "max_error": 3,
+            "mismatches": 4120,
+            "first_index": 0,
+            "first_actual": 524,
+            "first_reference": 523
+          },
+          "Cr": {
+            "psnr_db": 62.490142854430005,
+            "max_error": 3,
+            "mismatches": 4296,
+            "first_index": 0,
+            "first_actual": 466,
+            "first_reference": 465
+          }
+        }
+      },
+      "sdk_vs_uncompressed_p10": {
+        "overall": {
+          "psnr_db": 18.991594331615033,
+          "max_error": 382,
+          "mismatches": 23905,
+          "first_index": 0,
+          "first_actual": 514,
+          "first_reference": 132
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 15.981390049134083,
+            "max_error": 382,
+            "mismatches": 16364,
+            "first_index": 0,
+            "first_actual": 514,
+            "first_reference": 132
+          },
+          "Cb": {
+            "psnr_db": 63.29888549074429,
+            "max_error": 4,
+            "mismatches": 3488,
+            "first_index": 0,
+            "first_actual": 524,
+            "first_reference": 522
+          },
+          "Cr": {
+            "psnr_db": 61.913595149129094,
+            "max_error": 3,
+            "mismatches": 4053,
+            "first_index": 0,
+            "first_actual": 466,
+            "first_reference": 469
+          }
+        }
+      },
+      "sdk_vs_ffmpeg_rgb": {
+        "psnr_db": 41.90587816615934,
+        "max_error": 5,
+        "mismatches": 47030,
+        "first_index": 0,
+        "first_actual": 26,
+        "first_reference": 24
+      }
+    },
+    {
+      "pattern": "canonical",
+      "sdk_p10_sha256": "f0d8d0eb51764e24aba90ebaf756cc289946f0969e7b3c1180034fa5e4c010ca",
+      "sdk_bgra_sha256": "42ba5a9370babd889480d90af76fd4f2843826f8d2268c13388b3bf71b4e8301",
+      "sdk_vs_ffmpeg_p10": {
+        "overall": {
+          "psnr_db": 17.25780776540195,
+          "max_error": 441,
+          "mismatches": 24491,
+          "first_index": 0,
+          "first_actual": 501,
+          "first_reference": 61
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 14.247567289554365,
+            "max_error": 441,
+            "mismatches": 16361,
+            "first_index": 0,
+            "first_actual": 501,
+            "first_reference": 61
+          },
+          "Cb": {
+            "psnr_db": 63.17927876254718,
+            "max_error": 3,
+            "mismatches": 3908,
+            "first_index": 0,
+            "first_actual": 513,
+            "first_reference": 512
+          },
+          "Cr": {
+            "psnr_db": 62.60304756884679,
+            "max_error": 2,
+            "mismatches": 4222,
+            "first_index": 6,
+            "first_actual": 528,
+            "first_reference": 527
+          }
+        }
+      },
+      "sdk_vs_uncompressed_p10": {
+        "overall": {
+          "psnr_db": 17.267064152015227,
+          "max_error": 440,
+          "mismatches": 22523,
+          "first_index": 0,
+          "first_actual": 501,
+          "first_reference": 64
+        },
+        "planes": {
+          "Y": {
+            "psnr_db": 14.256810040113256,
+            "max_error": 440,
+            "mismatches": 16357,
+            "first_index": 0,
+            "first_actual": 501,
+            "first_reference": 64
+          },
+          "Cb": {
+            "psnr_db": 64.64055911932955,
+            "max_error": 3,
+            "mismatches": 2780,
+            "first_index": 0,
+            "first_actual": 513,
+            "first_reference": 512
+          },
+          "Cr": {
+            "psnr_db": 63.4801902474926,
+            "max_error": 3,
+            "mismatches": 3386,
+            "first_index": 0,
+            "first_actual": 515,
+            "first_reference": 517
+          }
+        }
+      },
+      "sdk_vs_ffmpeg_rgb": {
+        "psnr_db": 8.792762191947158,
+        "max_error": 235,
+        "mismatches": 48648,
+        "first_index": 1,
+        "first_actual": 43,
+        "first_reference": 0
+      }
+    }
+  ],
+  "control": {
+    "packet_bytes": 9184,
+    "packet_sha256": "56548569fb6d59c1176bb975890e3fc2c3606112f9c39e11a26fb4443a3934d7",
+    "sdk_p10_sha256": "31bcb7cbc115cbff6a2569b71932baf8d847987ac5891cfbcc4c41cd44aff536",
+    "ffmpeg_p10_sha256": "783965e39c222efe03684e7f175a85bb804f965811ddd620afacab75426bec27",
+    "sdk_vs_ffmpeg_p10": {
+      "overall": {
+        "psnr_db": 62.74819714791427,
+        "max_error": 3,
+        "mismatches": 16851,
+        "first_index": 3,
+        "first_actual": 66,
+        "first_reference": 65
+      },
+      "planes": {
+        "Y": {
+          "psnr_db": 62.806047924630505,
+          "max_error": 2,
+          "mismatches": 8185,
+          "first_index": 3,
+          "first_actual": 66,
+          "first_reference": 65
+        },
+        "Cb": {
+          "psnr_db": 62.66062005591859,
+          "max_error": 3,
+          "mismatches": 4439,
+          "first_index": 0,
+          "first_actual": 785,
+          "first_reference": 783
+        },
+        "Cr": {
+          "psnr_db": 62.721809192799924,
+          "max_error": 2,
+          "mismatches": 4227,
+          "first_index": 0,
+          "first_actual": 744,
+          "first_reference": 743
+        }
+      }
+    },
+    "sdk_vs_source_p10": {
+      "overall": {
+        "psnr_db": 38.91279149375285,
+        "max_error": 273,
+        "mismatches": 23148,
+        "first_index": 0,
+        "first_actual": 62,
+        "first_reference": 64
+      },
+      "planes": {
+        "Y": {
+          "psnr_db": 57.42277477927331,
+          "max_error": 7,
+          "mismatches": 11697,
+          "first_index": 0,
+          "first_actual": 62,
+          "first_reference": 64
+        },
+        "Cb": {
+          "psnr_db": 33.30450539429444,
+          "max_error": 273,
+          "mismatches": 5091,
+          "first_index": 0,
+          "first_actual": 785,
+          "first_reference": 512
+        },
+        "Cr": {
+          "psnr_db": 43.674031600217624,
+          "max_error": 227,
+          "mismatches": 6360,
+          "first_index": 0,
+          "first_actual": 744,
+          "first_reference": 517
+        }
+      }
+    },
+    "ffmpeg_vs_source_p10": {
+      "overall": {
+        "psnr_db": 38.90129949419348,
+        "max_error": 271,
+        "mismatches": 24518,
+        "first_index": 0,
+        "first_actual": 62,
+        "first_reference": 64
+      },
+      "planes": {
+        "Y": {
+          "psnr_db": 56.75750661718773,
+          "max_error": 7,
+          "mismatches": 12024,
+          "first_index": 0,
+          "first_actual": 62,
+          "first_reference": 64
+        },
+        "Cb": {
+          "psnr_db": 33.299642404974584,
+          "max_error": 271,
+          "mismatches": 5990,
+          "first_index": 0,
+          "first_actual": 783,
+          "first_reference": 512
+        },
+        "Cr": {
+          "psnr_db": 43.649958315497024,
+          "max_error": 226,
+          "mismatches": 6504,
+          "first_index": 0,
+          "first_actual": 743,
+          "first_reference": 517
+        }
+      }
+    }
+  },
+  "state": "FAIL: unrestricted SDK worker outputs unstable; all API calls succeeded; not a compatibility pass",
+  "commit": "a61fc4a34e06ad1095b9dcda67b2bbebebc2fdf0",
+  "windows_ctest": {
+    "result": "FAIL 5/6",
+    "failed_test": "standalone_sdk_decode_3_packets"
+  },
+  "windows_observations": [
+    "flat distinctYU64=3 distinctBGRA=5",
+    "gradient distinctYU64=4 distinctBGRA=3",
+    "canonical distinctYU64=3 distinctBGRA=5",
+    "SDK decode FAIL: see unmasked diagnostics",
+    "flat distinctYU64=3 distinctBGRA=3",
+    "gradient distinctYU64=2 distinctBGRA=4",
+    "canonical distinctYU64=5 distinctBGRA=2",
+    "SDK decode FAIL: see unmasked diagnostics"
+  ]
+}
