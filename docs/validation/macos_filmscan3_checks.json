@@ -7,7 +7,7 @@
     "build": {
       "passed": 25,
       "failed": 0,
-      "log_sha256": "caf5be44d2011c33637e8a53e574ddce656050c2491f47cb6062e0ad9bd9e82a"
+      "log_sha256": "1ae6830967a7bea6c3e4f25e396a66e29e40f2e074bd60d14b70b9b62ec11185"
     },
     "build-sanitized": {
       "passed": 25,
@@ -38,7 +38,13 @@
     "actual_sample_files_verified": 480,
     "sha256sums_entries_verified": 482
   },
-  "windows_gopro_decoder": "PENDING actual Windows CI run",
+  "windows_gopro_decoder": {
+    "status": "PASS",
+    "evidence": "macos_filmscan3_windows_decoder.json",
+    "code_commit": "a11fcdd548ef039d686489064c5719bc26582eb9",
+    "ctest_passed": 6,
+    "ctest_failed": 0
+  },
   "unquantized_windows_intermediates": "PENDING; not inferred from quantized hashes",
   "performance_claim": false
 }

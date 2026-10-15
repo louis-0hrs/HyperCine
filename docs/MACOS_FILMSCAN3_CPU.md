@@ -20,7 +20,7 @@ profile remains the default of the existing smoke tool.
 | Quantized coefficient FNV / independently framed band bytes | PASS: 480/480 Tier A and 3,600/3,600 sequence bands |
 | Full original sample with explicitly injected variable metadata | PASS: 120/120 actual SDK samples byte-identical; originals untouched |
 | Native FFmpeg decode | PASS: flat, gradient, noise and hard edges; decoded p10 PSNR >35 dB |
-| Real Windows GoPro decoder, one worker | PENDING until the added Windows CTest actually runs |
+| Real Windows GoPro decoder, one worker | PASS: both native Mac fixtures, two fresh-decoder repetitions each; Windows CI 6/6 |
 | Windows unquantized conversion/filter dumps | PENDING: not supplied; no unquantized intermediate identity claim |
 | Other qualities, formats, 4K/8K and Metal | Outside this profile; no release or acceleration claim |
 
@@ -180,3 +180,5 @@ identity is not inferred from matching quantized hashes. No other quality,
 format, 4K/8K, application or acceleration milestone is released by these tests.
 
 Validation of the final implementation: full Release CTest **25/25**, full Debug AddressSanitizer + UndefinedBehaviorSanitizer CTest **25/25**, including the actual 120-frame corpus. All **27** recorded legacy Q2 packet SHA-256 values remain unchanged. Source, binary, report and test-log fingerprints are recorded in `validation/macos_filmscan3_checks.json`.
+
+Windows MSVC CI on code commit `a11fcdd548ef039d686489064c5719bc26582eb9` passed all **6/6** tests, including `test_filmscan3_windows_decoder` against the two original Mac production packets. [Run 38696144395](https://github.com/louis-0hrs/HyperCine/actions/runs/38696144395/job/116293046294) and `validation/macos_filmscan3_windows_decoder.json` record the result. This certifies those two GoPro decode vectors; the 120-frame actual SDK byte comparisons are the separate native Mac gate. The older per-encode reports retain their historical pending Windows status; this later CI evidence resolves that gate. Unquantized Windows stages remain pending.
