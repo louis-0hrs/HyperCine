@@ -1,0 +1,28 @@
+[  4%] Building CXX object CMakeFiles/hypercine_standalone.dir/src/cpu/filmscan3_frontend.cpp.o
+[  8%] Building CXX object CMakeFiles/hypercine_standalone.dir/src/core/filmscan3_encoder.cpp.o
+[ 12%] Building CXX object CMakeFiles/hypercine_standalone.dir/src/core/filmscan3_backend.cpp.o
+[ 16%] Building OBJCXX object CMakeFiles/hypercine_standalone.dir/src/metal/filmscan3_metal.mm.o
+[ 20%] Linking CXX static library libhypercine_standalone.a
+[ 33%] Built target hypercine_standalone
+[ 37%] Building CXX object CMakeFiles/hypercine_encode_smoke.dir/tools/hypercine_encode_smoke.cpp.o
+[ 41%] Linking CXX executable hypercine_reference_probe
+[ 45%] Building CXX object CMakeFiles/test_filmscan3_backend.dir/tests/test_filmscan3_backend.cpp.o
+[ 50%] Building CXX object CMakeFiles/hypercine_encode_filmscan3.dir/tools/hypercine_encode_filmscan3.cpp.o
+[ 54%] Built target hypercine_reference_probe
+[ 58%] Building CXX object CMakeFiles/test_metal_filmscan3.dir/tests/test_metal_filmscan3.cpp.o
+[ 62%] Linking CXX executable test_filmscan3_backend
+[ 66%] Linking CXX executable hypercine_encode_smoke
+[ 66%] Built target test_filmscan3_backend
+[ 70%] Building CXX object CMakeFiles/hypercine_encode_filmscan3_metal.dir/tools/hypercine_encode_filmscan3.cpp.o
+[ 75%] Linking CXX executable hypercine_encode_filmscan3
+[ 75%] Built target hypercine_encode_smoke
+[ 75%] Built target hypercine_encode_filmscan3
+[ 79%] Building CXX object CMakeFiles/test_filmscan3.dir/tests/test_filmscan3.cpp.o
+[ 83%] Linking CXX executable test_standalone
+[ 87%] Built target test_standalone
+[ 91%] Linking CXX executable test_metal_filmscan3
+[ 91%] Built target test_metal_filmscan3
+[ 95%] Linking CXX executable test_filmscan3
+[100%] Linking CXX executable hypercine_encode_filmscan3_metal
+[100%] Built target test_filmscan3
+[100%] Built target hypercine_encode_filmscan3_metal

@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #pragma once
 #include "hypercine/standalone.h"
+#include <memory>
 
 namespace hypercine { namespace standalone {
 // Separate from the legacy fixed-Q2 profile. This initial profile is restricted
@@ -31,9 +32,17 @@ struct FilmScan3Frame {
 Planes ConvertFilmScan3Bgra(const uint8_t* data, std::size_t bytes, int width, int height, std::size_t stride);
 int16_t QuantizeFilmScan3(int16_t value, unsigned divisor);
 FilmScan3Tables ComputeFilmScan3Tables(int fs_rate_limiter);
+// Metal requires an enabled Apple build and fails if device/pipeline creation fails.
+// MetalOrCpu falls back only during initialization; dispatch failures propagate.
+enum class FilmScan3Backend { Cpu, Metal, MetalOrCpu };
+namespace detail { struct Frontend; struct FrontendAccess; }
 class FilmScan3Encoder {
+    friend struct detail::FrontendAccess;
+    std::shared_ptr<detail::Frontend> frontend_;
     FilmScan3State state_;
 public:
+    FilmScan3Encoder() = default; // scalar CPU remains the default
+    explicit FilmScan3Encoder(FilmScan3Backend backend);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
                          const FilmScan3Metadata& metadata);

@@ -1,0 +1,34 @@
+Required Metal device: Apple M2 Pro
+Metal device: Apple M2 Pro; audited frames=39 levels=351 color_gpu_ms=4.75608 wavelet_gpu_ms=16.9034 upload_ms=62.1822 readback_ms=11.9497 submit_ms=5.81662 wait_ms=138.325 peak_shared_buffer_bytes=16606064 peak_device_allocated_bytes=17039360
+CPU complete encode (5 measured after 1 warmup) avg_ms=98.5381 min_ms=96.4931 max_ms=100.615 fps=10.1484 mpix_s=21.0436
+Metal complete encode (5 measured after 1 warmup) avg_ms=100.827 min_ms=97.6917 max_ms=105.875 fps=9.91794 mpix_s=20.5658
+Metal host quant/entropy/framing + orchestration avg_ms=89.0297
+All 8 timed/reset GPU frames: color_gpu_ms=2.43363 wavelet_gpu_ms=6.72987 upload_ms=38.9712 readback_ms=7.21167 submit_ms=1.7998 wait_ms=55.4007 peak_shared_buffer_bytes=16588800 peak_device_allocated_bytes=17022976
+process_peak_rss_bytes=104103936
+PASS exact full-storage planes, 3 wavelet levels, borders/prescale, packets, repeated encode/reset
+Process 2672 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         test_metal_filmscan3 [2672]
+Path:            /Users/USER/*/test_metal_filmscan3
+Load Address:    0x100cac000
+Identifier:      test_metal_filmscan3
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  leaks [2670]
+Target Type:     live task
+
+Date/Time:       2026-10-15 21:00:44.937 +0200
+Launch Time:     2026-10-15 21:00:42.788 +0200
+OS Version:      macOS 26.5.2 (25F84)
+Report Version:  7
+Analysis Tool:   /usr/bin/leaks
+
+Physical footprint:         62.9M
+Physical footprint (peak):  91.0M
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0, multi-line stacks
+Process 2672: 3685 nodes malloced for 682 KB
+Process 2672: 0 leaks for 0 total leaked bytes.

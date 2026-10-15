@@ -1,0 +1,86 @@
+{"system": "Darwin", "platform": "macOS-26.5.2-arm64-arm-64bit", "architecture": "arm64", "python": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]"}
+ffmpeg version n8.0 Copyright (c) 2000-2025 the FFmpeg developers
+built with Apple clang version 21.0.0 (clang-2100.1.1.101)
+configuration: --disable-everything --disable-doc --disable-network --disable-autodetect --disable-asm --disable-audiotoolbox --disable-videotoolbox --enable-ffmpeg --enable-ffprobe --enable-decoder='cfhd,rawvideo' --enable-demuxer='avi,mov,rawvideo' --enable-muxer=rawvideo --enable-encoder=rawvideo --enable-protocol=file --enable-filter='scale,format' --enable-swscale
+libavutil      60.  8.100 / 60.  8.100
+libavcodec     62. 11.100 / 62. 11.100
+libavformat    62.  3.100 / 62.  3.100
+libavdevice    62.  1.100 / 62.  1.100
+libavfilter    11.  4.100 / 11.  4.100
+libswscale      9.  1.100 /  9.  1.100
+libswresample   6.  1.100 /  6.  1.100
+
+Exiting with exit code 0
+ffprobe version n8.0 Copyright (c) 2007-2025 the FFmpeg developers
+built with Apple clang version 21.0.0 (clang-2100.1.1.101)
+configuration: --disable-everything --disable-doc --disable-network --disable-autodetect --disable-asm --disable-audiotoolbox --disable-videotoolbox --enable-ffmpeg --enable-ffprobe --enable-decoder='cfhd,rawvideo' --enable-demuxer='avi,mov,rawvideo' --enable-muxer=rawvideo --enable-encoder=rawvideo --enable-protocol=file --enable-filter='scale,format' --enable-swscale
+libavutil      60.  8.100 / 60.  8.100
+libavcodec     62. 11.100 / 62. 11.100
+libavformat    62.  3.100 / 62.  3.100
+libavdevice    62.  1.100 / 62.  1.100
+libavfilter    11.  4.100 / 11.  4.100
+libswscale      9.  1.100 /  9.  1.100
+libswresample   6.  1.100 /  6.  1.100
+cmake version 3.31.5
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+Registered full standalone tests: 26
+Internal ctest changing into directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-cpu
+Test project /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-cpu
+      Start  1: filmscan3_backend_selection
+ 1/26 Test  #1: filmscan3_backend_selection ..........   Passed    0.34 sec
+      Start  2: filmscan3_api
+ 2/26 Test  #2: filmscan3_api ........................   Passed    0.38 sec
+      Start  3: filmscan3_fixture_integrity
+ 3/26 Test  #3: filmscan3_fixture_integrity ..........   Passed    0.01 sec
+      Start  4: standalone_color
+ 4/26 Test  #4: standalone_color .....................   Passed    0.33 sec
+      Start  5: standalone_wavelet
+ 5/26 Test  #5: standalone_wavelet ...................   Passed    0.00 sec
+      Start  6: standalone_quantization
+ 6/26 Test  #6: standalone_quantization ..............   Passed    0.00 sec
+      Start  7: standalone_entropy
+ 7/26 Test  #7: standalone_entropy ...................   Passed    0.00 sec
+      Start  8: standalone_sample
+ 8/26 Test  #8: standalone_sample ....................   Passed    0.02 sec
+      Start  9: standalone_geometry
+ 9/26 Test  #9: standalone_geometry ..................   Passed    0.27 sec
+      Start 10: standalone_oracle_fixtures
+10/26 Test #10: standalone_oracle_fixtures ...........   Passed    0.27 sec
+      Start 11: windows_reference_inputs
+11/26 Test #11: windows_reference_inputs .............   Passed    3.02 sec
+      Start 12: windows_reference_guardrails
+12/26 Test #12: windows_reference_guardrails .........   Passed    0.20 sec
+      Start 13: windows_reference_parser
+13/26 Test #13: windows_reference_parser .............   Passed    0.04 sec
+      Start 14: windows_reference_sdk_coefficients
+14/26 Test #14: windows_reference_sdk_coefficients ...   Passed    0.61 sec
+      Start 15: filmscan3_autonomous_manifest
+15/26 Test #15: filmscan3_autonomous_manifest ........   Passed    2.06 sec
+      Start 16: filmscan3_sequence_manifest
+16/26 Test #16: filmscan3_sequence_manifest ..........   Passed   11.72 sec
+      Start 17: filmscan3_external_decode
+17/26 Test #17: filmscan3_external_decode ............   Passed    6.50 sec
+      Start 18: standalone_external_decode
+18/26 Test #18: standalone_external_decode ...........   Passed    0.26 sec
+      Start 19: standalone_external_256x256
+19/26 Test #19: standalone_external_256x256 ..........   Passed    1.60 sec
+      Start 20: standalone_external_1920x1080
+20/26 Test #20: standalone_external_1920x1080 ........   Passed   39.15 sec
+      Start 21: standalone_external_128x24
+21/26 Test #21: standalone_external_128x24 ...........   Passed    0.14 sec
+      Start 22: standalone_external_384x40
+22/26 Test #22: standalone_external_384x40 ...........   Passed    0.18 sec
+      Start 23: standalone_external_4096x24
+23/26 Test #23: standalone_external_4096x24 ..........   Passed    0.60 sec
+      Start 24: standalone_external_128x4096
+24/26 Test #24: standalone_external_128x4096 .........   Passed    2.79 sec
+      Start 25: standalone_external_2048x1024
+25/26 Test #25: standalone_external_2048x1024 ........   Passed   10.94 sec
+      Start 26: standalone_windows_oracle_replay
+26/26 Test #26: standalone_windows_oracle_replay .....   Passed    0.25 sec
+
+100% tests passed, 0 tests failed out of 26
+
+Total Test time (real) =  81.68 sec
+{"status": "PASS", "registered_tests": 26, "passed_tests": 26, "system": "Darwin", "architecture": "arm64", "windows_binaries": "NOT REQUIRED: versioned manifests/fixtures; optional NAS corpus is separate"}

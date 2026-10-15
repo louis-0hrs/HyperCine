@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/filmscan3.h"
+#include "filmscan3_backend.h"
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
@@ -97,6 +98,7 @@ void Lowpass(Writer& s,const Plane& p) {
     s.Tag(4,0x1b4b);s.End(start,0x2000);
 }
 }
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::SelectFrontend(backend)) {}
 FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride) {
     FilmScan3Metadata metadata;
     const unsigned f=state_.frame_index,parts[]={f/(30*60*60)%24,f/(30*60)%60,f/30%60,f%30};
@@ -105,7 +107,8 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
 }
 FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride,const FilmScan3Metadata& metadata) {
     if(state_.frame_index>=65535)throw std::length_error("FilmScan3 frame counter exhausted");
-    auto planes=ConvertFilmScan3Bgra(data,bytes,1920,1080,stride);
+    auto& frontend=*(frontend_ ? frontend_ : detail::CpuFrontend());
+    auto planes=frontend.Convert(data,bytes,1920,1080,stride);
     FilmScan3Frame result;result.state=state_;result.state.fs_rate_limiter=NextLimiter(state_);
     result.tables=ComputeFilmScan3Tables(result.state.fs_rate_limiter);
     Writer s;
@@ -118,7 +121,7 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     s.Tag(-63,0);s.Tag(-64,0);s.Tag(-65,16);s.Tag(-66,9);s.Tag(68,1);
     for(int c=0;c<3;++c) {
         if(c){s.Tag(1,3);s.Tag(62,c);}const auto begin=s.bytes.size();
-        auto l1=ForwardLevel(planes[c],0),l2=ForwardLevel(l1.bands[0],2),l3=ForwardLevel(l2.bands[0],0);
+        auto l1=frontend.Forward(planes[c],0),l2=frontend.Forward(l1.bands[0],2),l3=frontend.Forward(l2.bands[0],0);
         WaveletLevel* levels[]={&l1,&l2,&l3};int sub=0;
         result.coefficient_fnv64[c*10+sub++]=Hash(l3.bands[0]);Lowpass(s,l3.bands[0]);
         for(int lv=2;lv>=0;--lv) {

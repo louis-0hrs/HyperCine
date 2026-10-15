@@ -21,7 +21,7 @@ import validate_windows_reference as gate
 from validate_standalone import avi
 
 
-def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False):
+def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None):
     directory.mkdir(parents=True, exist_ok=True)
     inputs, metadata, expected = [], bytearray(), []
     run_name = 'tier-a-1080' if any('tier-a-1080/' in a['path'] for a in manifest['artifacts']) else 'sequence-1920x1080'
@@ -45,9 +45,17 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
     if inject:
         path = directory/'variable-metadata.raw';path.write_bytes(metadata)
         arguments += ['--metadata-binary', str(path)]
+    cpu_options = arguments[1:]
     output = directory/'samples';arguments += [str(output)] + inputs
     subprocess.run(arguments, check=True)
     trace = json.loads((output/'trace.json').read_text())['frames']
+    cpu_output = directory/'cpu-samples'
+    if cpu_encoder:
+        # Identical input paths and explicit metadata; compare raw full packets,
+        # independently from SDK-normalized hashes and the mandatory stage audit.
+        subprocess.run([str(cpu_encoder)] + cpu_options + [str(cpu_output)] + inputs, check=True)
+        if json.loads((cpu_output/'trace.json').read_text())['frames'] != trace:
+            raise ValueError('same-input comparison encoder state/tables/30 bands differ')
     if len(trace) != len(expected):
         raise ValueError('missing encoder trace frames')
     results = []
@@ -59,6 +67,11 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
         if actual['coefficient_fnv64'] != [b['sdk_coeff_fnv64'] for b in frame['bands']]:
             raise ValueError('frame %d production coefficient mismatch' % index)
         raw = (output/('frame_%04d.cfhd' % index)).read_bytes()
+        if cpu_encoder:
+            cpu_raw = (cpu_output/('frame_%04d.cfhd' % index)).read_bytes()
+            if raw != cpu_raw:
+                first = next((i for i, (a, b) in enumerate(zip(cpu_raw, raw)) if a != b), min(len(raw), len(cpu_raw)))
+                raise ValueError('frame %d CPU/Metal full packet differs at byte %d' % (index, first))
         parsed = sample.parse_sample(raw)
         normalized = sample.normalized_sample(raw, parsed, frame['metadata_mask_ranges'])
         if len(raw) != frame['sdk_byte_length'] or actual['sample_bytes'] != len(raw):
@@ -69,6 +82,9 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
                'raw_sha256': gate.sha(raw), 'normalized_sha256': gate.sha(normalized),
                'coefficient_hashes_equal': 30, 'framed_payload_hashes_equal': 30,
                'autonomous_state': 'PASS', 'full_normalized_sample': 'PASS'}
+        if cpu_encoder:
+            row['same_input_cpu_packet_sha256'] = gate.sha(cpu_raw)
+            row['same_input_full_raw_packet_equal'] = True
         if corpus:
             original = (corpus/'frames'/run_name/('frame_%04d' % index)/'sdk.cfhd').read_bytes()
             gate.verify_bytes(original, frame['sdk_sha256'], frame['sdk_byte_length'], 'original SDK sample')
@@ -123,6 +139,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--probe', required=True, type=Path)
     parser.add_argument('--encoder', required=True, type=Path)
+    parser.add_argument('--cpu-encoder', type=Path, help='Also compare every full raw packet using exactly the same input bytes and metadata')
     parser.add_argument('--corpus-root', type=Path)
     parser.add_argument('--sequence', action='store_true')
     parser.add_argument('--ffmpeg', type=Path)
@@ -142,7 +159,7 @@ def main():
         inventory = {'status': 'PENDING', 'meaning': 'manifest hashes only; no actual Windows bytes supplied'}
     with tempfile.TemporaryDirectory(prefix='hypercine-fs3-production-') as tmp:
         directory = args.output_dir or Path(tmp)
-        result = compare_run(args.probe, args.encoder, manifest, args.corpus_root, directory, args.ffmpeg, args.inject_metadata)
+        result = compare_run(args.probe, args.encoder, manifest, args.corpus_root, directory, args.ffmpeg, args.inject_metadata, args.cpu_encoder)
     result.update({'copyright': 'Copyright (c) 2026 HyperCine Contributors.', 'license': 'MIT OR Apache-2.0',
                    'manifest': name, 'inventory': inventory, 'machine': platform.platform(), 'architecture': platform.machine(),
                    'encoder_sha256': gate.sha(args.encoder.read_bytes()),
@@ -155,6 +172,14 @@ def main():
                    'command': [sys.executable]+sys.argv,
                    'windows_gopro_decoder': 'PENDING: actual one-worker Windows test required',
                    'unquantized_windows_intermediates': 'PENDING: Windows stage dumps not supplied'})
+    if args.cpu_encoder:
+        for name in ['src/core/filmscan3_backend.h', 'src/core/filmscan3_backend.cpp',
+                     'src/metal/filmscan3.metal', 'src/metal/filmscan3_metal.mm',
+                     'tests/metal_audit.h']:
+            result['sources'].append({'path': name, 'sha256': gate.sha((gate.ROOT/name).read_bytes())})
+        result['same_input_cpu_encoder_sha256'] = gate.sha(args.cpu_encoder.read_bytes())
+        result['same_input_full_raw_packets_equal'] = len(result['frames'])
+        result['profile'] = 'autonomous FilmScan3 with same-input CPU/Metal packet comparison'
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True);args.report.write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps({'frames': len(result['frames']), 'autonomous_tables_and_state': 'PASS',
