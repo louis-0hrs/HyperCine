@@ -36,10 +36,11 @@
     "note": "Known upstream SIMD OOB diagnostic; see issue #21; not reproduced in CUDA"
   },
   "archive": {
-    "status": "BLOCKED_BY_AUTO_REVIEW",
+    "status": "AUTHORIZED_BUT_UNREACHABLE",
     "requested_root": "\\\\TRUENAS\\DeDub\\HyperCine\\golden\\windows\\qualities",
     "local_corpora_retained": true,
-    "reason": "Auto-review rejected copying potentially non-public corpus files to an external NAS because destination may contain existing data."
+    "reason": "User authorized upload, but the TrueNAS host was unreachable during this session (net view \\\\TRUENAS returned system error 53; all UNC path probes failed). No NAS files were written.",
+    "user_authorized": true
   },
   "profiles": [
     {
