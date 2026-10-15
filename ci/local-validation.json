@@ -1,0 +1,61 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 8,
+  "base_commit": "8118288a6144e2dbdb09e1cd2d34ce1c2df850e5",
+  "date": "2026-10-15",
+  "system": "macOS-26.5.2-arm64-arm-64bit",
+  "architecture": "arm64",
+  "release": {
+    "status": "PASS",
+    "registered_tests": 25,
+    "passed_tests": 25,
+    "system": "Darwin",
+    "architecture": "arm64",
+    "windows_binaries": "NOT REQUIRED: versioned manifests/fixtures; optional NAS corpus is separate"
+  },
+  "release_ctest_seconds": 78.8,
+  "guardrail_tests": {
+    "passed": 6,
+    "failed": 0
+  },
+  "required_decode_without_ffmpeg": "PASS: configure rejects unavailable FFmpeg/ffprobe",
+  "compiler_provenance_without_unix_cpp": "PASS: configured MSVC identity retained; missing identity explicit",
+  "workflow_yaml": "PASS: Ruby YAML parser",
+  "workflow_bash": "PASS: bash -n",
+  "leak_detection_attempt": {
+    "passed_tests": 4,
+    "failed_tests": 21,
+    "status": "ENVIRONMENT_FAILURE",
+    "reason": "AppleClang arm64 AddressSanitizer: detect_leaks is not supported on this platform"
+  },
+  "hosted_ci": {
+    "macos_arm64": "PENDING",
+    "windows_msvc_x64": "PENDING",
+    "linux_x64": "PENDING"
+  },
+  "workflow_installation": "ACTIVATED: user renewed GitHub login; workflow scope verified on 2026-10-15; hosted results pending",
+  "actual_nas_corpus_in_this_run": "NOT USED: versioned hash manifests and small frozen fixtures only",
+  "upstream_modified": false,
+  "core_codec_math_changed": false,
+  "performance_claim": false,
+  "asan_ubsan": {
+    "status": "PASS",
+    "registered_tests": 25,
+    "passed_tests": 25,
+    "system": "Darwin",
+    "architecture": "arm64",
+    "windows_binaries": "NOT REQUIRED: versioned manifests/fixtures; optional NAS corpus is separate"
+  },
+  "asan_ubsan_ctest_seconds": 164.67,
+  "asan_options": "detect_leaks=0:halt_on_error=1",
+  "ubsan_options": "halt_on_error=1:print_stacktrace=1",
+  "initial_hosted_run": {
+    "url": "https://github.com/louis-0hrs/HyperCine/actions/runs/38783548636",
+    "macos_arm64_release": "PASS",
+    "macos_arm64_asan_ubsan": "PASS",
+    "linux_x64_release": "PASS",
+    "windows_msvc_x64_release": "FAIL: 19/25 passed; core.autocrlf changed pinned generator bytes"
+  },
+  "windows_checkout_regression": "PASS: actual core.autocrlf=true checkout preserves generator and two imported manifest hashes"
+}

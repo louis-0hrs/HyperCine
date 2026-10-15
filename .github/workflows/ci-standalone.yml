@@ -1,0 +1,143 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+# See ci/STANDALONE.md for the validation contract and evidence.
+name: Standalone CFHD CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['**']
+    paths:
+      - 'CMakeLists.txt'
+      - 'include/**'
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - 'docs/validation/**'
+      - 'ci/**'
+      - '.github/workflows/ci-standalone.yml'
+  pull_request:
+    paths:
+      - 'CMakeLists.txt'
+      - 'include/**'
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - 'docs/validation/**'
+      - 'ci/**'
+      - '.github/workflows/ci-standalone.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  standalone:
+    name: Standalone full decode (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64 Release
+            runner: macos-15
+            system: Darwin
+            machine: arm64
+            config: Release
+            sanitize: 'OFF'
+          - name: macOS arm64 ASan UBSan
+            runner: macos-15
+            system: Darwin
+            machine: arm64
+            config: RelWithDebInfo
+            sanitize: 'ON'
+          - name: Windows MSVC x64 Release
+            runner: windows-2022
+            system: Windows
+            machine: x86_64
+            config: Release
+            sanitize: 'OFF'
+          - name: Linux x64 Release
+            runner: ubuntu-24.04
+            system: Linux
+            machine: x86_64
+            config: Release
+            sanitize: 'OFF'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install FFmpeg and Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg ninja
+      - name: Install FFmpeg and Ninja (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y ffmpeg ninja-build
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install ffmpeg --no-progress -y
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Configure MSVC environment (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (!$vs) { throw 'MSVC x64 installation not found' }
+          & "$vs\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64 -SkipAutomaticLocation
+          if (!$?) { throw 'MSVC developer shell failed' }
+          foreach ($key in @('PATH', 'INCLUDE', 'LIB', 'LIBPATH', 'VCINSTALLDIR', 'VCToolsInstallDir', 'WindowsSdkDir', 'WindowsSDKVersion', 'UniversalCRTSdkDir', 'UCRTVersion')) {
+            $value = [Environment]::GetEnvironmentVariable($key)
+            if ($value) { "$key=$value" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          }
+      - name: Configure SDK-free build
+        env:
+          BUILD_CONFIG: ${{ matrix.config }}
+          SANITIZE: ${{ matrix.sanitize }}
+        run: |
+          flags=()
+          if [[ "$RUNNER_OS" == macOS ]]; then flags+=(-DCMAKE_OSX_ARCHITECTURES=arm64); fi
+          if [[ "$RUNNER_OS" == Windows ]]; then flags+=(-DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl); fi
+          if [[ "$SANITIZE" == ON ]]; then
+            flags+=('-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer' '-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined')
+          fi
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="$BUILD_CONFIG" \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF \
+            -DHYPERCINE_ENABLE_CUDA=OFF -DHYPERCINE_BUILD_TESTS=ON \
+            -DHYPERCINE_BUILD_BENCHMARKS=OFF -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON "${flags[@]}"
+      - name: Build
+        run: cmake --build build --parallel 3
+      - name: Full CTest, architecture and external decode gate
+        env:
+          EXPECTED_SYSTEM: ${{ matrix.system }}
+          EXPECTED_MACHINE: ${{ matrix.machine }}
+          # AppleClang ASan on arm64 does not support LeakSanitizer.
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: |
+          python ci/test_standalone_gate.py
+          python ci/run_standalone.py --system "$EXPECTED_SYSTEM" --machine "$EXPECTED_MACHINE"
+      - name: Preserve test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: standalone-${{ matrix.system }}-${{ matrix.config }}
+          retention-days: 7
+          path: |
+            build/CMakeCache.txt
+            build/compile_commands.json
+            build/registered-tests.json
+            build/standalone-results.xml
+            build/standalone-gate.json
+            build/Testing/Temporary/
+            build/samples*/validation.json
+            build/windows-oracle-replay/*.json

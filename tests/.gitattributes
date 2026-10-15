@@ -1,0 +1,6 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+# These exact bytes are pinned by reference_corpus/import_provenance.json.
+/reference_frame_generator.h text eol=lf
+/reference_corpus/manifest.json text eol=lf
+/reference_corpus/phase3a_1080p_120_manifest.json text eol=lf

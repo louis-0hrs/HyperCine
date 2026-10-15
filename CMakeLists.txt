@@ -24,6 +24,10 @@ option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 
 # This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
+option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
+if(HYPERCINE_REQUIRE_EXTERNAL_DECODE AND (NOT HYPERCINE_BUILD_STANDALONE OR NOT HYPERCINE_BUILD_TESTS))
+    message(FATAL_ERROR "External decode gate requires standalone mode and tests")
+endif()
 if(HYPERCINE_BUILD_STANDALONE)
     cmake_minimum_required(VERSION 3.25)
     if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA)
@@ -79,6 +83,9 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME filmscan3_autonomous_manifest COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>)
+        add_test(NAME filmscan3_sequence_manifest COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+            --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3> --sequence)
         if(HYPERCINE_REFERENCE_CORPUS_ROOT)
             add_test(NAME filmscan3_actual_tier_a COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
@@ -94,6 +101,10 @@ if(HYPERCINE_BUILD_STANDALONE)
         endif()
         find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
         find_program(HYPERCINE_FFPROBE_EXECUTABLE NAMES ffprobe)
+        if(HYPERCINE_REQUIRE_EXTERNAL_DECODE AND
+           (NOT HYPERCINE_FFMPEG_EXECUTABLE OR NOT HYPERCINE_FFPROBE_EXECUTABLE))
+            message(FATAL_ERROR "External decode gate requires both FFmpeg and ffprobe")
+        endif()
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
             add_test(NAME filmscan3_external_decode COMMAND "${Python3_EXECUTABLE}"
@@ -130,6 +141,20 @@ if(HYPERCINE_BUILD_STANDALONE)
         else()
             message(STATUS "Optional standalone external decode test not registered: FFmpeg/ffprobe unavailable")
         endif()
+        # Record the compiler that built these binaries, including on MSVC hosts
+        # where a Unix-style c++ command need not exist.
+        set_tests_properties(windows_reference_inputs filmscan3_autonomous_manifest filmscan3_sequence_manifest PROPERTIES
+            ENVIRONMENT "HYPERCINE_TEST_COMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} (${CMAKE_CXX_COMPILER})")
+        if(TEST filmscan3_external_decode)
+            set_tests_properties(filmscan3_external_decode PROPERTIES
+                ENVIRONMENT "HYPERCINE_TEST_COMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} (${CMAKE_CXX_COMPILER})")
+        endif()
+        foreach(binary_test filmscan3_actual_tier_a filmscan3_actual_sequence)
+            if(TEST ${binary_test})
+                set_tests_properties(${binary_test} PROPERTIES
+                    ENVIRONMENT "HYPERCINE_TEST_COMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} (${CMAKE_CXX_COMPILER})")
+            endif()
+        endforeach()
     endif()
     return()
 endif()
