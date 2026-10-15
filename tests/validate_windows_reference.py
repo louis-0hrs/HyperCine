@@ -6,7 +6,8 @@
 
 Exit 0: input-only gate passed. Exit 1: invalid input/provenance/artifact.
 Exit 2: diagnostic completed, SDK-compatible encoder parity remains blocked.
-No Windows sample bytes are inferred from hashes. No metadata is masked here.
+No Windows sample bytes are inferred from hashes. Only parsed whitelist metadata
+values are normalized in copies after original file hash verification.
 """
 import argparse
 import hashlib
@@ -17,6 +18,7 @@ import struct
 import subprocess
 import tempfile
 import sys
+import reference_sample as sample
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / 'tests/reference_corpus'
@@ -117,40 +119,94 @@ def first_i16_difference(expected, actual, width):
     return None if len(expected) == len(actual) else {'byte_length': [len(expected), len(actual)]}
 
 
-def diagnose(probe, frame, input_path, directory):
+def diagnose(probe, frame, input_path, directory, reference=None, sdk_replay=False):
     # Recheck before entering the codec, even if caller already generated it.
     verify_bytes(input_path.read_bytes(), frame['input_sha256'], frame['input_byte_length'], 'pre-codec BGRA')
     directory.mkdir(parents=True, exist_ok=True)
     plan = directory / 'quant-plan.txt'
     plan.write_text(' '.join(str(b['quant']) for b in frame['bands']))
-    subprocess.run([str(probe), 'diagnose', str(frame['width']), str(frame['height']),
+    subprocess.run([str(probe), 'diagnose-sdk-replay' if sdk_replay else 'diagnose', str(frame['width']), str(frame['height']),
                     str(input_path), str(directory), str(plan)], check=True)
     bands = []
     for b in frame['bands']:
         prefix = directory / ('c%d-s%d' % (b['channel'], b['subband']))
         coeff = prefix.with_suffix('.fnv64').read_text()
-        payload = sha(prefix.with_suffix('.payload').read_bytes())
+        entropy = prefix.with_suffix('.payload').read_bytes()
+        payload = sha(sample.reframe_band(reference['bands'][len(bands)], entropy)) if reference else None
+        raw = reference['bands'][len(bands)] if reference else None
+        difference = None
+        if raw and raw['lowpass']:
+            p = raw['payload']
+            expected = b''.join(p[i:i+2][::-1] for i in range(0, len(p), 2))
+            difference = first_i16_difference(expected, prefix.with_suffix('.i16le').read_bytes(), b['width'])
+        byte_diff = None
+        if raw:
+            common = min(len(raw['payload']), len(entropy))
+            byte_diff = next((i for i in range(common) if raw['payload'][i] != entropy[i]), None)
+            if byte_diff is None and len(raw['payload']) != len(entropy):
+                byte_diff = common
         bands.append({'channel': b['channel'], 'subband': b['subband'],
                       'quant': b['quant'], 'scale_reference_only': b['scale'],
                       'coefficient_fnv64': coeff, 'payload_sha256': payload,
+                      'payload_scope': 'reference-header diagnostic reframe' if raw else 'PENDING: actual reference headers required',
+                      'entropy_sha256': sha(entropy),
+                      'first_signed_difference': difference,
+                      'first_entropy_byte_difference': byte_diff,
+                      'reference_sample_byte_offset': raw['offset']+byte_diff if raw and byte_diff is not None else None,
                       'expected_coeff_fnv64': b['sdk_coeff_fnv64'],
                       'expected_payload_sha256': b['sdk_payload_sha256'],
                       'coefficient_hash_equal': coeff == b['sdk_coeff_fnv64'],
-                      'payload_equal': payload == b['sdk_payload_sha256']})
-    first = next((b for b in bands if not b['coefficient_hash_equal'] or not b['payload_equal']), None)
+                      'payload_equal': payload == b['sdk_payload_sha256'] if payload is not None else None})
+    first = next((b for b in bands if not b['coefficient_hash_equal'] or b['payload_equal'] is False), None)
     return {'status': 'FAIL' if first else 'PASS',
-            'scope': 'current Q2 frontend/wavelet with exported divisors; diagnostic only',
+            'scope': 'frozen-table SDK arithmetic replay; reference-header diagnostic wrapping; no stateful encoder' if sdk_replay else 'current Q2 frontend/wavelet with exported divisors; diagnostic only',
             'coeff_matches': sum(b['coefficient_hash_equal'] for b in bands),
-            'payload_matches': sum(b['payload_equal'] for b in bands), 'bands': bands,
+            'payload_matches': sum(b['payload_equal'] is True for b in bands) if reference else None, 'bands': bands,
             'first_observed_difference': first,
             'earliest_causal_stage': 'PENDING: Windows converted/filter/coeff dumps unavailable',
-            'coordinate': 'PENDING: coefficient hashes cannot locate a signed coordinate'}
+            'coordinate': 'exact signed LL comparisons available' if reference else 'PENDING: reference binary required'}
+
+
+
+def inspect_inventory(manifest, root):
+    verified, missing = 0, []
+    for artifact in manifest['artifacts']:
+        path = (root / artifact['path']).resolve()
+        if root.resolve() not in path.parents:
+            raise ValueError('artifact escapes corpus root')
+        if not path.is_file():
+            missing.append(artifact['path'])
+            continue
+        verify_bytes(path.read_bytes(), artifact['sha256'], artifact['byte_length'], artifact['path'])
+        verified += 1
+    result = {'status': 'BLOCKED' if missing else 'PASS', 'files_verified': verified,
+              'files_expected': len(manifest['artifacts']), 'files_missing': len(missing),
+              'missing_examples': missing[:3], 'parsed_frames': []}
+    if missing:
+        return result
+    for frame in manifest['frames']:
+        if (frame['width'], frame['height']) != (1920, 1080):
+            continue  # File integrity for 128px is not an encoder oracle.
+        directory = 'tier-a-1080' if any('tier-a-1080/' in a['path'] for a in manifest['artifacts']) else 'sequence-1920x1080'
+        base = root / 'frames' / directory / ('frame_%04d' % frame['frame_index'])
+        sdk, sdk_normalized = sample.verify_sample((base/'sdk.cfhd').read_bytes(), frame, 'sdk')
+        cuda, cuda_normalized = sample.verify_sample((base/'cuda.cfhd').read_bytes(), frame, 'cuda')
+        if sdk_normalized != cuda_normalized:
+            raise ValueError('actual SDK/CUDA normalized bytes differ')
+        if any(a['framed'] != b['framed'] for a, b in zip(sdk['bands'], cuda['bands'])):
+            raise ValueError('actual SDK/CUDA framed band bytes differ')
+        result['parsed_frames'].append({'frame_index': frame['frame_index'],
+                                       'framed_band_pairs_equal': 30,
+                                       'normalized_sample_bytes_equal': True,
+                                       'll_coefficient_hashes_checked_per_encoder': 3})
+    return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--probe', type=Path, required=True)
     parser.add_argument('--inputs-only', action='store_true')
+    parser.add_argument('--sdk-replay', action='store_true', help='replay documented CG709/default midpoint arithmetic with frozen exported divisors')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--corpus-root', type=Path)
     parser.add_argument('--stage-dir', type=Path, help='retain intermediate dumps outside Git')
@@ -164,7 +220,7 @@ def main():
               'command': [sys.executable] + sys.argv,
               'source_files': [{'path': name, 'sha256': sha((ROOT/name).read_bytes())} for name in
                                ['CMakeLists.txt', 'tests/reference_frame_generator.h',
-                                'tests/validate_windows_reference.py', 'tools/hypercine_reference_probe.cpp',
+                                'tests/validate_windows_reference.py', 'tests/reference_sample.py', 'tools/hypercine_reference_probe.cpp',
                                 'src/cpu/standalone_frontend.cpp', 'src/core/standalone_encoder.cpp',
                                 'src/cpu/wavelet_cpu.cpp']],
               'import_provenance': json.loads((CORPUS / 'import_provenance.json').read_text()),
@@ -174,6 +230,8 @@ def main():
     for name in ['manifest.json', 'phase3a_1080p_120_manifest.json']:
         manifest = load_manifest(CORPUS / name)
         run = {'manifest': name, 'profile': manifest['profile'], 'frames': []}
+        if args.corpus_root and not args.inputs_only:
+            run['binary_inventory'] = inspect_inventory(manifest, args.corpus_root)
         report['runs'].append(run)
         with tempfile.TemporaryDirectory(prefix='hypercine-reference-') as tmp:
             work = Path(tmp)
@@ -190,7 +248,11 @@ def main():
                     row['windows_artifacts'] = (verify_artifacts(manifest, frame, args.corpus_root) if args.corpus_root else
                                                {'status': 'BLOCKED', 'reason': 'Windows binaries not supplied'})
                     directory = (args.stage_dir / ('frame_%04d' % frame['frame_index'])) if args.stage_dir else work
-                    row['diagnostic'] = diagnose(args.probe, frame, input_path, directory)
+                    reference = None
+                    if args.corpus_root and row['windows_artifacts']['status'] == 'PASS':
+                        original = (args.corpus_root / ('frames/tier-a-1080/frame_%04d/sdk.cfhd' % frame['frame_index'])).read_bytes()
+                        reference, _ = sample.verify_sample(original, frame, 'sdk')
+                    row['diagnostic'] = diagnose(args.probe, frame, input_path, directory, reference, args.sdk_replay)
         run['input_gate'] = 'PASS'
         run['input_frames_verified'] = len(run['frames'])
     if args.output:

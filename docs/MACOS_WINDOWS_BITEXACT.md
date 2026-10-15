@@ -13,9 +13,13 @@ experimental FS3-Q2 encoder and its packet bytes are unchanged.
 |---|---|---|
 | Tier A input BGRA SHA-256 | PASS, 16/16 | Actual regenerated 1920×1080 bytes, including stamps |
 | Sequence input BGRA SHA-256 | PASS, 120/120 | Each sequence index checked against the imported manifest |
-| CPU diagnostic replay, frames 0/3/6/13 | FAIL | 0/30 coefficient FNV and 0/30 payload SHA matches per frame |
-| Windows SDK/CUDA binary files | BLOCKED | No local corpus root supplied; hashes are not sample files |
-| Earliest causal stage / signed coordinate | PENDING | Windows conversion/filter/coefficient dumps required |
+| Legacy Q2 diagnostic replay, frames 0/3/6/13 | FAIL | 0/30 coefficient FNV and 0/30 correctly framed payload SHA matches per frame |
+| Frozen SDK arithmetic replay | PASS, 16/16 | 480/480 coefficient hashes and entropy blocks; reference band headers reused only for diagnostic wrapping |
+| Windows Tier A binary files | PASS | 280/280 actual files verified from the NAS archive |
+| Windows SDK/CUDA Tier A normalized samples | PASS, 16/16 | Actual bytes equal after parsed whitelist normalization; 480/480 framed band pairs equal |
+| Windows 120-frame binary files | BLOCKED | Not included in the supplied Tier A archive |
+| First differing LL signed coordinate | FAIL | Frame 0: Y L3 LL (0,0), expected 1888, actual 13936; first entropy byte at sample offset 788 |
+| Earliest causal stage | PENDING | Windows conversion/filter dumps still required |
 | SDK-compatible FS3 profile / dynamic state | PENDING | Exported quant/scale/state retained, no state evolution port |
 | Mac vs Windows normalized full sample | BLOCKED | SDK-compatible encoder and actual binaries required |
 | 4K/8K production parity | PENDING | No supported oracle/data or geometry release |
@@ -25,8 +29,10 @@ The machine-readable results are in
 The first *observed* mismatch for all four probed frames is channel 0, subband 0
 (Y L3 LL, 240×135, quant=1). For frame 0 the Mac coefficient FNV is
 `e3e8b01a9160e0d3`. Expected hashes are recorded alongside actual hashes in the
-JSON. This is a coefficient-hash observation, not proof of the earliest causal
-stage or a particular differing coefficient. No PSNR threshold is used here.
+JSON. The NAS-backed follow-up now also compares the actual big-endian LL
+coefficients against the Mac signed dumps; the first differing coordinate and
+entropy byte offsets are recorded for every probed band. This still does not
+establish the earliest causal stage. No PSNR threshold is used here.
 
 The replay uses the existing Q2 conversion/wavelet implementation with the
 **exported per-band divisors**. It does not apply the SDK scale table as a new
@@ -99,8 +105,11 @@ int16; HP payload uses the existing Table17 writer. Quant plans contain exactly
 in the result JSON. These diagnostic files are not SDK-compatible samples.
 The horizontal and vertical internal filter passes are not separately dumped
 in this draft. A future instrumented stage interface must expose those too.
-`first_i16_difference` supports exact signed x/y/value reporting once verified
-Windows intermediate bytes are available; hashes alone cannot provide that.
+`first_i16_difference` reports exact signed x/y/value differences for the three
+LL bands extracted from actual samples. HP coefficients cannot be recovered
+bit-for-bit from lossy companded entropy; Windows coefficient dumps are still
+required for exact HP coordinates. Raw and reframed entropy differences are
+reported separately.
 
 ```sh
 cmake -S . -B build-sanitized -DCMAKE_BUILD_TYPE=Debug \
@@ -139,20 +148,125 @@ validator. Existing files must match original artifact lengths/SHA-256; absent
 files remain BLOCKED, corrupt files fail. File verification alone does not
 change the Mac production gate.
 
-This draft performs **no metadata masking**. Later full-sample comparison must
-parse and validate only GUID/DATE/TIME/TIMECODE value ranges before normalizing
-copies. Never trust arbitrary offsets or mask size/codec tags. Compare original
-files separately when metadata is identical. Do not claim a normalized sample
-was the untouched original.
+`tests/reference_sample.py` now parses size-bounded sample/level/subband chunks,
+raw channel indices and typed metadata records. It normalizes copies of only
+parsed GUID/DATE/TIME/TIMECODE values, checks the exact mask ranges against the
+original manifest, and validates normalized sample SHA-256. Arbitrary mask
+ranges, unexpected types/sizes, truncated records/chunks, malformed band
+trailers and excessive nesting are rejected. Untouched original SHA-256 values
+are verified first. All 16 actual Windows SDK/CUDA normalized samples and all
+480 framed band pairs are byte-identical. This is Windows reference integrity,
+not a Mac encoder parity result.
+
+## NAS acquisition and corrected payload scope (2026-10-15)
+
+The provided data was found at
+`smb://TRUENAS/DeDub/HyperCine/golden/windows/fs3/2026-10-14/tier-a`.
+The shell's directory access stalled; Finder successfully copied the ZIP and
+two manifest files to `/private/tmp/hypercine-nas-tier-a`. No NAS files were
+modified. The archive has the exact expected SHA-256 and extracts 280 files,
+276,444,160 bytes. All 280 lengths/SHA-256 values match the pinned Git manifest.
+The transferred manifest is one byte longer (CRLF versus LF at EOF); bytes are
+otherwise identical and parsed JSON is identical. Both file hashes are recorded in `validation/macos_windows_nas.json`;
+the versioned reference manifest is unchanged.
+
+**Correction to the initial draft:** Windows `*_payload_sha256` hashes complete
+framed band blocks produced by `BuildLowpassPayloadPtr` /
+`BuildHighpassPayloadPtr`, including headers and trailers. The initial Mac
+probe hashed only entropy bytes, so its payload-hash comparison was not a valid
+like-for-like test. Coefficient-FNV comparisons were independent and remain
+valid. The updated diagnostic extracts actual framed blocks, validates all 960
+individual SDK/CUDA band hashes, and compares Mac entropy both directly and
+inside an explicitly marked diagnostic wrapper made from the reference band
+header/trailer with a recomputed subband length. This wrapper is **not** a Mac
+encoder-produced SDK-compatible sample or a production framing implementation.
+Without actual reference headers payload comparison stays PENDING.
+
+For frames 0/3/6/13, the first LL coordinate is (0,0) in Y L3:
+
+| Frame | SDK signed coefficient | Mac signed coefficient | SDK sample entropy byte offset |
+|---|---:|---:|---:|
+| 0 FlatBlack | 1888 | 13936 | 788 |
+| 3 HorizontalGradient | 4832 | 13936 | 788 |
+| 6 DeterministicNoise | 7744 | 13936 | 788 |
+| 13 HardEdges | 6096 | 13936 | 788 |
+
+Source inspection identifies a concrete frontend difference to isolate next:
+Windows `BgraToYuvKernel` reads row `height-1-row`, uses SIMD-style per-product
+multiply-high rounding and picks chroma from the even pixel; the current Q2
+frontend reads row `row`, rounds after summation and averages chroma across the
+pair. The isolated SDK replay below implements those documented arithmetic differences;
+the legacy Q2 frontend/quantization remains unchanged. Windows converted/filter
+dumps are still needed to measure each earlier intermediate stage directly.
+
+Optional binary-backed CTest registration:
+
+```sh
+cmake -S . -B build \
+  -DHYPERCINE_REFERENCE_CORPUS_ROOT=/private/tmp/hypercine-nas-tier-a/extracted
+ctest --test-dir build -C Release --output-on-failure
+python3 tests/validate_windows_reference.py \
+  --probe build/hypercine_reference_probe \
+  --corpus-root /private/tmp/hypercine-nas-tier-a/extracted \
+  --stage-dir /private/tmp/hypercine-nas-stages \
+  --output docs/validation/macos_windows_bitexact.json
+```
+
+The Tier A file blocker is resolved. The 120-frame binary corpus, Windows
+conversion/filter/HP-coefficient dumps, SDK-compatible profile/state evolution,
+and genuine Mac full-sample parity remain open.
+
+## Frozen-table SDK arithmetic replay
+
+`hypercine_reference_probe diagnose-sdk-replay` is a separate diagnostic mode.
+It implements the documented CG709 multiply-high, signed floor, saturating and
+16-bit wrapping operations, bottom-up source row traversal, even-pixel chroma
+selection, and default pre-emphasis midpoint (`q/2-1`) before reciprocal
+quantization. Wavelet passes still use the existing safe scalar functions and
+prescale [0,2,0]. No SDK headers, SDK build or SDK runtime are required. The
+implementation uses explicit C++17 floors, not undefined negative shifts or
+out-of-bounds SIMD accesses.
+
+Using each frame's exported divisors, **all 16 frames match all 480 coefficient
+FNV hashes**. All 480 Mac-produced entropy byte blocks also equal the actual
+Windows bytes, and all 480 complete band SHA-256 values match after the explicit
+reference-header diagnostic wrapping. All 48 actual LL coefficient planes
+match signed value for signed value; exact HP coefficient bytes still require
+Windows coefficient dumps, although every exported HP FNV matches. Results are
+in `validation/macos_windows_sdk_replay.json`.
+
+```sh
+python3 tests/validate_windows_reference.py \
+  --probe build/hypercine_reference_probe \
+  --corpus-root /private/tmp/hypercine-nas-tier-a/extracted \
+  --sdk-replay --frames 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 \
+  --output docs/validation/macos_windows_sdk_replay.json
+```
+
+This mode lives in the diagnostic tool, not the public encoder. It does not
+compute dynamic quant tables, evolve FSratelimiter/previous-GOP state, consume
+scale[36] as an arbitrary transform profile, or create channel/frame/metadata
+headers. Reusing a validated reference header to isolate entropy behavior is
+not an independent SDK-compatible encoder or a full sample hash match. The
+command therefore still exits 2 and the production gate remains BLOCKED.
+Default `diagnose` continues to measure the original Q2 frontend independently.
+
+The SDK arithmetic CTest covers flat, gradient, noise and hard-edge vectors,
+checks the input SHA first, then all 30 coefficient hashes. With the optional
+corpus root it additionally checks actual LL signed values and entropy bytes
+and all 30 reframed payload hashes for each vector. Separate parser tests cover
+bounds, raw index entries, immutable originals, whitelist normalization, corrupt
+trailers/metadata, and explicit diagnostic reframing.
 
 ## Remaining implementation and release gates
 
-1. Obtain and verify the minimal actual Windows files and intermediate dumps.
+1. Tier A original files are now verified. Obtain Windows intermediate dumps
+   and the separate 120-frame binary sequence.
    Compare BGRA → conversion → horizontal/vertical stages → levels → quantized
    coefficients to locate the earliest differing signed value. Resolve the
    conversion/transform gap based on that evidence.
-2. Add a **separate** SDK-compatible FS3 profile with exported fixed quant/scale
-   replay first, then the full quantization and FSratelimiter / previous GOP
+2. Promote the isolated frozen arithmetic replay into a **separate** tested
+   core FS3 profile with a public stage interface, then add full quantization and FSratelimiter / previous GOP
    byte-count state machine. Include state trajectory tests; leave FS3-Q2 bytes
    unchanged. Replay of exported tables is not dynamic rate-control testing.
 3. Port/verify entropy, scale/size tags, channel/frame framing and side metadata.
@@ -171,14 +285,17 @@ bitstream parity. Metal #7 can research CPU-vs-Metal FS3-Q2 parity, but SDK/Wind
 identity and production release remain gated on this issue. No optimization or
 acceleration milestone is claimed, and no Windows/CUDA/upstream files are edited.
 
-## Validation recorded for this draft
+## Validation recorded for the NAS follow-up
 
-Release CTest: **16/16 PASS**. Debug ASan+UBSan CTest: **16/16 PASS**.
-Both runs include all existing native FFmpeg decode checks. The additional input
-CTest regenerates all 136 corpus inputs, and the guardrail CTest contains ten
-unit cases. Independently compared all **27/27** Q2 sample packet SHA-256 values
-against `macos_variable_size_2026-10-15.json`; all remain unchanged, including
-128×128, 256×256 and 1920×1080. See the separate machine-readable
-`validation/macos_windows_checks.json` for regression and sanitizer evidence.
-These PASS results cover the local tests and Q2 regressions only; they do not
-change the FAIL/PENDING/BLOCKED encoder-parity gates above.
+Release CTest: **19/19 PASS**. Debug ASan+UBSan CTest: **19/19 PASS**.
+Both include all existing native FFmpeg decode checks, deterministic SDK replay
+vectors, and the optional actual-corpus parser/byte comparisons. The input CTest
+regenerates all 136 corpus inputs. Independently compared all **27/27** Q2 sample
+packet SHA-256 values against `macos_variable_size_2026-10-15.json`; all remain
+unchanged, including 128×128, 256×256 and 1920×1080.
+
+Current checks and exact log/result hashes are recorded in
+`validation/macos_windows_nas.json`. The earlier
+`validation/macos_windows_checks.json` remains the historical initial-draft
+record. Local tests and frozen SDK replay PASS do not release the dynamic
+encoder/full sample/Metal production gates.
