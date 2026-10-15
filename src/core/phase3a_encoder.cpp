@@ -1126,7 +1126,7 @@ void GeneratePhase3AFrame(int width, int height, int frame_index, Phase3APattern
 // SECTION 3: 120-Frame Changing-Complexity Sequence Equivalence Verification
 // ============================================================================
 
-Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num_frames, uint32_t seed) {
+Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num_frames, uint32_t seed, const Phase3AReferenceFrameCallback& artifact_callback) {
     Phase3ASequence120Report rep;
     rep.width = width;
     rep.height = height;
@@ -1516,6 +1516,67 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
             (a_masked == b_masked) &&
             (b_masked == c_masked);
         item.b_eq_c_unmasked = (b_sample == c_sample);
+
+        if (artifact_callback) {
+            Phase3AReferenceFrameArtifact artifact;
+            artifact.frame_index = f;
+            artifact.pattern_name = item.pattern_name;
+            artifact.width = width;
+            artifact.height = height;
+            artifact.pitch = pitch;
+            artifact.fs_rate_limiter = q_a.fs_rate_limiter;
+            artifact.previous_sample_bytes = static_cast<int>(item.a_prev_bytes);
+            std::memcpy(artifact.quant, q_a.quant, sizeof(artifact.quant));
+            std::memcpy(artifact.scale, q_a.scale, sizeof(artifact.scale));
+            artifact.input_bgra = frame_buf;
+            artifact.upstream_cfhd = a_sample;
+            artifact.cuda_cfhd = c_sample;
+            artifact.normalized_upstream_cfhd = a_masked;
+            artifact.normalized_cuda_cfhd = c_masked;
+            MaskCfhdVolatileMetadata(a_sample, &artifact.metadata_mask_ranges);
+            artifact.input_sha256 = Sha256Hex(artifact.input_bgra.data(), artifact.input_bgra.size());
+            artifact.upstream_sha256 = Sha256Hex(a_sample.data(), a_sample.size());
+            artifact.cuda_sha256 = Sha256Hex(c_sample.data(), c_sample.size());
+            artifact.normalized_upstream_sha256 = item.a_masked_sha256;
+            artifact.normalized_cuda_sha256 = item.c_masked_sha256;
+            const size_t common = std::min(a_masked.size(), c_masked.size());
+            artifact.first_unmasked_difference = static_cast<size_t>(-1);
+            for (size_t k = 0; k < common; ++k) {
+                if (a_masked[k] != c_masked[k]) { artifact.first_unmasked_difference = k; break; }
+            }
+            if (artifact.first_unmasked_difference == static_cast<size_t>(-1) && a_masked.size() != c_masked.size())
+                artifact.first_unmasked_difference = common;
+            artifact.bands.reserve(refs.size());
+            for (size_t bi = 0; bi < refs.size(); ++bi) {
+                const BandRef& band = refs[bi];
+                Phase3ABandReference record;
+                record.channel = band.channel;
+                record.wavelet = band.wavelet_index;
+                record.band = band.band;
+                record.subband = band.subband;
+                record.width = band.width;
+                record.height = band.height;
+                record.quant = q_a.quant[(band.channel * 3 + band.wavelet_index) * 4 + band.band];
+                record.scale = q_a.scale[(band.channel * 3 + band.wavelet_index) * 4 + band.band];
+                char sdk_coeff_hex[17] = {};
+                char cuda_coeff_hex[17] = {};
+                std::snprintf(sdk_coeff_hex, sizeof(sdk_coeff_hex), "%016llx", static_cast<unsigned long long>(a_coeff_hash[bi]));
+                std::snprintf(cuda_coeff_hex, sizeof(cuda_coeff_hex), "%016llx", static_cast<unsigned long long>(c_coeff_hash[bi]));
+                record.sdk_coeff_fnv64 = sdk_coeff_hex;
+                record.cuda_coeff_fnv64 = cuda_coeff_hex;
+                const size_t sdk_payload_bytes = b_pieces[bi].payload.size();
+                if (b_offsets[bi] + sdk_payload_bytes <= a_sample.size())
+                    record.sdk_payload_sha256 = Sha256Hex(a_sample.data() + b_offsets[bi], sdk_payload_bytes);
+                record.cuda_payload_sha256 = Sha256Hex(c_pieces[bi].payload.data(), c_pieces[bi].payload.size());
+                artifact.bands.push_back(std::move(record));
+            }
+            std::string callback_error;
+            if (!artifact_callback(artifact, &callback_error)) {
+                cleanup();
+                rep.error = callback_error.empty() ? "reference artifact callback failed" : callback_error;
+                return rep;
+            }
+        }
 
         // Decode verification: since a_masked == c_masked (every compressed wavelet byte is identical),
         // we decode c_sample (and a_sample on transition/checkpoint frames) to verify stamp + PSNR + pixel equality.
