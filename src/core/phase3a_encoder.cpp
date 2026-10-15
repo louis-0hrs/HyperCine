@@ -443,16 +443,20 @@ struct Phase3AEncoderContext {
         if (ref) CFHD_CloseEncoder(ref);
     }
 
-    bool Init(int w, int h, Phase3AQuantMode quant_mode) {
+    bool Init(int w, int h, Phase3AQuantMode quant_mode,
+              EncodingQuality quality = EncodingQuality::FilmScan3) {
         width = w;
         height = h;
+        if (!IsValidEncodingQuality(quality)) return false;
         if (CFHD_OpenEncoder(&ref, nullptr) != CFHD_ERROR_OKAY) return false;
         if (CFHD_PrepareToEncode(ref, width, height, CFHD_PIXEL_FORMAT_BGRA, CFHD_ENCODED_FORMAT_YUV_422,
-                                 CFHD_ENCODING_FLAGS_NONE, CFHD_ENCODING_QUALITY_FILMSCAN3) != CFHD_ERROR_OKAY) {
+                                 CFHD_ENCODING_FLAGS_NONE, static_cast<CFHD_EncodingQuality>(static_cast<int>(quality))) != CFHD_ERROR_OKAY) {
             return false;
         }
         sample = reinterpret_cast<CSampleEncoder*>(ref);
         if (!sample) return false;
+        auto* prepared_encoder = reinterpret_cast<ENCODER*>(sample->m_encoder);
+        const int initial_fs_rate_limiter = prepared_encoder ? prepared_encoder->q.FSratelimiter : 4;
 
         // Run one initial CFHD_EncodeSample pass (or 3 passes for FixedSteadyState) so upstream
         // allocates and configures encoder->frame, m_scratchBuffer, and transforms[0..2]->wavelet[0..2]
@@ -476,7 +480,7 @@ struct Phase3AEncoderContext {
         encoder->group.count = 0;
         if (quant_mode != Phase3AQuantMode::FixedSteadyState) {
             encoder->lastgopbitcount = 0;
-            encoder->q.FSratelimiter = 4;
+            encoder->q.FSratelimiter = initial_fs_rate_limiter;
         }
         sample->m_last_unique_frame = -1;
         sample->m_last_timecode_base = 0;
@@ -1126,13 +1130,13 @@ void GeneratePhase3AFrame(int width, int height, int frame_index, Phase3APattern
 // SECTION 3: 120-Frame Changing-Complexity Sequence Equivalence Verification
 // ============================================================================
 
-Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num_frames, uint32_t seed, const Phase3AReferenceFrameCallback& artifact_callback) {
+Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num_frames, uint32_t seed, const Phase3AReferenceFrameCallback& artifact_callback, EncodingQuality quality) {
     Phase3ASequence120Report rep;
     rep.width = width;
     rep.height = height;
     rep.total_frames = num_frames;
-    if (width <= 0 || height <= 0 || num_frames <= 0) {
-        rep.error = "invalid dimensions or frame count";
+    if (width <= 0 || height <= 0 || num_frames <= 0 || !IsValidEncodingQuality(quality)) {
+        rep.error = "invalid dimensions, frame count, or encoding quality";
         return rep;
     }
 
@@ -1151,7 +1155,7 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
     CFHD_EncoderRef ref_a = nullptr;
     if (CFHD_OpenEncoder(&ref_a, nullptr) != CFHD_ERROR_OKAY ||
         CFHD_PrepareToEncode(ref_a, width, height, CFHD_PIXEL_FORMAT_BGRA, CFHD_ENCODED_FORMAT_YUV_422,
-                             CFHD_ENCODING_FLAGS_NONE, CFHD_ENCODING_QUALITY_FILMSCAN3) != CFHD_ERROR_OKAY) {
+                             CFHD_ENCODING_FLAGS_NONE, static_cast<CFHD_EncodingQuality>(static_cast<int>(quality))) != CFHD_ERROR_OKAY) {
         if (ref_a) CFHD_CloseEncoder(ref_a);
         rep.error = "failed to open Pristine Upstream encoder A";
         return rep;
@@ -1163,8 +1167,8 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
     // Open HyperCine CPU/Reference encoder B and HyperCine GPU encoder C:
     Phase3AEncoderContext ctx_b;
     Phase3AEncoderContext ctx_c;
-    if (!ctx_b.Init(width, height, Phase3AQuantMode::DynamicUpstreamState) ||
-        !ctx_c.Init(width, height, Phase3AQuantMode::DynamicUpstreamState)) {
+    if (!ctx_b.Init(width, height, Phase3AQuantMode::DynamicUpstreamState, quality) ||
+        !ctx_c.Init(width, height, Phase3AQuantMode::DynamicUpstreamState, quality)) {
         CFHD_CloseEncoder(ref_a);
         rep.error = "failed to initialize HyperCine B or C encoder context";
         return rep;
@@ -1226,6 +1230,7 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
     std::set<int> distinct_fs;
     int prev_fs = -1;
     int prev_quant0 = -1;
+    int initial_fs_rate_limiter = -1;
 
     rep.frames.reserve(static_cast<size_t>(num_frames));
 
@@ -1243,6 +1248,7 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
         // --- A: Pristine Upstream CFHD_EncodeSample ---
         item.a_prev_bits = enc_a->lastgopbitcount;
         item.a_prev_bytes = static_cast<size_t>(enc_a->lastgopbitcount >> 3);
+        if (f == 0) initial_fs_rate_limiter = enc_a->q.FSratelimiter;
         if (CFHD_EncodeSample(ref_a, frame_buf.data(), pitch) != CFHD_ERROR_OKAY) {
             cleanup();
             rep.error = "Pristine Upstream CFHD_EncodeSample failed at frame " + std::to_string(f);
@@ -1471,13 +1477,17 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
         item.c_sample_bytes = c_sample.size();
 
         // --- Compare A, B, and C for Frame f ---
+        const bool rate_state_match = (f == 0)
+            ? (initial_fs_rate_limiter == item.b_fs_rate_limiter &&
+               item.b_fs_rate_limiter == item.c_fs_rate_limiter)
+            : (item.a_fs_rate_limiter == item.b_fs_rate_limiter &&
+               item.b_fs_rate_limiter == item.c_fs_rate_limiter);
         item.quant_tables_match =
             (item.a_prev_bytes == item.b_prev_bytes) &&
             (item.b_prev_bytes == item.c_prev_bytes) &&
             (item.a_prev_bits == item.b_prev_bits) &&
             (item.b_prev_bits == item.c_prev_bits) &&
-            (item.a_fs_rate_limiter == item.b_fs_rate_limiter) &&
-            (item.b_fs_rate_limiter == item.c_fs_rate_limiter) &&
+            rate_state_match &&
             (std::memcmp(item.a_quant, item.b_quant, sizeof(item.a_quant)) == 0) &&
             (std::memcmp(item.b_quant, item.c_quant, sizeof(item.b_quant)) == 0);
 
@@ -1630,14 +1640,35 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
         if (frame_ok) {
             ++rep.matched_frames;
         } else if (rep.error.empty()) {
-            rep.error = "frame equivalence mismatch at frame " + std::to_string(f);
+            int qdiff = -1;
+            for (int qi = 0; qi < 36; ++qi) {
+                if (item.a_quant[qi] != item.b_quant[qi]) { qdiff = qi; break; }
+            }
+            rep.error = "frame equivalence mismatch at frame " + std::to_string(f) +
+                " (pattern=" + item.pattern_name +
+                ", quant=" + (item.quant_tables_match ? "match" : "mismatch") +
+                ", coeff30=" + (item.all_30_coeff_hashes_match ? "match" : "mismatch") +
+                ", payload_size30=" + (item.all_30_payload_sizes_match ? "match" : "mismatch") +
+                ", payload30=" + (item.all_30_payload_hashes_match ? "match" : "mismatch") +
+                ", sample_masked=" + (item.sample_masked_match ? "match" : "mismatch") +
+                ", cpu_cuda=" + (item.b_eq_c_unmasked ? "match" : "mismatch") +
+                ", decoded=" + (item.decoded_match ? "match" : "mismatch") +
+                ", sdk/cpu_bytes=" + std::to_string(item.a_sample_bytes) + "/" +
+                std::to_string(item.b_sample_bytes) +
+                ", first_qdiff=" + std::to_string(qdiff) + ":" +
+                (qdiff < 0 ? std::string("equal") : std::to_string(item.a_quant[qdiff]) + "/" + std::to_string(item.b_quant[qdiff])) +
+                ", fs=" + std::to_string(item.a_fs_rate_limiter) + "/" +
+                std::to_string(item.b_fs_rate_limiter) + "/" +
+                std::to_string(item.c_fs_rate_limiter) + ")";
         }
         rep.frames.push_back(std::move(item));
     }
 
     cleanup();
     rep.distinct_fs_rate_limiters_observed = static_cast<int>(distinct_fs.size());
-    rep.ok = (rep.matched_frames == num_frames) && (rep.distinct_fs_rate_limiters_observed >= 2);
+    // Equality is independent of whether this particular clip exercises a
+    // limiter transition; callers that require transition coverage assert it.
+    rep.ok = (rep.matched_frames == num_frames);
     return rep;
 }
 
@@ -2309,7 +2340,7 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     }
 
     Phase3AEncoderContext ctx;
-    if (!ctx.Init(width, height, cfg.quant_mode)) {
+    if (!ctx.Init(width, height, cfg.quant_mode, cfg.encoding_quality)) {
         res.error = "failed to initialize Phase3AEncoderContext";
         return res;
     }

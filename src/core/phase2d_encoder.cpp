@@ -120,10 +120,12 @@ struct Phase2DEncoderContext {
 
     bool Init(int width, int height, const std::vector<uint8_t>& frame,
               Phase2DQuantStateMode state_mode,
-              bool deterministic_test_metadata) {
+              bool deterministic_test_metadata,
+              EncodingQuality quality = EncodingQuality::FilmScan3) {
+        if (!IsValidEncodingQuality(quality)) return false;
         if (CFHD_OpenEncoder(&ref, nullptr) != CFHD_ERROR_OKAY) return false;
         if (CFHD_PrepareToEncode(ref, width, height, CFHD_PIXEL_FORMAT_BGRA, CFHD_ENCODED_FORMAT_YUV_422,
-                                 CFHD_ENCODING_FLAGS_NONE, CFHD_ENCODING_QUALITY_FILMSCAN3) != CFHD_ERROR_OKAY) {
+                                 CFHD_ENCODING_FLAGS_NONE, static_cast<CFHD_EncodingQuality>(static_cast<int>(quality))) != CFHD_ERROR_OKAY) {
             return false;
         }
         sample = reinterpret_cast<CSampleEncoder*>(ref);
@@ -489,18 +491,20 @@ std::vector<uint8_t> MaskCfhdVolatileMetadata(
 Phase2DUpstreamComparisonReport VerifyPhase2DUpstreamComparison(
     int width, int height,
     Phase2DQuantStateMode state_mode,
-    uint32_t seed) {
+    uint32_t seed,
+    EncodingQuality quality) {
     (void)seed;
     Phase2DUpstreamComparisonReport rep;
     rep.width = width;
     rep.height = height;
     rep.quant_state_mode = state_mode;
+    rep.encoding_quality = EncodingQualitySdkName(quality);
 
     const std::vector<uint8_t> frame = MakeFrame(width, height, CanonicalPattern::Canonical);
 
     // 1. Pristine Upstream Handle A (unmodified upstream CFHD_EncodeSample).
     Phase2DEncoderContext ctx_a;
-    if (!ctx_a.Init(width, height, frame, state_mode, false)) {
+    if (!ctx_a.Init(width, height, frame, state_mode, false, quality)) {
         rep.error = "failed to initialize pristine upstream encoder handle A";
         return rep;
     }
@@ -517,7 +521,7 @@ Phase2DUpstreamComparisonReport VerifyPhase2DUpstreamComparison(
 
     // 2. HyperCine Reference/GPU Handle B/C initialized to the exact same quantizer state.
     Phase2DEncoderContext ctx_bc;
-    if (!ctx_bc.Init(width, height, frame, state_mode, false)) {
+    if (!ctx_bc.Init(width, height, frame, state_mode, false, quality)) {
         rep.error = "failed to initialize encoder handle B/C";
         return rep;
     }

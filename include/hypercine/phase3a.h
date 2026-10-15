@@ -205,7 +205,8 @@ struct Phase3ASequence120Report {
 
 Phase3ASequence120Report VerifyPhase3ASequence120(
     int width = 1920, int height = 1080, int num_frames = 120,
-    uint32_t seed = 0x1337BEEFu, const Phase3AReferenceFrameCallback& artifact_callback = {});
+    uint32_t seed = 0x1337BEEFu, const Phase3AReferenceFrameCallback& artifact_callback = {},
+    EncodingQuality quality = EncodingQuality::FilmScan3);
 
 // ============================================================================
 // SECTION 4: 300-Frame Distinct-Frame Slot Wrap & Ordering Verification
@@ -372,6 +373,8 @@ struct Phase3AConfig {
     bool deterministic_test_metadata = false;
     bool verify_sequence = true;
     bool retain_frame_records = true;
+    // Keep existing HyperCine output stable; SDK default FilmScan1 is separate.
+    EncodingQuality encoding_quality = EncodingQuality::FilmScan3;
     uint32_t seed = 0x1337BEEFu;
 };
 
