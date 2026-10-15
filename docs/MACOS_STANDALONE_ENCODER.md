@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2026 HyperCine Contributors.
      Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE. -->
-# Native SDK-free encoder vertical slice — issue #3
+# Native SDK-free encoder — issues #3 and #6
 
 The experimental `hypercine_standalone` target produces real, independently
 decodable CFHD packets on Apple Silicon. Its core uses C++17 and the standard
@@ -25,9 +25,11 @@ encoder, an acceleration milestone, or a claim of Adobe/Resolve certification.
 
 ## Profile and conventions
 
-* Exactly 128x128, progressive, one frame / GOP, 10-bit YUV 4:2:2.
-  `EncodeBgra128` accepts top-down BGRA8 with ignored alpha. The input pointer must
-  be 16-byte aligned, positive byte stride >=512 and divisible by 16, and the
+* Progressive, one frame / GOP, 10-bit YUV 4:2:2.
+  `EncodeBgra(data, bytes, width, height, stride)` accepts top-down BGRA8 with
+  ignored alpha. `EncodeBgra128` and `ConvertBgra128` remain byte-identical
+  compatibility wrappers. The input pointer must be 16-byte aligned, positive
+  byte stride >=4*width and divisible by 16, and the
   supplied storage length must cover the last pixel. Invalid bounds throw before
   any pixel access. `Plane` uses 32-byte aligned RAII storage and an int16 stride
   padded to 16 bytes. Public stage types are experimental.
@@ -103,7 +105,7 @@ check regression after the branch is pushed.
 ## Independent decode and quality gates
 
 If `ffmpeg`, `ffprobe` and Python 3 are available, the external decoder CTest is
-registered automatically. Without them the five native unit/stage tests still
+registered automatically. Without them the six native unit/stage tests still
 run and CMake explicitly reports that the external test is not registered.
 To use specific validation binaries:
 
@@ -145,7 +147,7 @@ make -j8
 Only the rawvideo output encoder is enabled in this validation binary: CFHD is
 **decoder-only**. None of these sources or libraries is shipped with HyperCine.
 
-## Actual results and limits
+## Historical 128x128 results (PR #4) and limits
 
 Release stage suite: **6/6 PASS**, no skips. The stages are color (including
 bounds, alignment and padded stride), wavelet (three-level constant, affine and
@@ -210,6 +212,124 @@ the same aligned, signed `Plane` / `WaveletLevel` values. Quantized subbands and
 checked host VLC/framing remain the host boundary. Do not pass SDK encoder or
 transform structures through that API. Metal kernels, NEON, a new decoder, larger
 resolutions and production rate control are outside issue #3's implementation.
+
+
+## Variable geometry (issue #6)
+
+The dimensioned CPU/stage interface uses the same fixed FS3-Q2 profile, forward
+filters, quantization, Table17 data and wire framing. `Plane(width,height)` and
+`ForwardLevel(plane,prescale)` describe real logical sizes independently of
+storage stride; the future Metal backend can consume that SDK-free contract.
+`ConvertBgra` and `EncodeBgra` validate the complete geometry and input byte extent
+before allocating planes or reading pixels.
+
+The implemented conservative contract is:
+
+- Width in [128,4096], divisible by **128**. YUV422 halves chroma width, three
+  wavelet stages halve it again, and the deepest chroma width must be divisible
+  by 8 because this VLC profile encodes no implicit virtual row-gap zeros.
+- Height in [24,4096], divisible by **8**. Every forward input height is even;
+  the last input has >=6 rows and the final LL has >=3. Final band heights may
+  be odd. Other widths/heights are rejected with a diagnostic, not rounded.
+- `width*height <= 2,097,152` pixels. Individual padded plane storage has the
+  same element cap. This intentional resource budget permits 1920x1080 and
+  2048x1024; UHD 4K/8K are rejected rather than advertised. There is no claimed
+  production certification for all legal geometry combinations.
+- Stride and supplied bytes must cover `(height-1)*stride + width*4`, with
+  explicit `size_t` overflow checks. Last-row trailing padding is optional.
+  Plane storage remains 32-byte aligned and row strides multiples of 16 bytes.
+- Dimension tag values must fit 16 bits. Existing optional size chunks carry
+  **24-bit counts of 32-bit words**, not truncated 16-bit counts; channel indices
+  carry checked 32-bit byte extents. All entropy writes and whole-sample appends
+  are bounded. A conservative maximum sample is `8*2,097,152+16,384` bytes,
+  below the 24-bit chunk limit. More than 65,535 words is exercised by genuine
+  large samples and dense highpass data; the independent decoder accepts them.
+
+For **1920x1080** the Y pyramid is 960x540 -> 480x270 -> **240x135**;
+chroma is 480x540 -> 240x270 -> **120x135**, with chroma LL pitch 120 int16
+(240 bytes). The third forward vertical input has 270 rows. The 135-row output
+is emitted as exactly 135 rows, with frame/display-height tags **1080**.
+There is no encoder padding to 1088, crop, fake tag, or discarded row. The
+independent validator compares every one of the **4,147,200** decoded p10
+samples against the independently calculated uncompressed reference.
+
+CLI examples (old three-argument invocations still emit the original 128 packet):
+
+```sh
+build/hypercine_encode_smoke gradient build/gradient-256.cfhd 256 256
+build/hypercine_encode_smoke canonical build/canonical-1080.cfhd 1920 1080
+build/hypercine_encode_smoke bgra:/absolute/path/frame.bgra build/frame.cfhd 1920 1080
+python3 tests/validate_standalone.py --encoder build/hypercine_encode_smoke \
+  --ffmpeg /private/tmp/hypercine-ffmpeg-validator/ffmpeg \
+  --ffprobe /private/tmp/hypercine-ffmpeg-validator/ffprobe \
+  --width 1920 --height 1080 --patterns flat gradient canonical noise checker edges impulse \
+  --output-dir build/samples-1920x1080
+```
+
+Raw BGRA input must have exactly `width*height*4` bytes; the CLI owns aligned
+staging storage. Pattern inputs reuse `canonical.h`; additional raw stress
+patterns are generated independently in the Python test, with seed 0x1337BEEF.
+No GoPro or FFmpeg encoder implements this path. FFmpeg remains external.
+
+The final configured suite has **14 tests**: six C++ stages, the original
+128x128 decode/golden gate, and seven dimensioned external-decode cases. Each
+packet is encoded in two independent CLI processes and must match byte-for-byte.
+C++ additionally repeats each original packet ten times and compares its full
+FNV1a64 to the baseline; Python checks the original compressed and decoded
+SHA-256 values against the **unchanged** PR #4 evidence JSON. Original packets
+remain 3444/25604/15416 bytes. The existing 128 API wrappers and CLI behavior, fixed profile,
+SDK/CUDA sources and PR #9 oracle branch are unchanged.
+
+Native Apple M2 Pro arm64 Release and Debug ASan+UBSan results, complete hashes,
+all-pixel/per-plane metrics and actual process observations are recorded in
+[the variable-size evidence](validation/macos_variable_size_2026-10-15.json).
+Release CTest **14/14 PASS** and Debug ASan+UBSan CTest **14/14 PASS**,
+with no findings in the instrumented encoder and C++ tests. External FFmpeg
+is the unmodified, unsanitized n8.0 validator. Configure/build/CTest commands
+are the same as above; both full suites ran before the commit. The additional cases are:
+
+| Size | Patterns | Actual p10 result |
+| --- | --- | --- |
+| 128x128 | Original flat, gradient, canonical | Original packet and decode SHA-256 unchanged |
+| 256x256 | Flat, gradient, canonical, seeded RGB noise, monochrome checker, chroma edges, border impulses | Flat exact; others 56.53..72.14 dB |
+| 1920x1080 | Same seven patterns | Flat exact; others 56.54..87.14 dB |
+| 128x24 | Flat, canonical; minimum legal height / odd LL height 3 | Flat exact; canonical 61.29 dB |
+| 384x40 | Flat, canonical; odd final height 5 | Flat exact; canonical 61.16 dB |
+| 4096x24 | Flat, canonical; maximum axis width | Flat exact; canonical 61.32 dB |
+| 128x4096 | Flat, canonical; maximum axis height | Flat exact; canonical 61.53 dB |
+| 2048x1024 | Flat, canonical; maximum pixel budget | Flat exact; canonical 61.36 dB |
+
+All 27 tested inputs actually decode as the requested YUV422 p10 geometry,
+pass >35 dB against uncompressed p10, and check sample count/range and every
+pixel. C++ tests also cover invalid dimensions/huge integers, input length and
+alignment, padded-stride independence, negative/saturated coefficients, bounded
+dense VLC, complete 30-band framing and analytic odd-height borders.
+
+**Quality limits remain visible:** original-RGB PSNR is diagnostic except the
+existing flat/canonical >35 dB gates. At 256, GradientChecker is 34.12 dB
+(uncompressed 422 baseline 34.34); seeded RGB noise is ~14.25 dB because of
+subsampling; saturated chroma edges are 24.35 dB at 256 and 32.92 dB at 1080.
+Those are not universal FS3 original-RGB passes. Sparse white border impulses
+have max p10 error **50** in luma although whole-frame PSNR is 72.14/87.14 dB;
+chroma is exact. The first differing 1080 luma pixel at (0,0) is 897 vs source
+940. This profile does not promise exact impulses or lossless coding; those
+localized errors are retained in the per-plane evidence.
+
+This issue changes permitted dimensions, not performance or encoder parity.
+A single Release 1080 canonical CLI process (including input generation and
+startup) used ~31 MB peak resident memory and ~0.076 s on this Mac. This is an
+observation with no timing gate, FPS claim, Windows baseline comparison or
+acceleration milestone. `benchmark_codec` is **NOT RUN**.
+
+**External status:** PR #9 independently proves the original 128 samples decode
+in the Windows SDK with public `TAG_CPU_MAX=1`, but it is unmerged and does not
+certify new sizes. Windows SDK decode of the new geometry, standalone MSVC
+compilation, CUDA regression, Adobe and Resolve are **NOT RUN** here. Existing
+Windows SDK reference CI is a separate regression check after push. The exact
+128 contract permits the unmodified #9 oracle to be integrated later, as the
+issue handoff requests. No workflow, upstream, CUDA, decoder or oracle files
+are edited; no follow-up defect issue is needed for 1080 because the genuine
+geometry and independent decode gates pass.
 
 ## Subsequent Windows oracle — issue #5
 

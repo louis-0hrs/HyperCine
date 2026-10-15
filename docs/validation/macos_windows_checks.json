@@ -1,0 +1,205 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "recorded_at_utc": "2026-10-15T05:31:28.579464+00:00",
+  "base_sha": "d1c341d8aa586f1bd74adf90c913ad705cd66a8e",
+  "production_gate": "BLOCKED",
+  "ctest": [
+    {
+      "command": "ctest --test-dir build -C Release --output-on-failure",
+      "configuration": "Release",
+      "status": "PASS",
+      "passed": 16,
+      "total": 16,
+      "log_sha256": "0315a27c5eb6579f0b97bff381e4ec19b60fa4c0eaffe36fa4d8633240f8e862"
+    },
+    {
+      "command": "ctest --test-dir build-sanitized -C Release --output-on-failure",
+      "configuration": "Debug; -fsanitize=address,undefined -fno-omit-frame-pointer",
+      "status": "PASS",
+      "passed": 16,
+      "total": 16,
+      "log_sha256": "83b7ca0bf799397bcfe1f2e2de5454a42ff86245a044d8a347f966fe5cff3bc4"
+    }
+  ],
+  "q2_packet_regression": {
+    "status": "PASS",
+    "matched": 27,
+    "baseline": "docs/validation/macos_variable_size_2026-10-15.json",
+    "samples": [
+      {
+        "width": 128,
+        "height": 128,
+        "pattern": "flat",
+        "sample_sha256": "236cacbac9c5f39a5fbd1a4b939619276ccfc622ac486bf5a2ba967bcf28392b"
+      },
+      {
+        "width": 128,
+        "height": 128,
+        "pattern": "gradient",
+        "sample_sha256": "4086e8c7ec3cc0b287ab637a486354eaa89623d048ac9d79d290291099b767fb"
+      },
+      {
+        "width": 128,
+        "height": 128,
+        "pattern": "canonical",
+        "sample_sha256": "9cf732846c1b9838c8f5d24f92db0182b82b5b6a05df63ffd5114fc1606db6fd"
+      },
+      {
+        "width": 256,
+        "height": 256,
+        "pattern": "flat",
+        "sample_sha256": "5cef6ccae1808771e1eb4468aac1b7fa5e9593c01cf1f30806722d4f40561f9d"
+      },
+      {
+        "width": 256,
+        "height": 256,
+        "pattern": "gradient",
+        "sample_sha256": "953f6f2576e4cee2e66e8d23c52485752f370488a322423059b1a207d1cb66b8"
+      },
+      {
+        "width": 256,
+        "height": 256,
+        "pattern": "canonical",
+        "sample_sha256": "1e6151af738f0afa80607f3e22c5f295acda84d654c222bf3a9f2da3a7c7231f"
+      },
+      {
+        "width": 256,
+        "height": 256,
+        "pattern": "noise",
+        "sample_sha256": "514a9f5c021ce433c6765a4fef76d39c54991dbaafaf344c0cb3bf6104582690"
+      },
+      {
+        "width": 256,
+        "height": 256,
+        "pattern": "checker",
+        "sample_sha256": "58ddeeae925bad48d2aa54a659b820be449365cf8e2184d569ee8d4a02eb247a"
+      },
+      {
+        "width": 256,
+        "height": 256,
+        "pattern": "edges",
+        "sample_sha256": "8c3935f0e636d87d24b7d1df26766c25354c56928e32482a7211e3be13f5f6da"
+      },
+      {
+        "width": 256,
+        "height": 256,
+        "pattern": "impulse",
+        "sample_sha256": "dd16b1c87a923f81bc6a73db33566da8ff6802a703b167107e24b8576ca24fff"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "pattern": "flat",
+        "sample_sha256": "ad94750dc171b3b2489d5d2b526ea3592f9d81af52a522c963e147d91e4d4eb2"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "pattern": "gradient",
+        "sample_sha256": "b8a3524b63a16bd81302f93460d0e66d84d2371e6854912592c232ffa723c883"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "pattern": "canonical",
+        "sample_sha256": "aa13a3ac59cfba9ec879946fbadc74936c4c740c08f69c206ab2d81e75edc6bc"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "pattern": "noise",
+        "sample_sha256": "0ea16da2dcbee7fe8c5126539882474c741505687ee323aa31c87f1e5d497fb3"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "pattern": "checker",
+        "sample_sha256": "f9d8e84596d5601f96c154dcc45a29d84943e22f2561a21a6a624c5f7915ff36"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "pattern": "edges",
+        "sample_sha256": "dcdef1087445b929e9a9f25d03ebd1f377ecdb33886a7c483748f93795f7a752"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "pattern": "impulse",
+        "sample_sha256": "b3adde817a6350c59484a4f666361c0a32fa7bb855b5358df19253e40b932bc1"
+      },
+      {
+        "width": 128,
+        "height": 24,
+        "pattern": "flat",
+        "sample_sha256": "2769102cd99a73501e7629a3c5784a0493fbd230fbb722a68d561c0090c2a345"
+      },
+      {
+        "width": 128,
+        "height": 24,
+        "pattern": "canonical",
+        "sample_sha256": "f5c76c988ffd73fabc2646fbe720c3b66d99c47d4c66db369baf6e69ba2d031b"
+      },
+      {
+        "width": 384,
+        "height": 40,
+        "pattern": "flat",
+        "sample_sha256": "70729b31c1296158b9f34dd0a77a9104f316566773afa79d2d4564e7cd45ff76"
+      },
+      {
+        "width": 384,
+        "height": 40,
+        "pattern": "canonical",
+        "sample_sha256": "f4cf565dd4cdd82c481a4ed09a0a1c94df0866eabe37dcec998191425f1cd2e9"
+      },
+      {
+        "width": 4096,
+        "height": 24,
+        "pattern": "flat",
+        "sample_sha256": "b60a2490d1acc2cf2f660b34638a19b076b5438869f94ff68ac839ad156c4612"
+      },
+      {
+        "width": 4096,
+        "height": 24,
+        "pattern": "canonical",
+        "sample_sha256": "b6e9491211584d850a42d7a3bec5f80a07223640848b344b71b0726d78ebbafb"
+      },
+      {
+        "width": 128,
+        "height": 4096,
+        "pattern": "flat",
+        "sample_sha256": "a21b0f0a4a03e7ec45051645e8fec82556e252cf249ff753b455ab0729bd6981"
+      },
+      {
+        "width": 128,
+        "height": 4096,
+        "pattern": "canonical",
+        "sample_sha256": "f0c88b14910b88dff523076858054730f9eaef37031880809ab402b6002478fc"
+      },
+      {
+        "width": 2048,
+        "height": 1024,
+        "pattern": "flat",
+        "sample_sha256": "e4b8e81081549a9dc64f7ab23dde14e224dd3374362bdc48397288e6661e830a"
+      },
+      {
+        "width": 2048,
+        "height": 1024,
+        "pattern": "canonical",
+        "sample_sha256": "f106fdb14bd2834811dba8a30b60a6614612c0dea3fa8f3422e495ccc126144f"
+      }
+    ]
+  },
+  "sanitized_reference_diagnostics": {
+    "status": "PASS for reproducibility and sanitizer execution; parity remains FAIL/BLOCKED",
+    "exit_code": 2,
+    "input_frames_verified": [
+      16,
+      120
+    ],
+    "runs_identical_to_release": true,
+    "probe_sha256": "1c354571d4d552ecede983a02f71e02d7d24f75e86f0c047bbc6976f23b55395",
+    "result_sha256": "d2b0581878cbd68dba1f04f1df126d0caf1757c96512fc8594d1ce897ebe47d6"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "code_commit": "a11fcdd548ef039d686489064c5719bc26582eb9",
+  "run_id": 38696144395,
+  "job_id": 116293046294,
+  "url": "https://github.com/louis-0hrs/HyperCine/actions/runs/38696144395/job/116293046294",
+  "suite": {
+    "passed": 6,
+    "failed": 0
+  },
+  "decoder": {
+    "implementation": "pristine upstream GoPro CFHDCodecStatic",
+    "format": "YU64",
+    "width": 1920,
+    "height": 1080,
+    "cpu_max": 1,
+    "samples": [
+      "flat.cfhd",
+      "gradient.cfhd"
+    ],
+    "fresh_decoder_repetitions_per_sample": 2,
+    "checks": [
+      "fixture SHA-256 and byte length",
+      "PrepareToDecode geometry/format",
+      "aligned pitch/storage",
+      "DecodeSample returns success",
+      "output contains nonzero bytes",
+      "repeated decoded bytes identical"
+    ]
+  },
+  "log_excerpt": [
+    "2026-10-15T07:02:44.1580057Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b",
+    "2026-10-15T07:04:15.1329332Z 1/6 Test #1: test_transform_wavelet ...........   Passed    0.02 sec",
+    "2026-10-15T07:04:15.1576913Z 2/6 Test #2: test_codec_roundtrip .............   Passed    0.02 sec",
+    "2026-10-15T07:04:16.3021189Z 3/6 Test #3: test_yuy2_stability ..............   Passed    1.14 sec",
+    "2026-10-15T07:04:16.5155919Z 4/6 Test #4: test_avi_sample ..................   Passed    0.21 sec",
+    "2026-10-15T07:04:16.5461528Z 5/6 Test #5: filmscan3_fixture_integrity ......   Passed    0.03 sec",
+    "2026-10-15T07:04:16.6207287Z 6/6 Test #6: test_filmscan3_windows_decoder ...   Passed    0.07 sec",
+    "2026-10-15T07:04:16.6216837Z 100% tests passed out of 6",
+    "2026-10-15T07:04:16.6217258Z Total Test time (real) =   1.56 sec"
+  ],
+  "limits": [
+    "Only these two production Mac fixtures were decoded by GoPro in this CI run.",
+    "120-frame actual Windows SDK comparisons were performed locally on macOS.",
+    "Unquantized Windows stage identity remains unverified."
+  ]
+}

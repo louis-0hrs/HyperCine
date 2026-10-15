@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.16...3.31)
 project(HyperCine VERSION 0.1.0 LANGUAGES C CXX)
 
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE HYPERCINE_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(NOT HYPERCINE_SOURCE_COMMIT)
+    set(HYPERCINE_SOURCE_COMMIT unknown)
+endif()
+execute_process(COMMAND git status --porcelain WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE HYPERCINE_SOURCE_STATUS OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(HYPERCINE_SOURCE_STATUS)
+    set(HYPERCINE_SOURCE_DIRTY true)
+else()
+    set(HYPERCINE_SOURCE_DIRTY false)
+endif()
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,15 +32,26 @@ if(HYPERCINE_BUILD_STANDALONE)
     add_library(hypercine_standalone STATIC
         src/cpu/wavelet_cpu.cpp
         src/cpu/standalone_frontend.cpp
-        src/core/standalone_encoder.cpp)
+        src/core/standalone_encoder.cpp
+        src/cpu/filmscan3_frontend.cpp
+        src/core/filmscan3_encoder.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     add_executable(hypercine_encode_smoke tools/hypercine_encode_smoke.cpp)
     target_link_libraries(hypercine_encode_smoke PRIVATE hypercine_standalone)
+    add_executable(hypercine_encode_filmscan3 tools/hypercine_encode_filmscan3.cpp)
+    target_link_libraries(hypercine_encode_filmscan3 PRIVATE hypercine_standalone)
+    add_executable(hypercine_reference_probe tools/hypercine_reference_probe.cpp)
+    target_link_libraries(hypercine_reference_probe PRIVATE hypercine_standalone)
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
+        add_executable(test_filmscan3 tests/test_filmscan3.cpp)
+        target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
+        add_test(NAME filmscan3_api COMMAND test_filmscan3)
+        add_test(NAME filmscan3_fixture_integrity COMMAND "${CMAKE_COMMAND}"
+            "-DROOT=${CMAKE_SOURCE_DIR}" -P "${CMAKE_SOURCE_DIR}/tests/verify_filmscan3_fixtures.cmake")
         add_executable(test_standalone tests/test_standalone.cpp)
         target_link_libraries(test_standalone PRIVATE hypercine_standalone)
-        foreach(stage color wavelet quantization entropy sample)
+        foreach(stage color wavelet quantization entropy sample geometry)
             add_test(NAME standalone_${stage} COMMAND test_standalone ${stage})
         endforeach()
         add_test(NAME standalone_oracle_fixtures COMMAND "${CMAKE_COMMAND}"
@@ -37,16 +59,68 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DENCODER=$<TARGET_FILE:hypercine_encode_smoke>"
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
+        find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
+            --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
+        add_test(NAME windows_reference_guardrails COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_windows_reference.py")
+        add_test(NAME windows_reference_parser COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py")
+        add_test(NAME windows_reference_sdk_coefficients COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
+            --probe $<TARGET_FILE:hypercine_reference_probe>)
+        set(HYPERCINE_REFERENCE_CORPUS_ROOT "" CACHE PATH "Optional extracted Windows Tier A corpus")
+        if(HYPERCINE_REFERENCE_CORPUS_ROOT)
+            add_test(NAME windows_reference_binaries COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
+                --corpus-root "${HYPERCINE_REFERENCE_CORPUS_ROOT}" --probe $<TARGET_FILE:hypercine_reference_probe>)
+        endif()
+        add_test(NAME filmscan3_autonomous_manifest COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+            --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>)
+        if(HYPERCINE_REFERENCE_CORPUS_ROOT)
+            add_test(NAME filmscan3_actual_tier_a COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+                --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --corpus-root "${HYPERCINE_REFERENCE_CORPUS_ROOT}" --inject-metadata)
+        endif()
+        set(HYPERCINE_FS3_SEQUENCE_ROOT "" CACHE PATH "Optional verified 120-frame Windows FS3 corpus")
+        if(HYPERCINE_FS3_SEQUENCE_ROOT)
+            add_test(NAME filmscan3_actual_sequence COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+                --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --corpus-root "${HYPERCINE_FS3_SEQUENCE_ROOT}" --sequence)
+        endif()
         find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
         find_program(HYPERCINE_FFPROBE_EXECUTABLE NAMES ffprobe)
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            add_test(NAME filmscan3_external_decode COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+                --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}")
             add_test(NAME standalone_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_standalone.py"
                 --encoder $<TARGET_FILE:hypercine_encode_smoke>
                 --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
                 --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
                 --output-dir "${CMAKE_CURRENT_BINARY_DIR}/samples")
+            foreach(geometry 256x256 1920x1080 128x24 384x40 4096x24 128x4096 2048x1024)
+                string(REPLACE "x" ";" dimensions "${geometry}")
+                list(GET dimensions 0 width)
+                list(GET dimensions 1 height)
+                set(patterns flat canonical)
+                if(geometry STREQUAL "256x256" OR geometry STREQUAL "1920x1080")
+                    set(patterns flat gradient canonical noise checker edges impulse)
+                endif()
+                add_test(NAME standalone_external_${geometry} COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_standalone.py"
+                    --encoder $<TARGET_FILE:hypercine_encode_smoke>
+                    --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}" --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
+                    --width ${width} --height ${height} --patterns ${patterns}
+                    --output-dir "${CMAKE_CURRENT_BINARY_DIR}/samples-${geometry}")
+            endforeach()
             add_test(NAME standalone_windows_oracle_replay COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/compare_sdk_oracle.py"
                 --windows-fixtures "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/windows-oracle"

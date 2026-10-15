@@ -133,9 +133,11 @@ ctest --test-dir build-release-sm89 -C Release --output-on-failure
 
 ### Option C: Experimental SDK-free Apple Silicon encoder
 
-The separate fixed 128x128 FS3-Q2 CPU encoder builds natively on arm64 without
+The separate fixed-quant FS3-Q2 CPU encoder builds natively on arm64 without
 compiling or linking the SDK or CUDA. It emits real CFHD samples validated with
-an independent FFmpeg decoder. See [the standalone report](docs/MACOS_STANDALONE_ENCODER.md)
+an independent FFmpeg decoder at 128x128, 256x256 and 1920x1080, preserving
+the original 128 packet hashes. Conservative geometry/resource limits apply.
+See [the standalone report](docs/MACOS_STANDALONE_ENCODER.md)
 for profile limits, RGB quality results and pending Windows/Adobe/Resolve gates.
 
 ```sh
@@ -207,3 +209,10 @@ HyperCine is dual-licensed under the **MIT License** or the **Apache License, Ve
 Original CineForm SDK (`upstream/`): Copyright (c) 2017 GoPro, Inc. (dual-licensed under MIT or Apache-2.0; see [`upstream/LICENSE.txt`](upstream/LICENSE.txt) and [`upstream/LICENSE-APACHE.txt`](upstream/LICENSE-APACHE)).
 
 HyperCine additions: Copyright (c) 2026 HyperCine Contributors.
+
+### Experimental standalone FilmScan3 CPU profile (macOS)
+
+The SDK-free CPU target now includes a separate stateful FilmScan3 profile for
+1920×1080 BGRA8 → YUV422 p10, GOP1. The existing fixed FS3-Q2 mode is retained.
+See [native FilmScan3 CPU validation](docs/MACOS_FILMSCAN3_CPU.md) for profile
+selection, real Windows-corpus byte comparisons, limitations and decoder gates.
