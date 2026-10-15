@@ -1,0 +1,316 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "issue": 24,
+  "generated_at": "2026-10-15",
+  "source": {
+    "commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+    "working_tree_dirty": false,
+    "upstream_unchanged": true
+  },
+  "environment": {
+    "os": "Windows 10.0.26200",
+    "compiler": "MSVC 19.44.35229.0",
+    "cuda_toolkit": "12.8.61",
+    "cuda_runtime": 12080,
+    "cuda_driver_api": 13030,
+    "display_driver": "610.62",
+    "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+    "compute_capability": "8.9",
+    "ffmpeg_in_path": false
+  },
+  "tests": {
+    "release_ctest": "PASS",
+    "passed": 18,
+    "failed": 0,
+    "phase3a": "PASS",
+    "quality_profiles_1080p": "6/6 profiles, 16/16 frames each; upstream == CPU == CUDA",
+    "filmscan2_sequence_120": "PASS",
+    "build": "PASS"
+  },
+  "decoder": {
+    "gopro_sdk": "PASS; per-frame SDK decode/pixel equality in reference verifier; standalone Windows decoder CTests passed",
+    "ffmpeg": "NOT RUN for generated samples; FFmpeg executable not available in PATH"
+  },
+  "boundary_128": {
+    "status": "NOT RUN",
+    "note": "Known upstream SIMD OOB diagnostic; see issue #21; not reproduced in CUDA"
+  },
+  "archive": {
+    "status": "AUTHORIZED_BUT_UNREACHABLE",
+    "requested_root": "\\\\TRUENAS\\DeDub\\HyperCine\\golden\\windows\\qualities",
+    "local_corpora_retained": true,
+    "reason": "User authorized upload, but the TrueNAS host was unreachable during this session (net view \\\\TRUENAS returned system error 53; all UNC path probes failed). No NAS files were written.",
+    "user_authorized": true
+  },
+  "profiles": [
+    {
+      "quality": "low",
+      "sdk_enum": 1,
+      "samples": {
+        "1080p": {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "status": "complete",
+          "artifact_files": 80,
+          "manifest_sha256": "602a15e00b1a2fc1d0aebf90d6f63f21c01d0cc32649bb0497a8d6a131711f41",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\manifest.json"
+        },
+        "4k": {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "a4f2e2dab636a4abcea2c6989c6def5e294c1153106b4dfb51c11f1826773080",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\3840x2160\\manifest.json"
+        },
+        "8k": {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "afbd888f3aadb59fcdc378138bb685ce4eb0eda206abe21ab7991e6395dd0d4f",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\7680x4320\\manifest.json"
+        }
+      }
+    },
+    {
+      "quality": "medium",
+      "sdk_enum": 2,
+      "samples": {
+        "1080p": {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "status": "complete",
+          "artifact_files": 80,
+          "manifest_sha256": "19a2bd96b23da910925c9addced8a5354aaddcc9b8104c3f624cadff821a0705",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\manifest.json"
+        },
+        "4k": {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "dbb64b0cb4f7203df0b853250a478a56531b534e275114af8fb452a350a441b4",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\3840x2160\\manifest.json"
+        },
+        "8k": {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "c5ffe8154e1390700088c93ba0f524cd0503ea18828ec9eed26b67b85d2efea5",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\7680x4320\\manifest.json"
+        }
+      }
+    },
+    {
+      "quality": "high",
+      "sdk_enum": 3,
+      "samples": {
+        "1080p": {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "status": "complete",
+          "artifact_files": 80,
+          "manifest_sha256": "161c132b94795eded8a307f0113ca950f545a8595cb1b4e81888ad8119d650b7",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\manifest.json"
+        },
+        "4k": {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "9b496fb2954f994f4c83f3da1215880aea9e2f9fcb5db8db906dbadd75059ff9",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\3840x2160\\manifest.json"
+        },
+        "8k": {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "17c619bd0c7bb80467acbbf43e4427a3ef178b34b8798e2750882baaed5bedac",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\7680x4320\\manifest.json"
+        }
+      }
+    },
+    {
+      "quality": "filmscan1",
+      "sdk_enum": 4,
+      "samples": {
+        "1080p": {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "status": "complete",
+          "artifact_files": 80,
+          "manifest_sha256": "c7f18ce04161358c6a89838afdc8e110e53bccd3c07e7e1d8c18fb3c2b987edb",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\manifest.json"
+        },
+        "4k": {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "538f47fede86acbcc9212db5789095ab47c27912a628d4e4d04e48772510edb9",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\3840x2160\\manifest.json"
+        },
+        "8k": {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "50869d43ecfc47955261109273dfc89399750c1af2e0c63a7749cac2e7308abd",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\7680x4320\\manifest.json"
+        }
+      }
+    },
+    {
+      "quality": "filmscan2",
+      "sdk_enum": 5,
+      "samples": {
+        "1080p": {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "status": "complete",
+          "artifact_files": 80,
+          "manifest_sha256": "d7044bb986e91e2dc4dcc109e5908e5de6197b606790d8b6fedbd0df948c20cf",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\manifest.json"
+        },
+        "4k": {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "ef9014c053c1945dc97469f74205117cd0a48816b0830e2d1cc72b34e23a8700",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\3840x2160\\manifest.json"
+        },
+        "8k": {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "597ebf23c4103e05c8878ceb8590f5239de0ab2b97f4c3a05319ac11141197dd",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\7680x4320\\manifest.json"
+        }
+      },
+      "sequence_120": {
+        "status": "complete",
+        "matched_frames": 120,
+        "fs_rate_limiter_states": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          14,
+          16,
+          20
+        ],
+        "fs_rate_limiter_transitions": 74,
+        "quant_or_scale_transitions": 71,
+        "artifact_files": 600,
+        "manifest_sha256": "6ed7907589ab7e52fec6d588ba667b6d062cc9928316c1ba05ad64feac9d2792",
+        "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\sequence-120\\manifest.json"
+      }
+    },
+    {
+      "quality": "filmscan3",
+      "sdk_enum": 6,
+      "samples": {
+        "1080p": {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "status": "complete",
+          "artifact_files": 80,
+          "manifest_sha256": "9197a632860efec625260f012166b4f46eca1a7fc23310e7054ac71dab3cfadf",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\manifest.json"
+        },
+        "4k": {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "2834ed349b49d3da5b2ff59845b67946ea331cd1a157f48155ee747990bee94d",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\3840x2160\\manifest.json"
+        },
+        "8k": {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "status": "complete",
+          "artifact_files": 5,
+          "manifest_sha256": "3d31557f46dba46320befb833e3df9c58d98686a1945e2ef9ebf60b0cb94deb6",
+          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\7680x4320\\manifest.json"
+        }
+      },
+      "sequence_120": {
+        "status": "complete",
+        "matched_frames": 120,
+        "fs_rate_limiter_states": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          12,
+          15,
+          16,
+          18,
+          19,
+          20
+        ],
+        "fs_rate_limiter_transitions": 85,
+        "quant_or_scale_transitions": 73,
+        "artifact_files": 600,
+        "manifest_sha256": "bc56bd4556ef7177a8959674e359909c1c57e847f08262275c191065c723bba3",
+        "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\sequence-120\\manifest.json"
+      }
+    }
+  ]
+}

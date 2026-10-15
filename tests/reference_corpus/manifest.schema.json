@@ -61,7 +61,15 @@
       ]
     },
     "profile": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "quality": {
+          "enum": ["low", "medium", "high", "filmscan1", "filmscan2", "filmscan3"]
+        },
+        "quality_sdk_enum": {
+          "enum": [1, 2, 3, 4, 5, 6]
+        }
+      }
     },
     "runs": {
       "type": "array"

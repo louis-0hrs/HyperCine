@@ -38,6 +38,9 @@ int main(int argc, char** argv) {
         if (c3a.quant_mode != hypercine::Phase3AQuantMode::DynamicUpstreamState) {
             return Fail("Phase3AConfig::quant_mode must default to DynamicUpstreamState");
         }
+        if (c3a.encoding_quality != hypercine::EncodingQuality::FilmScan3) {
+            return Fail("Phase3AConfig must retain the existing FilmScan3 default");
+        }
     }
 
     // 2. Test 4: Multi-Frame Production Metadata Sequence Test (16 frames).
@@ -101,6 +104,36 @@ int main(int argc, char** argv) {
                   << "A==B==C across all " << seq.total_frames << " frames, "
                   << "distinct_FSratelimiters=" << seq.distinct_fs_rate_limiters_observed
                   << " quant_transitions=" << seq.quant_transitions_observed << std::endl;
+    }
+
+    // 4b. Every regular SDK quality must drive the complete upstream, CPU and
+    // CUDA pipeline. The first 16 deterministic archetypes include flat,
+    // gradient, edge/detail and seeded-noise inputs at 1080p.
+    if (!quick_sanitize) {
+        const hypercine::EncodingQuality qualities[] = {
+            hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
+            hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
+            hypercine::EncodingQuality::FilmScan2, hypercine::EncodingQuality::FilmScan3};
+        for (const auto quality : qualities) {
+            const auto matrix = hypercine::VerifyPhase3ASequence120(
+                1920, 1080, 16, 0x1337BEEFu, {}, quality);
+            if (!matrix.ok || matrix.matched_frames != 16) {
+                return Fail(std::string("quality matrix failed for ") +
+                    hypercine::EncodingQualityName(quality) + ": " + matrix.error +
+                    " (" + std::to_string(matrix.matched_frames) + "/16 frames)");
+            }
+            std::cout << "[Quality Matrix " << hypercine::EncodingQualityName(quality)
+                      << "] upstream == CPU == CUDA, " << matrix.matched_frames
+                      << "/16 frames" << std::endl;
+        }
+        const auto filmscan2_sequence = hypercine::VerifyPhase3ASequence120(
+            1920, 1080, 120, 0x1337BEEFu, {}, hypercine::EncodingQuality::FilmScan2);
+        if (!filmscan2_sequence.ok || filmscan2_sequence.matched_frames != 120 ||
+            filmscan2_sequence.distinct_fs_rate_limiters_observed < 2) {
+            return Fail("FilmScan2 120-frame rate-control sequence failed: " +
+                filmscan2_sequence.error + " (distinct FSratelimiters=" +
+                std::to_string(filmscan2_sequence.distinct_fs_rate_limiters_observed) + ")");
+        }
     }
 
     // 5. Test 2: 300-Frame Distinct-Frame Multi-Slot Pipeline Test (plus 4K and 8K slot wrap).

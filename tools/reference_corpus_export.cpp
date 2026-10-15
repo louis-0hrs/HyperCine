@@ -33,6 +33,7 @@ std::vector<RunRecord> g_runs;
 fs::path g_out;
 bool g_save_input_files = true;
 std::string g_run_label = "sequence";
+hypercine::EncodingQuality g_quality = hypercine::EncodingQuality::FilmScan3;
 
 std::string Escape(const std::string& s) {
     std::ostringstream o;
@@ -155,7 +156,7 @@ bool SaveFrame(const hypercine::Phase3AReferenceFrameArtifact& a, std::string* e
 
 bool Run(int width, int height, int frames) {
     const auto cb = [](const hypercine::Phase3AReferenceFrameArtifact& a, std::string* err) { return SaveFrame(a, err); };
-    const auto report = hypercine::VerifyPhase3ASequence120(width, height, frames, 0x1337BEEFu, cb);
+    const auto report = hypercine::VerifyPhase3ASequence120(width, height, frames, 0x1337BEEFu, cb, g_quality);
     const std::string status = report.ok ? "complete" : (report.frames.empty() ? "unsupported" : (report.error.find("equivalence mismatch") != std::string::npos ? "mismatch" : "failed"));
     g_runs.push_back({width, height, frames, report.matched_frames, static_cast<int>(report.frames.size()), report.ok, status, report.error});
     return report.ok;
@@ -172,7 +173,7 @@ bool WriteManifest() {
       << "\"cuda\":{\"device\":\"" << Escape(prop.name) << "\",\"compute_capability\":\"" << prop.major << '.' << prop.minor
       << "\",\"runtime_version\":" << runtime << ",\"driver_api_version\":" << driver << ",\"display_driver_version\":\"" << Escape(DisplayDriverVersion()) << "\"},\n"
       << "\"host\":{\"os\":\"Windows\",\"os_version\":\"" << WindowsVersion() << "\",\"compiler\":\"MSVC\",\"compiler_version\":" << _MSC_VER << ",\"compiler_full_version\":" << _MSC_FULL_VER << "},\n"
-      << "\"profile\":{\"input_format\":\"BGRA8\",\"encoded_format\":\"YUV422\",\"range\":\"CFHD upstream default for generated BGRA8 source values\",\"row_orientation\":\"top-down\",\"pitch_bytes\":\"width*4\",\"color_conversion\":\"Rec.709 default; YUV_601 flag not set\",\"chroma_convention\":\"CFHD YUV 4:2:2 default\",\"encoder_flags\":\"CFHD_ENCODING_FLAGS_NONE\",\"quality\":\"FilmScan3\",\"gop\":1,\"precision\":10,\"metadata\":\"SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes\"},\n"
+      << "\"profile\":{\"input_format\":\"BGRA8\",\"encoded_format\":\"YUV422\",\"range\":\"CFHD upstream default for generated BGRA8 source values\",\"row_orientation\":\"top-down\",\"pitch_bytes\":\"width*4\",\"color_conversion\":\"Rec.709 default; YUV_601 flag not set\",\"chroma_convention\":\"CFHD YUV 4:2:2 default\",\"encoder_flags\":\"CFHD_ENCODING_FLAGS_NONE\",\"quality\":\"" << hypercine::EncodingQualityName(g_quality) << "\",\"quality_sdk_enum\":" << static_cast<int>(g_quality) << ",\"gop\":1,\"precision\":10,\"metadata\":\"SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes\"},\n"
       << "\"runs\":[";
     for(size_t i=0;i<g_runs.size();++i) { const auto& r=g_runs[i]; if(i) j << ',';
         j << "{\"width\":"<<r.width<<",\"height\":"<<r.height<<",\"requested_frames\":"<<r.requested<<",\"matched_frames\":"<<r.matched<<",\"exported_frames\":"<<r.exported
@@ -208,8 +209,20 @@ bool Verify(const fs::path& root) {
 }
 
 void Usage() {
-    std::cout << "hypercine_reference_export --tier-a --out-dir DIR\n"
+    std::cout << "hypercine_reference_export [--quality low|medium|high|filmscan1|filmscan2|filmscan3] --tier-a --out-dir DIR\n"
+                 "hypercine_reference_export [--quality low|medium|high|filmscan1|filmscan2|filmscan3] --sequence WIDTH HEIGHT FRAMES --out-dir DIR\n"
                  "hypercine_reference_export --verify DIR\n";
+}
+
+bool ParseQuality(const std::string& name, hypercine::EncodingQuality* quality) {
+    if (name == "low") *quality = hypercine::EncodingQuality::Low;
+    else if (name == "medium") *quality = hypercine::EncodingQuality::Medium;
+    else if (name == "high") *quality = hypercine::EncodingQuality::High;
+    else if (name == "filmscan1") *quality = hypercine::EncodingQuality::FilmScan1;
+    else if (name == "filmscan2") *quality = hypercine::EncodingQuality::FilmScan2;
+    else if (name == "filmscan3") *quality = hypercine::EncodingQuality::FilmScan3;
+    else return false;
+    return true;
 }
 }
 
@@ -222,6 +235,7 @@ int main(int argc, char** argv) {
         const std::string arg=argv[i];
         if (arg=="--tier-a") tier_a=true;
         else if (arg=="--sequence" && i+3<argc) { sequence=true; width=std::stoi(argv[++i]); height=std::stoi(argv[++i]); frames=std::stoi(argv[++i]); }
+        else if (arg=="--quality" && i+1<argc) { if (!ParseQuality(argv[++i], &g_quality)) { std::cerr << "unsupported quality profile\n"; return 2; } }
         else if (arg=="--out-dir" && i+1<argc) out_dir=argv[++i];
         else if (arg=="--omit-input-files") g_save_input_files=false;
         else { Usage(); return 2; }
@@ -231,14 +245,14 @@ int main(int argc, char** argv) {
     if(ec) { std::cerr<<ec.message()<<'\n'; return 1; }
     bool ok=false;
     if(tier_a) {
-        g_run_label="tier-a-128";
+        g_run_label=std::string(hypercine::EncodingQualityName(g_quality))+"-tier-a-128";
         const bool tier_a_128_ok=Run(128,128,40);
-        g_run_label="tier-a-1080";
+        g_run_label=std::string(hypercine::EncodingQualityName(g_quality))+"-tier-a-1080";
         const bool hd=Run(1920,1080,16);
         ok=hd;
         std::cout << "Tier A 128x128: " << (tier_a_128_ok?"PASS":(g_runs[0].status=="mismatch"?"MISMATCH (retained)":"UNSUPPORTED/FAILED")) << "; 1080p: " << (hd?"PASS":"FAILED") << '\n';
     } else {
-        g_run_label="sequence-"+std::to_string(width)+"x"+std::to_string(height);
+        g_run_label=std::string(hypercine::EncodingQualityName(g_quality))+"-sequence-"+std::to_string(width)+"x"+std::to_string(height);
         ok=Run(width,height,frames);
         std::cout << "Sequence " << width << 'x' << height << " frames=" << frames << ": " << (ok?"PASS":"FAILED/MISMATCH") << '\n';
     }
