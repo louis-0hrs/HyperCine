@@ -34,7 +34,7 @@
     "windows_msvc_x64": "PENDING",
     "linux_x64": "PENDING"
   },
-  "workflow_installation": "BLOCKED: current CLI credential scopes gist, read:org, repo exclude workflow; candidate only",
+  "workflow_installation": "ACTIVATED: user renewed GitHub login; workflow scope verified on 2026-10-15; hosted results pending",
   "actual_nas_corpus_in_this_run": "NOT USED: versioned hash manifests and small frozen fixtures only",
   "upstream_modified": false,
   "core_codec_math_changed": false,

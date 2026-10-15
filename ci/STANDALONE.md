@@ -7,29 +7,20 @@ and independently decoded by the Windows SDK oracle in #5 / PR #9 needs its
 own CI. The existing `CPU Reference CI` builds the legacy SDK configuration;
 it does not replace this standalone gate.
 
-`standalone-workflow.yml` is an **installation candidate**, not an installed
-workflow. On 2026-10-15, the current GitHub CLI credential reported scopes
-`gist, read:org, repo`, without `workflow`. No attempt was made to bypass that
-restriction. Issue #8 remains open until the installed matrix actually passes
-on GitHub. Windows/Linux standalone results and hosted Mac results are pending.
+The workflow is installed at `.github/workflows/ci-standalone.yml`. The
+initial credential lacked `workflow` permission; the user renewed GitHub
+login on 2026-10-15 and the scope was verified before activation.
+Issue #8 remains open until the installed matrix actually passes on GitHub.
+Windows/Linux standalone results and hosted Mac results are pending.
 
-## Install with a workflow-authorized credential
+## Activation and review
 
-From this PR's branch, an authorized maintainer can run:
+The workflow runs on relevant pushes and pull requests. Manual dispatch is
+available once the workflow is on the default branch. Check all four matrix
+jobs and the separate existing Windows reference job before accepting the PR.
+Do not close #8 based on local results alone. No automatic merge is configured.
 
-```sh
-cp ci/standalone-workflow.yml .github/workflows/ci-standalone.yml
-git add .github/workflows/ci-standalone.yml
-git commit -m "ci(standalone): activate full CFHD decode matrix"
-git push
-```
-
-The new workflow triggers on that push. It also supports manual dispatch once
-on the default branch. Check all four matrix jobs and the separate existing
-Windows reference job before accepting the PR. Do not close #8 based on local
-results or the presence of this candidate file. No automatic merge is configured.
-
-The candidate uses `macos-15` for Apple Silicon, `windows-2022` for MSVC x64,
+The workflow uses `macos-15` for Apple Silicon, `windows-2022` for MSVC x64,
 and `ubuntu-24.04` for Linux x64. These are single runner labels, not combined
 label arrays. The Mac choice follows the current
 [GitHub hosted-runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
@@ -91,7 +82,7 @@ on those hosts. `run_standalone.py` invokes the required full
 `ctest --test-dir build -C Release --output-on-failure`, with JUnit and
 `--no-tests=error` added. Optional actual-corpus tests are also required to pass
 if registered. A sanitizer build uses a separate directory and the flags in the
-candidate workflow; pass that directory via `--build-dir`.
+workflow; pass that directory via `--build-dir`.
 
 The Python reference validators now receive the actual configured compiler
 identity through CTest, rather than requiring a Unix `c++` executable on MSVC.
@@ -105,7 +96,7 @@ macOS 26.5.2, AppleClang 21.0.0.21000101, CMake 3.31.5, Python 3.9.6.
 FFmpeg/ffprobe n8.0 are the existing unmodified standalone validation build
 (`/private/tmp/hypercine-ffmpeg-validator`), configured without assembly or
 network and with the CFHD/rawvideo decode and AVI/rawvideo validation paths.
-The hosted candidate installs packaged FFmpeg instead; those results remain
+The hosted workflow installs packaged FFmpeg instead; those results remain
 pending and are not inferred from this local run.
 
 - Release full gate: **25/25 passed**, zero skips, 78.80 seconds.
@@ -118,7 +109,7 @@ pending and are not inferred from this local run.
 - Initial sanitizer run with `detect_leaks=1`: **4/25 passed**, 21 aborted/failed
   because the sanitizer runtime reports that leak detection is unsupported.
   This is retained as an environment failure, not a codec finding or a pass.
-- Candidate YAML parses; embedded bash steps pass `bash -n`.
+- Workflow YAML parses; embedded bash steps pass `bash -n`.
 - Release and sanitizer executables identify as native Mach-O arm64.
 
 Full local diagnostics are in the ignored `build/local-gate.log` and

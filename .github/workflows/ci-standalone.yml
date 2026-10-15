@@ -1,6 +1,6 @@
 # Copyright (c) 2026 HyperCine Contributors.
 # Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
-# Install unchanged as .github/workflows/ci-standalone.yml; see STANDALONE.md.
+# See ci/STANDALONE.md for the validation contract and evidence.
 name: Standalone CFHD CI
 
 on:
