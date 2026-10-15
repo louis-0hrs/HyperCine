@@ -133,9 +133,11 @@ ctest --test-dir build-release-sm89 -C Release --output-on-failure
 
 ### Option C: Experimental SDK-free Apple Silicon encoder
 
-The separate fixed 128x128 FS3-Q2 CPU encoder builds natively on arm64 without
+The separate fixed-quant FS3-Q2 CPU encoder builds natively on arm64 without
 compiling or linking the SDK or CUDA. It emits real CFHD samples validated with
-an independent FFmpeg decoder. See [the standalone report](docs/MACOS_STANDALONE_ENCODER.md)
+an independent FFmpeg decoder at 128x128, 256x256 and 1920x1080, preserving
+the original 128 packet hashes. Conservative geometry/resource limits apply.
+See [the standalone report](docs/MACOS_STANDALONE_ENCODER.md)
 for profile limits, RGB quality results and pending Windows/Adobe/Resolve gates.
 
 ```sh

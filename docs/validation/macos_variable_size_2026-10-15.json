@@ -1,0 +1,1547 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 6,
+  "branch": "codex/macos-standalone-variable-size",
+  "base_sha": "a0518c0f39649056116eba57547fea1b96457dcf",
+  "measured_utc": "2026-10-14T23:45:17.314957+00:00",
+  "local_date": "2026-10-15 Europe/Berlin",
+  "host": {
+    "machine": "Apple M2 Pro",
+    "architecture": "arm64",
+    "os": "macOS26.5.2 (25F84)",
+    "compiler": "Apple Clang21.0.0",
+    "cmake": "3.31.5",
+    "generator": "Unix Makefiles"
+  },
+  "profile": {
+    "format": "progressive GOP1 BGRA8 top-down -> BT.709 studio p10 YUV422",
+    "quality": "experimental fixed FS3-Q2; no rate control/SDK encoder byte parity",
+    "prescale": [
+      0,
+      2,
+      0
+    ],
+    "lowpass_quant": 1,
+    "highpass_quant": 2,
+    "seed": "0x1337BEEF"
+  },
+  "geometry_contract": {
+    "width_min": 128,
+    "width_max": 4096,
+    "width_multiple": 128,
+    "height_min": 24,
+    "height_max": 4096,
+    "height_multiple": 8,
+    "max_frame_pixels": 2097152,
+    "max_padded_plane_elements": 2097152,
+    "max_sample_bytes": 16793600,
+    "dimension_tags_bits": 16,
+    "size_chunk_words_bits": 24
+  },
+  "true_1080_hierarchy": {
+    "y": [
+      [
+        960,
+        540
+      ],
+      [
+        480,
+        270
+      ],
+      [
+        240,
+        135
+      ]
+    ],
+    "cr_cb": [
+      [
+        480,
+        540
+      ],
+      [
+        240,
+        270
+      ],
+      [
+        120,
+        135
+      ]
+    ],
+    "final_chroma_stride_int16": 120,
+    "frame_height": 1080,
+    "display_height": 1080,
+    "encoder_padding_or_cropping": false,
+    "decoded_p10_samples_per_frame": 4147200
+  },
+  "tests": {
+    "release": {
+      "status": "PASS",
+      "passed": 14,
+      "failed": 0,
+      "log_sha256": "04cb657c87ce581142138d5b3797322ecf68aae187ea1cd719635055ca8ac363",
+      "seconds": 54.11
+    },
+    "asan_ubsan": {
+      "status": "PASS",
+      "passed": 14,
+      "failed": 0,
+      "log_sha256": "df4a299a18c847ad4c778f822469605325fa1e7ee1fd9b4562ed93dcb2793fd6",
+      "seconds": 88.66,
+      "instrumented": "HyperCine encoder and C++ tests; external FFmpeg not instrumented",
+      "findings": 0
+    },
+    "release_vs_sanitized_packet_and_decoded_hashes": "PASS all27",
+    "original_128_packet_and_decode_goldens": "PASS unchanged original SHA256 + C++ FNV1a64",
+    "repeated_process_determinism": "PASS two fresh CLI encodes for each27 input",
+    "native_dependencies": "PASS Mach-O arm64; libc++/libSystem only; compile database has no SDK/CUDA paths",
+    "upstream_cuda_workflow_oracle_changes": "NONE"
+  },
+  "external_decoder": {
+    "version": "FFmpeg n8.0",
+    "sha": "140fd653aed8cad774f991ba083e2d01e86420c7",
+    "build": "unmodified; external CFHD decoder; rawvideo encoder only for output; no core linkage"
+  },
+  "quality_limits": {
+    "p10": "PASS all27 inputs >35dB; all flat exact",
+    "source_rgb": "NOT universal >35dB; 256 gradient34.116494,256 noise14.253943,256 edges24.346625,1080 edges32.916371",
+    "impulse": "luma max50 at both256/1080; first1080 difference (0,0) source940 decoded897; chroma exact",
+    "lossless": "NOT CLAIMED"
+  },
+  "process_observation": {
+    "command": [
+      "build/hypercine_encode_smoke",
+      "canonical",
+      "build/observed-canonical-1080.cfhd",
+      "1920",
+      "1080"
+    ],
+    "wall_seconds": 0.075640792,
+    "user_seconds": 0.069059,
+    "system_seconds": 0.0036669999999999997,
+    "peak_resident_bytes": 31064064,
+    "interpretation": "Single process observation including CLI input generation and startup; no performance milestone/baseline comparison"
+  },
+  "external_gates": {
+    "new_geometry_windows_sdk_decode": "NOT RUN",
+    "standalone_windows_msvc": "NOT RUN",
+    "legacy_windows_reference_ci": "PENDING push; separate from new geometry",
+    "cuda": "NOT RUN",
+    "adobe_resolve": "NOT RUN",
+    "benchmark_codec": "NOT RUN; no performance milestone"
+  },
+  "resolved_test_failure": {
+    "initial_asan_suite": "13/14 PASS, geometry assertion FAIL",
+    "cause": "Test incorrectly required individual canonical HP band >65535 words; sample/level chunks genuinely exceed65535 words. Parser now validates all size chunk kinds. Dense VLC independently exercises large band payload.",
+    "encoder_sanitizer_error": false,
+    "final_full_suite": "14/14 PASS"
+  },
+  "samples": [
+    {
+      "pattern": "flat",
+      "sample_bytes": 3444,
+      "sample_sha256": "236cacbac9c5f39a5fbd1a4b939619276ccfc622ac486bf5a2ba967bcf28392b",
+      "decoded_sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 16384,
+          "exact_samples": 16384,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 8192,
+          "exact_samples": 8192,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 8192,
+          "exact_samples": 8192,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.003409,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 128,
+      "uncompressed_reference_p10_sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "gradient",
+      "sample_bytes": 25604,
+      "sample_sha256": "4086e8c7ec3cc0b287ab637a486354eaa89623d048ac9d79d290291099b767fb",
+      "decoded_sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d",
+      "psnr_yuv_p10_db": 60.731328,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 16384,
+          "exact_samples": 6821,
+          "max_error": 3,
+          "psnr_db": 60.877951,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 132,
+            "decoded": 131
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 8192,
+          "exact_samples": 3360,
+          "max_error": 5,
+          "psnr_db": 60.90532,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 522,
+            "decoded": 523
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 8192,
+          "exact_samples": 3289,
+          "max_error": 4,
+          "psnr_db": 60.295087,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 469,
+            "decoded": 465
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 31.733328,
+      "psnr_source_rgb_db": 31.601047,
+      "encode_process_seconds": 0.003646,
+      "max_error": 5,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 128,
+      "uncompressed_reference_p10_sha256": "6a45617626d0867912532c194feb36d7d4161ae486354c85d3dcffc05f4033b6",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 15416,
+      "sample_sha256": "9cf732846c1b9838c8f5d24f92db0182b82b5b6a05df63ffd5114fc1606db6fd",
+      "decoded_sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f",
+      "psnr_yuv_p10_db": 61.26656,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 16384,
+          "exact_samples": 7137,
+          "max_error": 4,
+          "psnr_db": 61.242891,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 61
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 8192,
+          "exact_samples": 3496,
+          "max_error": 3,
+          "psnr_db": 61.609663,
+          "first_difference": {
+            "x": 1,
+            "y": 0,
+            "expected": 517,
+            "decoded": 518
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 8192,
+          "exact_samples": 3434,
+          "max_error": 4,
+          "psnr_db": 60.992932,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 517,
+            "decoded": 515
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.597795,
+      "psnr_source_rgb_db": 40.520486,
+      "encode_process_seconds": 0.003454,
+      "max_error": 4,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 128,
+      "uncompressed_reference_p10_sha256": "d639417d370f765f7b384dbfeb9645387bbe8420ad7d7f78f319a6afd433f927",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "flat",
+      "sample_bytes": 6996,
+      "sample_sha256": "5cef6ccae1808771e1eb4468aac1b7fa5e9593c01cf1f30806722d4f40561f9d",
+      "decoded_sha256": "5de8d8dd8dd4353e9cf16779496ed9d827d46801acb87ae74c1a770639f82758",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 65536,
+          "exact_samples": 65536,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 32768,
+          "exact_samples": 32768,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 32768,
+          "exact_samples": 32768,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.004718,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 256,
+      "height": 256,
+      "uncompressed_reference_p10_sha256": "5de8d8dd8dd4353e9cf16779496ed9d827d46801acb87ae74c1a770639f82758",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "gradient",
+      "sample_bytes": 81468,
+      "sample_sha256": "953f6f2576e4cee2e66e8d23c52485752f370488a322423059b1a207d1cb66b8",
+      "decoded_sha256": "0cbe9c4107250b2b375df2971368e1015048f1e1be36303ec587a7847e683e0a",
+      "psnr_yuv_p10_db": 60.832191,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 65536,
+          "exact_samples": 28030,
+          "max_error": 4,
+          "psnr_db": 60.819823,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 132,
+            "decoded": 129
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 32768,
+          "exact_samples": 13896,
+          "max_error": 5,
+          "psnr_db": 61.115949,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 522,
+            "decoded": 520
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 32768,
+          "exact_samples": 12797,
+          "max_error": 5,
+          "psnr_db": 60.589204,
+          "first_difference": {
+            "x": 2,
+            "y": 0,
+            "expected": 474,
+            "decoded": 475
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 34.343647,
+      "psnr_source_rgb_db": 34.116494,
+      "encode_process_seconds": 0.006606,
+      "max_error": 5,
+      "format": "yuv422p10le",
+      "width": 256,
+      "height": 256,
+      "uncompressed_reference_p10_sha256": "3a4da484bcd673e4896a9c8f43f17a15d1289aa99afc42a283ac02185d02c21c",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 54608,
+      "sample_sha256": "1e6151af738f0afa80607f3e22c5f295acda84d654c222bf3a9f2da3a7c7231f",
+      "decoded_sha256": "7377ab21971e7746df317a2344217102d7a8fdb618ac52df8a63f5fcc71b3ec0",
+      "psnr_yuv_p10_db": 61.347107,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 65536,
+          "exact_samples": 27852,
+          "max_error": 3,
+          "psnr_db": 61.237751,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 65
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 32768,
+          "exact_samples": 13973,
+          "max_error": 3,
+          "psnr_db": 61.733601,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 511,
+            "decoded": 510
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 32768,
+          "exact_samples": 13848,
+          "max_error": 3,
+          "psnr_db": 61.201276,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 517,
+            "decoded": 519
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.748663,
+      "psnr_source_rgb_db": 40.651097,
+      "encode_process_seconds": 0.00604,
+      "max_error": 3,
+      "format": "yuv422p10le",
+      "width": 256,
+      "height": 256,
+      "uncompressed_reference_p10_sha256": "f76855675c1190985de069007be2d2613cab383736b975bb9ebb79697a61b98e",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "noise",
+      "sample_bytes": 311480,
+      "sample_sha256": "514a9f5c021ce433c6765a4fef76d39c54991dbaafaf344c0cb3bf6104582690",
+      "decoded_sha256": "50836947755321fc6b7039120f813bda13045602b01faeb7fcb70e78511725be",
+      "psnr_yuv_p10_db": 56.53269,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 65536,
+          "exact_samples": 15130,
+          "max_error": 7,
+          "psnr_db": 55.642387,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 770,
+            "decoded": 765
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 32768,
+          "exact_samples": 10003,
+          "max_error": 6,
+          "psnr_db": 57.847545,
+          "first_difference": {
+            "x": 1,
+            "y": 0,
+            "expected": 462,
+            "decoded": 461
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 32768,
+          "exact_samples": 9519,
+          "max_error": 7,
+          "psnr_db": 57.468419,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 439,
+            "decoded": 438
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 14.248307,
+      "psnr_source_rgb_db": 14.253943,
+      "encode_process_seconds": 0.006928,
+      "max_error": 7,
+      "format": "yuv422p10le",
+      "width": 256,
+      "height": 256,
+      "uncompressed_reference_p10_sha256": "1dadabea8b5b6ce02beb5f472ba4706dc2d7c20fc11696ca274a5016bd4d35d3",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "checker",
+      "sample_bytes": 60160,
+      "sample_sha256": "58ddeeae925bad48d2aa54a659b820be449365cf8e2184d569ee8d4a02eb247a",
+      "decoded_sha256": "ed2f256d2695a7ef0b43b1112adb869152e44e1fb5c3b4817871fb405e34d77c",
+      "psnr_yuv_p10_db": 57.187213,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 65536,
+          "exact_samples": 0,
+          "max_error": 2,
+          "psnr_db": 54.176913,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 66
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 32768,
+          "exact_samples": 32768,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 32768,
+          "exact_samples": 32768,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 45.120504,
+      "psnr_source_rgb_db": 45.120504,
+      "encode_process_seconds": 0.005084,
+      "max_error": 2,
+      "format": "yuv422p10le",
+      "width": 256,
+      "height": 256,
+      "uncompressed_reference_p10_sha256": "9935ed91993c63892ed0a704409698b57a117a3e60cd8252d55531527b608a06",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "edges",
+      "sample_bytes": 23544,
+      "sample_sha256": "8c3935f0e636d87d24b7d1df26766c25354c56928e32482a7211e3be13f5f6da",
+      "decoded_sha256": "c1f3a353f3fc23100bda267f1df026b618b782244f09815d712ca4ec460ec3e9",
+      "psnr_yuv_p10_db": 66.901652,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 65536,
+          "exact_samples": 60770,
+          "max_error": 4,
+          "psnr_db": 69.540483,
+          "first_difference": {
+            "x": 1,
+            "y": 0,
+            "expected": 691,
+            "decoded": 689
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 32768,
+          "exact_samples": 27371,
+          "max_error": 4,
+          "psnr_db": 66.315687,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 167,
+            "decoded": 166
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 32768,
+          "exact_samples": 25683,
+          "max_error": 5,
+          "psnr_db": 64.431125,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 105,
+            "decoded": 106
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 24.35602,
+      "psnr_source_rgb_db": 24.346625,
+      "encode_process_seconds": 0.005144,
+      "max_error": 5,
+      "format": "yuv422p10le",
+      "width": 256,
+      "height": 256,
+      "uncompressed_reference_p10_sha256": "e8257f3ac8d8b8c14fc3444c1ab59725f13c93a193d0865923be4c95f5fe05cc",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "impulse",
+      "sample_bytes": 7172,
+      "sample_sha256": "dd16b1c87a923f81bc6a73db33566da8ff6802a703b167107e24b8576ca24fff",
+      "decoded_sha256": "7e64a9fee7d2f83ddea612cf6898c98a246eebf5f9c67c7e018e7ae6b895221d",
+      "psnr_yuv_p10_db": 72.13551,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 65536,
+          "exact_samples": 65391,
+          "max_error": 50,
+          "psnr_db": 69.12521,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 940,
+            "decoded": 897
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 32768,
+          "exact_samples": 32768,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 32768,
+          "exact_samples": 32768,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 83.285303,
+      "psnr_source_rgb_db": 67.54499,
+      "encode_process_seconds": 0.004757,
+      "max_error": 50,
+      "format": "yuv422p10le",
+      "width": 256,
+      "height": 256,
+      "uncompressed_reference_p10_sha256": "a035bc2bbb242a9d94c6f42c12b8315d638d192a7579561de7a7f8ebba41d5a3",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "flat",
+      "sample_bytes": 152540,
+      "sample_sha256": "ad94750dc171b3b2489d5d2b526ea3592f9d81af52a522c963e147d91e4d4eb2",
+      "decoded_sha256": "749e741aff039cb700b83233a47d4e0d2de995eb0341451f8ea074b7cdffac0a",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2073600,
+          "exact_samples": 2073600,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 1036800,
+          "exact_samples": 1036800,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 1036800,
+          "exact_samples": 1036800,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.02836,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 1920,
+      "height": 1080,
+      "uncompressed_reference_p10_sha256": "749e741aff039cb700b83233a47d4e0d2de995eb0341451f8ea074b7cdffac0a",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "gradient",
+      "sample_bytes": 1818240,
+      "sample_sha256": "b8a3524b63a16bd81302f93460d0e66d84d2371e6854912592c232ffa723c883",
+      "decoded_sha256": "1a50abeb44d8447adb712c6428231d10f34485300b32eade0df3a494ba516943",
+      "psnr_yuv_p10_db": 61.669322,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2073600,
+          "exact_samples": 1000864,
+          "max_error": 4,
+          "psnr_db": 61.766132,
+          "first_difference": {
+            "x": 14,
+            "y": 0,
+            "expected": 132,
+            "decoded": 133
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1036800,
+          "exact_samples": 546531,
+          "max_error": 3,
+          "psnr_db": 62.315967,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 522,
+            "decoded": 520
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 1036800,
+          "exact_samples": 451247,
+          "max_error": 4,
+          "psnr_db": 60.941565,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 468,
+            "decoded": 469
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.799057,
+      "psnr_source_rgb_db": 40.676167,
+      "encode_process_seconds": 0.055648,
+      "max_error": 4,
+      "format": "yuv422p10le",
+      "width": 1920,
+      "height": 1080,
+      "uncompressed_reference_p10_sha256": "b8d484ede0da5d119a6e389c25025c8497e5a887c80cd0103e6a6862e76e6be1",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 1712708,
+      "sample_sha256": "aa13a3ac59cfba9ec879946fbadc74936c4c740c08f69c206ab2d81e75edc6bc",
+      "decoded_sha256": "4a770fba3e4704b029b933fe14605c9bde1c36644e2bdacb4706f3eb4efd04fe",
+      "psnr_yuv_p10_db": 61.374599,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2073600,
+          "exact_samples": 881332,
+          "max_error": 4,
+          "psnr_db": 61.278541,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 65
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1036800,
+          "exact_samples": 455450,
+          "max_error": 3,
+          "psnr_db": 61.677979,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 511,
+            "decoded": 512
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 1036800,
+          "exact_samples": 442597,
+          "max_error": 4,
+          "psnr_db": 61.276937,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 517,
+            "decoded": 518
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.794093,
+      "psnr_source_rgb_db": 40.696277,
+      "encode_process_seconds": 0.080233,
+      "max_error": 4,
+      "format": "yuv422p10le",
+      "width": 1920,
+      "height": 1080,
+      "uncompressed_reference_p10_sha256": "c07702b0a9fb02a9b9b05da4418d3af78ab414335096ac9722085230109362fd",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "noise",
+      "sample_bytes": 9884204,
+      "sample_sha256": "0ea16da2dcbee7fe8c5126539882474c741505687ee323aa31c87f1e5d497fb3",
+      "decoded_sha256": "b5b14aa371f17a1b3e091121e255f4c84065b11f26700f75f6d81dd4f83dde7c",
+      "psnr_yuv_p10_db": 56.538756,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2073600,
+          "exact_samples": 476830,
+          "max_error": 8,
+          "psnr_db": 55.650233,
+          "first_difference": {
+            "x": 2,
+            "y": 0,
+            "expected": 495,
+            "decoded": 494
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1036800,
+          "exact_samples": 315257,
+          "max_error": 8,
+          "psnr_db": 57.817354,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 642,
+            "decoded": 640
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 1036800,
+          "exact_samples": 303589,
+          "max_error": 7,
+          "psnr_db": 57.502518,
+          "first_difference": {
+            "x": 1,
+            "y": 0,
+            "expected": 758,
+            "decoded": 754
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 14.269742,
+      "psnr_source_rgb_db": 14.275513,
+      "encode_process_seconds": 0.127761,
+      "max_error": 8,
+      "format": "yuv422p10le",
+      "width": 1920,
+      "height": 1080,
+      "uncompressed_reference_p10_sha256": "a7ee4839144741dd3aabf0161d08873db5fc2fa0341dd1548c5f14dbcf0f8989",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "checker",
+      "sample_bytes": 1834708,
+      "sample_sha256": "f9d8e84596d5601f96c154dcc45a29d84943e22f2561a21a6a624c5f7915ff36",
+      "decoded_sha256": "7bf1daefb89ffa311b31947b80af62ea5339bfc9d467ae148e2b8eb14d22e8c8",
+      "psnr_yuv_p10_db": 57.187213,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2073600,
+          "exact_samples": 0,
+          "max_error": 2,
+          "psnr_db": 54.176913,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 66
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1036800,
+          "exact_samples": 1036800,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 1036800,
+          "exact_samples": 1036800,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 45.120504,
+      "psnr_source_rgb_db": 45.120504,
+      "encode_process_seconds": 0.040792,
+      "max_error": 2,
+      "format": "yuv422p10le",
+      "width": 1920,
+      "height": 1080,
+      "uncompressed_reference_p10_sha256": "3a30dccad641da9496a0d88278b32a8b2d4126fb136aa208b34626575834d9d6",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "edges",
+      "sample_bytes": 245432,
+      "sample_sha256": "dcdef1087445b929e9a9f25d03ebd1f377ecdb33886a7c483748f93795f7a752",
+      "decoded_sha256": "bddc6d91cb98fdbad81fa453ccda6bd7fff9cbd5115b83ab738d14ad85de3f81",
+      "psnr_yuv_p10_db": 74.183515,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2073600,
+          "exact_samples": 2044778,
+          "max_error": 4,
+          "psnr_db": 76.376452,
+          "first_difference": {
+            "x": 1,
+            "y": 0,
+            "expected": 691,
+            "decoded": 689
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1036800,
+          "exact_samples": 1006555,
+          "max_error": 4,
+          "psnr_db": 73.635517,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 167,
+            "decoded": 166
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 1036800,
+          "exact_samples": 999107,
+          "max_error": 5,
+          "psnr_db": 71.986539,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 105,
+            "decoded": 106
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 32.926756,
+      "psnr_source_rgb_db": 32.916371,
+      "encode_process_seconds": 0.028733,
+      "max_error": 5,
+      "format": "yuv422p10le",
+      "width": 1920,
+      "height": 1080,
+      "uncompressed_reference_p10_sha256": "38523b299be852407af96938d73360675f47f11466845e543ccfffc133ba98fc",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "impulse",
+      "sample_bytes": 152736,
+      "sample_sha256": "b3adde817a6350c59484a4f666361c0a32fa7bb855b5358df19253e40b932bc1",
+      "decoded_sha256": "86bf9a96789983fd0ea36b3ee513a6922c1f6da0deda7c4cd1f49ecded4bbe07",
+      "psnr_yuv_p10_db": 87.137961,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2073600,
+          "exact_samples": 2073455,
+          "max_error": 50,
+          "psnr_db": 84.127661,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 940,
+            "decoded": 897
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1036800,
+          "exact_samples": 1036800,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 1036800,
+          "exact_samples": 1036800,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 98.287753,
+      "psnr_source_rgb_db": 82.547441,
+      "encode_process_seconds": 0.028723,
+      "max_error": 50,
+      "format": "yuv422p10le",
+      "width": 1920,
+      "height": 1080,
+      "uncompressed_reference_p10_sha256": "21673291b21e099d6e353b764c88388b89623d8c02342f3093bac63f035a0c0b",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "flat",
+      "sample_bytes": 2480,
+      "sample_sha256": "2769102cd99a73501e7629a3c5784a0493fbd230fbb722a68d561c0090c2a345",
+      "decoded_sha256": "116088b5e5540757894342cff19cdb0bfc647151504bb704f2d481236749686f",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 3072,
+          "exact_samples": 3072,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 1536,
+          "exact_samples": 1536,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 1536,
+          "exact_samples": 1536,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.003448,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 24,
+      "uncompressed_reference_p10_sha256": "116088b5e5540757894342cff19cdb0bfc647151504bb704f2d481236749686f",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 4776,
+      "sample_sha256": "f5c76c988ffd73fabc2646fbe720c3b66d99c47d4c66db369baf6e69ba2d031b",
+      "decoded_sha256": "b95f997109807b06a8e4b6a6df11ccc4785377019b83bf8dfbcc437dbe9d741f",
+      "psnr_yuv_p10_db": 61.29411,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 3072,
+          "exact_samples": 1268,
+          "max_error": 3,
+          "psnr_db": 61.121958,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 61
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1536,
+          "exact_samples": 656,
+          "max_error": 3,
+          "psnr_db": 61.866108,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 512,
+            "decoded": 510
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 1536,
+          "exact_samples": 686,
+          "max_error": 3,
+          "psnr_db": 61.113221,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 517,
+            "decoded": 516
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.657827,
+      "psnr_source_rgb_db": 40.593371,
+      "encode_process_seconds": 0.002675,
+      "max_error": 3,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 24,
+      "uncompressed_reference_p10_sha256": "95d79eec14477b09f8d55bcf09383beaba92063672c896ace583a1ed766860f3",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "flat",
+      "sample_bytes": 3344,
+      "sample_sha256": "70729b31c1296158b9f34dd0a77a9104f316566773afa79d2d4564e7cd45ff76",
+      "decoded_sha256": "fd9d08163b719c38974f20de7c94e39ef3c08a38ca5b59df0fac4f97cf9cea1e",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 15360,
+          "exact_samples": 15360,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 7680,
+          "exact_samples": 7680,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 7680,
+          "exact_samples": 7680,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.00346,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 384,
+      "height": 40,
+      "uncompressed_reference_p10_sha256": "fd9d08163b719c38974f20de7c94e39ef3c08a38ca5b59df0fac4f97cf9cea1e",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 15120,
+      "sample_sha256": "f4cf565dd4cdd82c481a4ed09a0a1c94df0866eabe37dcec998191425f1cd2e9",
+      "decoded_sha256": "f7117b132e919a22b9ee7ae83f2a8ff69d63d05478ba5f4ddfbf8a72e7f60329",
+      "psnr_yuv_p10_db": 61.164846,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 15360,
+          "exact_samples": 6473,
+          "max_error": 4,
+          "psnr_db": 61.1437,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 62
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 7680,
+          "exact_samples": 3008,
+          "max_error": 3,
+          "psnr_db": 61.301578,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 511,
+            "decoded": 510
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 7680,
+          "exact_samples": 3238,
+          "max_error": 4,
+          "psnr_db": 61.073604,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 517,
+            "decoded": 513
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.84113,
+      "psnr_source_rgb_db": 40.683037,
+      "encode_process_seconds": 0.003691,
+      "max_error": 4,
+      "format": "yuv422p10le",
+      "width": 384,
+      "height": 40,
+      "uncompressed_reference_p10_sha256": "7f03dd2566790ad946c53b60879fb419bb85ac7821d10f69f890695bd9a38e14",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "flat",
+      "sample_bytes": 9404,
+      "sample_sha256": "b60a2490d1acc2cf2f660b34638a19b076b5438869f94ff68ac839ad156c4612",
+      "decoded_sha256": "b72ddb2feeca4f712e7fc3fcd8b887d3166dfd5c08ffea9b1b54be467a9b0d5d",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 98304,
+          "exact_samples": 98304,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 49152,
+          "exact_samples": 49152,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 49152,
+          "exact_samples": 49152,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.004072,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 4096,
+      "height": 24,
+      "uncompressed_reference_p10_sha256": "b72ddb2feeca4f712e7fc3fcd8b887d3166dfd5c08ffea9b1b54be467a9b0d5d",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 84428,
+      "sample_sha256": "b6e9491211584d850a42d7a3bec5f80a07223640848b344b71b0726d78ebbafb",
+      "decoded_sha256": "d2c26f9483462c67aca2d8deb806d82d5039b8b6bb8807c0519b18aa564fef9e",
+      "psnr_yuv_p10_db": 61.321522,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 98304,
+          "exact_samples": 41320,
+          "max_error": 4,
+          "psnr_db": 61.143986,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 67
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 49152,
+          "exact_samples": 23067,
+          "max_error": 4,
+          "psnr_db": 61.954716,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 511,
+            "decoded": 510
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 49152,
+          "exact_samples": 20707,
+          "max_error": 4,
+          "psnr_db": 61.100475,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 517,
+            "decoded": 515
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.829027,
+      "psnr_source_rgb_db": 40.755805,
+      "encode_process_seconds": 0.008253,
+      "max_error": 4,
+      "format": "yuv422p10le",
+      "width": 4096,
+      "height": 24,
+      "uncompressed_reference_p10_sha256": "19fc6f2f235f1da366cd7e5724c1ba0fd790f9db376bd7274f1578596d70e50e",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "flat",
+      "sample_bytes": 40252,
+      "sample_sha256": "a21b0f0a4a03e7ec45051645e8fec82556e252cf249ff753b455ab0729bd6981",
+      "decoded_sha256": "d4a71e70fb19ec43e80a97b12e495bd09c77e88d57557c02cc29038ffed83ead",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 524288,
+          "exact_samples": 524288,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 262144,
+          "exact_samples": 262144,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 262144,
+          "exact_samples": 262144,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.009212,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 4096,
+      "uncompressed_reference_p10_sha256": "d4a71e70fb19ec43e80a97b12e495bd09c77e88d57557c02cc29038ffed83ead",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 425188,
+      "sample_sha256": "f0c88b14910b88dff523076858054730f9eaef37031880809ab402b6002478fc",
+      "decoded_sha256": "bf94041c5b2668b045e583d11a1dd750a531a4e5851627962b6a3ab3ea0dd3c4",
+      "psnr_yuv_p10_db": 61.529905,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 524288,
+          "exact_samples": 226257,
+          "max_error": 5,
+          "psnr_db": 61.328151,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 63
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 262144,
+          "exact_samples": 125317,
+          "max_error": 4,
+          "psnr_db": 62.346872,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 512,
+            "decoded": 511
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 262144,
+          "exact_samples": 112023,
+          "max_error": 5,
+          "psnr_db": 61.210262,
+          "first_difference": {
+            "x": 2,
+            "y": 0,
+            "expected": 519,
+            "decoded": 518
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.575731,
+      "psnr_source_rgb_db": 40.581459,
+      "encode_process_seconds": 0.023082,
+      "max_error": 5,
+      "format": "yuv422p10le",
+      "width": 128,
+      "height": 4096,
+      "uncompressed_reference_p10_sha256": "82296ef4a3cba1c108c8834199d2557744be877248602fb7a13e64791e7b6371",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "flat",
+      "sample_bytes": 154276,
+      "sample_sha256": "e4b8e81081549a9dc64f7ab23dde14e224dd3374362bdc48397288e6661e830a",
+      "decoded_sha256": "0b7024ce8b5135e4c8d24a2758f9ea36665cee75fd4ce2a9532270c8c0bae397",
+      "psnr_yuv_p10_db": null,
+      "yuv_exact": true,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2097152,
+          "exact_samples": 2097152,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cb",
+          "samples": 1048576,
+          "exact_samples": 1048576,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        },
+        {
+          "channel": "Cr",
+          "samples": 1048576,
+          "exact_samples": 1048576,
+          "max_error": 0,
+          "psnr_db": null,
+          "first_difference": null
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 42.110204,
+      "psnr_source_rgb_db": 42.110204,
+      "encode_process_seconds": 0.025086,
+      "max_error": 0,
+      "format": "yuv422p10le",
+      "width": 2048,
+      "height": 1024,
+      "uncompressed_reference_p10_sha256": "0b7024ce8b5135e4c8d24a2758f9ea36665cee75fd4ce2a9532270c8c0bae397",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    },
+    {
+      "pattern": "canonical",
+      "sample_bytes": 1728260,
+      "sample_sha256": "f106fdb14bd2834811dba8a30b60a6614612c0dea3fa8f3422e495ccc126144f",
+      "decoded_sha256": "994b5240dead33280b83fab98e68310896e5baf9d35aabf187475c404636f783",
+      "psnr_yuv_p10_db": 61.357387,
+      "yuv_exact": false,
+      "planes": [
+        {
+          "channel": "Y",
+          "samples": 2097152,
+          "exact_samples": 889820,
+          "max_error": 4,
+          "psnr_db": 61.269793,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 64,
+            "decoded": 63
+          }
+        },
+        {
+          "channel": "Cb",
+          "samples": 1048576,
+          "exact_samples": 457407,
+          "max_error": 3,
+          "psnr_db": 61.637622,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 511,
+            "decoded": 510
+          }
+        },
+        {
+          "channel": "Cr",
+          "samples": 1048576,
+          "exact_samples": 446071,
+          "max_error": 4,
+          "psnr_db": 61.263981,
+          "first_difference": {
+            "x": 0,
+            "y": 0,
+            "expected": 517,
+            "decoded": 518
+          }
+        }
+      ],
+      "psnr_rgb_subsampling_baseline_db": 41.794067,
+      "psnr_source_rgb_db": 40.691273,
+      "encode_process_seconds": 0.076915,
+      "max_error": 4,
+      "format": "yuv422p10le",
+      "width": 2048,
+      "height": 1024,
+      "uncompressed_reference_p10_sha256": "6a1f426f91f75cd7b5b8cbc5ce760fccae228f7a7628f127667787245385a324",
+      "status": "PASS p10 >35dB and exact flat; RGB diagnostic except flat/canonical"
+    }
+  ]
+}

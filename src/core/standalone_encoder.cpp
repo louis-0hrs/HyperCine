@@ -89,10 +89,19 @@ public:
     }
 };
 class Sample {
+    // 27 HP bands contain <2*frame_pixels coefficients, <=4 bytes each.
+    // Final LL payload and all headers fit in the remaining conservative bound.
+    static constexpr std::size_t kCapacity = 8*kMaxPixels + 16384;
+    void Check(std::size_t extra) const {
+        if (extra > kCapacity-bytes.size()) throw std::length_error("sample capacity exceeded");
+    }
 public:
     std::vector<uint8_t> bytes;
-    void U16(unsigned x) { bytes.push_back(static_cast<uint8_t>(x>>8)); bytes.push_back(static_cast<uint8_t>(x)); }
-    void Tag(int tag, unsigned value) { U16(static_cast<uint16_t>(tag)); U16(value); }
+    void U16(unsigned x) { Check(2); bytes.push_back(static_cast<uint8_t>(x>>8)); bytes.push_back(static_cast<uint8_t>(x)); }
+    void Tag(int tag, unsigned value) {
+        if (value>65535) throw std::length_error("wire tag value exceeds 16 bits");
+        U16(static_cast<uint16_t>(tag)); U16(value); }
+    void Append(const std::vector<uint8_t>& v) { Check(v.size()); bytes.insert(bytes.end(),v.begin(),v.end()); }
     void Patch32(std::size_t at, uint32_t value) {
         if (at > bytes.size() || bytes.size()-at < 4) throw std::out_of_range("sample patch");
         for (unsigned i=0;i<4;++i) bytes[at+i] = static_cast<uint8_t>(value >> (24-i*8));
@@ -116,7 +125,8 @@ void Lowpass(Sample& s, const Plane& p) {
 }
 }
 std::vector<uint8_t> PackHighpass(const Plane& p, std::size_t capacity) {
-    if (p.width<1 || p.width>128 || p.width%8 || p.height<1 || p.height>128 || p.stride<p.width || p.stride%8 ||
+    if (p.width<1 || p.width>kMaxDimension || p.width%8 || p.height<1 || p.height>kMaxDimension || p.stride<p.width || p.stride%8 ||
+        static_cast<std::size_t>(p.stride)*p.height>kMaxPixels ||
         p.pixels.size()<static_cast<std::size_t>(p.stride)*p.height)
         throw std::invalid_argument("invalid entropy plane");
     Bits bits(capacity);
@@ -146,15 +156,15 @@ std::vector<uint8_t> PackHighpass(const Plane& p, std::size_t capacity) {
     flush(); bits.Put(detail::band_end17.bits,detail::band_end17.size); bits.Finish();
     return std::move(bits.bytes);
 }
-std::vector<uint8_t> EncodeBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride) {
-    auto planes=ConvertBgra128(data,bytes,stride);
+std::vector<uint8_t> EncodeBgra(const uint8_t* data, std::size_t bytes, int width, int height, std::size_t stride) {
+    auto planes=ConvertBgra(data,bytes,width,height,stride);
     Sample s;
     s.Tag(kSampleType,9); s.Tag(kIndex,3);
     const auto index=s.bytes.size(); for(int i=0;i<3;++i) s.Tag(kIndexEntry,i);
     s.Tag(kTransformType,0); s.Tag(kFrameCount,1); s.Tag(kChannelCount,3); s.Tag(kEncodedFormat,1); s.Tag(-kColorSpace,2);
     s.Tag(kWaveletCount,3); s.Tag(kSubbandCount,10); s.Tag(kSpatialCount,2); s.Tag(kFirstWavelet,3);
-    s.Tag(kFrameWidth,128); s.Tag(kFrameHeight,128); s.Tag(-kFrameNumber,0); s.Tag(kPrecision,10);
-    s.Tag(-kDisplayHeight,128); s.Tag(-kQualityLow,6); s.Tag(-kQualityHigh,0); s.Tag(kPrescale,kSubbandSize); // 10-bit prescale 0,2,0
+    s.Tag(kFrameWidth,width); s.Tag(kFrameHeight,height); s.Tag(-kFrameNumber,0); s.Tag(kPrecision,10);
+    s.Tag(-kDisplayHeight,height); s.Tag(-kQualityLow,6); s.Tag(-kQualityHigh,0); s.Tag(kPrescale,kSubbandSize); // 10-bit prescale 0,2,0
     const auto sample=s.Begin(kSampleSize);
     s.Tag(kSampleFlags,1); // progressive
     for(int c=0;c<3;++c) {
@@ -183,7 +193,7 @@ std::vector<uint8_t> EncodeBgra128(const uint8_t* data, std::size_t bytes, std::
                 s.Tag(kBandWidth,band.width); s.Tag(kBandHeight,band.height); s.Tag(kBandSubband,subband++);
                 s.Tag(kBandEncoding,3); s.Tag(kBandQuantization,quant); s.Tag(kBandScale,(b==3?1u:2u)<<(2*lv));
                 const auto chunk=s.Begin(kSubbandSize); s.Tag(kBandHeader,0);
-                s.bytes.insert(s.bytes.end(),coeff.begin(),coeff.end());
+                s.Append(coeff);
                 s.Tag(kBandTrailer,0); s.End(chunk,kSubbandSize);
             }
             s.Tag(kMarker,0x0C0C); s.End(level,kLevelSize);
@@ -192,5 +202,8 @@ std::vector<uint8_t> EncodeBgra128(const uint8_t* data, std::size_t bytes, std::
     }
     s.Tag(kFrameTrailer,0); s.End(sample,kSampleSize);
     return std::move(s.bytes);
+}
+std::vector<uint8_t> EncodeBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride) {
+    return EncodeBgra(data,bytes,128,128,stride);
 }
 }}
