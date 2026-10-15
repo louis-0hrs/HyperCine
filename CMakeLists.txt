@@ -36,6 +36,8 @@ if(HYPERCINE_BUILD_STANDALONE)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     add_executable(hypercine_encode_smoke tools/hypercine_encode_smoke.cpp)
     target_link_libraries(hypercine_encode_smoke PRIVATE hypercine_standalone)
+    add_executable(hypercine_reference_probe tools/hypercine_reference_probe.cpp)
+    target_link_libraries(hypercine_reference_probe PRIVATE hypercine_standalone)
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
         add_executable(test_standalone tests/test_standalone.cpp)
@@ -43,6 +45,23 @@ if(HYPERCINE_BUILD_STANDALONE)
         foreach(stage color wavelet quantization entropy sample geometry)
             add_test(NAME standalone_${stage} COMMAND test_standalone ${stage})
         endforeach()
+        find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
+            --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
+        add_test(NAME windows_reference_guardrails COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_windows_reference.py")
+        add_test(NAME windows_reference_parser COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py")
+        add_test(NAME windows_reference_sdk_coefficients COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
+            --probe $<TARGET_FILE:hypercine_reference_probe>)
+        set(HYPERCINE_REFERENCE_CORPUS_ROOT "" CACHE PATH "Optional extracted Windows Tier A corpus")
+        if(HYPERCINE_REFERENCE_CORPUS_ROOT)
+            add_test(NAME windows_reference_binaries COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
+                --corpus-root "${HYPERCINE_REFERENCE_CORPUS_ROOT}" --probe $<TARGET_FILE:hypercine_reference_probe>)
+        endif()
         find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
         find_program(HYPERCINE_FFPROBE_EXECUTABLE NAMES ffprobe)
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)

@@ -1,0 +1,77 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "recorded_at_utc": "2026-10-15T05:49:40.109477+00:00",
+  "source": "smb://TRUENAS/DeDub/HyperCine/golden/windows/fs3/2026-10-14/tier-a",
+  "transfer": "Finder copy; shell SMB directory listing stalled; NAS originals unchanged",
+  "archive": {
+    "name": "reference-corpus-tier-a-20261014.zip",
+    "byte_length": 86987753,
+    "sha256": "fdc9cd0e881db417e23423c8cd3f9f1e27161f2c946e40edfa2bcb8b56d58dcf",
+    "expected_sha256": "fdc9cd0e881db417e23423c8cd3f9f1e27161f2c946e40edfa2bcb8b56d58dcf",
+    "status": "PASS"
+  },
+  "manifest": {
+    "transferred_sha256": "c10fbdd2a41709573ddc1f1826b49301d7bbb94233da213c7bb13440c325e9cd",
+    "pinned_sha256": "8c995f2c86dffadb67c6964d11b1f92921699165f7aeda4253b29c8ff60efd0f",
+    "transferred_byte_length": 684567,
+    "pinned_byte_length": 684566,
+    "json_semantically_equal": true,
+    "difference": "CRLF in transferred file versus LF in pinned file; otherwise byte-identical; pinned manifest not modified"
+  },
+  "inventory": {
+    "file_lengths_and_sha256": "PASS",
+    "files_verified": 280,
+    "extracted_byte_length": 276444160,
+    "tier_a_1080p_frames": 16,
+    "parsed_sdk_cuda_framed_payloads_verified": 960,
+    "sdk_cuda_band_byte_pairs_equal": 480,
+    "sdk_cuda_normalized_samples_equal": 16,
+    "sdk_cuda_lowpass_coefficient_fnv_checks": 96,
+    "sequence_120_binary_files": "PENDING: not supplied"
+  },
+  "production_gate": "BLOCKED",
+  "validation": {
+    "ctest": [
+      {
+        "command": "ctest --test-dir build -C Release --output-on-failure",
+        "configuration": "Release",
+        "status": "PASS",
+        "passed": 19,
+        "total": 19,
+        "log_sha256": "dfa974e5950ff55421c85a57135c7647b899e1f5861b2794c0a364240ee34621"
+      },
+      {
+        "command": "ctest --test-dir build-sanitized -C Release --output-on-failure",
+        "configuration": "Debug; ASan+UBSan",
+        "status": "PASS",
+        "passed": 19,
+        "total": 19,
+        "log_sha256": "d8ff90a33c26c11f0806bf754f336cf1e487d9a4f0ecf701503c59efd018330c"
+      }
+    ],
+    "q2_packet_regression": {
+      "status": "PASS",
+      "matched": 27,
+      "total": 27,
+      "baseline": "docs/validation/macos_variable_size_2026-10-15.json"
+    },
+    "sdk_replay": {
+      "frames": 16,
+      "coefficient_hash_matches": 480,
+      "entropy_byte_blocks_equal": 480,
+      "reframed_payload_hash_matches": 480,
+      "actual_ll_signed_planes_equal": 48,
+      "dynamic_state_evolution": "PENDING",
+      "independent_encoder_framing": "PENDING"
+    },
+    "macos_windows_bitexact.json": {
+      "sha256": "25664e01451e1ab5921400ca4a497f687cbf0c3b7522c74d66d788df8579f201",
+      "diagnostic_exit_code": 2
+    },
+    "macos_windows_sdk_replay.json": {
+      "sha256": "32c37c80dd48aa1e6c851c3f1cbf0612784a9aa3908fd9ba0e9f3b2a3636f0e0",
+      "diagnostic_exit_code": 2
+    }
+  }
+}

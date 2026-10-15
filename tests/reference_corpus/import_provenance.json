@@ -1,0 +1,28 @@
+{
+  "import_commit": "addd8f46ca78a968b9c235baf3f7e3d53d8238f7",
+  "repository": "https://github.com/louis-0hrs/HyperCine",
+  "files": [
+    {
+      "path": "tests/reference_corpus/manifest.json",
+      "sha256": "8c995f2c86dffadb67c6964d11b1f92921699165f7aeda4253b29c8ff60efd0f"
+    },
+    {
+      "path": "tests/reference_corpus/manifest.schema.json",
+      "sha256": "1a923ebc709651333987c0f3cb00af3e596391ad5a89b13c08f7bfb7447017a3"
+    },
+    {
+      "path": "tests/reference_corpus/phase3a_1080p_120_manifest.json",
+      "sha256": "ebe40fcf14bf35847d4be2990051d0675cb8f7dd38e91d83a584c60fdbf0b865"
+    }
+  ],
+  "generator_source_sha256": "569dfc35ba063e0cd20a450a866b6d7eec600ee643e051b08784c3a8c1c1697b",
+  "portable_generator": {
+    "path": "tests/reference_frame_generator.h",
+    "sha256": "14328b642368ad4b2f1667f9cedac44825e401502d12a7d638bcfcedf2b94672",
+    "adaptations": [
+      "Explicit FloorHalf for negative arithmetic shifts in C++17",
+      "Caller generates archetype at index=pattern then restamps sequence index",
+      "Aligned uint32 storage serialized in explicit little-endian BGRA byte order"
+    ]
+  }
+}
