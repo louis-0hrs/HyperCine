@@ -3,8 +3,8 @@
   "issue": 24,
   "generated_at": "2026-10-15",
   "source": {
-    "base_commit": "c28e3e3f54bc2fa077928b0f0834b03a4ea82e8d",
-    "working_tree_dirty": true,
+    "commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+    "working_tree_dirty": false,
     "upstream_unchanged": true
   },
   "environment": {
@@ -28,8 +28,8 @@
     "build": "PASS"
   },
   "decoder": {
-    "gopro_sdk": "PASS; per-frame SDK decode/pixel equality in the reference sequence verifier, plus standalone Windows fixture decode CTest",
-    "ffmpeg": "NOT RUN for generated samples; ffmpeg executable was not available in PATH"
+    "gopro_sdk": "PASS; per-frame SDK decode/pixel equality in reference verifier; standalone Windows decoder CTests passed",
+    "ffmpeg": "NOT RUN for generated samples; FFmpeg executable not available in PATH"
   },
   "boundary_128": {
     "status": "NOT RUN",
@@ -39,7 +39,7 @@
     "status": "BLOCKED_BY_AUTO_REVIEW",
     "requested_root": "\\\\TRUENAS\\DeDub\\HyperCine\\golden\\windows\\qualities",
     "local_corpora_retained": true,
-    "reason": "Auto-review rejected copying potentially non-public corpus files to an external NAS because of possible overwrite of existing data."
+    "reason": "Auto-review rejected copying potentially non-public corpus files to an external NAS because destination may contain existing data."
   },
   "profiles": [
     {
@@ -53,7 +53,7 @@
           "matched_frames": 16,
           "status": "complete",
           "artifact_files": 80,
-          "manifest_sha256": "7ce18175ad1f16c7baac1fb1d3c95d465a8c3a1c4088b9148ee51f1d1c42d21a",
+          "manifest_sha256": "602a15e00b1a2fc1d0aebf90d6f63f21c01d0cc32649bb0497a8d6a131711f41",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\manifest.json"
         },
         "4k": {
@@ -63,7 +63,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "d0ec8780822e444231470f8089df9c61092efc70b1ef82d64f91577edc41a70c",
+          "manifest_sha256": "a4f2e2dab636a4abcea2c6989c6def5e294c1153106b4dfb51c11f1826773080",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\3840x2160\\manifest.json"
         },
         "8k": {
@@ -73,7 +73,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "76c04840c5ef3c138ed648d9710898a5e8d6658dae1674d37837d05ba7e82ed4",
+          "manifest_sha256": "afbd888f3aadb59fcdc378138bb685ce4eb0eda206abe21ab7991e6395dd0d4f",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\7680x4320\\manifest.json"
         }
       }
@@ -89,7 +89,7 @@
           "matched_frames": 16,
           "status": "complete",
           "artifact_files": 80,
-          "manifest_sha256": "2c267f87b8bb8553a33da6ac6fef13b803fca6614aa83afefd0a8547fa4f8a72",
+          "manifest_sha256": "19a2bd96b23da910925c9addced8a5354aaddcc9b8104c3f624cadff821a0705",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\manifest.json"
         },
         "4k": {
@@ -99,7 +99,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "acbe8ef9594f9fabad0b1eea7bf30515587c6c4590175dd66702cc1a413fc69a",
+          "manifest_sha256": "dbb64b0cb4f7203df0b853250a478a56531b534e275114af8fb452a350a441b4",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\3840x2160\\manifest.json"
         },
         "8k": {
@@ -109,7 +109,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "6711e153c7c452f9964d3de5b888ca6619b10798ec1fd1f93daa689f31317c41",
+          "manifest_sha256": "c5ffe8154e1390700088c93ba0f524cd0503ea18828ec9eed26b67b85d2efea5",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\7680x4320\\manifest.json"
         }
       }
@@ -125,7 +125,7 @@
           "matched_frames": 16,
           "status": "complete",
           "artifact_files": 80,
-          "manifest_sha256": "83a3a248e3adebb7dac47098d2050a1f0e9b3faaeba53d740877b50360fc87df",
+          "manifest_sha256": "161c132b94795eded8a307f0113ca950f545a8595cb1b4e81888ad8119d650b7",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\manifest.json"
         },
         "4k": {
@@ -135,7 +135,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "77769a4387087a55217c5b08b33d008716a3622c1ac677dc41fccb2fdb118ee2",
+          "manifest_sha256": "9b496fb2954f994f4c83f3da1215880aea9e2f9fcb5db8db906dbadd75059ff9",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\3840x2160\\manifest.json"
         },
         "8k": {
@@ -145,7 +145,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "08baafb37b7fe6e67bed90ccd52dcc346918e8376e113395b685dcf7ea5dbc4f",
+          "manifest_sha256": "17c619bd0c7bb80467acbbf43e4427a3ef178b34b8798e2750882baaed5bedac",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\7680x4320\\manifest.json"
         }
       }
@@ -161,7 +161,7 @@
           "matched_frames": 16,
           "status": "complete",
           "artifact_files": 80,
-          "manifest_sha256": "280c74fb65437f70156683096833cb869614303b9d781ca508e232d68f7d6c74",
+          "manifest_sha256": "c7f18ce04161358c6a89838afdc8e110e53bccd3c07e7e1d8c18fb3c2b987edb",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\manifest.json"
         },
         "4k": {
@@ -171,7 +171,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "827974d078ea5821f64cfe19fc0d81a2c8fcb82759cb2ceb51f89dee8fdc6277",
+          "manifest_sha256": "538f47fede86acbcc9212db5789095ab47c27912a628d4e4d04e48772510edb9",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\3840x2160\\manifest.json"
         },
         "8k": {
@@ -181,7 +181,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "8d0c90af137858dcda302c6eab25a3154d0425162ee318be94ea94e0fd42b23b",
+          "manifest_sha256": "50869d43ecfc47955261109273dfc89399750c1af2e0c63a7749cac2e7308abd",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\7680x4320\\manifest.json"
         }
       }
@@ -197,7 +197,7 @@
           "matched_frames": 16,
           "status": "complete",
           "artifact_files": 80,
-          "manifest_sha256": "784ba7d6c7a7451d267e8aa4272209ab3ae82bb4e6dea2c838604f8b5e965ce7",
+          "manifest_sha256": "d7044bb986e91e2dc4dcc109e5908e5de6197b606790d8b6fedbd0df948c20cf",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\manifest.json"
         },
         "4k": {
@@ -207,7 +207,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "7b4b4c34cd256969626bac2f5a83e8819038fb5e8d043ef313bf3554c79b3b73",
+          "manifest_sha256": "ef9014c053c1945dc97469f74205117cd0a48816b0830e2d1cc72b34e23a8700",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\3840x2160\\manifest.json"
         },
         "8k": {
@@ -217,7 +217,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "b9d5f1b3bc46222492e1bcbb03052f157e77b6d22f8489f7fb17418fd478bd04",
+          "manifest_sha256": "597ebf23c4103e05c8878ceb8590f5239de0ab2b97f4c3a05319ac11141197dd",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\7680x4320\\manifest.json"
         }
       },
@@ -245,7 +245,7 @@
         "fs_rate_limiter_transitions": 74,
         "quant_or_scale_transitions": 71,
         "artifact_files": 600,
-        "manifest_sha256": "131daf31234cf0f742f6187ceb2d32f3fe91ce0803efb36f319ee64003b18d70",
+        "manifest_sha256": "6ed7907589ab7e52fec6d588ba667b6d062cc9928316c1ba05ad64feac9d2792",
         "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\sequence-120\\manifest.json"
       }
     },
@@ -260,7 +260,7 @@
           "matched_frames": 16,
           "status": "complete",
           "artifact_files": 80,
-          "manifest_sha256": "d8e7ffd624bf08aaa2f5613ca58c6ec10c37b888351c23f283fd298bde9bac5b",
+          "manifest_sha256": "9197a632860efec625260f012166b4f46eca1a7fc23310e7054ac71dab3cfadf",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\manifest.json"
         },
         "4k": {
@@ -270,7 +270,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "68abf79e9e92478c1e7a2908949d4e943c11b5cca25dbe369ffa686c983c921e",
+          "manifest_sha256": "2834ed349b49d3da5b2ff59845b67946ea331cd1a157f48155ee747990bee94d",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\3840x2160\\manifest.json"
         },
         "8k": {
@@ -280,7 +280,7 @@
           "matched_frames": 1,
           "status": "complete",
           "artifact_files": 5,
-          "manifest_sha256": "e6fbea605a437422942bc2c07a58027b20d3cd2bf95570f201cac565b6119a9d",
+          "manifest_sha256": "3d31557f46dba46320befb833e3df9c58d98686a1945e2ef9ebf60b0cb94deb6",
           "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\7680x4320\\manifest.json"
         }
       },
@@ -307,7 +307,7 @@
         "fs_rate_limiter_transitions": 85,
         "quant_or_scale_transitions": 73,
         "artifact_files": 600,
-        "manifest_sha256": "169a7a0deff5437d8fa2b206f4bf4a3394da3ac8e86ee3d923285b64cc7de5d1",
+        "manifest_sha256": "bc56bd4556ef7177a8959674e359909c1c57e847f08262275c191065c723bba3",
         "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\sequence-120\\manifest.json"
       }
     }
