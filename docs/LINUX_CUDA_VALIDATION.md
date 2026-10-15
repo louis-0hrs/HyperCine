@@ -132,11 +132,35 @@ these figures; the kernel-only column is the transfer-independent part.
 
 ## 6. Compute Sanitizer
 
-    compute-sanitizer --tool memcheck ./tests/test_cuda_pyramid   # 0 errors
-    compute-sanitizer --tool memcheck ./tests/test_cuda_wavelet   # 0 errors
+    compute-sanitizer --tool memcheck  ./tests/test_cuda_pyramid   # ERROR SUMMARY: 0 errors
+    compute-sanitizer --tool memcheck  ./tests/test_cuda_wavelet   # ERROR SUMMARY: 0 errors
+    compute-sanitizer --tool initcheck ./tests/test_cuda_pyramid   # ERROR SUMMARY: 0 errors
+    compute-sanitizer --tool initcheck ./tests/test_cuda_wavelet   # ERROR SUMMARY: 57748 errors
+    compute-sanitizer --tool racecheck ./tests/test_cuda_pyramid   # RACECHECK SUMMARY: 0 hazards
+    compute-sanitizer --tool racecheck ./tests/test_cuda_wavelet   # RACECHECK SUMMARY: 0 hazards
 
-Both runs reported `ERROR SUMMARY: 0 errors` while still passing the full
-bit-exactness check set (1680 / 1680). No error was masked or suppressed.
+`memcheck` and `racecheck` are clean on both binaries, and every run still passed
+the full bit-exactness set (1680 / 1680). Nothing was masked or suppressed.
+
+**`initcheck` on `test_cuda_wavelet` is not clean, and is reported as found.** All
+15 errors printed with `--print-limit 15` are of one kind:
+
+    Uninitialized access at 0x... on access by cudaMemcpy source
+
+The reported addresses step by 32 bytes (one padded row of the output buffer). The
+test copies `in_stride * H` elements back with `cudaMemcpy`, while the kernels only
+produce the `width` valid columns of each row, so `initcheck` flags the *stride
+padding* of the read-back. `CompareBuffers()` never looks at that padding: it
+indexes `buf[y * stride + x]` for `x < width` only. This is therefore a harness
+read-back artefact rather than a kernel reading uninitialized global memory, which
+is also consistent with `test_cuda_pyramid` (no padded read-back) being clean. The
+remaining 57633 errors were not printed and are therefore not individually
+classified.
+
+The bit-exactness result is unaffected, but the comparison is unnecessarily coupled
+to allocator residue in the padding. Copying only the valid columns, or clearing the
+buffers with `cudaMemset` before launch, would remove that coupling - worth a
+follow-up.
 
 ## 7. Open items
 
@@ -154,7 +178,8 @@ bit-exactness check set (1680 / 1680). No error was masked or suppressed.
 * Vulkan cross-check (#31) not performed — it must be coordinated and run
   sequentially on the same A2; CUDA `nvidia-smi` output alone says nothing about
   Vulkan.
-* `racecheck`/`initcheck` and an ASan/UBSan host-only build were not run.
+* An ASan/UBSan host-only build was not run; `memcheck`, `initcheck` and
+  `racecheck` results are in section 6 (including the one non-clean finding).
 * Bit-exactness of the stage gates was checked via `test_cuda_wavelet` (up to
   1920x1080) and the phase tests; 4K/8K appear in section 5 as performance
   measurements only, not as bit-exactness gates.
