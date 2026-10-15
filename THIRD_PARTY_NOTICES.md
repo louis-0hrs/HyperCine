@@ -84,3 +84,15 @@ The pristine GoPro CineForm SDK tree in [`upstream/`](upstream/) includes the fo
 ## 3. External Build / Platform Dependencies (Not Bundled)
 
 HyperCine bundles **zero** external third-party libraries outside `upstream/`. When built with GPU acceleration enabled (`-DHYPERCINE_ENABLE_CUDA=ON`), HyperCine links against the system-installed **NVIDIA CUDA Runtime** (`cudart`) and optionally loads the **NVIDIA Management Library** (`nvml.dll`) dynamically at runtime for benchmark telemetry.
+
+## 4. Standalone encoder format data
+
+`src/core/standalone_codebook.h` contains the 256 magnitude codewords, seven
+zero-run codewords, and band-end codeword from GoPro's `upstream/Common/table17.inc`
+at the frozen commit listed above. The one-zero codeword is magnitude zero.
+These fixed format data retain GoPro's copyright and the same MIT OR Apache-2.0
+licensing; the full license notices in section 1 apply. They are stored as small
+C++17 value arrays, with no SDK headers, structures, FSM tables, compiled sources,
+or runtime linkage. Wire tag numbers and scale conventions in
+`src/core/standalone_encoder.cpp` are documented from `upstream/Codec/codec.h`,
+`codec.c`, and `wavelet.c`. See `docs/MACOS_STANDALONE_ENCODER.md` for the boundary.

@@ -11,6 +11,44 @@ option(HYPERCINE_BUILD_TESTS "Build HyperCine reference tests" ON)
 option(HYPERCINE_BUILD_BENCHMARKS "Build HyperCine benchmark tool" ON)
 option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 
+# This path intentionally returns before any SDK include directory or target.
+option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
+if(HYPERCINE_BUILD_STANDALONE)
+    cmake_minimum_required(VERSION 3.25)
+    if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA)
+        message(FATAL_ERROR "Standalone requires HYPERCINE_BUILD_UPSTREAM=OFF and HYPERCINE_ENABLE_CUDA=OFF")
+    endif()
+    add_library(hypercine_standalone STATIC
+        src/cpu/wavelet_cpu.cpp
+        src/cpu/standalone_frontend.cpp
+        src/core/standalone_encoder.cpp)
+    target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    add_executable(hypercine_encode_smoke tools/hypercine_encode_smoke.cpp)
+    target_link_libraries(hypercine_encode_smoke PRIVATE hypercine_standalone)
+    if(HYPERCINE_BUILD_TESTS)
+        enable_testing()
+        add_executable(test_standalone tests/test_standalone.cpp)
+        target_link_libraries(test_standalone PRIVATE hypercine_standalone)
+        foreach(stage color wavelet quantization entropy sample)
+            add_test(NAME standalone_${stage} COMMAND test_standalone ${stage})
+        endforeach()
+        find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
+        find_program(HYPERCINE_FFPROBE_EXECUTABLE NAMES ffprobe)
+        if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
+            find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            add_test(NAME standalone_external_decode COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_standalone.py"
+                --encoder $<TARGET_FILE:hypercine_encode_smoke>
+                --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
+                --output-dir "${CMAKE_CURRENT_BINARY_DIR}/samples")
+        else()
+            message(STATUS "Optional standalone external decode test not registered: FFmpeg/ffprobe unavailable")
+        endif()
+    endif()
+    return()
+endif()
+
 if(HYPERCINE_ENABLE_CUDA)
     include(CheckLanguage)
     check_language(CUDA)
