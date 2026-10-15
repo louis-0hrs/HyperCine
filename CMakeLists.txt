@@ -32,14 +32,23 @@ if(HYPERCINE_BUILD_STANDALONE)
     add_library(hypercine_standalone STATIC
         src/cpu/wavelet_cpu.cpp
         src/cpu/standalone_frontend.cpp
-        src/core/standalone_encoder.cpp)
+        src/core/standalone_encoder.cpp
+        src/cpu/filmscan3_frontend.cpp
+        src/core/filmscan3_encoder.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     add_executable(hypercine_encode_smoke tools/hypercine_encode_smoke.cpp)
     target_link_libraries(hypercine_encode_smoke PRIVATE hypercine_standalone)
+    add_executable(hypercine_encode_filmscan3 tools/hypercine_encode_filmscan3.cpp)
+    target_link_libraries(hypercine_encode_filmscan3 PRIVATE hypercine_standalone)
     add_executable(hypercine_reference_probe tools/hypercine_reference_probe.cpp)
     target_link_libraries(hypercine_reference_probe PRIVATE hypercine_standalone)
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
+        add_executable(test_filmscan3 tests/test_filmscan3.cpp)
+        target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
+        add_test(NAME filmscan3_api COMMAND test_filmscan3)
+        add_test(NAME filmscan3_fixture_integrity COMMAND "${CMAKE_COMMAND}"
+            "-DROOT=${CMAKE_SOURCE_DIR}" -P "${CMAKE_SOURCE_DIR}/tests/verify_filmscan3_fixtures.cmake")
         add_executable(test_standalone tests/test_standalone.cpp)
         target_link_libraries(test_standalone PRIVATE hypercine_standalone)
         foreach(stage color wavelet quantization entropy sample geometry)
@@ -62,10 +71,30 @@ if(HYPERCINE_BUILD_STANDALONE)
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
                 --corpus-root "${HYPERCINE_REFERENCE_CORPUS_ROOT}" --probe $<TARGET_FILE:hypercine_reference_probe>)
         endif()
+        add_test(NAME filmscan3_autonomous_manifest COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+            --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>)
+        if(HYPERCINE_REFERENCE_CORPUS_ROOT)
+            add_test(NAME filmscan3_actual_tier_a COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+                --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --corpus-root "${HYPERCINE_REFERENCE_CORPUS_ROOT}" --inject-metadata)
+        endif()
+        set(HYPERCINE_FS3_SEQUENCE_ROOT "" CACHE PATH "Optional verified 120-frame Windows FS3 corpus")
+        if(HYPERCINE_FS3_SEQUENCE_ROOT)
+            add_test(NAME filmscan3_actual_sequence COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+                --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --corpus-root "${HYPERCINE_FS3_SEQUENCE_ROOT}" --sequence)
+        endif()
         find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
         find_program(HYPERCINE_FFPROBE_EXECUTABLE NAMES ffprobe)
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            add_test(NAME filmscan3_external_decode COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+                --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}")
             add_test(NAME standalone_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_standalone.py"
                 --encoder $<TARGET_FILE:hypercine_encode_smoke>

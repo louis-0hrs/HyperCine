@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/standalone.h"
+#include "hypercine/filmscan3.h"
 #include "hypercine/canonical.h"
 #include <fstream>
 #include <iostream>
@@ -10,7 +11,13 @@
 
 int main(int argc,char** argv) {
     try {
-        if(argc!=3 && argc!=5) throw std::invalid_argument("usage: hypercine_encode_smoke flat|gradient|canonical|bgra:input.raw output.cfhd [width height]");
+        bool filmscan3=false;
+        if(argc>=3 && std::string(argv[1])=="--profile") {
+            const std::string profile=argv[2];
+            if(profile!="filmscan3" && profile!="fs3-q2")throw std::invalid_argument("unknown encoding profile");
+            filmscan3=profile=="filmscan3";argv+=2;argc-=2;
+        }
+        if(argc!=3 && argc!=5) throw std::invalid_argument("usage: hypercine_encode_smoke [--profile fs3-q2|filmscan3] flat|gradient|canonical|bgra:input.raw output.cfhd [width height]");
         const std::string name=argv[1];
         auto pattern=hypercine::CanonicalPattern::Flat128;
         if(name=="gradient") pattern=hypercine::CanonicalPattern::GradientChecker;
@@ -36,7 +43,9 @@ int main(int argc,char** argv) {
             auto frame=hypercine::MakeFrame(width,height,pattern);
             aligned.assign(frame.begin(),frame.end());
         }
-        auto sample=hypercine::standalone::EncodeBgra(aligned.data(),aligned.size(),width,height,width*4);
+        if(filmscan3 && (width!=1920 || height!=1080))throw std::invalid_argument("FilmScan3 currently supports the 1920x1080 oracle domain");
+        hypercine::standalone::FilmScan3Encoder fs3;
+        auto sample=filmscan3 ? fs3.Encode(aligned.data(),aligned.size(),width*4).sample : hypercine::standalone::EncodeBgra(aligned.data(),aligned.size(),width,height,width*4);
         std::ofstream output(argv[2],std::ios::binary);
         output.write(reinterpret_cast<const char*>(sample.data()),static_cast<std::streamsize>(sample.size()));
         output.close();

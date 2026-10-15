@@ -1,0 +1,50 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "measured_utc": "2026-10-15T06:50:28.770125+00:00",
+  "legacy_q2_packets_unchanged": 27,
+  "ctest": {
+    "build": {
+      "passed": 25,
+      "failed": 0,
+      "log_sha256": "1ae6830967a7bea6c3e4f25e396a66e29e40f2e074bd60d14b70b9b62ec11185"
+    },
+    "build-sanitized": {
+      "passed": 25,
+      "failed": 0,
+      "log_sha256": "22adc356e2c357d75ca56b40f51bfe9a1a543eaa0d152912d3e8fe6504dfa611"
+    }
+  },
+  "reports": {
+    "tier_a": {
+      "sha256": "2a4b6d3b5723e2eb520114a99e00bfdbefdaa8c5d48f5facf43726631e41d2ac",
+      "frames": 16,
+      "status": "PASS"
+    },
+    "sequence": {
+      "sha256": "5287a9ea2e41b8aa1a6d92118c399e98d689c2fcec97541aa0333e0ac96f1b9e",
+      "frames": 120,
+      "status": "PASS"
+    },
+    "sequence_injected": {
+      "sha256": "9e6eb651248b36f38887efdf71b46aa58e83b1c307ba95e407fd45f2ccca9126",
+      "frames": 120,
+      "status": "PASS"
+    }
+  },
+  "sequence_archive": {
+    "bytes": 317566878,
+    "sha256": "9667d078ca54dccaf4f849f0136a5a8aae674c2c5e603e29b6cfc225aab21b06",
+    "actual_sample_files_verified": 480,
+    "sha256sums_entries_verified": 482
+  },
+  "windows_gopro_decoder": {
+    "status": "PASS",
+    "evidence": "macos_filmscan3_windows_decoder.json",
+    "code_commit": "a11fcdd548ef039d686489064c5719bc26582eb9",
+    "ctest_passed": 6,
+    "ctest_failed": 0
+  },
+  "unquantized_windows_intermediates": "PENDING; not inferred from quantized hashes",
+  "performance_claim": false
+}

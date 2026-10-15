@@ -97,6 +97,19 @@ if(HYPERCINE_ENABLE_CUDA)
     add_test(NAME test_phase3a COMMAND test_phase3a)
 endif()
 
+# Decode actual native Mac-produced 1080p FS3 fixtures with pristine GoPro SDK.
+# This is independent of the sibling PR #9 and does not merge its fixtures/code.
+if(WIN32 AND TARGET CFHDCodecStatic)
+    add_test(NAME filmscan3_fixture_integrity COMMAND "${CMAKE_COMMAND}"
+        "-DROOT=${CMAKE_SOURCE_DIR}" -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_filmscan3_fixtures.cmake")
+    add_executable(test_filmscan3_windows_decoder test_filmscan3_windows_decoder.cpp)
+    target_link_libraries(test_filmscan3_windows_decoder PRIVATE CFHDCodecStatic)
+    add_test(NAME test_filmscan3_windows_decoder COMMAND test_filmscan3_windows_decoder
+        "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/macos-filmscan3/flat.cfhd"
+        "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/macos-filmscan3/gradient.cfhd")
+    set_tests_properties(test_filmscan3_windows_decoder PROPERTIES DEPENDS filmscan3_fixture_integrity)
+endif()
+
 if(HYPERCINE_ENABLE_CUDA AND WIN32)
     add_executable(hypercine_reference_export ../tools/reference_corpus_export.cpp)
     target_link_libraries(hypercine_reference_export PRIVATE hypercine_wavelet CFHDCodecStatic bcrypt)
