@@ -72,6 +72,73 @@ class RuleTests(unittest.TestCase):
         self.assertEqual([("a", 5, "PRIVATE_IPV4")], guard.scan_patch(sample))
 
 
+class HookInterpreterTests(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "POSIX shell test; Git for Windows uses Git Bash")
+    def test_windows_store_alias_falls_back_to_working_python(self):
+        # A found python3 command that cannot run Python must not be selected.
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+            fake = cwd / "fakebin"
+            fake.mkdir()
+            alias = fake / "python3"
+            alias.write_text("#!/bin/sh\nexit 37\n", encoding="utf-8")
+            alias.chmod(0o755)
+            fallback = fake / "python"
+            import shlex
+            fallback.write_text("#!/bin/sh\nexec {} \\"$@\\"\n".format(
+                shlex.quote(sys.executable)), encoding="utf-8")
+            fallback.chmod(0o755)
+            def git(*args):
+                return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      text=True).stdout.strip()
+            git("init", "-q")
+            git("config", "user.email", "test@example.invalid")
+            git("config", "user.name", "Privacy Hook")
+            git("remote", "add", "origin", str(cwd / "public.git"))
+            (cwd / "ci").mkdir()
+            (cwd / "ci/privacy_guard.py").write_bytes(
+                Path(guard.__file__).resolve().read_bytes())
+            (cwd / "safe.txt").write_text("clean test input\n", encoding="utf-8")
+            git("add", "safe.txt")
+            env = dict(os.environ, PATH=str(fake) + os.pathsep + os.environ["PATH"])
+            hooks = Path(guard.__file__).resolve().parent.parent / ".githooks"
+            check = subprocess.run(["sh", str(hooks / "pre-commit")], cwd=cwd,
+                                   env=env, text=True, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+            self.assertEqual(0, check.returncode, check.stderr)
+            self.assertIn("Privacy guard passed", check.stdout)
+            git("commit", "-qm", "safe commit")
+            sha = git("rev-parse", "HEAD")
+            ref_line = "refs/heads/feature {} refs/heads/feature {}\n".format(
+                sha, "0" * 40)
+            check = subprocess.run(["sh", str(hooks / "pre-push"), "origin",
+                                    str(cwd / "public.git")], cwd=cwd, env=env,
+                                   input=ref_line, text=True,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertEqual(0, check.returncode, check.stderr)
+            self.assertIn("Privacy guard passed", check.stdout)
+
+    @unittest.skipIf(os.name == "nt", "POSIX shell test; Git for Windows uses Git Bash")
+    def test_no_working_python_fails_closed(self):
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+            fake = cwd / "fakebin"
+            fake.mkdir()
+            for candidate in ("python3", "python", "py"):
+                stub = fake / candidate
+                stub.write_text("#!/bin/sh\nexit 37\n", encoding="utf-8")
+                stub.chmod(0o755)
+            subprocess.run(["git", "init", "-q"], cwd=cwd, check=True)
+            env = dict(os.environ, PATH=str(fake) + os.pathsep + os.environ["PATH"])
+            hook = Path(guard.__file__).resolve().parent.parent / ".githooks/pre-commit"
+            result = subprocess.run(["sh", str(hook)], cwd=cwd, env=env,
+                                    text=True, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            self.assertEqual(2, result.returncode)
+            self.assertIn("commit blocked", result.stderr)
+
+
 class GitIntegrationTests(unittest.TestCase):
     def test_commit_message_leak_is_checked(self):
         with tempfile.TemporaryDirectory() as work:
