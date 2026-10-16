@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "entropy_legacy.h"
+#include "../src/core/entropy_fast.h"
 #include "reference_frame_generator.h"
 #include "hypercine/filmscan3.h"
 #include <iostream>
@@ -29,6 +30,25 @@ void Compare(const Plane& p) {
 }
 }
 int main(){try{
+    // Exercise primitive boundaries separately from the codec's <=26-bit codes.
+    for(unsigned prefix=0;prefix<33;++prefix) {
+        legacy::Bits old(128);detail::EntropyBits fast(128,128);
+        for(unsigned i=0;i<prefix;++i){old.Put(i%2,1);fast.Put(i%2,1);}
+        old.Put(0,1);fast.Put(0,1);
+        old.Put(0x7fffffff,31);fast.Put(0x7fffffff,31);
+        // Legacy accepts <=31 bits: express an unsigned 32-bit word as 31+1.
+        old.Put(0x55667788u>>1,31);old.Put(0,1);fast.Put(0x55667788u,32);
+        old.Put(0x7fffffff,31);old.Put(1,1);fast.Put(0xffffffffu,32);
+        old.Finish();fast.Finish();fast.Finish();
+        Require(old.bytes==fast.bytes,"primitive boundary mismatch");
+    }
+    detail::EntropyBits invalid(4,4);
+    Reject([&]{invalid.Put(0,0);});Reject([&]{invalid.Put(0,33);});
+    Reject([&]{invalid.Put(2,1);});
+    invalid.Put(0xffffffffu,32);Reject([&]{invalid.Put(0,1);});
+    detail::EntropyBits short_word(3,3);short_word.Put(0,24);
+    Reject([&]{short_word.Finish();});
+    Require(short_word.bytes.empty(),"capacity failure emitted a partial word");
     std::mt19937 rng(0x1337BEEF);
     for(int height:{1,2,3,4,7,8,9,15,16,17,31,32,33,63,64,65,127,128,129}) {
         Plane p(16,height);

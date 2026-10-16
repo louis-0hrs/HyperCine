@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/standalone.h"
 #include "standalone_codebook.h"
+#include "entropy_fast.h"
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
@@ -68,26 +69,19 @@ enum WireTag {
     kColorSpace = 91,
     kSubbandSize = 0x2000, kLevelSize = 0x2100, kSampleSize = 0x2200
 };
-class Bits {
-    std::size_t capacity_, count_ = 0;
-public:
-    std::vector<uint8_t> bytes;
-    explicit Bits(std::size_t capacity) : capacity_(capacity) {}
-    void Put(uint32_t code, unsigned size) {
-        if (size < 1 || size > 31 || (code >> size)) throw std::invalid_argument("invalid VLC codeword");
-        for (unsigned n=size;n>0;--n) {
-            if (count_ % 8 == 0) {
-                if (bytes.size() >= capacity_) throw std::length_error("entropy capacity exceeded");
-                bytes.push_back(0);
-            }
-            bytes.back() |= static_cast<uint8_t>(((code >> (n-1)) & 1u) << (7-count_%8));
-            ++count_;
-        }
+// Inverse of table17's integer cubic decompanding, identical tie policy to
+// FillVleTable: largest mapped index <= magnitude, clamped to 1023.
+constexpr std::array<unsigned,1024> InverseCubic() {
+    std::array<unsigned,1024> cubic{};
+    for (unsigned i=1;i<256;++i) {
+        const unsigned m=std::min(1023u,i+static_cast<unsigned>((uint64_t{768}*i*i*i)/(256u*256u*256u)));
+        cubic[m]=i;
     }
-    void Finish() {
-        while (count_ % 32) Put(0,1);
-    }
-};
+    unsigned previous=0;
+    for(auto& x:cubic) { if (x) previous=x; else x=previous; }
+    return cubic;
+}
+inline constexpr auto kInverseCubic=InverseCubic();
 class Sample {
     // 27 HP bands contain <2*frame_pixels coefficients, <=4 bytes each.
     // Final LL payload and all headers fit in the remaining conservative bound.
@@ -129,16 +123,9 @@ std::vector<uint8_t> PackHighpass(const Plane& p, std::size_t capacity) {
         static_cast<std::size_t>(p.stride)*p.height>kMaxPixels ||
         p.pixels.size()<static_cast<std::size_t>(p.stride)*p.height)
         throw std::invalid_argument("invalid entropy plane");
-    Bits bits(capacity);
-    // Inverse of table17's integer cubic decompanding, identical tie policy to
-    // FillVleTable: largest mapped index <= magnitude, clamped to 1023.
-    std::array<unsigned,1024> cubic{};
-    for (unsigned i=1;i<256;++i) {
-        const unsigned m=std::min(1023u,i+static_cast<unsigned>((uint64_t{768}*i*i*i)/(256u*256u*256u)));
-        cubic[m]=i;
-    }
-    unsigned previous=0;
-    for(auto& x:cubic) { if (x) previous=x; else x=previous; }
+    // <=26 bits per signed coefficient plus the 26-bit end marker and word
+    // padding fit in 4*(N+1) bytes: one bounded allocation, no vector growth.
+    detail::EntropyBits bits(capacity,4*(static_cast<std::size_t>(p.width)*p.height+1));
     unsigned run=0;
     auto flush=[&] {
         for(const auto& r:detail::runs17) while(run>=r.count) {
@@ -148,9 +135,9 @@ std::vector<uint8_t> PackHighpass(const Plane& p, std::size_t capacity) {
     for(int y=0;y<p.height;++y) for(int x=0;x<p.width;++x) {
         const int v=p.pixels[y*p.stride+x];
         if (!v) { ++run; continue; }
-        flush();
+        if(run) flush();
         const auto magnitude=static_cast<unsigned>(v<0 ? -v:v);
-        const auto code=detail::magnitude17[cubic[std::min(1023u,magnitude)]];
+        const auto code=detail::magnitude17[kInverseCubic[std::min(1023u,magnitude)]];
         bits.Put((code.bits<<1) | (v<0 ? 1u:0u),code.size+1);
     }
     flush(); bits.Put(detail::band_end17.bits,detail::band_end17.size); bits.Finish();
