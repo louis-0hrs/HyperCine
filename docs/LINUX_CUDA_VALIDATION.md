@@ -157,10 +157,25 @@ is also consistent with `test_cuda_pyramid` (no padded read-back) being clean. T
 remaining 57633 errors were not printed and are therefore not individually
 classified.
 
-The bit-exactness result is unaffected, but the comparison is unnecessarily coupled
-to allocator residue in the padding. Copying only the valid columns, or clearing the
-buffers with `cudaMemset` before launch, would remove that coupling - worth a
-follow-up.
+The bit-exactness result itself was unaffected, but the comparison was unnecessarily
+coupled to allocator residue in the padding.
+
+**Resolved by PR #40, verified on the A2.** PR #40 replaces the read-back with a
+checked `cudaMemcpy2D` over the active columns only; the host vectors keep their
+original padded pitch and the CPU-vs-CUDA index and comparison contracts are
+unchanged. Verified at commit `b4161b4` on the same host (NVIDIA A2, sm 8.6, driver
+550.163.01, CUDA 12.4.131, Compute Sanitizer 2024.1.1.0):
+
+| Run | Before #40 | After #40 |
+| --- | --- | --- |
+| `initcheck test_cuda_wavelet` | 57748 errors | **0 errors** (exit 0) |
+| `memcheck test_cuda_wavelet` | 0 errors | 0 errors (exit 0) |
+| `racecheck test_cuda_wavelet` | 0 hazards | 0 hazards (exit 0) |
+| `ctest -R 'test_cuda_wavelet\|test_cuda_pyramid'` | 1680/1680 bit-exact | 1680/1680 bit-exact |
+
+`initcheck` was run with `--error-exitcode 99` and a log file, and the summary was
+read from that log rather than from the process exit alone. The pre-#40 measurement
+above is kept for history; it is not silently superseded.
 
 ## 7. Windows golden corpus: received, verified, and what it shows
 
@@ -207,6 +222,12 @@ owns. That is a scope decision for the maintainers — issue #33 explicitly forb
 writing a new CUDA engine here, and reusing the standalone encoder is not possible
 because of the mutual exclusion above.
 
+**Maintainer decision (2026-10-16):** the shared SDK-free encoder core from #29 /
+PR #49 is the intended basis for future Linux CUDA integration. No separate
+Linux-CUDA encoder engine is to be developed, and the existing CMake guards are not
+to be bypassed. The missing complete CFHD output therefore remains an explicit,
+separate integration gate; this branch does not close it and makes no Windows/Linux
+bitstream parity claim.
 Stage-level comparison against this corpus is also not possible as it stands: it
 contains inputs and complete SDK/CUDA samples, but no Windows intermediate dumps
 (converted planes, filter stages, HP coefficients), which the earlier macOS work
