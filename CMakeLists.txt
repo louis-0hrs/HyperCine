@@ -359,6 +359,23 @@ target_include_directories(hypercine_core INTERFACE
 )
 if(TARGET CFHDCodecStatic)
     target_link_libraries(hypercine_core INTERFACE CFHDCodecStatic)
+
+    # upstream/EncoderSDK calls uuid_generate() (MetadataWriter.cpp,
+    # SampleEncoder.cpp), but the frozen upstream build only appends -luuid to
+    # its own tools. Every target that links the CFHDCodecStatic archive
+    # directly therefore leaves the symbol unresolved on Linux. Resolve it on
+    # the archive's INTERFACE so all downstream consumers link it without manual
+    # -luuid flags. A missing library is a clear configure error. upstream/ is
+    # not modified; MSVC and Apple (libSystem) need no extra library here.
+    if(UNIX AND NOT APPLE)
+        find_library(HYPERCINE_UUID_LIBRARY uuid)
+        if(NOT HYPERCINE_UUID_LIBRARY)
+            message(FATAL_ERROR
+                "libuuid not found; upstream/EncoderSDK needs uuid_generate on Linux. "
+                "Install the libuuid development package (Debian/Ubuntu: uuid-dev).")
+        endif()
+        target_link_libraries(CFHDCodecStatic INTERFACE ${HYPERCINE_UUID_LIBRARY})
+    endif()
 endif()
 
 # Core HyperCine library source
