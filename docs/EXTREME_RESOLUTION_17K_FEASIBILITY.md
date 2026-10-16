@@ -16,6 +16,35 @@ allocated, encoded or decoded in this C0 audit. No production code changes.
 
 ## Geometry and format matrix
 
+### Reconciliation against the newer main snapshot
+
+The independent Windows source audit at main
+`e87ef0258ba37f5c78f1557c59d9c7331df5521c` was reconciled with this C0 report
+on 2026-10-16. The audited writer, geometry validator, FilmScan3 backend,
+standalone public bounds, entropy packer, Metal workspace and frozen upstream
+chunk/geometry sources have no changes between the original snapshot above
+and that main commit. Their source conclusions therefore agree; this is a
+source comparison, not new runtime qualification of either commit.
+
+Keep this report's more detailed format matrix, build-dependent SDK limit,
+independent-decoder evidence and reproducible arithmetic model. In particular,
+4K hits the generic pixel allocation budget even though both dimensions fit
+4096; 8K and larger also exceed the dimension limit, while 17K additionally
+violates the current active-width entropy contract. The fixed 1080p public
+FilmScan3 API remains a separate restriction. No constant increase establishes
+a dimensioned encoder, and unmerged P4/P5 evidence does not qualify main.
+
+The independent audit's approximate 15.25 bytes per pixel Metal workspace
+estimate agrees with the row-padded model below. That estimate excludes host
+readbacks, caller input and replacement overlap; retain the detailed model
+rather than treating the approximation as a measured memory admission limit.
+
+For future C1 comparisons, hash active input bytes separately from stride
+padding and record the input orientation, matrix/range and generator reset
+contract. Verify PSNR against an explicitly specified common color conversion;
+BGRA bytes and planar YUV bytes are not directly comparable. Existing C1/C2
+approval and resource bounds remain in effect; no large-frame probe was run.
+
 All sizes below use MiB = 1,048,576 bytes. Source dimensions are the explicit
 workloads requested in #48; they are not measurements of a camera recording.
 The p10/p12 columns describe **uncompressed host storage in 16-bit containers**,
