@@ -22,10 +22,33 @@ option(HYPERCINE_BUILD_TESTS "Build HyperCine reference tests" ON)
 option(HYPERCINE_BUILD_BENCHMARKS "Build HyperCine benchmark tool" ON)
 option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
+option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
 
 # This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
+set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quality-profile corpus root")
+add_library(hypercine_quality_state STATIC src/core/quality_state.cpp)
+target_include_directories(hypercine_quality_state PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_compile_features(hypercine_quality_state PUBLIC cxx_std_17)
+if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
+    enable_testing()
+    add_executable(test_quality_state tests/test_quality_state.cpp)
+    target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
+    add_test(NAME quality_state_unit COMMAND test_quality_state)
+    add_executable(quality_state_probe tests/quality_state_probe.cpp)
+    target_link_libraries(quality_state_probe PRIVATE hypercine_quality_state)
+    if(HYPERCINE_QUALITY_ORACLE_ROOT)
+        find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME quality_state_windows_oracle COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_quality_state_corpus.py"
+            --probe $<TARGET_FILE:quality_state_probe> --corpus "${HYPERCINE_QUALITY_ORACLE_ROOT}")
+        set_tests_properties(quality_state_windows_oracle PROPERTIES
+            ENVIRONMENT "HYPERCINE_TEST_COMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
+            TIMEOUT 3600)
+    endif()
+    return()
+endif()
 if(HYPERCINE_REQUIRE_EXTERNAL_DECODE AND (NOT HYPERCINE_BUILD_STANDALONE OR NOT HYPERCINE_BUILD_TESTS))
     message(FATAL_ERROR "External decode gate requires standalone mode and tests")
 endif()
