@@ -1,0 +1,12 @@
+2026-10-16 01:37:01.746 test_metal_filmscan3[13325:20756848] Metal API Validation Enabled
+2026-10-16 01:37:01.747 test_metal_filmscan3[13325:20756848] Metal GPU Validation Enabled
+2026-10-16 01:45:03.500 hypercine_encode_filmscan3_metal[15825:20777606] Metal API Validation Enabled
+2026-10-16 01:45:03.500 hypercine_encode_filmscan3_metal[15825:20777606] Metal GPU Validation Enabled
+2026-10-16 01:45:54.551 hypercine_encode_filmscan3_metal[15987:20778704] Metal API Validation Enabled
+2026-10-16 01:45:54.551 hypercine_encode_filmscan3_metal[15987:20778704] Metal GPU Validation Enabled
+2026-10-16 01:48:21.325 hypercine_encode_filmscan3_metal[16046:20780561] Metal API Validation Enabled
+2026-10-16 01:48:21.325 hypercine_encode_filmscan3_metal[16046:20780561] Metal GPU Validation Enabled
+2026-10-16 01:49:17.908 hypercine_encode_filmscan3_metal[16183:20781403] Metal API Validation Enabled
+2026-10-16 01:49:17.908 hypercine_encode_filmscan3_metal[16183:20781403] Metal GPU Validation Enabled
+2026-10-16 01:51:46.039 hypercine_encode_filmscan3_metal[16266:20783299] Metal API Validation Enabled
+2026-10-16 01:51:46.039 hypercine_encode_filmscan3_metal[16266:20783299] Metal GPU Validation Enabled

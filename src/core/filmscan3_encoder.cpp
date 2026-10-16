@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
+#include <chrono>
 namespace hypercine { namespace standalone {
 FilmScan3Tables ComputeFilmScan3Tables(int limiter) {
     if(limiter<0 || limiter>20) throw std::invalid_argument("invalid FilmScan3 limiter");
@@ -108,7 +109,13 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
 FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride,const FilmScan3Metadata& metadata) {
     if(state_.frame_index>=65535)throw std::length_error("FilmScan3 frame counter exhausted");
     auto& frontend=*(frontend_ ? frontend_ : detail::CpuFrontend());
-    auto planes=frontend.Convert(data,bytes,1920,1080,stride);
+    auto pyramid=frontend.Transform(data,bytes,1920,1080,stride);
+    using Clock=std::chrono::steady_clock;
+    const bool profile=frontend.ProfileHost();
+    auto stamp=[&]{return profile ? Clock::now() : Clock::time_point{};};
+    auto elapsed=[&](Clock::time_point start){return profile ? std::chrono::duration<double,std::milli>(Clock::now()-start).count() : 0.0;};
+    detail::HostTiming timing;
+    const auto host_start=stamp();
     FilmScan3Frame result;result.state=state_;result.state.fs_rate_limiter=NextLimiter(state_);
     result.tables=ComputeFilmScan3Tables(result.state.fs_rate_limiter);
     Writer s;
@@ -121,9 +128,11 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     s.Tag(-63,0);s.Tag(-64,0);s.Tag(-65,16);s.Tag(-66,9);s.Tag(68,1);
     for(int c=0;c<3;++c) {
         if(c){s.Tag(1,3);s.Tag(62,c);}const auto begin=s.bytes.size();
-        auto l1=frontend.Forward(planes[c],0),l2=frontend.Forward(l1.bands[0],2),l3=frontend.Forward(l2.bands[0],0);
-        WaveletLevel* levels[]={&l1,&l2,&l3};int sub=0;
-        result.coefficient_fnv64[c*10+sub++]=Hash(l3.bands[0]);Lowpass(s,l3.bands[0]);
+        auto& channel=pyramid.levels[c];
+        WaveletLevel* levels[]={&channel[0],&channel[1],&channel[2]};int sub=0;
+        auto start=stamp();
+        result.coefficient_fnv64[c*10+sub++]=Hash(channel[2].bands[0]);
+        timing.coefficient_hash_ms+=elapsed(start);Lowpass(s,channel[2].bands[0]);
         for(int lv=2;lv>=0;--lv) {
             auto& bands=levels[lv]->bands;const auto& p=bands[0];
             s.Tag(4,0x0d0d);s.Tag(37,lv?3:5);s.Tag(38,lv+1);s.Tag(39,lv+1);s.Tag(40,4);
@@ -131,9 +140,12 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
             const auto level=s.Begin(0x2100);
             for(int b=1;b<4;++b) {
                 auto& p=bands[b];const auto at=c*12+lv*4+b;const auto q=result.tables.quant[at];
-                for(auto& v:p.pixels)v=QuantizeFilmScan3(v,q);
+                start=stamp();for(auto& v:p.pixels)v=QuantizeFilmScan3(v,q);
+                timing.quant_ms+=elapsed(start);start=stamp();
                 result.coefficient_fnv64[c*10+sub]=Hash(p);
+                timing.coefficient_hash_ms+=elapsed(start);start=stamp();
                 const auto entropy=PackHighpass(p,4*(static_cast<std::size_t>(p.width)*p.height+1));
+                timing.entropy_ms+=elapsed(start);
                 s.Tag(4,0x0e0e);s.Tag(48,b);s.Tag(72,1);s.Tag(49,p.width);s.Tag(50,p.height);s.Tag(51,sub++);
                 s.Tag(52,3);s.Tag(53,q);s.Tag(54,result.tables.scale[at]);
                 const auto band=s.Begin(0x2000);s.Tag(55,0);s.Append(entropy);s.Tag(56,0);s.End(band,0x2000);
@@ -144,6 +156,8 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     }
     s.Tag(24,0);s.End(sample,0x2200);
     result.sample=std::move(s.bytes);
+    timing.framing_ms=elapsed(host_start)-timing.quant_ms-timing.coefficient_hash_ms-timing.entropy_ms;
+    if(profile)frontend.RecordHostTiming(timing);
     // Commit state only after a complete sample exists (strong exception guarantee).
     state_.fs_rate_limiter=result.state.fs_rate_limiter;state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
     return result;

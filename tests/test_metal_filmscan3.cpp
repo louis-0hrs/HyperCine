@@ -26,6 +26,9 @@ int main(int argc,char** argv){try{
             }
             if(pattern==12)for(int y=0;y<h;++y)for(int x=0;x<w;++x)for(int c=0;c<4;++c)
                 pixels[static_cast<std::size_t>(y)*stride+4*x+c]=static_cast<uint8_t>((y&1)?(x+c)%256:255-(x+c)%256);
+            // Audit the actual batched resident path, including every intermediate
+            // LL and all untouched row padding, independently of stage entrypoints.
+            audit->Transform(pixels.data(),pixels.size()-16,w,h,stride,true);
             auto planes=audit->Convert(pixels.data(),pixels.size()-16,w,h,stride);
             for(const auto& plane:planes) {
                 auto l1=audit->Forward(plane,0);auto l2=audit->Forward(l1.bands[0],2);audit->Forward(l2.bands[0],0);
@@ -68,6 +71,45 @@ int main(int argc,char** argv){try{
     const auto previous=metal.state();Reject([&]{metal.Encode(input.data(),0,7680);});
     if(metal.state().frame_index!=previous.frame_index || metal.state().previous_sample_bytes!=previous.previous_sample_bytes || metal.state().fs_rate_limiter!=previous.fs_rate_limiter)
         throw std::runtime_error("Metal invalid input advanced sequence state");
+    detail::FailNextMetalCompletion(*timed);
+    bool failed=false;
+    try {metal.Encode(input.data(),input.size(),7680);}catch(const std::runtime_error&){failed=true;}
+    if(!failed || metal.state().frame_index!=previous.frame_index ||
+       metal.state().previous_sample_bytes!=previous.previous_sample_bytes ||
+       metal.state().fs_rate_limiter!=previous.fs_rate_limiter)
+        throw std::runtime_error("completion failure did not preserve encoder state");
+    // Recover on the same resident buffers. No GPU fallback or stale output.
+    const auto before_reuse=detail::ReadMetalTiming(*timed);
+    metal.Reset();cpu.Reset();
+    for(int f=0;f<105;++f) {
+        GeneratePhase3AFrame(1920,1080,f,static_cast<Phase3APattern>(f%11),input.data(),7680,0x1337beef);
+        metal_test::EqualPacket(cpu.Encode(input.data(),input.size(),7680).sample,
+                                metal.Encode(input.data(),input.size(),7680).sample);
+    }
+    const auto after_reuse=detail::ReadMetalTiming(*timed);
+    if(after_reuse.buffer_allocations!=before_reuse.buffer_allocations ||
+       after_reuse.command_buffers-before_reuse.command_buffers!=105 ||
+       after_reuse.waits-before_reuse.waits!=105 ||
+       after_reuse.upload_copies-before_reuse.upload_copies!=105 ||
+       after_reuse.readback_copies-before_reuse.readback_copies!=105*30 ||
+       after_reuse.wavelet_dispatches-before_reuse.wavelet_dispatches!=105*27)
+        throw std::runtime_error("resident allocation/submission/copy contract failed");
+    std::cout<<"PASS 105 sequential changing frames, zero buffer allocations, 1 upload/command/wait and 30 readbacks per frame; completion-failure recovery\n";
+    Reject([&]{timed->Transform(input.data(),input.size(),1920,1080,std::numeric_limits<std::size_t>::max()-15);});
+    bool oversized=false;
+    try {timed->Transform(input.data(),input.size(),4096,4096,16384);}catch(const std::length_error&){oversized=true;}
+    if(!oversized)throw std::runtime_error("oversized pyramid accepted");
+    FilmScan3Encoder independent(FilmScan3Backend::Metal),independent_cpu;
+    metal.Reset();cpu.Reset();
+    for(int f=0;f<3;++f) {
+        metal_test::EqualPacket(cpu.Encode(input.data(),input.size(),7680).sample,
+                                metal.Encode(input.data(),input.size(),7680).sample);
+        metal_test::EqualPacket(independent_cpu.Encode(input.data(),input.size(),7680).sample,
+                                independent.Encode(input.data(),input.size(),7680).sample);
+    }
+    independent.Reset();independent_cpu.Reset();
+    metal_test::EqualPacket(independent_cpu.Encode(input.data(),input.size(),7680).sample,
+                            independent.Encode(input.data(),input.size(),7680).sample);
     // New devices/queues/pipelines repeatedly acquire and release their ARC-owned resources.
     for(int repeat=0;repeat<3;++repeat) {
         auto fresh=detail::MetalFrontend();const auto a=ConvertFilmScan3Bgra(input.data(),input.size(),1920,1080,7680);
@@ -79,7 +121,7 @@ int main(int argc,char** argv){try{
     std::cout<<"\nMetal complete encode (5 measured after 1 warmup)";stats(mt);
     std::cout<<"\nMetal host quant/entropy/framing + orchestration avg_ms="<<host/5<<'\n';
     const auto t=detail::ReadMetalTiming(*timed);
-    std::cout<<"All 8 timed/reset GPU frames: color_gpu_ms="<<t.color_gpu_ms<<" wavelet_gpu_ms="<<t.wavelet_gpu_ms<<" upload_ms="<<t.upload_ms<<" readback_ms="<<t.readback_ms<<" submit_ms="<<t.submit_ms<<" wait_ms="<<t.wait_ms<<" peak_shared_buffer_bytes="<<t.peak_buffer_bytes<<" peak_device_allocated_bytes="<<t.peak_device_allocated_bytes<<'\n';
+    std::cout<<"Accumulated production GPU frames: batch_gpu_ms="<<t.batch_gpu_ms<<" upload_ms="<<t.upload_ms<<" readback_ms="<<t.readback_ms<<" submit_ms="<<t.submit_ms<<" wait_ms="<<t.wait_ms<<" waits="<<t.waits<<" buffer_allocations="<<t.buffer_allocations<<" peak_shared_buffer_bytes="<<t.peak_buffer_bytes<<" peak_device_allocated_bytes="<<t.peak_device_allocated_bytes<<'\n';
     rusage usage{};getrusage(RUSAGE_SELF,&usage);std::cout<<"process_peak_rss_bytes="<<usage.ru_maxrss<<"\nPASS exact full-storage planes, 3 wavelet levels, borders/prescale, packets, repeated encode/reset\n";
     return 0;
 }catch(const std::exception& e){std::cerr<<"FAIL "<<e.what()<<'\n';return 1;}}

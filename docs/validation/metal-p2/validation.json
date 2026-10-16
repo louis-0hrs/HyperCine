@@ -1,0 +1,57 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "timestamp_utc": "2026-10-15T23:54:32.258412+00:00",
+  "source_parent": "8631ef591f6e09f97a7551caeaf1c3d460185f9d",
+  "tested_source_snapshot": "tested-source-files.json",
+  "configuration_results": [
+    {
+      "log": "release-ctest.txt",
+      "status": "PASS",
+      "passed": 35,
+      "skipped": 0,
+      "elapsed_seconds": 181.2
+    },
+    {
+      "log": "debug-gpu-ctest.txt",
+      "status": "PASS",
+      "passed": 35,
+      "skipped": 0,
+      "elapsed_seconds": 921.7
+    },
+    {
+      "log": "asan-ubsan-ctest.txt",
+      "status": "PASS",
+      "passed": 35,
+      "skipped": 0,
+      "elapsed_seconds": 528.01
+    },
+    {
+      "log": "cpu-gate.txt",
+      "status": "PASS",
+      "passed": 26,
+      "skipped": 0,
+      "elapsed_seconds": 80.84
+    }
+  ],
+  "metal_validation": {
+    "api": "PASS",
+    "gpu_shader": "PASS",
+    "proof": "logs/gpu-validation-messages.txt"
+  },
+  "process_exit_leaks": "PASS: 0 leaks / 0 bytes; arm64 LeakSanitizer unavailable",
+  "actual_original_corpus": {
+    "tier_a_files_verified": 280,
+    "tier_c_files_verified": 480,
+    "tier_a_frames": 16,
+    "tier_c_frames": 120,
+    "unquantized_metal_vs_scalar": "PASS full stored values incl padding",
+    "quantized_bands_payloads_normalized_and_synchronized_raw_sdk_packets": "PASS all frames",
+    "windows_unquantized_sdk_internal_stages": "PENDING #23"
+  },
+  "benchmark": "benchmark-summary.json",
+  "external_windows_cuda_execution": "NOT RUN on this Mac; hosted CPU CI recorded on PR",
+  "adobe_resolve": "NOT RUN",
+  "physical_gpu_device_loss": "NOT SIMULATED; deterministic post-completion failure only",
+  "upstream_cuda_workflows": "UNCHANGED"
+}

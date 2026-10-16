@@ -1,0 +1,10 @@
+{
+  "CMakeLists.txt": "e1f97bbb85b50ae528bccbd6ec65830bcb56879768d5798bcb9d2f34dbcad6b1",
+  "src/core/filmscan3_backend.h": "9347eb446a28169369c35281ca27844f7f5bc7ae39128cb4cc223f2253431811",
+  "src/core/filmscan3_backend.cpp": "dbad6116ab85d7b5b04a4dcc373bcddf5f331c0f287857c07c97607ab1c9c9c3",
+  "src/core/filmscan3_encoder.cpp": "8cd955e9568e7a69a10cd0e44ff6f3d427566fe74d025017938435a8abc0afa8",
+  "src/metal/filmscan3_metal.mm": "c1e2448e13ca082919ff646f8b16ae6d9db7bcb5fd39df7f43fc80ef0c90535e",
+  "src/metal/filmscan3.metal": "87a4f4d5a20ca7fcd2a6e19c695fd082d2443823f047e6fc4565e3fcbadf06fe",
+  "tests/metal_audit.h": "46d755a6011ff29279e6e5ab6172d6100cc1c54453afab0af7d286287454599d",
+  "tests/test_metal_filmscan3.cpp": "8fb63b2a84c1a13909b2a94190635bba53dbe07568adde674a4efd434458dc43"
+}

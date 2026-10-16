@@ -31,6 +31,16 @@ class Audit final : public detail::Frontend {
 public:
     std::shared_ptr<detail::Frontend> gpu=detail::MetalFrontend();
     unsigned frames=0,levels=0;
+    detail::FrontendFrame Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool=false) override {
+        auto cpu=detail::CpuFrontend()->Transform(p,n,w,h,s,true);
+        auto metal=gpu->Transform(p,n,w,h,s,true);
+        for(int c=0;c<3;++c) {
+            Equal(cpu.color[c],metal.color[c],c,0,0);
+            for(int l=0;l<3;++l)for(int b=0;b<4;++b)
+                Equal(cpu.levels[c][l].bands[b],metal.levels[c][l].bands[b],c,l+1,b);
+        }
+        ++frames;levels+=9;return metal;
+    }
     Planes Convert(const uint8_t* p,std::size_t n,int w,int h,std::size_t s) override {
         auto cpu=ConvertFilmScan3Bgra(p,n,w,h,s);auto metal=gpu->Convert(p,n,w,h,s);
         for(int c=0;c<3;++c)Equal(cpu[c],metal[c],c,0,0);
