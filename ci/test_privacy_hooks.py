@@ -139,6 +139,34 @@ class InstalledHookTests(unittest.TestCase):
         self.rejected(result, "PRIVATE_IPV4", value)
         self.unpublished()
 
+    def test_nested_private_remote_cannot_hide_first_public_push(self):
+        value = "192." + "168.8.9"
+        self.import_commit(text="network " + value + "\n")
+        self.git("init", "--bare", "-q", str(self.root / "private.git"))
+        self.git("remote", "add", "public/private", str(self.root / "private.git"))
+        subprocess.run(["git", "push", "-q", str(self.root / "private.git"),
+                        "HEAD:refs/heads/feature"], cwd=self.root / "incoming",
+                       env=self.env, check=True, stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+        self.git("fetch", "-q", "public/private")
+        result = self.git("push", "-q", "public", "HEAD:refs/heads/review", expected=1)
+        self.rejected(result, "OVERLAPPING_REMOTE_NAMESPACES", value)
+        self.unpublished()
+
+    def test_nested_destination_remote_fails_closed(self):
+        self.git("remote", "add", "public/review", str(self.root / "public.git"))
+        result = self.git("push", "-q", "public/review",
+                          "HEAD:refs/heads/review", expected=1)
+        self.rejected(result, "OVERLAPPING_REMOTE_NAMESPACES", "unused-private-value")
+        self.unpublished()
+
+    def test_remote_names_with_shared_text_prefix_can_push(self):
+        self.git("remote", "add", "public-review", str(self.root / "public.git"))
+        self.commit()
+        self.git("push", "-q", "public", "HEAD:refs/heads/review")
+        self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(),
+                         self.git("ls-remote", "public", "refs/heads/review").stdout.split()[0])
+
     def test_cleanup_cannot_hide_intermediate_disclosure(self):
         value = "/" + "c/" + "Users/" + "synthetic-agent/report"
         self.import_commit(text="ROOT=" + value + "\n")

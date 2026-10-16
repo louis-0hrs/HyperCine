@@ -279,8 +279,16 @@ def push_findings(remote, records):
     """Validate pre-push records and collect commits from this destination only."""
     # Inspect actual stored objects, never local replacement objects.
     os.environ["GIT_NO_REPLACE_OBJECTS"] = "1"
-    if remote not in git("remote").splitlines():
+    remotes = git("remote").splitlines()
+    if remote not in remotes:
         raise RuntimeError("Push requires a configured remote name")
+    # --remotes=<name> includes every ref below refs/remotes/<name>/.
+    # Another configured remote can own a nested part of that namespace;
+    # its private commits are not proof of publication to this destination.
+    if any(other != remote and
+           (other.startswith(remote + "/") or remote.startswith(other + "/"))
+           for other in remotes):
+        return [("[PUSH_REMOTE]", 0, "OVERLAPPING_REMOTE_NAMESPACES")], []
     findings = []
     commits = set()
     for record in records:
