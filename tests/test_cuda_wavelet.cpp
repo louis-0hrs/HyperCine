@@ -138,6 +138,33 @@ struct MismatchReport {
     int max_diff;
 };
 
+// Copy only initialized pixel columns: CUDA wavelet kernels do not write
+// stride padding. Full-pitch D2H copies trigger false-positive initcheck
+// reads even though CompareBuffers only examines active columns.
+void CopyActivePixelsToHost(
+    std::vector<int16_t>& host, int host_stride,
+    const int16_t* device, int device_stride,
+    int active_width, int rows
+) {
+    if (rows <= 0 || active_width <= 0 || host_stride < active_width ||
+        device_stride < active_width ||
+        (static_cast<size_t>(rows - 1) * host_stride + active_width) > host.size()) {
+        std::cerr << "[-] Invalid CUDA test readback geometry\n";
+        std::exit(EXIT_FAILURE);
+    }
+
+    const cudaError_t status = cudaMemcpy2D(
+        host.data(), static_cast<size_t>(host_stride) * sizeof(int16_t),
+        device, static_cast<size_t>(device_stride) * sizeof(int16_t),
+        static_cast<size_t>(active_width) * sizeof(int16_t),
+        static_cast<size_t>(rows), cudaMemcpyDeviceToHost);
+    if (status != cudaSuccess) {
+        std::cerr << "[-] CUDA test readback failed: "
+                  << cudaGetErrorString(status) << "\n";
+        std::exit(EXIT_FAILURE);
+    }
+}
+
 MismatchReport CompareBuffers(
     const int16_t* cpu_buf, int cpu_stride,
     const int16_t* cuda_buf, int cuda_stride,
@@ -292,8 +319,8 @@ int main() {
                 HyperCine_ForwardHorizontal26_CUDA(backend, d_src, W, H, in_stride, d_low, low_stride, d_high, high_stride, nullptr);
                 cudaDeviceSynchronize();
 
-                cudaMemcpy(h_cuda_low.data(), d_low, static_cast<size_t>(low_stride) * H * sizeof(int16_t), cudaMemcpyDeviceToHost);
-                cudaMemcpy(h_cuda_high.data(), d_high, static_cast<size_t>(high_stride) * H * sizeof(int16_t), cudaMemcpyDeviceToHost);
+                CopyActivePixelsToHost(h_cuda_low, low_stride, d_low, low_stride, half_w, H);
+                CopyActivePixelsToHost(h_cuda_high, high_stride, d_high, high_stride, half_w, H);
 
                 auto r_hl = CompareBuffers(cpu_low.data(), low_stride, h_cuda_low.data(), low_stride, half_w, H);
                 auto r_hh = CompareBuffers(cpu_high.data(), high_stride, h_cuda_high.data(), high_stride, half_w, H);
@@ -324,8 +351,8 @@ int main() {
                 HyperCine_ForwardVertical26_CUDA(backend, d_src, W, H, in_stride, d_low, in_stride, d_high, in_stride, nullptr);
                 cudaDeviceSynchronize();
 
-                cudaMemcpy(h_cuda_low.data(), d_low, static_cast<size_t>(in_stride) * half_h * sizeof(int16_t), cudaMemcpyDeviceToHost);
-                cudaMemcpy(h_cuda_high.data(), d_high, static_cast<size_t>(in_stride) * half_h * sizeof(int16_t), cudaMemcpyDeviceToHost);
+                CopyActivePixelsToHost(h_cuda_low, in_stride, d_low, in_stride, W, half_h);
+                CopyActivePixelsToHost(h_cuda_high, in_stride, d_high, in_stride, W, half_h);
 
                 auto r_vl = CompareBuffers(cpu_low.data(), in_stride, h_cuda_low.data(), in_stride, W, half_h);
                 auto r_vh = CompareBuffers(cpu_high.data(), in_stride, h_cuda_high.data(), in_stride, W, half_h);
@@ -361,10 +388,10 @@ int main() {
                                                d_hl, low_stride, d_hh, high_stride, nullptr);
                 cudaDeviceSynchronize();
 
-                cudaMemcpy(h_cuda_ll.data(), d_ll, static_cast<size_t>(low_stride) * half_h * sizeof(int16_t), cudaMemcpyDeviceToHost);
-                cudaMemcpy(h_cuda_lh.data(), d_lh, static_cast<size_t>(high_stride) * half_h * sizeof(int16_t), cudaMemcpyDeviceToHost);
-                cudaMemcpy(h_cuda_hl.data(), d_hl, static_cast<size_t>(low_stride) * half_h * sizeof(int16_t), cudaMemcpyDeviceToHost);
-                cudaMemcpy(h_cuda_hh.data(), d_hh, static_cast<size_t>(high_stride) * half_h * sizeof(int16_t), cudaMemcpyDeviceToHost);
+                CopyActivePixelsToHost(h_cuda_ll, low_stride, d_ll, low_stride, half_w, half_h);
+                CopyActivePixelsToHost(h_cuda_lh, high_stride, d_lh, high_stride, half_w, half_h);
+                CopyActivePixelsToHost(h_cuda_hl, low_stride, d_hl, low_stride, half_w, half_h);
+                CopyActivePixelsToHost(h_cuda_hh, high_stride, d_hh, high_stride, half_w, half_h);
 
                 auto r_2ll = CompareBuffers(cpu_ll.data(), low_stride, h_cuda_ll.data(), low_stride, half_w, half_h);
                 auto r_2lh = CompareBuffers(cpu_lh.data(), high_stride, h_cuda_lh.data(), high_stride, half_w, half_h);
@@ -387,7 +414,7 @@ int main() {
                 HyperCine_InverseVertical26_CPU(cpu_ll.data(), low_stride, cpu_hl.data(), low_stride, half_w, half_h, cpu_low.data(), low_stride);
                 HyperCine_InverseVertical26_CUDA(backend, d_ll, low_stride, d_hl, low_stride, half_w, half_h, d_low, low_stride, nullptr);
                 cudaDeviceSynchronize();
-                cudaMemcpy(h_cuda_low.data(), d_low, static_cast<size_t>(low_stride) * H * sizeof(int16_t), cudaMemcpyDeviceToHost);
+                CopyActivePixelsToHost(h_cuda_low, low_stride, d_low, low_stride, half_w, H);
 
                 auto r_iv = CompareBuffers(cpu_low.data(), low_stride, h_cuda_low.data(), low_stride, half_w, H);
                 if (!r_iv.passed) {
@@ -403,7 +430,7 @@ int main() {
                 HyperCine_InverseHorizontal26_CPU(cpu_low.data(), low_stride, cpu_low.data(), low_stride, half_w, H, cpu_recon.data(), in_stride);
                 HyperCine_InverseHorizontal26_CUDA(backend, d_low, low_stride, d_low, low_stride, half_w, H, d_recon, in_stride, nullptr);
                 cudaDeviceSynchronize();
-                cudaMemcpy(h_cuda_recon.data(), d_recon, static_cast<size_t>(in_stride) * H * sizeof(int16_t), cudaMemcpyDeviceToHost);
+                CopyActivePixelsToHost(h_cuda_recon, in_stride, d_recon, in_stride, W, H);
 
                 auto r_ih = CompareBuffers(cpu_recon.data(), in_stride, h_cuda_recon.data(), in_stride, W, H);
                 if (!r_ih.passed) {
@@ -424,7 +451,7 @@ int main() {
                                                d_hl, low_stride, d_hh, high_stride,
                                                half_w, half_h, d_recon, in_stride, nullptr);
                 cudaDeviceSynchronize();
-                cudaMemcpy(h_cuda_recon.data(), d_recon, static_cast<size_t>(in_stride) * H * sizeof(int16_t), cudaMemcpyDeviceToHost);
+                CopyActivePixelsToHost(h_cuda_recon, in_stride, d_recon, in_stride, W, H);
 
                 auto r_2i = CompareBuffers(cpu_recon.data(), in_stride, h_cuda_recon.data(), in_stride, W, H);
                 if (!r_2i.passed) {
