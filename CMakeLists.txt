@@ -351,6 +351,19 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/upstream/WarpLib
 )
 
+# The root SDK include_directories() also mutates targets declared earlier in
+# this CMakeLists.txt. hypercine_cpu_isa is SDK-free and needs only src/, but
+# upstream/Codec/cpuid.h otherwise shadows GCC/Clang's <cpuid.h> and breaks
+# __get_cpuid_max/__cpuid_count in the Linux regular SDK-enabled build.
+# Restore the isolated header search path for these two pre-existing targets;
+# keep the upstream includes intact for actual CineForm SDK consumers.
+set_property(TARGET hypercine_cpu_isa PROPERTY INCLUDE_DIRECTORIES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src")
+if(TARGET test_cpu_isa)
+    set_property(TARGET test_cpu_isa PROPERTY INCLUDE_DIRECTORIES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src")
+endif()
+
 # Placeholder target for HyperCine library integration
 add_library(hypercine_core INTERFACE)
 target_include_directories(hypercine_core INTERFACE
