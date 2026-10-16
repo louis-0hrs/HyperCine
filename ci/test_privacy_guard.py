@@ -240,5 +240,129 @@ class GitIntegrationTests(unittest.TestCase):
             self.assertNotIn(private_example, result.stderr)
 
 
+class IdentityIntegrationTests(unittest.TestCase):
+    def setUp(self):
+        self.work = tempfile.TemporaryDirectory()
+        self.addCleanup(self.work.cleanup)
+        self.cwd = Path(self.work.name)
+        self.env = os.environ.copy()
+        for key in tuple(self.env):
+            if key.startswith(("GIT_AUTHOR_", "GIT_COMMITTER_")):
+                del self.env[key]
+        self.git("init", "-q")
+        self.git("config", "user.name", "Privacy Test")
+        self.git("config", "user.email", "privacy-test@example.invalid")
+        (self.cwd / "safe.txt").write_text("safe\n", encoding="utf-8")
+        self.git("add", "safe.txt")
+        self.git("commit", "-qm", "baseline")
+        self.base = self.git("rev-parse", "HEAD").strip()
+
+    def git(self, *args):
+        return subprocess.run(["git", *args], cwd=self.cwd, env=self.env,
+                              check=True, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE, text=True).stdout
+
+    def scan(self, *args):
+        return subprocess.run([sys.executable, str(Path(guard.__file__).resolve()),
+                               *args], cwd=self.cwd, env=self.env, text=True,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def assert_blocked(self, result, value, marker):
+        self.assertEqual(1, result.returncode)
+        self.assertIn(marker, result.stderr)
+        self.assertNotIn(value, result.stdout + result.stderr)
+
+    def test_staged_checks_effective_author_and_committer_overrides(self):
+        for role in ("AUTHOR", "COMMITTER"):
+            for field, value in (("NAME", "node" + ".internal"),
+                                 ("EMAIL", "agent@node" + ".local")):
+                key = "GIT_" + role + "_" + field
+                with self.subTest(key=key):
+                    self.env[key] = value
+                    self.assert_blocked(self.scan("--staged"), value, role)
+                    del self.env[key]
+
+    def test_committed_metadata_checked_in_single_and_range_modes(self):
+        for role in ("AUTHOR", "COMMITTER"):
+            for field, value in (("NAME", "node" + ".internal"),
+                                 ("EMAIL", "agent@node" + ".local")):
+                key = "GIT_" + role + "_" + field
+                with self.subTest(key=key):
+                    self.env[key] = value
+                    self.git("commit", "--allow-empty", "-qm", "safe subject")
+                    del self.env[key]
+                    self.assert_blocked(self.scan("--commit", "HEAD"), value, role)
+                    self.assert_blocked(self.scan("--commits", self.base + "..HEAD"),
+                                        value, role)
+
+    def test_single_label_and_git_none_domains_blocked(self):
+        for value in ("agent@synthetic-node", "agent@synthetic-node.(none)"):
+            with self.subTest(value=value):
+                self.env["GIT_AUTHOR_EMAIL"] = value
+                self.assert_blocked(self.scan("--staged"), value, "HOST_DERIVED_IDENTITY")
+                self.git("commit", "--allow-empty", "-qm", "safe subject")
+                del self.env["GIT_AUTHOR_EMAIL"]
+                self.assert_blocked(self.scan("--commit", "HEAD"), value,
+                                    "HOST_DERIVED_IDENTITY")
+
+    def test_safe_identities_pass(self):
+        for value in ("agent@example.invalid", "agent@example.org",
+                      "12345+agent@users.noreply.github.com"):
+            with self.subTest(value=value):
+                self.env["GIT_AUTHOR_EMAIL"] = value
+                self.env["GIT_COMMITTER_EMAIL"] = value
+                self.assertEqual(0, self.scan("--staged").returncode)
+                self.git("commit", "--allow-empty", "-qm", "safe identity")
+                self.assertEqual(0, self.scan("--commit", "HEAD").returncode)
+                self.assertEqual(0, self.scan("--commits", self.base + "..HEAD").returncode)
+
+    def test_staged_checks_configured_identity(self):
+        value = "agent@node" + ".internal"
+        self.git("config", "user.email", value)
+        self.assert_blocked(self.scan("--staged"), value, "PRIVATE_HOSTNAME")
+
+    def test_mailmap_and_later_safe_commit_do_not_hide_raw_identity(self):
+        value = "agent@node" + ".local"
+        self.env["GIT_AUTHOR_EMAIL"] = value
+        self.git("commit", "--allow-empty", "-qm", "safe subject")
+        sha = self.git("rev-parse", "HEAD").strip()
+        del self.env["GIT_AUTHOR_EMAIL"]
+        (self.cwd / ".mailmap").write_text(
+            "Privacy Test <agent@example.invalid> <" + value + ">\n", encoding="utf-8")
+        self.git("config", "log.mailmap", "true")
+        self.git("commit", "--allow-empty", "-qm", "later safe identity")
+        self.assertEqual(0, self.scan("--commit", "HEAD").returncode)
+        self.assert_blocked(self.scan("--commit", sha), value, "AUTHOR")
+        self.assert_blocked(self.scan("--commits", self.base + "..HEAD"), value, "AUTHOR")
+
+    @unittest.skipIf(os.name == "nt", "POSIX shell hook integration runs on Linux/macOS")
+    def test_first_push_hook_checks_commit_identity(self):
+        public = self.cwd / "public.git"
+        self.git("init", "--bare", "-q", str(public))
+        self.git("remote", "add", "public", str(public))
+        self.git("push", "-q", "public", "HEAD:refs/heads/main")
+        value = "agent@node" + ".local"
+        self.env["GIT_COMMITTER_EMAIL"] = value
+        self.git("commit", "--allow-empty", "-qm", "safe subject")
+        del self.env["GIT_COMMITTER_EMAIL"]
+        sha = self.git("rev-parse", "HEAD").strip()
+        (self.cwd / "ci").mkdir()
+        source = Path(guard.__file__).resolve()
+        (self.cwd / "ci/privacy_guard.py").write_bytes(source.read_bytes())
+        hook = source.parent.parent / ".githooks/pre-push"
+        result = subprocess.run(["sh", str(hook), "public", str(public)],
+                                input="refs/heads/feature {} refs/heads/feature {}\n".format(
+                                    sha, "0" * 40), cwd=self.cwd, env=self.env,
+                                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assert_blocked(result, value, "COMMITTER")
+
+    def test_unresolvable_effective_identity_fails_closed(self):
+        self.env["GIT_AUTHOR_NAME"] = ""
+        result = self.scan("--staged")
+        self.assertEqual(2, result.returncode)
+        self.assertIn("publication blocked", result.stderr)
+        self.assertNotIn(str(self.cwd), result.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
