@@ -1,12 +1,15 @@
 #!/bin/sh
-# Activate once per worktree: git config --local core.hooksPath .githooks
+# Activate per worktree: git config --worktree core.hooksPath .githooks
+# Git for Windows can expose a python3 Windows Store alias without an interpreter.
 set -eu
 cd "$(git rev-parse --show-toplevel)"
-if command -v python3 >/dev/null 2>&1; then
+if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
   python3 ci/privacy_guard.py --staged
-elif command -v python >/dev/null 2>&1; then
+elif python -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
   python ci/privacy_guard.py --staged
+elif py -3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+  py -3 ci/privacy_guard.py --staged
 else
-  echo "Privacy guard: Python 3 unavailable; commit blocked." >&2
+  echo "Privacy guard: no working Python 3.8+ interpreter; commit blocked." >&2
   exit 2
 fi

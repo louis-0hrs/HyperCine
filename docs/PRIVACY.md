@@ -17,10 +17,18 @@ not remove it from Git history. This applies equally to Windows, Linux and macOS
    descriptions such as "external corpus (read-only)".
 4. Check the full staged diff manually. Run:
    `python ci/privacy_guard.py --staged`
-5. Configure local hooks per clone or worktree (Git does not auto-activate hooks):
-   `git config --local core.hooksPath .githooks`
-   The hook files require executable permissions on Unix-like systems.
-   Where hooks cannot execute, agents must invoke the scanner explicitly.
+5. Configure local hooks per clone or worktree (Git does not auto-activate hooks).
+   For **separate per-worktree settings** enable `extensions.worktreeConfig=true`
+   in the shared Git configuration first (only after confirming every worktree
+   supports this Git feature), then in the intended worktree run:
+   `git config --worktree core.hooksPath .githooks`
+   Without this setup, `git config --local` writes to the *shared* config and
+   changes hook behavior for every linked worktree. Every affected worktree
+   must contain the hooks and `ci/privacy_guard.py` at the expected paths.
+   Git for Windows may expose an unusable `python3` Store alias; hooks now
+   verify that the interpreter actually runs Python 3.8+, trying `python3`,
+   then `python`, then Windows `py -3`, and fail closed if none works.
+   Hook files require executable permissions on Unix-like systems.
 6. The pre-push hook scans every outgoing commit. Always push through a
    configured remote name (e.g. `git push origin my-branch`), not a raw URL;
    new branches exclude only commits already known on that destination
