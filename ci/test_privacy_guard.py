@@ -140,6 +140,50 @@ class HookInterpreterTests(unittest.TestCase):
 
 
 class GitIntegrationTests(unittest.TestCase):
+    def test_textconv_cannot_hide_added_sensitive_text(self):
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+
+            def git(*args):
+                return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      text=True).stdout.strip()
+
+            git("init", "-q")
+            git("config", "user.email", "privacy-test@example.invalid")
+            git("config", "user.name", "Privacy Test")
+            # A portable converter replaces each file's text with its object hash.
+            git("config", "diff.privacytest.textconv", "git hash-object")
+            (cwd / ".gitattributes").write_text("*.txt diff=privacytest\n",
+                                              encoding="utf-8")
+            artifact = cwd / "report.txt"
+            artifact.write_text("safe\n", encoding="utf-8")
+            git("add", ".gitattributes", "report.txt")
+            git("commit", "-qm", "baseline")
+            base = git("rev-parse", "HEAD")
+            synthetic_address = "192." + "168.4.8"
+            artifact.write_text("network " + synthetic_address + "\n", encoding="utf-8")
+            git("add", "report.txt")
+            # Prove this repository really hides the source in ordinary diffs.
+            self.assertNotIn(synthetic_address, git("diff", "--cached"))
+            self.assertIn(synthetic_address, git("diff", "--cached", "--no-textconv"))
+            command = [sys.executable, str(Path(guard.__file__).resolve())]
+
+            def assert_blocked(*args):
+                result = subprocess.run(command + list(args), cwd=cwd, text=True,
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.assertEqual(1, result.returncode, result.stdout)
+                self.assertIn("report.txt:1: PRIVATE_IPV4", result.stderr)
+                self.assertNotIn(synthetic_address, result.stdout + result.stderr)
+
+            with self.subTest(mode="staged"):
+                assert_blocked("--staged")
+            git("commit", "-qm", "synthetic exposure")
+            with self.subTest(mode="commit"):
+                assert_blocked("--commit", "HEAD")
+            with self.subTest(mode="commits"):
+                assert_blocked("--commits", base + "..HEAD")
+
     def test_commit_message_leak_is_checked(self):
         with tempfile.TemporaryDirectory() as work:
             cwd = Path(work)
