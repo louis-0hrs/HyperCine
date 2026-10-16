@@ -101,7 +101,7 @@ class RuleTests(unittest.TestCase):
                          guard.scan_patch(patch))
 
 
-class HookInterpreterTests(unittest.TestCase):
+class PathDecodingTests(unittest.TestCase):
 
     def test_quoted_path_decoding_and_invalid_escapes(self):
         self.assertEqual("b/caf\u00e9.txt", guard.decode_patch_path(r'"b/caf\303\251.txt"'))
