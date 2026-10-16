@@ -50,6 +50,10 @@ Result: attach resolved; instrumentation proven active by the controls; memcheck
 checking, initcheck, racecheck and synccheck report zero findings on the decoder targets within
 the coverage documented above.
 
+## ctest-release-summary.txt
+
+Full CUDA CTest on this branch: 44/44 PASS in 773.46 s.
+
 ## environment.txt
 
 Tool versions and GPU/driver information for the runs.

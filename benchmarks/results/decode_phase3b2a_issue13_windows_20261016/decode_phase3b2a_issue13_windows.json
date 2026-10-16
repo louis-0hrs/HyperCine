@@ -151,5 +151,11 @@
     "The #13 safety gate remains HOLD until the stacked integration and the resulting-parent native tests exist",
     "racecheck/synccheck on the full production reconstruction target and the upstream temporal target are not run on Windows"
   ],
-  "sanitized": "Host paths, user names and the machine name were redacted from the committed logs; raw logs remain local."
+  "sanitized": "Host paths, user names and the machine name were redacted from the committed logs; raw logs remain local.",
+  "windows_cuda_ctest": {
+    "command": "ctest --test-dir build-release-sm89 -C Release --output-on-failure",
+    "result": "44/44 PASS, 773.46 s",
+    "date": "2026-10-16",
+    "log": "ctest-release-summary.txt"
+  }
 }

@@ -112,6 +112,7 @@ The production reconstruction target verified its BGRA hashes, the 200/100-repea
 
 ## 6. Session result
 
+- Full CUDA CTest on this branch: **44/44 PASS** in 773.46 s (Release, CUDA 12.8.61, RTX 4090 Laptop GPU).
 - Windows host instrumentation part of #13: **PASS**. Attach is demonstrated, instrumentation is proven active with controls, all four tools plus leak checking report zero on the decoder targets within the documented coverage, and the historical heap corruption did not reproduce in 20 instrumented repetitions.
 - The reproducible host finding is an upstream oracle read-ahead, documented rather than fixed, with a bounded effect claim: it is a read, it does not change HyperCine production decode, and the frozen reference hashes still reproduce in the non-ASan Release build.
 - The #13 safety gate stays **HOLD** overall: PR #52 still has not integrated the native A2 test patch #80, and the resulting-parent native tests do not exist yet. No production promotion is recommended from this evidence.
