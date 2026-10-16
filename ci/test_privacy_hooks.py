@@ -165,5 +165,169 @@ class InstalledHookTests(unittest.TestCase):
         self.unpublished()
 
 
+    def tag(self, name="release-test", message="safe release", target="HEAD"):
+        self.git("tag", "-a", name, "-m", message, target)
+
+    def push_rejected(self, ref, marker, value, *extra):
+        result = self.git("push", "-q", *extra, "public", ref, expected=1)
+        self.rejected(result, marker, value)
+        self.assertEqual("", self.git("ls-remote", "public", ref).stdout)
+
+    def test_annotated_tag_on_published_commit_rejects_message(self):
+        value = "192." + "168.8.9"
+        self.tag(message="network " + value)
+        self.push_rejected("refs/tags/release-test", "TAG_METADATA", value)
+
+    def test_tag_rejects_private_tagger_email(self):
+        value = "release@node" + ".internal"
+        self.identity("Release Example", value)
+        self.tag()
+        self.push_rejected("refs/tags/release-test", "TAGGER", value)
+
+    def test_tag_rejects_host_inferred_tagger_domain(self):
+        value = "release@node"
+        self.identity("Release Example", value)
+        self.tag()
+        self.push_rejected("refs/tags/release-test", "HOST_DERIVED_IDENTITY", value)
+
+    def test_tag_rejects_private_tagger_name(self):
+        value = "10." + "4.6.8"
+        self.identity("Release " + value, "release@example.org")
+        self.tag()
+        self.push_rejected("refs/tags/release-test", "TAGGER", value)
+
+    def test_nested_annotated_tag_rejects_inner_message(self):
+        value = "10." + "4.6.8"
+        self.tag("inner", "network " + value)
+        self.tag("outer", target="inner")
+        self.push_rejected("refs/tags/outer", "TAG_METADATA", value)
+
+    def test_sensitive_local_branch_name_rejected(self):
+        value = "10." + "4.6.8"
+        self.git("branch", "review-" + value)
+        result = self.git("push", "-q", "public", "review-" + value +
+                          ":refs/heads/review", expected=1)
+        self.rejected(result, "LOCAL_REF", value)
+        self.unpublished()
+
+    def test_sensitive_remote_branch_name_rejected(self):
+        value = "10." + "4.6.8"
+        self.push_rejected("HEAD:refs/heads/review-" + value, "REMOTE_REF", value)
+
+    def test_sensitive_lightweight_tag_name_rejected(self):
+        value = "node" + ".internal"
+        self.git("tag", value)
+        self.push_rejected("refs/tags/" + value, "LOCAL_REF", value)
+
+    def test_clean_annotated_and_lightweight_tags_pass(self):
+        self.tag()
+        self.git("tag", "light-test")
+        self.git("push", "-q", "public", "refs/tags/release-test", "refs/tags/light-test")
+        self.assertEqual(3, len(self.git("ls-remote", "public", "refs/tags/*").stdout.splitlines()))
+
+    def test_clean_nested_tags_pass(self):
+        self.tag("inner")
+        self.tag("outer", target="inner")
+        self.git("push", "-q", "public", "refs/tags/outer")
+
+    def test_repointed_tag_rejects_metadata(self):
+        self.tag()
+        self.git("push", "-q", "public", "refs/tags/release-test")
+        before = self.git("ls-remote", "public", "refs/tags/release-test").stdout
+        value = "10." + "4.6.8"
+        self.git("tag", "-f", "-a", "release-test", "-m", "network " + value)
+        result = self.git("push", "-q", "--force", "public", "refs/tags/release-test", expected=1)
+        self.rejected(result, "TAG_METADATA", value)
+        self.assertEqual(before, self.git("ls-remote", "public", "refs/tags/release-test").stdout)
+
+    def test_follow_tags_rejects_metadata(self):
+        value = "10." + "4.6.8"
+        self.commit()
+        self.tag(message="network " + value)
+        result = self.git("push", "-q", "--follow-tags", "public",
+                          "HEAD:refs/heads/review", expected=1)
+        self.rejected(result, "TAG_METADATA", value)
+        self.unpublished()
+        self.assertEqual("", self.git("ls-remote", "public", "refs/tags/*").stdout)
+
+    def test_clean_delete_passes(self):
+        self.tag()
+        self.git("push", "-q", "public", "refs/tags/release-test")
+        self.git("push", "-q", "--delete", "public", "release-test")
+        self.assertEqual("", self.git("ls-remote", "public", "refs/tags/*").stdout)
+
+    def test_blob_ref_fails_closed(self):
+        blob = self.git("hash-object", "-w", "ci/privacy_guard.py").stdout.strip()
+        self.git("update-ref", "refs/tags/blob-test", blob)
+        self.push_rejected("refs/tags/blob-test", "UNSUPPORTED_OBJECT_TYPE", "unused-private-value")
+
+    def test_tag_to_tree_fails_closed(self):
+        self.tag(target="HEAD^{tree}")
+        self.push_rejected("refs/tags/release-test", "UNSUPPORTED_OBJECT_TYPE", "unused-private-value")
+
+
+    def test_sensitive_remote_tag_name_rejected(self):
+        value = "node" + ".internal"
+        self.git("tag", "light-test")
+        self.push_rejected("refs/tags/light-test:refs/tags/" + value,
+                           "REMOTE_REF", value)
+
+    def test_home_shaped_ref_name_rejected(self):
+        value = "Users/" + "synthetic-agent/review"
+        self.git("branch", value)
+        result = self.git("push", "-q", "public", value +
+                          ":refs/heads/review", expected=1)
+        self.rejected(result, "PERSONAL_ABSOLUTE_PATH", value)
+        self.unpublished()
+
+    def test_clean_repointed_annotated_tag_passes(self):
+        self.tag()
+        self.git("push", "-q", "public", "refs/tags/release-test")
+        self.commit()
+        self.git("tag", "-f", "-a", "release-test", "-m", "safe revision")
+        self.git("push", "-q", "--force", "public", "refs/tags/release-test")
+        actual = self.git("ls-remote", "public", "refs/tags/release-test").stdout.split()[0]
+        self.assertEqual(self.git("rev-parse", "release-test").stdout.strip(), actual)
+
+    def test_mixed_refs_reject_entire_push(self):
+        value = "10." + "4.6.8"
+        self.tag(message="network " + value)
+        result = self.git("push", "-q", "public", "HEAD:refs/heads/review",
+                          "refs/tags/release-test", expected=1)
+        self.rejected(result, "TAG_METADATA", value)
+        self.unpublished()
+        self.assertEqual("", self.git("ls-remote", "public", "refs/tags/*").stdout)
+
+    def raw_tag(self, payload):
+        path = self.root / "tag-object"
+        path.write_bytes(payload)
+        oid = self.git("hash-object", "-t", "tag", "-w", "--literally",
+                       str(path)).stdout.strip()
+        self.git("update-ref", "refs/tags/raw-test", oid)
+        return oid
+
+    def test_tag_without_tagger_fails_closed(self):
+        self.raw_tag(("object " + self.base + "\ntype commit\ntag raw-test\n\nsafe\n").encode())
+        self.push_rejected("refs/tags/raw-test", "PRIVACY GUARD ERROR", "unused-private-value")
+
+    def test_non_utf8_tag_fails_closed(self):
+        self.raw_tag(("object " + self.base + "\ntype commit\ntag raw-test\n" +
+                      "tagger Release Example <release@example.org> 1 +0000\n\n").encode() + b"\xff")
+        self.push_rejected("refs/tags/raw-test", "PRIVACY GUARD ERROR", "unused-private-value")
+
+    def test_replacement_object_cannot_hide_sensitive_tag(self):
+        value = "10." + "4.6.8"
+        self.tag("unsafe", "network " + value)
+        self.tag("safe")
+        self.git("replace", "unsafe", "safe")
+        self.push_rejected("refs/tags/unsafe", "TAG_METADATA", value)
+
+    def test_tag_internal_name_is_scanned(self):
+        value = "node" + ".internal"
+        self.tag(value)
+        self.git("update-ref", "refs/tags/review", self.git("rev-parse", value).stdout.strip())
+        self.push_rejected("refs/tags/review", "TAG_METADATA", value)
+
+
 if __name__ == "__main__":
     unittest.main()

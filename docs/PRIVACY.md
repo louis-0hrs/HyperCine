@@ -29,7 +29,8 @@ not remove it from Git history. This applies equally to Windows, Linux and macOS
    verify that the interpreter actually runs Python 3.8+, trying `python3`,
    then `python`, then Windows `py -3`, and fail closed if none works.
    Hook files require executable permissions on Unix-like systems.
-6. The pre-push hook scans every outgoing commit. Always push through a
+6. The pre-push hook scans outgoing ref names, annotated tags and every
+   outgoing commit. Always push through a
    configured remote name (e.g. `git push origin my-branch`), not a raw URL;
    new branches exclude only commits already known on that destination
    remote. Never bypass the hook by using `--no-verify`, removing it or
@@ -121,3 +122,50 @@ review remains mandatory for imported public branches.
 The scanner must never print matched sensitive values. Historic Git objects,
 previous issue revisions, clones and caches remain public independently of
 forward-only redaction; no history rewrite/force-push is authorized here.
+
+
+## Ref and release-tag publication (issue #96)
+
+The installed pre-push hook passes the entire Git pre-push record stream to
+`ci/privacy_guard.py --push-remote <name>`. It checks both local and destination
+ref names, including names on deletion records, with the existing privacy rules.
+It also checks the branch/tag name after its namespace so a home-shaped name
+cannot hide behind the ref prefix. Safe deletions need no object inspection.
+
+For each outgoing object the guard inspects its actual type before peeling.
+Annotated tags are followed recursively: every tag's full text (including its
+internal name, annotation and any signature) is scanned, and its raw tagger
+name/email is checked with the commit identity policy. This also applies when
+its target commit is already public and there are zero new commits. Local Git
+replacement objects are disabled during the scan. Supported tag headers must
+have the standard object/type/tag/tagger layout and valid UTF-8; missing taggers,
+malformed headers, unreadable objects and excessive nesting fail closed.
+Non-commit terminal targets, including tree/blob tags and unusual refs pointing
+to those types, are rejected. Clean lightweight and annotated tags pointing to
+commits, nested tags and updates/repointed tags remain supported.
+
+Git supplies automatically followed tags (`--follow-tags`) and every ref of a
+multi-ref push to the same hook. Any violation aborts the whole push before
+transfer. Ref, tag and tagger findings use fixed redacted markers and rule names;
+Git's own transport/status output is outside the scanner's diagnostic control.
+Outgoing commits still exclude only history known on the named destination;
+history on another remote cannot hide first publication to this one.
+
+This is not inspection of every reachable Git object: binary blobs and embedded
+metadata remain outside the content rules, as do unrecognized sensitive strings.
+The existing Actions workflow covers branch pushes/PRs after publication; it has
+no tag-push trigger. It neither prevents a first disclosure nor replaces local
+release-tag checks. A release service, web UI, GitHub connector or clone without
+these installed hooks needs its own pre-publication controls. This change does
+not publish a release/tag or authorize main integration/history rewriting.
+
+Run the real-hook regression matrix with:
+
+```sh
+python3 -m unittest discover -s ci -p 'test_privacy*.py' -v
+```
+
+The installed-hook matrix currently requires POSIX and is skipped by native
+Windows Python; Git Bash/MSYS and Windows native execution remain separate
+qualification work. All test data is synthetic and all remotes are disposable
+local bare repositories, never public endpoints.
