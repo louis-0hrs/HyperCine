@@ -641,8 +641,39 @@ bool DecodeOne(const uint8_t* data, size_t size, CFHD_PixelFormat requested, Att
     return true;
 }
 
+// These unsupported SDK input-to-encoded conversions were measured under
+// an assert-active pristine SampleEncoder (issue #13). In a Release/NDEBUG
+// build its assert(0) is compiled out and the same request can SIGSEGV.
+// Keep this deny-list narrow and diagnostic-only: unsupported means *skipped*,
+// not an encoder/decoder PASS. Never patch the vendor upstream implementation.
+bool UnsupportedSdkEncodePair(CFHD_PixelFormat input, CFHD_EncodedFormat encoded) {
+    switch (input) {
+    case CFHD_PIXEL_FORMAT_YUY2:
+        return encoded == CFHD_ENCODED_FORMAT_RGB_444 ||
+               encoded == CFHD_ENCODED_FORMAT_RGBA_4444;
+    case CFHD_PIXEL_FORMAT_RG24:
+        return encoded == CFHD_ENCODED_FORMAT_RGBA_4444;
+    case CFHD_PIXEL_FORMAT_RG48:
+        return encoded == CFHD_ENCODED_FORMAT_RGB_444 ||
+               encoded == CFHD_ENCODED_FORMAT_YUV_422;
+    case CFHD_PIXEL_FORMAT_B64A:
+        return encoded == CFHD_ENCODED_FORMAT_RGBA_4444 ||
+               encoded == CFHD_ENCODED_FORMAT_RGB_444 ||
+               encoded == CFHD_ENCODED_FORMAT_YUV_422;
+    case CFHD_PIXEL_FORMAT_BYR4:
+    case CFHD_PIXEL_FORMAT_BYR5:
+        return encoded == CFHD_ENCODED_FORMAT_BAYER;
+    default: return false;
+    }
+}
+
 Attempt Run(const Attempt& request) {
     Attempt a = request;
+    if (UnsupportedSdkEncodePair(a.input, a.encoded)) {
+        a.note += " encode skipped: pristine upstream SDK asserts for unsupported input-to-encoded conversion (Release would continue unsafely)";
+        a.prepare = -2;
+        return a;
+    }
     if (a.input == CFHD_PIXEL_FORMAT_RG30 || a.input == CFHD_PIXEL_FORMAT_R210 ||
         a.input == CFHD_PIXEL_FORMAT_DPX0 || a.input == CFHD_PIXEL_FORMAT_AR10 ||
         a.input == CFHD_PIXEL_FORMAT_AB10 || a.input == CFHD_PIXEL_FORMAT_RG64 ||
