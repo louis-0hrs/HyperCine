@@ -162,17 +162,62 @@ to allocator residue in the padding. Copying only the valid columns, or clearing
 buffers with `cudaMemset` before launch, would remove that coupling - worth a
 follow-up.
 
-## 7. Open items
+## 7. Windows golden corpus: received, verified, and what it shows
 
-* **Windows GoPro-SDK/CUDA oracle comparison — blocked.** The archived Windows
-  golden corpus referenced by the issue (`//TRUENAS/DeDub` ->
-  `HyperCine/golden/windows/qualities/2026-10-15/`, 20 part-corpora, 1760 files,
-  ~5.97 GB) is not present on this host. Only the small in-repo fixtures under
-  `tests/fixtures/windows-oracle/` are available, which is not the 6-profile
-  corpus. -> `BLOCKED: SDK_ORACLE_UNAVAILABLE` for any full-file
-  "Linux CUDA == Windows CUDA" CFHD bitstream claim. No such claim is made here.
-  Section 4 establishes CPU-versus-CUDA equality *within Linux*, which is a
-  necessary but not sufficient condition.
+The archived corpus was supplied through the NAS space as
+`~/.openclaw/workspace/nas-openclawspace/HyperCine/golden/windows/qualities/2026-10-15/`
+(`//192.168.249.38/Openclawspace`), read-only in this work. Pre-flight was done
+before any comparison, as the issue requires:
+
+* `TRANSFER_SHA256.tsv` itself hashes to
+  `2343a5efae40590de81cc87b275fce382cc59565f3ae4689f21cc83f48218205`, exactly the
+  value pinned in the issue.
+* All **1760 / 1760** listed files match the index in both byte length and
+  SHA-256 (`ENTRIES=1760 OK=1760 PROBLEMS=0`). Nothing was written to the share.
+* Layout: 20 part-corpora (6 qualities x 1080p-16f / 3840x2160-1f / 7680x4320-1f,
+  plus sequence-120f for filmscan2 and filmscan3), 348 encoded frames total.
+
+What the per-part manifests record:
+
+* **All 348 frames have `sdk_normalized_sha256 == cuda_normalized_sha256`.** On
+  Windows the GoPro SDK encoder and the Windows CUDA encoder produce identical
+  *normalized* samples; the raw samples differ (`raw_equal=0` for all 348) only in
+  the masked GUID/DATE/TIME/TIMECODE bytes. Normalized equality is therefore the
+  meaningful target for any other platform.
+* The Windows CUDA reference was produced on an **NVIDIA GeForce RTX 4090 Laptop
+  GPU, compute capability 8.9** — not on an A2 (8.6). Any Linux CUDA comparison is
+  cross-architecture as well as cross-platform, so a mismatch would have to be
+  attributed before it is called a porting defect.
+
+### Why the full-packet gate cannot be run here
+
+The encoder targets that produce complete CFHD samples
+(`hypercine_encode_filmscan3`, `hypercine_reference_probe`) are defined only
+inside `if(HYPERCINE_BUILD_STANDALONE)` in the root `CMakeLists.txt`, and that
+block hard-fails when CUDA or the upstream SDK is enabled:
+
+    message(FATAL_ERROR "Standalone requires HYPERCINE_BUILD_UPSTREAM=OFF and HYPERCINE_ENABLE_CUDA=OFF")
+
+They are consequently absent from `build-linux-cuda` — verified, not assumed. So
+there is currently **no Linux build that has CUDA enabled and can emit a full CFHD
+sample**; the CUDA configuration ships the kernel library and its tests, not an
+encoder tool. Producing the full bitstream therefore needs either a
+Linux-CUDA-capable encoder target or the SDK-free quality core that issue #29
+owns. That is a scope decision for the maintainers — issue #33 explicitly forbids
+writing a new CUDA engine here, and reusing the standalone encoder is not possible
+because of the mutual exclusion above.
+
+Stage-level comparison against this corpus is also not possible as it stands: it
+contains inputs and complete SDK/CUDA samples, but no Windows intermediate dumps
+(converted planes, filter stages, HP coefficients), which the earlier macOS work
+identified as required for exact HP coordinates.
+
+## 8. Open items
+
+* **Full-packet "Linux CUDA == Windows CUDA" claim — not reachable in this build
+  configuration.** See section 7. The corpus is present and verified; the missing
+  piece is a Linux encoder target that can produce a complete CFHD sample with
+  CUDA enabled. No such claim is made here.
 * The 120-frame stateful `FSratelimiter` sequence and the six Windows quality
   profiles were not run.
 * Vulkan cross-check (#31) not performed — it must be coordinated and run
@@ -184,7 +229,7 @@ follow-up.
   1920x1080) and the phase tests; 4K/8K appear in section 5 as performance
   measurements only, not as bit-exactness gates.
 
-## 8. Environment notes for reproducibility
+## 9. Environment notes for reproducibility
 
 * The toolkit comes from the distribution, so `nvcc` is `/usr/bin/nvcc` and there
   is no `/usr/local/cuda`; `CUDA_PATH` is unset and not needed.
