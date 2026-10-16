@@ -40,6 +40,29 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(self.run_install([completed(1, stderr='(503) Service Unavailable'),
                                            completed()], [False, True])[:4], (0, 2, 2, 1))
 
+    def test_chocolatey_feed_status_retries(self):
+        for status in ('429', '500', '502', '503', '504'):
+            for exit_code in (0, 1):
+                with self.subTest(status=status, exit_code=exit_code):
+                    message = ('Response status code does not indicate success: '
+                               + status + ' (Service Unavailable).')
+                    outcome = self.run_install([completed(exit_code, stderr=message),
+                                                completed()], [False, True])
+                    self.assertEqual(outcome[:4], (0, 2, 2, 1))
+                    self.assertIn('HTTP=' + status, outcome[4])
+
+    def test_chocolatey_feed_retries_are_bounded(self):
+        message = 'Response status code does not indicate success: 503 (Service Unavailable).'
+        self.assertEqual(self.run_install([completed(0, message)] * 3,
+                                           [False] * 3)[:4], (1, 3, 3, 2))
+
+    def test_chocolatey_permanent_feed_status_does_not_retry(self):
+        for status in ('400', '401', '403', '404'):
+            with self.subTest(status=status):
+                message = 'Response status code does not indicate success: ' + status
+                self.assertEqual(self.run_install([completed(1, message)],
+                                                   [False])[:4], (1, 1, 1, 0))
+
     def test_transient_retries_are_bounded(self):
         self.assertEqual(self.run_install([completed(1, 'HTTP 503')] * 3,
                                            [False] * 3)[:4], (1, 3, 3, 2))
