@@ -9,6 +9,14 @@ assignees: []
 ## Goal and scope
 <!-- Describe public product behavior and the smallest intended change. -->
 
+## Dispatch and agent claim
+- Coordination queue: #62
+- Parent implementation issue:
+- Status: READY / IN_PROGRESS / BLOCKED / REVIEW / DONE
+- Agent platform / intended worktree owner:
+- Dependencies / do-not-start-before:
+- GitHub comment with task claim (URL, when active):
+
 ## Platform, ownership, and branch
 - Platform / backend:
 - Allowed source directories:
@@ -37,3 +45,12 @@ local environment configuration outside this public repository.
 
 ## Hand-off
 <!-- Note remaining blockers without pasting local environment values. -->
+- Current status:
+- PR URL / head commit SHA:
+- Tests actually run (OS/backend + outcome):
+- Blocker or next dependency:
+- Exactly one recommended next action:
+- Return status to the assigned implementation issue, not only this template.
+
+Do not assume an Issue triggers or wakes an unattended local Codex agent.
+Local polling/dispatch must be configured separately with user permission.
