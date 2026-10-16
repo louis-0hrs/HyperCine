@@ -17,6 +17,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cstring>
+#include <thread>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -60,6 +61,7 @@ struct BenchmarkMetrics {
     size_t avgCompressedBytes;
     double compressionRatio;
     size_t peakMemoryBytes;
+    std::string peakMemoryMetric;
 };
 
 std::string GetCpuBrandString() {
@@ -78,14 +80,83 @@ std::string GetCpuBrandString() {
     return "Unknown CPU";
 }
 
-size_t GetPeakWorkingSetBytes() {
+// Reported logical hardware threads. Windows keeps the system-info query it has
+// always used so recorded Windows baselines stay comparable; other platforms use
+// the portable standard query and never report a zero thread count.
+int GetLogicalThreadCount() {
+#ifdef _WIN32
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+    return static_cast<int>(sysInfo.dwNumberOfProcessors);
+#else
+    unsigned int count = std::thread::hardware_concurrency();
+    return count > 0 ? static_cast<int>(count) : 1;
+#endif
+}
+
+// Host OS this binary was built for. Build-time constant, not a claim about a
+// specific machine or its physical core/NUMA topology.
+const char* GetBuildOsName() {
+#if defined(_WIN32)
+    return "Windows x64";
+#elif defined(__APPLE__)
+    return "macOS";
+#elif defined(__linux__)
+    return "Linux";
+#else
+    return "Unknown";
+#endif
+}
+
+// Compiler that built this binary. Uses the CMake-provided identifier/version
+// (see benchmarks/CMakeLists.txt) and falls back to a plain toolchain name.
+const char* GetCompilerDescription() {
+#if defined(HYPERCINE_BENCH_COMPILER)
+    return HYPERCINE_BENCH_COMPILER;
+#elif defined(_MSC_VER)
+    return "MSVC";
+#elif defined(__clang__)
+    return "Clang";
+#elif defined(__GNUC__)
+    return "GCC";
+#else
+    return "Unknown";
+#endif
+}
+
+// Peak memory is a platform-specific measurement (Windows working set vs POSIX
+// resident set); the metric name travels with the value so unrelated counters
+// are never silently compared across operating systems.
+struct PeakMemoryReport {
+    size_t bytes;
+    const char* metric;
+};
+
+PeakMemoryReport GetPeakMemoryReport() {
 #ifdef _WIN32
     PROCESS_MEMORY_COUNTERS pmc;
     if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        return pmc.PeakWorkingSetSize;
+        return { static_cast<size_t>(pmc.PeakWorkingSetSize), "windows_peak_working_set" };
     }
+    return { 0, "unavailable" };
+#elif defined(__linux__)
+    std::ifstream status("/proc/self/status");
+    std::string key;
+    while (status >> key) {
+        if (key == "VmHWM:") {
+            size_t kb = 0;
+            if (status >> kb) {
+                return { kb * 1024, "linux_vmhwm" };
+            }
+            break;
+        }
+    }
+    return { 0, "unavailable" };
+#else
+    // No equivalent peak counter is read here; report it explicitly as
+    // unavailable rather than reusing another platform's metric.
+    return { 0, "unavailable" };
 #endif
-    return 0;
 }
 
 // Generate realistic synthetic frame data (checkerboard + diagonal gradient)
@@ -233,7 +304,9 @@ BenchmarkMetrics RunResolutionBenchmark(const BenchmarkConfig& cfg) {
 
     CFHD_CloseDecoder(decoder);
 
-    metrics.peakMemoryBytes = GetPeakWorkingSetBytes();
+    const PeakMemoryReport peakMemory = GetPeakMemoryReport();
+    metrics.peakMemoryBytes = peakMemory.bytes;
+    metrics.peakMemoryMetric = peakMemory.metric;
 
     // Print summary table row
     std::cout << std::fixed << std::setprecision(2);
@@ -247,7 +320,7 @@ BenchmarkMetrics RunResolutionBenchmark(const BenchmarkConfig& cfg) {
               << metrics.decodeMinLatencyMs << " - " << metrics.decodeMaxLatencyMs << " ms]\n";
     std::cout << "  Comp:   " << (metrics.avgCompressedBytes / 1024) << " KB/frame ("
               << metrics.compressionRatio << ":1) | Peak RAM: "
-              << (metrics.peakMemoryBytes / (1024 * 1024)) << " MB\n";
+              << (metrics.peakMemoryBytes / (1024 * 1024)) << " MB (" << metrics.peakMemoryMetric << ")\n";
 
     return metrics;
 }
@@ -257,23 +330,30 @@ void WriteResultsJson(const std::string& filepath,
                       const std::string& cpuModel,
                       int threadCount)
 {
-    std::string normPath = filepath;
-    for (char& c : normPath) {
+#if defined(_WIN32)
+    // Windows tooling expects backslash separators in the recorded path.
+    std::string nativePath = filepath;
+    for (char& c : nativePath) {
         if (c == '/') c = '\\';
     }
-    std::ofstream out(normPath);
+#else
+    // POSIX paths are used as given; turning '/' into '\\' would create a
+    // literal file name instead of a directory path.
+    std::string nativePath = filepath;
+#endif
+    std::ofstream out(nativePath);
     if (!out.is_open()) {
-        std::cerr << "Failed to write JSON output: " << normPath << std::endl;
+        std::cerr << "Failed to write JSON output: " << nativePath << std::endl;
         perror("Reason");
         return;
     }
 
     out << "{\n";
     out << "  \"system\": {\n";
-    out << "    \"os\": \"Windows x64\",\n";
+    out << "    \"os\": \"" << GetBuildOsName() << "\",\n";
     out << "    \"cpu_model\": \"" << cpuModel << "\",\n";
     out << "    \"thread_count\": " << threadCount << ",\n";
-    out << "    \"compiler\": \"MSVC 19.44 / Visual Studio 2022\",\n";
+    out << "    \"compiler\": \"" << GetCompilerDescription() << "\",\n";
     out << "    \"build_type\": \"Release\",\n";
     out << "    \"upstream_commit\": \"11574d0295771edccadd17af14af74a539f924c7\"\n";
     out << "  },\n";
@@ -309,7 +389,8 @@ void WriteResultsJson(const std::string& filepath,
         out << "        \"avg_bytes\": " << m.avgCompressedBytes << ",\n";
         out << "        \"ratio\": " << m.compressionRatio << "\n";
         out << "      },\n";
-        out << "      \"peak_memory_bytes\": " << m.peakMemoryBytes << "\n";
+        out << "      \"peak_memory_bytes\": " << m.peakMemoryBytes << ",\n";
+        out << "      \"peak_memory_metric\": \"" << m.peakMemoryMetric << "\"\n";
         out << "    }" << (i + 1 < results.size() ? "," : "") << "\n";
     }
 
@@ -326,16 +407,21 @@ int main(int argc, char* argv[]) {
     std::cout << "=========================================================\n";
 
     std::string cpuModel = GetCpuBrandString();
-    SYSTEM_INFO sysInfo;
-    GetSystemInfo(&sysInfo);
-    int threadCount = sysInfo.dwNumberOfProcessors;
+    int threadCount = GetLogicalThreadCount();
 
     std::cout << "CPU:          " << cpuModel << "\n";
     std::cout << "Cores/Threads:" << threadCount << "\n";
-    std::cout << "Compiler:     MSVC 19.44 (Visual Studio 2022)\n";
+    std::cout << "Compiler:     " << GetCompilerDescription() << "\n";
     std::cout << "Configuration:BGRA -> 4:2:2 Film3 (Reference CPU)\n";
 
+#if defined(_WIN32)
+    // Preserve the recorded Windows baseline output path on Windows.
     std::string jsonPath = "benchmarks/results/reference_windows_msvc.json";
+#else
+    // Distinct default on non-Windows so a POSIX run never overwrites the
+    // recorded Windows baseline JSON.
+    std::string jsonPath = "benchmarks/results/reference_local.json";
+#endif
     bool run1080p = true;
     bool run4k = true;
     bool run8k = true;
