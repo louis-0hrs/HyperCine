@@ -6,7 +6,7 @@ Dual-licensed under MIT OR Apache-2.0.
 
 This branch adds a CUDA production path for progressive FIELDPLUS / GOP-2, YUV422, coded precision 10. A request selects exactly one of the two images with `DecodeRequest::frame_index`. Interlaced FIELDPLUS remains unsupported. GOP-1 parsing and reconstruction remain on their existing path.
 
-The implementation is exact for the frozen canonical 64×64 sample, the temporal-asymmetric and motion probes, the chroma-temporal probe, and the frozen 1920×1080 FilmScan3 sample covered by the new reconstruction test. It is not ready for production promotion: the full CUDA and CPU-only suites pass, and the mixed 5,000-output stress, FIELDPLUS lifetime, slot-mode, and multi-instance gates pass. Sanitizer, performance, 4K smoke, and 4K memory gates remain open. A partial 1920×1080 slot-memory measurement is recorded; 4K memory and stream/event deltas remain unmeasured. See the JSON result files under `benchmarks/results/` for per-gate state. Do not interpret unrun gates as passes.
+The implementation is exact for the frozen canonical 64×64 sample, the temporal-asymmetric and motion probes, the chroma-temporal probe, and the frozen 1920×1080 FilmScan3 sample covered by the reconstruction test. Overall production promotion remains HOLD for the separate sanitizer and host memory-safety follow-ups tracked by Issues #13/#38. Issue #14 performance, resource, and provenance gates are PASS as of 2026-10-16; see section 14 and its raw report bundle. Historical sections below retain the gate state known on their original dates.
 
 ## 1. Phase 3B-2R baseline
 
@@ -98,6 +98,17 @@ The matrix/range cross-product now passes: `--matrix-range` compared both FIELDP
 
 The canonical 64×64 fixture also discriminates both format-specific base-LL offsets. Removing the added +24 BGRA offset changes 128 coefficients; removing the +10 signed-planar offset changes 128 coefficients. The production GPU coefficients, temporal stages, and reconstructed output remain exact against upstream for both formats. Evidence is in `benchmarks/results/decode_phase3b2a_lowpass_offsets.json`; the counterfactual was computed against frozen upstream coefficients rather than a separate binary built with offsets disabled.
 
-The same-session GOP-1 A-B-B-A comparison ran the baseline and current progressive benchmark binaries in one environment, with six 100-request measurements per case and build. Eleven of twelve case medians are within 5%. The 1920×1080 flat Automatic case is +5.14% (about 0.05 ms absolute); this single threshold miss remains unresolved, so the GOP-1 performance gate is partial. Full case data and raw runs are in `benchmarks/results/decode_phase3b2a_gop1_regression.json` and the four referenced raw JSON files.
+Historical snapshot (through 2026-10-15): the progressive flat-Automatic case was reported at +5.14% and the interlaced baseline comparison was pending. The follow-up below supersedes that intermediate state.
 
-Still open: run memcheck/leak checking, initcheck, racecheck, and synccheck on a platform where Compute Sanitizer can attach; add stage-level timing; and resolve the one GOP-1 performance case above the 5% threshold. The detailed per-gate files remain explicit about what is partial or not run.
+Historical snapshot (through 2026-10-15): sanitizer and interlaced GOP-1 evidence were incomplete. The separate safety status remains tracked by Issues #13/#38; Issue #14 is updated in section 14.
+## 14. Issue #14 final qualification (2026-10-16)
+
+**Issue #14 performance, resource, and provenance gates: PASS.** The former progressive 1920×1080 flat-Automatic +5.144% case was rerun with 12 100-request block means per build in two A-B-B-A cycles. Median change is +0.647%; the approximate Welch 95% interval for the mean delta is -0.0083 to +0.0453 ms, below the +0.052696 ms five-percent limit.
+
+The frozen interlaced GOP-1 YUY2/FilmScan3 sample was measured in three A-B-B-A cycles with a byte-identical test-only harness. Each build contributes 600 requests per strategy; the timed path includes QueueDecode, WaitForDecode, D2H download, and ReleaseOutput. Compressed sample and upstream BGRA output hashes match. Lightweight, Hybrid, and Automatic mean changes are -0.061%, -0.291%, and -0.157%, respectively. AC was checked at each block; the final cycle also captured GPU clocks, power, temperature, and P-state.
+
+Both compared commits configured and built CUDA Release benchmarks with CUDA 12.8.61, Visual Studio 17 2022 x64, MSVC 19.44.35229.0, architecture 89, and upstream/tests/benchmarks enabled. The restricted-environment C1902 was reproduced during compiler-ID/PDB creation; both clean local CUDA configurations succeeded with ordinary process access, without decoder changes.
+
+Memory evidence records 1080p/4K device, pinned, and pageable footprints; lazy per-slot FIELDPLUS first-use growth; zero warmed steady-state allocation delta; and a source-level count of 13 streams/197 events per slot (zero delta). The API documents first-use behavior and recommends warming every slot before latency-sensitive use. The complete CUDA CTest suite passed 44/44 in 767.02 seconds. FIELDPLUS per-stage timing remains a non-blocking follow-up.
+
+Raw JSON, telemetry, and the aggregate decision are in benchmarks/results/decode_phase3b2a_issue14_qualification_20261016/. The interlaced harness source and CMake target are identical across both benchmark builds. This PASS is limited to Issue #14; PR #12 remains Draft/HOLD for the separate safety qualification tracked by Issues #13/#38.

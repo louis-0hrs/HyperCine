@@ -118,6 +118,8 @@ public:
     bool IsInitialized() const;
     DecoderCapabilities Capabilities() const;
     int SlotCount() const;
+    // Progressive FIELDPLUS/GOP-2 buffers are allocated lazily on first use per slot.
+    // For latency-sensitive use, submit and release a FIELDPLUS request on each slot before timing.
     // Accepted malformed samples receive a Failed ticket requiring release.
     // Saturation returns an empty ticket and Busy, without consuming a slot.
     // Input bytes may be reused as soon as this call returns. Host indexing is
