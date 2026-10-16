@@ -170,3 +170,14 @@ The installed-hook matrix currently requires POSIX and is skipped by native
 Windows Python; Git Bash/MSYS and Windows native execution remain separate
 qualification work. All test data is synthetic and all remotes are disposable
 local bare repositories, never public endpoints.
+
+## Overlapping remote names
+
+Keep configured remote names separate at slash boundaries. For example,
+`public` and `public/private` share a remote-tracking namespace: Git's
+`--remotes=public` includes refs fetched from both. The pre-push guard blocks
+pushes through either name while both are configured, because private history
+must not count as already published. Rename one remote to a separate namespace
+before retrying. Names such as `public` and `public-review` remain independent.
+This check applies to configured remote names; it does not validate arbitrary
+custom fetch refspecs or manually populated remote-tracking refs.
