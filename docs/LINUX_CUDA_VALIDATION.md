@@ -15,7 +15,7 @@ installed or modified: the existing system toolkit was used as is.
 
 | Item | Value |
 | --- | --- |
-| Host / kernel | `Openclaw`, Linux 6.12.100+deb13-amd64 (Debian 13.6 trixie), x86_64 |
+| Host / kernel | Linux 6.12.100+deb13-amd64 (Debian 13.6 trixie), x86_64 |
 | GPU | NVIDIA A2, UUID `GPU-2c023501-e70d-293f-0d41-98842bc468f1`, PCI `00000000:00:07.0` |
 | Compute capability | 8.6 (`-DCMAKE_CUDA_ARCHITECTURES=86`) |
 | Driver | 550.163.01 |
@@ -180,8 +180,8 @@ above is kept for history; it is not silently superseded.
 ## 7. Windows golden corpus: received, verified, and what it shows
 
 The archived corpus was supplied through the NAS space as
-`~/.openclaw/workspace/nas-openclawspace/HyperCine/golden/windows/qualities/2026-10-15/`
-(`//192.168.249.38/Openclawspace`), read-only in this work. Pre-flight was done
+`$HYPERCINE_GOLDEN_DIR/qualities/2026-10-15/`
+on a read-only external corpus mount. Pre-flight was done
 before any comparison, as the issue requires:
 
 * `TRANSFER_SHA256.tsv` itself hashes to
