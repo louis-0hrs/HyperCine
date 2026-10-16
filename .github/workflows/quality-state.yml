@@ -1,0 +1,56 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+name: Portable quality state
+
+on:
+  push:
+    paths:
+      - 'include/hypercine/quality_state.h'
+      - 'src/core/quality_state.cpp'
+      - 'tests/quality_state*'
+      - 'tests/test_quality_state.cpp'
+      - 'CMakeLists.txt'
+      - '.github/workflows/quality-state.yml'
+  pull_request:
+    paths:
+      - 'include/hypercine/quality_state.h'
+      - 'src/core/quality_state.cpp'
+      - 'tests/quality_state*'
+      - 'tests/test_quality_state.cpp'
+      - 'CMakeLists.txt'
+      - '.github/workflows/quality-state.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-state:
+    name: Quality state (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64
+            runner: macos-15
+            osx_arch: arm64
+          - name: Windows MSVC x64
+            runner: windows-2022
+            osx_arch: ''
+          - name: Linux x64
+            runner: ubuntu-24.04
+            osx_arch: ''
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure portable calculator only
+        shell: bash
+        run: |
+          flags=()
+          if [[ "${{ matrix.osx_arch }}" != "" ]]; then flags+=(-DCMAKE_OSX_ARCHITECTURES=${{ matrix.osx_arch }}); fi
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+            -DHYPERCINE_BUILD_QUALITY_STATE_ONLY=ON "${flags[@]}"
+      - name: Build
+        run: cmake --build build --config Release --parallel 3
+      - name: CTest
+        run: ctest --test-dir build -C Release --output-on-failure
