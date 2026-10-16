@@ -36,6 +36,29 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(outcome[:4], (0, 2, 2, 1))
         self.assertIn('HTTP=503', outcome[4])
 
+    def test_chocolatey_v2_feed_status_retries_then_succeeds(self):
+        # Sanitized wording from the actual Chocolatey V2 feed failure.
+        for status in (429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                message = (f'Response status code does not indicate success: {status} '
+                           '(Service Unavailable). Unable to find package \'ffmpeg\'. '
+                           'installed 0/0 packages')
+                outcome = self.run_install([completed(stdout=message), completed()],
+                                           [False, True])
+                self.assertEqual(outcome[:4], (0, 2, 2, 1))
+                self.assertIn(f'HTTP={status}', outcome[4])
+                self.assertNotIn(message, outcome[4])
+
+    def test_chocolatey_v2_permanent_status_does_not_retry(self):
+        message = 'Response status code does not indicate success: 404 (Not Found).'
+        self.assertEqual(self.run_install([completed(1, message)],
+                                         [False])[:4], (1, 1, 1, 0))
+
+    def test_chocolatey_v2_retries_remain_bounded(self):
+        message = 'Response status code does not indicate success: 503 (Service Unavailable).'
+        self.assertEqual(self.run_install([completed(stdout=message)] * gate.ATTEMPTS,
+                                         [False] * gate.ATTEMPTS)[:4], (1, 3, 3, 2))
+
     def test_nonzero_503_retries(self):
         self.assertEqual(self.run_install([completed(1, stderr='(503) Service Unavailable'),
                                            completed()], [False, True])[:4], (0, 2, 2, 1))
