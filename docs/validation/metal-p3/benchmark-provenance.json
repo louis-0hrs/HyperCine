@@ -1,0 +1,63 @@
+{
+  "started_utc": "2026-10-16T02:58:02.131549+00:00",
+  "order": [
+    {
+      "file": "p1-before.json",
+      "started_utc": "2026-10-16T02:58:02.144635+00:00",
+      "finished_utc": "2026-10-16T02:58:25.412938+00:00"
+    },
+    {
+      "file": "p2-abba-1.json",
+      "started_utc": "2026-10-16T02:58:25.412969+00:00",
+      "finished_utc": "2026-10-16T02:58:46.431939+00:00"
+    },
+    {
+      "file": "p3-abba-1.json",
+      "started_utc": "2026-10-16T02:58:46.431963+00:00",
+      "finished_utc": "2026-10-16T02:59:03.127250+00:00"
+    },
+    {
+      "file": "p3-abba-2.json",
+      "started_utc": "2026-10-16T02:59:03.127280+00:00",
+      "finished_utc": "2026-10-16T02:59:18.244467+00:00"
+    },
+    {
+      "file": "p2-abba-2.json",
+      "started_utc": "2026-10-16T02:59:18.244493+00:00",
+      "finished_utc": "2026-10-16T02:59:39.245952+00:00"
+    },
+    {
+      "file": "p2-abba-3.json",
+      "started_utc": "2026-10-16T02:59:39.245983+00:00",
+      "finished_utc": "2026-10-16T03:00:00.248644+00:00"
+    },
+    {
+      "file": "p3-abba-3.json",
+      "started_utc": "2026-10-16T03:00:00.248673+00:00",
+      "finished_utc": "2026-10-16T03:00:15.359117+00:00"
+    },
+    {
+      "file": "p3-abba-4.json",
+      "started_utc": "2026-10-16T03:00:15.359164+00:00",
+      "finished_utc": "2026-10-16T03:00:30.456643+00:00"
+    },
+    {
+      "file": "p2-abba-4.json",
+      "started_utc": "2026-10-16T03:00:30.456672+00:00",
+      "finished_utc": "2026-10-16T03:00:51.471660+00:00"
+    },
+    {
+      "file": "p1-after.json",
+      "started_utc": "2026-10-16T03:00:51.471701+00:00",
+      "finished_utc": "2026-10-16T03:01:14.740224+00:00"
+    }
+  ],
+  "binary_sha256": {
+    "p1": "ffa0d789ab8440fb7eb3e457488d70a41aba1a753a71d60fc622577fa606c31f",
+    "p2": "7194990bd1b6b79300d6487c4387b1ae35320803810c45eb97baeb880a4fdf22",
+    "p3": "455f85478bed71a49aca760ef9556841eeca8750332f76e4290094bda60caf15"
+  },
+  "p3_source_sha": "43bba9fa6be191f2cc83f593567e7c1f1b475d40",
+  "overlap": "No task-launched builds/tests overlap; uncontrolled background activity remains possible",
+  "finished_utc": "2026-10-16T03:01:14.740252+00:00"
+}

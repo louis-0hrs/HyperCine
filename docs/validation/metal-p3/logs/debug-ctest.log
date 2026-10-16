@@ -1,0 +1,82 @@
+Internal ctest changing into directory: /tmp/hypercine-entropy-p3/build-debug
+Test project /tmp/hypercine-entropy-p3/build-debug
+      Start  1: filmscan3_backend_selection
+ 1/36 Test  #1: filmscan3_backend_selection ...........   Passed    1.63 sec
+      Start  2: filmscan3_metal_required
+ 2/36 Test  #2: filmscan3_metal_required ..............   Passed   91.71 sec
+      Start  3: filmscan3_api
+ 3/36 Test  #3: filmscan3_api .........................   Passed    1.83 sec
+      Start  4: filmscan3_fixture_integrity
+ 4/36 Test  #4: filmscan3_fixture_integrity ...........   Passed    0.01 sec
+      Start  5: entropy_bitexact
+ 5/36 Test  #5: entropy_bitexact ......................   Passed    2.68 sec
+      Start  6: standalone_color
+ 6/36 Test  #6: standalone_color ......................   Passed    0.26 sec
+      Start  7: standalone_wavelet
+ 7/36 Test  #7: standalone_wavelet ....................   Passed    0.00 sec
+      Start  8: standalone_quantization
+ 8/36 Test  #8: standalone_quantization ...............   Passed    0.00 sec
+      Start  9: standalone_entropy
+ 9/36 Test  #9: standalone_entropy ....................   Passed    0.01 sec
+      Start 10: standalone_sample
+10/36 Test #10: standalone_sample .....................   Passed    0.09 sec
+      Start 11: standalone_geometry
+11/36 Test #11: standalone_geometry ...................   Passed    1.54 sec
+      Start 12: standalone_oracle_fixtures
+12/36 Test #12: standalone_oracle_fixtures ............   Passed    0.29 sec
+      Start 13: windows_reference_inputs
+13/36 Test #13: windows_reference_inputs ..............   Passed   34.63 sec
+      Start 14: windows_reference_guardrails
+14/36 Test #14: windows_reference_guardrails ..........   Passed    0.17 sec
+      Start 15: windows_reference_parser
+15/36 Test #15: windows_reference_parser ..............   Passed    0.04 sec
+      Start 16: windows_reference_sdk_coefficients
+16/36 Test #16: windows_reference_sdk_coefficients ....   Passed    5.90 sec
+      Start 17: windows_reference_binaries
+17/36 Test #17: windows_reference_binaries ............   Passed    7.36 sec
+      Start 18: filmscan3_autonomous_manifest
+18/36 Test #18: filmscan3_autonomous_manifest .........   Passed   13.45 sec
+      Start 19: filmscan3_sequence_manifest
+19/36 Test #19: filmscan3_sequence_manifest ...........   Passed   91.40 sec
+      Start 20: filmscan3_actual_tier_a
+20/36 Test #20: filmscan3_actual_tier_a ...............   Passed   14.45 sec
+      Start 21: filmscan3_actual_sequence
+21/36 Test #21: filmscan3_actual_sequence .............   Passed  100.70 sec
+      Start 22: filmscan3_external_decode
+22/36 Test #22: filmscan3_external_decode .............   Passed   22.94 sec
+      Start 23: standalone_external_decode
+23/36 Test #23: standalone_external_decode ............   Passed    0.29 sec
+      Start 24: standalone_external_256x256
+24/36 Test #24: standalone_external_256x256 ...........   Passed    1.66 sec
+      Start 25: standalone_external_1920x1080
+25/36 Test #25: standalone_external_1920x1080 .........   Passed   43.86 sec
+      Start 26: standalone_external_128x24
+26/36 Test #26: standalone_external_128x24 ............   Passed    0.13 sec
+      Start 27: standalone_external_384x40
+27/36 Test #27: standalone_external_384x40 ............   Passed    0.20 sec
+      Start 28: standalone_external_4096x24
+28/36 Test #28: standalone_external_4096x24 ...........   Passed    0.67 sec
+      Start 29: standalone_external_128x4096
+29/36 Test #29: standalone_external_128x4096 ..........   Passed    3.14 sec
+      Start 30: standalone_external_2048x1024
+30/36 Test #30: standalone_external_2048x1024 .........   Passed   12.23 sec
+      Start 31: standalone_windows_oracle_replay
+31/36 Test #31: standalone_windows_oracle_replay ......   Passed    0.24 sec
+      Start 32: filmscan3_metal_autonomous_manifest
+32/36 Test #32: filmscan3_metal_autonomous_manifest ...   Passed   24.02 sec
+      Start 33: filmscan3_metal_sequence_manifest
+33/36 Test #33: filmscan3_metal_sequence_manifest .....   Passed  160.07 sec
+      Start 34: filmscan3_metal_actual_tier_a
+34/36 Test #34: filmscan3_metal_actual_tier_a .........   Passed   23.88 sec
+      Start 35: filmscan3_metal_actual_sequence
+35/36 Test #35: filmscan3_metal_actual_sequence .......   Passed  167.57 sec
+      Start 36: filmscan3_metal_external_decode
+36/36 Test #36: filmscan3_metal_external_decode .......   Passed   37.93 sec
+
+100% tests passed, 0 tests failed out of 36
+
+Label Time Summary:
+gpu-required    = 505.17 sec*proc (6 tests)
+metal           = 505.17 sec*proc (6 tests)
+
+Total Test time (real) = 866.97 sec

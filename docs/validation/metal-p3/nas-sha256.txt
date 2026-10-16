@@ -1,0 +1,2 @@
+fdc9cd0e881db417e23423c8cd3f9f1e27161f2c946e40edfa2bcb8b56d58dcf  /Volumes/DeDub/HyperCine/golden/windows/fs3/2026-10-14/tier-a/reference-corpus-tier-a-20261014.zip
+9667d078ca54dccaf4f849f0136a5a8aae674c2c5e603e29b6cfc225aab21b06  /Volumes/DeDub/HyperCine/golden/windows/fs3/2026-10-14/sequence-1080/reference-corpus-sequence-1080-tier-c-20261015.zip

@@ -1,0 +1,60 @@
+Internal ctest changing into directory: /tmp/hypercine-entropy-p3/build-cpu
+Test project /tmp/hypercine-entropy-p3/build-cpu
+      Start  1: filmscan3_backend_selection
+ 1/27 Test  #1: filmscan3_backend_selection ..........   Passed    0.09 sec
+      Start  2: filmscan3_api
+ 2/27 Test  #2: filmscan3_api ........................   Passed    0.12 sec
+      Start  3: filmscan3_fixture_integrity
+ 3/27 Test  #3: filmscan3_fixture_integrity ..........   Passed    0.01 sec
+      Start  4: entropy_bitexact
+ 4/27 Test  #4: entropy_bitexact .....................   Passed    0.64 sec
+      Start  5: standalone_color
+ 5/27 Test  #5: standalone_color .....................   Passed    0.00 sec
+      Start  6: standalone_wavelet
+ 6/27 Test  #6: standalone_wavelet ...................   Passed    0.00 sec
+      Start  7: standalone_quantization
+ 7/27 Test  #7: standalone_quantization ..............   Passed    0.00 sec
+      Start  8: standalone_entropy
+ 8/27 Test  #8: standalone_entropy ...................   Passed    0.00 sec
+      Start  9: standalone_sample
+ 9/27 Test  #9: standalone_sample ....................   Passed    0.01 sec
+      Start 10: standalone_geometry
+10/27 Test #10: standalone_geometry ..................   Passed    0.15 sec
+      Start 11: standalone_oracle_fixtures
+11/27 Test #11: standalone_oracle_fixtures ...........   Passed    0.03 sec
+      Start 12: windows_reference_inputs
+12/27 Test #12: windows_reference_inputs .............   Passed    2.58 sec
+      Start 13: windows_reference_guardrails
+13/27 Test #13: windows_reference_guardrails .........   Passed    0.15 sec
+      Start 14: windows_reference_parser
+14/27 Test #14: windows_reference_parser .............   Passed    0.04 sec
+      Start 15: windows_reference_sdk_coefficients
+15/27 Test #15: windows_reference_sdk_coefficients ...   Passed    0.53 sec
+      Start 16: filmscan3_autonomous_manifest
+16/27 Test #16: filmscan3_autonomous_manifest ........   Passed    1.45 sec
+      Start 17: filmscan3_sequence_manifest
+17/27 Test #17: filmscan3_sequence_manifest ..........   Passed    9.85 sec
+      Start 18: filmscan3_external_decode
+18/27 Test #18: filmscan3_external_decode ............   Passed    6.14 sec
+      Start 19: standalone_external_decode
+19/27 Test #19: standalone_external_decode ...........   Passed    0.25 sec
+      Start 20: standalone_external_256x256
+20/27 Test #20: standalone_external_256x256 ..........   Passed    1.48 sec
+      Start 21: standalone_external_1920x1080
+21/27 Test #21: standalone_external_1920x1080 ........   Passed   38.99 sec
+      Start 22: standalone_external_128x24
+22/27 Test #22: standalone_external_128x24 ...........   Passed    0.12 sec
+      Start 23: standalone_external_384x40
+23/27 Test #23: standalone_external_384x40 ...........   Passed    0.18 sec
+      Start 24: standalone_external_4096x24
+24/27 Test #24: standalone_external_4096x24 ..........   Passed    0.59 sec
+      Start 25: standalone_external_128x4096
+25/27 Test #25: standalone_external_128x4096 .........   Passed    2.80 sec
+      Start 26: standalone_external_2048x1024
+26/27 Test #26: standalone_external_2048x1024 ........   Passed   10.74 sec
+      Start 27: standalone_windows_oracle_replay
+27/27 Test #27: standalone_windows_oracle_replay .....   Passed    0.24 sec
+
+100% tests passed, 0 tests failed out of 27
+
+Total Test time (real) =  77.20 sec

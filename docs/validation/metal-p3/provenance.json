@@ -1,0 +1,14 @@
+{
+  "date_local": "2026-10-16",
+  "base_sha": "db98869012a75fa628110e14fb25f93697a78754",
+  "baseline_benchmark_sha256": "7194990bd1b6b79300d6487c4387b1ae35320803810c45eb97baeb880a4fdf22",
+  "hardware": {"cpu": "Apple M2 Pro", "cores": "6P+4E", "gpu_cores": 16, "ram_gib": 16},
+  "os": "macOS 26.5.2 (25F84)",
+  "compiler": "AppleClang 21.0.0.21000101",
+  "flags": "-O3 -DNDEBUG -std=c++17 -arch arm64",
+  "rosetta_proc_translated": 0,
+  "power": "AC attached",
+  "thermal": "pmset: no recorded thermal or performance warning; temperature/clocks/energy not measured",
+  "benchmark_threads": "single host encoder thread; Metal unchanged",
+  "scope": "1080p BGRA8 YUV422 p10 progressive GOP1 FilmScan3; hashes enabled"
+}
