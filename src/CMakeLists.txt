@@ -40,6 +40,14 @@ else()
     )
 endif()
 
+# hypercine_wavelet calls the upstream CFHD encode/decode entry points. Declaring
+# that dependency keeps the link line ordered (hypercine_wavelet before
+# CFHDCodecStatic) on toolchains whose static archive resolution is a single
+# left-to-right pass, e.g. GNU ld.
+if(TARGET CFHDCodecStatic)
+    target_link_libraries(hypercine_wavelet PUBLIC CFHDCodecStatic)
+endif()
+
 if(TARGET hypercine_core)
     target_link_libraries(hypercine_core INTERFACE hypercine_wavelet)
 endif()

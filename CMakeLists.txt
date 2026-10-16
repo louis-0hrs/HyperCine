@@ -316,6 +316,32 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/upstream/WarpLib
 )
 
+# Linux portability shims. upstream/ itself is never modified.
+#
+# 1. upstream/Common/CFHDAllocator.h declares size_t based typedefs without
+#    including <stddef.h>. MSVC and older libstdc++ provided size_t
+#    transitively, GCC 14 does not. Force the declaration into the C++ targets
+#    defined below (src/, tests/, benchmarks/); targets already created above -
+#    the pristine upstream SDK build - keep their original flags.
+#    The joined form `-include<file>` is required because a generator expression
+#    cannot expand to two command line arguments. nvcc rejects the joined form,
+#    hence the COMPILE_LANGUAGE:CXX guard.
+# 2. CFHDCodecStatic is a static archive with an empty link interface; the
+#    upstream tools append -luuid themselves, our targets link the archive
+#    directly and therefore need uuid_generate resolved here.
+if(UNIX AND NOT APPLE)
+    add_compile_options(
+        "$<$<COMPILE_LANGUAGE:CXX>:-include${CMAKE_CURRENT_SOURCE_DIR}/cmake/linux_size_t_prefix.h>")
+
+    if(TARGET CFHDCodecStatic)
+        find_library(HYPERCINE_UUID_LIBRARY uuid)
+        if(NOT HYPERCINE_UUID_LIBRARY)
+            message(FATAL_ERROR "libuuid not found. upstream/EncoderSDK needs uuid_generate on UNIX.")
+        endif()
+        target_link_libraries(CFHDCodecStatic INTERFACE ${HYPERCINE_UUID_LIBRARY})
+    endif()
+endif()
+
 # Placeholder target for HyperCine library integration
 add_library(hypercine_core INTERFACE)
 target_include_directories(hypercine_core INTERFACE

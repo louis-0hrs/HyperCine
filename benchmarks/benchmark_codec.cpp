@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include "hypercine/platform_compat.h"
+
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -326,9 +328,7 @@ int main(int argc, char* argv[]) {
     std::cout << "=========================================================\n";
 
     std::string cpuModel = GetCpuBrandString();
-    SYSTEM_INFO sysInfo;
-    GetSystemInfo(&sysInfo);
-    int threadCount = sysInfo.dwNumberOfProcessors;
+    int threadCount = HYPERCINE_CPU_THREAD_COUNT();
 
     std::cout << "CPU:          " << cpuModel << "\n";
     std::cout << "Cores/Threads:" << threadCount << "\n";

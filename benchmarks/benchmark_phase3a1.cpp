@@ -30,6 +30,8 @@ extern "C" {
 
 #include "hypercine/phase3a.h"
 
+#include "hypercine/platform_compat.h"
+
 #include <cuda_runtime.h>
 
 #include <algorithm>
@@ -140,11 +142,11 @@ std::string JsonEscape(const std::string& text) {
 
 std::string Capture(const std::string& command) {
     std::string output;
-    FILE* pipe = _popen(command.c_str(), "r");
+    FILE* pipe = HYPERCINE_POPEN(command.c_str(), "r");
     if (!pipe) return output;
     char buf[512];
     while (std::fgets(buf, sizeof(buf), pipe)) output += buf;
-    _pclose(pipe);
+    HYPERCINE_PCLOSE(pipe);
     while (!output.empty() && (output.back() == '\n' || output.back() == '\r')) output.pop_back();
     return output;
 }

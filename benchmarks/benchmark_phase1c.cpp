@@ -35,6 +35,8 @@ void EncodeQuantizedGroup(ENCODER* encoder, TRANSFORM* transform[], int num_tran
 #undef protected
 
 #include "hypercine/wavelet.h"
+
+#include "hypercine/platform_compat.h"
 #include "hypercine/canonical.h"
 #include "hypercine/entropy_parallel.h"
 #include "hypercine/hybrid_encoder.h"
@@ -284,7 +286,7 @@ int main(int argc, char** argv) {
     json << "    \"timer\": \"CFHD_EncodeSample wall clock, GetSampleData excluded\",\n";
     json << "    \"upstream_threaded_encoder\": " << _THREADED_ENCODER << ",\n";
     json << "    \"cpu_affinity_mask\": " << AffinityMask() << ",\n";
-    json << "    \"compiler\": \"MSVC " << _MSC_VER << "\",\n";
+    json << "    \"compiler\": \"" HYPERCINE_COMPILER_STRING "\",\n";
     json << "    \"build_type\": \"Release\"\n  },\n";
     json << "  \"system\": {\n";
     json << "    \"cpu_model\": \"" << JsonEscape(cpu) << "\",\n";
