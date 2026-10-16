@@ -111,10 +111,22 @@ packets with FFmpeg to actual `yuv422p10le`. It checks the native pixel format
 and dimensions with ffprobe before conversion, checks exact output extent and
 10-bit range, and requires aggregate p10 PSNR >35 dB against CPU conversion
 planes. It additionally wraps and decodes all 16 GOP1 packets together,
-verifying exactly 16 frames and the full decoded byte extent. Only FFmpeg's
+verifying exactly 16 frames and the full decoded byte extent. Every sequence
+frame must also match the SHA-256 of its independently decoded packet, in
+order. The report records these 16 hashes and `sequence_pixel_identity`;
+older reports without this field do not establish this additional gate.
+The mandatory `filmscan3_geometry_validation` test rejects reordered,
+duplicated, corrupted, truncated and extra frames using synthetic byte data.
+Only FFmpeg's
 CFHD decoder and rawvideo support are needed; no PSNR filter, null muxer,
 pipe protocol or external Python package is required. Temporary inputs,
 references and decoded images are removed after their hashes are recorded.
+
+The follow-up review results and tested source hashes are recorded in
+[`sequence-review.json`](validation/macos-geometry-p4/sequence-review.json).
+The review also tests the original P4 tree combined with the then-current
+main; this is CPU integration evidence, not P4 merge approval or Metal 4K
+qualification.
 
 Reports, native logs, JUnit and exact tested source hashes are under
 `docs/validation/macos-geometry-p4/`. Process RSS is measured after the export
