@@ -9,6 +9,7 @@ on:
     branches: ['**']
     paths:
       - 'CMakeLists.txt'
+      - 'cmake/**'
       - 'include/**'
       - 'src/**'
       - 'tools/**'
@@ -19,6 +20,7 @@ on:
   pull_request:
     paths:
       - 'CMakeLists.txt'
+      - 'cmake/**'
       - 'include/**'
       - 'src/**'
       - 'tools/**'
@@ -63,6 +65,12 @@ jobs:
             machine: x86_64
             config: Release
             sanitize: 'OFF'
+          - name: Linux x64 ASan UBSan
+            runner: ubuntu-24.04
+            system: Linux
+            machine: x86_64
+            config: RelWithDebInfo
+            sanitize: 'ON'
     defaults:
       run:
         shell: bash
