@@ -7,6 +7,32 @@ Raw evidence for the Windows part of issue #13. The narrative report is
 the machine-readable record is [`decode_phase3b2a_issue13_windows.json`](decode_phase3b2a_issue13_windows.json).
 Committed logs are sanitized: host paths, user names and the machine name are redacted.
 
+## Reproducing the runs
+
+Both runners take every checkout-specific path from the environment, contain no absolute local
+path, validate the directories and the expected test binaries up front, and exit 2 with a usage
+line instead of starting a matrix they cannot run.
+
+```
+export HYPERCINE_WORKTREE_DIR=<checkout that holds the build>
+export HYPERCINE_EVIDENCE_DIR=<existing writable directory for the raw logs>
+bash benchmarks/results/decode_phase3b2a_issue13_windows_20261016/host-asan/run-asan-matrix.sh
+bash benchmarks/results/decode_phase3b2a_issue13_windows_20261016/compute-sanitizer/run-sanitizer-matrix.sh
+```
+
+| Variable | Runner | Meaning |
+| --- | --- | --- |
+| `HYPERCINE_WORKTREE_DIR` | both | required; checkout that holds the build directory |
+| `HYPERCINE_EVIDENCE_DIR` | both | required; existing writable directory for the raw logs |
+| `HYPERCINE_ASAN_BIN` | host-asan | test binary directory, default `<worktree>/build-asan/tests/Release` |
+| `HYPERCINE_MSVC_BIN` | host-asan | prepended to `PATH` for the ASan runtime when the toolset directory is not already reachable |
+| `HYPERCINE_SANITIZER_BIN` | compute-sanitizer | test binary directory, default `<worktree>/build-release-sm89/tests/Release` |
+| `HYPERCINE_COMPUTE_SANITIZER` | compute-sanitizer | sanitizer executable, default `compute-sanitizer` on `PATH` |
+
+Non-zero target exit codes are expected and are not script failures: the default reconstruction
+mode reports the upstream read-ahead finding, so the runner records exit code, duration and ASan
+hit count per run instead of aborting on the first non-zero one.
+
 ## host-asan
 
 Built with MSVC AddressSanitizer, CUDA host pass included:
@@ -31,6 +57,12 @@ cmake -B build-asan -S . -G "Visual Studio 17 2022" -A x64 \
 Result: 20/20 `test_decode_phase3b0` runs clean (heap corruption not reproduced); one reproducible
 finding in the upstream oracle (`InvertTemporalQuant16s`, `upstream/Codec/temporal.c:9606`,
 16-byte read past the plane allocation); 64x64, temporal, and 3B-2R paths clean.
+
+`run-matrix.txt` is the output of the parameterized runner on the same machine after the path fix:
+all 33 target runs reported the same exit codes and ASan hit counts as before, only the durations
+differ. The sanitizer runner was checked with `bash -n`, the guard and preflight cases, and a local
+stand-in for `compute-sanitizer` that exercises every command line without touching the GPU; it was
+not re-executed against the GPU in this change.
 
 ## compute-sanitizer
 
