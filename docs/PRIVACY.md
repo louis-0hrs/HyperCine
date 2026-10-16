@@ -21,8 +21,11 @@ not remove it from Git history. This applies equally to Windows, Linux and macOS
    `git config --local core.hooksPath .githooks`
    The hook files require executable permissions on Unix-like systems.
    Where hooks cannot execute, agents must invoke the scanner explicitly.
-6. The pre-push hook scans every outgoing commit. Never bypass the hook
-   by using `--no-verify`, removing it or suppressing scanner findings.
+6. The pre-push hook scans every outgoing commit. Always push through a
+   configured remote name (e.g. `git push origin my-branch`), not a raw URL;
+   new branches exclude only commits already known on that destination
+   remote. Never bypass the hook by using `--no-verify`, removing it or
+   suppressing scanner findings.
 7. Check PR titles, issue bodies and comments separately; Git diff scanners
    cannot inspect public conversation text.
 
@@ -30,9 +33,10 @@ not remove it from Git history. This applies equally to Windows, Linux and macOS
 
 The repository scanner is Python 3 standard-library-only. It checks additions
 in the staging area or each selected commit for RFC1918 IPv4 addresses, private
-DNS suffixes, UNC/SMB/NFS-style shares, user-specific Windows/Unix home paths
-and likely secrets. It reports only a relative file path, line number and rule.
-It does not output the matched value.
+DNS suffixes, UNC/SMB/NFS-style shares, user-specific Windows/Unix home paths,
+tilde-relative home paths and likely secrets. It also scans new path names and
+commit messages. It reports file/line/rule only, with sensitive filenames
+redacted. It does not output the matched value.
 
 It is a **defense in depth**, not proof of privacy. It cannot identify every
 internal hostname, embedded binary metadata, every credential format or leaks
@@ -43,7 +47,9 @@ to silence results; use explicit sanitized data instead.
 
 The independent `Privacy guard / publication-privacy` GitHub Actions job
 scans all commits introduced by a PR, including content later removed in the
-same PR. It additionally checks commits pushed to `main`. Maintainers should
+same PR. It additionally runs on pushes to **every branch**, checking commits
+since the previous push or the verified merge base with `main` on first push.
+Maintainers should
 make the check required in branch protection/rulesets after it is verified.
 GitHub CI begins **after pushing**, so it cannot undo initial public exposure.
 

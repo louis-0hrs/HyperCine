@@ -9,8 +9,10 @@ Usage:
   python ci/privacy_guard.py --commit <sha>
   python ci/privacy_guard.py --commits <base>..HEAD
 
-Only reports repository-relative filename, line and rule; never prints a match.
-It does not validate binary blobs, issue text, GitHub artifacts or old history.
+Only reports filename, line and rule; never prints matching sensitive data.
+It also scans commit messages and repository path names. Sensitive path names are
+redacted in diagnostics. It does not validate binary blobs, issue text, GitHub
+artifacts or old history.
 """
 import argparse
 import ipaddress
@@ -25,6 +27,7 @@ def is_private_network_address(address):
     return a == 10 or (a == 172 and 16 <= b <= 31) or (a == 192 and b == 168)
 UNIX_HOME = re.compile(r"(?<![\w/])/(?:Users|home|root)/[^/\s\"'<>]+")
 WINDOWS_HOME = re.compile(r"\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>]+")
+TILDE_HOME = re.compile(r"(?<![\w/])~/(?:[^\s\"'<>]+)")
 WINDOWS_UNC = re.compile(r"(?<![A-Za-z0-9])\\{2,}[A-Za-z0-9._-]+\\+[A-Za-z0-9.$_-]+")
 POSIX_SHARE = re.compile(r"(?<![A-Za-z0-9:/])//[A-Za-z0-9._-]+/[A-Za-z0-9.$_-]+")
 NETWORK_URI = re.compile(r"\b(?:smb|cifs|nfs|sshfs)://", re.IGNORECASE)
@@ -52,7 +55,7 @@ def rules_for(line):
             continue
         if is_private_network_address(address):
             result.add("PRIVATE_IPV4")
-    if UNIX_HOME.search(line) or WINDOWS_HOME.search(line):
+    if UNIX_HOME.search(line) or WINDOWS_HOME.search(line) or TILDE_HOME.search(line):
         result.add("PERSONAL_ABSOLUTE_PATH")
     if WINDOWS_UNC.search(line) or POSIX_SHARE.search(line) or NETWORK_URI.search(line):
         result.add("NETWORK_SHARE")
@@ -75,6 +78,8 @@ def scan_patch(patch):
         if entry.startswith("+++ b/"):
             path = entry[6:]
             line_number = None
+            for rule in rules_for(path):
+                findings.append(("[SENSITIVE_PATH]", 0, "PATH_" + rule))
         elif entry.startswith("+++ /dev/null"):
             path = None
             line_number = None
@@ -84,7 +89,8 @@ def scan_patch(patch):
         elif entry.startswith("+") and not entry.startswith("+++"):
             if path is not None and line_number is not None:
                 for rule in rules_for(entry[1:]):
-                    findings.append((path, line_number, rule))
+                    findings.append(("[SENSITIVE_PATH]" if rules_for(path)
+                                     else path, line_number, rule))
                 line_number += 1
         elif entry.startswith(" ") and line_number is not None:
             line_number += 1
@@ -110,16 +116,22 @@ def main(argv=None):
     args = parser.parse_args(argv)
     common = ("--no-ext-diff", "--no-color", "--unified=0", "--diff-filter=ACMRT")
     patches = []
+    commits = []
     if args.staged:
         patches.append(git("diff", "--cached", *common))
     elif args.commit:
-        patches.append(git("show", "--format=", "--first-parent", *common, args.commit))
+        commits = [args.commit]
     else:
         commits = git("rev-list", "--reverse", "--topo-order", args.commits).splitlines()
         # Empty ranges are allowed (e.g. synchronized branches with no new commits).
-        for sha in commits:
-            patches.append(git("show", "--format=", "--first-parent", *common, sha))
+    for sha in commits:
+        patches.append(git("show", "--format=", "--first-parent", *common, sha))
     findings = [finding for patch in patches for finding in scan_patch(patch)]
+    # A secret in a commit subject/body is public even when the patch is clean.
+    for sha in commits:
+        message = git("show", "-s", "--format=%B", sha)
+        for rule in rules_for(message):
+            findings.append(("[COMMIT_MESSAGE]", 0, rule))
     if findings:
         for path, line, rule in findings[:100]:
             print("{}:{}: {}".format(path, line, rule), file=sys.stderr)

@@ -25,6 +25,12 @@ class RuleTests(unittest.TestCase):
                        "172.32.0.1"):
             self.assertNotIn("PRIVATE_IPV4", self.codes(public))
 
+    def test_tilde_homedir(self):
+        self.assertIn("PERSONAL_ABSOLUTE_PATH",
+                      self.codes("~/" + ".openclaw/private/log.txt"))
+        self.assertNotIn("PERSONAL_ABSOLUTE_PATH",
+                         self.codes("docs/validation/log.txt"))
+
     def test_local_home_paths(self):
         self.assertIn("PERSONAL_ABSOLUTE_PATH",
                       self.codes("/Users/" + "worker/build/results.json"))
@@ -51,6 +57,14 @@ class RuleTests(unittest.TestCase):
         self.assertNotIn("POSSIBLE_CREDENTIAL", self.codes("password" + "=REDACTED"))
         self.assertIn("TOKEN_PATTERN", self.codes("ghp_" + "A" * 24))
 
+    def test_sensitive_filenames_do_not_echo_name(self):
+        suspect = "private/" + "192." + "168.4.8"
+        patch = "\n".join(("diff --git a/x b/" + suspect, "--- /dev/null",
+                           "+++ b/" + suspect, "@@ -0,0 +1 @@", "+safe"))
+        findings = guard.scan_patch(patch)
+        self.assertIn(("[SENSITIVE_PATH]", 0, "PATH_PRIVATE_IPV4"), findings)
+        self.assertNotIn(suspect, str(findings))
+
     def test_added_only_and_location(self):
         sample = "\n".join(("diff --git a/a b/a", "--- a/a", "+++ b/a",
                             "@@ -4,1 +4,2 @@", "-old " + "192." + "168.1.2",
@@ -59,6 +73,28 @@ class RuleTests(unittest.TestCase):
 
 
 class GitIntegrationTests(unittest.TestCase):
+    def test_commit_message_leak_is_checked(self):
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+            def run(*args):
+                return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      text=True).stdout.strip()
+            run("init", "-q")
+            run("config", "user.email", "test@example.invalid")
+            run("config", "user.name", "Privacy")
+            (cwd / "safe.txt").write_text("safe\n", encoding="utf-8")
+            run("add", "safe.txt")
+            run("commit", "-qm", "baseline")
+            leaked = "10." + "4.6.8"
+            run("commit", "--allow-empty", "-qm", "internal " + leaked)
+            result = subprocess.run([sys.executable, str(Path(guard.__file__).resolve()),
+                                     "--commit", "HEAD"], cwd=cwd, text=True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("COMMIT_MESSAGE", result.stderr)
+            self.assertNotIn(leaked, result.stderr)
+
     def test_intermediate_exposure_is_not_hidden_by_later_cleanup(self):
         with tempfile.TemporaryDirectory() as work:
             cwd = Path(work)
