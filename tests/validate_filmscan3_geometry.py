@@ -38,6 +38,28 @@ def sha(path):
     return value.hexdigest()
 
 
+def verify_sequence(path, expected_hashes, frame_bytes):
+    """Compare decoded frames in order, using at most 1 MiB of read storage."""
+    hashes = []
+    with path.open('rb') as stream:
+        for index, expected in enumerate(expected_hashes):
+            value = hashlib.sha256()
+            remaining = frame_bytes
+            while remaining:
+                block = stream.read(min(remaining, 1024 * 1024))
+                if not block:
+                    raise ValueError('truncated sequence frame ' + str(index))
+                value.update(block)
+                remaining -= len(block)
+            actual = value.hexdigest()
+            if actual != expected:
+                raise ValueError('sequence frame ' + str(index) + ' differs from independent decode')
+            hashes.append(actual)
+        if stream.read(1):
+            raise ValueError('trailing decoded sequence data')
+    return hashes
+
+
 def probe(executable, path, frames):
     info = json.loads(subprocess.check_output([executable, '-v', 'error', '-count_frames',
         '-show_entries', 'stream=width,height,pix_fmt,nb_read_frames', '-of', 'json', str(path)]))
@@ -113,10 +135,13 @@ def main():
         subprocess.run([args.ffmpeg, '-v', 'error', '-xerror', '-y', '-i', str(multi), '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', str(sequence_yuv)], check=True)
         if sequence_yuv.stat().st_size != 16*3840*2160*4:
             raise ValueError('sequence decoded p10 extent/frame count')
+        report['sequence_decoded_sha256'] = verify_sequence(
+            sequence_yuv, [row['decoded_sha256'] for row in report['frames'][3:]], 3840*2160*4)
+        report['sequence_pixel_identity'] = 'PASS'
         if len({r['sample_sha256'] for r in report['frames'][3:]}) != 16:
             raise ValueError('sequence packets do not change')
     (args.output_dir/'geometry.json').write_text(json.dumps(report, indent=2) + '\n')
-    print('PASS: 19 independent 4K FFmpeg p10 decodes, 16-frame sequence, PSNR >35 dB')
+    print('PASS: 19 independent 4K FFmpeg p10 decodes, 16-frame sequence pixel identity, PSNR >35 dB')
 
 
 if __name__ == '__main__':
