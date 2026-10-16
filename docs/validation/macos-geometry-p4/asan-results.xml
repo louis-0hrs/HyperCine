@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="32"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="406"
+	timestamp="2026-10-16T05:34:35"
+	>
+	<testcase name="filmscan3_backend_selection" classname="filmscan3_backend_selection" time="1.24102" status="run">
+		<properties/>
+		<system-out>PASS CPU default/selection, injected unavailable device/pipeline fallback, required-GPU failure
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_api" classname="filmscan3_api" time="0.948797" status="run">
+		<properties/>
+		<system-out>PASS: production FS3 API arithmetic, initial tables, feedback, invalid storage and reset
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_geometry" classname="filmscan3_geometry" time="24.3704" status="run">
+		<properties/>
+		<system-out>PASS: bounded CPU 4K geometry, 19 packets, 16 changing frames, rollback, Reset, pitch, independent sessions
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_fixture_integrity" classname="filmscan3_fixture_integrity" time="0.0101719" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="entropy_bitexact" classname="entropy_bitexact" time="1.99959" status="run">
+		<properties/>
+		<system-out>PASS: independent frozen legacy, full int16 corpus, RLE boundaries, padding, capacity and 1001 repeated bands
+</system-out>
+	</testcase>
+	<testcase name="standalone_color" classname="standalone_color" time="0.734005" status="run">
+		<properties/>
+		<system-out>color PASS
+</system-out>
+	</testcase>
+	<testcase name="standalone_wavelet" classname="standalone_wavelet" time="0.0557064" status="run">
+		<properties/>
+		<system-out>wavelet PASS
+</system-out>
+	</testcase>
+	<testcase name="standalone_quantization" classname="standalone_quantization" time="0.0543572" status="run">
+		<properties/>
+		<system-out>quantization PASS
+</system-out>
+	</testcase>
+	<testcase name="standalone_entropy" classname="standalone_entropy" time="0.0556648" status="run">
+		<properties/>
+		<system-out>entropy PASS
+</system-out>
+	</testcase>
+	<testcase name="standalone_sample" classname="standalone_sample" time="0.105158" status="run">
+		<properties/>
+		<system-out>flat_bgra_128: 3444 bytes, 30 bands parsed
+gradient_checker: 25604 bytes, 30 bands parsed
+canonical_lcg_0x1337BEEF: 15416 bytes, 30 bands parsed
+sample PASS
+</system-out>
+	</testcase>
+	<testcase name="standalone_geometry" classname="standalone_geometry" time="0.884447" status="run">
+		<properties/>
+		<system-out>128x24: L3 height 3, sample 4776 bytes
+256x256: L3 height 32, sample 54608 bytes
+1920x1080: L3 height 135, sample 1712708 bytes
+geometry PASS
+</system-out>
+	</testcase>
+	<testcase name="standalone_oracle_fixtures" classname="standalone_oracle_fixtures" time="0.440547" status="run">
+		<properties/>
+		<system-out>flat: 128x128 YUV422 p10, 3444 bytes
+gradient: 128x128 YUV422 p10, 25604 bytes
+canonical: 128x128 YUV422 p10, 15416 bytes
+-- Oracle fixture SHA-256 checks PASS (12 files)
+</system-out>
+	</testcase>
+	<testcase name="windows_reference_inputs" classname="windows_reference_inputs" time="25.2313" status="run">
+		<properties/>
+		<system-out>{"input_frames_verified": [16, 120], "input_gate": "PASS", "production_gate": "BLOCKED"}
+</system-out>
+	</testcase>
+	<testcase name="windows_reference_guardrails" classname="windows_reference_guardrails" time="0.152152" status="run">
+		<properties/>
+		<system-out>..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.074s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="windows_reference_parser" classname="windows_reference_parser" time="0.0383225" status="run">
+		<properties/>
+		<system-out>..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.002s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="windows_reference_sdk_coefficients" classname="windows_reference_sdk_coefficients" time="3.5683" status="run">
+		<properties/>
+		<system-out>..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.002s
+
+OK
+4 deterministic SDK arithmetic vectors x 30 coefficient hashes verified
+</system-out>
+	</testcase>
+	<testcase name="windows_reference_binaries" classname="windows_reference_binaries" time="5.0685" status="run">
+		<properties/>
+		<system-out>..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.002s
+
+OK
+280/280 files; 16/16 normalized SDK/CUDA samples; 480/480 framed band pairs verified
+4 deterministic SDK arithmetic vectors x 30 coefficient hashes verified
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_autonomous_manifest" classname="filmscan3_autonomous_manifest" time="8.24293" status="run">
+		<properties/>
+		<system-out>{"frames": 16, "autonomous_tables_and_state": "PASS", "full_normalized_samples": "PASS", "actual_windows_bytes": "PENDING", "explicit_metadata_raw_identity": false}
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_sequence_manifest" classname="filmscan3_sequence_manifest" time="50.0705" status="run">
+		<properties/>
+		<system-out>{"frames": 120, "autonomous_tables_and_state": "PASS", "full_normalized_samples": "PASS", "actual_windows_bytes": "PENDING", "explicit_metadata_raw_identity": false}
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_actual_tier_a" classname="filmscan3_actual_tier_a" time="8.59299" status="run">
+		<properties/>
+		<system-out>{"frames": 16, "autonomous_tables_and_state": "PASS", "full_normalized_samples": "PASS", "actual_windows_bytes": "PASS", "explicit_metadata_raw_identity": true}
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_actual_sequence" classname="filmscan3_actual_sequence" time="60.857" status="run">
+		<properties/>
+		<system-out>{"frames": 120, "autonomous_tables_and_state": "PASS", "full_normalized_samples": "PASS", "actual_windows_bytes": "PASS", "explicit_metadata_raw_identity": true}
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_geometry_external_decode" classname="filmscan3_geometry_external_decode" time="137.678" status="run">
+		<properties/>
+		<system-out>PASS: bounded CPU 4K geometry, 19 packets, 16 changing frames, rollback, Reset, pitch, independent sessions
+PASS: 19 independent 4K FFmpeg p10 decodes, 16-frame sequence, PSNR &gt;35 dB
+</system-out>
+	</testcase>
+	<testcase name="filmscan3_external_decode" classname="filmscan3_external_decode" time="14.2853" status="run">
+		<properties/>
+		<system-out>{"frames": 16, "autonomous_tables_and_state": "PASS", "full_normalized_samples": "PASS", "actual_windows_bytes": "PENDING", "explicit_metadata_raw_identity": false}
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_decode" classname="standalone_external_decode" time="0.604012" status="run">
+		<properties/>
+		<system-out>flat: 128x128 YUV422 p10, 3444 bytes
+flat: 128x128 YUV422 p10, 3444 bytes
+{"pattern": "flat", "sample_bytes": 3444, "sample_sha256": "236cacbac9c5f39a5fbd1a4b939619276ccfc622ac486bf5a2ba967bcf28392b", "decoded_sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 16384, "exact_samples": 16384, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 8192, "exact_samples": 8192, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 8192, "exact_samples": 8192, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.06039, "max_error": 0, "format": "yuv422p10le", "width": 128, "height": 128}
+gradient: 128x128 YUV422 p10, 25604 bytes
+gradient: 128x128 YUV422 p10, 25604 bytes
+{"pattern": "gradient", "sample_bytes": 25604, "sample_sh...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_256x256" classname="standalone_external_256x256" time="2.31677" status="run">
+		<properties/>
+		<system-out>flat: 256x256 YUV422 p10, 6996 bytes
+flat: 256x256 YUV422 p10, 6996 bytes
+{"pattern": "flat", "sample_bytes": 6996, "sample_sha256": "5cef6ccae1808771e1eb4468aac1b7fa5e9593c01cf1f30806722d4f40561f9d", "decoded_sha256": "5de8d8dd8dd4353e9cf16779496ed9d827d46801acb87ae74c1a770639f82758", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 65536, "exact_samples": 65536, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 32768, "exact_samples": 32768, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 32768, "exact_samples": 32768, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.064264, "max_error": 0, "format": "yuv422p10le", "width": 256, "height": 256}
+gradient: 256x256 YUV422 p10, 81468 bytes
+gradient: 256x256 YUV422 p10, 81468 bytes
+{"pattern": "gradient", "sample_bytes": 81468, "samp...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_1920x1080" classname="standalone_external_1920x1080" time="41.8989" status="run">
+		<properties/>
+		<system-out>flat: 1920x1080 YUV422 p10, 152540 bytes
+flat: 1920x1080 YUV422 p10, 152540 bytes
+{"pattern": "flat", "sample_bytes": 152540, "sample_sha256": "ad94750dc171b3b2489d5d2b526ea3592f9d81af52a522c963e147d91e4d4eb2", "decoded_sha256": "749e741aff039cb700b83233a47d4e0d2de995eb0341451f8ea074b7cdffac0a", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 2073600, "exact_samples": 2073600, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 1036800, "exact_samples": 1036800, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 1036800, "exact_samples": 1036800, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.216192, "max_error": 0, "format": "yuv422p10le", "width": 1920, "height": 1080}
+gradient: 1920x1080 YUV422 p10, 1818240 bytes
+gradient: 1920x1080 YUV422 p10, 1818240 bytes
+{"pattern": "gradien...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_128x24" classname="standalone_external_128x24" time="0.408402" status="run">
+		<properties/>
+		<system-out>flat: 128x24 YUV422 p10, 2480 bytes
+flat: 128x24 YUV422 p10, 2480 bytes
+{"pattern": "flat", "sample_bytes": 2480, "sample_sha256": "2769102cd99a73501e7629a3c5784a0493fbd230fbb722a68d561c0090c2a345", "decoded_sha256": "116088b5e5540757894342cff19cdb0bfc647151504bb704f2d481236749686f", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 3072, "exact_samples": 3072, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 1536, "exact_samples": 1536, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 1536, "exact_samples": 1536, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.126993, "max_error": 0, "format": "yuv422p10le", "width": 128, "height": 24}
+canonical: 128x24 YUV422 p10, 4776 bytes
+canonical: 128x24 YUV422 p10, 4776 bytes
+{"pattern": "canonical", "sample_bytes": 4776, "sample_sha256":...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_384x40" classname="standalone_external_384x40" time="0.397523" status="run">
+		<properties/>
+		<system-out>flat: 384x40 YUV422 p10, 3344 bytes
+flat: 384x40 YUV422 p10, 3344 bytes
+{"pattern": "flat", "sample_bytes": 3344, "sample_sha256": "70729b31c1296158b9f34dd0a77a9104f316566773afa79d2d4564e7cd45ff76", "decoded_sha256": "fd9d08163b719c38974f20de7c94e39ef3c08a38ca5b59df0fac4f97cf9cea1e", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 15360, "exact_samples": 15360, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 7680, "exact_samples": 7680, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 7680, "exact_samples": 7680, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.059496, "max_error": 0, "format": "yuv422p10le", "width": 384, "height": 40}
+canonical: 384x40 YUV422 p10, 15120 bytes
+canonical: 384x40 YUV422 p10, 15120 bytes
+{"pattern": "canonical", "sample_bytes": 15120, "sample_sha...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_4096x24" classname="standalone_external_4096x24" time="0.86328" status="run">
+		<properties/>
+		<system-out>flat: 4096x24 YUV422 p10, 9404 bytes
+flat: 4096x24 YUV422 p10, 9404 bytes
+{"pattern": "flat", "sample_bytes": 9404, "sample_sha256": "b60a2490d1acc2cf2f660b34638a19b076b5438869f94ff68ac839ad156c4612", "decoded_sha256": "b72ddb2feeca4f712e7fc3fcd8b887d3166dfd5c08ffea9b1b54be467a9b0d5d", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 98304, "exact_samples": 98304, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 49152, "exact_samples": 49152, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 49152, "exact_samples": 49152, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.073042, "max_error": 0, "format": "yuv422p10le", "width": 4096, "height": 24}
+canonical: 4096x24 YUV422 p10, 84428 bytes
+canonical: 4096x24 YUV422 p10, 84428 bytes
+{"pattern": "canonical", "sample_bytes": 84428, "s...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_128x4096" classname="standalone_external_128x4096" time="3.16115" status="run">
+		<properties/>
+		<system-out>flat: 128x4096 YUV422 p10, 40252 bytes
+flat: 128x4096 YUV422 p10, 40252 bytes
+{"pattern": "flat", "sample_bytes": 40252, "sample_sha256": "a21b0f0a4a03e7ec45051645e8fec82556e252cf249ff753b455ab0729bd6981", "decoded_sha256": "d4a71e70fb19ec43e80a97b12e495bd09c77e88d57557c02cc29038ffed83ead", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 524288, "exact_samples": 524288, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 262144, "exact_samples": 262144, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 262144, "exact_samples": 262144, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.100922, "max_error": 0, "format": "yuv422p10le", "width": 128, "height": 4096}
+canonical: 128x4096 YUV422 p10, 425188 bytes
+canonical: 128x4096 YUV422 p10, 425188 bytes
+{"pattern": "canonical", "sample_b...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_external_2048x1024" classname="standalone_external_2048x1024" time="11.4411" status="run">
+		<properties/>
+		<system-out>flat: 2048x1024 YUV422 p10, 154276 bytes
+flat: 2048x1024 YUV422 p10, 154276 bytes
+{"pattern": "flat", "sample_bytes": 154276, "sample_sha256": "e4b8e81081549a9dc64f7ab23dde14e224dd3374362bdc48397288e6661e830a", "decoded_sha256": "0b7024ce8b5135e4c8d24a2758f9ea36665cee75fd4ce2a9532270c8c0bae397", "psnr_yuv_p10_db": null, "yuv_exact": true, "planes": [{"channel": "Y", "samples": 2097152, "exact_samples": 2097152, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cb", "samples": 1048576, "exact_samples": 1048576, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 1048576, "exact_samples": 1048576, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 42.110204, "psnr_source_rgb_db": 42.110204, "encode_process_seconds": 0.225804, "max_error": 0, "format": "yuv422p10le", "width": 2048, "height": 1024}
+canonical: 2048x1024 YUV422 p10, 1728260 bytes
+canonical: 2048x1024 YUV422 p10, 1728260 bytes
+{"pattern": "canon...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="standalone_windows_oracle_replay" classname="standalone_windows_oracle_replay" time="0.23233" status="run">
+		<properties/>
+		<system-out>{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "windows_run": "https://github.com/louis-0hrs/HyperCine/actions/runs/38627689864",
+  "log_sha256": "bf6fa81f30c9bb0e5522768cf87790568efcb790271b931fbce356a6659f549f",
+  "windows_observations": [],
+  "ffmpeg_version": "ffmpeg version n8.0 Copyright (c) 2000-2025 the FFmpeg developers",
+  "input_contract": "128x128 top-down BT.709 studio YUV422 p10; YU64 LE Y0 Cr Y1 Cb &gt;&gt;6; BGRA SDK bottom-up",
+  "alpha_excluded": true,
+  "samples": [
+    {
+      "pattern": "flat",
+      "sdk_p10_sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a",
+      "sdk_bgra_sha256": "148dee3e8f139487270598699b09f700a00ad8626ec9846a1fcf89f3b947634d",
+      "sdk_vs_ffmpeg_p10": {
+        "overall": {
+          "psnr_db": null,
+          "max_error": 0,
+          "mismatches": 0,
+          "first_index": null,
+          "first_actual": null,
+          "first_reference": null
+        },
+        "planes": {
+          "Y":...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+</testsuite>

@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 
 REQUIRED = {
     'filmscan3_api', 'filmscan3_fixture_integrity',
+    'filmscan3_geometry', 'filmscan3_geometry_external_decode',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
     'windows_reference_sdk_coefficients', 'filmscan3_autonomous_manifest',

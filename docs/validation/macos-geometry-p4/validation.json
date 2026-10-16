@@ -1,0 +1,79 @@
+{
+  "baseline": "2a5e94ff6120a7053621c6ab4dcb020c7934e6d4",
+  "host": {
+    "model": "Mac14,9",
+    "cpu": "Apple M2 Pro",
+    "architecture": "arm64",
+    "ram_bytes": 17179869184
+  },
+  "native_suites": {
+    "cpu_release": 32,
+    "cpu_asan_ubsan": 32,
+    "metal_release": 38
+  },
+  "asan_options": "detect_leaks=0; UBSAN_OPTIONS=halt_on_error=1; native Apple leak sanitizer unavailable",
+  "geometry_truth_table": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "api": "existing constructors + explicit geometry",
+      "sdk_raw_bytes": "PASS",
+      "tier_a_frames": 16,
+      "tier_c_frames": 120,
+      "ffmpeg": "PASS",
+      "old_header_consumer": "PASS",
+      "metal_regression": "PASS"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "api": "explicit CPU session only",
+      "status": "EXPERIMENTAL",
+      "sdk_raw_bytes": "REFERENCE_BLOCKED",
+      "ffmpeg_frames": 19,
+      "changing_sequence_frames": 16,
+      "ffmpeg_sequence_framecount": 16,
+      "min_psnr_db": 52.32134949615484,
+      "peak_rss_bytes": 242860032
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "status": "PENDING",
+      "label": "PENDING_8K",
+      "encode": "REJECTED_BEFORE_PLANE_ALLOCATION",
+      "sdk_reference": "MISSING",
+      "ffmpeg": "NOT_TESTED",
+      "peak_rss_bytes": null,
+      "sample_bound_bytes": 265437184,
+      "chunk_payload_limit_bytes": 67108860,
+      "reason": "No matching original SDK corpus in inspected NAS FS3 tree; 4096 dimension cap; conservative sample bound exceeds existing 24-bit word count; actual sample support and resources not qualified"
+    }
+  ],
+  "budgets": {
+    "legacy_pixels": 2097152,
+    "max_dimension": 4096,
+    "plane_elements": 8294400,
+    "max_plane_bytes": 16588800,
+    "max_sample_bytes": 66371584,
+    "conservative_live_bytes_with_caller": 299646976,
+    "sample_capacity": "session descriptor zero=geometric bound, nonzero may reduce only"
+  },
+  "nas_inspected": "/Volumes/DeDub/HyperCine/golden/windows/fs3/2026-10-14",
+  "nas_entries": [
+    "tier-a/manifest.json",
+    "tier-a/reference-corpus-tier-a-20261014.zip",
+    "sequence-1080/manifest.json",
+    "sequence-1080/reference-corpus-sequence-1080-tier-c-20261015.zip"
+  ],
+  "failure_tests": [
+    "invalid dimensions including 8K and overflow-sized ints",
+    "misalignment/truncated storage/stride overflow",
+    "simulated bad_alloc after complete CPU transform",
+    "framing rejection after complete CPU transform",
+    "actual output capacity exhaustion after one successful frame, unchanged state and successful retry",
+    "Reset, padded pitch and interleaved independent HD/4K instances"
+  ],
+  "performance": "No optimization or acceleration milestone; no performance claim or benchmark comparison",
+  "hosted_ci": "PENDING"
+}

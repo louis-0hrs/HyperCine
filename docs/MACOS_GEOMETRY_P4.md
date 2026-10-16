@@ -42,7 +42,141 @@ unbounded concurrent encoders. Measure process peak RSS separately on the
 
 ## Qualification status
 
-Implementation and measured evidence will be added after testing. 4K SDK
+Native validation is complete; see results below. 4K SDK
 byte matching requires a genuine original-GoPro corpus with identical inputs,
 parameters, state and metadata. 8K remains PENDING_8K until independent SDK
 samples, chunk feasibility and host resource qualification exist.
+
+## Implemented API and resource contract
+
+```cpp
+using namespace hypercine::standalone;
+FilmScan3Encoder hd; // existing ABI/layout, always 1920x1080
+FilmScan3Encoder uhd(FilmScan3Geometry{3840,2160}); // CPU only
+// Optional output limit can only REDUCE 8*width*height+16384.
+FilmScan3Encoder bounded(FilmScan3Geometry{3840,2160,1024*1024});
+auto packet = uhd.Encode(aligned_bgra, available_bytes, padded_positive_stride);
+uhd.Reset(); // same geometry and output budget; frame/rate state starts over
+```
+
+The geometry descriptor is copied into an immutable internal CPU frontend;
+no data members were added to the public encoder. A consumer compiled against
+the exact baseline public headers and linked with the new library passes the
+existing API test (`old-api-consumer.log`). No geometry mutation API exists;
+construct another encoder to change resolution. The returned descriptor is a
+copy. Existing backend constructors retain the implicit 1080p geometry;
+there is no new public Metal geometry constructor.
+
+`sample_capacity_bytes=0` selects the derived bound. A nonzero value above the
+bound throws at construction; a smaller bound can cause `length_error` during
+packet assembly. This is a real Writer capacity error, tested after one
+successful flat frame with subsequent noise, followed by a correct retry.
+The test also simulates `bad_alloc` after the full CPU transform and causes a
+late framing rejection. Those injections verify rollback and RAII; they do
+not claim that the machine was driven into physical OOM. Invalid 8K geometry
+fails at construction before allocating input/plane/entropy buffers.
+
+The only edit in `standalone_encoder.cpp` changes the shared `PackHighpass`
+plane-storage check to the separate plane cap; legacy Sample capacity and
+`ValidateGeometry` stay unchanged. The shared plane validators check positive
+stride/height and division-based capacity before multiplying, including
+mutated public Plane descriptors. All new products are evaluated after their
+validated constant bounds; no unchecked size_t/int narrowing is introduced.
+
+## Reproducible gates and evidence
+
+Configure an SDK-free Release build with `HYPERCINE_BUILD_STANDALONE=ON`,
+`HYPERCINE_BUILD_UPSTREAM=OFF`, `HYPERCINE_REQUIRE_EXTERNAL_DECODE=ON`, and
+explicit FFmpeg/ffprobe paths if needed. Optional actual corpus roots are
+`HYPERCINE_REFERENCE_CORPUS_ROOT` and `HYPERCINE_FS3_SEQUENCE_ROOT`.
+Run `python3 ci/run_standalone.py --build-dir <build> --system Darwin
+--machine arm64` for the complete registered suite. The CI inventory now
+requires `filmscan3_geometry` and `filmscan3_geometry_external_decode`.
+The existing four-host standalone workflow includes these automatically.
+The actual 120-frame CTest now injects original metadata as the 16-frame test
+already did, so both require complete raw packet identity.
+
+The C++ geometry test exports genuine Flat, GradientChecker, Noise and a
+16-frame Noise/HorizontalGradient/Checkerboard sequence generated from seed
+`0x1337BEEF`, with unique frame identity stamps in the sequence. It checks all
+30 subband extents, three dimensions, nine levels, channel byte indices and
+24-bit chunk bounds; it also exercises invalid/misaligned/truncated input,
+pitch overflow, padded pitch, Reset, distinct session state, output capacity
+failure and retry. The export records quant[36], scale[36], coefficient FNV[30],
+frame index, limiter and previous byte count.
+
+The Python test hashes actual BGRA bytes and raw packets, parses and hashes
+all 30 payload/framed bands, checks UFRM, then independently decodes all 19
+packets with FFmpeg to actual `yuv422p10le`. It checks the native pixel format
+and dimensions with ffprobe before conversion, checks exact output extent and
+10-bit range, and requires aggregate p10 PSNR >35 dB against CPU conversion
+planes. It additionally wraps and decodes all 16 GOP1 packets together,
+verifying exactly 16 frames and the full decoded byte extent. Only FFmpeg's
+CFHD decoder and rawvideo support are needed; no PSNR filter, null muxer,
+pipe protocol or external Python package is required. Temporary inputs,
+references and decoded images are removed after their hashes are recorded.
+
+Reports, native logs, JUnit and exact tested source hashes are under
+`docs/validation/macos-geometry-p4/`. Process RSS is measured after the export
+child exits (including its correctness/failure tests and retained samples),
+separately for Release and sanitizer binaries. This is not a single isolated
+buffer-allocation count. Sanitizer RSS includes quarantine/instrumentation.
+No performance optimization or acceleration milestone is claimed.
+
+## Separate reference and 8K gates
+
+The read-only NAS FS3 directory at
+`/Volumes/DeDub/HyperCine/golden/windows/fs3/2026-10-14` contains Tier A and
+sequence-1080 archives. Neither supplies matching 3840×2160 or 7680×4320
+original-GoPro samples. Accordingly 4K SDK raw-byte qualification is
+**REFERENCE_BLOCKED**; 4K CPU/FFmpeg remains experimental. Premiere, Resolve
+and original SDK 4K decoding were not tested here.
+
+8K is **PENDING_8K**, not an accepted encode geometry. The current conservative
+8*P+16384 sample bound would become 265,437,184 bytes at 8K, exceeding the
+existing 24-bit word-count payload limit of 67,108,860 bytes. That does not
+prove every real 8K sample is impossible; actual compression and the original
+SDK wire behavior must first be established. A conservative 36P+1MiB live
+allocation estimate is about 1.11 GiB before caller-retained history and
+concurrency; no 8K allocator/RSS qualification has been performed. Existing
+4096 dimension and 8,294,400-element caps deliberately reject it. A follow-up
+must obtain SDK packets and identical inputs, independently decode them, audit
+actual chunk sizes, then qualify bounded host allocations before enabling 8K.
+Metal P5 remains a separate follow-up after P4 review; no GPU source, CUDA,
+Windows decoder, upstream file or quality-state #29 source was edited.
+
+## Native measured results (2026-10-16)
+
+Apple M2 Pro, Mac14,9, arm64, 17,179,869,184 bytes RAM; AppleClang 21.
+
+| Gate | Result | Full-suite elapsed |
+| --- | --- | --- |
+| CPU Release complete CI inventory + original corpora | 32/32 PASS | 217.77 s |
+| CPU ASan/UBSan + original corpora | 32/32 PASS | 406.03 s |
+| Metal Release + original corpora | 38/38 PASS | 289.20 s |
+
+Suites overlapped on the host; elapsed times are correctness-run durations,
+not throughput measurements. ASan runs with `detect_leaks=0` (Apple native
+leak sanitizer unsupported) and UBSan with `halt_on_error=1`.
+
+CPU Release export/test peak RSS is **242,860,032 bytes (231.61 MiB)**;
+ASan/UBSan **439,615,488 bytes (419.25 MiB)**. The Metal-enabled build's new
+geometry constructor still selects CPU, and reaches 247,300,096 bytes
+(235.84 MiB). All 19 input, packet, coefficient, table, state, payload and
+decoded hashes match across all three builds.
+
+| Independent 4K initial frame | Packet bytes | p10 PSNR |
+| --- | --- | --- |
+| Flat128 | 604,172 | exact reconstructed p10 planes |
+| GradientChecker | 4,240,660 | 59.84 dB |
+| DeterministicNoise | 19,829,252 | 55.09 dB |
+
+All 19 independently decoded packets exceed 35 dB (minimum **52.32135 dB**,
+excluding the exact flat frame). The separate 16-frame container decodes to
+exactly 16 frames / 530,841,600 raw bytes. Its autonomous limiters are
+`4,9,5,10,15,11,14,19,15,18,20,16,19,20,16,19`; inputs and coefficients change
+on every frame. Full raw SDK packets, 36 quant/scale entries and 30 coefficient
+and payload identities remain unchanged for all 16+120 1080p frames.
+
+Hosted CI status is recorded separately in `validation.json`; native results
+do not imply a hosted pass before those jobs complete.
