@@ -40,6 +40,8 @@ else()
     )
 endif()
 
+target_link_libraries(hypercine_wavelet PUBLIC hypercine_quality_state)
+
 if(TARGET hypercine_core)
     target_link_libraries(hypercine_core INTERFACE hypercine_wavelet)
 endif()

@@ -12,6 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    'cpu_isa_selection',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'filmscan3_geometry', 'filmscan3_geometry_external_decode',
     'filmscan3_geometry_validation',

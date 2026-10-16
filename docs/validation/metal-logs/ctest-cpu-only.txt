@@ -25,8 +25,8 @@ cmake version 3.31.5
 
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
 Registered full standalone tests: 26
-Internal ctest changing into directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-cpu
-Test project /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-cpu
+Internal ctest changing into directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-cpu
+Test project $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-cpu
       Start  1: filmscan3_backend_selection
  1/26 Test  #1: filmscan3_backend_selection ..........   Passed    0.34 sec
       Start  2: filmscan3_api

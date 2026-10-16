@@ -137,8 +137,7 @@ No performance optimization or acceleration milestone is claimed.
 
 ## Separate reference and 8K gates
 
-The read-only NAS FS3 directory at
-`/Volumes/DeDub/HyperCine/golden/windows/fs3/2026-10-14` contains Tier A and
+The locally configured `HYPERCINE_GOLDEN_DIR` corpus contains Tier A and
 sequence-1080 archives. Neither supplies matching 3840×2160 or 7680×4320
 original-GoPro samples. Accordingly 4K SDK raw-byte qualification is
 **REFERENCE_BLOCKED**; 4K CPU/FFmpeg remains experimental. Premiere, Resolve
@@ -244,3 +243,26 @@ c++ -std=c++17 -O2 -Iinclude \
 Actual GoPro/FFmpeg compatibility, padding conventions, chunk acceptance and
 measured allocator/RSS gates for 8K/12K/17K belong to separate issue #48. All
 three remain rejected here; no high-resolution product or throughput claim.
+
+## Current-main native integration review (2026-10-16)
+
+P4 parent `66568157de2958452df3800cd1c2b4739d60410f` (including the #64
+sequence gate) integrates without conflict with main
+`5c87391e82f307fbe7db0be6a53fd0edbdaad527`. No implementation correction was
+required. Native ARM64 Release **34/34**, ASan/UBSan **34/34**, Metal 1080p
+regression **7/7**, and the separate QualityState/ISA configuration **2/2** pass.
+Both full native suites include the actual original-SDK 16/120-frame corpora.
+All 19 4K input/packet/coefficient/payload/decoded-frame hashes remain identical
+to frozen P4 evidence and between Release and sanitizer builds; all sixteen
+ordered decoded sequence hashes are unchanged. Minimum p10 PSNR is 52.32 dB.
+These test durations are validation telemetry, not a throughput benchmark.
+
+The review also replaces two published current-tree corpus locations with a
+local variable name. This does not remove old public commit/diff history; #54
+tracks that separately. Raw new logs and build artifacts remain outside Git.
+Sanitized results, source digest and precise scope are in
+[`current-main-integration.json`](validation/macos-geometry-p4/current-main-integration.json).
+P4's parent hosted checks are 14/14 green; hosted checks for the combined
+integration branch are pending at publication. 4K original-SDK parity remains
+REFERENCE_BLOCKED. P4 acceptance and mainline integration require separate
+review; NEON #70 and Metal P5 #45 remain dependent on that decision.
