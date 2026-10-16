@@ -12,6 +12,25 @@ include_directories(
 )
 
 # 1. Transform-level test
+if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
+    add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
+    target_link_libraries(test_small_chroma_oracle PRIVATE CFHDCodecStatic)
+    add_test(NAME small_chroma_upstream_oracle COMMAND test_small_chroma_oracle)
+    # Instrument a separate compile of the pristine translation unit. This
+    # keeps production SDK flags and upstream files unchanged.
+    option(HYPERCINE_SMALL_CHROMA_ASAN "Build the manual upstream prefix ASan diagnostic" OFF)
+    if(HYPERCINE_SMALL_CHROMA_ASAN)
+        add_executable(test_small_chroma_oracle_asan test_small_chroma_oracle.cpp
+            ${CMAKE_SOURCE_DIR}/upstream/Codec/spatial.c)
+        target_compile_definitions(test_small_chroma_oracle_asan PRIVATE
+            HYPERCINE_ORACLE_ASAN=1 _ALLOCATOR=1 WARPSTUFF=1
+            _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION)
+        target_compile_options(test_small_chroma_oracle_asan PRIVATE /fsanitize=address /Zi)
+        target_link_options(test_small_chroma_oracle_asan PRIVATE /INCREMENTAL:NO /DEBUG)
+        target_link_libraries(test_small_chroma_oracle_asan PRIVATE CFHDCodecStatic)
+    endif()
+endif()
+
 add_executable(test_transform_wavelet
     test_transform_wavelet.cpp
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo/utils.c
