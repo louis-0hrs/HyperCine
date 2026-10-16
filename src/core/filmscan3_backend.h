@@ -22,6 +22,7 @@ struct HostTiming {
 // Internal stage boundary. Implementations throw before returning incomplete data.
 struct Frontend {
     virtual ~Frontend() = default;
+    virtual FilmScan3Geometry Geometry() const noexcept { return {}; }
     virtual Planes Convert(const uint8_t*, std::size_t, int, int, std::size_t) = 0;
     virtual WaveletLevel Forward(const Plane&, int) = 0;
     virtual std::string DeviceName() const = 0;
@@ -42,6 +43,7 @@ struct MetalTiming {
     HostTiming host;
 };
 std::shared_ptr<Frontend> CpuFrontend();
+std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry);
 std::shared_ptr<Frontend> MetalFrontend(); // throws if disabled/device/pipeline unavailable
 MetalTiming ReadMetalTiming(const Frontend&);
 // One-shot deterministic failure *after real GPU completion*, before readback.

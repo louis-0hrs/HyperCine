@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "platform": {
+    "system": "Darwin",
+    "architecture": "arm64",
+    "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)"
+  },
+  "p4_parent_commit": "9ac91b95f957b46119e22b0af7c24f88e66a18b4",
+  "current_main_integration": {
+    "main_commit": "d6ef272ebaac2defce6a7994d53bd2118d26caa6",
+    "p4_commit": "9ac91b95f957b46119e22b0af7c24f88e66a18b4",
+    "merge_conflicts": 0,
+    "cpu_ctest_passed": 32,
+    "cpu_ctest_total": 32,
+    "elapsed_seconds": 217.51,
+    "core_review": "No additional API/bounds defect identified; existing rollback tests pass"
+  },
+  "followup": {
+    "cpu_ctest_passed": 33,
+    "cpu_ctest_total": 33,
+    "elapsed_seconds": 213.0,
+    "synthetic_regression_cases": 7,
+    "required_inventory": "PASS",
+    "source_files_sha256": {
+      "CMakeLists.txt": "59416eee5b2b63d85fa146c30d9c01041f5721f479c9a54de1b63bf07536b6cb",
+      "ci/run_standalone.py": "c94d2b70ac01a0e05df306b66b642222a26404caccd6b69f4fc8a41b675dcbeb",
+      "tests/validate_filmscan3_geometry.py": "a2d205ea034a31234583e6bd71438f2d0107390e82e05402db8e2156f9718f70",
+      "tests/test_filmscan3_geometry_validation.py": "afb02c699847078370e094af6e88c477c9f431af6f699aa540262ed642208d0c"
+    }
+  },
+  "independent_decode": {
+    "geometry": [
+      3840,
+      2160
+    ],
+    "packets": 19,
+    "ffmpeg_version": "ffmpeg version n8.0 Copyright (c) 2000-2025 the FFmpeg developers",
+    "minimum_psnr_db": 52.32134949615484,
+    "sequence_pixel_identity": "PASS",
+    "sequence_decoded_sha256": [
+      "f7da47a0a9a1819be465f595767c73a490ac550db2fcec979ebbfaff7bf74b59",
+      "af4014c35fad1ec51b277a2b33c121c4792a4755179c2c8490b9c1ba2354d0b3",
+      "b11eabc8b1f186068b50387e387cf0c73fa67257aa1496a54d45f72ec8aa5341",
+      "47d0416f6b796b38127f6d168bc60d28a33e74a066b273120e12bcd56b3405c7",
+      "2503a4f7e5faaa824fa1d41591d87e126375046d9cb7bced7a04acd0ea4bb09d",
+      "749d3f96164cf20bde5d64c5f26c66697bb541d357b64812bff47ee7e64b4ca3",
+      "c2bf0ea751b0bb8d1138881ba503bc5de5e12f5c75e8b27d3bddd7f22f613f29",
+      "ab500d2d3509b1b2861ca4e17910afd7a5a21297c49fba10c19f9e16b2091e60",
+      "9dcd0aed72cc16e7e75c37d0cfe11d550f05efba625bd11dc8814d805d2a3a55",
+      "7eb644dcc7341ade3ba56e795f4af8278eaf1a488ec68333a5ef8dd6544d4605",
+      "1efee646c933a1b03a381ba4318bcf3e4d84aff8da77dba6363d1f94f158203c",
+      "44d7b64c5ba35ab4d55263d9c2ef7d2daf701f9fe9fde0617277eef59ca432c1",
+      "ea41e55a9f3abeff7893e745d21c27bcd7a09898a3af3543d7a8968ca5201d8e",
+      "f0a52caed706d266e966c5b7d1bac77eda11abcc726619b1caafc5b859bcc31a",
+      "0148985b5162cd5a5637ff82299171e8fa95b04c44c06fbfcdf92aa552f88fa8",
+      "081558b4be26b0a666c0b8d138e0a6b81a019d715d364cf5db1efa3cfb3d0304"
+    ]
+  },
+  "qualification": {
+    "original_sdk_1080p": "PASS: existing 16-frame and 120-frame raw packet CTest gates",
+    "original_sdk_4k": "REFERENCE_BLOCKED",
+    "eight_k_twelve_k_seventeen_k": "NOT_QUALIFIED",
+    "metal_cuda": "NOT_RUN",
+    "hosted_followup_ci": "PENDING_AT_PUBLICATION",
+    "p5": "BLOCKED_PENDING_P4_ACCEPTANCE"
+  },
+  "reproduction": [
+    "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF -DHYPERCINE_ENABLE_CUDA=OFF -DHYPERCINE_ENABLE_METAL=OFF -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON",
+    "cmake --build build --parallel 4",
+    "ctest --test-dir build -C Release --output-on-failure"
+  ],
+  "optional_reference_configuration": "Configure HYPERCINE_REFERENCE_CORPUS_ROOT and HYPERCINE_FS3_SEQUENCE_ROOT privately to include the three corpus-backed tests; a host without them registers 30 tests."
+}

@@ -1,0 +1,98 @@
+{"system": "Darwin", "platform": "macOS-26.5.2-arm64-arm-64bit", "architecture": "arm64", "python": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]"}
+ffmpeg version n8.0 Copyright (c) 2000-2025 the FFmpeg developers
+built with Apple clang version 21.0.0 (clang-2100.1.1.101)
+configuration: --disable-everything --disable-doc --disable-network --disable-autodetect --disable-asm --disable-audiotoolbox --disable-videotoolbox --enable-ffmpeg --enable-ffprobe --enable-decoder='cfhd,rawvideo' --enable-demuxer='avi,mov,rawvideo' --enable-muxer=rawvideo --enable-encoder=rawvideo --enable-protocol=file --enable-filter='scale,format' --enable-swscale
+libavutil      60.  8.100 / 60.  8.100
+libavcodec     62. 11.100 / 62. 11.100
+libavformat    62.  3.100 / 62.  3.100
+libavdevice    62.  1.100 / 62.  1.100
+libavfilter    11.  4.100 / 11.  4.100
+libswscale      9.  1.100 /  9.  1.100
+libswresample   6.  1.100 /  6.  1.100
+
+Exiting with exit code 0
+ffprobe version n8.0 Copyright (c) 2007-2025 the FFmpeg developers
+built with Apple clang version 21.0.0 (clang-2100.1.1.101)
+configuration: --disable-everything --disable-doc --disable-network --disable-autodetect --disable-asm --disable-audiotoolbox --disable-videotoolbox --enable-ffmpeg --enable-ffprobe --enable-decoder='cfhd,rawvideo' --enable-demuxer='avi,mov,rawvideo' --enable-muxer=rawvideo --enable-encoder=rawvideo --enable-protocol=file --enable-filter='scale,format' --enable-swscale
+libavutil      60.  8.100 / 60.  8.100
+libavcodec     62. 11.100 / 62. 11.100
+libavformat    62.  3.100 / 62.  3.100
+libavdevice    62.  1.100 / 62.  1.100
+libavfilter    11.  4.100 / 11.  4.100
+libswscale      9.  1.100 /  9.  1.100
+libswresample   6.  1.100 /  6.  1.100
+cmake version 3.31.5
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+Registered full standalone tests: 32
+Internal ctest changing into directory: /tmp/hypercine-geometry-p4/build
+Test project /tmp/hypercine-geometry-p4/build
+      Start  1: filmscan3_backend_selection
+ 1/32 Test  #1: filmscan3_backend_selection ..........   Passed    0.09 sec
+      Start  2: filmscan3_api
+ 2/32 Test  #2: filmscan3_api ........................   Passed    0.12 sec
+      Start  3: filmscan3_geometry
+ 3/32 Test  #3: filmscan3_geometry ...................   Passed    4.36 sec
+      Start  4: filmscan3_fixture_integrity
+ 4/32 Test  #4: filmscan3_fixture_integrity ..........   Passed    0.01 sec
+      Start  5: entropy_bitexact
+ 5/32 Test  #5: entropy_bitexact .....................   Passed    0.26 sec
+      Start  6: standalone_color
+ 6/32 Test  #6: standalone_color .....................   Passed    0.00 sec
+      Start  7: standalone_wavelet
+ 7/32 Test  #7: standalone_wavelet ...................   Passed    0.00 sec
+      Start  8: standalone_quantization
+ 8/32 Test  #8: standalone_quantization ..............   Passed    0.00 sec
+      Start  9: standalone_entropy
+ 9/32 Test  #9: standalone_entropy ...................   Passed    0.00 sec
+      Start 10: standalone_sample
+10/32 Test #10: standalone_sample ....................   Passed    0.01 sec
+      Start 11: standalone_geometry
+11/32 Test #11: standalone_geometry ..................   Passed    0.15 sec
+      Start 12: standalone_oracle_fixtures
+12/32 Test #12: standalone_oracle_fixtures ...........   Passed    0.03 sec
+      Start 13: windows_reference_inputs
+13/32 Test #13: windows_reference_inputs .............   Passed    2.52 sec
+      Start 14: windows_reference_guardrails
+14/32 Test #14: windows_reference_guardrails .........   Passed    0.15 sec
+      Start 15: windows_reference_parser
+15/32 Test #15: windows_reference_parser .............   Passed    0.04 sec
+      Start 16: windows_reference_sdk_coefficients
+16/32 Test #16: windows_reference_sdk_coefficients ...   Passed    0.51 sec
+      Start 17: windows_reference_binaries
+17/32 Test #17: windows_reference_binaries ...........   Passed    2.03 sec
+      Start 18: filmscan3_autonomous_manifest
+18/32 Test #18: filmscan3_autonomous_manifest ........   Passed    1.46 sec
+      Start 19: filmscan3_sequence_manifest
+19/32 Test #19: filmscan3_sequence_manifest ..........   Passed    9.82 sec
+      Start 20: filmscan3_actual_tier_a
+20/32 Test #20: filmscan3_actual_tier_a ..............   Passed    2.78 sec
+      Start 21: filmscan3_actual_sequence
+21/32 Test #21: filmscan3_actual_sequence ............   Passed   18.94 sec
+      Start 22: filmscan3_geometry_external_decode
+22/32 Test #22: filmscan3_geometry_external_decode ...   Passed  115.50 sec
+      Start 23: filmscan3_external_decode
+23/32 Test #23: filmscan3_external_decode ............   Passed    5.91 sec
+      Start 24: standalone_external_decode
+24/32 Test #24: standalone_external_decode ...........   Passed    0.24 sec
+      Start 25: standalone_external_256x256
+25/32 Test #25: standalone_external_256x256 ..........   Passed    1.39 sec
+      Start 26: standalone_external_1920x1080
+26/32 Test #26: standalone_external_1920x1080 ........   Passed   37.34 sec
+      Start 27: standalone_external_128x24
+27/32 Test #27: standalone_external_128x24 ...........   Passed    0.10 sec
+      Start 28: standalone_external_384x40
+28/32 Test #28: standalone_external_384x40 ...........   Passed    0.16 sec
+      Start 29: standalone_external_4096x24
+29/32 Test #29: standalone_external_4096x24 ..........   Passed    0.57 sec
+      Start 30: standalone_external_128x4096
+30/32 Test #30: standalone_external_128x4096 .........   Passed    2.68 sec
+      Start 31: standalone_external_2048x1024
+31/32 Test #31: standalone_external_2048x1024 ........   Passed   10.30 sec
+      Start 32: standalone_windows_oracle_replay
+32/32 Test #32: standalone_windows_oracle_replay .....   Passed    0.22 sec
+
+100% tests passed, 0 tests failed out of 32
+
+Total Test time (real) = 217.77 sec
+{"status": "PASS", "registered_tests": 32, "passed_tests": 32, "system": "Darwin", "architecture": "arm64", "windows_binaries": "NOT REQUIRED: versioned manifests/fixtures; optional NAS corpus is separate"}

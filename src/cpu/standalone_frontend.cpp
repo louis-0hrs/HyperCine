@@ -11,7 +11,7 @@ namespace hypercine { namespace standalone {
 namespace {
 void Validate(const Plane& p) {
     if (p.width < 1 || p.height < 1 || p.width > kMaxDimension || p.height > kMaxDimension || p.stride < p.width || p.stride % 8 ||
-        static_cast<std::size_t>(p.stride) * p.height > kMaxPixels ||
+        !PlaneStorageFits(p.stride,p.height) ||
         p.pixels.size() < static_cast<std::size_t>(p.stride) * p.height)
         throw std::invalid_argument("invalid plane storage");
 }
@@ -29,7 +29,7 @@ void ValidateGeometry(int w, int h) {
 Plane::Plane(int w, int h) : width(w), height(h), stride(0) {
     if (w < 1 || h < 1 || w > kMaxDimension || h > kMaxDimension) throw std::invalid_argument("plane dimensions out of bounds");
     stride = (w + 7) & ~7;
-    if (static_cast<std::size_t>(stride) * h > kMaxPixels)
+    if (!PlaneStorageFits(stride,h))
         throw std::length_error("plane exceeds allocation budget");
     pixels.resize(static_cast<std::size_t>(stride) * h);
 }
