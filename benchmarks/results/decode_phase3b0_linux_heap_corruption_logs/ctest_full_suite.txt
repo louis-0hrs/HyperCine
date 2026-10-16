@@ -1,0 +1,261 @@
+Internal ctest changing into directory: $REPO_ROOT/build-linux-cuda
+Test project $REPO_ROOT/build-linux-cuda
+      Start  1: test_decode_phase3b2a_parser
+ 1/43 Test  #1: test_decode_phase3b2a_parser ..............   Passed    0.01 sec
+      Start  2: test_decode_phase3b2a_api
+ 2/43 Test  #2: test_decode_phase3b2a_api .................   Passed    0.40 sec
+      Start  3: test_decode_phase3b2a_reconstruction
+ 3/43 Test  #3: test_decode_phase3b2a_reconstruction ......   Passed    4.51 sec
+      Start  4: test_decode_phase3b2a_temporal
+ 4/43 Test  #4: test_decode_phase3b2a_temporal ............   Passed    0.25 sec
+      Start  5: test_decode_phase3b2a_upstream_temporal
+ 5/43 Test  #5: test_decode_phase3b2a_upstream_temporal ...   Passed    0.01 sec
+      Start  6: test_decode_phase3ae
+ 6/43 Test  #6: test_decode_phase3ae ......................   Passed    0.38 sec
+      Start  7: test_decode_phase3a_rc
+ 7/43 Test  #7: test_decode_phase3a_rc ....................   Passed   45.76 sec
+      Start  8: test_transform_wavelet
+ 8/43 Test  #8: test_transform_wavelet ....................   Passed    0.01 sec
+      Start  9: test_codec_roundtrip
+ 9/43 Test  #9: test_codec_roundtrip ......................   Passed    0.03 sec
+      Start 10: test_yuy2_stability
+10/43 Test #10: test_yuy2_stability .......................   Passed    1.21 sec
+      Start 11: test_decode_phase0
+11/43 Test #11: test_decode_phase0 ........................   Passed    5.96 sec
+      Start 12: test_avi_sample
+12/43 Test #12: test_avi_sample ...........................   Passed    0.46 sec
+      Start 13: test_decoder
+13/43 Test #13: test_decoder ..............................   Passed   33.89 sec
+      Start 14: test_decode_phase3b0
+14/43 Test #14: test_decode_phase3b0 ......................***Exception: SegFault  0.20 sec
+begin yuy2_yuv_prog_64_low_gradient
+end yuy2_yuv_prog_64_low_gradient encode=0 bytes=3252
+begin yuy2_yuv_prog_64_medium_gradient
+end yuy2_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin yuy2_yuv_prog_64_high_gradient
+end yuy2_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin yuy2_yuv_prog_64_filmscan1_gradient
+end yuy2_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin yuy2_yuv_prog_64_filmscan2_gradient
+end yuy2_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin yuy2_yuv_prog_64_filmscan3_gradient
+end yuy2_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin yuy2_yuv_intl_64_low_gradient
+end yuy2_yuv_intl_64_low_gradient encode=0 bytes=3284
+begin yuy2_yuv_intl_64_medium_gradient
+end yuy2_yuv_intl_64_medium_gradient encode=0 bytes=3296
+begin yuy2_yuv_intl_64_high_gradient
+end yuy2_yuv_intl_64_high_gradient encode=0 bytes=3300
+begin yuy2_yuv_intl_64_filmscan1_gradient
+end yuy2_yuv_intl_64_filmscan1_gradient encode=0 bytes=3364
+begin yuy2_yuv_intl_64_filmscan2_gradient
+end yuy2_yuv_intl_64_filmscan2_gradient encode=0 bytes=3416
+begin yuy2_yuv_intl_64_filmscan3_gradient
+end yuy2_yuv_intl_64_filmscan3_gradient encode=0 bytes=3420
+begin yuy2_yuv_gop2_64_low_gradient
+end yuy2_yuv_gop2_64_low_gradient encode=0 bytes=6072
+begin yuy2_yuv_gop2_64_medium_gradient
+end yuy2_yuv_gop2_64_medium_gradient encode=0 bytes=6084
+begin yuy2_yuv_gop2_64_high_gradient
+end yuy2_yuv_gop2_64_high_gradient encode=0 bytes=6088
+begin yuy2_yuv_gop2_64_filmscan1_gradient
+end yuy2_yuv_gop2_64_filmscan1_gradient encode=0 bytes=6132
+begin yuy2_yuv_gop2_64_filmscan2_gradient
+end yuy2_yuv_gop2_64_filmscan2_gradient encode=0 bytes=6176
+begin yuy2_yuv_gop2_64_filmscan3_gradient
+end yuy2_yuv_gop2_64_filmscan3_gradient encode=0 bytes=6176
+begin yuy2_yuv_intl_gop2_64_low_gradient
+end yuy2_yuv_intl_gop2_64_low_gradient encode=0 bytes=6140
+begin yuy2_yuv_intl_gop2_64_medium_gradient
+end yuy2_yuv_intl_gop2_64_medium_gradient encode=0 bytes=6152
+begin yuy2_yuv_intl_gop2_64_high_gradient
+end yuy2_yuv_intl_gop2_64_high_gradient encode=0 bytes=6156
+begin yuy2_yuv_intl_gop2_64_filmscan1_gradient
+end yuy2_yuv_intl_gop2_64_filmscan1_gradient encode=0 bytes=6296
+begin yuy2_yuv_intl_gop2_64_filmscan2_gradient
+end yuy2_yuv_intl_gop2_64_filmscan2_gradient encode=0 bytes=6340
+begin yuy2_yuv_intl_gop2_64_filmscan3_gradient
+end yuy2_yuv_intl_gop2_64_filmscan3_gradient encode=0 bytes=6348
+begin yuy2_yuv_601_64_low_gradient
+end yuy2_yuv_601_64_low_gradient encode=0 bytes=3252
+probed 25/297
+begin yuy2_yuv_601_64_medium_gradient
+end yuy2_yuv_601_64_medium_gradient encode=0 bytes=3264
+begin yuy2_yuv_601_64_high_gradient
+end yuy2_yuv_601_64_high_gradient encode=0 bytes=3268
+begin yuy2_yuv_601_64_filmscan1_gradient
+end yuy2_yuv_601_64_filmscan1_gradient encode=0 bytes=3284
+begin yuy2_yuv_601_64_filmscan2_gradient
+end yuy2_yuv_601_64_filmscan2_gradient encode=0 bytes=3336
+begin yuy2_yuv_601_64_filmscan3_gradient
+end yuy2_yuv_601_64_filmscan3_gradient encode=0 bytes=3336
+begin 2vuy_yuv_prog_64_low_gradient
+end 2vuy_yuv_prog_64_low_gradient encode=0 bytes=3252
+begin 2vuy_yuv_prog_64_medium_gradient
+end 2vuy_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin 2vuy_yuv_prog_64_high_gradient
+end 2vuy_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin 2vuy_yuv_prog_64_filmscan1_gradient
+end 2vuy_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin 2vuy_yuv_prog_64_filmscan2_gradient
+end 2vuy_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin 2vuy_yuv_prog_64_filmscan3_gradient
+end 2vuy_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin yu64_yuv_prog_64_low_gradient
+end yu64_yuv_prog_64_low_gradient encode=0 bytes=3252
+begin yu64_yuv_prog_64_medium_gradient
+end yu64_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin yu64_yuv_prog_64_high_gradient
+end yu64_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin yu64_yuv_prog_64_filmscan1_gradient
+end yu64_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin yu64_yuv_prog_64_filmscan2_gradient
+end yu64_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin yu64_yuv_prog_64_filmscan3_gradient
+end yu64_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin yu64_yuv_intl_64_low_gradient
+end yu64_yuv_intl_64_low_gradient encode=0 bytes=3284
+begin yu64_yuv_intl_64_medium_gradient
+end yu64_yuv_intl_64_medium_gradient encode=0 bytes=3296
+begin yu64_yuv_intl_64_high_gradient
+end yu64_yuv_intl_64_high_gradient encode=0 bytes=3300
+begin yu64_yuv_intl_64_filmscan1_gradient
+end yu64_yuv_intl_64_filmscan1_gradient encode=0 bytes=3364
+begin yu64_yuv_intl_64_filmscan2_gradient
+end yu64_yuv_intl_64_filmscan2_gradient encode=0 bytes=3416
+begin yu64_yuv_intl_64_filmscan3_gradient
+end yu64_yuv_intl_64_filmscan3_gradient encode=0 bytes=3420
+begin v210_yuv_prog_64_low_gradient
+end v210_yuv_prog_64_low_gradient encode=0 bytes=3252
+begin v210_yuv_prog_64_medium_gradient
+end v210_yuv_prog_64_medium_gradient encode=0 bytes=3264
+probed 50/297
+begin v210_yuv_prog_64_high_gradient
+end v210_yuv_prog_64_high_gradient encode=0 bytes=3324
+begin v210_yuv_prog_64_filmscan1_gradient
+end v210_yuv_prog_64_filmscan1_gradient encode=0 bytes=3352
+begin v210_yuv_prog_64_filmscan2_gradient
+end v210_yuv_prog_64_filmscan2_gradient encode=0 bytes=3504
+begin v210_yuv_prog_64_filmscan3_gradient
+end v210_yuv_prog_64_filmscan3_gradient encode=0 bytes=3516
+begin v210_yuv_intl_64_low_gradient
+end v210_yuv_intl_64_low_gradient encode=0 bytes=3284
+begin v210_yuv_intl_64_medium_gradient
+end v210_yuv_intl_64_medium_gradient encode=0 bytes=3296
+begin v210_yuv_intl_64_high_gradient
+end v210_yuv_intl_64_high_gradient encode=0 bytes=3300
+begin v210_yuv_intl_64_filmscan1_gradient
+end v210_yuv_intl_64_filmscan1_gradient encode=0 bytes=3368
+begin v210_yuv_intl_64_filmscan2_gradient
+end v210_yuv_intl_64_filmscan2_gradient encode=0 bytes=3484
+begin v210_yuv_intl_64_filmscan3_gradient
+end v210_yuv_intl_64_filmscan3_gradient encode=0 bytes=3576
+begin nv12_yuv_prog_64_filmscan1_gradient
+end nv12_yuv_prog_64_filmscan1_gradient encode=-1 bytes=0
+begin yv12_yuv_prog_64_filmscan1_gradient
+end yv12_yuv_prog_64_filmscan1_gradient encode=-1 bytes=0
+begin ct_yuv_prog_64_low_gradient
+end ct_yuv_prog_64_low_gradient encode=0 bytes=3252
+begin ct_yuv_prog_64_medium_gradient
+end ct_yuv_prog_64_medium_gradient encode=0 bytes=3264
+begin ct_yuv_prog_64_high_gradient
+end ct_yuv_prog_64_high_gradient encode=0 bytes=3268
+begin ct_yuv_prog_64_filmscan1_gradient
+end ct_yuv_prog_64_filmscan1_gradient encode=0 bytes=3284
+begin ct_yuv_prog_64_filmscan2_gradient
+end ct_yuv_prog_64_filmscan2_gradient encode=0 bytes=3336
+begin ct_yuv_prog_64_filmscan3_gradient
+end ct_yuv_prog_64_filmscan3_gradient encode=0 bytes=3336
+begin rg24_rgb_64_low_gradient
+end rg24_rgb_64_low_gradient encode=0 bytes=3368
+begin rg24_rgb_64_medium_gradient
+end rg24_rgb_64_medium_gradient encode=0 bytes=3376
+begin rg24_rgb_64_high_gradient
+end rg24_rgb_64_high_gradient encode=0 bytes=3384
+begin rg24_rgb_64_filmscan1_gradient
+end rg24_rgb_64_filmscan1_gradient encode=0 bytes=3388
+begin rg24_rgb_64_filmscan2_gradient
+end rg24_rgb_64_filmscan2_gradient encode=0 bytes=3428
+begin rg24_rgb_64_filmscan3_gradient
+end rg24_rgb_64_filmscan3_gradient encode=0 bytes=3428
+begin rg24_yuv_64_low_gradient
+end rg24_yuv_64_low_gradient encode=0 bytes=3276
+probed 75/297
+begin rg24_yuv_64_medium_gradient
+end rg24_yuv_64_medium_gradient encode=0 bytes=3296
+begin rg24_yuv_64_high_gradient
+end rg24_yuv_64_high_gradient encode=0 bytes=3296
+begin rg24_yuv_64_filmscan1_gradient
+end rg24_yuv_64_filmscan1_gradient encode=0 bytes=3304
+begin rg24_yuv_64_filmscan2_gradient
+end rg24_yuv_64_filmscan2_gradient encode=0 bytes=3332
+begin rg24_yuv_64_filmscan3_gradient
+end rg24_yuv_64_filmscan3_gradient encode=0 bytes=3332
+begin rg24_rgba_64_low_gradient
+
+      Start 15: test_decode_phase3b1
+15/43 Test #15: test_decode_phase3b1 ......................   Passed    1.36 sec
+      Start 16: test_decode_phase3b1_acceptance
+16/43 Test #16: test_decode_phase3b1_acceptance ...........   Passed   20.64 sec
+      Start 17: test_decode_phase3b2a_mixed_stress
+17/43 Test #17: test_decode_phase3b2a_mixed_stress ........   Passed   22.51 sec
+      Start 18: test_decode_phase3b2r_math
+18/43 Test #18: test_decode_phase3b2r_math ................   Passed    0.01 sec
+      Start 19: test_decode_phase3b2r_reference
+19/43 Test #19: test_decode_phase3b2r_reference ...........   Passed    0.06 sec
+      Start 20: test_decode_phase2fa
+20/43 Test #20: test_decode_phase2fa ......................   Passed  461.76 sec
+      Start 21: test_decode_gpu_index
+21/43 Test #21: test_decode_gpu_index .....................   Passed    0.42 sec
+      Start 22: test_cuda_wavelet
+22/43 Test #22: test_cuda_wavelet .........................   Passed    2.29 sec
+      Start 23: test_cuda_pyramid
+23/43 Test #23: test_cuda_pyramid .........................   Passed    0.34 sec
+      Start 24: test_entropy_parallel
+24/43 Test #24: test_entropy_parallel .....................   Passed    0.26 sec
+      Start 25: test_hybrid_roundtrip
+25/43 Test #25: test_hybrid_roundtrip .....................   Passed    0.39 sec
+      Start 26: test_phase2a
+26/43 Test #26: test_phase2a ..............................   Passed    1.28 sec
+      Start 27: test_phase2b
+27/43 Test #27: test_phase2b ..............................   Passed    1.18 sec
+      Start 28: test_phase2c
+28/43 Test #28: test_phase2c ..............................   Passed   17.13 sec
+      Start 29: test_phase2d
+29/43 Test #29: test_phase2d ..............................   Passed   25.48 sec
+      Start 30: test_entropy_capacity
+30/43 Test #30: test_entropy_capacity .....................   Passed    0.39 sec
+      Start 31: test_phase3a
+31/43 Test #31: test_phase3a ..............................   Passed   58.10 sec
+      Start 32: test_decode_inverse_wavelet_cuda
+32/43 Test #32: test_decode_inverse_wavelet_cuda ..........   Passed    2.79 sec
+      Start 33: test_decode_phase1
+33/43 Test #33: test_decode_phase1 ........................   Passed    3.33 sec
+      Start 34: test_color_conversion_cuda
+34/43 Test #34: test_color_conversion_cuda ................   Passed    0.74 sec
+      Start 35: test_decode_phase2a
+35/43 Test #35: test_decode_phase2a .......................   Passed    4.40 sec
+      Start 36: test_decode_entropy_cuda
+36/43 Test #36: test_decode_entropy_cuda ..................   Passed    0.31 sec
+      Start 37: test_decode_phase2b
+37/43 Test #37: test_decode_phase2b .......................   Passed   10.45 sec
+      Start 38: test_decode_entropy_phase2c
+38/43 Test #38: test_decode_entropy_phase2c ...............   Passed    0.31 sec
+      Start 39: test_decode_phase2c
+39/43 Test #39: test_decode_phase2c .......................   Passed   36.25 sec
+      Start 40: test_decode_phase2d
+40/43 Test #40: test_decode_phase2d .......................   Passed   55.91 sec
+      Start 41: test_decode_phase2e
+41/43 Test #41: test_decode_phase2e .......................   Passed   49.18 sec
+      Start 42: test_decode_phase2fc
+42/43 Test #42: test_decode_phase2fc ......................   Passed    5.17 sec
+      Start 43: test_decode_phase2fc_audit
+43/43 Test #43: test_decode_phase2fc_audit ................   Passed   53.57 sec
+
+98% tests passed, 1 tests failed out of 43
+
+Total Test time (real) = 929.14 sec
+
+The following tests FAILED:
+	 14 - test_decode_phase3b0 (SEGFAULT)
+Errors while running CTest

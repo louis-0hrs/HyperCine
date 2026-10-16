@@ -72,20 +72,61 @@ restriction was used to hide work.
 - frame 0/1 BGRA hashes, 200/100-repeat determinism and zero-allocation 400-request
   alternation passed
 
+## Full case matrix (widened after the clean minimal run)
+
+Every tool was re-run, with `--error-exitcode 99` and its own `--log-file`, over three
+targets that together cover the issue's matrix:
+
+1. `test_decode_phase3b1_acceptance --sanitizer` — frozen 64×64 and 1080p
+   progressive/interlaced/GOP-1/GOP-2, a mixed GOP-1+FIELDPLUS corpus, slot reuse,
+   1/2/4/auto slot modes, two and four concurrent decoder instances, consumer-stream
+   `StreamWait` ordering, held/delayed release, failed-ticket independence, drain, and
+   the malformed/truncated/oversized/band-missing rejection cases;
+2. `test_decode_phase3b2a_reconstruction` — canonical 64×64 fieldplus frames 0/1 plus
+the four committed fixtures
+   (`temporal_asymmetric_64_progressive`, `motion_64_progressive`,
+   `chroma_temporal_64_progressive`, `motion_1080p_progressive`), BT.601/BT.709 ×
+   CG/VS matrix/range, 200/100-repeat determinism, 400-request zero-allocation
+   alternation, and the frame-index-2 `InvalidRequest` rejection;
+3. `test_decode_phase3b2a_temporal` — the minimal temporal kernel, kept for continuity.
+
+| Tool | acceptance `--sanitizer` | reconstruction | temporal |
+| --- | --- | --- | --- |
+| `memcheck --leak-check full` | 0 errors / 0 leaks | 0 errors / 0 leaks | 0 errors / 0 leaks |
+| `initcheck` | 0 errors | 0 errors | 0 errors |
+| `racecheck` | 0 hazards / 0 warnings | 0 hazards / 0 warnings | 0 hazards / 0 warnings |
+| `synccheck` | 0 errors | 0 errors | 0 errors |
+
+All 12 tool×target runs exited 0. Summaries were read from the sanitizer log files, not
+inferred from the test exit code. No suppressions, no `--launch-skip`/`--launch-count`.
+This is GPU-instrumented qualification of the FIELDPLUS decoder, not a golden-bitstream
+equality proof (the corpus has no phase3b2a intermediate dumps).
+
+Per-run sanitizer logs (local paths neutralised) are committed under
+`benchmarks/results/decode_phase3b2a_linux_sanitizer_logs/` with `summary.tsv`; the
+full-suite log is in
+`benchmarks/results/decode_phase3b0_linux_heap_corruption_logs/ctest_full_suite.txt`.
+
 ## Outcome
 
-`DECODER_SAFETY_PASS` **for the minimal decoder GPU gates**: all five tools genuinely
-instrumented on the A2 with zero errors/hazards and zero leaks.
+`DECODER_SAFETY_PASS` **for the FIELDPLUS decoder GPU gates**: all four tools genuinely
+instrumented on the A2 across the minimal kernel **and** the full matrix, with zero
+errors/hazards/leaks throughout.
 
-Still open, and not claimed:
+The separate host heap-corruption item is resolved with evidence (not silently closed):
+it is **reproducible and deterministic on Linux**, and it is a crash inside the
+**upstream encoder's unsupported-format path**, not the FIELDPLUS decoder — see
+`docs/DECODE_PHASE3B0_LINUX_HEAP_CORRUPTION.md` and
+`benchmarks/results/decode_phase3b0_linux_heap_corruption.json`. In short: the upstream
+`SampleEncoder` guards unsupported input→encoded conversions with `assert(0)`
+(`SampleEncoder.cpp:260`); Release/`NDEBUG` builds compile that out, and the probe's
+`rg24_rgba` case then SIGSEGVs during `CFHD_EncodeSample`. Not a 3B-2A defect, and not
+claimed to be the exact single Windows observation.
 
-- the full case matrix (GOP2 frames 0/1 alternation, 1/2/4 slots, invalid input, GOP1
-  progressive/interlaced, mixed GOP1+GOP2, consumer-stream/wait ordering) was not run;
-  the issue prescribes widening only after a clean minimal run.
-- the single, never-reproduced Windows `test_decode_phase3b0` host heap corruption has
-  **not** been reproduced here; a host ASan/UBSan build and repeated runs are still
-  required before that item can be closed.
-- real 1080p/4K GOP2 samples were not exercised in this minimal run.
+Also not claimed:
+
+- real 1080p/4K GOP-2 **golden** samples were only exercised as the committed 1080p
+  fixture and generated 4K probe, not against Windows golden intermediate dumps.
 - `upstream/` unchanged, nothing merged, no decoder-source change beyond the six
   portability fixes above.
 

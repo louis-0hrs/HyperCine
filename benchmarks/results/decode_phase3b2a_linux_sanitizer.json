@@ -1,7 +1,7 @@
 {
   "issue": 38,
   "title": "Decode Phase 3B-2A Linux A2 sanitizer qualification",
-  "outcome": "DECODER_SAFETY_PASS (minimal decoder GPU gates); full matrix and host-heap item open",
+  "outcome": "DECODER_SAFETY_PASS (FIELDPLUS decoder GPU gates, minimal + full matrix); host heap-corruption item resolved as a reproducible upstream-encoder unsupported-format crash, not a decoder defect",
   "source": {
     "base_pr": 12,
     "base_head": "1d78fc183ea28c4268345521e83fb2bca3226381",
@@ -30,24 +30,66 @@
     "tests/decoder_support.h: explicit reinterpret_cast<void**> for cudaMalloc on T*",
     "tests/test_phase2b.cpp: add <cstring> for std::memcpy"
   ],
-  "gates": [
+  "minimal_gates": [
     { "tool": "plain", "target": "test_decode_phase3b2a_temporal", "exit": 0, "result": "progressive FIELDPLUS temporal inverse exact vectors passed" },
-    { "tool": "memcheck", "flags": "--leak-check full --error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "leaks_bytes": 0, "errors": 0, "log": "/tmp/hc-dec-memcheck.log" },
-    { "tool": "initcheck", "flags": "--error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "errors": 0, "log": "/tmp/hc-dec-initcheck.log" },
-    { "tool": "racecheck", "flags": "--error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "hazards": 0, "warnings": 0, "log": "/tmp/hc-dec-racecheck.log" },
-    { "tool": "synccheck", "flags": "--error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "errors": 0, "log": "/tmp/hc-dec-synccheck.log" }
+    { "tool": "memcheck", "flags": "--leak-check full --error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "leaks_bytes": 0, "errors": 0 },
+    { "tool": "initcheck", "flags": "--error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "errors": 0 },
+    { "tool": "racecheck", "flags": "--error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "hazards": 0, "warnings": 0 },
+    { "tool": "synccheck", "flags": "--error-exitcode 99", "target": "test_decode_phase3b2a_temporal", "exit": 0, "errors": 0 }
   ],
+  "full_matrix_gates": {
+    "method": "compute-sanitizer --tool <tool> [--leak-check full] --error-exitcode 99 --log-file <log> <target> <args>; summaries read from the sanitizer log files, not inferred from the test exit code; no suppressions, no --launch-skip/--launch-count",
+    "targets": {
+      "acceptance_sanitizer": {
+        "binary": "test_decode_phase3b1_acceptance",
+        "args": "\"$ROOT\" <out> --sanitizer",
+        "coverage": "frozen 64x64 + 1080p progressive/interlaced/GOP-1/GOP-2, mixed GOP-1+FIELDPLUS corpus, slot reuse, 1/2/4/auto slot modes, 2 and 4 concurrent decoder instances, consumer-stream StreamWait ordering, held/delayed release, failed-ticket independence, drain, malformed/truncated/oversized/band-missing rejection cases"
+      },
+      "reconstruction": {
+        "binary": "test_decode_phase3b2a_reconstruction",
+        "args": "\"$ROOT\"",
+        "coverage": "canonical 64x64 FIELDPLUS frames 0/1, four committed fixtures (temporal_asymmetric_64_progressive, motion_64_progressive, chroma_temporal_64_progressive, motion_1080p_progressive), BT.601/BT.709 x CG/VS matrix/range, 200/100-repeat determinism, 400-request zero-allocation alternation, frame-index-2 InvalidRequest rejection"
+      },
+      "temporal_minimal": {
+        "binary": "test_decode_phase3b2a_temporal",
+        "args": "",
+        "coverage": "minimal temporal kernel (continuity)"
+      }
+    },
+    "results": [
+      { "tool": "memcheck", "flags": "--leak-check full", "target": "acceptance_sanitizer", "exit": 0, "leaks_bytes": 0, "errors": 0 },
+      { "tool": "memcheck", "flags": "--leak-check full", "target": "reconstruction", "exit": 0, "leaks_bytes": 0, "errors": 0 },
+      { "tool": "memcheck", "flags": "--leak-check full", "target": "temporal_minimal", "exit": 0, "leaks_bytes": 0, "errors": 0 },
+      { "tool": "initcheck", "target": "acceptance_sanitizer", "exit": 0, "errors": 0 },
+      { "tool": "initcheck", "target": "reconstruction", "exit": 0, "errors": 0 },
+      { "tool": "initcheck", "target": "temporal_minimal", "exit": 0, "errors": 0 },
+      { "tool": "racecheck", "target": "acceptance_sanitizer", "exit": 0, "hazards": 0, "warnings": 0 },
+      { "tool": "racecheck", "target": "reconstruction", "exit": 0, "hazards": 0, "warnings": 0 },
+      { "tool": "racecheck", "target": "temporal_minimal", "exit": 0, "hazards": 0, "warnings": 0 },
+      { "tool": "synccheck", "target": "acceptance_sanitizer", "exit": 0, "errors": 0 },
+      { "tool": "synccheck", "target": "reconstruction", "exit": 0, "errors": 0 },
+      { "tool": "synccheck", "target": "temporal_minimal", "exit": 0, "errors": 0 }
+    ],
+    "nonzero_runs": 0,
+    "summary": "12/12 tool x target runs exited 0 with zero errors/hazards/leaks"
+  },
   "reconstruction": {
     "target": "test_decode_phase3b2a_reconstruction",
     "exit": 0,
     "memory_report": "FIELDPLUS memory max=1920x1080 slots=2 device_total_bytes=170532360 immutable_device_bytes=150016 per_slot_device_bytes=85191172 pinned_total_bytes=72518552 per_slot_pinned_bytes=36259276 pageable_capacity_total_bytes=85510472 cuda_allocation_calls=152",
     "determinism": "frame 0/1 BGRA hashes, 200/100-repeat determinism, zero-allocation 400-request alternation passed"
   },
+  "host_heap_corruption_item": {
+    "status": "RESOLVED_WITH_EVIDENCE",
+    "not_a_fieldplus_decoder_defect": true,
+    "root_cause": "upstream SampleEncoder guards unsupported input->encoded conversions with assert(0) at upstream/EncoderSDK/SampleEncoder.cpp:260; Release/NDEBUG builds compile the assert out and the probe's rg24_rgba case then SIGSEGVs during CFHD_EncodeSample",
+    "report": "docs/DECODE_PHASE3B0_LINUX_HEAP_CORRUPTION.md",
+    "detail_file": "benchmarks/results/decode_phase3b0_linux_heap_corruption.json",
+    "reproducer": "tools/repro_phase3b0_convert.cpp"
+  },
   "open_items": [
-    "full case matrix (GOP2 frame 0/1 alternation, 1/2/4 slots, invalid input, GOP1 progressive/interlaced, mixed GOP1+GOP2, consumer-stream/wait) not run",
-    "never-reproduced Windows test_decode_phase3b0 host heap corruption not reproduced here; host ASan/UBSan build and repeated runs still required",
-    "no real 1080p/4K GOP2 samples exercised in this minimal run",
-    "no golden bitstream parity claim: the verified Windows corpus has no phase3b2a decoder intermediate dumps"
+    "no golden bitstream parity claim: the verified Windows corpus has no phase3b2a decoder intermediate dumps",
+    "upstream/ unchanged, nothing merged, no decoder-source change beyond the six portability fixes above"
   ],
   "copyright": "Copyright (c) 2026 HyperCine Contributors.",
   "license": "MIT OR Apache-2.0"
