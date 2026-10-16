@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Test detector with synthetic examples
-        run: python -m unittest discover -s ci -p 'test_privacy_guard.py' -v
+        run: python -m unittest discover -s ci -p 'test_privacy*.py' -v
       - name: Inspect each introduced commit (not just final diff)
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
