@@ -11,7 +11,8 @@ import tempfile
 import unittest
 
 
-@unittest.skipIf(os.name == "nt", "Native POSIX hook qualification")
+# Git for Windows runs the installed shell hooks through its bundled shell.
+# Keep these end-to-end tests enabled on Windows as well as POSIX systems.
 class InstalledHookTests(unittest.TestCase):
     def setUp(self):
         work = tempfile.TemporaryDirectory()
