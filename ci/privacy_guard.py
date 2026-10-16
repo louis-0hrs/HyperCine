@@ -221,12 +221,12 @@ def git(*args):
 
 
 def ref_findings(role, ref):
-    # Scan both the literal ref and its path after the standard namespace.
-    # The latter exposes home-shaped names hidden behind refs/heads or tags.
+    # Scan the literal ref and the name after refs/<namespace>/, including
+    # custom namespaces accepted by Git. A prefix must not hide a home path.
     candidates = [ref]
-    for prefix in ("refs/heads/", "refs/tags/"):
-        if ref.startswith(prefix):
-            candidates.append("/" + ref[len(prefix):])
+    parts = ref.split("/", 2)
+    if len(parts) == 3 and parts[0] == "refs":
+        candidates.append("/" + parts[2])
     rules = {rule for candidate in candidates for rule in rules_for(candidate)}
     return [("[" + role + "]", 0, rule) for rule in sorted(rules)]
 
