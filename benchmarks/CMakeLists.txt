@@ -15,6 +15,11 @@ add_executable(benchmark_codec
 
 target_link_libraries(benchmark_codec PRIVATE CFHDCodecStatic)
 
+# Record the real compiler that built this binary instead of a hardcoded
+# toolchain string, so Linux/macOS runs report truthful metadata.
+target_compile_definitions(benchmark_codec PRIVATE
+    HYPERCINE_BENCH_COMPILER="${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
 if(WIN32)
     target_link_libraries(benchmark_codec PRIVATE psapi)
 endif()
