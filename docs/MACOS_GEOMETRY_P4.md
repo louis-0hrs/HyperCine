@@ -180,3 +180,55 @@ and payload identities remain unchanged for all 16+120 1080p frames.
 
 Hosted CI status is recorded separately in `validation.json`; native results
 do not imply a hosted pass before those jobs complete.
+
+## Extended 12K/17K design and fail-closed audit (issue #48)
+
+Issue #44 was expanded during implementation to cover future URSA Cine 12K
+12288×8040 and 17K 17520×8040 as **audit targets only**. The explicit 4K CPU
+implementation and its DoD stay unchanged. `FilmScan3Geometry` uses signed
+int dimensions (all 16-bit CFHD wire values are representable) and size_t byte
+budgets; it introduces no future 8K ceiling. The unchanged historical 4096
+cap and the separate *currently qualified* 4K allocation cap are policy gates,
+not the representation limit of the descriptor. Raising either requires a new
+qualification; no caller can bypass them by supplying a larger byte budget.
+
+| Research geometry | width %128 | LL3 chroma width (%8) | Conservative sample bound | Current result |
+| --- | ---: | ---: | ---: | --- |
+| 7680×4320 | 0 | 480 (0) | 265,437,184 | PENDING_8K; early rejection |
+| 12288×8040 | 0 | 768 (0) | 790,380,544 | PENDING_12K; early rejection |
+| 17520×8040 | 112 | 1095 (7) | 1,126,902,784 | PENDING_17K; early rejection |
+
+17520 is divisible by 16, but the existing entropy coder requires each deepest
+chroma row width to be divisible by 8. Its logical LL3/chroma width 1095 fails
+that contract; blindly relaxing %128 would produce unsupported row semantics.
+No band padding, display-width substitution or private entropy variant is added.
+8040 is divisible by 8, yielding a final lowpass height of 1005; that fact alone
+does not qualify either frame format. Width/height tags can represent these
+numbers, while the enclosing 24-bit word-sized sample remains a separate limit.
+
+The prospective 10-bit rate numerator P*3*10 exceeds signed int32 at 12K and
+17K (2,963,865,600 and 4,225,824,000 respectively). The current path multiplies
+size_t only after the qualified cap check, so these rejected geometries never
+reach arithmetic, transforms, allocations, or state commit. Future work must
+use checked multiplication/addition for BGRA, pitch extent, padded planes,
+entropy, writer storage and rate metrics **before allocation**, independent of
+resolution names; apply the existing wire limit before reserving memory. Do
+not set the new API's ultimate limit to 8K or infer a larger legal sample from
+host RAM. The conservative 36P+1MiB host estimates for 12K/17K are about 3.31
+and 4.72 GiB per session before history/concurrency/instrumentation. They are
+research estimates, not measured encode support on the 16GB host.
+
+`large-geometry-audit.json` records real constructor acceptance/rejection,
+unchanged independent session state, checked uint64 arithmetic and all bounds.
+Reproduce without allocating large frames:
+
+```sh
+c++ -std=c++17 -O2 -Iinclude \
+  docs/validation/macos-geometry-p4/audit_large_geometry.cpp \
+  <build>/libhypercine_standalone.a -o /tmp/audit_large_geometry
+/tmp/audit_large_geometry
+```
+
+Actual GoPro/FFmpeg compatibility, padding conventions, chunk acceptance and
+measured allocator/RSS gates for 8K/12K/17K belong to separate issue #48. All
+three remain rejected here; no high-resolution product or throughput claim.

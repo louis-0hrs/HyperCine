@@ -48,6 +48,44 @@
       "sample_bound_bytes": 265437184,
       "chunk_payload_limit_bytes": 67108860,
       "reason": "No matching original SDK corpus in inspected NAS FS3 tree; 4096 dimension cap; conservative sample bound exceeds existing 24-bit word count; actual sample support and resources not qualified"
+    },
+    {
+      "width": 12288,
+      "height": 8040,
+      "accepted": false,
+      "width_mod_128": 0,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 768,
+      "ll3_chroma_width_mod_8": 0,
+      "sample_bound_bytes": 790380544,
+      "conservative_live_bytes": 3557687296,
+      "rate_numerator_before_div8": 2963865600,
+      "session_unchanged": true,
+      "status": "PENDING",
+      "label": "PENDING_12K",
+      "encode": "REJECTED_BEFORE_PLANE_ALLOCATION",
+      "sdk_reference": "MISSING",
+      "ffmpeg": "NOT_TESTED",
+      "follow_up_issue": 48
+    },
+    {
+      "width": 17520,
+      "height": 8040,
+      "accepted": false,
+      "width_mod_128": 112,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 1095,
+      "ll3_chroma_width_mod_8": 7,
+      "sample_bound_bytes": 1126902784,
+      "conservative_live_bytes": 5072037376,
+      "rate_numerator_before_div8": 4225824000,
+      "session_unchanged": true,
+      "status": "PENDING",
+      "label": "PENDING_17K",
+      "encode": "REJECTED_BEFORE_PLANE_ALLOCATION",
+      "sdk_reference": "MISSING",
+      "ffmpeg": "NOT_TESTED",
+      "follow_up_issue": 48
     }
   ],
   "budgets": {
@@ -75,5 +113,6 @@
     "Reset, padded pitch and interleaved independent HD/4K instances"
   ],
   "performance": "No optimization or acceleration milestone; no performance claim or benchmark comparison",
-  "hosted_ci": "PENDING"
+  "hosted_ci": "PENDING",
+  "extended_geometry_gate": "Issue #48: 8K/12K/17K wire/SDK/RAM feasibility; current public descriptor has no future 8K ceiling"
 }
