@@ -1,0 +1,40 @@
+# Privacy checks are intentionally independent of expensive codec builds.
+name: Privacy guard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  publication-privacy:
+    name: Publication privacy (all new commits)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test detector with synthetic examples
+        run: python -m unittest discover -s ci -p 'test_privacy_guard.py' -v
+      - name: Inspect each introduced commit (not just final diff)
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            base="$PR_BASE_SHA"
+          else
+            base="$PUSH_BEFORE_SHA"
+          fi
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            echo 'Missing reliable base SHA; fail closed.'
+            exit 2
+          fi
+          python ci/privacy_guard.py --commits "$base..HEAD"

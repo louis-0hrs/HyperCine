@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under the MIT License or Apache License, Version 2.0.
+# See LICENSE-MIT and LICENSE-APACHE for details.
+"""Synthetic tests: real hostnames, IPs, home paths and credentials must not appear."""
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import unittest
+
+import privacy_guard as guard
+
+
+class RuleTests(unittest.TestCase):
+    def codes(self, value):
+        return set(guard.rules_for(value))
+
+    def test_rfc1918_only(self):
+        for candidate in ("192." + "168.12.8", "10." + "0.20.3",
+                          "172." + "31.9.8"):
+            self.assertIn("PRIVATE_IPV4", self.codes(candidate))
+        for public in ("8.8.8.8", "192.0.2.3", "127.0.0.1",
+                       "172.32.0.1"):
+            self.assertNotIn("PRIVATE_IPV4", self.codes(public))
+
+    def test_local_home_paths(self):
+        self.assertIn("PERSONAL_ABSOLUTE_PATH",
+                      self.codes("/Users/" + "worker/build/results.json"))
+        self.assertIn("PERSONAL_ABSOLUTE_PATH",
+                      self.codes("/home/" + "worker/worktree"))
+        self.assertIn("PERSONAL_ABSOLUTE_PATH",
+                      self.codes("C:" + "\\Users\\" + "worker\\repo"))
+        self.assertNotIn("PERSONAL_ABSOLUTE_PATH",
+                         self.codes("docs/validation/result.json"))
+
+    def test_network_mounts(self):
+        self.assertIn("NETWORK_SHARE", self.codes("\\\\" + "TESTNAS" + "\\golden"))
+        self.assertIn("NETWORK_SHARE", self.codes("//" + "TESTNAS/golden"))
+        self.assertIn("NETWORK_SHARE", self.codes("smb" + "://TESTNAS/golden"))
+        self.assertNotIn("NETWORK_SHARE",
+                         self.codes("https://example.com/doc"))
+
+    def test_private_dns(self):
+        self.assertIn("PRIVATE_HOSTNAME", self.codes("node" + ".local"))
+        self.assertNotIn("PRIVATE_HOSTNAME", self.codes("example.org"))
+
+    def test_credentials_and_placeholders(self):
+        self.assertIn("POSSIBLE_CREDENTIAL", self.codes("password" + "=BadSecret123"))
+        self.assertNotIn("POSSIBLE_CREDENTIAL", self.codes("password" + "=REDACTED"))
+        self.assertIn("TOKEN_PATTERN", self.codes("ghp_" + "A" * 24))
+
+    def test_added_only_and_location(self):
+        sample = "\n".join(("diff --git a/a b/a", "--- a/a", "+++ b/a",
+                            "@@ -4,1 +4,2 @@", "-old " + "192." + "168.1.2",
+                            "+safe text", "+new " + "192." + "168.1.3"))
+        self.assertEqual([("a", 5, "PRIVATE_IPV4")], guard.scan_patch(sample))
+
+
+class GitIntegrationTests(unittest.TestCase):
+    def test_intermediate_exposure_is_not_hidden_by_later_cleanup(self):
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+            def run(*args):
+                return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      text=True).stdout.strip()
+            run("init", "-q")
+            run("config", "user.email", "privacy-test@example.invalid")
+            run("config", "user.name", "Privacy Test")
+            artifact = cwd / "report.txt"
+            artifact.write_text("safe\n", encoding="utf-8")
+            run("add", "report.txt")
+            run("commit", "-qm", "initial")
+            base = run("rev-parse", "HEAD")
+            private_example = "192." + "168.4.8"
+            artifact.write_text("network " + private_example + "\n", encoding="utf-8")
+            run("add", "report.txt")
+            run("commit", "-qm", "bad intermediate commit")
+            artifact.write_text("safe again\n", encoding="utf-8")
+            run("add", "report.txt")
+            run("commit", "-qm", "later cleanup")
+            command = [sys.executable, str(Path(guard.__file__).resolve()),
+                       "--commits", base + "..HEAD"]
+            result = subprocess.run(command, cwd=cwd, text=True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("PRIVATE_IPV4", result.stderr)
+            self.assertNotIn(private_example, result.stderr)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,27 @@
+#!/bin/sh
+# Activate once per worktree: git config --local core.hooksPath .githooks
+# The hook checks EACH outgoing commit, not only the final branch state.
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON=python3
+elif command -v python >/dev/null 2>&1; then
+  PYTHON=python
+else
+  echo "Privacy guard: Python 3 unavailable; push blocked." >&2
+  exit 2
+fi
+zero=0000000000000000000000000000000000000000
+while read -r local_ref local_sha remote_ref remote_sha
+do
+  [ "$local_sha" != "$zero" ] || continue
+  if [ "$remote_sha" = "$zero" ]; then
+    commits=$(git rev-list --reverse "$local_sha" --not --remotes)
+  else
+    commits=$(git rev-list --reverse "$remote_sha..$local_sha")
+  fi
+  for sha in $commits
+  do
+    "$PYTHON" ci/privacy_guard.py --commit "$sha" || exit $?
+  done
+done

@@ -2,7 +2,7 @@
 
 This document specifies mandatory rules, design constraints, and operational protocols for any AI agent or software engineer contributing to the **HyperCine** repository.
 
-Every agent operating in this repository must strictly adhere to these 11 rules.
+Every agent operating in this repository must strictly adhere to these rules.
 
 ---
 
@@ -115,3 +115,38 @@ Every agent operating in this repository must strictly adhere to these 11 rules.
   - `docs(...)`: Documentation updates.
   - `build(...)`: Build system or CMake adjustments.
 - Ensure `git status --porcelain upstream/` is always 100% empty before committing.
+
+
+---
+
+## 12. Public Repository: Privacy and Pre-Publication Gates (Mandatory)
+- Treat **everything** in GitHub (branch commits, draft PRs, issues, comments, logs,
+  CI artifacts and validation reports) as public immediately, even before merge.
+- **Never publish** actual private IPs, internal DNS/hostnames, SMB/NFS/NAS
+  locations, machine-specific absolute home directories, personal usernames,
+  credentials, tokens, API keys, SSH configuration, or environment dumps.
+- Use repository-relative paths in public commands and reports. Access external
+  reference corpora through a locally configured variable such as
+  `HYPERCINE_GOLDEN_DIR`; publish the *variable name*, not its value.
+- Keep local host/mount paths and raw verbose tool logs outside the Git tree.
+  For public validation evidence, provide portable reproduction instructions,
+  test counts, test results, GPU/OS/compiler versions, checksums and timings.
+  Sanitize generated JSON, XML, CMake diagnostics and logs before staging.
+- Before **each commit**, run `python ci/privacy_guard.py --staged` and review
+  `git diff --cached`. Before **each push**, run the privacy guard over
+  **every outgoing commit**; do not rely on a final tree diff.
+- Install optional local hooks with `git config --local core.hooksPath .githooks`.
+  They are not activated automatically; installation/availability must be
+  explicitly checked on each worktree, platform and CI agent environment.
+- A scanner pass does not replace human review. If the guard fails or Git/Python
+  is unavailable, **stop** and report the blocker; never use `--no-verify`,
+  disable a hook, or quietly suppress a hit just to publish.
+- If potentially sensitive information was *already pushed*, STOP further
+  publication of that content, notify the maintainer without reproducing the
+  value, and propose a targeted remediation. Do not rewrite shared history,
+  force-push active branches or rotate secrets without the maintainer's approval.
+- Issue/PR instructions must contain no workstation-specific values. Existing
+  public examples or old issues are **not** authorization to repeat such data.
+- GitHub CI runs **after** data is pushed. Required status checks can block a
+  merge, but only local pre-push controls can block a first public disclosure.
+  See `docs/PRIVACY.md` for the limits and response process.
