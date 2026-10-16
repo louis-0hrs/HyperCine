@@ -14,6 +14,22 @@ import privacy_guard as guard
 
 
 class RefNamespaceTests(unittest.TestCase):
+    def test_nested_home_components_rejected(self):
+        for prefix in ("refs/heads/topic/", "refs/remotes/origin/",
+                       "refs/archive/deep/nested/", "refs/custom/Users/topic/"):
+            for home in ("Users/", "home/", "root/", "c/Users/", "~/"):
+                with self.subTest(prefix=prefix, home=home):
+                    ref = prefix + home + "synthetic-agent/review"
+                    self.assertEqual(
+                        [("[LOCAL_REF]", 0, "PERSONAL_ABSOLUTE_PATH")],
+                        guard.ref_findings("LOCAL_REF", ref))
+
+    def test_nested_clean_components_remain_supported(self):
+        for name in ("users-guide", "homepage", "rooted", "Users", "home"):
+            ref = "refs/archive/deep/" + name
+            with self.subTest(ref=ref):
+                self.assertEqual([], guard.ref_findings("REMOTE_REF", ref))
+
     def test_home_paths_rejected_in_every_namespace(self):
         for namespace in ("heads", "tags", "archive", "notes"):
             for home in ("Users/", "home/", "c/Users/"):

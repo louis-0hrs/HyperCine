@@ -221,12 +221,16 @@ def git(*args):
 
 
 def ref_findings(role, ref):
-    # Scan the literal ref and the name after refs/<namespace>/, including
-    # custom namespaces accepted by Git. A prefix must not hide a home path.
+    # Ref prefixes are not filesystem boundaries. Check each component as
+    # a possible home-path start, including nested and remote-tracking names.
+    # Three components suffice for the existing home rules (drive/Users/name);
+    # bounded windows avoid repeatedly scanning an arbitrarily long suffix.
     candidates = [ref]
-    parts = ref.split("/", 2)
-    if len(parts) == 3 and parts[0] == "refs":
-        candidates.append("/" + parts[2])
+    parts = ref.split("/")
+    if len(parts) >= 3 and parts[0] == "refs":
+        for index in range(2, len(parts)):
+            window = "/".join(parts[index:index + 3])
+            candidates.extend((window, "/" + window))
     rules = {rule for candidate in candidates for rule in rules_for(candidate)}
     return [("[" + role + "]", 0, rule) for rule in sorted(rules)]
 
