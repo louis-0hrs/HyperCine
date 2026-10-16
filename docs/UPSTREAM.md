@@ -116,6 +116,30 @@ The existing Phase 3A verification wrapper and new Phase 0 reference harness set
 
 See [DECODE_PHASE0.md](DECODE_PHASE0.md) for the call graph, exact predicates, scheduling analysis and deterministic BGRA/YU64 reference. YUY2 final-strip dither remains a separate repeatability limitation, including when a persistent output worker has its own CRT RNG state.
 
+### 10. SSE2 temporal inverse reads past the end of the plane allocation
+
+Host AddressSanitizer (MSVC 19.44, `/fsanitize=address`) reports a 16-byte
+heap-buffer-overflow read in `InvertTemporalQuant16s` (`upstream/Codec/temporal.c:9606`)
+for 1920x1080 and 3840x2160 FIELDPLUS/GOP-2 samples that are decoded through
+`CFHD_DecodeSample` into a `CFHD_PIXEL_FORMAT_YU64` target. The reported chain is
+`TransformInverseTemporalQuant` (`wavelet.c:2355`) -> `ReconstructWaveletBand` ->
+`DecodeSampleSubband`, and the read lands exactly 0 bytes past a plane allocated by
+`AllocWaveletStack` (`wavelet.c:478`) through `AllocImage` (`image.c:169`).
+
+The SSE2 loop preloads the next iteration's lowpass and highpass coefficients with
+unconditional `_mm_load_si128` loads. On the last group of the last row that read-ahead
+passes the end of the plane. The 64x64 variant of the same path stays inside its
+allocation and reports nothing, so the behaviour is size dependent.
+
+The access is a read, it happens inside the frozen oracle rather than in HyperCine
+production decode, and the frozen reference hashes for the same fixtures still
+reproduce in a non-ASan Release build. It is recorded as a plausible explanation for
+the single historical Windows heap-corruption exit in a full CTest run, not as a proven
+cause. Upstream is not modified; HyperCine SIMD backends must keep defined boundary
+behaviour and must not reproduce this read-ahead. Evidence:
+[DECODE_PHASE3B2A_ISSUE13_WINDOWS.md](DECODE_PHASE3B2A_ISSUE13_WINDOWS.md) and
+`benchmarks/results/decode_phase3b2a_issue13_windows_20261016/`.
+
 ### RC extreme-input encoder capacity probe
 
 The Phase 3A-RC test generator observed an upstream access violation (Windows
