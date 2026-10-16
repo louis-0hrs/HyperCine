@@ -95,6 +95,50 @@ class GitIntegrationTests(unittest.TestCase):
             self.assertIn("COMMIT_MESSAGE", result.stderr)
             self.assertNotIn(leaked, result.stderr)
 
+    @unittest.skipIf(os.name == "nt", "POSIX shell hook integration runs on Linux")
+    def test_new_public_branch_rechecks_commit_from_private_remote(self):
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+            public = cwd / "public.git"
+            private = cwd / "private.git"
+            def git(*args):
+                return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      text=True).stdout.strip()
+            git("init", "-q")
+            git("config", "user.email", "privacy-test@example.invalid")
+            git("config", "user.name", "Privacy Test")
+            git("init", "--bare", "-q", str(public))
+            git("init", "--bare", "-q", str(private))
+            git("remote", "add", "public", str(public))
+            git("remote", "add", "private", str(private))
+            artifact = cwd / "report.txt"
+            artifact.write_text("baseline\n", encoding="utf-8")
+            git("add", "report.txt")
+            git("commit", "-qm", "baseline")
+            git("push", "-q", "public", "HEAD:refs/heads/main")
+
+            synthetic_address = "192." + "168.8.9"
+            artifact.write_text("private test " + synthetic_address + "\n",
+                                encoding="utf-8")
+            git("add", "report.txt")
+            git("commit", "-qm", "unsafe example")
+            git("push", "-q", "private", "HEAD:refs/heads/feature")
+            sha = git("rev-parse", "HEAD")
+
+            # Former '--not --remotes' would wrongly suppress this commit.
+            self.assertEqual("", git("rev-list", sha, "--not", "--remotes"))
+            self.assertIn(sha, git("rev-list", sha, "--not", "--remotes=public"))
+            hook = Path(guard.__file__).resolve().parent.parent / ".githooks/pre-push"
+            ref_line = "refs/heads/feature {} refs/heads/feature {}\n".format(
+                sha, "0" * 40)
+            result = subprocess.run(["sh", str(hook), "public", str(public)],
+                                    input=ref_line, cwd=cwd, text=True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("PRIVATE_IPV4", result.stderr)
+            self.assertNotIn(synthetic_address, result.stderr)
+
     def test_intermediate_exposure_is_not_hidden_by_later_cleanup(self):
         with tempfile.TemporaryDirectory() as work:
             cwd = Path(work)
