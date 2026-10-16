@@ -116,9 +116,12 @@ def main(argv=None):
     args = parser.parse_args(argv)
     common = ("--no-ext-diff", "--no-color", "--unified=0", "--diff-filter=ACMRT")
     patches = []
+    paths = []
     commits = []
     if args.staged:
         patches.append(git("diff", "--cached", *common))
+        paths.extend(git("diff", "--cached", "--name-only", "-z",
+                         "--no-renames", "--diff-filter=ACMRT").split("\0"))
     elif args.commit:
         commits = [args.commit]
     else:
@@ -126,7 +129,18 @@ def main(argv=None):
         # Empty ranges are allowed (e.g. synchronized branches with no new commits).
     for sha in commits:
         patches.append(git("show", "--format=", "--first-parent", *common, sha))
+        paths.extend(git("show", "--format=", "--first-parent", "--name-only",
+                         "-z", "--no-renames", "--diff-filter=ACMRT", sha).split("\0"))
     findings = [finding for patch in patches for finding in scan_patch(patch)]
+    # Empty/binary files and pure renames have no +++ text header. Inspect
+    # destination paths independently; NUL records avoid Git path quoting.
+    # Disabling rename detection presents destinations as additions, while
+    # the filter excludes deleted paths during forward-only remediation.
+    for path in sorted(set(paths) - {""}):
+        for rule in rules_for(path):
+            finding = ("[SENSITIVE_PATH]", 0, "PATH_" + rule)
+            if finding not in findings:
+                findings.append(finding)
     # A secret in a commit subject/body is public even when the patch is clean.
     for sha in commits:
         message = git("show", "-s", "--format=%B", sha)

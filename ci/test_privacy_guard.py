@@ -140,6 +140,65 @@ class HookInterpreterTests(unittest.TestCase):
 
 
 class GitIntegrationTests(unittest.TestCase):
+    def test_path_only_changes_are_checked_in_all_modes(self):
+        scanner = str(Path(guard.__file__).resolve())
+        for kind in ("empty", "binary", "rename"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as work:
+                cwd = Path(work)
+
+                def git(*args):
+                    return subprocess.run(
+                        ["git", *args], cwd=cwd, check=True,
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        text=True).stdout.strip()
+
+                git("init", "-q")
+                git("config", "user.email", "test@example.invalid")
+                git("config", "user.name", "Privacy Test")
+                source = cwd / "safe.txt"
+                source.write_text("safe content\n", encoding="utf-8")
+                git("add", ".")
+                git("commit", "-qm", "baseline")
+                base = git("rev-parse", "HEAD")
+                sensitive = "node" + ".internal"
+                target = cwd / (sensitive + ".dat")
+                if kind == "rename":
+                    git("mv", source.name, target.name)
+                else:
+                    target.write_bytes(b"" if kind == "empty" else b"\0safe\0")
+                    git("add", target.name)
+
+                def check(*args):
+                    result = subprocess.run(
+                        [sys.executable, scanner, *args], cwd=cwd, text=True,
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    self.assertEqual(1, result.returncode, result.stdout)
+                    self.assertIn("PATH_PRIVATE_HOSTNAME", result.stderr)
+                    self.assertNotIn(sensitive, result.stdout + result.stderr)
+
+                # Commit even after a failing assertion, so every mode is tested.
+                with self.subTest(mode="staged"):
+                    check("--staged")
+                git("commit", "-qm", "path-only change")
+                with self.subTest(mode="commit"):
+                    check("--commit", "HEAD")
+                with self.subTest(mode="range"):
+                    check("--commits", base + "..HEAD")
+
+                # Removing a sensitive path must remain possible without
+                # re-reporting the deleted name as a new disclosure.
+                git("rm", target.name)
+                result = subprocess.run(
+                    [sys.executable, scanner, "--staged"], cwd=cwd, text=True,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.assertEqual(0, result.returncode, result.stderr)
+                git("commit", "-qm", "remove test path")
+                result = subprocess.run(
+                    [sys.executable, scanner, "--commit", "HEAD"],
+                    cwd=cwd, text=True, stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                self.assertEqual(0, result.returncode, result.stderr)
+
     def test_commit_message_leak_is_checked(self):
         with tempfile.TemporaryDirectory() as work:
             cwd = Path(work)
