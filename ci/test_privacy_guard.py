@@ -129,6 +129,9 @@ class GitIntegrationTests(unittest.TestCase):
             # Former '--not --remotes' would wrongly suppress this commit.
             self.assertEqual("", git("rev-list", sha, "--not", "--remotes"))
             self.assertIn(sha, git("rev-list", sha, "--not", "--remotes=public"))
+            (cwd / "ci").mkdir()
+            (cwd / "ci/privacy_guard.py").write_bytes(
+                Path(guard.__file__).resolve().read_bytes())
             hook = Path(guard.__file__).resolve().parent.parent / ".githooks/pre-push"
             ref_line = "refs/heads/feature {} refs/heads/feature {}\n".format(
                 sha, "0" * 40)
