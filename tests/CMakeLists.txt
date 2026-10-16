@@ -311,3 +311,11 @@ if(HYPERCINE_ENABLE_CUDA AND HYPERCINE_BUILD_BENCHMARKS)
     add_test(NAME test_decode_phase2fb COMMAND test_decode_phase2fb)
     set_tests_properties(test_decode_phase2fb PROPERTIES TIMEOUT 300)
 endif()
+
+# Diagnostics-only helper for Compute Sanitizer evidence (issue #13). It is a
+# kernel-instrumentation control, not a codec test, so it registers no CTest:
+# run it manually under compute-sanitizer. See docs/DECODE_PHASE3B2A.md.
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(sanitizer_launch_control sanitizer_launch_control.cu)
+    set_target_properties(sanitizer_launch_control PROPERTIES CUDA_ARCHITECTURES ${CMAKE_CUDA_ARCHITECTURES})
+endif()

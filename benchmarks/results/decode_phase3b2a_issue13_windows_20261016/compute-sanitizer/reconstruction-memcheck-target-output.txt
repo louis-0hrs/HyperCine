@@ -1,0 +1,3 @@
+base-LL offset discrimination: BGRA missing +24 changes 128 coefficients; signed planar missing +10 changes 128 coefficients
+FIELDPLUS memory max=1920x1080 slots=2 device_total_bytes=170532360 immutable_device_bytes=150016 per_slot_device_bytes=85191172 pinned_total_bytes=72518552 per_slot_pinned_bytes=36259276 pageable_capacity_total_bytes=85510728 cuda_allocation_calls=152
+progressive FIELDPLUS frame 0/1 BGRA hashes, 200/100-repeat determinism, and zero-allocation 400-request alternation passed
