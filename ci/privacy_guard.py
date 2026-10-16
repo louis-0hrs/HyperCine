@@ -27,7 +27,7 @@ def is_private_network_address(address):
     return a == 10 or (a == 172 and 16 <= b <= 31) or (a == 192 and b == 168)
 UNIX_HOME = re.compile(r"(?<![\w/])/(?:Users|home|root)/[^/\s\"'<>]+")
 WINDOWS_HOME = re.compile(r"\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>]+")
-TILDE_HOME = re.compile(r"(?<![\w/])~/(?:[^\s\"'<>]+)")
+TILDE_HOME = re.compile(r"(?<![\w/])~/(?=[A-Za-z._])[^\s\"'<>]+")
 WINDOWS_UNC = re.compile(r"(?<![A-Za-z0-9])\\{2,}[A-Za-z0-9._-]+\\+[A-Za-z0-9.$_-]+")
 POSIX_SHARE = re.compile(r"(?<![A-Za-z0-9:/])//[A-Za-z0-9._-]+/[A-Za-z0-9.$_-]+")
 NETWORK_URI = re.compile(r"\b(?:smb|cifs|nfs|sshfs)://", re.IGNORECASE)
