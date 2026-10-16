@@ -1,0 +1,161 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "issue": 13,
+  "scope": "Windows host instrumentation and Compute Sanitizer attach evidence (Windows agent part of issue #13)",
+  "date": "2026-10-16",
+  "branch": "decode-phase3b2a-issue13-windows-asan",
+  "base_commit": "1d78fc183ea28c4268345521e83fb2bca3226381",
+  "base_branch": "decode-phase3b2a (PR #12 head)",
+  "upstream_modified": false,
+  "encoder_modified": false,
+  "production_decoder_modified": false,
+  "environment": {
+    "os": "Windows 11 Home 25H2, build 26200 (WDDM)",
+    "cpu": "AMD Ryzen 9 7940HS",
+    "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+    "driver": "610.62",
+    "cuda_toolkit": "12.8.61",
+    "compute_sanitizer": "2025.1.0.0 (build 35351055)",
+    "compiler": "MSVC 19.44.35229.0 (toolset 14.44.35207), Visual Studio 2022 Community",
+    "cmake": "3.31.6",
+    "powershell": "not used; commands were run from Git Bash"
+  },
+  "builds": {
+    "cuda_release": {
+      "command": "cmake -B build-release-sm89 -S . -G \"Visual Studio 17 2022\" -A x64 -DHYPERCINE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=89 -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_BUILD_BENCHMARKS=ON",
+      "result": "configure and Release build succeeded"
+    },
+    "host_asan": {
+      "command": "cmake -B build-asan -S . -G \"Visual Studio 17 2022\" -A x64 -DHYPERCINE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=89 -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_BUILD_BENCHMARKS=OFF -DCMAKE_CXX_FLAGS=\"/fsanitize=address /Zi /Dfseeko=_fseeki64\" -DCMAKE_CUDA_FLAGS=\"-Xcompiler=/fsanitize=address -Xcompiler=/Zi\" -DCMAKE_EXE_LINKER_FLAGS=\"/DEBUG\"",
+      "asan_runtime": "clang_rt.asan_dynamic-x86_64.dll (toolset 14.44.35207)",
+      "notes": [
+        "The CUDA host pass must carry /fsanitize=address as well; otherwise ASan-instrumented C++ objects and non-instrumented nvcc host objects inside one static library fail to link with LNK2038 annotate_string/annotate_vector mismatches.",
+        "/DEBUG is required for symbolized ASan reports.",
+        "The ASan configuration needs /Dfseeko=_fseeki64 for the unmodified upstream mp4reader.cpp; upstream sources were not edited.",
+        "MSVC ASan does not support detect_leaks on Windows and does not honor halt_on_error=0."
+      ]
+    }
+  },
+  "host_asan_results": {
+    "tool": "AddressSanitizer as shipped with MSVC 19.44 (/fsanitize=address)",
+    "ubsan": "NOT_AVAILABLE_WITH_MSVC_TOOLSET",
+    "test_decode_phase3b0": {
+      "repetitions": 20,
+      "cases_per_repetition": 297,
+      "exit_codes": "0 in 20/20",
+      "asan_reports": 0,
+      "inventory_per_run": "attempts 297 encoded 274 profiles 7 fixtures 7 yuv10 1 interlaced 1",
+      "determinism": "After removing the upstream-encoded byte counts, all 20 logs hash identically (identical case sequence, error codes and inventory). A subset of cases reports encoded byte counts that differ by up to 4 bytes between runs; that is upstream SDK probe metadata/rate-control variance in the probe, not HyperCine decoder output.",
+      "conclusion": "The one-time heap-corruption observation in test_decode_phase3b0 did not reproduce under host ASan in 20 isolated repetitions (5,940 case executions)."
+    },
+    "test_decode_phase3b2a_reconstruction_default": {
+      "repetitions": 5,
+      "exit_codes": "1 in 5/5",
+      "asan_reports_per_run": 1,
+      "finding": "heap-buffer-overflow, READ of size 16, 0 bytes past the end of a 2,073,680-byte aligned allocation",
+      "first_frame": "InvertTemporalQuant16s, upstream/Codec/temporal.c:9606",
+      "call_chain": [
+        "TransformInverseTemporalQuant upstream/Codec/wavelet.c:2355",
+        "ReconstructWaveletBand upstream/Codec/decoder.c:13238",
+        "DecodeSampleSubband upstream/Codec/decoder.c:12144",
+        "UpdateCodecState upstream/Codec/decoder.c:24070",
+        "DecodeSampleGroup upstream/Codec/decoder.c:11242",
+        "DecodeSample upstream/Codec/decoder.c:11083",
+        "CSampleDecoder::DecodeSample upstream/DecoderSDK/SampleDecoder.cpp:1558",
+        "CFHD_DecodeSample upstream/DecoderSDK/CFHDDecoder.cpp:757",
+        "CaptureUpstreamFieldPlusBands tests/test_decode_phase3b2a_reconstruction.cpp:135",
+        "main tests/test_decode_phase3b2a_reconstruction.cpp:1136 (1920x1080 FIELDPLUS fixture, CFHD_PIXEL_FORMAT_YU64 capture)"
+      ],
+      "allocation_site": "AllocWaveletStack upstream/Codec/wavelet.c:478 -> AllocImage upstream/Codec/image.c:169 -> AllocAligned upstream/Codec/allocator.h:162 -> debug aligned allocator upstream/Codec/config.h:188",
+      "site_reproducible": "same first frame and access size in 5/5 runs",
+      "log": "host-asan/reconstruction-heap-buffer-overflow.log"
+    },
+    "test_decode_phase3b2a_reconstruction_4k_smoke": {
+      "repetitions": 1,
+      "exit_codes": "1",
+      "asan_reports": 1,
+      "finding": "same access site and size as the 1080p case (InvertTemporalQuant16s, READ of size 16)",
+      "log": "host-asan/reconstruction-4k-smoke-heap-buffer-overflow.log"
+    },
+    "test_decode_phase3b2a_reconstruction_matrix_range": {
+      "repetitions": 1,
+      "exit_codes": "0",
+      "asan_reports": 0,
+      "note": "64x64 FIELDPLUS fixture, BT.601/BT.709 x CG/VS; upstream capture at 64x64 stays inside its allocation"
+    },
+    "test_decode_phase3b2a_temporal": {
+      "repetitions": 5,
+      "exit_codes": "0 in 5/5",
+      "asan_reports": 0
+    },
+    "test_decode_phase3b2r_reference_smoke": {
+      "repetitions": 1,
+      "exit_codes": "0",
+      "asan_reports": 0
+    },
+    "test_decode_phase3b2r_math": {
+      "repetitions": 1,
+      "exit_codes": "0",
+      "asan_reports": 0
+    },
+    "interpretation": {
+      "classification": "UPSTREAM_ORACLE_OUT_OF_ALLOCATION_READ",
+      "statement": "The reported access is inside the frozen upstream CPU decoder used as the HyperCine coefficient oracle, not inside HyperCine production decode. The load is an unconditional vector read-ahead in the SSE2 temporal inverse loop (_mm_load_si128 of the next iteration's low/high coefficients); on the final row of the plane the read-ahead passes the end of the plane allocation.",
+      "effect_on_reference_values": "NOT_PROVEN_TO_CHANGE_OUTPUT; the trace shows a read, not a write, and the existing frozen upstream hashes for the same fixtures still match in the non-ASan Release build",
+      "explains_historical_heap_corruption": "PLAUSIBLE_EXPLANATION_NOT_PROVEN; a 16-byte read past a heap allocation is exactly the kind of access that a CRT heap checker reports as heap corruption when the read lands on unmapped or checker-poisoned memory",
+      "action": "Documented as an upstream quirk in docs/UPSTREAM.md; upstream sources were not modified. HyperCine SIMD backends (#69/#70) must not imitate it."
+    }
+  },
+  "compute_sanitizer_results": {
+    "attach": "RESOLVED; instrumented runs occurred on the RTX 4090 Laptop GPU / driver 610.62 / Compute Sanitizer 2025.1.0.0",
+    "instrumentation_controls": {
+      "binary": "tests/sanitizer_launch_control.cu (diagnostics-only; no CTest registration)",
+      "clean_kernel_under_memcheck": "0 errors",
+      "faulty_kernel_under_memcheck": "Invalid __global__ write of size 4 bytes reported by memcheck",
+      "faulty_kernel_with_kernel_name_filter_matching_faulty_kernel": "same invalid write reported",
+      "faulty_kernel_with_kernel_name_filter_matching_only_clean_kernel": "0 errors; the filter demonstrably gates which kernels are instrumented",
+      "conclusion": "The installed sanitizer instruments device code and reports defects on this machine, so a reported zero does not just mean 'the tool saw nothing'."
+    },
+    "coverage": {
+      "test_decode_phase3b2a_temporal.exe": {
+        "memcheck_leak_full": "PASS, 0 errors, 0 leaked bytes in 0 allocations",
+        "initcheck": "PASS, 0 errors",
+        "racecheck": "PASS, 0 hazards displayed (0 errors, 0 warnings)",
+        "synccheck": "PASS, 0 errors"
+      },
+      "test_decode_phase3b2a_reconstruction.exe .": {
+        "memcheck_leak_full": "PASS, 0 errors, 0 leaked bytes in 0 allocations; the executable verified its BGRA hashes, 400-request alternation and zero-allocation accounting inside the instrumented process and printed its pass line",
+        "initcheck": "PASS, 0 errors",
+        "racecheck": "SEE limitations",
+        "synccheck": "SEE limitations"
+      },
+      "test_decode_phase3b2a_upstream_temporal.exe": "SEE limitations"
+    },
+    "limitations": [
+      "Compute Sanitizer 2025.1.0.0 in this installation does not provide --dump-kernel-launches, so no kernel-launch list can be recorded; kernel-launch coverage is evidenced by the instrumentation controls plus the decoded, hash-verified GPU output produced inside the instrumented process, not by a launch enumeration.",
+      "racecheck on the full production reconstruction target and the upstream temporal target did not complete within the session time budget and is reported as not run rather than as a pass."
+    ],
+    "logs": "compute-sanitizer/*.log and compute-sanitizer/*.stdout"
+  },
+  "heap_corruption_followup": {
+    "historical_observation": "One full CTest run exited with heap corruption in test_decode_phase3b0; isolated reruns passed.",
+    "windows_reproduction_attempt": "NOT_REPRODUCED",
+    "evidence": "20 isolated host-ASan repetitions of test_decode_phase3b0, 297 cases each, exit code 0, zero ASan reports; identical case/status sequence in all 20 runs",
+    "first_failing_trace": "none for test_decode_phase3b0; the only reproducible host ASan finding in this session is the upstream oracle read-ahead recorded above",
+    "linux_lane_reference": "The Linux A2 lane root-caused the Linux test_decode_phase3b0 failure to an unsupported upstream SDK conversion pair (rg24 -> RGBA_4444). On Windows the same probe cases return upstream error code 10 (CFHD_ERROR_UNEXPECTED) instead of crashing, which is consistent with the release-build assert being compiled out."
+  },
+  "windows_evidence_status": "PASS_FOR_THE_WINDOWS_HOST_INSTRUMENTATION_PART",
+  "production_promotion": "NOT_RECOMMENDED_FROM_THIS_EVIDENCE_ALONE",
+  "remaining_blockers": [
+    "PR #52 still has not integrated the native A2 test patch #80",
+    "The #13 safety gate remains HOLD until the stacked integration and the resulting-parent native tests exist",
+    "racecheck/synccheck on the full production reconstruction target and the upstream temporal target are not run on Windows"
+  ],
+  "sanitized": "Host paths, user names and the machine name were redacted from the committed logs; raw logs remain local.",
+  "windows_cuda_ctest": {
+    "command": "ctest --test-dir build-release-sm89 -C Release --output-on-failure",
+    "result": "44/44 PASS, 773.46 s",
+    "date": "2026-10-16",
+    "log": "ctest-release-summary.txt"
+  }
+}
