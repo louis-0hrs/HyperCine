@@ -8,6 +8,7 @@
 #include "hypercine/entropy_gpu.h"
 #include "hypercine/phase2a_gpu.h"
 #include "hypercine/phase2c.h"
+#include "hypercine/quality_state.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -15,53 +16,6 @@
 #include <vector>
 
 namespace hypercine {
-
-// SDK-identical regular CFHD quality values. KEYING and UNCOMPRESSED modes
-// are deliberately excluded because they describe separate format families.
-enum class EncodingQuality : int {
-    Low = 1,
-    Medium = 2,
-    High = 3,
-    FilmScan1 = 4,
-    FilmScan2 = 5,
-    FilmScan3 = 6
-};
-
-inline const char* EncodingQualityName(EncodingQuality quality) noexcept {
-    switch (quality) {
-    case EncodingQuality::Low: return "low";
-    case EncodingQuality::Medium: return "medium";
-    case EncodingQuality::High: return "high";
-    case EncodingQuality::FilmScan1: return "filmscan1";
-    case EncodingQuality::FilmScan2: return "filmscan2";
-    case EncodingQuality::FilmScan3: return "filmscan3";
-    }
-    return "invalid";
-}
-
-inline const char* EncodingQualitySdkName(EncodingQuality quality) noexcept {
-    switch (quality) {
-    case EncodingQuality::Low: return "CFHD_ENCODING_QUALITY_LOW";
-    case EncodingQuality::Medium: return "CFHD_ENCODING_QUALITY_MEDIUM";
-    case EncodingQuality::High: return "CFHD_ENCODING_QUALITY_HIGH";
-    case EncodingQuality::FilmScan1: return "CFHD_ENCODING_QUALITY_FILMSCAN1";
-    case EncodingQuality::FilmScan2: return "CFHD_ENCODING_QUALITY_FILMSCAN2";
-    case EncodingQuality::FilmScan3: return "CFHD_ENCODING_QUALITY_FILMSCAN3";
-    }
-    return "invalid";
-}
-
-inline bool IsValidEncodingQuality(EncodingQuality quality) noexcept {
-    switch (quality) {
-    case EncodingQuality::Low:
-    case EncodingQuality::Medium:
-    case EncodingQuality::High:
-    case EncodingQuality::FilmScan1:
-    case EncodingQuality::FilmScan2:
-    case EncodingQuality::FilmScan3: return true;
-    }
-    return false;
-}
 
 // ============================================================================
 // PART 1: Clarify & Verify "Byte-Identical" (A: Pristine Upstream, B: HyperCine
