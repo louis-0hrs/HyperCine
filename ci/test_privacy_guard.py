@@ -41,6 +41,26 @@ class RuleTests(unittest.TestCase):
         self.assertNotIn("PERSONAL_ABSOLUTE_PATH",
                          self.codes("docs/validation/result.json"))
 
+    def test_msys_git_bash_home_paths(self):
+        # Compose synthetic homes so test sources never contain real host data.
+        for drive in ("c", "D", "z"):
+            path = "/" + drive + "/Users/" + "synthetic-agent/repo"
+            self.assertIn("PERSONAL_ABSOLUTE_PATH", self.codes(path))
+        for safe in ("docs/Users/ci/report.json", "/opt/Users/cache",
+                     "/Users", "relative/c/Users/build"):
+            self.assertNotIn("PERSONAL_ABSOLUTE_PATH", self.codes(safe))
+
+    def test_msys_path_in_added_diff_is_redacted(self):
+        sample = "/" + "c/" + "Users/" + "synthetic-agent/build/run.sh"
+        patch = "\n".join((
+            "diff --git a/safe.txt b/safe.txt",
+            "--- a/safe.txt", "+++ b/safe.txt", "@@ -0,0 +1 @@",
+            "+ROOT=" + sample,
+        ))
+        findings = guard.scan_patch(patch)
+        self.assertIn(("safe.txt", 1, "PERSONAL_ABSOLUTE_PATH"), findings)
+        self.assertNotIn(sample, str(findings))
+
     def test_network_mounts(self):
         self.assertIn("NETWORK_SHARE", self.codes("\\\\" + "TESTNAS" + "\\golden"))
         self.assertIn("NETWORK_SHARE", self.codes("//" + "TESTNAS/golden"))

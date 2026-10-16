@@ -28,6 +28,8 @@ def is_private_network_address(address):
     return a == 10 or (a == 172 and 16 <= b <= 31) or (a == 192 and b == 168)
 UNIX_HOME = re.compile(r"(?<![\w/])/(?:Users|home|root)/[^/\s\"'<>]+")
 WINDOWS_HOME = re.compile(r"\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>]+")
+# Git Bash/MSYS mounts Windows drives with POSIX-like home paths.
+MSYS_HOME = re.compile(r"(?<![\w/])/[a-z]/Users/[^/\s\"'<>]+", re.IGNORECASE)
 TILDE_HOME = re.compile(r"(?<![\w/])~/(?=[A-Za-z._])[^\s\"'<>]+")
 WINDOWS_UNC = re.compile(r"(?<![A-Za-z0-9])\\{2,}[A-Za-z0-9._-]+\\+[A-Za-z0-9.$_-]+")
 POSIX_SHARE = re.compile(r"(?<![A-Za-z0-9:/])//[A-Za-z0-9._-]+/[A-Za-z0-9.$_-]+")
@@ -56,7 +58,8 @@ def rules_for(line):
             continue
         if is_private_network_address(address):
             result.add("PRIVATE_IPV4")
-    if UNIX_HOME.search(line) or WINDOWS_HOME.search(line) or TILDE_HOME.search(line):
+    if (UNIX_HOME.search(line) or WINDOWS_HOME.search(line) or
+            MSYS_HOME.search(line) or TILDE_HOME.search(line)):
         result.add("PERSONAL_ABSOLUTE_PATH")
     if WINDOWS_UNC.search(line) or POSIX_SHARE.search(line) or NETWORK_URI.search(line):
         result.add("NETWORK_SHARE")
