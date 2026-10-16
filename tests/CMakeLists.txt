@@ -152,6 +152,13 @@ if(WIN32 AND TARGET CFHDCodecStatic)
         # /EHs drops the assumption. MSVC reports D9025 for overriding /EHsc.
         target_compile_options(format_corpus_probe PRIVATE /EHs)
     endif()
+    # Cheap guard for the probe itself: one family and one source format must still
+    # encode and decode all six qualities. The full matrix stays an on-demand run.
+    add_test(NAME format_corpus_probe_smoke COMMAND format_corpus_probe
+        --family YUV_422 --source BGRA --width 256 --height 256)
+    set_tests_properties(format_corpus_probe_smoke PROPERTIES
+        PASS_REGULAR_EXPRESSION "total=6 bidirectional_pass=6"
+        TIMEOUT 900)
 endif()
 
 # Actual GoPro decode of packets produced by the independent SDK-free encoder.
