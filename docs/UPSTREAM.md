@@ -113,3 +113,19 @@ In `upstream/Codec/decoder.c` (`_THREADED_DECODER=1`), two latent concurrency bu
 
 - *Mitigation:* In accordance with Rule 1 (`upstream/` immutability), `upstream/Codec/decoder.c` is untouched. In HyperCine's decode verification harnesses (`DecodeCfhdSample3A` in `src/core/phase3a_encoder.cpp`), the upstream decoder worker count is clamped to 1 thread (`TAG_CPU_MAX = 1` via `CFHD_SetActiveMetadata` and `m_decoder->thread_cntrl.capabilities = (capabilities & 0xffff) | (1 << 16)` after `CFHD_PrepareToDecode`), forcing `EntropyDecodeBand` onto the synchronous `thread_count == 1` path (`scratch_memory = decoder->buffer.scratch.base_ptr`, no worker race).
 
+### 10. Small-width horizontal highpass prefix reads (#21)
+
+On Windows x64 with `_XMMOPT=1`, pristine `FilterHorizontalRow16s` skips
+its SIMD loop for row widths 12/14/16 and enters the scalar interior formula
+at column zero, reading `input[-2]` and `input[-1]`. Controlled aligned prefix
+experiments change exactly `highpass[0]`; a poisoned-prefix MSVC ASan run
+reports the read in `upstream/Codec/spatial.c:540`. A flat width-16 row of 512s
+produces 0, +128 or -128 solely from changing prefix values.
+
+The 128px YUV422 deepest-chroma width-16 SDK coefficients are therefore
+`UPSTREAM_ORACLE_UNDEFINED`. HyperCine must retain defined boundary handling
+rather than mimic arbitrary memory content. Production code and upstream
+remain unchanged. The test-only negative regression preserves this oracle
+limitation and checks prefix independence at larger tested widths, without
+granting new full-frame parity claims. See [diagnosis and reproduction](SMALL_CHROMA_ORACLE.md).
+
