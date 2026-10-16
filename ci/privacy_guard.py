@@ -8,6 +8,7 @@ Usage:
   python ci/privacy_guard.py --staged
   python ci/privacy_guard.py --commit <sha>
   python ci/privacy_guard.py --commits <base>..HEAD
+  python ci/privacy_guard.py --push-remote <name>  # pre-push stdin records
 
 Only reports filename, line and rule; never prints matching sensitive data.
 It also scans commit messages, author/committer identities and repository paths.
@@ -17,6 +18,7 @@ blobs, issue text, GitHub artifacts or old history.
 """
 import argparse
 import ipaddress
+import os
 import re
 import subprocess
 import sys
@@ -218,12 +220,103 @@ def git(*args):
     return proc.stdout
 
 
+def ref_findings(role, ref):
+    # Scan both the literal ref and its path after the standard namespace.
+    # The latter exposes home-shaped names hidden behind refs/heads or tags.
+    candidates = [ref]
+    for prefix in ("refs/heads/", "refs/tags/"):
+        if ref.startswith(prefix):
+            candidates.append("/" + ref[len(prefix):])
+    rules = {rule for candidate in candidates for rule in rules_for(candidate)}
+    return [("[" + role + "]", 0, rule) for rule in sorted(rules)]
+
+
+def tag_chain_findings(oid):
+    """Inspect every tag object before peeling; accept only commit targets."""
+    findings = []
+    seen = set()
+    for _ in range(128):
+        if oid in seen:
+            raise RuntimeError("Cyclic tag chain")
+        seen.add(oid)
+        kind = git("cat-file", "-t", oid).strip()
+        if kind == "commit":
+            return findings, oid
+        if kind != "tag":
+            findings.append(("[PUSH_OBJECT]", 0, "UNSUPPORTED_OBJECT_TYPE"))
+            return findings, None
+        # Strict decoding is required: replacements could conceal metadata.
+        proc = subprocess.run(["git", "cat-file", "tag", oid],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if proc.returncode:
+            raise RuntimeError("Unable to inspect tag object")
+        raw = proc.stdout.decode("utf-8")
+        for rule in rules_for(raw):
+            findings.append(("[TAG_METADATA]", 0, rule))
+        header, sep, _ = raw.partition("\n\n")
+        lines = header.splitlines()
+        if (not sep or len(lines) != 4 or
+                not lines[0].startswith("object ") or
+                not lines[1].startswith("type ") or
+                not lines[2].startswith("tag ") or
+                not lines[3].startswith("tagger ")):
+            raise RuntimeError("Unsupported tag header")
+        target = lines[0][7:]
+        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", target):
+            raise RuntimeError("Invalid tag target")
+        if git("cat-file", "-t", target).strip() != lines[1][5:]:
+            raise RuntimeError("Tag target type mismatch")
+        identity = re.fullmatch(r"tagger (.*) <([^<>]*)> -?\d+ [+-]\d{4}", lines[3])
+        if not identity:
+            raise RuntimeError("Unsupported tagger identity")
+        findings.extend(identity_findings("TAGGER", *identity.groups()))
+        findings.extend(ref_findings("TAG_NAME", "refs/tags/" + lines[2][4:]))
+        oid = target
+    raise RuntimeError("Tag nesting exceeds inspection limit")
+
+
+def push_findings(remote, records):
+    """Validate pre-push records and collect commits from this destination only."""
+    # Inspect actual stored objects, never local replacement objects.
+    os.environ["GIT_NO_REPLACE_OBJECTS"] = "1"
+    if remote not in git("remote").splitlines():
+        raise RuntimeError("Push requires a configured remote name")
+    findings = []
+    commits = set()
+    for record in records:
+        fields = record.split()
+        if len(fields) != 4:
+            raise RuntimeError("Malformed pre-push record")
+        local_ref, local_oid, remote_ref, remote_oid = fields
+        for oid in (local_oid, remote_oid):
+            if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", oid):
+                raise RuntimeError("Invalid push object ID")
+        findings.extend(ref_findings("LOCAL_REF", local_ref))
+        findings.extend(ref_findings("REMOTE_REF", remote_ref))
+        if set(local_oid) == {"0"}:
+            continue  # deletion has no outgoing object, but names were checked
+        tag_findings, target = tag_chain_findings(local_oid)
+        findings.extend(tag_findings)
+        if target is None:
+            continue
+        if set(remote_oid) == {"0"}:
+            outgoing = git("rev-list", "--reverse", target, "--not",
+                           "--remotes=" + remote)
+        else:
+            # A replaced tag may previously have targeted a blob or tree.
+            # Exclusion works for any existing object; no tag metadata is trusted.
+            outgoing = git("rev-list", "--reverse", target, "^" + remote_oid)
+        commits.update(outgoing.splitlines())
+    return findings, sorted(commits)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--staged", action="store_true")
     group.add_argument("--commit", metavar="SHA")
     group.add_argument("--commits", metavar="BASE..HEAD")
+    group.add_argument("--push-remote", metavar="NAME")
     args = parser.parse_args(argv)
     # Enforce stable diff prefixes and bypass any textconv redaction.
     common = ("--no-ext-diff", "--no-textconv", "--no-color",
@@ -233,7 +326,9 @@ def main(argv=None):
     paths = []
     commits = []
     findings = []
-    if args.staged:
+    if args.push_remote:
+        findings, commits = push_findings(args.push_remote, sys.stdin)
+    elif args.staged:
         findings.extend(staged_identity_findings())
         patches.append(git("diff", "--cached", *common))
         paths.extend(git("diff", "--cached", "--name-only", "-z",
