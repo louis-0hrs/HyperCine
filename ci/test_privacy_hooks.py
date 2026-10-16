@@ -329,5 +329,31 @@ class InstalledHookTests(unittest.TestCase):
         self.push_rejected("refs/tags/review", "TAG_METADATA", value)
 
 
+    def test_home_shaped_custom_local_ref_rejected(self):
+        value = "Users/" + "synthetic-agent/review"
+        ref = "refs/archive/" + value
+        self.git("update-ref", ref, self.base)
+        result = self.git("push", "-q", "public", ref +
+                          ":refs/heads/review", expected=1)
+        self.rejected(result, "LOCAL_REF", value)
+        self.unpublished()
+
+    def test_home_shaped_custom_remote_ref_rejected(self):
+        value = "home/" + "synthetic-agent/review"
+        ref = "refs/archive/" + value
+        result = self.git("push", "-q", "public", "HEAD:" + ref, expected=1)
+        self.rejected(result, "REMOTE_REF", value)
+        self.assertEqual("", self.git("ls-remote", "public", ref).stdout)
+
+    def test_clean_custom_commit_ref_and_delete_pass(self):
+        ref = "refs/archive/review"
+        self.git("update-ref", ref, self.base)
+        self.git("push", "-q", "public", ref)
+        actual = self.git("ls-remote", "public", ref).stdout.split()[0]
+        self.assertEqual(self.base, actual)
+        self.git("push", "-q", "public", ":" + ref)
+        self.assertEqual("", self.git("ls-remote", "public", ref).stdout)
+
+
 if __name__ == "__main__":
     unittest.main()
