@@ -6,6 +6,7 @@
 #include "reference_frame_generator.h"
 #include "hypercine/filmscan3.h"
 #include <iostream>
+#include <string>
 #include <limits>
 #include <random>
 using namespace hypercine::standalone;
