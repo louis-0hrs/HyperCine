@@ -13,6 +13,23 @@ import unittest
 import privacy_guard as guard
 
 
+class RefNamespaceTests(unittest.TestCase):
+    def test_home_paths_rejected_in_every_namespace(self):
+        for namespace in ("heads", "tags", "archive", "notes"):
+            for home in ("Users/", "home/", "c/Users/"):
+                with self.subTest(namespace=namespace, home=home):
+                    ref = "refs/" + namespace + "/" + home + "synthetic-agent/review"
+                    self.assertEqual(
+                        [("[REMOTE_REF]", 0, "PERSONAL_ABSOLUTE_PATH")],
+                        guard.ref_findings("REMOTE_REF", ref))
+
+    def test_clean_refs_remain_supported(self):
+        for ref in ("HEAD", "refs/heads/review", "refs/tags/release-test",
+                    "refs/archive/review", "refs/notes/review"):
+            with self.subTest(ref=ref):
+                self.assertEqual([], guard.ref_findings("LOCAL_REF", ref))
+
+
 class RuleTests(unittest.TestCase):
     def codes(self, value):
         return set(guard.rules_for(value))
