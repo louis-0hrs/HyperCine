@@ -2,7 +2,7 @@
 
 This document specifies mandatory rules, design constraints, and operational protocols for any AI agent or software engineer contributing to the **HyperCine** repository.
 
-Every agent operating in this repository must strictly adhere to these 11 rules.
+Every agent operating in this repository must strictly adhere to these rules.
 
 ---
 
@@ -115,3 +115,80 @@ Every agent operating in this repository must strictly adhere to these 11 rules.
   - `docs(...)`: Documentation updates.
   - `build(...)`: Build system or CMake adjustments.
 - Ensure `git status --porcelain upstream/` is always 100% empty before committing.
+
+
+---
+
+## 12. Public Repository: Privacy and Pre-Publication Gates (Mandatory)
+- Treat **everything** in GitHub (branch commits, draft PRs, issues, comments, logs,
+  CI artifacts and validation reports) as public immediately, even before merge.
+- **Never publish** actual private IPs, internal DNS/hostnames, SMB/NFS/NAS
+  locations, machine-specific absolute home directories, personal usernames,
+  credentials, tokens, API keys, SSH configuration, or environment dumps.
+- Use repository-relative paths in public commands and reports. Access external
+  reference corpora through a locally configured variable such as
+  `HYPERCINE_GOLDEN_DIR`; publish the *variable name*, not its value.
+- Keep local host/mount paths and raw verbose tool logs outside the Git tree.
+  For public validation evidence, provide portable reproduction instructions,
+  test counts, test results, GPU/OS/compiler versions, checksums and timings.
+  Sanitize generated JSON, XML, CMake diagnostics and logs before staging.
+- Before **each commit**, run `python ci/privacy_guard.py --staged` and review
+  `git diff --cached`. Before **each push**, run the privacy guard over
+  **every outgoing commit**; do not rely on a final tree diff.
+- Install and verify hooks explicitly in every participating worktree.
+  With `extensions.worktreeConfig=true`, use
+  `git config --worktree core.hooksPath .githooks` rather than changing the
+  shared `--local` configuration. Hooks and the scanner must be present in
+  the given worktree and an actual Python interpreter must work. See
+  `docs/PRIVACY.md` for platform-specific details.
+- A scanner pass does not replace human review. If the guard fails or Git/Python
+  is unavailable, **stop** and report the blocker; never use `--no-verify`,
+  disable a hook, or quietly suppress a hit just to publish.
+- If potentially sensitive information was *already pushed*, STOP further
+  publication of that content, notify the maintainer without reproducing the
+  value, and propose a targeted remediation. Do not rewrite shared history,
+  force-push active branches or rotate secrets without the maintainer's approval.
+- Issue/PR instructions must contain no workstation-specific values. Existing
+  public examples or old issues are **not** authorization to repeat such data.
+- GitHub CI runs **after** data is pushed. Required status checks can block a
+  merge, but only local pre-push controls can block a first public disclosure.
+  See `docs/PRIVACY.md` for the limits and response process.
+
+---
+
+## 13. Issue-First Agent Coordination & Handoff (Mandatory)
+- The shared **dispatch index** is public GitHub Issue
+  [#62](https://github.com/louis-0hrs/HyperCine/issues/62); each linked
+  platform-specific issue is the authoritative scope and test contract.
+- At the beginning of a new task or resumed session, **read the latest**
+  issue #62, the selected issue, and open PR discussion, before selecting
+  code files to modify. If the GitHub CLI or connector is unavailable,
+  report `BLOCKED_GITHUB_ACCESS`; do not claim an invented issue status.
+  CLI example: `gh issue view 62 -R louis-0hrs/HyperCine`.
+- **Claim before editing:** post a short comment to the specific issue with
+  agent platform, existing worktree/branch, status `IN_PROGRESS`, and
+  expected first verifiable deliverable. If a different live agent already
+  owns the same task/files or shared GPU test window, coordinate instead of
+  duplicating work. One agent may own multiple queued issues but must not
+  start a blocked dependency.
+- Respect issue states `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`,
+  `DONE`. A green historical check is not a substitute for testing the
+  current commit or correct hardware. Explicitly distinguish CPU-only,
+  Windows CUDA, Linux CUDA, Vulkan and macOS Metal evidence.
+- Use one focused branch and Draft PR per independent deliverable. Do not
+  overwrite another worktree, change unrelated branches, silently replace
+  upstream reference bits or start a consumer before its required shared
+  interface has passed review.
+- At **every handoff or blocker**, update the assigned issue with:
+  status; PR URL; exact head SHA; tests actually run with platform and
+  result; files/interfaces modified; dependency/blocker; and one specific
+  next action. Keep lengthy telemetry on local disk; publish only sanitized
+  evidence and hashes. When a task completes, link the PR to the
+  originating issue and return its status to `REVIEW`.
+- Unless explicitly authorized by the maintainer, **do not autonomously
+  merge, release, force-push or rewrite history**. Historical privacy
+  violations require issue #54 remediation rather than disabling checks.
+- This is a coordination **protocol**, not a remote-execution system:
+  public GitHub issues/comments alone do not wake local agents.
+  Unattended discovery needs a separately configured local agent poller,
+  with user-controlled schedules, permissions and approval boundaries.

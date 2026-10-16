@@ -97,7 +97,7 @@
     "conservative_live_bytes_with_caller": 299646976,
     "sample_capacity": "session descriptor zero=geometric bound, nonzero may reduce only"
   },
-  "nas_inspected": "/Volumes/DeDub/HyperCine/golden/windows/fs3/2026-10-14",
+  "nas_inspected": "HYPERCINE_GOLDEN_DIR (configured locally; value not published)",
   "nas_entries": [
     "tier-a/manifest.json",
     "tier-a/reference-corpus-tier-a-20261014.zip",
