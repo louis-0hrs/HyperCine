@@ -1,0 +1,455 @@
+{
+  "method": "same host native P2/P3 ABBA/ABBA; production benchmark unchanged",
+  "packet_identity_cases_per_process": 232,
+  "packet_identity": "PASS",
+  "process_order": [
+    "p2-abba-1.json",
+    "p3-abba-1.json",
+    "p3-abba-2.json",
+    "p2-abba-2.json",
+    "p2-abba-3.json",
+    "p3-abba-3.json",
+    "p3-abba-4.json",
+    "p2-abba-4.json"
+  ],
+  "benchmarks": [
+    {
+      "name": "flat",
+      "p2": {
+        "n": 120,
+        "median_ms": 20.152709,
+        "p95_ms": 20.579958,
+        "avg_ms": 20.172802466666667,
+        "min_ms": 19.725792,
+        "max_ms": 20.8775,
+        "fps": 49.571694446143006,
+        "megapixels_per_sec": 102.79186560352214,
+        "sample_bytes_mean": 190536,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.909879575,
+          "coefficient_hash_ms": 10.759870308333333,
+          "entropy_ms": 2.3737369083333335,
+          "framing_ms": 0.09158336666666667
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 23.746854,
+          "p95_ms": 23.939,
+          "avg_ms": 23.67334375,
+          "min_ms": 23.260667,
+          "max_ms": 23.939,
+          "fps": 42.24160349126853,
+          "megapixels_per_sec": 87.59218899949441
+        }
+      },
+      "p3": {
+        "n": 120,
+        "median_ms": 19.7291455,
+        "p95_ms": 20.055958,
+        "avg_ms": 19.73841665,
+        "min_ms": 19.253166,
+        "max_ms": 20.9215,
+        "fps": 50.66262495781291,
+        "megapixels_per_sec": 105.05401911252085,
+        "sample_bytes_mean": 190536,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.904261733333334,
+          "coefficient_hash_ms": 10.745433075,
+          "entropy_ms": 1.91194885,
+          "framing_ms": 0.0905043
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 23.509895999999998,
+          "p95_ms": 25.431875,
+          "avg_ms": 23.926385500000002,
+          "min_ms": 23.253875,
+          "max_ms": 25.431875,
+          "fps": 41.79486283040954,
+          "megapixels_per_sec": 86.66582756513723
+        }
+      },
+      "median_reduction_percent": 2.101769543737275,
+      "p2_entropy_mean_ms": 2.3737369083333335,
+      "p3_entropy_mean_ms": 1.91194885,
+      "p1": {
+        "n": 60,
+        "median_ms": 28.3852915,
+        "p95_ms": 28.95675,
+        "avg_ms": 28.40228056666667,
+        "min_ms": 27.432,
+        "max_ms": 29.251833,
+        "fps": 35.20844031002266,
+        "megapixels_per_sec": 73.008221826863
+      },
+      "per_process_median_ms": {
+        "p2-abba-1.json": 20.158833,
+        "p3-abba-1.json": 19.6969585,
+        "p3-abba-2.json": 19.7425625,
+        "p2-abba-2.json": 20.1402915,
+        "p2-abba-3.json": 20.1585625,
+        "p3-abba-3.json": 19.7323125,
+        "p3-abba-4.json": 19.744166,
+        "p2-abba-4.json": 20.141624999999998
+      }
+    },
+    {
+      "name": "gradient",
+      "p2": {
+        "n": 120,
+        "median_ms": 22.557041499999997,
+        "p95_ms": 22.923458,
+        "avg_ms": 22.560645133333335,
+        "min_ms": 22.03725,
+        "max_ms": 23.623625,
+        "fps": 44.324973602926846,
+        "megapixels_per_sec": 91.9122652630291,
+        "sample_bytes_mean": 315704,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.905371733333333,
+          "coefficient_hash_ms": 10.744806475,
+          "entropy_ms": 4.735179208333333,
+          "framing_ms": 0.093478
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 24.582250000000002,
+          "p95_ms": 25.186042,
+          "avg_ms": 24.617791750000002,
+          "min_ms": 24.120625,
+          "max_ms": 25.186042,
+          "fps": 40.62102767605059,
+          "megapixels_per_sec": 84.2317629890585
+        }
+      },
+      "p3": {
+        "n": 120,
+        "median_ms": 21.484167,
+        "p95_ms": 21.810625,
+        "avg_ms": 21.452942041666667,
+        "min_ms": 20.931625,
+        "max_ms": 22.65575,
+        "fps": 46.61365317902619,
+        "megapixels_per_sec": 96.6580712320287,
+        "sample_bytes_mean": 315704,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.900478175,
+          "coefficient_hash_ms": 10.728742116666666,
+          "entropy_ms": 3.7360599666666667,
+          "framing_ms": 0.09247873333333333
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 24.006604,
+          "p95_ms": 24.123,
+          "avg_ms": 23.9771145,
+          "min_ms": 23.77225,
+          "max_ms": 24.123,
+          "fps": 41.70643636038857,
+          "megapixels_per_sec": 86.48246643690173
+        }
+      },
+      "median_reduction_percent": 4.756273113209453,
+      "p2_entropy_mean_ms": 4.735179208333333,
+      "p3_entropy_mean_ms": 3.7360599666666667,
+      "p1": {
+        "n": 60,
+        "median_ms": 30.7851875,
+        "p95_ms": 31.10475,
+        "avg_ms": 30.80602916666667,
+        "min_ms": 30.148333,
+        "max_ms": 31.915791,
+        "fps": 32.461178121652864,
+        "megapixels_per_sec": 67.31149895305937
+      },
+      "per_process_median_ms": {
+        "p2-abba-1.json": 22.559521,
+        "p3-abba-1.json": 21.4884165,
+        "p3-abba-2.json": 21.318896000000002,
+        "p2-abba-2.json": 22.535521000000003,
+        "p2-abba-3.json": 22.6037705,
+        "p3-abba-3.json": 21.483771,
+        "p3-abba-4.json": 21.5271875,
+        "p2-abba-4.json": 22.5209585
+      }
+    },
+    {
+      "name": "noise",
+      "p2": {
+        "n": 120,
+        "median_ms": 83.409729,
+        "p95_ms": 84.323458,
+        "avg_ms": 83.5036082,
+        "min_ms": 82.709791,
+        "max_ms": 85.723666,
+        "fps": 11.975530417858039,
+        "megapixels_per_sec": 24.83245987447043,
+        "sample_bytes_mean": 4066864.2666666666,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.8913954,
+          "coefficient_hash_ms": 10.717939058333334,
+          "entropy_ms": 65.2825334,
+          "framing_ms": 0.31617834166666664
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 91.1650625,
+          "p95_ms": 91.245834,
+          "avg_ms": 91.102271,
+          "min_ms": 90.833125,
+          "max_ms": 91.245834,
+          "fps": 10.976674774660667,
+          "megapixels_per_sec": 22.761232812736356
+        }
+      },
+      "p3": {
+        "n": 120,
+        "median_ms": 38.671437499999996,
+        "p95_ms": 39.253125,
+        "avg_ms": 38.73808369166667,
+        "min_ms": 38.039791,
+        "max_ms": 40.959583,
+        "fps": 25.814389993047588,
+        "megapixels_per_sec": 53.528719089583475,
+        "sample_bytes_mean": 4066864.2666666666,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.9079015833333335,
+          "coefficient_hash_ms": 10.744137191666667,
+          "entropy_ms": 20.53238208333333,
+          "framing_ms": 0.3100319
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 41.961541499999996,
+          "p95_ms": 42.396833,
+          "avg_ms": 42.03071875,
+          "min_ms": 41.802959,
+          "max_ms": 42.396833,
+          "fps": 23.792122279612457,
+          "megapixels_per_sec": 49.335344759004386
+        }
+      },
+      "median_reduction_percent": 53.6367783906839,
+      "p2_entropy_mean_ms": 65.2825334,
+      "p3_entropy_mean_ms": 20.53238208333333,
+      "p1": {
+        "n": 60,
+        "median_ms": 92.31616650000001,
+        "p95_ms": 93.12,
+        "avg_ms": 92.3009111,
+        "min_ms": 91.108416,
+        "max_ms": 93.437917,
+        "fps": 10.834129241872674,
+        "megapixels_per_sec": 22.465650395947176
+      },
+      "per_process_median_ms": {
+        "p2-abba-1.json": 83.4211245,
+        "p3-abba-1.json": 38.643854000000005,
+        "p3-abba-2.json": 38.6739995,
+        "p2-abba-2.json": 83.34495799999999,
+        "p2-abba-3.json": 83.37643800000001,
+        "p3-abba-3.json": 38.709166999999994,
+        "p3-abba-4.json": 38.660520500000004,
+        "p2-abba-4.json": 83.443375
+      }
+    },
+    {
+      "name": "16-frame-stateful",
+      "p2": {
+        "n": 64,
+        "median_ms": 22.1699585,
+        "p95_ms": 86.774625,
+        "avg_ms": 31.80957875,
+        "min_ms": 20.086958,
+        "max_ms": 87.823417,
+        "fps": 31.43707145131559,
+        "megapixels_per_sec": 65.187911361448,
+        "sample_bytes_mean": 1125336.25,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.89292340625,
+          "coefficient_hash_ms": 10.727175265625,
+          "entropy_ms": 13.626407375,
+          "framing_ms": 0.147569421875
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 23.973395500000002,
+          "p95_ms": 24.404667,
+          "avg_ms": 24.064448,
+          "min_ms": 23.906334,
+          "max_ms": 24.404667,
+          "fps": 41.55507743206908,
+          "megapixels_per_sec": 86.16860856313845
+        }
+      },
+      "p3": {
+        "n": 64,
+        "median_ms": 21.032625,
+        "p95_ms": 38.392084,
+        "avg_ms": 23.902674484375,
+        "min_ms": 19.611167,
+        "max_ms": 38.6105,
+        "fps": 41.83632256941341,
+        "megapixels_per_sec": 86.75179847993564,
+        "sample_bytes_mean": 1125336.25,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.901306734375,
+          "coefficient_hash_ms": 10.735595015625,
+          "entropy_ms": 5.71889178125,
+          "framing_ms": 0.146496828125
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 23.13175,
+          "p95_ms": 23.254916,
+          "avg_ms": 23.1008125,
+          "min_ms": 22.884834,
+          "max_ms": 23.254916,
+          "fps": 43.288520695971194,
+          "megapixels_per_sec": 89.76307651516586
+        }
+      },
+      "median_reduction_percent": 5.130065985464071,
+      "p2_entropy_mean_ms": 13.626407375,
+      "p3_entropy_mean_ms": 5.71889178125,
+      "p1": {
+        "n": 32,
+        "median_ms": 30.0684375,
+        "p95_ms": 96.046708,
+        "avg_ms": 40.41792315625,
+        "min_ms": 27.188375,
+        "max_ms": 96.0595,
+        "fps": 24.741498867572705,
+        "megapixels_per_sec": 51.30397205179876
+      },
+      "per_process_median_ms": {
+        "p2-abba-1.json": 22.12725,
+        "p3-abba-1.json": 21.062479500000002,
+        "p3-abba-2.json": 20.930916500000002,
+        "p2-abba-2.json": 22.0744585,
+        "p2-abba-3.json": 22.220792,
+        "p3-abba-3.json": 21.0395415,
+        "p3-abba-4.json": 21.032104,
+        "p2-abba-4.json": 22.0605415
+      }
+    },
+    {
+      "name": "120-frame-stateful",
+      "p2": {
+        "n": 480,
+        "median_ms": 22.520521000000002,
+        "p95_ms": 87.373333,
+        "avg_ms": 36.25621094583333,
+        "min_ms": 19.662708,
+        "max_ms": 89.514583,
+        "fps": 27.581481183844527,
+        "megapixels_per_sec": 57.19295938282001,
+        "sample_bytes_mean": 1536652.9666666666,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.896092220833333,
+          "coefficient_hash_ms": 10.72890240625,
+          "entropy_ms": 18.2897759625,
+          "framing_ms": 0.16345365416666666
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 23.4793335,
+          "p95_ms": 23.633625,
+          "avg_ms": 23.3170835,
+          "min_ms": 22.676042,
+          "max_ms": 23.633625,
+          "fps": 42.88701029011626,
+          "megapixels_per_sec": 88.93050453758507
+        }
+      },
+      "p3": {
+        "n": 480,
+        "median_ms": 21.559979,
+        "p95_ms": 38.486834,
+        "avg_ms": 25.04596056666667,
+        "min_ms": 19.175875,
+        "max_ms": 39.088416,
+        "fps": 39.92659803716558,
+        "megapixels_per_sec": 82.79179368986655,
+        "sample_bytes_mean": 1536652.9666666666,
+        "host_stage_mean_ms": {
+          "quant_ms": 4.904188085416667,
+          "coefficient_hash_ms": 10.741134458333333,
+          "entropy_ms": 7.092266970833333,
+          "framing_ms": 0.16150930416666667
+        },
+        "cold_first_frame": {
+          "n": 4,
+          "median_ms": 23.193354,
+          "p95_ms": 23.802542,
+          "avg_ms": 23.20171875,
+          "min_ms": 22.617625,
+          "max_ms": 23.802542,
+          "fps": 43.10025523432396,
+          "megapixels_per_sec": 89.37268925389417
+        }
+      },
+      "median_reduction_percent": 4.265185516800452,
+      "p2_entropy_mean_ms": 18.2897759625,
+      "p3_entropy_mean_ms": 7.092266970833333,
+      "p1": {
+        "n": 240,
+        "median_ms": 30.7862085,
+        "p95_ms": 96.134458,
+        "avg_ms": 45.45154406666666,
+        "min_ms": 26.701375,
+        "max_ms": 96.958166,
+        "fps": 22.001452767660357,
+        "megapixels_per_sec": 45.62221245902052
+      },
+      "per_process_median_ms": {
+        "p2-abba-1.json": 22.5865415,
+        "p3-abba-1.json": 21.5441875,
+        "p3-abba-2.json": 21.585854,
+        "p2-abba-2.json": 22.576041500000002,
+        "p2-abba-3.json": 22.4739795,
+        "p3-abba-3.json": 21.4947705,
+        "p3-abba-4.json": 21.564541499999997,
+        "p2-abba-4.json": 22.4665835
+      }
+    }
+  ],
+  "peak_rss_bytes": {
+    "p2-abba-1.json": 105578496,
+    "p3-abba-1.json": 105611264,
+    "p3-abba-2.json": 109690880,
+    "p2-abba-2.json": 105594880,
+    "p2-abba-3.json": 105971712,
+    "p3-abba-3.json": 105545728,
+    "p3-abba-4.json": 105496576,
+    "p2-abba-4.json": 105594880
+  },
+  "windows_baseline": {
+    "comparison": "NOT_COMPARABLE: different host, SDK, threads and input generator",
+    "reference_1080p": {
+      "name": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "frames": 50,
+      "encode": {
+        "fps": 77.6958,
+        "megapixels_per_sec": 161.11,
+        "latency_avg_ms": 12.5634,
+        "latency_min_ms": 11.9338,
+        "latency_max_ms": 14.7025
+      },
+      "decode": {
+        "fps": 394.146,
+        "megapixels_per_sec": 817.301,
+        "latency_avg_ms": 2.5368,
+        "latency_min_ms": 2.0961,
+        "latency_max_ms": 3.0989
+      },
+      "compression": {
+        "avg_bytes": 1186352,
+        "ratio": 6.99152
+      },
+      "peak_memory_bytes": 96985088
+    }
+  }
+}

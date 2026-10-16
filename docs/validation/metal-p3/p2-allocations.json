@@ -1,0 +1,1 @@
+{"ordinary_vector_allocations":[{"dense":0,"allocations":13,"allocated_bytes_sum":8191,"output_bytes":2636,"output_capacity":4096},{"dense":1,"allocations":22,"allocated_bytes_sum":4194303,"output_bytes":1684804,"output_capacity":2097152}]}

@@ -1,0 +1,14 @@
+{
+  "source_sha": "43bba9fa6be191f2cc83f593567e7c1f1b475d40",
+  "source_files": {
+    "CMakeLists.txt": "186c9da97113175dfbfd48796f6fb7a5cdbd0c87cd16aa21b7fadaf0cb719a53",
+    "src/core/entropy_fast.h": "fb8f9e1ccff96270af0ecf077299a762e5e67de85cd599c584ecd5bfce191481",
+    "src/core/standalone_encoder.cpp": "bb50c71cc362b346f2232c62b032f0aeb9f3c49e0ea325762a99df28ff30a3f8",
+    "src/core/standalone_codebook.h": "95a1c34b88530acb7d62811ecd0b57f22fdb5b3d783d59573d8406ad2143f906",
+    "src/core/filmscan3_encoder.cpp": "8cd955e9568e7a69a10cd0e44ff6f3d427566fe74d025017938435a8abc0afa8",
+    "tests/test_entropy_bitexact.cpp": "44091ff977120417764f525d6d1763f6a91fa9aaa48165fc5fc7cfa341551091",
+    "tests/entropy_legacy.h": "17a7e41354762e16222a5017781599ad12ab03352efb976ebedf4d5f74355d57"
+  },
+  "upstream_status": "",
+  "algorithm_changes_since_full_suites": "NONE; test-only explicit <string> include rebuilt and rerun in Release, Debug and ASan/UBSan"
+}

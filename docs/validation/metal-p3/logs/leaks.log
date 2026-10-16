@@ -1,0 +1,28 @@
+PASS: independent frozen legacy, full int16 corpus, RLE boundaries, padding, capacity and 1001 repeated bands
+Process 26810 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         test_entropy_bitexact [26810]
+Path:            /private/tmp/*/test_entropy_bitexact
+Load Address:    0x104e80000
+Identifier:      test_entropy_bitexact
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  leaks [26808]
+Target Type:     live task
+
+Date/Time:       2026-10-16 05:02:05.269 +0200
+Launch Time:     2026-10-16 05:02:04.999 +0200
+OS Version:      macOS 26.5.2 (25F84)
+Report Version:  7
+Analysis Tool:   /usr/bin/leaks
+
+Physical footprint:         30.8M
+Physical footprint (peak):  30.8M
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0, multi-line stacks
+Process 26810: 886 nodes malloced for 93 KB
+Process 26810: 0 leaks for 0 total leaked bytes.
+

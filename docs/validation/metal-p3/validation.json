@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "base_sha": "db98869012a75fa628110e14fb25f93697a78754",
+  "tested_algorithm_source_sha": "43bba9fa6be191f2cc83f593567e7c1f1b475d40",
+  "local_suites": {
+    "metal_release": {
+      "passed": 36,
+      "total": 36,
+      "seconds": 165.87
+    },
+    "cpu_release": {
+      "passed": 27,
+      "total": 27,
+      "seconds": 77.2
+    },
+    "metal_debug_gpu_validation": {
+      "passed": 36,
+      "total": 36,
+      "seconds": 866.97
+    },
+    "metal_asan_ubsan": {
+      "passed": 36,
+      "total": 36,
+      "seconds": 511.03
+    }
+  },
+  "skips": 0,
+  "sanitizer_findings": 0,
+  "leaks": 0,
+  "actual_sdk_frames": {
+    "tier_a": 16,
+    "sequence": 120,
+    "raw_identity_with_synchronized_metadata": "PASS",
+    "coefficient_bands_per_frame": 30
+  },
+  "nas_archive_sha256": "nas-sha256.txt",
+  "legacy_vs_fast": "full payload equality, all int16 values, RLE/word/capacity boundaries, 81 real quantized bands",
+  "stress": "1001 actual frames per CPU/Metal encoder, resets 500/800; stress-sequence.json",
+  "benchmark": "ABBA/ABBA, 4 processes/implementation, 30 warm pairs/process/pattern; 232 packet identities/process; P1 bracketing included",
+  "windows_sdk_reference_performance": "NOT_COMPARABLE across hardware/input/SDK/threading",
+  "hosted_ci": "hosted-ci.json and hosted-sdk-cpu-ci.json",
+  "upstream_diff": "EMPTY",
+  "optional_stage_c": "DEFERRED for separate review; no worker pool or rate-control concurrency",
+  "limits": [
+    "1080p progressive GOP1 FilmScan3 only",
+    "No per-symbol production instrumentation, CPU Instruments trace or power/temperature telemetry",
+    "ASan leak detection unsupported; separate native process-exit leaks check used",
+    "No Adobe/Resolve or local Windows/Linux execution; hosted CPU CI covers Windows/Linux"
+  ]
+}
