@@ -85,7 +85,7 @@ class HookInterpreterTests(unittest.TestCase):
             alias.chmod(0o755)
             fallback = fake / "python"
             import shlex
-            fallback.write_text("#!/bin/sh\nexec {} \\"$@\\"\n".format(
+            fallback.write_text('#!/bin/sh\nexec {} "$@"\n'.format(
                 shlex.quote(sys.executable)), encoding="utf-8")
             fallback.chmod(0o755)
             def git(*args):
