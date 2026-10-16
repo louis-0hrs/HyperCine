@@ -457,6 +457,36 @@ class InstalledHookTests(unittest.TestCase):
         self.git("push", "-q", "public", ":" + ref)
         self.assertEqual("", self.git("ls-remote", "public", ref).stdout)
 
+    def test_nested_home_shaped_local_refs_rejected(self):
+        for prefix in ("refs/heads/topic/", "refs/remotes/origin/",
+                       "refs/archive/deep/nested/"):
+            with self.subTest(prefix=prefix):
+                value = "Users/" + "synthetic-agent/review"
+                ref = prefix + value
+                self.git("update-ref", ref, self.base)
+                result = self.git("push", "-q", "public", ref +
+                                  ":refs/heads/review", expected=1)
+                self.rejected(result, "LOCAL_REF", value)
+                self.unpublished()
+
+    def test_nested_home_shaped_destination_refs_rejected(self):
+        for prefix in ("refs/heads/topic/", "refs/remotes/origin/",
+                       "refs/archive/deep/nested/"):
+            with self.subTest(prefix=prefix):
+                value = "home/" + "synthetic-agent/review"
+                ref = prefix + value
+                result = self.git("push", "-q", "public", "HEAD:" + ref, expected=1)
+                self.rejected(result, "REMOTE_REF", value)
+                self.assertEqual("", self.git("ls-remote", "public", ref).stdout)
+
+    def test_clean_nested_ref_and_delete_pass(self):
+        ref = "refs/archive/deep/nested/review"
+        self.git("update-ref", ref, self.base)
+        self.git("push", "-q", "public", ref)
+        self.assertEqual(self.base, self.git("ls-remote", "public", ref).stdout.split()[0])
+        self.git("push", "-q", "public", ":" + ref)
+        self.assertEqual("", self.git("ls-remote", "public", ref).stdout)
+
 
 class Sha256InstalledHookTests(InstalledHookTests):
     """Run every actual publish/reject/tag/ref vector with 64-digit Git objects."""
