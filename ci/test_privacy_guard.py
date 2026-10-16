@@ -650,5 +650,25 @@ class IdentityIntegrationTests(unittest.TestCase):
                       self.scan("--commit", "HEAD").stderr)
 
 
+class SuiteInventoryTests(unittest.TestCase):
+    def test_all_declared_tests_are_discoverable(self):
+        # A duplicate Python class name silently hides the earlier class and
+        # its tests; fail CI instead of accepting a misleading green suite.
+        import ast
+        tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+        classes = [node for node in tree.body if isinstance(node, ast.ClassDef)
+                   and any(isinstance(base, ast.Attribute) and
+                           base.attr == "TestCase" for base in node.bases)]
+        names = [node.name for node in classes]
+        self.assertEqual(len(names), len(set(names)), "duplicate unittest class")
+        declared = sum(1 for node in classes for child in node.body
+                       if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+                       and child.name.startswith("test_"))
+        discovered = unittest.defaultTestLoader.loadTestsFromModule(
+            sys.modules[__name__]).countTestCases()
+        self.assertEqual(declared, discovered,
+                         "some declared regression tests were shadowed or not collected")
+
+
 if __name__ == "__main__":
     unittest.main()
