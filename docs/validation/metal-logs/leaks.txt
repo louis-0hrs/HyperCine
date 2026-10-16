@@ -9,7 +9,7 @@ PASS exact full-storage planes, 3 wavelet levels, borders/prescale, packets, rep
 Process 2672 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
 
 Process:         test_metal_filmscan3 [2672]
-Path:            /Users/USER/*/test_metal_filmscan3
+Path:            $HOME/*/test_metal_filmscan3
 Load Address:    0x100cac000
 Identifier:      test_metal_filmscan3
 Version:         0

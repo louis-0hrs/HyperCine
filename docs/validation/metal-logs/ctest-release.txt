@@ -1,5 +1,5 @@
-Internal ctest changing into directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build
-Test project /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build
+Internal ctest changing into directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build
+Test project $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build
       Start  1: filmscan3_backend_selection
  1/35 Test  #1: filmscan3_backend_selection ...........   Passed    0.39 sec
       Start  2: filmscan3_metal_required

@@ -2,8 +2,8 @@ Start testing: Oct 15 20:59 CEST
 ----------------------------------------------------------
 1/35 Testing: filmscan3_backend_selection
 1/35 Test: filmscan3_backend_selection
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_filmscan3_backend"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_filmscan3_backend"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_backend_selection" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -18,8 +18,8 @@ Test Passed.
 
 2/35 Testing: filmscan3_metal_required
 2/35 Test: filmscan3_metal_required
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_metal_filmscan3"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_metal_filmscan3"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_metal_required" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -41,8 +41,8 @@ Test Passed.
 
 3/35 Testing: filmscan3_api
 3/35 Test: filmscan3_api
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_filmscan3"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_filmscan3"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_api" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -57,8 +57,8 @@ Test Passed.
 
 4/35 Testing: filmscan3_fixture_integrity
 4/35 Test: filmscan3_fixture_integrity
-Command: "/Users/louis/.local/cmake-3.31.5-macos-universal/CMake.app/Contents/bin/cmake" "-DROOT=/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine" "-P" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/verify_filmscan3_fixtures.cmake"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.local/cmake-3.31.5-macos-universal/CMake.app/Contents/bin/cmake" "-DROOT=$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine" "-P" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/verify_filmscan3_fixtures.cmake"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_fixture_integrity" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -72,8 +72,8 @@ Test Passed.
 
 5/35 Testing: standalone_color
 5/35 Test: standalone_color
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "color"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "color"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_color" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -88,8 +88,8 @@ Test Passed.
 
 6/35 Testing: standalone_wavelet
 6/35 Test: standalone_wavelet
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "wavelet"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "wavelet"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_wavelet" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -104,8 +104,8 @@ Test Passed.
 
 7/35 Testing: standalone_quantization
 7/35 Test: standalone_quantization
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "quantization"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "quantization"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_quantization" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -120,8 +120,8 @@ Test Passed.
 
 8/35 Testing: standalone_entropy
 8/35 Test: standalone_entropy
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "entropy"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "entropy"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_entropy" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -136,8 +136,8 @@ Test Passed.
 
 9/35 Testing: standalone_sample
 9/35 Test: standalone_sample
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "sample"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "sample"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_sample" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -155,8 +155,8 @@ Test Passed.
 
 10/35 Testing: standalone_geometry
 10/35 Test: standalone_geometry
-Command: "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "geometry"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/test_standalone" "geometry"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_geometry" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -174,8 +174,8 @@ Test Passed.
 
 11/35 Testing: standalone_oracle_fixtures
 11/35 Test: standalone_oracle_fixtures
-Command: "/Users/louis/.local/cmake-3.31.5-macos-universal/CMake.app/Contents/bin/cmake" "-DFIXTURES=/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/fixtures/standalone" "-DENCODER=/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "-DOUTPUT=/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/oracle-fixture-check" "-P" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/verify_oracle_fixtures.cmake"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "$HOME/.local/cmake-3.31.5-macos-universal/CMake.app/Contents/bin/cmake" "-DFIXTURES=$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/fixtures/standalone" "-DENCODER=$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "-DOUTPUT=$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/oracle-fixture-check" "-P" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/verify_oracle_fixtures.cmake"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_oracle_fixtures" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -193,8 +193,8 @@ Test Passed.
 
 12/35 Testing: windows_reference_inputs
 12/35 Test: windows_reference_inputs
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_windows_reference.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--inputs-only"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_windows_reference.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--inputs-only"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "windows_reference_inputs" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -209,8 +209,8 @@ Test Passed.
 
 13/35 Testing: windows_reference_guardrails
 13/35 Test: windows_reference_guardrails
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_windows_reference.py"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_windows_reference.py"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "windows_reference_guardrails" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -229,8 +229,8 @@ Test Passed.
 
 14/35 Testing: windows_reference_parser
 14/35 Test: windows_reference_parser
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_reference_sample.py"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_reference_sample.py"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "windows_reference_parser" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -249,8 +249,8 @@ Test Passed.
 
 15/35 Testing: windows_reference_sdk_coefficients
 15/35 Test: windows_reference_sdk_coefficients
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_reference_sample.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_reference_sample.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "windows_reference_sdk_coefficients" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -270,8 +270,8 @@ Test Passed.
 
 16/35 Testing: windows_reference_binaries
 16/35 Test: windows_reference_binaries
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_reference_sample.py" "--corpus-root" "/tmp/hc-metal-oracle/tier-a" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/test_reference_sample.py" "--corpus-root" "/tmp/hc-metal-oracle/tier-a" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "windows_reference_binaries" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -292,8 +292,8 @@ Test Passed.
 
 17/35 Testing: filmscan3_autonomous_manifest
 17/35 Test: filmscan3_autonomous_manifest
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_autonomous_manifest" start time: Oct 15 20:59 CEST
 Output:
 ----------------------------------------------------------
@@ -308,8 +308,8 @@ Test Passed.
 
 18/35 Testing: filmscan3_sequence_manifest
 18/35 Test: filmscan3_sequence_manifest
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--sequence"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--sequence"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_sequence_manifest" start time: Oct 15 21:00 CEST
 Output:
 ----------------------------------------------------------
@@ -324,8 +324,8 @@ Test Passed.
 
 19/35 Testing: filmscan3_actual_tier_a
 19/35 Test: filmscan3_actual_tier_a
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--corpus-root" "/tmp/hc-metal-oracle/tier-a" "--inject-metadata"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--corpus-root" "/tmp/hc-metal-oracle/tier-a" "--inject-metadata"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_actual_tier_a" start time: Oct 15 21:01 CEST
 Output:
 ----------------------------------------------------------
@@ -340,8 +340,8 @@ Test Passed.
 
 20/35 Testing: filmscan3_actual_sequence
 20/35 Test: filmscan3_actual_sequence
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--corpus-root" "/tmp/hc-metal-oracle/sequence" "--sequence"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--corpus-root" "/tmp/hc-metal-oracle/sequence" "--sequence"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_actual_sequence" start time: Oct 15 21:01 CEST
 Output:
 ----------------------------------------------------------
@@ -356,8 +356,8 @@ Test Passed.
 
 21/35 Testing: filmscan3_external_decode
 21/35 Test: filmscan3_external_decode
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_external_decode" start time: Oct 15 21:02 CEST
 Output:
 ----------------------------------------------------------
@@ -372,8 +372,8 @@ Test Passed.
 
 22/35 Testing: standalone_external_decode
 22/35 Test: standalone_external_decode
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_decode" start time: Oct 15 21:02 CEST
 Output:
 ----------------------------------------------------------
@@ -396,8 +396,8 @@ Test Passed.
 
 23/35 Testing: standalone_external_256x256
 23/35 Test: standalone_external_256x256
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "256" "--height" "256" "--patterns" "flat" "gradient" "canonical" "noise" "checker" "edges" "impulse" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "256" "--height" "256" "--patterns" "flat" "gradient" "canonical" "noise" "checker" "edges" "impulse" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_256x256" start time: Oct 15 21:02 CEST
 Output:
 ----------------------------------------------------------
@@ -410,17 +410,17 @@ gradient: 256x256 YUV422 p10, 81468 bytes
 canonical: 256x256 YUV422 p10, 54608 bytes
 canonical: 256x256 YUV422 p10, 54608 bytes
 {"pattern": "canonical", "sample_bytes": 54608, "sample_sha256": "1e6151af738f0afa80607f3e22c5f295acda84d654c222bf3a9f2da3a7c7231f", "decoded_sha256": "7377ab21971e7746df317a2344217102d7a8fdb618ac52df8a63f5fcc71b3ec0", "psnr_yuv_p10_db": 61.347107, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 65536, "exact_samples": 27852, "max_error": 3, "psnr_db": 61.237751, "first_difference": {"x": 0, "y": 0, "expected": 64, "decoded": 65}}, {"channel": "Cb", "samples": 32768, "exact_samples": 13973, "max_error": 3, "psnr_db": 61.733601, "first_difference": {"x": 0, "y": 0, "expected": 511, "decoded": 510}}, {"channel": "Cr", "samples": 32768, "exact_samples": 13848, "max_error": 3, "psnr_db": 61.201276, "first_difference": {"x": 0, "y": 0, "expected": 517, "decoded": 519}}], "psnr_rgb_subsampling_baseline_db": 41.748663, "psnr_source_rgb_db": 40.651097, "encode_process_seconds": 0.084891, "max_error": 3, "format": "yuv422p10le", "width": 256, "height": 256}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/noise-input.bgra: 256x256 YUV422 p10, 311480 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/noise-input.bgra: 256x256 YUV422 p10, 311480 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/noise-input.bgra: 256x256 YUV422 p10, 311480 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/noise-input.bgra: 256x256 YUV422 p10, 311480 bytes
 {"pattern": "noise", "sample_bytes": 311480, "sample_sha256": "514a9f5c021ce433c6765a4fef76d39c54991dbaafaf344c0cb3bf6104582690", "decoded_sha256": "50836947755321fc6b7039120f813bda13045602b01faeb7fcb70e78511725be", "psnr_yuv_p10_db": 56.53269, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 65536, "exact_samples": 15130, "max_error": 7, "psnr_db": 55.642387, "first_difference": {"x": 0, "y": 0, "expected": 770, "decoded": 765}}, {"channel": "Cb", "samples": 32768, "exact_samples": 10003, "max_error": 6, "psnr_db": 57.847545, "first_difference": {"x": 1, "y": 0, "expected": 462, "decoded": 461}}, {"channel": "Cr", "samples": 32768, "exact_samples": 9519, "max_error": 7, "psnr_db": 57.468419, "first_difference": {"x": 0, "y": 0, "expected": 439, "decoded": 438}}], "psnr_rgb_subsampling_baseline_db": 14.248307, "psnr_source_rgb_db": 14.253943, "encode_process_seconds": 0.093208, "max_error": 7, "format": "yuv422p10le", "width": 256, "height": 256}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/checker-input.bgra: 256x256 YUV422 p10, 60160 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/checker-input.bgra: 256x256 YUV422 p10, 60160 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/checker-input.bgra: 256x256 YUV422 p10, 60160 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/checker-input.bgra: 256x256 YUV422 p10, 60160 bytes
 {"pattern": "checker", "sample_bytes": 60160, "sample_sha256": "58ddeeae925bad48d2aa54a659b820be449365cf8e2184d569ee8d4a02eb247a", "decoded_sha256": "ed2f256d2695a7ef0b43b1112adb869152e44e1fb5c3b4817871fb405e34d77c", "psnr_yuv_p10_db": 57.187213, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 65536, "exact_samples": 0, "max_error": 2, "psnr_db": 54.176913, "first_difference": {"x": 0, "y": 0, "expected": 64, "decoded": 66}}, {"channel": "Cb", "samples": 32768, "exact_samples": 32768, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 32768, "exact_samples": 32768, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 45.120504, "psnr_source_rgb_db": 45.120504, "encode_process_seconds": 0.081196, "max_error": 2, "format": "yuv422p10le", "width": 256, "height": 256}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/edges-input.bgra: 256x256 YUV422 p10, 23544 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/edges-input.bgra: 256x256 YUV422 p10, 23544 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/edges-input.bgra: 256x256 YUV422 p10, 23544 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/edges-input.bgra: 256x256 YUV422 p10, 23544 bytes
 {"pattern": "edges", "sample_bytes": 23544, "sample_sha256": "8c3935f0e636d87d24b7d1df26766c25354c56928e32482a7211e3be13f5f6da", "decoded_sha256": "c1f3a353f3fc23100bda267f1df026b618b782244f09815d712ca4ec460ec3e9", "psnr_yuv_p10_db": 66.901652, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 65536, "exact_samples": 60770, "max_error": 4, "psnr_db": 69.540483, "first_difference": {"x": 1, "y": 0, "expected": 691, "decoded": 689}}, {"channel": "Cb", "samples": 32768, "exact_samples": 27371, "max_error": 4, "psnr_db": 66.315687, "first_difference": {"x": 0, "y": 0, "expected": 167, "decoded": 166}}, {"channel": "Cr", "samples": 32768, "exact_samples": 25683, "max_error": 5, "psnr_db": 64.431125, "first_difference": {"x": 0, "y": 0, "expected": 105, "decoded": 106}}], "psnr_rgb_subsampling_baseline_db": 24.35602, "psnr_source_rgb_db": 24.346625, "encode_process_seconds": 0.075982, "max_error": 5, "format": "yuv422p10le", "width": 256, "height": 256}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/impulse-input.bgra: 256x256 YUV422 p10, 7172 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/impulse-input.bgra: 256x256 YUV422 p10, 7172 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/impulse-input.bgra: 256x256 YUV422 p10, 7172 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-256x256/impulse-input.bgra: 256x256 YUV422 p10, 7172 bytes
 {"pattern": "impulse", "sample_bytes": 7172, "sample_sha256": "dd16b1c87a923f81bc6a73db33566da8ff6802a703b167107e24b8576ca24fff", "decoded_sha256": "7e64a9fee7d2f83ddea612cf6898c98a246eebf5f9c67c7e018e7ae6b895221d", "psnr_yuv_p10_db": 72.13551, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 65536, "exact_samples": 65391, "max_error": 50, "psnr_db": 69.12521, "first_difference": {"x": 0, "y": 0, "expected": 940, "decoded": 897}}, {"channel": "Cb", "samples": 32768, "exact_samples": 32768, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 32768, "exact_samples": 32768, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 83.285303, "psnr_source_rgb_db": 67.54499, "encode_process_seconds": 0.076708, "max_error": 50, "format": "yuv422p10le", "width": 256, "height": 256}
 <end of output>
 Test time =   2.54 sec
@@ -432,8 +432,8 @@ Test Passed.
 
 24/35 Testing: standalone_external_1920x1080
 24/35 Test: standalone_external_1920x1080
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "1920" "--height" "1080" "--patterns" "flat" "gradient" "canonical" "noise" "checker" "edges" "impulse" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "1920" "--height" "1080" "--patterns" "flat" "gradient" "canonical" "noise" "checker" "edges" "impulse" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_1920x1080" start time: Oct 15 21:02 CEST
 Output:
 ----------------------------------------------------------
@@ -446,17 +446,17 @@ gradient: 1920x1080 YUV422 p10, 1818240 bytes
 canonical: 1920x1080 YUV422 p10, 1712708 bytes
 canonical: 1920x1080 YUV422 p10, 1712708 bytes
 {"pattern": "canonical", "sample_bytes": 1712708, "sample_sha256": "aa13a3ac59cfba9ec879946fbadc74936c4c740c08f69c206ab2d81e75edc6bc", "decoded_sha256": "4a770fba3e4704b029b933fe14605c9bde1c36644e2bdacb4706f3eb4efd04fe", "psnr_yuv_p10_db": 61.374599, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 2073600, "exact_samples": 881332, "max_error": 4, "psnr_db": 61.278541, "first_difference": {"x": 0, "y": 0, "expected": 64, "decoded": 65}}, {"channel": "Cb", "samples": 1036800, "exact_samples": 455450, "max_error": 3, "psnr_db": 61.677979, "first_difference": {"x": 0, "y": 0, "expected": 511, "decoded": 512}}, {"channel": "Cr", "samples": 1036800, "exact_samples": 442597, "max_error": 4, "psnr_db": 61.276937, "first_difference": {"x": 0, "y": 0, "expected": 517, "decoded": 518}}], "psnr_rgb_subsampling_baseline_db": 41.794093, "psnr_source_rgb_db": 40.696277, "encode_process_seconds": 0.424356, "max_error": 4, "format": "yuv422p10le", "width": 1920, "height": 1080}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/noise-input.bgra: 1920x1080 YUV422 p10, 9884204 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/noise-input.bgra: 1920x1080 YUV422 p10, 9884204 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/noise-input.bgra: 1920x1080 YUV422 p10, 9884204 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/noise-input.bgra: 1920x1080 YUV422 p10, 9884204 bytes
 {"pattern": "noise", "sample_bytes": 9884204, "sample_sha256": "0ea16da2dcbee7fe8c5126539882474c741505687ee323aa31c87f1e5d497fb3", "decoded_sha256": "b5b14aa371f17a1b3e091121e255f4c84065b11f26700f75f6d81dd4f83dde7c", "psnr_yuv_p10_db": 56.538756, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 2073600, "exact_samples": 476830, "max_error": 8, "psnr_db": 55.650233, "first_difference": {"x": 2, "y": 0, "expected": 495, "decoded": 494}}, {"channel": "Cb", "samples": 1036800, "exact_samples": 315257, "max_error": 8, "psnr_db": 57.817354, "first_difference": {"x": 0, "y": 0, "expected": 642, "decoded": 640}}, {"channel": "Cr", "samples": 1036800, "exact_samples": 303589, "max_error": 7, "psnr_db": 57.502518, "first_difference": {"x": 1, "y": 0, "expected": 758, "decoded": 754}}], "psnr_rgb_subsampling_baseline_db": 14.269742, "psnr_source_rgb_db": 14.275513, "encode_process_seconds": 0.66086, "max_error": 8, "format": "yuv422p10le", "width": 1920, "height": 1080}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/checker-input.bgra: 1920x1080 YUV422 p10, 1834708 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/checker-input.bgra: 1920x1080 YUV422 p10, 1834708 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/checker-input.bgra: 1920x1080 YUV422 p10, 1834708 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/checker-input.bgra: 1920x1080 YUV422 p10, 1834708 bytes
 {"pattern": "checker", "sample_bytes": 1834708, "sample_sha256": "f9d8e84596d5601f96c154dcc45a29d84943e22f2561a21a6a624c5f7915ff36", "decoded_sha256": "7bf1daefb89ffa311b31947b80af62ea5339bfc9d467ae148e2b8eb14d22e8c8", "psnr_yuv_p10_db": 57.187213, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 2073600, "exact_samples": 0, "max_error": 2, "psnr_db": 54.176913, "first_difference": {"x": 0, "y": 0, "expected": 64, "decoded": 66}}, {"channel": "Cb", "samples": 1036800, "exact_samples": 1036800, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 1036800, "exact_samples": 1036800, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 45.120504, "psnr_source_rgb_db": 45.120504, "encode_process_seconds": 0.3541, "max_error": 2, "format": "yuv422p10le", "width": 1920, "height": 1080}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/edges-input.bgra: 1920x1080 YUV422 p10, 245432 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/edges-input.bgra: 1920x1080 YUV422 p10, 245432 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/edges-input.bgra: 1920x1080 YUV422 p10, 245432 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/edges-input.bgra: 1920x1080 YUV422 p10, 245432 bytes
 {"pattern": "edges", "sample_bytes": 245432, "sample_sha256": "dcdef1087445b929e9a9f25d03ebd1f377ecdb33886a7c483748f93795f7a752", "decoded_sha256": "bddc6d91cb98fdbad81fa453ccda6bd7fff9cbd5115b83ab738d14ad85de3f81", "psnr_yuv_p10_db": 74.183515, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 2073600, "exact_samples": 2044778, "max_error": 4, "psnr_db": 76.376452, "first_difference": {"x": 1, "y": 0, "expected": 691, "decoded": 689}}, {"channel": "Cb", "samples": 1036800, "exact_samples": 1006555, "max_error": 4, "psnr_db": 73.635517, "first_difference": {"x": 0, "y": 0, "expected": 167, "decoded": 166}}, {"channel": "Cr", "samples": 1036800, "exact_samples": 999107, "max_error": 5, "psnr_db": 71.986539, "first_difference": {"x": 0, "y": 0, "expected": 105, "decoded": 106}}], "psnr_rgb_subsampling_baseline_db": 32.926756, "psnr_source_rgb_db": 32.916371, "encode_process_seconds": 0.22613, "max_error": 5, "format": "yuv422p10le", "width": 1920, "height": 1080}
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/impulse-input.bgra: 1920x1080 YUV422 p10, 152736 bytes
-bgra:/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/impulse-input.bgra: 1920x1080 YUV422 p10, 152736 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/impulse-input.bgra: 1920x1080 YUV422 p10, 152736 bytes
+bgra:$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-1920x1080/impulse-input.bgra: 1920x1080 YUV422 p10, 152736 bytes
 {"pattern": "impulse", "sample_bytes": 152736, "sample_sha256": "b3adde817a6350c59484a4f666361c0a32fa7bb855b5358df19253e40b932bc1", "decoded_sha256": "86bf9a96789983fd0ea36b3ee513a6922c1f6da0deda7c4cd1f49ecded4bbe07", "psnr_yuv_p10_db": 87.137961, "yuv_exact": false, "planes": [{"channel": "Y", "samples": 2073600, "exact_samples": 2073455, "max_error": 50, "psnr_db": 84.127661, "first_difference": {"x": 0, "y": 0, "expected": 940, "decoded": 897}}, {"channel": "Cb", "samples": 1036800, "exact_samples": 1036800, "max_error": 0, "psnr_db": null, "first_difference": null}, {"channel": "Cr", "samples": 1036800, "exact_samples": 1036800, "max_error": 0, "psnr_db": null, "first_difference": null}], "psnr_rgb_subsampling_baseline_db": 98.287753, "psnr_source_rgb_db": 82.547441, "encode_process_seconds": 0.230634, "max_error": 50, "format": "yuv422p10le", "width": 1920, "height": 1080}
 <end of output>
 Test time =  42.99 sec
@@ -468,8 +468,8 @@ Test Passed.
 
 25/35 Testing: standalone_external_128x24
 25/35 Test: standalone_external_128x24
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "128" "--height" "24" "--patterns" "flat" "canonical" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-128x24"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "128" "--height" "24" "--patterns" "flat" "canonical" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-128x24"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_128x24" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -489,8 +489,8 @@ Test Passed.
 
 26/35 Testing: standalone_external_384x40
 26/35 Test: standalone_external_384x40
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "384" "--height" "40" "--patterns" "flat" "canonical" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-384x40"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "384" "--height" "40" "--patterns" "flat" "canonical" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-384x40"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_384x40" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -510,8 +510,8 @@ Test Passed.
 
 27/35 Testing: standalone_external_4096x24
 27/35 Test: standalone_external_4096x24
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "4096" "--height" "24" "--patterns" "flat" "canonical" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-4096x24"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "4096" "--height" "24" "--patterns" "flat" "canonical" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-4096x24"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_4096x24" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -531,8 +531,8 @@ Test Passed.
 
 28/35 Testing: standalone_external_128x4096
 28/35 Test: standalone_external_128x4096
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "128" "--height" "4096" "--patterns" "flat" "canonical" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-128x4096"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "128" "--height" "4096" "--patterns" "flat" "canonical" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-128x4096"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_128x4096" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -552,8 +552,8 @@ Test Passed.
 
 29/35 Testing: standalone_external_2048x1024
 29/35 Test: standalone_external_2048x1024
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "2048" "--height" "1024" "--patterns" "flat" "canonical" "--output-dir" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-2048x1024"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_standalone.py" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_smoke" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--width" "2048" "--height" "1024" "--patterns" "flat" "canonical" "--output-dir" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/samples-2048x1024"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_external_2048x1024" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -573,8 +573,8 @@ Test Passed.
 
 30/35 Testing: standalone_windows_oracle_replay
 30/35 Test: standalone_windows_oracle_replay
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/compare_sdk_oracle.py" "--windows-fixtures" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/fixtures/windows-oracle" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--output" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/windows-oracle-replay"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/compare_sdk_oracle.py" "--windows-fixtures" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/fixtures/windows-oracle" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg" "--ffprobe" "/private/tmp/hypercine-ffmpeg-validator/ffprobe" "--output" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/windows-oracle-replay"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "standalone_windows_oracle_replay" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -993,8 +993,8 @@ Test Passed.
 
 31/35 Testing: filmscan3_metal_autonomous_manifest
 31/35 Test: filmscan3_metal_autonomous_manifest
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_metal_autonomous_manifest" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -1011,8 +1011,8 @@ Test Passed.
 
 32/35 Testing: filmscan3_metal_sequence_manifest
 32/35 Test: filmscan3_metal_sequence_manifest
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--sequence"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--sequence"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_metal_sequence_manifest" start time: Oct 15 21:03 CEST
 Output:
 ----------------------------------------------------------
@@ -1029,8 +1029,8 @@ Test Passed.
 
 33/35 Testing: filmscan3_metal_actual_tier_a
 33/35 Test: filmscan3_metal_actual_tier_a
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--corpus-root" "/tmp/hc-metal-oracle/tier-a" "--inject-metadata"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--corpus-root" "/tmp/hc-metal-oracle/tier-a" "--inject-metadata"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_metal_actual_tier_a" start time: Oct 15 21:04 CEST
 Output:
 ----------------------------------------------------------
@@ -1047,8 +1047,8 @@ Test Passed.
 
 34/35 Testing: filmscan3_metal_actual_sequence
 34/35 Test: filmscan3_metal_actual_sequence
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--sequence" "--corpus-root" "/tmp/hc-metal-oracle/sequence" "--inject-metadata"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--sequence" "--corpus-root" "/tmp/hc-metal-oracle/sequence" "--inject-metadata"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_metal_actual_sequence" start time: Oct 15 21:04 CEST
 Output:
 ----------------------------------------------------------
@@ -1065,8 +1065,8 @@ Test Passed.
 
 35/35 Testing: filmscan3_metal_external_decode
 35/35 Test: filmscan3_metal_external_decode
-Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "/Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg"
-Directory: /Users/louis/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
+Command: "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/tests/validate_filmscan3.py" "--probe" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_reference_probe" "--encoder" "$HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized/hypercine_encode_filmscan3_metal" "--ffmpeg" "/private/tmp/hypercine-ffmpeg-validator/ffmpeg"
+Directory: $HOME/.codex/worktrees/macos-metal-filmscan3-p1/HyperCine/build-sanitized
 "filmscan3_metal_external_decode" start time: Oct 15 21:06 CEST
 Output:
 ----------------------------------------------------------
