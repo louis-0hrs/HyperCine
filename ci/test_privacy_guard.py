@@ -140,6 +140,50 @@ class HookInterpreterTests(unittest.TestCase):
 
 
 class GitIntegrationTests(unittest.TestCase):
+    def check_diff_prefix_config(self, key, value, unsafe=True):
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+            def git(*args):
+                return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      text=True).stdout.strip()
+            git("init", "-q")
+            git("config", "user.email", "privacy-test@example.invalid")
+            git("config", "user.name", "Privacy Test")
+            artifact = cwd / "report.txt"
+            artifact.write_text("safe baseline\n", encoding="utf-8")
+            git("add", "report.txt")
+            git("commit", "-qm", "baseline")
+            base = git("rev-parse", "HEAD")
+            git("config", key, value)
+            synthetic_address = "192." + "168.8.9"
+            artifact.write_text(("network " + synthetic_address if unsafe
+                                 else "safe update") + "\n", encoding="utf-8")
+            git("add", "report.txt")
+            command = [sys.executable, str(Path(guard.__file__).resolve())]
+            def check(*args):
+                with self.subTest(config=key, mode=args[0], unsafe=unsafe):
+                    result = subprocess.run(command + list(args), cwd=cwd, text=True,
+                                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    self.assertEqual(1 if unsafe else 0, result.returncode, result.stderr)
+                    if unsafe:
+                        self.assertIn("report.txt:1: PRIVATE_IPV4", result.stderr)
+                    self.assertNotIn(synthetic_address, result.stdout + result.stderr)
+            check("--staged")
+            git("commit", "-qm", "update report")
+            check("--commit", "HEAD")
+            check("--commits", base + "..HEAD")
+
+    def test_omitted_diff_prefixes_cannot_hide_added_text(self):
+        self.check_diff_prefix_config("diff.noprefix", "true")
+
+    def test_mnemonic_diff_prefixes_cannot_hide_added_text(self):
+        self.check_diff_prefix_config("diff.mnemonicprefix", "true")
+
+    def test_safe_text_with_configured_diff_prefixes(self):
+        for key in ("diff.noprefix", "diff.mnemonicprefix"):
+            self.check_diff_prefix_config(key, "true", unsafe=False)
+
     def test_commit_message_leak_is_checked(self):
         with tempfile.TemporaryDirectory() as work:
             cwd = Path(work)
