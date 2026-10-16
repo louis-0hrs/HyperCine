@@ -10,7 +10,10 @@ import time
 
 ATTEMPTS = 3
 # Only recognized transport/feed failures justify another install attempt.
-HTTP_STATUS = re.compile(r"(?<!\w)(?:HTTP(?:/\d(?:\.\d)?)?\s*[:=]?\s*|status(?:\s+code)?\s*[:=]?\s*|\()(429|5\d\d)\b", re.I)
+HTTP_STATUS = re.compile(
+    r"(?<!\w)(?:HTTP(?:/\d(?:\.\d)?)?\s*[:=]?\s*|"
+    r"status(?:\s+code)?(?:\s+does\s+not\s+indicate\s+success)?\s*[:=]?\s*|"
+    r"\()(429|5\d\d)\b", re.I)
 TRANSPORT = re.compile(r"timed?\s*out|timeout|connection (?:reset|refused)|"
                        r"temporary failure in name resolution|remote name could not be resolved", re.I)
 

@@ -36,6 +36,21 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(outcome[:4], (0, 2, 2, 1))
         self.assertIn('HTTP=503', outcome[4])
 
+    def test_actual_chocolatey_v2_feed_503_retries(self):
+        # Matches the real feed error, without publishing any feed URL.
+        response = ("Failed to fetch results from V2 feed with following message: "
+                    "Response status code does not indicate success: 503 (Service Unavailable).\n"
+                    "Unable to find package 'ffmpeg'.")
+        outcome = self.run_install([completed(stdout=response), completed()], [False, True])
+        self.assertEqual(outcome[:4], (0, 2, 2, 1))
+        self.assertIn('HTTP=503', outcome[4])
+        self.assertNotIn('Failed to fetch results', outcome[4])
+
+    def test_actual_chocolatey_v2_feed_404_is_not_retried(self):
+        response = 'Response status code does not indicate success: 404 (Not Found).'
+        self.assertEqual(self.run_install([completed(1, response)], [False])[:4],
+                         (1, 1, 1, 0))
+
     def test_nonzero_503_retries(self):
         self.assertEqual(self.run_install([completed(1, stderr='(503) Service Unavailable'),
                                            completed()], [False, True])[:4], (0, 2, 2, 1))
