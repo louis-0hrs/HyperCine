@@ -129,9 +129,12 @@ forward-only redaction; no history rewrite/force-push is authorized here.
 The installed pre-push hook passes the entire Git pre-push record stream to
 `ci/privacy_guard.py --push-remote <name>`. It checks both local and destination
 ref names, including names on deletion records, with the existing privacy rules.
-It also checks the name after every `refs/<namespace>/` prefix, including
-custom namespaces such as `refs/archive/`, so a home-shaped name cannot hide
-behind the ref prefix. Safe deletions need no object inspection.
+It also checks every slash-separated name component after `refs/<namespace>/`
+as a possible home-path start, including custom namespaces, deeper prefixes
+and remote-tracking names. Both absolute-home and tilde-home rules apply at
+these boundaries. Short component windows keep this inspection linear in the
+ref length. Clean nested names and safe deletions remain supported; deletion
+records still undergo name checks but need no object inspection.
 
 For each outgoing object the guard inspects its actual type before peeling.
 Annotated tags are followed recursively: every tag's full text (including its
