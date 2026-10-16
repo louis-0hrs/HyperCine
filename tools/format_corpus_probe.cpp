@@ -40,11 +40,19 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
+#include "../tests/test_vectors.h"
 
 namespace {
+
+using ByteBuffer = HyperCineTest::AlignedVector<uint8_t>;
+using EncoderOwner = std::unique_ptr<std::remove_pointer_t<CFHD_EncoderRef>, decltype(&CFHD_CloseEncoder)>;
+using DecoderOwner = std::unique_ptr<std::remove_pointer_t<CFHD_DecoderRef>, decltype(&CFHD_CloseDecoder)>;
+using MetadataOwner = std::unique_ptr<std::remove_pointer_t<CFHD_MetadataRef>, decltype(&CFHD_CloseMetadata)>;
 
 // Pinned upstream baseline; the measured SDK version of a produced sample is also
 // recorded per case so the matrix never rests on this constant alone.
@@ -156,7 +164,7 @@ std::string HashText(uint64_t hash) {
 
 // Deterministic across runs and identical for every case at the same geometry, so a
 // re-run of the probe can be compared byte for byte (AGENTS.md rule 6).
-void FillSource(std::vector<uint8_t>& buffer, int width, int height) {
+void FillSource(ByteBuffer& buffer, int width, int height) {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             const size_t index = static_cast<size_t>(y) * static_cast<size_t>(width) + static_cast<size_t>(x);
@@ -235,7 +243,9 @@ struct EncodeIo {
 void RunEncode(EncodeIo* io) {
     CFHD_EncoderRef encoder = nullptr;
     io->stage = "open";
-    if (CFHD_OpenEncoder(&encoder, nullptr) != CFHD_ERROR_OKAY) return;
+    const CFHD_Error open_error = CFHD_OpenEncoder(&encoder, nullptr);
+    EncoderOwner owner(encoder, &CFHD_CloseEncoder);
+    if (open_error != CFHD_ERROR_OKAY) return;
     io->opened = true;
     io->stage = "prepare";
     io->prepare_error = CFHD_PrepareToEncode(encoder, io->width, io->height, io->source_format,
@@ -257,7 +267,6 @@ void RunEncode(EncodeIo* io) {
         }
     }
     io->stage = "close";
-    CFHD_CloseEncoder(encoder);
 }
 
 constexpr int kMaxOfferedFormats = 64;
@@ -307,7 +316,10 @@ void RunDecode(DecodeIo* io) {
     CFHD_DecoderRef decoder = nullptr;
     CFHD_MetadataRef metadata = nullptr;
     io->stage = "open";
-    if (CFHD_OpenDecoder(&decoder, nullptr) != CFHD_ERROR_OKAY) return;
+    const CFHD_Error open_error = CFHD_OpenDecoder(&decoder, nullptr);
+    DecoderOwner owner(decoder, &CFHD_CloseDecoder);
+    MetadataOwner metadata_owner(nullptr, &CFHD_CloseMetadata);
+    if (open_error != CFHD_ERROR_OKAY) return;
     io->stage = "sample_info";
     QueryInfo(decoder, io, CFHD_SAMPLE_ENCODED_FORMAT, &io->encoded_format);
     QueryInfo(decoder, io, CFHD_SAMPLE_INFO_CHANNELS, &io->channels);
@@ -356,7 +368,9 @@ void RunDecode(DecodeIo* io) {
             // than eight cores. TAG_CPU_MAX pins the thread count through the public
             // metadata API (see docs/UPSTREAM.md).
             io->stage = "metadata";
-            if (CFHD_OpenMetadata(&metadata) == CFHD_ERROR_OKAY) {
+            const CFHD_Error metadata_error = CFHD_OpenMetadata(&metadata);
+            metadata_owner.reset(metadata);
+            if (metadata_error == CFHD_ERROR_OKAY) {
                 CFHD_InitSampleMetadata(metadata, METADATATYPE_ORIGINAL, const_cast<uint8_t*>(io->sample),
                                         static_cast<uint32_t>(io->sample_size));
                 uint32_t process_flags = PROCESSING_ALL_ON;
@@ -375,8 +389,6 @@ void RunDecode(DecodeIo* io) {
         }
     }
     io->stage = "close";
-    if (metadata) CFHD_CloseMetadata(metadata);
-    CFHD_CloseDecoder(decoder);
 }
 
 struct CaseResult {
@@ -392,7 +404,7 @@ struct CaseResult {
     bool geometry_rejected = false;
     EncodeIo encode;
     DecodeIo decode;
-    std::vector<uint8_t> sample;
+    ByteBuffer sample;
     uint64_t output_hash = 0;
     std::string verdict;
 };
@@ -434,8 +446,7 @@ bool IsUnsupportedCode(CFHD_Error error) {
 std::string VerdictFor(const CaseResult& item) {
     if (item.source_bytes == 0) return item.geometry_rejected ? "SDK_UNSUPPORTED" : "NOT_TESTED";
     if (item.encode.thrown) {
-        if (std::string(item.encode.stage) == "prepare" ||
-            IsUnsupportedCode(static_cast<CFHD_Error>(item.encode.thrown_error))) {
+        if (IsUnsupportedCode(static_cast<CFHD_Error>(item.encode.thrown_error))) {
             return "SDK_UNSUPPORTED";
         }
         return "ENCODE_FAILED";
@@ -449,8 +460,7 @@ std::string VerdictFor(const CaseResult& item) {
     }
     if (item.encode.sample_error != CFHD_ERROR_OKAY || item.sample.empty()) return "ENCODE_FAILED";
     if (item.decode.thrown) {
-        if (std::string(item.decode.stage) == "prepare" ||
-            IsUnsupportedCode(static_cast<CFHD_Error>(item.decode.thrown_error))) {
+        if (IsUnsupportedCode(static_cast<CFHD_Error>(item.decode.thrown_error))) {
             return "DECODE_UNSUPPORTED";
         }
         return "DECODE_FAILED";
@@ -614,7 +624,9 @@ int main(int argc, char** argv) {
     std::vector<std::string> declared_input_formats;
     {
         CFHD_EncoderRef encoder = nullptr;
-        if (CFHD_OpenEncoder(&encoder, nullptr) == CFHD_ERROR_OKAY) {
+        const CFHD_Error open_error = CFHD_OpenEncoder(&encoder, nullptr);
+        EncoderOwner owner(encoder, &CFHD_CloseEncoder);
+        if (open_error == CFHD_ERROR_OKAY) {
             CFHD_PixelFormat declared[kMaxFormats] = {};
             int count = 0;
             if (CFHD_GetInputFormats(encoder, declared, kMaxFormats, &count) == CFHD_ERROR_OKAY) {
@@ -622,14 +634,13 @@ int main(int argc, char** argv) {
                     declared_input_formats.push_back(FormatLabel(static_cast<uint32_t>(declared[i])));
                 }
             }
-            CFHD_CloseEncoder(encoder);
         }
     }
 
     std::vector<CaseResult> cases;
     // Reused across cases so the 64 MiB buffers are not reallocated ~200 times.
-    std::vector<uint8_t> output(kMaxOutputBytes, 0);
-    std::vector<uint8_t> sample_buffer(kMaxOutputBytes, 0);
+    ByteBuffer output(kMaxOutputBytes, 0);
+    ByteBuffer sample_buffer(kMaxOutputBytes, 0);
     std::string current_family;
     const std::vector<Family> families = BuildFamilies();
     for (const Family& family : families) {
@@ -642,7 +653,7 @@ int main(int argc, char** argv) {
             const uint32_t source_size = geometry.bytes;
             int32_t source_pitch = geometry.pitch > 0 ? geometry.pitch : static_cast<int32_t>(width) * 4;
             source_note = geometry.note;
-            std::vector<uint8_t> source;
+            ByteBuffer source;
             if (source_size > 0) {
                 const size_t rows = static_cast<size_t>(source_pitch) * static_cast<size_t>(height);
                 source.assign(rows > source_size ? rows : source_size, 0);

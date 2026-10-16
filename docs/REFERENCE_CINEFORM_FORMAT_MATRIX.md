@@ -126,6 +126,20 @@ used as a cross-run gate.
 
 ## 6. Method notes and limits
 
+- **Failure handling.** Encoder, decoder and metadata handles are owned by RAII guards,
+  including when an SDK entry point throws. Only the documented capability error codes
+  classify a thrown error as unsupported; memory, internal and unknown exceptions
+  remain failures even at the prepare stage. Codec byte buffers use 16-byte aligned
+  allocations. `format_corpus_probe_faults` checks capability and unexpected prepare
+  exceptions without requiring an actual SDK fault.
+- **Windows safety follow-up validation (2026-10-16).** MSVC 19.44, x64,
+  CPU-only Release SDK build: full CTest **12/12 PASS**. The eight deterministic
+  prepare-exception checks initially reproduced six misclassifications and now
+  pass. A fresh 168-case run reproduces every verdict, source hash and decoded
+  output hash in the committed F0 matrix (120 pass, 36 unsupported, 12 decode
+  failures). Raw packet hashes remain excluded for the metadata reason above.
+  Python CI suite: 19 discovered, 16 passed, three POSIX-only tests skipped on
+  Windows. This does not qualify CUDA, Linux or macOS.
 - **Compilation model.** The probe is built with `/EHs`. The SDK's geometry helpers throw across an `extern "C"`
   boundary, which is undefined behaviour under MSVC's default `/EHsc`; see [UPSTREAM.md](UPSTREAM.md) quirk 11.
   Without this flag the probe aborts part-way through the matrix on the first format the SDK rejects.
