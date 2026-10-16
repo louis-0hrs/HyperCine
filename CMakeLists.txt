@@ -24,6 +24,18 @@ option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
 option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
 
+# Internal P0 probe/selection boundary, built without ISA flags or SDK headers.
+# Codec targets deliberately do not dispatch through it until lane validation.
+add_library(hypercine_cpu_isa STATIC src/cpu/cpu_isa.cpp)
+target_include_directories(hypercine_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+if(HYPERCINE_BUILD_TESTS)
+    enable_testing()
+    add_executable(test_cpu_isa tests/test_cpu_isa.cpp)
+    target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+    target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
+    add_test(NAME cpu_isa_selection COMMAND test_cpu_isa)
+endif()
+
 # This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
