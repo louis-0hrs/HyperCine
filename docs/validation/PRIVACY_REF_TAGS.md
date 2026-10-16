@@ -52,9 +52,22 @@ FFmpeg/ffprobe executable configuration. These commands use the equivalent
 portable PATH setup. No codec math, bitstream fixtures, core dependencies or
 upstream files change; no new performance or SDK-parity claim is made.
 
-Linux and Windows native results are not claimed. The real-hook test class is
-POSIX-only; Windows Python skips it. Hosted CI and independent review are
-separate exact-head gates. Existing CI begins after publication and does not
+The original validation above does not claim native Linux or Windows results.
+The installed-hook class now also runs under native Windows Python with Git
+for Windows, whose bundled shell executes the installed hooks. A dedicated
+Windows CI job runs all 35 installed-hook tests against local bare remotes.
+Native Windows follow-up, based on PR #98 `dacd2aa61ce4cc4c8a59f3ec36673f92592dd2cb`:
+Git for Windows 2.45.1, Python 3.10.9, MSVC 19.44.35229.0 and CMake 3.31.6.
+Full Python discovery ran 79 tests in 141.635 seconds: 75 PASS, four existing
+POSIX-specific tests skipped. All 35 installed-hook tests executed and passed;
+none of that class was skipped. The tests used only disposable local remotes.
+The standalone Release build succeeded and full available CTest passed 18/18
+in 39.36 seconds. FFmpeg/ffprobe were unavailable, so external decode was not
+registered or claimed. Frozen upstream status and whitespace checks were clean.
+These results qualify the Windows test enablement, not a protected-main merge.
+
+Hosted CI and independent review are separate exact-head gates.
+Existing CI begins after publication and does not
 run on tag pushes; release services without installed hooks are outside this
 local gate. See `docs/PRIVACY.md` for supported object types and limitations.
 
