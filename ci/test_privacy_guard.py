@@ -65,6 +65,16 @@ class RuleTests(unittest.TestCase):
         self.assertIn(("[SENSITIVE_PATH]", 0, "PATH_PRIVATE_IPV4"), findings)
         self.assertNotIn(suspect, str(findings))
 
+    def test_quoted_path_decoding_and_invalid_escapes(self):
+        self.assertEqual("b/caf\u00e9.txt", guard.decode_patch_path(r'"b/caf\303\251.txt"'))
+        self.assertEqual("b/a\t\n\\\".txt",
+                         guard.decode_patch_path(r'"b/a\t\n\\\".txt"'))
+        self.assertEqual("b/space name.txt", guard.decode_patch_path("b/space name.txt\t"))
+        for malformed in ['"b/unclosed', r'"b/invalid\q"', r'"b/invalid\777"',
+                          r'"b/invalid\3"', '"b/path"extra']:
+            with self.subTest(path=malformed), self.assertRaises(RuntimeError):
+                guard.decode_patch_path(malformed)
+
     def test_added_only_and_location(self):
         sample = "\n".join(("diff --git a/a b/a", "--- a/a", "+++ b/a",
                             "@@ -4,1 +4,2 @@", "-old " + "192." + "168.1.2",
@@ -140,6 +150,58 @@ class HookInterpreterTests(unittest.TestCase):
 
 
 class GitIntegrationTests(unittest.TestCase):
+    def test_git_quoted_paths_are_scanned(self):
+        # Git C-quotes control characters and (by default) non-ASCII names.
+        names = ["caf\u00e9.txt"]
+        if os.name != "nt":
+            names.extend(["tab\treport.txt", "line\nreport.txt",
+                          'quote"report.txt', "slash\\report.txt"])
+        for name in names:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as work:
+                cwd = Path(work)
+                def run(*args):
+                    return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                          text=True).stdout.strip()
+                run("init", "-q")
+                run("config", "user.email", "test@example.invalid")
+                run("config", "user.name", "Privacy Test")
+                run("config", "core.quotePath", "true")
+                run("commit", "--allow-empty", "-qm", "baseline")
+                suspect = "10." + "4.6.8"
+                (cwd / name).write_text("network " + suspect + "\n", encoding="utf-8")
+                run("add", "--", name)
+                self.assertIn('+++ "b/', run("diff", "--cached"))
+                scanner = [sys.executable, str(Path(guard.__file__).resolve())]
+                staged = subprocess.run(scanner + ["--staged"], cwd=cwd, text=True,
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                run("commit", "-qm", "quoted path")
+                results = [staged] + [subprocess.run(scanner + list(mode), cwd=cwd,
+                           text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                           for mode in [("--commit", "HEAD"), ("--commits", "HEAD~1..HEAD")]]
+                for result in results:
+                    self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+                    self.assertIn("PRIVATE_IPV4", result.stderr)
+                    self.assertNotIn(suspect, result.stderr)
+                    self.assertNotIn("\nreport.txt", result.stderr)
+
+    def test_git_quoted_sensitive_path_is_redacted(self):
+        with tempfile.TemporaryDirectory() as work:
+            cwd = Path(work)
+            def run(*args):
+                return subprocess.run(["git", *args], cwd=cwd, check=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      text=True).stdout.strip()
+            run("init", "-q")
+            suspect = "10." + "4.6.8"
+            run("config", "core.quotePath", "true")
+            name = "report\u00e9" + suspect
+            (cwd / name).write_text("safe\n", encoding="utf-8")
+            run("add", "--", name)
+            findings = guard.scan_patch(run("diff", "--cached"))
+            self.assertIn(("[SENSITIVE_PATH]", 0, "PATH_PRIVATE_IPV4"), findings)
+            self.assertNotIn(suspect, str(findings))
+
     def test_commit_message_leak_is_checked(self):
         with tempfile.TemporaryDirectory() as work:
             cwd = Path(work)
