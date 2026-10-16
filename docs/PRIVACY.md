@@ -43,8 +43,26 @@ The repository scanner is Python 3 standard-library-only. It checks additions
 in the staging area or each selected commit for RFC1918 IPv4 addresses, private
 DNS suffixes, UNC/SMB/NFS-style shares, user-specific Windows/Unix home paths,
 tilde-relative home paths and likely secrets. It also scans new path names and
-commit messages. It reports file/line/rule only, with sensitive filenames
-redacted. It does not output the matched value.
+commit messages. Staged scans also inspect the effective author and committer
+identities using `git var`, including `GIT_AUTHOR_*` / `GIT_COMMITTER_*`
+overrides. Commit and range scans inspect the actual author and committer
+name/email stored in every selected Git object, without mailmap rewriting.
+The same text rules apply to those fields; single-label email domains and
+Git's inferred `(none)` domain are also rejected as likely host-derived
+identities. Missing/unreadable identity data blocks the scan.
+
+Use a deliberately configured identity with a public domain, a chosen GitHub
+noreply address, or a neutral agent address such as
+`hypercine-agent@example.invalid`. Configure it only in your own worktree
+with `git config --worktree user.name`, `git config --worktree user.email`,
+and `git config --worktree user.useConfigOnly true` after the per-worktree
+setup above. These settings do not override explicit `GIT_*` environment
+values; review overrides locally without publishing raw identity output.
+The guard cannot infer whether an arbitrary name or public email domain
+identifies private infrastructure, so manual metadata review remains required.
+
+Diagnostics report only a file or identity-field marker, line and rule,
+with sensitive filenames redacted. They do not output the matched value.
 
 It is a **defense in depth**, not proof of privacy. It cannot identify every
 internal hostname, embedded binary metadata, every credential format or leaks
@@ -77,3 +95,29 @@ GitHub CI begins **after pushing**, so it cannot undo initial public exposure.
 
 Tracking: issue #54. No active feature branch history is rewritten by this
 hardening change.
+
+## Combined hardening and Git identity policy (issue #54)
+
+Six overlapping PRs are integrated together: #74 (`+++` hunk content),
+#78 (disable textconv), #79 (quoted paths), #81 (binary/empty/rename-only
+destination path scanning), #85 (fixed Git diff prefixes), and #87 (raw
+author/committer identity scanning). The scanner inspects added text and a
+NUL-delimited destination-path inventory in staged, commit, and range modes.
+
+**Pre-commit:** configure `user.name` and `user.email` explicitly. Absent
+configuration fails closed rather than trusting an auto-inferred hostname.
+Agent-named identities also require `user.useConfigOnly=true`. For agents
+use a deliberate `agent@example.invalid` style alias or a verified GitHub
+`users.noreply.github.com` address. Human contributors may retain explicitly
+configured public identities; the scanner cannot prove their provenance.
+
+**Commit/pre-push:** raw author and committer envelope fields are checked,
+including public-looking multi-label dynamic/reverse-DNS host patterns that
+the earlier suffix-only implementation missed. This heuristic cannot detect
+*every* machine-owned public domain: Git objects have no explicit record
+of whether their metadata came from host inference. Manual author/committer
+review remains mandatory for imported public branches.
+
+The scanner must never print matched sensitive values. Historic Git objects,
+previous issue revisions, clones and caches remain public independently of
+forward-only redaction; no history rewrite/force-push is authorized here.
