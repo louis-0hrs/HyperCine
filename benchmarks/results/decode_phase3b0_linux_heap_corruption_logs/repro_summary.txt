@@ -1,0 +1,46 @@
+== ASan/UBSan repeated isolated runs (n=20) ==
+  asan run 1 exit=1
+  asan run 2 exit=1
+  asan run 3 exit=1
+  asan run 4 exit=1
+  asan run 5 exit=1
+  asan run 6 exit=1
+  asan run 7 exit=1
+  asan run 8 exit=1
+  asan run 9 exit=1
+  asan run 10 exit=1
+  asan run 11 exit=1
+  asan run 12 exit=1
+  asan run 13 exit=1
+  asan run 14 exit=1
+  asan run 15 exit=1
+  asan run 16 exit=1
+  asan run 17 exit=1
+  asan run 18 exit=1
+  asan run 19 exit=1
+  asan run 20 exit=1
+  ASan non-zero exits: 20 / 20
+  ASan report files: 0
+== Release repeated isolated runs (n=20) ==
+  release run 1 exit=139
+  release run 2 exit=139
+  release run 3 exit=139
+  release run 4 exit=139
+  release run 5 exit=139
+  release run 6 exit=139
+  release run 7 exit=139
+  release run 8 exit=139
+  release run 9 exit=139
+  release run 10 exit=139
+  release run 11 exit=139
+  release run 12 exit=139
+  release run 13 exit=139
+  release run 14 exit=139
+  release run 15 exit=139
+  release run 16 exit=139
+  release run 17 exit=139
+  release run 18 exit=139
+  release run 19 exit=139
+  release run 20 exit=139
+  Release non-zero exits: 20 / 20
+HEAP-REPRO DONE

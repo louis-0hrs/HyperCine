@@ -74,6 +74,13 @@ if(HYPERCINE_ENABLE_CUDA)
 endif()
 add_library(HyperCine::Decoder ALIAS hypercine_decoder)
 
+# hypercine_wavelet calls the upstream CFHD entry points. Declaring the dependency
+# keeps the link line ordered (hypercine_wavelet before CFHDCodecStatic) on
+# toolchains whose static archive resolution is a single left-to-right pass (GNU ld).
+if(TARGET CFHDCodecStatic)
+    target_link_libraries(hypercine_wavelet PUBLIC CFHDCodecStatic)
+endif()
+
 if(TARGET hypercine_core)
     target_link_libraries(hypercine_core INTERFACE hypercine_wavelet)
 endif()
