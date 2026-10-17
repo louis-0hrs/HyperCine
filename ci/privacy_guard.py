@@ -69,14 +69,51 @@ def rules_for(line):
     return sorted(result)
 
 
+def decode_patch_path(value):
+    """Decode Git's C-quoted byte paths without evaluating arbitrary text."""
+    if not value.startswith('"'):
+        return value.split("\t", 1)[0]
+    escaped = {"a": 7, "b": 8, "t": 9, "n": 10, "v": 11,
+               "f": 12, "r": 13, "\\": 92, '"': 34}
+    data = bytearray()
+    index = 1
+    while index < len(value):
+        char = value[index]
+        index += 1
+        if char == '"':
+            if value[index:] not in ("", "\t"):
+                raise RuntimeError("Invalid Git patch path")
+            return data.decode("utf-8", errors="replace")
+        if char != "\\":
+            data.extend(char.encode("utf-8"))
+            continue
+        if index >= len(value):
+            break
+        char = value[index]
+        index += 1
+        if char in escaped:
+            data.append(escaped[char])
+        elif char in "0123" and re.fullmatch(r"[0-7]{2}", value[index:index + 2]):
+            data.append(int(char + value[index:index + 2], 8))
+            index += 2
+        else:
+            raise RuntimeError("Invalid Git patch path escape")
+    raise RuntimeError("Unterminated Git patch path")
+
+
+def display_path(path):
+    # Control characters in valid filenames must not forge diagnostic lines.
+    return path.encode("unicode_escape").decode("ascii")
+
+
 def scan_patch(patch):
     """Inspect added lines only; return (path, new_line, rule)."""
     findings = []
     path = None
     line_number = None
     for entry in patch.splitlines():
-        if entry.startswith("+++ b/"):
-            path = entry[6:]
+        if entry.startswith("+++ b/") or entry.startswith('+++ "b/'):
+            path = decode_patch_path(entry[4:])[2:]
             line_number = None
             for rule in rules_for(path):
                 findings.append(("[SENSITIVE_PATH]", 0, "PATH_" + rule))
@@ -90,7 +127,7 @@ def scan_patch(patch):
             if path is not None and line_number is not None:
                 for rule in rules_for(entry[1:]):
                     findings.append(("[SENSITIVE_PATH]" if rules_for(path)
-                                     else path, line_number, rule))
+                                     else display_path(path), line_number, rule))
                 line_number += 1
         elif entry.startswith(" ") and line_number is not None:
             line_number += 1
