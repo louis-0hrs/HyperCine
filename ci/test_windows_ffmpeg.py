@@ -36,6 +36,13 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(outcome[:4], (0, 2, 2, 1))
         self.assertIn('HTTP=503', outcome[4])
 
+    def test_zero_exit_feed_failure_cannot_be_hidden_by_existing_tools(self):
+        failure = completed(stdout='Response status code does not indicate success: 503 (Service Unavailable).')
+        self.assertEqual(self.run_install([failure, completed()], [True, True])[:4],
+                         (0, 2, 2, 1))
+        self.assertEqual(self.run_install([failure] * 3, [True] * 3)[:4],
+                         (1, 3, 3, 2))
+
     def test_nonzero_503_retries(self):
         self.assertEqual(self.run_install([completed(1, stderr='(503) Service Unavailable'),
                                            completed()], [False, True])[:4], (0, 2, 2, 1))
