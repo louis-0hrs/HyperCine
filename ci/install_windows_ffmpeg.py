@@ -47,7 +47,7 @@ def install():
             output = result.stdout + result.stderr
             statuses = sorted(set(HTTP_STATUS.findall(output)))
             transient = bool(statuses or TRANSPORT.search(output))
-            installer_ok = result.returncode == 0
+            installer_ok = result.returncode == 0 and not transient
             print(f'Chocolatey exit={result.returncode}; transient={transient}; '
                   f'HTTP={",".join(statuses) or "unreported"}')
         except subprocess.TimeoutExpired:
