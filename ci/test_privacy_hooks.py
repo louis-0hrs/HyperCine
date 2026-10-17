@@ -13,6 +13,8 @@ import unittest
 
 @unittest.skipIf(os.name == "nt", "Native POSIX hook qualification")
 class InstalledHookTests(unittest.TestCase):
+    object_format = "sha1"
+
     def setUp(self):
         work = tempfile.TemporaryDirectory()
         self.addCleanup(work.cleanup)
@@ -37,8 +39,12 @@ class InstalledHookTests(unittest.TestCase):
         self.git("remote", "add", "public", str(self.root / "public.git"))
         self.git("push", "-q", "public", "HEAD:refs/heads/main")
         self.base = self.git("rev-parse", "HEAD").stdout.strip()
+        self.assertEqual(self.object_format, self.git("rev-parse", "--show-object-format").stdout.strip())
+        self.assertEqual(64 if self.object_format == "sha256" else 40, len(self.base))
 
     def git(self, *args, expected=0):
+        if args[0] == "init":
+            args = ("init", "--object-format=" + self.object_format, *args[1:])
         result = subprocess.run(["git", *args], cwd=self.repo, env=self.env,
                                 text=True, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
@@ -437,6 +443,11 @@ class InstalledHookTests(unittest.TestCase):
         self.assertEqual(self.base, actual)
         self.git("push", "-q", "public", ":" + ref)
         self.assertEqual("", self.git("ls-remote", "public", ref).stdout)
+
+
+class Sha256InstalledHookTests(InstalledHookTests):
+    """Run every actual publish/reject/tag/ref vector with 64-digit Git objects."""
+    object_format = "sha256"
 
 
 if __name__ == "__main__":
