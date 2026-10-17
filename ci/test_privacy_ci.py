@@ -161,6 +161,53 @@ class WorkflowIdentityTests(unittest.TestCase):
                 self.assertEqual(2, result.returncode)
                 self.assertIn("Missing reliable base SHA; fail closed.", result.stdout)
 
+    def test_replacements_cannot_hide_commit_content_in_ci_ranges(self):
+        value = "192." + "168.8.9"
+        (self.repo / "report.txt").write_text("network " + value + "\n", encoding="utf-8")
+        self.git("add", "report.txt")
+        self.git("commit", "-qm", "synthetic imported report")
+        unsafe = self.git("rev-parse", "HEAD")
+        clean = self.git("commit-tree", self.base + "^{tree}", "-p", self.base,
+                         "-m", "synthetic replacement")
+        self.git("replace", unsafe, clean)
+        self.assertNotIn(value, self.git("show", "--format=", "HEAD"))
+        for event in ("pull_request", "push"):
+            with self.subTest(event=event):
+                result = self.run_gate(event)
+                self.assertEqual(1, result.returncode)
+                self.assertIn("PRIVATE_IPV4", result.stderr)
+                self.assertNotIn(value, result.stdout + result.stderr)
+
+    def test_replacements_cannot_hide_identity_in_direct_modes(self):
+        identity = ("Codex Agent", "agent@company.example.org")
+        self.commit(identity, identity)
+        unsafe = self.git("rev-parse", "HEAD")
+        clean = self.git("commit-tree", self.base + "^{tree}", "-p", self.base,
+                         "-m", "synthetic replacement")
+        self.git("replace", unsafe, clean)
+        for arguments in (("--commit", unsafe), ("--commits", self.base + "..HEAD")):
+            with self.subTest(mode=arguments[0]):
+                result = subprocess.run(
+                    [sys.executable, "ci/privacy_guard.py", *arguments],
+                    cwd=self.repo, env=self.env,
+                    text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.assert_rejected(result, ("AUTHOR", "COMMITTER"), identity[1])
+
+    def test_replacement_head_cannot_hide_staged_addition(self):
+        value = "192." + "168.8.9"
+        (self.repo / "report.txt").write_text("network " + value + "\n", encoding="utf-8")
+        self.git("add", "report.txt")
+        tree = self.git("write-tree")
+        replacement = self.git("commit-tree", tree, "-m", "synthetic replacement HEAD")
+        self.git("replace", self.base, replacement)
+        self.assertEqual("", self.git("diff", "--cached", "--format="))
+        result = subprocess.run([sys.executable, "ci/privacy_guard.py", "--staged"],
+                                cwd=self.repo, env=self.env, text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(1, result.returncode)
+        self.assertIn("PRIVATE_IPV4", result.stderr)
+        self.assertNotIn(value, result.stdout + result.stderr)
+
     def test_empty_range_passes(self):
         for event in ("pull_request", "push"):
             with self.subTest(event=event):
