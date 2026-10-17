@@ -114,6 +114,27 @@ int main() {
         Check(million.sample_count == 1000000 && million.graphics_clock_mhz_mean == 1000, "million-poll aggregation");
         Check(sizeof(detail::NvmlAccumulator) < 512, "fixed accumulator storage");
 
+        Phase3AResult memory;
+        memory.slot_selection.total_estimated_vram_bytes = 9999;
+        detail::SetMeasuredVramUsage(memory, 100, 150);
+        Check(memory.measured_global_vram_delta_bytes == 50 && memory.vram_used_bytes == 50, "positive measured delta");
+        detail::SetMeasuredVramUsage(memory, 100, 100);
+        Check(memory.measured_global_vram_delta_bytes == 0 && memory.vram_used_bytes == 0, "measured zero is not estimate");
+        detail::SetMeasuredVramUsage(memory, 150, 100);
+        Check(memory.measured_global_vram_delta_bytes == -50 && memory.vram_used_bytes == 0, "negative global delta preserved");
+        for (auto before : {std::optional<size_t>{}, std::optional<size_t>{100}}) {
+            detail::SetMeasuredVramUsage(memory, before, std::nullopt);
+            Check(!memory.measured_global_vram_delta_bytes && memory.vram_used_bytes == 0, "missing after snapshot");
+        }
+        detail::SetMeasuredVramUsage(memory, std::nullopt, 100);
+        Check(!memory.measured_global_vram_delta_bytes, "missing before snapshot");
+        detail::SetMeasuredVramUsage(memory, 0, 0);
+        Check(memory.measured_global_vram_delta_bytes == 0, "two successful zero snapshots");
+        if (std::numeric_limits<size_t>::max() > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
+            detail::SetMeasuredVramUsage(memory, 0, std::numeric_limits<size_t>::max());
+            Check(!memory.measured_global_vram_delta_bytes, "unrepresentable delta unavailable");
+        }
+
         NvmlRuntimeSampler sampler;
         sampler.Start(); sampler.Start(); // duplicate start must not replace a joinable thread
         auto live = sampler.Stop();
@@ -139,6 +160,11 @@ int main() {
         for (auto telemetry : {live, partial, failed, missing}) {
             Phase3AResult result;
             result.nvml = telemetry;
+            result.slot_selection.total_estimated_vram_bytes = 9999;
+            if (index == 0) detail::SetMeasuredVramUsage(result, 100, 150);
+            if (index == 1) detail::SetMeasuredVramUsage(result, 100, 100);
+            if (index == 2) detail::SetMeasuredVramUsage(result, 150, 100);
+            if (index == 3) detail::SetMeasuredVramUsage(result, std::nullopt, 100);
             result.mean_latency_ms = 3; result.median_latency_ms = 2;
             result.p95_latency_ms = 7; result.p99_latency_ms = 9.125;
             std::ostringstream json;
