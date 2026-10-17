@@ -54,6 +54,10 @@ add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 add_executable(reference_decode_worker reference_decode/worker.cpp)
 target_link_libraries(reference_decode_worker PRIVATE CFHDCodecStatic)
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+    add_executable(reference_decoder_completion_flags reference_decode/test_completion_flags.cpp)
+    target_compile_definitions(reference_decoder_completion_flags PRIVATE _ALLOCATOR=1 WARPSTUFF=1)
+    add_test(NAME reference_decoder_completion_flags COMMAND reference_decoder_completion_flags)
+    set_tests_properties(reference_decoder_completion_flags PROPERTIES LABELS "synthetic;reference-decoder-contract")
     add_executable(reference_decode_temporal EXCLUDE_FROM_ALL reference_decode/worker.cpp
         reference_decode/decoder_temporal.c reference_decode/temporal_observer.cpp)
     target_compile_definitions(reference_decode_temporal PRIVATE HYPERCINE_TEMPORAL_TRACE=1 _ALLOCATOR=1 WARPSTUFF=1

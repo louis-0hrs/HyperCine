@@ -9,6 +9,7 @@ import measure
 import bgra_ab
 import trace_bands
 import priority_probe
+import analyze_dependency
 
 
 class MeasurementTests(unittest.TestCase):
@@ -53,7 +54,26 @@ class MeasurementTests(unittest.TestCase):
 
 
 class BgraTests(unittest.TestCase):
-    def test_temporal_snapshot_checks_complete_input_and_real_before_after(self):
+    def test_equality_completion_macro_does_not_imply_lowpass_ready(self):
+        producer=dict(channel=0,input_wavelet=2,begin=4,end=6,output_width=2,output_height=2,
+            output_after=dict(sha256='a'*64))
+        consumer=dict(channel=0,input_wavelet=1,begin=1,end=3,width=2,height=2,valid_flags_before=14,
+            started_flags_before=14,all_valid_before=True,input_before=dict(band_sha256=['b'*64]*4),
+            input_after=dict(band_sha256=['b'*64]*4))
+        call=dict(process=1,ordinal=1,psnr_db=8,temporal_events=[producer,consumer])
+        result=analyze_dependency.dependency(call,0)
+        self.assertTrue(result['all_valid_macro'])
+        self.assertFalse(result['lowpass_valid'])
+        self.assertFalse(result['required_four_bands_valid'])
+        self.assertTrue(result['consumer_return_before_producer_entry'])
+        self.assertFalse(result['before_matches_producer'])
+        consumer.update(begin=7,end=8,valid_flags_before=15,started_flags_before=15)
+        result=analyze_dependency.dependency(call,0)
+        self.assertTrue(result['required_four_bands_valid'])
+        self.assertFalse(result['consumer_return_before_producer_entry'])
+        self.assertFalse(result['consumer_entry_before_producer_return'])
+
+    def test_temporal_snapshot_checks_macro_flags_and_real_before_after(self):
         event=dict(channel=0,input_wavelet=1,width=1,height=1,output_width=2,output_height=2,
             begin=1,end=2,valid_flags_before=15,started_flags_before=15,all_valid_before=True,
             all_started_before=True,scale=0,scratch_free_size=16,inverse_prescale=True,

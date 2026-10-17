@@ -139,3 +139,11 @@ is an unresolved release gate; it must not mask encoder packet mismatch, API
 errors or stable quality failure. Threaded CRT rounding is a hypothesis, not a
 complete explanation of large pixel differences. No frozen source is changed.
 
+The subsequent [temporal diagnostic](validation/TEMPORAL_LOWPASS_DEPENDENCY.md)
+demonstrates that the original `BANDS_ALL_VALID` equality is true for
+`valid=started=0x0e` although lowpass bit0 is absent. An isolated call-boundary
+observer records premature dependent inverse reconstruction at 128px; a 256px
+unmodified-decoder control also varies. The downstream validity guard is present
+but uses that same predicate. This is not yet an exact-packet reproduction of
+the original #116 1080p failure, and no frozen/production codec fix is applied.
+

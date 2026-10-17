@@ -1,5 +1,9 @@
 # BGRA active-metadata A/B and retained-band observation (#120 / #138)
 
+Next dispatch completed separately: [Phase2C reference recreation and temporal
+lowpass dependency](TEMPORAL_LOWPASS_DEPENDENCY.md). The measurements below are
+preserved as the earlier uninstrumented A/B and post-completion observation.
+
 Copyright (c) 2026 HyperCine Contributors.
 Dual-licensed under MIT OR Apache-2.0; see LICENSE-MIT and LICENSE-APACHE.
 

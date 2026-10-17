@@ -15,7 +15,9 @@ from measure import run, sha
 
 
 def temporal_hashes(raw, document):
-    if not raw or len(raw)>32*1024*1024 or document['observer_calls_in_flight_after_decode'] != 0:
+    if (not raw or len(raw)>32*1024*1024 or
+        type(document['observer_calls_in_flight_after_decode']) is not int or
+        document['observer_calls_in_flight_after_decode'] != 0):
         raise ValueError('invalid/incomplete temporal observation')
     events=document['events']
     if not isinstance(events,list) or not 1<=len(events)<=24:
@@ -40,10 +42,12 @@ def temporal_hashes(raw, document):
         if not (1<=item['width']<=1920 and 1<=item['height']<=1088 and
                 item['output_width']==2*item['width'] and item['output_height']==2*item['height']):
             raise ValueError('invalid boundary geometry')
+        # Preserve 0x0e equality positives: the missing lowpass bit is observed
+        # evidence, not malformed input to discard or turn into a skip.
         if (item['all_valid_before'] is not True or item['all_started_before'] is not True or
             item['valid_flags_before'] != item['started_flags_before'] or
             (item['started_flags_before']&14)!=14):
-            raise ValueError('non-complete input boundary')
+            raise ValueError('inconsistent macro/flags boundary')
         for phase in ('input_before','input_after','output_after'):
             segment=item[phase]
             size=item['width']*item['height']*8 if phase.startswith('input') else item['output_width']*item['output_height']*2
@@ -132,7 +136,7 @@ def main():
         print(json.dumps(dict(priority_a=report['priority_a']['summary'],control256=report['control256']['summary'],
             temporal=[dict(geometry=c['geometry'],**c['summary'],boundaries=c['temporal_summary']) for c in report['temporal_cases']])) )
         return 1
-    except (OSError,ValueError,KeyError,TypeError,subprocess.SubprocessError):
+    except (OSError,ValueError,KeyError,TypeError,RecursionError,subprocess.SubprocessError):
         print('INVALID_PRIORITY_PROBE: release blocked',file=sys.stderr)
         return 2
 
