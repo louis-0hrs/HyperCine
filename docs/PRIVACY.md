@@ -43,8 +43,26 @@ The repository scanner is Python 3 standard-library-only. It checks additions
 in the staging area or each selected commit for RFC1918 IPv4 addresses, private
 DNS suffixes, UNC/SMB/NFS-style shares, user-specific Windows/Unix home paths,
 tilde-relative home paths and likely secrets. It also scans new path names and
-commit messages. It reports file/line/rule only, with sensitive filenames
-redacted. It does not output the matched value.
+commit messages. Staged scans also inspect the effective author and committer
+identities using `git var`, including `GIT_AUTHOR_*` / `GIT_COMMITTER_*`
+overrides. Commit and range scans inspect the actual author and committer
+name/email stored in every selected Git object, without mailmap rewriting.
+The same text rules apply to those fields; single-label email domains and
+Git's inferred `(none)` domain are also rejected as likely host-derived
+identities. Missing/unreadable identity data blocks the scan.
+
+Use a deliberately configured identity with a public domain, a chosen GitHub
+noreply address, or a neutral agent address such as
+`hypercine-agent@example.invalid`. Configure it only in your own worktree
+with `git config --worktree user.name`, `git config --worktree user.email`,
+and `git config --worktree user.useConfigOnly true` after the per-worktree
+setup above. These settings do not override explicit `GIT_*` environment
+values; review overrides locally without publishing raw identity output.
+The guard cannot infer whether an arbitrary name or public email domain
+identifies private infrastructure, so manual metadata review remains required.
+
+Diagnostics report only a file or identity-field marker, line and rule,
+with sensitive filenames redacted. They do not output the matched value.
 
 It is a **defense in depth**, not proof of privacy. It cannot identify every
 internal hostname, embedded binary metadata, every credential format or leaks

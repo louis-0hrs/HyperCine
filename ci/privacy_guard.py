@@ -10,9 +10,10 @@ Usage:
   python ci/privacy_guard.py --commits <base>..HEAD
 
 Only reports filename, line and rule; never prints matching sensitive data.
-It also scans commit messages and repository path names. Sensitive path names are
-redacted in diagnostics. It does not validate binary blobs, issue text, GitHub
-artifacts or old history.
+It also scans commit messages, author/committer identities and repository paths.
+Staged scans check effective Git identities, including environment overrides.
+Sensitive path names are redacted in diagnostics. It does not validate binary
+blobs, issue text, GitHub artifacts or old history.
 """
 import argparse
 import ipaddress
@@ -69,6 +70,42 @@ def rules_for(line):
     return sorted(result)
 
 
+def identity_findings(role, name, email):
+    """Inspect raw identity fields without exposing them in diagnostics.
+
+    Single-label and Git's '(none)' email domains commonly come from automatic
+    machine identity inference. Other hostnames use the existing text rules.
+    This is a heuristic, not proof that an arbitrary public domain is safe.
+    """
+    rules = set(rules_for(name)) | set(rules_for(email))
+    domain = email.rpartition("@")[2].lower()
+    if not domain or "." not in domain or domain.endswith(".(none)"):
+        rules.add("HOST_DERIVED_IDENTITY")
+    return [("[" + role + "]", 0, rule) for rule in sorted(rules)]
+
+
+def staged_identity_findings():
+    findings = []
+    for role in ("AUTHOR", "COMMITTER"):
+        # git var observes config and GIT_* overrides exactly as Git does.
+        identity = git("var", "GIT_" + role + "_IDENT").rstrip("\n")
+        match = re.fullmatch(r"(.*) <([^<>]*)> \d+ [+-]\d{4}", identity)
+        if not match:
+            raise RuntimeError("Unable to parse effective Git identity")
+        findings.extend(identity_findings(role, *match.groups()))
+    return findings
+
+
+def commit_identity_findings(sha):
+    # Lowercase format codes return actual object fields, without mailmap.
+    fields = git("show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce",
+                 sha).rstrip("\n").split("\0")
+    if len(fields) != 4:
+        raise RuntimeError("Unable to parse committed Git identity")
+    return (identity_findings("AUTHOR", *fields[:2]) +
+            identity_findings("COMMITTER", *fields[2:]))
+
+
 def scan_patch(patch):
     """Inspect added lines only; return (path, new_line, rule)."""
     findings = []
@@ -117,7 +154,9 @@ def main(argv=None):
     common = ("--no-ext-diff", "--no-color", "--unified=0", "--diff-filter=ACMRT")
     patches = []
     commits = []
+    findings = []
     if args.staged:
+        findings.extend(staged_identity_findings())
         patches.append(git("diff", "--cached", *common))
     elif args.commit:
         commits = [args.commit]
@@ -126,9 +165,10 @@ def main(argv=None):
         # Empty ranges are allowed (e.g. synchronized branches with no new commits).
     for sha in commits:
         patches.append(git("show", "--format=", "--first-parent", *common, sha))
-    findings = [finding for patch in patches for finding in scan_patch(patch)]
+    findings.extend(finding for patch in patches for finding in scan_patch(patch))
     # A secret in a commit subject/body is public even when the patch is clean.
     for sha in commits:
+        findings.extend(commit_identity_findings(sha))
         message = git("show", "-s", "--format=%B", sha)
         for rule in rules_for(message):
             findings.append(("[COMMIT_MESSAGE]", 0, rule))
