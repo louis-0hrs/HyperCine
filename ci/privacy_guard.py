@@ -275,6 +275,26 @@ def tag_chain_findings(oid):
     raise RuntimeError("Tag nesting exceeds inspection limit")
 
 
+def fetch_mapping_findings(remotes):
+    """Require canonical ownership of every configured tracking namespace."""
+    for remote in remotes:
+        proc = subprocess.run(
+            ["git", "config", "--null", "--get-all", "remote." + remote + ".fetch"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if proc.returncode == 1:
+            continue  # A push-only remote need not configure a fetch mapping.
+        if proc.returncode != 0:
+            raise RuntimeError("Unable to inspect remote fetch mappings")
+        # NUL records preserve embedded newlines; no config value is echoed.
+        mappings = proc.stdout.decode("utf-8").split("\0")
+        canonical = "refs/heads/*:refs/remotes/" + remote + "/*"
+        if (mappings[-1] != "" or
+                any(mapping not in (canonical, "+" + canonical)
+                    for mapping in mappings[:-1])):
+            return [("[PUSH_REMOTE]", 0, "UNSUPPORTED_FETCH_REFSPEC")]
+    return []
+
+
 def push_findings(remote, records):
     """Validate pre-push records and collect commits from this destination only."""
     # Inspect actual stored objects, never local replacement objects.
@@ -289,7 +309,11 @@ def push_findings(remote, records):
            (other.startswith(remote + "/") or remote.startswith(other + "/"))
            for other in remotes):
         return [("[PUSH_REMOTE]", 0, "OVERLAPPING_REMOTE_NAMESPACES")], []
-    findings = []
+    # Non-overlapping names alone are insufficient: a custom fetch mapping
+    # can write private history into another remote's tracking namespace.
+    findings = fetch_mapping_findings(remotes)
+    if findings:
+        return findings, []
     commits = set()
     for record in records:
         fields = record.split()
