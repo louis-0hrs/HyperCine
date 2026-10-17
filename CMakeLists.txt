@@ -36,6 +36,8 @@ if(HYPERCINE_BUILD_TESTS)
     add_test(NAME cpu_isa_selection COMMAND test_cpu_isa)
 endif()
 
+option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)
+
 # This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
@@ -67,6 +69,9 @@ endif()
 if(HYPERCINE_ENABLE_METAL AND (NOT APPLE OR NOT HYPERCINE_BUILD_STANDALONE))
     message(FATAL_ERROR "Metal requires Apple and the SDK-free standalone build")
 endif()
+if(HYPERCINE_ENABLE_VULKAN AND NOT HYPERCINE_BUILD_STANDALONE)
+    message(FATAL_ERROR "The Vulkan FilmScan3 frontend requires the SDK-free standalone build")
+endif()
 if(HYPERCINE_BUILD_STANDALONE)
     cmake_minimum_required(VERSION 3.25)
     if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA)
@@ -80,6 +85,42 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/core/filmscan3_encoder.cpp
         src/core/filmscan3_backend.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    if(HYPERCINE_ENABLE_VULKAN)
+        # Vulkan is loaded through dlopen at runtime, so only the headers are a
+        # build dependency; VK_NO_PROTOTYPES removes every link-time symbol.
+        find_package(Vulkan REQUIRED)
+        find_package(Threads REQUIRED)
+        set(VULKAN_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/vulkan/shaders")
+        set(VULKAN_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+        set(VULKAN_SHADER_SOURCES
+            "${VULKAN_SHADER_DIR}/color_cg709.comp"
+            "${VULKAN_SHADER_DIR}/wavelet_h26.comp"
+            "${VULKAN_SHADER_DIR}/wavelet_v26.comp")
+        # Deterministic GLSL -> SPIR-V embedder; dlopen("libshaderc") keeps the
+        # shader compiler optional on the build host (see the tool's header).
+        add_executable(vulkan_spirv_embed tools/vulkan_spirv_embed.cpp)
+        target_link_libraries(vulkan_spirv_embed PRIVATE ${CMAKE_DL_LIBS})
+        add_custom_command(
+            OUTPUT "${VULKAN_GEN_DIR}/vulkan_shaders_generated.h"
+                   "${VULKAN_GEN_DIR}/vulkan_spirv_manifest.txt"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${VULKAN_GEN_DIR}"
+            COMMAND $<TARGET_FILE:vulkan_spirv_embed>
+                    --out "${VULKAN_GEN_DIR}/vulkan_shaders_generated.h"
+                    --manifest "${VULKAN_GEN_DIR}/vulkan_spirv_manifest.txt"
+                    ${VULKAN_SHADER_SOURCES}
+            DEPENDS vulkan_spirv_embed ${VULKAN_SHADER_SOURCES}
+            COMMENT "Embedding HyperCine Vulkan compute shaders (SPIR-V)"
+            VERBATIM)
+        add_custom_target(hypercine_vulkan_shaders DEPENDS
+            "${VULKAN_GEN_DIR}/vulkan_shaders_generated.h")
+        add_dependencies(hypercine_standalone hypercine_vulkan_shaders)
+        target_sources(hypercine_standalone PRIVATE src/vulkan/vulkan_frontend.cpp)
+        target_include_directories(hypercine_standalone PRIVATE
+            "${VULKAN_GEN_DIR}" ${Vulkan_INCLUDE_DIRS})
+        target_compile_definitions(hypercine_standalone PRIVATE
+            HYPERCINE_VULKAN_AVAILABLE=1 VK_NO_PROTOTYPES)
+        set_property(GLOBAL PROPERTY HYPERCINE_HAS_VULKAN TRUE)
+    endif()
     if(HYPERCINE_ENABLE_METAL)
         enable_language(OBJCXX)
         set(CMAKE_OBJCXX_STANDARD 17)
@@ -119,6 +160,16 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_executable(hypercine_encode_filmscan3_metal tools/hypercine_encode_filmscan3.cpp)
             target_compile_definitions(hypercine_encode_filmscan3_metal PRIVATE HYPERCINE_METAL_AUDIT=1)
             target_link_libraries(hypercine_encode_filmscan3_metal PRIVATE hypercine_standalone)
+        endif()
+        if(HYPERCINE_ENABLE_VULKAN)
+            # CPU<->Vulkan parity. GPU-required run fails closed when no Vulkan
+            # compute device is usable; the same binary is a skip when not required.
+            add_executable(test_vulkan_filmscan3 tests/test_vulkan_filmscan3.cpp)
+            target_link_libraries(test_vulkan_filmscan3 PRIVATE hypercine_standalone)
+            add_test(NAME vulkan_filmscan3_cpu_parity COMMAND test_vulkan_filmscan3)
+            set_tests_properties(vulkan_filmscan3_cpu_parity PROPERTIES
+                LABELS "vulkan;gpu-required"
+                SKIP_RETURN_CODE 77)
         endif()
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)

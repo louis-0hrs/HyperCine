@@ -1,0 +1,95 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "recorded_at_utc": "2026-10-16T11:05:00+00:00",
+  "issue": 31,
+  "pull_request": 61,
+  "branch": "codex/linux-vulkan-filmscan3-p1",
+  "head_sha": "05b889a73372e015f4d2add5631f1359340cb55d",
+  "base_ref": "origin/main",
+  "base_sha": "5c87391e82f307fbe7db0be6a53fd0edbdaad527",
+  "production_gate": "NOT_APPLICABLE_EXPERIMENTAL_P1",
+  "review_scope": "independent Linux/A2 lane re-validation of PR #61 exact head",
+  "environment": {
+    "gpu": "NVIDIA A2, compute capability 8.6, driver 550.163.01",
+    "vulkan_instance": "1.4.309",
+    "vulkan_icd_api": "1.3.277",
+    "validation_layer": "VK_LAYER_KHRONOS_validation (Chromium-bundled runtime, user-level manifest)",
+    "validation_layer_library_sha256": "cdbea1e84213ba938b7eaa74a045bfde3e2872731a2705890597fdd4497ebe2d",
+    "shaderc_runtime": "libshaderc1 2025.2-1",
+    "compiler": "GCC 14.2.0"
+  },
+  "shader_fingerprints": {
+    "color_cg709": { "words": 1968, "fnv1a64": "b382a2254df10ccb" },
+    "wavelet_h26": { "words": 2024, "fnv1a64": "2c3e3eae4d8e5abc" },
+    "wavelet_v26": { "words": 2022, "fnv1a64": "40fc48953eed6386" }
+  },
+  "cpu_only_build_vulkan_off": {
+    "configuration": "HYPERCINE_BUILD_STANDALONE=ON HYPERCINE_BUILD_UPSTREAM=OFF HYPERCINE_ENABLE_CUDA=OFF HYPERCINE_ENABLE_VULKAN=OFF",
+    "status": "PASS",
+    "passed": 27,
+    "total": 27,
+    "total_test_time_s": 516.54,
+    "new_dependency_introduced": false,
+    "note": "Portable standalone build is unchanged with Vulkan OFF; no new target, no new link-time dependency."
+  },
+  "vulkan_on_build_and_parity": {
+    "configuration": "HYPERCINE_BUILD_STANDALONE=ON HYPERCINE_BUILD_UPSTREAM=OFF HYPERCINE_ENABLE_CUDA=OFF HYPERCINE_ENABLE_VULKAN=ON",
+    "build": "PASS",
+    "ctest_status": "PASS",
+    "ctest_passed": 28,
+    "ctest_total": 28,
+    "total_test_time_s": 560.44,
+    "gpu_required_test": "vulkan_filmscan3_cpu_parity (LABELS vulkan;gpu-required)",
+    "parity_result": "PASS (all samples bit-exact)",
+    "parity_compared_samples": 133,
+    "fail_closed": {
+      "gpu_required_no_icd_exit": 1,
+      "optional_no_icd_exit": 77,
+      "note": "With VK_ICD_FILENAMES pointed at a non-existent ICD, a --gpu-required run exits 1 (hard failure) and an optional run exits 77 (CTest SKIP_RETURN_CODE). The GPU path never silently falls back to the CPU."
+    }
+  },
+  "validation_layer_evidence": {
+    "status": "PASS",
+    "layer_enabled": "VK_LAYER_KHRONOS_validation",
+    "run_under_layer": "test_vulkan_filmscan3 --gpu-required",
+    "validation_errors": 0,
+    "validation_warnings": 0,
+    "parity_result_under_layer": "PASS (all samples bit-exact)",
+    "core_check": "enabled",
+    "gpu_assisted_validation": "layer-internal disable (GPU-AV self-disabled with an internal error under Vulkan 1.4.309 loader + layer 1.3.277); not an application or codec defect. Core validation checks remained active for the whole run.",
+    "capture_stdout_sha256": "1c47d24012662b0d0c6258754c6a7a2d8f57a7768e970798d62c84fc72e0ea3a",
+    "method": "User-level layer manifest under the per-user Vulkan explicit_layer.d directory plus VK_LAYER_PATH; enabled per-run via VK_INSTANCE_LAYERS. No root, no system change, and no repository code change was required."
+  },
+  "resource_ownership_review": {
+    "status": "PASS_REVIEWED",
+    "method": "static review of src/vulkan/vulkan_frontend.cpp at the exact head, plus the validation-layer run above",
+    "findings": [
+      "Every device resource (VkBuffer/VkDeviceMemory, VkShaderModule, VkDescriptorSetLayout, VkPipelineLayout, VkPipeline) is created per call and destroyed in both the success and exception paths; the Buffer/Pipeline helpers destroy before reuse.",
+      "Per-dispatch VkDescriptorSet and VkCommandBuffer are allocated from pools with a single queue, then freed after vkQueueWaitIdle, so both pools are reused across the long parity run instead of exhausting (descriptor pool maxSets 256, VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT set).",
+      "vkCmdResetQueryPool is recorded between vkBeginCommandBuffer and vkEndCommandBuffer (the bring-up defect 1 fix); timestamps are gated on timestampValidBits and optional entry-point availability.",
+      "Destructor order: query pool, descriptor pool, command pool, device, instance - no use-after-free of the device-bound pools.",
+      "Instance destruction for the discovery path (DiscoverDevice/IsAvailable) is correctly paired; no leaked VkInstance per probe."
+    ],
+    "device_selection": "VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU > INTEGRATED_GPU > other; a CPU-type device is only chosen when no GPU has a compute queue."
+  },
+  "integration_contract_verified": {
+    "vulkan_option_default": "OFF",
+    "vulkan_off_no_new_dependency": true,
+    "spirv_embedded_at_build_time": true,
+    "loader_loaded_via_dlopen": true,
+    "vk_no_prototypes": true,
+    "portable_header_includes_vulkan_headers": false
+  },
+  "explicitly_not_claimed": [
+    "No CFHD bitstream compatibility or production encoder claim.",
+    "No throughput/performance claim; P1 uses host-visible buffers, so wall time is transfer-dominated.",
+    "No L2/L3, quantization, entropy or framing.",
+    "No GPU-assisted (shader instrumentation) validation coverage - only Vulkan core validation.",
+    "No merge to main; PR #61 remains Draft and is a maintainer decision."
+  ],
+  "artifacts": {
+    "raw_logs_in_tree": false,
+    "note": "Raw build/logs remain outside Git; this JSON carries the reproducible summary, counts, exit codes and hashes."
+  }
+}
