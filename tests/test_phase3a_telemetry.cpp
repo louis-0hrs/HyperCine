@@ -19,9 +19,15 @@ using HMODULE = void*;
 static bool provider_present = true;
 static bool readings_work = true;
 static int power_status = 0;
-static int init() { return 0; }
-static int shutdown_nvml() { return 0; }
-static int get_device(unsigned, void** dev) { *dev = reinterpret_cast<void*>(1); return 0; }
+static const char* missing_symbol = "";
+static int init_status = 0, device_status = 0;
+static int init_calls = 0, shutdown_calls = 0, load_calls = 0, unload_calls = 0;
+static int init() { ++init_calls; return init_status; }
+static int shutdown_nvml() { ++shutdown_calls; return 0; }
+static int get_device(unsigned, void** dev) {
+    if (device_status) return device_status;
+    *dev = reinterpret_cast<void*>(1); return 0;
+}
 struct NvmlUtilization;
 static int utilization(void*, NvmlUtilization* ptr);
 
@@ -41,9 +47,13 @@ static int throttle(void*, unsigned long long* v) {
     if (!readings_work) return 3;
     *v = 0; return 0;
 }
-static HMODULE LoadLibraryA(const char*) { return provider_present ? reinterpret_cast<void*>(1) : nullptr; }
-static void FreeLibrary(HMODULE) {}
+static HMODULE LoadLibraryA(const char*) {
+    if (!provider_present) return nullptr;
+    ++load_calls; return reinterpret_cast<void*>(1);
+}
+static void FreeLibrary(HMODULE) { ++unload_calls; }
 static void* GetProcAddress(HMODULE, const char* name) {
+    if (!std::strcmp(name, missing_symbol)) return nullptr;
     if (!std::strcmp(name, "nvmlInit_v2")) return reinterpret_cast<void*>(&init);
     if (!std::strcmp(name, "nvmlShutdown")) return reinterpret_cast<void*>(&shutdown_nvml);
     if (!std::strcmp(name, "nvmlDeviceGetHandleByIndex_v2")) return reinterpret_cast<void*>(&get_device);
@@ -134,6 +144,34 @@ int main() {
             detail::SetMeasuredVramUsage(memory, 0, std::numeric_limits<size_t>::max());
             Check(!memory.measured_global_vram_delta_bytes, "unrepresentable delta unavailable");
         }
+
+        for (const char* symbol : {"nvmlInit_v2", "nvmlShutdown", "nvmlDeviceGetHandleByIndex_v2"}) {
+            // The alternate device symbol is absent in this fake provider.
+            missing_symbol = symbol;
+            const int starts = init_calls, stops = shutdown_calls, loads = load_calls;
+            {
+                NvmlRuntimeSampler broken;
+                broken.Start();
+                Check(!broken.Stop().nvml_available, "missing required lifecycle symbol");
+            }
+            Check(init_calls == starts && shutdown_calls == stops, "must not initialize without balanced lifecycle");
+            Check(load_calls == loads + 1 && unload_calls == load_calls, "missing-symbol library cleanup");
+        }
+        missing_symbol = "";
+        for (int status : {1, 2}) {
+            init_status = status == 1 ? 3 : 0;
+            device_status = status == 2 ? 3 : 0;
+            const int starts = init_calls, stops = shutdown_calls;
+            {
+                NvmlRuntimeSampler broken;
+                broken.Start();
+                Check(!broken.Stop().nvml_available, "initialization/device failure unavailable");
+            }
+            Check(init_calls == starts + 1, "one initialization attempt");
+            Check(shutdown_calls == stops + (status == 2 ? 1 : 0), "shutdown only successful initialization");
+            Check(unload_calls == load_calls, "failed-provider library cleanup");
+        }
+        init_status = device_status = 0;
 
         NvmlRuntimeSampler sampler;
         sampler.Start(); sampler.Start(); // duplicate start must not replace a joinable thread
