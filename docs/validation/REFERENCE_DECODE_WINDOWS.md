@@ -1,5 +1,9 @@
 # Windows original-decoder repeatability, issue #120
 
+Review follow-up: [BGRA metadata A/B and retained-band observations](BGRA_METADATA_AB.md).
+This earlier YUY2 evidence remains unchanged; the follow-up tests the actual
+Phase2B/C output/metadata configuration and records its separate results.
+
 Copyright (c) 2026 HyperCine Contributors.
 Dual-licensed under MIT OR Apache-2.0; see LICENSE-MIT and LICENSE-APACHE.
 
