@@ -46,6 +46,25 @@ class ArithmeticAudit(unittest.TestCase):
             with self.assertRaises(ValueError):
                 audit.geometry(*invalid)
 
+    def test_size_domain_rejects_non_integer_and_negative_alignment(self):
+        for value in (-1, True, 1.5, '16', None):
+            for fn, args in ((audit.align, (value, 16)),
+                             (audit.align, (16, value)),
+                             (audit.surface, (value, 24)),
+                             (audit.surface, (128, value)),
+                             (audit.geometry, (value, 24)),
+                             (audit.geometry, (128, value)),
+                             (audit.chunk_header, (0x2200, value))):
+                with self.subTest(function=fn.__name__, value=value, args=args):
+                    with self.assertRaises((ValueError, OverflowError)):
+                        fn(*args)
+        for fn in (audit.add, audit.mul):
+            for args in ((True, 1), (1, 2.0), (1, 1, False), (1, 1, -1)):
+                with self.assertRaises((ValueError, OverflowError)):
+                    fn(*args)
+        self.assertEqual(audit.align(0, 16), 0)
+        self.assertEqual(audit.align(audit.U64_MAX - 15, 16), audit.U64_MAX - 15)
+
     def test_recorded_report(self):
         root = Path(__file__).resolve().parents[2]
         recorded = json.loads((root / 'docs/validation/extreme-geometry-c0.json').read_text())

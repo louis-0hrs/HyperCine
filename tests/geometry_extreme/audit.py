@@ -10,13 +10,20 @@ CHUNK_MAX = ((1 << 24) - 1) * 4
 GEOMETRIES = ((3840, 2160), (7680, 4320), (12288, 8040), (17520, 8040))
 
 
+def size_integer(*values):
+    if any(type(value) is not int for value in values):
+        raise ValueError('integer size required')
+
+
 def add(a, b, limit=U64_MAX):
+    size_integer(a, b, limit)
     if min(a, b) < 0 or a > limit or b > limit - a:
         raise OverflowError('size addition')
     return a + b
 
 
 def mul(a, b, limit=U64_MAX):
+    size_integer(a, b, limit)
     if min(a, b) < 0 or a > limit or (a and b > limit // a):
         raise OverflowError('size multiplication')
     if b > limit:
@@ -25,6 +32,9 @@ def mul(a, b, limit=U64_MAX):
 
 
 def align(n, alignment):
+    size_integer(n, alignment)
+    if n < 0:
+        raise ValueError('negative size')
     if alignment < 1 or alignment & (alignment - 1):
         raise ValueError('power-of-two alignment required')
     return add(n, alignment - 1) & -alignment
@@ -32,6 +42,7 @@ def align(n, alignment):
 
 def chunk_header(key, payload_bytes):
     """Model Writer::End, without allocating a payload or emitting a sample."""
+    size_integer(key, payload_bytes)
     if key not in (0x2000, 0x2100, 0x2200):
         raise ValueError('unsupported audit chunk')
     if payload_bytes < 0 or payload_bytes % 4 or payload_bytes > CHUNK_MAX:
@@ -41,10 +52,14 @@ def chunk_header(key, payload_bytes):
 
 
 def surface(w, h):
+    size_integer(w, h)
+    if min(w, h) < 0:
+        raise ValueError('negative surface dimension')
     return mul(mul(align(w, 8), h), 2)
 
 
 def geometry(w, h):
+    size_integer(w, h)
     if w < 128 or h < 24 or w % 16 or h % 8 or max(w, h) > 65535:
         raise ValueError('outside C0 geometry domain')
     pixels = mul(w, h)
