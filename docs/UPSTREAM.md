@@ -129,3 +129,11 @@ remain unchanged. The test-only negative regression preserves this oracle
 limitation and checks prefix independence at larger tested widths, without
 granting new full-frame parity claims. See [diagnosis and reproduction](SMALL_CHROMA_ORACLE.md).
 
+### 11. `CFHD_GetImagePitch` / `CFHD_GetImageSize` throw out of `extern "C"`
+
+`upstream/DecoderSDK/SampleDecoder.cpp` reaches `default: throw CFHD_ERROR_BADFORMAT;` in `GetPixelSize` for any pixel format its switch does not list. That path is reachable from the public helpers `CFHD_GetImagePitch` and `CFHD_GetImageSize`, which `upstream/Common/CFHDDecoder.h` declares `extern "C"`.
+
+MSVC's `/EHsc` — the CMake default, and the model the upstream library is built with — tells the compiler that `extern "C"` functions never throw. A caller compiled with `/EHsc` leaves out the unwind information for that call, so the throw is undefined behaviour rather than a catchable exception. Measured with MSVC 19.44 on Windows x64 Release: a caller that merely wraps the call in `try { ... } catch (CFHD_Error) { ... }` reproducibly terminates the process without entering the handler. The outcome is codegen-sensitive — in `tools/format_corpus_probe.cpp` an unrelated extra logging statement near the call was enough to change whether the same source survived.
+
+- *Mitigation:* `tools/format_corpus_probe.cpp` is compiled with `/EHs`, which drops the `extern "C"`-never-throws assumption; the identical catch then works and the probe completes its full case matrix. MSVC reports D9025 because `/EHs` overrides the inherited `/EHsc`. Callers that never pass an unlisted pixel format are unaffected. `upstream/` is untouched.
+
