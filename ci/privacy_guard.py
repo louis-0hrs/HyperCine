@@ -114,7 +114,9 @@ def main(argv=None):
     group.add_argument("--commit", metavar="SHA")
     group.add_argument("--commits", metavar="BASE..HEAD")
     args = parser.parse_args(argv)
-    common = ("--no-ext-diff", "--no-color", "--unified=0", "--diff-filter=ACMRT")
+    # Inspect stored text, never a diff driver's converted/redacted view.
+    common = ("--no-ext-diff", "--no-textconv", "--no-color", "--unified=0",
+              "--diff-filter=ACMRT")
     patches = []
     commits = []
     if args.staged:
