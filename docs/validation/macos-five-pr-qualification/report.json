@@ -1,0 +1,113 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "scope": "Independent review of five existing macOS-relevant PRs and one reproduced CI fix",
+  "platform": {
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "gpu": "Apple M2 Pro",
+    "compiler": "AppleClang 21",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "git": "Apple Git 2.50.1",
+    "ffmpeg": "n8.0 existing CFHD validation build"
+  },
+  "reviews": [
+    {
+      "pr": 129,
+      "issue": 48,
+      "head": "813e2c8f2f4ce6f0c1489ef9eaac157830a7e66e",
+      "result": "NO_ACTIONABLE_FINDING_IN_SCOPE",
+      "fresh_tests": {
+        "arithmetic_units": 5,
+        "standalone_guardrail_units": 6
+      },
+      "scope": "integer input domain, negative and checked overflow boundaries, unchanged C0 report"
+    },
+    {
+      "pr": 131,
+      "issue": 96,
+      "head": "adcdb14bffe59166df98f61916c7f97eb1768df6",
+      "result": "NO_ACTIONABLE_FINDING_IN_SCOPE",
+      "fresh_tests": {
+        "privacy_units_and_hooks": 145,
+        "standalone_guardrail_units": 6,
+        "installed_sha1_hooks": 46,
+        "installed_sha256_hooks": 46,
+        "privacy_seconds": 94.324,
+        "skips": 0
+      },
+      "scope": "actual Git init object format, inherited hook vectors, rejection and non-publication"
+    },
+    {
+      "pr": 132,
+      "issue": 115,
+      "head": "951f371e1a31a0a6bed6e27ba34cd9d74faa5d5f",
+      "result": "NO_ACTIONABLE_FINDING_IN_SCOPE",
+      "fresh_tests": {
+        "asan_ubsan_ctest_passed": 2,
+        "skips": 0,
+        "seconds": 2.53,
+        "leak_detection": false
+      },
+      "scope": "actual extracted sampler and writers with synthetic lifecycle callbacks; no native NVIDIA execution"
+    },
+    {
+      "pr": 136,
+      "issue": 47,
+      "head": "8f547c6719f4ec7a529764d0b0525b5ee9f9afcf",
+      "result": "NO_ACTIONABLE_FINDING_IN_SCOPE",
+      "fresh_tests": {
+        "p7_ctest_passed": 3,
+        "skips": 0,
+        "seconds": 2.68,
+        "public_ffmpeg_frames": 24
+      },
+      "scope": "duplicate keys, exact JSON types, sanitized failures and actual public fixture decode"
+    },
+    {
+      "pr": 140,
+      "issue": 7,
+      "head": "1755796abc0dd007de27eb936c2dfae5ed6d3548",
+      "result": "DEFECT_REPRODUCED_AND_FIXED_IN_CHILD",
+      "fresh_tests": {
+        "parent_standalone_ctest_passed": 30,
+        "parent_seconds": 79.66,
+        "skips": 0
+      },
+      "scope": "CMake enabled Metal values must bind all required Metal registrations"
+    }
+  ],
+  "fix": {
+    "before_regression_failed_subcases": 11,
+    "after_guardrail_units_passed": 12,
+    "cmake_truth_vectors": 23,
+    "privacy_units_passed": 13,
+    "cpu": {
+      "status": "PASS",
+      "ctest_passed": 30,
+      "skips": 0,
+      "seconds": 75.97
+    },
+    "metal": {
+      "status": "PASS",
+      "ctest_passed": 34,
+      "skips": 0,
+      "seconds": 109.89
+    },
+    "actual_true_cache_metal_omissions_rejected": 4
+  },
+  "limits": [
+    "No original external SDK corpus configured",
+    "No native Windows or Linux execution",
+    "No NVIDIA hardware or full CUDA translation-unit validation",
+    "No SIMD, 4K SDK parity, decoder production or performance claim",
+    "Parent dependency and review gates remain open"
+  ],
+  "upstream_changed": false,
+  "owner_worktrees_changed": false,
+  "source_sha256": {
+    "ci/run_standalone.py": "6a55690eed7e221f012ebc88174ce28d5427416334815dbe6876a563155fd946",
+    "ci/test_standalone_gate.py": "fdf204e2c63ccf3d9b048309fd5d382ede5b3fc73adfb546f4500d19692ce63c"
+  }
+}
