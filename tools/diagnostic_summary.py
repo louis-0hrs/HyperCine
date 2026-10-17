@@ -111,8 +111,16 @@ def adapt_cpu(source, index=0, operation="encode"):
             "unavailable_metrics": unavailable}
 
 
+class DiagnosticParser(argparse.ArgumentParser):
+    def error(self, message):
+        # argparse's default error includes rejected values and option names.
+        # They may be paths or other private data supplied on the command line.
+        self.print_usage()
+        self.exit(2, "Diagnostic conversion failed: invalid arguments; use --help.\n")
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = DiagnosticParser(description=__doc__)
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--index", type=int, default=0)

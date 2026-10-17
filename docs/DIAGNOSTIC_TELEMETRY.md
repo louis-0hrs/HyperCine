@@ -39,7 +39,9 @@ The adapter uses Python standard library only, outside core codec libraries.
 CTest includes its tests when Python is available, including standalone builds.
 There is no collection thread, GPU call, production-path change or encoding
 overhead. Conversion occurs after the benchmark. Output creation is exclusive:
-existing files, including the source, cannot be overwritten.
+existing files, including the source, cannot be overwritten. Invalid CLI values,
+unknown options and extra arguments produce a fixed diagnostic without echoing
+the supplied text; `--help` documents the accepted arguments.
 
 ## Version 1 adapter contract
 

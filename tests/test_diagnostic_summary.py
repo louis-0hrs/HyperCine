@@ -97,6 +97,22 @@ class DiagnosticsTest(unittest.TestCase):
         self.assertEqual(failure["symbolic_name"], "cudaErrorNoKernelImageForDevice")
         self.assertTrue(summary.failure_record(2, "cudaErrorMemoryAllocation", "allocation")["is_oom"])
 
+    def test_cli_argument_errors_do_not_echo_values(self):
+        marker = "SYNTHETIC_PRIVATE_ARGUMENT"
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "input.json"
+            target = Path(directory) / "output.json"
+            source.write_text(json.dumps(fixture()), encoding="utf-8")
+            base = [sys.executable, str(SCRIPT), str(source), str(target)]
+            for arguments in (("--index", marker), ("--operation", marker),
+                              ("--" + marker,), (marker,)):
+                with self.subTest(arguments=arguments):
+                    result = subprocess.run(base + list(arguments), capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 2)
+                    self.assertNotIn(marker, result.stdout + result.stderr)
+                    self.assertNotIn(directory, result.stdout + result.stderr)
+                    self.assertFalse(target.exists())
+
     def test_cli_exclusive_output_and_safe_errors(self):
         with tempfile.TemporaryDirectory() as directory:
             source, target = Path(directory) / "input.json", Path(directory) / "output.json"
