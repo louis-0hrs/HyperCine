@@ -30,6 +30,11 @@ add_library(hypercine_cpu_isa STATIC src/cpu/cpu_isa.cpp)
 target_include_directories(hypercine_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 if(HYPERCINE_BUILD_TESTS)
     enable_testing()
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME reference_decode_contract
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_decode/test_contract.py")
+    set_tests_properties(reference_decode_contract PROPERTIES LABELS "synthetic;reference-decoder-contract")
     add_executable(test_cpu_isa tests/test_cpu_isa.cpp)
     target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
