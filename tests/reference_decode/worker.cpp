@@ -40,13 +40,17 @@ void Check(CFHD_Error status) { if (status != CFHD_ERROR_OKAY) throw std::runtim
 #ifdef HYPERCINE_REFERENCE_TRACE
 #include "trace_snapshot.h"
 #endif
+#ifdef HYPERCINE_TEMPORAL_TRACE
+#include "temporal_api.h"
+#endif
 
 int main(int argc, char** argv) {
     try {
-        // Only two fixed geometries; no unbounded allocations or GPU linkage.
+        // Fixed bounded geometries; no unbounded allocations or GPU linkage.
         if (argc != 5) throw std::runtime_error("arguments");
-        const int width = std::string(argv[2]) == "128" ? 128 : std::string(argv[2]) == "1080" ? 1920 : 0;
-        const int height = width == 128 ? 128 : 1080;
+        const std::string geometry=argv[2];
+        const int width = geometry=="128"?128:geometry=="256"?256:geometry=="1080"?1920:0;
+        const int height = width==1920?1080:width;
         if (!width) throw std::runtime_error("geometry");
         const std::string mode = argv[1], packet_path = argv[3], output = argv[4];
         const bool bgra = mode == "generate-bgra" || mode == "decode-bgra-off" || mode == "decode-bgra-on";
@@ -108,7 +112,13 @@ int main(int argc, char** argv) {
             }
             if (valid) {
                 pixels.resize(static_cast<size_t>(pitch)*h);
+#ifdef HYPERCINE_TEMPORAL_TRACE
+                TemporalBegin(raw,output+"-"+std::to_string(ordinal));
+#endif
                 status=CFHD_DecodeSample(raw,sample.data(),sample.size(),pixels.data(),pitch);
+#ifdef HYPERCINE_TEMPORAL_TRACE
+                if (status==CFHD_ERROR_OKAY) TemporalEnd();
+#endif
 #ifdef HYPERCINE_REFERENCE_TRACE
                 if (status==CFHD_ERROR_OKAY) Snapshot(raw,output+"-"+std::to_string(ordinal));
 #endif

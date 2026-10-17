@@ -8,6 +8,7 @@ from pathlib import Path
 import measure
 import bgra_ab
 import trace_bands
+import priority_probe
 
 
 class MeasurementTests(unittest.TestCase):
@@ -52,6 +53,24 @@ class MeasurementTests(unittest.TestCase):
 
 
 class BgraTests(unittest.TestCase):
+    def test_temporal_snapshot_checks_complete_input_and_real_before_after(self):
+        event=dict(channel=0,input_wavelet=1,width=1,height=1,output_width=2,output_height=2,
+            begin=1,end=2,valid_flags_before=15,started_flags_before=15,all_valid_before=True,
+            all_started_before=True,scale=0,scratch_free_size=16,inverse_prescale=True,
+            input_before=dict(offset=0,size=8),input_after=dict(offset=8,size=8),output_after=dict(offset=16,size=8))
+        raw=bytes(range(24))
+        document=dict(events=[event],observer_calls_in_flight_after_decode=0)
+        observed=priority_probe.temporal_hashes(raw,document)[0]
+        self.assertTrue(observed['input_changed_during_call'])
+        self.assertEqual(len(observed['input_before']['band_sha256']),4)
+        self.assertEqual(observed['output_after']['sha256'],measure.sha(raw[16:]))
+        for changes in (dict(all_valid_before=False),dict(end=1),dict(valid_flags_before=14),
+                        dict(input_after=dict(offset=7,size=8)),dict(width=True)):
+            with self.assertRaises(ValueError):
+                priority_probe.temporal_hashes(raw,dict(document,events=[dict(event,**changes)]))
+        with self.assertRaises(ValueError):
+            priority_probe.temporal_hashes(raw,dict(document,observer_calls_in_flight_after_decode=1))
+
     def test_retained_band_hashes_reject_invalid_or_overlapping_storage(self):
         raw=bytes([1,0,2,0,3,0,4,0])
         band=dict(channel=0,wavelet_index=2,band=1,width=2,height=2,offset=0,size=8)

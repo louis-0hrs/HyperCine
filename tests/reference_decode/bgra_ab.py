@@ -50,7 +50,7 @@ def validate(row, active, width, height):
 
 
 def collect(worker, packet, source, case, active, processes, root):
-    width, height = (128, 128) if case == '128' else (1920, 1080)
+    width, height = {'128':(128,128),'256':(256,256),'1080':(1920,1080)}[case]
     immutable = packet.read_bytes()
     mode = 'decode-bgra-on' if active else 'decode-bgra-off'
     calls = []

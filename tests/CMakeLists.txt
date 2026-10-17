@@ -54,6 +54,18 @@ add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 add_executable(reference_decode_worker reference_decode/worker.cpp)
 target_link_libraries(reference_decode_worker PRIVATE CFHDCodecStatic)
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+    add_executable(reference_decode_temporal EXCLUDE_FROM_ALL reference_decode/worker.cpp
+        reference_decode/decoder_temporal.c reference_decode/temporal_observer.cpp)
+    target_compile_definitions(reference_decode_temporal PRIVATE HYPERCINE_TEMPORAL_TRACE=1 _ALLOCATOR=1 WARPSTUFF=1
+        _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
+    target_include_directories(reference_decode_temporal PRIVATE ${CMAKE_SOURCE_DIR}/upstream/WarpLib
+        ${CMAKE_SOURCE_DIR}/upstream/ConvertLib)
+    target_link_libraries(reference_decode_temporal PRIVATE CFHDCodecStatic)
+    target_link_options(reference_decode_temporal PRIVATE "/MAP:${CMAKE_CURRENT_BINARY_DIR}/reference_decode_temporal.map")
+    add_executable(reference_phase2c_packet EXCLUDE_FROM_ALL reference_decode/phase2c_packet.cpp
+        ${CMAKE_SOURCE_DIR}/src/cpu/entropy_parallel.cpp)
+    target_compile_definitions(reference_phase2c_packet PRIVATE _ALLOCATOR=1 WARPSTUFF=1)
+    target_link_libraries(reference_phase2c_packet PRIVATE CFHDCodecStatic)
     # Manual read-only internal observer, never linked into production targets.
     add_executable(reference_decode_trace EXCLUDE_FROM_ALL reference_decode/worker.cpp)
     target_compile_definitions(reference_decode_trace PRIVATE HYPERCINE_REFERENCE_TRACE=1 _ALLOCATOR=1 WARPSTUFF=1)
