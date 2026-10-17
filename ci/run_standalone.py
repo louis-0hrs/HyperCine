@@ -12,6 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    'rgb444_frame_storage', 'rgb444_frame_rejection',
     'cpu_isa_selection',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'standalone_oracle_fixtures', 'windows_reference_inputs',

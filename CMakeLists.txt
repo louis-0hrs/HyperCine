@@ -72,6 +72,10 @@ if(HYPERCINE_BUILD_STANDALONE)
     if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA)
         message(FATAL_ERROR "Standalone requires HYPERCINE_BUILD_UPSTREAM=OFF and HYPERCINE_ENABLE_CUDA=OFF")
     endif()
+    # Issue #37 API/storage P0 only; no RGB bitstream encoder or SDK dependency.
+    add_library(hypercine_rgb444_frame STATIC src/cpu/rgb444_frontend.cpp)
+    target_include_directories(hypercine_rgb444_frame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    target_compile_features(hypercine_rgb444_frame PUBLIC cxx_std_17)
     add_library(hypercine_standalone STATIC
         src/cpu/wavelet_cpu.cpp
         src/cpu/standalone_frontend.cpp
@@ -107,6 +111,10 @@ if(HYPERCINE_BUILD_STANDALONE)
     endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
+        add_executable(test_rgb444_frame tests/test_rgb444_frame.cpp)
+        target_link_libraries(test_rgb444_frame PRIVATE hypercine_rgb444_frame)
+        add_test(NAME rgb444_frame_storage COMMAND test_rgb444_frame storage)
+        add_test(NAME rgb444_frame_rejection COMMAND test_rgb444_frame rejection)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
