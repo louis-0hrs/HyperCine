@@ -53,6 +53,12 @@ add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 # Manual bounded measurement worker; observations never count as a quality PASS.
 add_executable(reference_decode_worker reference_decode/worker.cpp)
 target_link_libraries(reference_decode_worker PRIVATE CFHDCodecStatic)
+if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+    # Manual read-only internal observer, never linked into production targets.
+    add_executable(reference_decode_trace EXCLUDE_FROM_ALL reference_decode/worker.cpp)
+    target_compile_definitions(reference_decode_trace PRIVATE HYPERCINE_REFERENCE_TRACE=1 _ALLOCATOR=1 WARPSTUFF=1)
+    target_link_libraries(reference_decode_trace PRIVATE CFHDCodecStatic)
+endif()
 
 # 3. Upstream sample AVI decode test
 add_executable(test_avi_sample

@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 import measure
 import bgra_ab
+import trace_bands
 
 
 class MeasurementTests(unittest.TestCase):
@@ -51,6 +52,16 @@ class MeasurementTests(unittest.TestCase):
 
 
 class BgraTests(unittest.TestCase):
+    def test_retained_band_hashes_reject_invalid_or_overlapping_storage(self):
+        raw=bytes([1,0,2,0,3,0,4,0])
+        band=dict(channel=0,wavelet_index=2,band=1,width=2,height=2,offset=0,size=8)
+        self.assertEqual(trace_bands.band_hashes(raw,[band])[0]['sha256'],measure.sha(raw))
+        for updates in (dict(offset=1),dict(size=10),dict(width=0),dict(band=4),dict(size=True)):
+            with self.assertRaises(ValueError):
+                trace_bands.band_hashes(raw,[dict(band,**updates)])
+        with self.assertRaises(ValueError):
+            trace_bands.band_hashes(raw+raw,[band,dict(band,offset=8)])
+
     def test_quality_matches_phase2c_orientation_and_ignores_alpha(self):
         source = bytes([10,20,30,255, 80,90,100,255])
         pixels = bytes([80,90,100,0, 10,20,30,0])

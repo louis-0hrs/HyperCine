@@ -37,6 +37,10 @@ Buffer Read(const std::string& path) {
 }
 void Check(CFHD_Error status) { if (status != CFHD_ERROR_OKAY) throw std::runtime_error("encoder API error"); }
 
+#ifdef HYPERCINE_REFERENCE_TRACE
+#include "trace_snapshot.h"
+#endif
+
 int main(int argc, char** argv) {
     try {
         // Only two fixed geometries; no unbounded allocations or GPU linkage.
@@ -105,6 +109,9 @@ int main(int argc, char** argv) {
             if (valid) {
                 pixels.resize(static_cast<size_t>(pitch)*h);
                 status=CFHD_DecodeSample(raw,sample.data(),sample.size(),pixels.data(),pitch);
+#ifdef HYPERCINE_REFERENCE_TRACE
+                if (status==CFHD_ERROR_OKAY) Snapshot(raw,output+"-"+std::to_string(ordinal));
+#endif
                 metadata.reset();
                 decoder.reset(); // Match existing tests: close before inspecting pixels.
                 valid=status==CFHD_ERROR_OKAY && sample==immutable;
