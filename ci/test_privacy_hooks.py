@@ -139,11 +139,20 @@ class InstalledHookTests(unittest.TestCase):
         self.rejected(result, "PRIVATE_IPV4", value)
         self.unpublished()
 
+    def legacy_remote(self, name, url):
+        # Git 2.55 rejects creation of slash-nested names via remote add.
+        # Existing configurations remain valid attack inputs: construct the
+        # legacy config explicitly so every Git version exercises the guard.
+        self.git("config", "remote." + name + ".url", str(url))
+        self.git("config", "remote." + name + ".fetch",
+                 "+refs/heads/*:refs/remotes/" + name + "/*")
+        self.assertIn(name, self.git("remote").stdout.splitlines())
+
     def test_nested_private_remote_cannot_hide_first_public_push(self):
         value = "192." + "168.8.9"
         self.import_commit(text="network " + value + "\n")
         self.git("init", "--bare", "-q", str(self.root / "private.git"))
-        self.git("remote", "add", "public/private", str(self.root / "private.git"))
+        self.legacy_remote("public/private", self.root / "private.git")
         subprocess.run(["git", "push", "-q", str(self.root / "private.git"),
                         "HEAD:refs/heads/feature"], cwd=self.root / "incoming",
                        env=self.env, check=True, stdout=subprocess.PIPE,
@@ -154,7 +163,7 @@ class InstalledHookTests(unittest.TestCase):
         self.unpublished()
 
     def test_nested_destination_remote_fails_closed(self):
-        self.git("remote", "add", "public/review", str(self.root / "public.git"))
+        self.legacy_remote("public/review", self.root / "public.git")
         result = self.git("push", "-q", "public/review",
                           "HEAD:refs/heads/review", expected=1)
         self.rejected(result, "OVERLAPPING_REMOTE_NAMESPACES", "unused-private-value")
