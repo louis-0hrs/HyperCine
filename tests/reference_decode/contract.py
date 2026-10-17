@@ -112,6 +112,28 @@ def report(document):
             'alternate_decoder': alternate}
 
 
+def strict_document(text):
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError('duplicate evidence key')
+            result[key] = value
+        return result
+
+    def invalid_constant(_):
+        raise ValueError('non-finite evidence constant')
+
+    def finite_float(value):
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError('non-finite evidence number')
+        return number
+
+    return json.loads(text, object_pairs_hook=pairs, parse_constant=invalid_constant,
+                      parse_float=finite_float)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('evidence', type=Path)
@@ -119,7 +141,7 @@ def main():
     try:
         if args.evidence.stat().st_size > 1024 * 1024:
             raise ValueError('evidence exceeds diagnostic bound')
-        result = report(json.loads(args.evidence.read_text(encoding='utf-8')))
+        result = report(strict_document(args.evidence.read_text(encoding='utf-8')))
     except (OSError, KeyError, TypeError, ValueError, RecursionError):
         # Never echo untrusted evidence or paths in a publishable diagnostic.
         print(json.dumps({'schema_version': 1, 'classification': 'INVALID_EVIDENCE',
