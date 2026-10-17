@@ -2278,7 +2278,15 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     const int pitch = width * 4;
     const size_t frame_bytes = static_cast<size_t>(pitch) * static_cast<size_t>(height);
 
-    res.vram_before_bytes = HyperCine_QueryUsedVramBytes();
+    // The legacy query returns zero on error; retain status for this delta.
+    const auto query_used_vram = []() -> std::optional<size_t> {
+        size_t free_bytes = 0, total_bytes = 0;
+        if (cudaMemGetInfo(&free_bytes, &total_bytes) != cudaSuccess ||
+            free_bytes > total_bytes) return std::nullopt;
+        return total_bytes - free_bytes;
+    };
+    const auto vram_before = query_used_vram();
+    res.vram_before_bytes = vram_before.value_or(0);
     res.host_rss_before_bytes = QueryProcessWorkingSetBytes();
 
     res.slot_selection = SelectPhase2DFrameSlots(
@@ -2465,10 +2473,9 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
         }
     }
 
-    res.vram_after_init_bytes = HyperCine_QueryUsedVramBytes();
-    res.vram_used_bytes = (res.vram_after_init_bytes > res.vram_before_bytes)
-        ? (res.vram_after_init_bytes - res.vram_before_bytes)
-        : res.slot_selection.total_estimated_vram_bytes;
+    const auto vram_after_init = query_used_vram();
+    res.vram_after_init_bytes = vram_after_init.value_or(0);
+    detail::SetMeasuredVramUsage(res, vram_before, vram_after_init);
     res.slot_vram_bytes = res.slot_selection.per_slot_vram_bytes * static_cast<size_t>(num_slots);
     const size_t max_px = static_cast<size_t>(width) * static_cast<size_t>(height);
     const size_t lp_host_bytes = (max_px / 64u) * 2u * sizeof(int16_t);

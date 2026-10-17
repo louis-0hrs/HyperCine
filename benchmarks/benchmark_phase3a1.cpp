@@ -941,8 +941,9 @@ void WriteGpu(std::ostringstream& json, const TrialRecord& rec) {
     json << "      \"memory_bytes\": {\n";
     json << "        \"per_slot_estimated_vram_bytes\": " << r.slot_selection.per_slot_vram_bytes << ",\n";
     json << "        \"session_workspace_estimated_vram_bytes\": " << r.slot_selection.session_workspace_vram_bytes << ",\n";
-    json << "        \"total_estimated_vram_bytes\": " << r.slot_selection.total_estimated_vram_bytes << ",\n";
-    json << "        \"vram_used_bytes\": " << r.vram_used_bytes << ",\n";
+    json << "        ";
+    hypercine::detail::WriteVramUsageJson(json, r);
+    json << ",\n";
     json << "        \"slot_vram_bytes\": " << r.slot_vram_bytes << ",\n";
     json << "        \"slot_pinned_host_bytes\": " << r.slot_pinned_host_bytes << "\n";
     json << "      },\n";
@@ -1596,7 +1597,8 @@ int main(int argc, char** argv) {
                     mean_lat_vals.push_back(tr->gpu.mean_latency_ms);
                     med_lat_vals.push_back(tr->gpu.median_latency_ms);
                     p95_lat_vals.push_back(tr->gpu.p95_latency_ms);
-                    vram_used_vals.push_back(static_cast<double>(tr->gpu.vram_used_bytes));
+                    if (tr->gpu.measured_global_vram_delta_bytes)
+                        vram_used_vals.push_back(static_cast<double>(*tr->gpu.measured_global_vram_delta_bytes));
                     est_vram = tr->gpu.slot_selection.total_estimated_vram_bytes;
                     per_slot_vram = tr->gpu.slot_selection.per_slot_vram_bytes;
                     ws_vram = tr->gpu.slot_selection.session_workspace_vram_bytes;
@@ -1623,7 +1625,11 @@ int main(int argc, char** argv) {
                 json << "        \"per_slot_estimated_vram_bytes\": " << per_slot_vram << ",\n";
                 json << "        \"session_workspace_estimated_vram_bytes\": " << ws_vram << ",\n";
                 json << "        \"total_estimated_vram_bytes\": " << est_vram << ",\n";
-                json << "        \"measured_vram_used_bytes_median\": " << static_cast<uint64_t>(med_vram) << "\n";
+                json << "        \"measured_vram_trial_count\": " << vram_used_vals.size() << ",\n";
+                json << "        \"measured_global_vram_delta_bytes_median\": ";
+                if (vram_used_vals.empty()) json << "null";
+                else json << med_vram;
+                json << "\n";
                 json << "      }";
             }
         }

@@ -8,9 +8,34 @@
 #include "hypercine/phase3a.h"
 #include <algorithm>
 #include <optional>
+#include <limits>
 #include <sstream>
 
 namespace hypercine { namespace detail {
+
+inline void SetMeasuredVramUsage(Phase3AResult& result,
+                                 std::optional<size_t> before,
+                                 std::optional<size_t> after) {
+    result.measured_global_vram_delta_bytes.reset();
+    result.vram_used_bytes = 0;
+    if (!before || !after) return;
+    const size_t magnitude = *after >= *before ? *after - *before : *before - *after;
+    if (magnitude > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) return;
+    const int64_t delta = static_cast<int64_t>(magnitude);
+    result.measured_global_vram_delta_bytes = *after >= *before ? delta : -delta;
+    if (*after > *before) result.vram_used_bytes = magnitude;
+}
+
+inline void WriteVramUsageJson(std::ostream& out, const Phase3AResult& result) {
+    out << "\"vram_used_bytes\": ";
+    if (result.measured_global_vram_delta_bytes) out << result.vram_used_bytes;
+    else out << "null";
+    out << ", \"measured_global_vram_delta_bytes\": ";
+    if (result.measured_global_vram_delta_bytes) out << *result.measured_global_vram_delta_bytes;
+    else out << "null";
+    out << ", \"vram_measurement_scope\": \"global_device_usage_delta\", "
+        << "\"total_estimated_vram_bytes\": " << result.slot_selection.total_estimated_vram_bytes;
+}
 
 // One optional per independently queried counter. Zero is a valid measurement.
 struct NvmlSample {

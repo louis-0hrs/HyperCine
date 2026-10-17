@@ -217,7 +217,9 @@ void WritePhase3AResultJson(std::ostringstream& json, const hypercine::Phase3ARe
          << indent << "    \"vram_mid_run_bytes\": " << r.vram_mid_run_bytes << ",\n"
          << indent << "    \"vram_end_run_bytes\": " << r.vram_end_run_bytes << ",\n"
          << indent << "    \"vram_after_destroy_bytes\": " << r.vram_after_destroy_bytes << ",\n"
-         << indent << "    \"vram_used_bytes\": " << r.vram_used_bytes << ",\n"
+         << indent << "    ";
+    hypercine::detail::WriteVramUsageJson(json, r);
+    json << ",\n"
          << indent << "    \"slot_vram_bytes\": " << r.slot_vram_bytes << ",\n"
          << indent << "    \"slot_pinned_host_bytes\": " << r.slot_pinned_host_bytes << ",\n"
          << indent << "    \"host_rss_before_bytes\": " << r.host_rss_before_bytes << ",\n"
