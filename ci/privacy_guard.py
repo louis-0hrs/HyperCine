@@ -75,19 +75,23 @@ def scan_patch(patch):
     path = None
     line_number = None
     for entry in patch.splitlines():
-        if entry.startswith("+++ b/"):
-            path = entry[6:]
-            line_number = None
-            for rule in rules_for(path):
-                findings.append(("[SENSITIVE_PATH]", 0, "PATH_" + rule))
-        elif entry.startswith("+++ /dev/null"):
+        if entry.startswith("diff --git "):
+            # A subsequent file header must not inherit the previous hunk.
             path = None
             line_number = None
+        elif line_number is None and entry.startswith("+++ b/"):
+            path = entry[6:]
+            for rule in rules_for(path):
+                findings.append(("[SENSITIVE_PATH]", 0, "PATH_" + rule))
+        elif line_number is None and entry.startswith("+++ /dev/null"):
+            path = None
         elif entry.startswith("@@ "):
             match = HUNK.match(entry)
             line_number = int(match.group(1)) if match else None
-        elif entry.startswith("+") and not entry.startswith("+++"):
-            if path is not None and line_number is not None:
+        elif entry.startswith("+") and line_number is not None:
+            # Inside a hunk, even '+++...' is content ('++...' in the file),
+            # not a Git '+++ b/path' header. Scan it without exceptions.
+            if path is not None:
                 for rule in rules_for(entry[1:]):
                     findings.append(("[SENSITIVE_PATH]" if rules_for(path)
                                      else path, line_number, rule))

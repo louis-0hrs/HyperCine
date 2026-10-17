@@ -71,6 +71,34 @@ class RuleTests(unittest.TestCase):
                             "+safe text", "+new " + "192." + "168.1.3"))
         self.assertEqual([("a", 5, "PRIVATE_IPV4")], guard.scan_patch(sample))
 
+    def test_plus_prefixed_hunk_lines_are_scanned_not_parsed_as_headers(self):
+        # File contents beginning '++' appear as '+++' in a unified diff.
+        # The second added line even looks like a Git file header.
+        patch = "\n".join((
+            "diff --git a/safe.txt b/safe.txt",
+            "--- a/safe.txt", "+++ b/safe.txt",
+            "@@ -0,0 +1,2 @@",
+            "+" + "++" + "password" + "=BadSecret123",
+            "+" + "++ b/" + "192." + "168.8.9",
+            "diff --git a/next.txt b/next.txt",
+            "--- a/next.txt", "+++ b/next.txt",
+            "@@ -0,0 +1 @@", "+safe",
+        ))
+        self.assertEqual([
+            ("safe.txt", 1, "POSSIBLE_CREDENTIAL"),
+            ("safe.txt", 2, "PRIVATE_IPV4"),
+        ], guard.scan_patch(patch))
+
+    def test_plus_prefixed_content_counts_toward_following_lines(self):
+        patch = "\n".join((
+            "diff --git a/safe.txt b/safe.txt",
+            "--- a/safe.txt", "+++ b/safe.txt",
+            "@@ -1 +1,3 @@",
+            "+++ordinary", "+safe", "+" + "192." + "168.1.7",
+        ))
+        self.assertEqual([("safe.txt", 3, "PRIVATE_IPV4")],
+                         guard.scan_patch(patch))
+
 
 class HookInterpreterTests(unittest.TestCase):
     @unittest.skipIf(os.name == "nt", "POSIX shell test; Git for Windows uses Git Bash")
