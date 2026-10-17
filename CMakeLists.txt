@@ -107,6 +107,9 @@ if(HYPERCINE_BUILD_STANDALONE)
     endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
+        add_executable(test_quality_state tests/test_quality_state.cpp)
+        target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
+        add_test(NAME quality_state_unit COMMAND test_quality_state)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
@@ -139,6 +142,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME standalone_gate_guardrails COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/ci/test_standalone_gate.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)

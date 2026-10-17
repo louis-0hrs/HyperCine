@@ -8,10 +8,68 @@ import hashlib
 import json
 import subprocess
 import unittest
-from run_standalone import REQUIRED, registered_tests, completed_tests
+from unittest.mock import patch
+from run_standalone import (REQUIRED, registered_tests, completed_tests,
+                            required_tests, validate_architecture, invalidate_results, main)
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_every_baseline_registration_is_binding(self):
+        for omitted in REQUIRED:
+            with self.subTest(omitted=omitted), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED - {omitted}]})
+
+    def test_metal_enabled_requires_all_existing_metal_gates(self):
+        cache = {'HYPERCINE_ENABLE_METAL': 'ON'}
+        required = required_tests(cache)
+        metal = {'filmscan3_metal_required', 'filmscan3_metal_autonomous_manifest',
+                 'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode'}
+        self.assertEqual(required - REQUIRED, metal)
+        for omitted in metal:
+            with self.subTest(omitted=omitted), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in required - {omitted}]}, required)
+        self.assertEqual(required_tests({'HYPERCINE_ENABLE_METAL': 'OFF'}), REQUIRED)
+
+    def test_configured_original_corpora_are_binding(self):
+        for key, expected in (
+            ('HYPERCINE_REFERENCE_CORPUS_ROOT', {'windows_reference_binaries', 'filmscan3_actual_tier_a'}),
+            ('HYPERCINE_FS3_SEQUENCE_ROOT', {'filmscan3_actual_sequence'}),
+        ):
+            cache = {key: 'corpus'}
+            required = required_tests(cache)
+            self.assertEqual(required - REQUIRED, expected)
+            with self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED]}, required)
+            cache['HYPERCINE_ENABLE_METAL'] = 'ON'
+            metal_required = required_tests(cache)
+            for name in expected - {'windows_reference_binaries'}:
+                self.assertIn(name.replace('filmscan3_', 'filmscan3_metal_'), metal_required)
+        self.assertEqual(required_tests({}), REQUIRED)
+
+    def test_apple_target_must_match_declared_native_architecture(self):
+        for architecture in ('', 'x86_64', 'arm64;x86_64', 'arm64e'):
+            with self.subTest(architecture=architecture), self.assertRaises(ValueError):
+                validate_architecture({'CMAKE_OSX_ARCHITECTURES': architecture}, 'Darwin', 'arm64')
+        validate_architecture({'CMAKE_OSX_ARCHITECTURES': 'arm64'}, 'Darwin', 'arm64')
+        validate_architecture({}, 'Linux', 'x86_64')
+        validate_architecture({}, 'Windows', 'x86_64')
+
+    def test_failed_preflight_removes_stale_pass_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build = Path(directory)
+            names = ('standalone-gate.json', 'standalone-results.xml', 'registered-tests.json')
+            for name in names:
+                (build / name).write_text('stale PASS')
+            (build / 'diagnostic.log').write_text('retain diagnostics')
+            with patch('sys.argv', ['run_standalone.py', '--build-dir', str(build),
+                                    '--system', 'Darwin', '--machine', 'arm64']), \
+                 patch('run_standalone.platform.system', return_value='Linux'), \
+                 self.assertRaises(ValueError):
+                main()
+            self.assertTrue(all(not (build / name).exists() for name in names))
+            self.assertTrue((build / 'diagnostic.log').exists())
+            invalidate_results(build)  # Also safe before any results exist.
+
     def test_unit_only_inventory_fails(self):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': 'standalone_color'}]})
