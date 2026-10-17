@@ -129,3 +129,13 @@ remain unchanged. The test-only negative regression preserves this oracle
 limitation and checks prefix independence at larger tested widths, without
 granting new full-frame parity claims. See [diagnosis and reproduction](SMALL_CHROMA_ORACLE.md).
 
+## Windows reference-decoder diagnostic follow-up (#120)
+
+The bounded CPU-only immutable-packet YUY2 diagnostic and measured repetition
+evidence are documented in
+[`validation/REFERENCE_DECODE_WINDOWS.md`](validation/REFERENCE_DECODE_WINDOWS.md).
+API success alone does not establish repeatable pixels. Decoder nondeterminism
+is an unresolved release gate; it must not mask encoder packet mismatch, API
+errors or stable quality failure. Threaded CRT rounding is a hypothesis, not a
+complete explanation of large pixel differences. No frozen source is changed.
+
