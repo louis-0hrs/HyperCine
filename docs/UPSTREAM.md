@@ -129,3 +129,21 @@ remain unchanged. The test-only negative regression preserves this oracle
 limitation and checks prefix independence at larger tested widths, without
 granting new full-frame parity claims. See [diagnosis and reproduction](SMALL_CHROMA_ORACLE.md).
 
+
+### 11. Sized-chunk overflow has no implemented huge-chunk path
+
+Source audit for Issue #48 at main `2a5e94f` (no large-frame encode attempted):
+`Codec/bitstream.c::SizeTagPop` encodes chunk content in four-byte units with
+24 size bits for tags containing `0x2000`. Above `0xffffff` words, its branch
+contains only commented-out huge-chunk code. The subsequent patch writes the
+low 16 size bits without supplying the high size byte in that branch. It does
+not report overflow. The huge flag and 256-byte-unit tags in `Codec/codec.h`
+are also commented out. An SDK success return must not be treated as proof of
+valid chunk extents for a large output.
+
+HyperCine's standalone writer rejects this overflow and retains its smaller
+allocation budget. Future test-only SDK probes must validate every actual
+nested chunk extent. Do not enable a private huge-chunk extension or infer a
+universal packet-size ceiling: other packet layouts require separate oracle
+qualification. See [C0 feasibility audit](EXTREME_RESOLUTION_17K_FEASIBILITY.md)
+for exact limits, the build-dependent SDK geometry gate and pending tests.
