@@ -116,6 +116,26 @@ class DecodeContract(unittest.TestCase):
             call.update(psnr_db=None, source_pixels_exact=True)
         self.assertEqual(contract.classify(True, calls), 'PASS')
 
+    def test_ambiguous_json_is_invalid_without_echoing_input(self):
+        clean = json.dumps(evidence())
+        documents = [clean.replace('"encoder_packets_equal": true',
+                                  '"encoder_packets_equal": false, "encoder_packets_equal": true'),
+                     clean.replace('"decoder_status": 0',
+                                   '"decoder_status": 7, "decoder_status": 0', 1)]
+        # Non-standard constants must be rejected even in unused metadata.
+        documents += [clean[:-1] + ', "unused": ' + value + '}'
+                      for value in ('NaN', 'Infinity', '-Infinity', '1e999')]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'synthetic.json'
+            for document in documents:
+                with self.subTest(document=documents.index(document)):
+                    path.write_text(document)
+                    run = subprocess.run([sys.executable, str(Path(contract.__file__)), str(path)],
+                                         capture_output=True, text=True)
+                    self.assertEqual(run.returncode, 2)
+                    self.assertEqual(json.loads(run.stdout)['classification'], 'INVALID_EVIDENCE')
+                    self.assertNotIn(str(path), run.stdout + run.stderr)
+
     def test_cli_quarantine_and_malformed_evidence_are_nonzero(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'synthetic.json'
