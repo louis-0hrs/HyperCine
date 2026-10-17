@@ -36,6 +36,10 @@ if(HYPERCINE_BUILD_TESTS)
     add_test(NAME cpu_isa_selection COMMAND test_cpu_isa)
 endif()
 
+if(HYPERCINE_BUILD_TESTS)
+    include(cmake/TelemetryTests.cmake)
+endif()
+
 # This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)

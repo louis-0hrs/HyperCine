@@ -29,6 +29,7 @@ extern "C" {
 #undef protected
 
 #include "hypercine/phase3a.h"
+#include "../src/core/phase3a_telemetry.h"
 
 #include <cuda_runtime.h>
 
@@ -946,15 +947,16 @@ void WriteGpu(std::ostringstream& json, const TrialRecord& rec) {
     json << "        \"slot_pinned_host_bytes\": " << r.slot_pinned_host_bytes << "\n";
     json << "      },\n";
     json << "      \"telemetry\": {\n";
-    json << "        \"graphics_clock_mhz_mean\": " << r.nvml.graphics_clock_mhz_mean << ",\n";
-    json << "        \"graphics_clock_mhz_min\": " << r.nvml.graphics_clock_mhz_min << ",\n";
-    json << "        \"graphics_clock_mhz_max\": " << r.nvml.graphics_clock_mhz_max << ",\n";
-    json << "        \"mem_clock_mhz_mean\": " << r.nvml.mem_clock_mhz_mean << ",\n";
-    json << "        \"temperature_c_max\": " << r.nvml.temperature_c_max << ",\n";
-    json << "        \"power_w_mean\": " << r.nvml.power_w_mean << ",\n";
-    json << "        \"power_w_max\": " << r.nvml.power_w_max << ",\n";
-    json << "        \"gpu_util_mean\": " << r.nvml.hardware_gpu_utilization_pct_mean << ",\n";
-    json << "        \"throttle\": \"" << JsonEscape(r.nvml.throttle_reasons_str) << "\",\n";
+    json << "        \"graphics_clock_mhz_mean\": " << hypercine::detail::TelemetryJson(r.nvml.graphics_clock_mhz_mean, r.nvml.graphics_clock_sample_count) << ",\n";
+    json << "        \"graphics_clock_mhz_min\": " << hypercine::detail::TelemetryJson(r.nvml.graphics_clock_mhz_min, r.nvml.graphics_clock_sample_count) << ",\n";
+    json << "        \"graphics_clock_mhz_max\": " << hypercine::detail::TelemetryJson(r.nvml.graphics_clock_mhz_max, r.nvml.graphics_clock_sample_count) << ",\n";
+    json << "        \"mem_clock_mhz_mean\": " << hypercine::detail::TelemetryJson(r.nvml.mem_clock_mhz_mean, r.nvml.mem_clock_sample_count) << ",\n";
+    json << "        \"temperature_c_max\": " << hypercine::detail::TelemetryJson(r.nvml.temperature_c_max, r.nvml.temperature_sample_count) << ",\n";
+    json << "        \"power_w_mean\": " << hypercine::detail::TelemetryJson(r.nvml.power_w_mean, r.nvml.power_sample_count) << ",\n";
+    json << "        \"power_w_max\": " << hypercine::detail::TelemetryJson(r.nvml.power_w_max, r.nvml.power_sample_count) << ",\n";
+    json << "        \"gpu_util_mean\": " << hypercine::detail::TelemetryJson(r.nvml.hardware_gpu_utilization_pct_mean, r.nvml.utilization_sample_count) << ",\n";
+    json << "        \"throttle\": " << hypercine::detail::TelemetryTextJson(r.nvml.throttle_reasons_str, r.nvml.throttle_sample_count) << ",\n";
+    json << "        \"counter_status\": " << hypercine::detail::NvmlCounterStatusJson(r.nvml) << ",\n";
     json << "        \"sample_count\": " << r.nvml.sample_count << "\n";
     json << "      },\n";
     json << "      \"correctness\": {\n";
@@ -1462,6 +1464,7 @@ int main(int argc, char** argv) {
                 std::vector<double> fps_vals, mean_lat_vals, med_lat_vals, p95_lat_vals, p99_lat_vals;
                 std::vector<double> clk_vals, mem_clk_vals, pwr_vals;
                 int max_temp = 0;
+                int temperature_trials = 0, throttle_trials = 0;
                 int slots_used = 1;
                 bool graph_used = false;
                 size_t mean_bytes = 0, min_bytes = 0, max_bytes = 0;
@@ -1484,17 +1487,21 @@ int main(int argc, char** argv) {
                         med_lat_vals.push_back(tr->gpu.median_latency_ms);
                         p95_lat_vals.push_back(tr->gpu.p95_latency_ms);
                         p99_lat_vals.push_back(tr->gpu.p99_latency_ms);
-                        clk_vals.push_back(tr->gpu.nvml.graphics_clock_mhz_mean);
-                        mem_clk_vals.push_back(tr->gpu.nvml.mem_clock_mhz_mean);
-                        pwr_vals.push_back(tr->gpu.nvml.power_w_mean);
-                        max_temp = std::max(max_temp, static_cast<int>(tr->gpu.nvml.temperature_c_max));
+                        if (tr->gpu.nvml.graphics_clock_sample_count) clk_vals.push_back(tr->gpu.nvml.graphics_clock_mhz_mean);
+                        if (tr->gpu.nvml.mem_clock_sample_count) mem_clk_vals.push_back(tr->gpu.nvml.mem_clock_mhz_mean);
+                        if (tr->gpu.nvml.power_sample_count) pwr_vals.push_back(tr->gpu.nvml.power_w_mean);
+                        if (tr->gpu.nvml.temperature_sample_count) {
+                            ++temperature_trials;
+                            max_temp = std::max(max_temp, tr->gpu.nvml.temperature_c_max);
+                        }
                         slots_used = tr->gpu.slot_selection.selected_slots;
                         graph_used = tr->graph;
                         mean_bytes = tr->gpu.mean_bitstream_bytes;
                         min_bytes = tr->gpu.min_bitstream_bytes;
                         max_bytes = tr->gpu.max_bitstream_bytes;
                         distinct_fs = tr->gpu.distinct_fs_rate_limiters;
-                        if (!tr->gpu.nvml.throttle_reasons_str.empty()) {
+                        if (tr->gpu.nvml.throttle_sample_count) {
+                            ++throttle_trials;
                             if (!throttles.empty()) throttles += "; ";
                             throttles += tr->gpu.nvml.throttle_reasons_str;
                         }
@@ -1555,11 +1562,11 @@ int main(int argc, char** argv) {
                 json << "      \"distinct_fs_rate_limiters\": " << distinct_fs << ",\n";
                 json << "      \"sample_bytes_match_upstream_exact\": " << (bytes_match_cpu ? "true" : "false") << ",\n";
                 json << "      \"speedup_vs_upstream_cpu_median\": " << speedup << ",\n";
-                json << "      \"graphics_clock_mhz_mean\": " << mean_clk << ",\n";
-                json << "      \"mem_clock_mhz_mean\": " << mean_mem_clk << ",\n";
-                json << "      \"power_w_mean\": " << mean_pwr << ",\n";
-                json << "      \"temperature_c_max\": " << max_temp << ",\n";
-                json << "      \"throttle_reasons\": \"" << JsonEscape(throttles) << "\"\n";
+                json << "      \"graphics_clock_mhz_mean\": " << hypercine::detail::TelemetryJson(mean_clk, clk_vals.size()) << ",\n";
+                json << "      \"mem_clock_mhz_mean\": " << hypercine::detail::TelemetryJson(mean_mem_clk, mem_clk_vals.size()) << ",\n";
+                json << "      \"power_w_mean\": " << hypercine::detail::TelemetryJson(mean_pwr, pwr_vals.size()) << ",\n";
+                json << "      \"temperature_c_max\": " << hypercine::detail::TelemetryJson(max_temp, temperature_trials) << ",\n";
+                json << "      \"throttle_reasons\": " << hypercine::detail::TelemetryTextJson(throttles, throttle_trials) << "\n";
                 json << "    }";
             }
         }
