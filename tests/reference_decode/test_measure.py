@@ -6,6 +6,7 @@ from unittest.mock import patch
 import tempfile
 from pathlib import Path
 import measure
+import bgra_ab
 
 
 class MeasurementTests(unittest.TestCase):
@@ -47,6 +48,43 @@ class MeasurementTests(unittest.TestCase):
             self.assertIsNone(report['encoder_packets_equal'])
             self.assertEqual(report['result']['classification'], 'REFERENCE_DECODE_ERROR')
             self.assertTrue(report['result']['release_blocked'])
+
+
+class BgraTests(unittest.TestCase):
+    def test_quality_matches_phase2c_orientation_and_ignores_alpha(self):
+        source = bytes([10,20,30,255, 80,90,100,255])
+        pixels = bytes([80,90,100,0, 10,20,30,0])
+        result = bgra_ab.quality(source,pixels,1,2)
+        self.assertIsNone(result['psnr_db'])
+        self.assertTrue(result['source_pixels_exact'])
+        self.assertEqual(result['best_orientation'],'bottom_up')
+        self.assertEqual(bgra_ab.rgb(source), bytes([10,80,20,90,30,100]))
+        with self.assertRaises(ValueError):
+            bgra_ab.quality(source,pixels[:-1],1,2)
+
+    def test_metadata_error_cannot_hide_behind_decode_success(self):
+        for failure in ('metadata_open_status','metadata_init_status','metadata_set_status'):
+            row = dict(active_metadata=True,requested_format='BGRA',processing_flags=65535,
+                metadata_open_status=0,metadata_init_status=0,metadata_set_status=0,
+                decoder_status=0,output_valid=True,width=128,height=128,pitch=512,buffer_size=65536)
+            row[failure] = 7
+            actual = bgra_ab.validate(row,True,128,128)
+            self.assertFalse(actual['output_valid'])
+            actual.update(process=1,ordinal=1)
+            self.assertEqual(bgra_ab.contract.classify(None,[actual]),'REFERENCE_DECODE_ERROR')
+
+    def test_unapplied_metadata_and_configuration_drift_are_not_success(self):
+        row = dict(active_metadata=False,requested_format='BGRA',processing_flags=0,
+            metadata_open_status=-1,metadata_init_status=-1,metadata_set_status=-1,
+            decoder_status=0,output_valid=True,width=128,height=128,pitch=512,buffer_size=65536)
+        self.assertTrue(bgra_ab.validate(row.copy(),False,128,128)['output_valid'])
+        with self.assertRaises(ValueError):
+            bgra_ab.validate(row.copy(),True,128,128)
+        wrong = row.copy(); wrong['processing_flags']=65535
+        with self.assertRaises(ValueError):
+            bgra_ab.validate(wrong,False,128,128)
+        wrong = row.copy(); wrong['metadata_init_status']=0
+        self.assertFalse(bgra_ab.validate(wrong,False,128,128)['output_valid'])
 
 
 if __name__ == '__main__':
