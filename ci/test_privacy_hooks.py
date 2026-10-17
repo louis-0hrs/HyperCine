@@ -167,6 +167,53 @@ class InstalledHookTests(unittest.TestCase):
         self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(),
                          self.git("ls-remote", "public", "refs/heads/review").stdout.split()[0])
 
+    def test_custom_fetch_cannot_hide_first_public_push(self):
+        value = "192." + "168.8.9"
+        self.import_commit(text="network " + value + "\n")
+        self.git("init", "--bare", "-q", str(self.root / "private.git"))
+        self.git("remote", "add", "private", str(self.root / "private.git"))
+        subprocess.run(["git", "push", "-q", str(self.root / "private.git"),
+                        "HEAD:refs/heads/feature"], cwd=self.root / "incoming",
+                       env=self.env, check=True, stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+        self.git("config", "remote.private.fetch",
+                 "+refs/heads/*:refs/remotes/public/private/*")
+        self.git("fetch", "-q", "private")
+        result = self.git("push", "-q", "public", "HEAD:refs/heads/review", expected=1)
+        self.rejected(result, "UNSUPPORTED_FETCH_REFSPEC", value)
+        self.unpublished()
+
+    def test_second_fetch_mapping_fails_closed_with_redacted_diagnostic(self):
+        self.git("remote", "add", "private", str(self.root / "public.git"))
+        value = "192." + "168.8.9"
+        mapping = "+refs/heads/*:refs/remotes/public/" + value + "/*"
+        self.git("config", "--add", "remote.private.fetch", mapping)
+        result = self.git("push", "-q", "public", "HEAD:refs/heads/review", expected=1)
+        self.rejected(result, "UNSUPPORTED_FETCH_REFSPEC", value)
+        self.assertNotIn(mapping, result.stdout + result.stderr)
+        self.unpublished()
+
+    def test_destination_custom_fetch_mapping_fails_closed(self):
+        self.git("config", "remote.public.fetch",
+                 "+refs/heads/*:refs/remotes/public/cache/*")
+        result = self.git("push", "-q", "public", "HEAD:refs/heads/review", expected=1)
+        self.rejected(result, "UNSUPPORTED_FETCH_REFSPEC", "unused-private-value")
+        self.unpublished()
+
+    def test_nonforced_standard_fetch_mapping_can_push(self):
+        self.git("config", "remote.public.fetch", "refs/heads/*:refs/remotes/public/*")
+        self.commit()
+        self.git("push", "-q", "public", "HEAD:refs/heads/review")
+        self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(),
+                         self.git("ls-remote", "public", "refs/heads/review").stdout.split()[0])
+
+    def test_push_only_remote_without_fetch_mapping_can_push(self):
+        self.git("config", "--unset-all", "remote.public.fetch")
+        self.commit()
+        self.git("push", "-q", "public", "HEAD:refs/heads/review")
+        self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(),
+                         self.git("ls-remote", "public", "refs/heads/review").stdout.split()[0])
+
     def test_cleanup_cannot_hide_intermediate_disclosure(self):
         value = "/" + "c/" + "Users/" + "synthetic-agent/report"
         self.import_commit(text="ROOT=" + value + "\n")
