@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
         // Reopen the original decoder each call, retaining original CRT/process state.
         for (int ordinal=1; ordinal<=5; ++ordinal) {
             Buffer sample=immutable; // protect immutable input from API writes
+            Buffer pixels; // Both sample and output outlive decoder teardown.
             CFHD_DecoderRef raw=nullptr;
             CFHD_Error status=CFHD_OpenDecoder(&raw,nullptr); Decoder decoder(raw);
             int w=0,h=0; int32_t pitch=0; CFHD_PixelFormat format=CFHD_PIXEL_FORMAT_UNKNOWN;
@@ -74,10 +75,10 @@ int main(int argc, char** argv) {
                 CFHD_DECODED_RESOLUTION_FULL,CFHD_DECODING_FLAGS_NONE,sample.data(),sample.size(),&w,&h,&format);
             if (status==CFHD_ERROR_OKAY) status=CFHD_GetImagePitch(w,format,&pitch);
             bool valid=status==CFHD_ERROR_OKAY && w==width && h==height && format==CFHD_PIXEL_FORMAT_YUY2 && pitch==width*2 && pitch%16==0;
-            Buffer pixels;
             if (valid) {
                 pixels.resize(static_cast<size_t>(pitch)*h);
                 status=CFHD_DecodeSample(raw,sample.data(),sample.size(),pixels.data(),pitch);
+                decoder.reset(); // Match existing tests: close before inspecting pixels.
                 valid=status==CFHD_ERROR_OKAY && sample==immutable;
                 if (valid) Write(output+"-"+std::to_string(ordinal)+".yuy2",pixels);
             }
