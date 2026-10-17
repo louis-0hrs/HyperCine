@@ -50,6 +50,10 @@ add_executable(test_yuy2_stability
 target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
 add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 
+# Manual bounded measurement worker; observations never count as a quality PASS.
+add_executable(reference_decode_worker reference_decode/worker.cpp)
+target_link_libraries(reference_decode_worker PRIVATE CFHDCodecStatic)
+
 # 3. Upstream sample AVI decode test
 add_executable(test_avi_sample
     test_avi_sample.cpp
