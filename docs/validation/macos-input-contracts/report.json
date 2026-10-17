@@ -1,0 +1,46 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "base_commit": "e87ef0258ba37f5c78f1557c59d9c7331df5521c",
+  "system": "Darwin",
+  "architecture": "arm64",
+  "macos": "26.5.2",
+  "python": "3.9.6",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+  "ffmpeg": "ffmpeg version n8.0 Copyright (c) 2000-2025 the FFmpeg developers",
+  "completed_subtasks": [
+    23,
+    46,
+    7,
+    11,
+    54
+  ],
+  "parent_features_complete": false,
+  "source_sha256": {
+    "CMakeLists.txt": "422a3732e89d36d2b87e74ca62c501f3999a6fe02d1d90d9fb835bd1fc3ea09e",
+    "ci/run_standalone.py": "413eabb8a7e4d4e196a6b87fee1ab25f80de6742f3534843856ce3350e37ed85",
+    "tests/validation_support.py": "7fc36d6771d1c355d3c0acd4e9e26514505acd2748ab06849674de6aec430807",
+    "tests/test_validation_contracts.py": "70b387b0550cc9bd0d1dc17b4531233f4b40c3326327de4153304c1cee039507",
+    "tests/validate_windows_reference.py": "654515d08e444efcf2916d2b42fab841907cb9a8615b7b173fda55cfa0c9b0e6",
+    "tests/validate_quality_state_corpus.py": "536a29a8b5e685115e7ce295df67500211492832c357c3c68c7e53c2ec416cc5",
+    "tests/validate_standalone.py": "de3961421d8327e7650678cdbdeac3acced9a8fdb841bb5fba857937f6ebb5d6",
+    "tests/compare_sdk_oracle.py": "5995a1cea23a41ea2f8fe6de2b6383af407e9ea24509bcfdc6d434a43bccf3a4",
+    "tests/validate_filmscan3.py": "b3a5afcd43e9e6b84695166f1d9fa31a271f1149546fae2be9daf884833aa631"
+  },
+  "validation": {
+    "regression_methods": 10,
+    "ci_helper_tests": 19,
+    "quality_only_ctest": 2,
+    "actual_quality_probe_schemas": 6,
+    "private_binary_corpus": "NOT_CONFIGURED",
+    "native_metal_gpu": "NOT_RUN",
+    "sanitizers": "NOT_RUN: Python/test changes only",
+    "cross_platform_execution": "NOT_RUN",
+    "standalone_ctest_registered": 29,
+    "standalone_ctest_passed": 29,
+    "standalone_ctest_skipped": 0,
+    "python_optimization": true,
+    "standalone_ctest_seconds": 74.39
+  },
+  "upstream_modified": false
+}
