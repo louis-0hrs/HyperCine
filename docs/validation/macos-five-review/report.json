@@ -1,0 +1,80 @@
+{
+  "license": "MIT OR Apache-2.0; Copyright (c) 2026 HyperCine Contributors",
+  "schema_version": 1,
+  "date": "2026-10-17",
+  "platform": "macOS ARM64",
+  "review_base": "e87ef0258ba37f5c78f1557c59d9c7331df5521c",
+  "parent_features_complete": false,
+  "reviews": [
+    {
+      "issue": 44,
+      "pr": 50,
+      "source": "56fbe550d2f88ebf6cc3a3e81b0d37a3ae8e084f",
+      "result": "NO_NEW_BLOCKING_FINDING_IN_SCOPE",
+      "tests_passed": 31,
+      "tests_total": 31,
+      "seconds": 204.46,
+      "real_4k_frames": 19,
+      "minimum_psnr_db": 52.32134949615484,
+      "sdk_4k_parity": "REFERENCE_BLOCKED"
+    },
+    {
+      "issue": 45,
+      "pr": 135,
+      "source": "59da896391137d50ba147df617c763e40f51ddfb",
+      "result": "CONFIRMED_WORKSPACE_PEAK_LIMITATION",
+      "measurement": "CALCULATED_NOT_GPU_MEASURED",
+      "reachable_1080p_pitch_replacement_bytes": 63262064,
+      "reported_new_workspace_bytes": 31639664,
+      "implementation": "BLOCKED_BY_P4"
+    },
+    {
+      "issue": 46,
+      "pr": 133,
+      "source": "be0d01ddad0b9a6c8700efe56b75f06a470081ac",
+      "result": "NO_BLOCKING_FINDING_IN_CLI_SCOPE",
+      "tests_passed": 3,
+      "tests_total": 3,
+      "implementation": "BLOCKED_BY_P4_P5"
+    },
+    {
+      "issue": 47,
+      "pr": 83,
+      "source": "fd844fd058e0d79d4eabd39769e453c65ea78ba3",
+      "result": "JSON_FINDING_FIXED_IN_CHILD",
+      "fix_commit": "8f547c6",
+      "before": {
+        "test_methods": 5,
+        "failed_subcases": 10,
+        "errors": 6
+      },
+      "after": {
+        "audit_ctest_passed": 3,
+        "audit_ctest_total": 3,
+        "standalone_ctest_passed": 28,
+        "standalone_ctest_total": 28
+      },
+      "native_decoder": "BLOCKED_BY_SAFETY_MAINLINE_AND_SDK_ORACLE",
+      "fix_pr": 136
+    },
+    {
+      "issue": 70,
+      "pr": 135,
+      "source": "59da896391137d50ba147df617c763e40f51ddfb",
+      "result": "NO_BLOCKING_FINDING_IN_SCALAR_PREPARATION_SCOPE",
+      "wavelet_checks": 1698720,
+      "release_contract_ctest": [
+        5,
+        5
+      ],
+      "asan_ubsan_contract_ctest": [
+        5,
+        5
+      ],
+      "neon": "NOT_IMPLEMENTED_BLOCKED_BY_P4"
+    }
+  ],
+  "private_sdk_corpus_configured": false,
+  "metal_kernel_execution": false,
+  "upstream_modified": false
+}
