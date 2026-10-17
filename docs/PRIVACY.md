@@ -179,5 +179,21 @@ Keep configured remote names separate at slash boundaries. For example,
 pushes through either name while both are configured, because private history
 must not count as already published. Rename one remote to a separate namespace
 before retrying. Names such as `public` and `public-review` remain independent.
-This check applies to configured remote names; it does not validate arbitrary
-custom fetch refspecs or manually populated remote-tracking refs.
+
+Before pushing, the guard also checks **every configured remote's** fetch
+mappings. Only the standard `refs/heads/*:refs/remotes/<remote>/*` mapping,
+with or without the leading `+`, is supported. A remote without a fetch mapping
+is allowed for push-only use. Other mappings fail closed with
+`UNSUPPORTED_FETCH_REFSPEC`; the diagnostic never includes remote names or
+configuration values. This includes custom mappings on unrelated remotes:
+they could otherwise import private commits into the destination's tracking
+namespace and hide those commits from a first-publication scan.
+
+Restore standard mappings before retrying. Narrow, negative, mirror and other
+custom fetch refspecs are intentionally unsupported, even when a particular
+mapping would be safe. Changing configuration does not remove previously
+fetched refs: review stale tracking refs separately before relying on them as
+publication evidence. Manually populated tracking refs and separate fetch/push
+URLs remain outside this check; a named remote must represent one publication
+destination. This guard is not proof that arbitrary local tracking refs are
+trustworthy.
