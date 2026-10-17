@@ -315,6 +315,8 @@ def push_findings(remote, records):
 
 
 def main(argv=None):
+    # All modes must inspect published objects, including CI and staged HEAD.
+    os.environ["GIT_NO_REPLACE_OBJECTS"] = "1"
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--staged", action="store_true")
