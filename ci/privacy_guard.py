@@ -343,6 +343,8 @@ def push_findings(remote, records):
 
 
 def main(argv=None):
+    # Direct/CI scans and range selection must inspect original published objects.
+    os.environ["GIT_NO_REPLACE_OBJECTS"] = "1"
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--staged", action="store_true")
