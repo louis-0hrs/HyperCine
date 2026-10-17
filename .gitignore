@@ -91,3 +91,6 @@ Makefile
 
 # Source fixture verifier (not a generated CMake artifact)
 !tests/verify_filmscan3_fixtures.cmake
+
+# Handwritten telemetry test configuration
+!cmake/TelemetryTests.cmake

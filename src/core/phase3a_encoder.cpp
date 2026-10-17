@@ -12,6 +12,8 @@
 #endif
 
 #include "hypercine/phase3a.h"
+#include "phase3a_telemetry.h"
+#include <condition_variable>
 
 #include "hypercine/canonical.h"
 #include "hypercine/entropy_parallel.h"
@@ -211,13 +213,17 @@ public:
     }
 
     void Start() {
-        if (!available_) return;
+        if (!available_ || thread_.joinable()) return;
+        accumulator_ = {};
+        stopped_ = false;
         stop_.store(false, std::memory_order_release);
         SampleOnce();
         thread_ = std::thread([this]() {
             while (!stop_.load(std::memory_order_acquire)) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(15));
-                if (stop_.load(std::memory_order_acquire)) break;
+                std::unique_lock<std::mutex> wait_lock(wait_mu_);
+                if (wake_.wait_for(wait_lock, std::chrono::milliseconds(250),
+                        [this]() { return stop_.load(std::memory_order_acquire); })) break;
+                wait_lock.unlock();
                 SampleOnce();
             }
         });
@@ -225,61 +231,19 @@ public:
 
     Phase3ANvmlTelemetry Stop() {
         if (thread_.joinable()) {
-            stop_.store(true, std::memory_order_release);
+            {
+                std::lock_guard<std::mutex> wait_lock(wait_mu_);
+                stop_.store(true, std::memory_order_release);
+            }
+            wake_.notify_all();
             thread_.join();
         }
-        if (available_) SampleOnce();
-
+        if (available_ && !stopped_) SampleOnce();
+        stopped_ = true;
         std::lock_guard<std::mutex> lk(mu_);
-        Phase3ANvmlTelemetry out;
-        out.nvml_available = available_ && !samples_.empty();
-        out.sample_count = static_cast<int>(samples_.size());
-        if (samples_.empty()) return out;
-
-        double sum_gpu = 0.0, max_gpu = 0.0;
-        double sum_mem = 0.0, max_mem = 0.0;
-        double sum_gclk = 0.0, sum_mclk = 0.0;
-        int min_gclk = samples_[0].gclk, max_gclk = samples_[0].gclk;
-        int min_mclk = samples_[0].mclk, max_mclk = samples_[0].mclk;
-        int max_temp = samples_[0].temp;
-        double sum_pwr = 0.0, max_pwr = 0.0;
-        uint64_t throttle_union = 0;
-
-        for (const Sample& s : samples_) {
-            sum_gpu += s.gpu_util;
-            max_gpu = std::max<double>(max_gpu, s.gpu_util);
-            sum_mem += s.mem_util;
-            max_mem = std::max<double>(max_mem, s.mem_util);
-            sum_gclk += s.gclk;
-            min_gclk = std::min(min_gclk, s.gclk);
-            max_gclk = std::max(max_gclk, s.gclk);
-            sum_mclk += s.mclk;
-            min_mclk = std::min(min_mclk, s.mclk);
-            max_mclk = std::max(max_mclk, s.mclk);
-            max_temp = std::max(max_temp, s.temp);
-            sum_pwr += s.power_w;
-            max_pwr = std::max(max_pwr, s.power_w);
-            throttle_union |= s.throttle;
-        }
-
-        const double inv_n = 1.0 / static_cast<double>(samples_.size());
-        out.hardware_gpu_utilization_pct_mean = sum_gpu * inv_n;
-        out.hardware_gpu_utilization_pct_max = max_gpu;
-        out.hardware_mem_utilization_pct_mean = sum_mem * inv_n;
-        out.hardware_mem_utilization_pct_max = max_mem;
-        out.graphics_clock_mhz_mean = sum_gclk * inv_n;
-        out.graphics_clock_mhz_min = min_gclk;
-        out.graphics_clock_mhz_max = max_gclk;
-        out.mem_clock_mhz_mean = sum_mclk * inv_n;
-        out.mem_clock_mhz_min = min_mclk;
-        out.mem_clock_mhz_max = max_mclk;
-        out.temperature_c_start = samples_.front().temp;
-        out.temperature_c_end = samples_.back().temp;
-        out.temperature_c_max = max_temp;
-        out.power_w_mean = sum_pwr * inv_n;
-        out.power_w_max = max_pwr;
-        out.throttle_reasons_bitmask = throttle_union;
-        out.throttle_reasons_str = FormatThrottleReasons(throttle_union);
+        auto out = accumulator_.Finish(available_);
+        out.throttle_reasons_str = out.throttle_sample_count
+            ? FormatThrottleReasons(out.throttle_reasons_bitmask) : "Unavailable";
         return out;
     }
 
@@ -311,20 +275,10 @@ public:
     }
 
 private:
-    struct Sample {
-        int gpu_util = 0;
-        int mem_util = 0;
-        int gclk = 0;
-        int mclk = 0;
-        int temp = 0;
-        double power_w = 0.0;
-        uint64_t throttle = 0;
-    };
-
     void SampleOnce() {
 #ifdef _WIN32
         if (!available_ || !dev_) return;
-        Sample s{};
+        detail::NvmlSample s{};
         if (fn_util_) {
             NvmlUtilization u{};
             if (fn_util_(dev_, &u) == 0) {
@@ -350,7 +304,7 @@ private:
             if (fn_throttle_(dev_, &tr) == 0) s.throttle = static_cast<uint64_t>(tr);
         }
         std::lock_guard<std::mutex> lk(mu_);
-        samples_.push_back(s);
+        accumulator_.Add(s);
 #endif
     }
 
@@ -380,7 +334,10 @@ private:
     std::atomic<bool> stop_{false};
     std::thread thread_;
     std::mutex mu_;
-    std::vector<Sample> samples_;
+    detail::NvmlAccumulator accumulator_;
+    bool stopped_ = false;
+    std::mutex wait_mu_;
+    std::condition_variable wake_;
 };
 
 // ============================================================================
@@ -3591,22 +3548,34 @@ Phase3AVarianceStudySummary RunPhase3AVarianceStudy(
 
         Phase3AResult r = RunPhase3A(cfg);
         fps_list.push_back(r.sustained_fps);
-        clk_sum += r.nvml.graphics_clock_mhz_mean;
-        if (r.nvml.graphics_clock_mhz_min > 0) min_clk = std::min(min_clk, r.nvml.graphics_clock_mhz_min);
-        max_clk = std::max(max_clk, r.nvml.graphics_clock_mhz_max);
-        pwr_sum += r.nvml.power_w_mean;
-        max_pwr = std::max(max_pwr, r.nvml.power_w_max);
-        max_temp = std::max(max_temp, r.nvml.temperature_c_max);
-        throttle_mask |= r.nvml.throttle_reasons_bitmask;
+        if (r.nvml.graphics_clock_sample_count) {
+            ++sum.clock_trial_count;
+            clk_sum += r.nvml.graphics_clock_mhz_mean;
+            min_clk = std::min(min_clk, r.nvml.graphics_clock_mhz_min);
+            max_clk = std::max(max_clk, r.nvml.graphics_clock_mhz_max);
+        }
+        if (r.nvml.power_sample_count) {
+            ++sum.power_trial_count;
+            pwr_sum += r.nvml.power_w_mean;
+            max_pwr = std::max(max_pwr, r.nvml.power_w_max);
+        }
+        if (r.nvml.temperature_sample_count) {
+            ++sum.temperature_trial_count;
+            max_temp = std::max(max_temp, r.nvml.temperature_c_max);
+        }
+        if (r.nvml.throttle_sample_count) {
+            ++sum.throttle_trial_count;
+            throttle_mask |= r.nvml.throttle_reasons_bitmask;
+        }
         sum.trial_results.push_back(std::move(r));
     }
 
     ComputeStats(fps_list, &sum.mean_fps, &sum.median_fps, nullptr,
                  &sum.min_fps, &sum.max_fps, &sum.stddev_fps);
-    sum.mean_clock_mhz = trials > 0 ? (clk_sum / trials) : 0.0;
+    sum.mean_clock_mhz = sum.clock_trial_count ? (clk_sum / sum.clock_trial_count) : 0.0;
     sum.min_clock_mhz = (min_clk == 99999) ? 0 : min_clk;
     sum.max_clock_mhz = max_clk;
-    sum.mean_power_w = trials > 0 ? (pwr_sum / trials) : 0.0;
+    sum.mean_power_w = sum.power_trial_count ? (pwr_sum / sum.power_trial_count) : 0.0;
     sum.max_power_w = max_pwr;
     sum.max_temp_c = max_temp;
     sum.combined_throttle_reasons = NvmlRuntimeSampler::FormatThrottleReasons(throttle_mask);
