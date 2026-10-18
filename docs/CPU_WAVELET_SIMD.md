@@ -60,6 +60,26 @@ threads; MSVC 19.44.35229, Release. Both AVX2 and AVX-512 executed natively.
   rejection PASS. ARM builds compile the baseline seam only; existing ARM CI
   must confirm scalar behavior. This does not implement NEON.
 
+### Current-main qualification (2026-10-18)
+
+PR #77 was merged forward onto protected main `e094682` and re-tested on a
+second native Windows x64 host: AMD EPYC 7601, 8 physical cores / 8 logical
+threads, MSVC 19.44.35229, Release. This host has AVX2 but no AVX-512, so it
+exercises the AVX2-only path used by older x86 machines.
+
+- `wavelet_simd_exact`: `PASS ISA=1 cases=2174`, `PASS ISA=2 cases=2174`,
+  `HW_PENDING ISA=3`; 4,348 deterministic cases executed. AVX-512 was not
+  claimed or emulated on this host.
+- `wavelet_simd_packets`: 16 ordered full FS3 frames PASS with
+  `AVX2=1 AVX512=0`; the frozen first packet is unchanged.
+- Full standalone CTest with required FFmpeg decode: 34/34 PASS (the suite
+  grew on current main). Native CPU SDK suite: 15/15 PASS.
+- Native MSVC AddressSanitizer: both new CTests PASS on the AVX2-only host.
+- `HYPERCINE_BUILD_X86_WAVELET_SIMD=OFF`: scalar exactness PASS; both SIMD
+  requests are rejected as unavailable, as expected.
+
+Hosted CI for the merged head is reviewed separately from these local runs.
+
 4K here means raw wavelet plane exactness, not new 4K production FS3 support
 or GoPro packet parity. The existing geometry and SDK-oracle restrictions
 remain in force. Native CUDA/Metal/Vulkan qualification is outside this change.
@@ -87,11 +107,13 @@ make the installed MSVC ASan runtime available on PATH. Run the two
 
 `benchmarks/results/cpu_wavelet_simd_windows.json` records individual raw-plane
 stage measurements at 1080p and 4K (31 iterations after three warmups), plus
-complete stateful 1080p FS3 sessions (16 frames after three warmups). Each
-entry includes median/p95, average/min/max latency, FPS, megapixels/second
-and cumulative process peak working set. Memory is the process high-water
-mark, not an isolated per-kernel allocation. The ISA IDs are 1=scalar,
-2=AVX2, 3=AVX-512.
+complete stateful 1080p FS3 sessions (16 frames after three warmups) on the
+original AVX2+AVX-512 host. `benchmarks/results/cpu_wavelet_simd_windows_avx2_only.json`
+records the AVX2-only AMD EPYC 7601 host at the merged head, with the same
+1-worker and 8-worker stages. Each entry includes median/p95,
+average/min/max latency, FPS, megapixels/second and cumulative process peak
+working set. Memory is the process high-water mark, not an isolated per-kernel
+allocation. The ISA IDs are 1=scalar, 2=AVX2, 3=AVX-512.
 
 Stage tests use identical seeded int16 input and separate 1-worker / 8-worker
 runs. Horizontal work partitions rows; vertical work partitions columns to
