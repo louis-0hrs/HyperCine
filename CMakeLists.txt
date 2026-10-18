@@ -108,6 +108,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME filmscan3_geometry_reference_p10 COMMAND "${Python3_EXECUTABLE}"
+            -O "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_geometry_reference_p10.py")
         add_test(NAME filmscan3_geometry_validation COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_geometry_validation.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
