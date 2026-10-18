@@ -1,5 +1,8 @@
 # HyperCine Phase 3A: Sequence Correctness, Reproducibility, and Benchmark Hardening
 
+> [!NOTE]
+> **Source-pinned Phase 3A engineering evidence.** “Correctness” and “closes gaps” below refer to the encoder-state, compressed-bitstream, and benchmark concerns tested in that phase, **not** a universal claim that the original GoPro decoder is reproducible or memory-safe. New decoder failures are tracked in [#120](https://github.com/louis-0hrs/HyperCine/issues/120). The latest public headline dataset from this benchmark lineage is [Phase 3A.2c](../benchmarks/phase3a2c_release_candidate.json).
+
 ## 1. Executive Summary
 
 Phase 3A closes every correctness, methodology, and reproducibility gap identified in the independent adversarial audit ([`docs/INDEPENDENT_AUDIT_2026-09-26.md`](../docs/INDEPENDENT_AUDIT_2026-09-26.md)) and establishes **HyperCine** as a verified, sustained multi-frame SMPTE VC-5 / CineForm (`CFHD`) encoder:
