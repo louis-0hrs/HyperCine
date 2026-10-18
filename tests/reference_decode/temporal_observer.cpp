@@ -39,6 +39,13 @@ constexpr bool enforced=true;
 #else
 constexpr bool enforced=false;
 #endif
+struct SdkLockGuard {
+    LOCK* lock;
+    explicit SdkLockGuard(LOCK* value):lock(value) {Lock(lock);}
+    ~SdkLockGuard() {Unlock(lock);}
+    SdkLockGuard(const SdkLockGuard&)=delete;
+    SdkLockGuard& operator=(const SdkLockGuard&)=delete;
+};
 
 std::vector<uint8_t> CopyBand(const IMAGE* image,int band) {
     if (!image || image->width<1 || image->width>1920 || image->height<1 || image->height>1088 ||
@@ -72,20 +79,19 @@ void TemporalBegin(CFHD_DecoderRef reference,const std::string& prefix) {
 
 extern "C" bool HyperCineDependencyReady(DECODER* decoder,TRANSFORM* transform,int channel,int index,IMAGE* wavelet) {
     ++readiness_checks;
-    if(!enforced || decoder!=current.load() || channel<0 || channel>=3 || index<1 || index>2 ||
+    if(!enforced || !decoder || !transform || !wavelet || decoder!=current.load() || channel<0 || channel>=3 || index<1 || index>2 ||
        transform!=decoder->transform[channel] || transform->type!=TRANSFORM_TYPE_SPATIAL ||
-       wavelet!=transform->wavelet[index]) {invalid=true;return false;}
+       wavelet!=transform->wavelet[index] || wavelet->num_bands!=4) {invalid=true;return false;}
     // This manual target is Windows-only: the SDK lock is a recursive Windows
     // CRITICAL_SECTION. The queue selection site already holds it; the two
     // subsequent predicate sites do not. Pair with UpdateWaveletBandValidFlags.
-    Lock(&decoder->entropy_worker_new.lock);
+    const SdkLockGuard guard(&decoder->entropy_worker_new.lock);
     const auto valid=wavelet->band_valid_flags, started=wavelet->band_started_flags;
     const bool lowpass=(valid&BAND_VALID_MASK(0))!=0;
     // Index 2 consumes the entropy-decoded lowpass. Index 1 additionally needs
     // this channel's actual index-2 inverse publication, not another channel.
     const bool published=index==2 || completed[channel][2].load(std::memory_order_acquire);
     const bool ready=lowpass && published && (valid&15)==15 && valid==started;
-    Unlock(&decoder->entropy_worker_new.lock);
     if(!lowpass) ++lowpass_deferrals;
     if(!published) ++producer_deferrals;
     return ready;
