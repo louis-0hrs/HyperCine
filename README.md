@@ -4,7 +4,7 @@
 
 HyperCine is an independent C++17 / NVIDIA CUDA engineering and research project built alongside the open-source [GoPro CineForm SDK](https://github.com/gopro/cineform-sdk). It accelerates the CineForm (`CFHD` / SMPTE VC-5) intra-frame wavelet encoder and validates its bitstreams against the upstream reference.
 
-**Stage:** `v0.1.0-alpha` · **CUDA target:** Windows x64 / NVIDIA · **Primary accelerated format:** BGRA8 → internal 12-bit YUV 4:2:2, FilmScan 3
+**Stage:** `v0.1.0-alpha` · **CUDA target:** Windows x64 / NVIDIA · **Primary accelerated format:** BGRA8 → CFHD YUV 4:2:2 (10-bit codec precision), FilmScan 3
 
 > [!IMPORTANT]
 > HyperCine is **not an official GoPro product** and is not affiliated with or endorsed by GoPro, Inc. The reference SDK in [`upstream/`](upstream/) is frozen at commit `11574d0295771edccadd17af14af74a539f924c7` and remains unmodified. HyperCine's compiler integration, wrappers, and implementation live outside that directory.
@@ -19,9 +19,9 @@ HyperCine is an independent C++17 / NVIDIA CUDA engineering and research project
 
 | Resolution | Upstream CPU | Host pageable (GPU) | Host pinned (GPU) | Device input (GPU) |
 | :--- | ---: | ---: | ---: | ---: |
-| **1080p** (`1920x1080`) | ****63.27**** | ****450.65**** (**7.12×**) | **551.37** (**8.71×**) | **792.82** (**12.53×**) |
-| **4K UHD** (`3840x2160`) | ****17.52**** | ****222.56**** (**12.71×**) | **290.27** (**16.57×**) | **393.60** (**22.47×**) |
-| **8K UHD** (`7680x4320`) | ****3.61**** | ****36.82**** (**10.20×**) | **45.74** (**12.67×**) | **93.22** (**25.82×**) |
+| **1080p** (`1920x1080`) | **63.27** | **450.65** (**7.12×**) | **551.37** (**8.71×**) | **792.82** (**12.53×**) |
+| **4K UHD** (`3840x2160`) | **17.52** | **222.56** (**12.71×**) | **290.27** (**16.57×**) | **393.60** (**22.47×**) |
+| **8K UHD** (`7680x4320`) | **3.61** | **36.82** (**10.20×**) | **45.74** (**12.67×**) | **93.22** (**25.82×**) |
 
 **The input paths are not interchangeable.** `HostPageableEndToEnd` is the primary host-to-host benchmark: its timing includes pageable-to-pinned staging, GPU transfers, CUDA processing, compressed D2H transfer, CFHD sample assembly, and synchronization. `HostPinnedApi` omits pageable staging. `DeviceInput` begins with frames already in GPU memory and **must not be presented as file-transcoding throughput**.
 
@@ -31,7 +31,7 @@ HyperCine is an independent C++17 / NVIDIA CUDA engineering and research project
 
 ## Technical scope
 
-**NVIDIA CUDA encoding.** The accelerated `Phase3AEncoderContext` processes progressive 8-bit `BGRA` (`CFHD_PIXEL_FORMAT_BGRA`) to internal 12-bit `YUV 4:2:2` (`CFHD_ENCODED_FORMAT_YUV_422`) at `FilmScan 3`, `GOP = 1`. It uses a three-level wavelet and stateful dynamic quantization (`Phase3AQuantMode::DynamicUpstreamState`) to match upstream `QuantizationSetQuality` / `FSratelimiter` transitions.
+**NVIDIA CUDA encoding.** The accelerated `Phase3AEncoderContext` processes progressive 8-bit `BGRA` (`CFHD_PIXEL_FORMAT_BGRA`) to CFHD `YUV 4:2:2` (`CFHD_ENCODED_FORMAT_YUV_422`) at **10-bit codec precision**, `FilmScan 3`, `GOP = 1`. Intermediate processing uses wider integer buffers; internal storage width is not the encoded bit depth. It uses a three-level wavelet and stateful dynamic quantization (`Phase3AQuantMode::DynamicUpstreamState`) to match upstream `QuantizationSetQuality` / `FSratelimiter` transitions.
 
 **CPU-only reference.** `-DHYPERCINE_ENABLE_CUDA=OFF` compiles the frozen SDK and HyperCine's C++17 reference wrappers without the CUDA Toolkit. The documented reference configuration was verified on Windows x64 (MSVC 19.44) and configured for [CPU-only CI](.github/workflows/ci-cpu.yml). See the [format compatibility matrix](docs/COMPATIBILITY.md).
 
