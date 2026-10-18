@@ -8,3 +8,6 @@ enable_testing()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME extreme_geometry_c0_arithmetic
     COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_audit.py")
+add_test(NAME extreme_geometry_c0_report
+    COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/audit.py"
+        --verify "${CMAKE_CURRENT_SOURCE_DIR}/../../docs/validation/extreme-geometry-c0.json")

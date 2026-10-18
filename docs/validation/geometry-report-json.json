@@ -1,0 +1,46 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 48,
+  "parent_commit": "813e2c8f2f4ce6f0c1489ef9eaac157830a7e66e",
+  "platform": {
+    "system": "macOS",
+    "architecture": "arm64",
+    "os_version": "26.5.2",
+    "compiler": "AppleClang 21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0"
+  },
+  "full_standalone_ctest": {
+    "registered": 30,
+    "passed": 30,
+    "skipped": 0,
+    "wall_seconds": 71.95,
+    "python_optimized": true,
+    "required_external_decode": true
+  },
+  "sources": [
+    {
+      "path": "ci/run_standalone.py",
+      "sha256": "287959a72607f1bf7879535cd3718e3e58c823e6420fd90942fdfe6f2f24817f"
+    },
+    {
+      "path": "ci/test_standalone_gate.py",
+      "sha256": "b7708d67daebbfa0089ef0796006df508d7b825a9ba38923c8535e4865ecb9c0"
+    },
+    {
+      "path": "tests/geometry_extreme/CMakeLists.txt",
+      "sha256": "98ccae109e2f0d1880cec901d06b6fa02de8cf61136dfd37b1d4329873717535"
+    },
+    {
+      "path": "tests/geometry_extreme/audit.py",
+      "sha256": "dd8f1b14c01adf8333673d155cbd56a398a7c89847dd1e27cfde27875a58f0ba"
+    },
+    {
+      "path": "tests/geometry_extreme/test_audit.py",
+      "sha256": "b8eba7ee279e012be505d792f3f489d4ecffea43a3b47b113b63c9850f1fb511"
+    }
+  ],
+  "scope": "Focused prerequisite fix; parent feature/reference gates remain open; no protected-main merge or release."
+}
