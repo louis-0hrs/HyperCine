@@ -27,3 +27,6 @@ if(HYPERCINE_P7_AUDIT_ROOT)
 else()
     message(STATUS "P7 negative tests NOT REGISTERED: set HYPERCINE_P7_AUDIT_ROOT")
 endif()
+
+add_test(NAME mac_metal_model_checks COMMAND "${Python3_EXECUTABLE}"
+    -O "${CMAKE_CURRENT_LIST_DIR}/test_metal_model.py")
