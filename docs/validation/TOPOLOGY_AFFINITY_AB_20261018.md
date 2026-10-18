@@ -4,6 +4,10 @@ Copyright (c) 2026 HyperCine Contributors.
 Dual-licensed under MIT OR Apache-2.0; see LICENSE-MIT and LICENSE-APACHE.
 
 **Status: REVIEW. Outcome `NO_EFFECT_DETECTED` in this sample; release blocked.**
+Draft PR: [#164](https://github.com/louis-0hrs/HyperCine/pull/164). Cross-links:
+[#116](https://github.com/louis-0hrs/HyperCine/issues/116),
+[#161](https://github.com/louis-0hrs/HyperCine/issues/161),
+[#158](https://github.com/louis-0hrs/HyperCine/issues/158).
 
 ## Run identity
 
