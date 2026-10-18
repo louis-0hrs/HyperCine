@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/louis-0hrs/HyperCine/tests/reference_formats/manifest.schema.json",
+  "title": "HyperCine issue #36 F1 format corpus manifest",
+  "description": "Index for a pristine-SDK golden corpus exported by tools/format_corpus_export.cpp. Raw corpus bytes live outside Git; artifacts are verified by SHA-256 and byte length.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "issue", "stage", "sdk", "host", "generator", "selection", "normalization", "limits", "transfer_manifest", "summary", "cases", "artifacts"],
+  "properties": {
+    "schema": { "const": "hypercine.format_corpus/1" },
+    "issue": { "const": 36 },
+    "stage": { "const": "F1" },
+    "description": { "type": "string" },
+    "sdk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["frozen_upstream_commit", "usage"],
+      "properties": {
+        "frozen_upstream_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "usage": { "type": "string" }
+      }
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os", "compiler"],
+      "properties": {
+        "os": { "type": "string" },
+        "compiler": { "type": "string" }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "seed", "source_generation_deterministic", "packet_reproducibility"],
+      "properties": {
+        "name": { "const": "format_corpus_export" },
+        "seed": { "type": "string" },
+        "source_generation_deterministic": { "type": "boolean" },
+        "packet_reproducibility": { "type": "string" }
+      }
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "qualities", "sources"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "qualities": { "type": "string" },
+        "sources": { "type": "string" }
+      }
+    },
+    "layout": { "type": "string" },
+    "normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tags", "method"],
+      "properties": {
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "method": { "type": "string" }
+      }
+    },
+    "limits": { "type": "array", "items": { "type": "string" } },
+    "transfer_manifest": { "$ref": "#/definitions/artifact" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cases", "exported", "encode_failed", "decode_failed", "write_failed"],
+      "properties": {
+        "cases": { "type": "integer", "minimum": 0 },
+        "exported": { "type": "integer", "minimum": 0 },
+        "encode_failed": { "type": "integer", "minimum": 0 },
+        "decode_failed": { "type": "integer", "minimum": 0 },
+        "write_failed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "cases": { "type": "array", "items": { "$ref": "#/definitions/case" } },
+    "artifacts": { "type": "array", "items": { "$ref": "#/definitions/artifact" } }
+  },
+  "definitions": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "byte_length"],
+      "properties": {
+        "path": { "type": "string" },
+        "sha256": { "$ref": "#/definitions/sha256" },
+        "byte_length": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "mask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "offset", "length"],
+      "properties": {
+        "tag": { "type": "string", "enum": ["GUID", "DATE", "TIME", "TIMC"] },
+        "offset": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "family", "family_code", "source_format", "source_format_code", "quality", "quality_code", "pattern", "geometry", "source", "encode", "sample_info", "decode", "comparison", "status"],
+      "properties": {
+        "case_id": { "type": "string" },
+        "family": { "type": "string", "enum": ["RGB_444", "RGBA_4444", "BAYER"] },
+        "family_code": { "type": "integer", "enum": [1, 2, 3] },
+        "source_format": { "type": "string" },
+        "source_format_code": { "type": "integer" },
+        "quality": { "type": "string", "enum": ["low", "medium", "high", "filmscan1", "filmscan2", "filmscan3"] },
+        "quality_code": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "pattern": { "type": "string" },
+        "geometry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "bayer_format": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "name"],
+          "properties": {
+            "value": { "type": "integer" },
+            "name": { "type": "string" }
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sha256", "byte_length", "pitch", "components", "component_bits", "layout"],
+          "properties": {
+            "sha256": { "$ref": "#/definitions/sha256" },
+            "byte_length": { "type": "integer", "minimum": 1 },
+            "pitch": { "type": "integer", "minimum": 1 },
+            "components": { "type": "integer", "minimum": 1, "maximum": 4 },
+            "component_bits": { "type": "integer", "enum": [8, 16] },
+            "layout": { "type": "string" }
+          }
+        },
+        "encode": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["threw", "thrown_error_code", "prepare_error", "encode_error", "sample_error", "sdk_sample_bytes", "sample_bytes", "sample_sha256", "normalized_sha256", "normalized_byte_length", "volatile_metadata_masks"],
+          "properties": {
+            "threw": { "type": "boolean" },
+            "thrown_error_code": { "type": "integer" },
+            "prepare_error": { "type": "string" },
+            "encode_error": { "type": "string" },
+            "sample_error": { "type": "string" },
+            "sdk_sample_bytes": { "type": "integer", "minimum": 0 },
+            "sample_bytes": { "type": "integer", "minimum": 0 },
+            "sample_sha256": { "$ref": "#/definitions/sha256" },
+            "normalized_sha256": { "$ref": "#/definitions/sha256" },
+            "normalized_byte_length": { "type": "integer", "minimum": 0 },
+            "volatile_metadata_masks": { "type": "array", "items": { "$ref": "#/definitions/mask" } }
+          }
+        },
+        "sample_info": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["encoded_format", "channels", "display_width", "display_height", "progressive", "key_frame", "sdk_version", "encode_version", "bayer_format", "bayer_format_error", "encode_curve", "decode_curve", "encode_preset"],
+          "properties": {
+            "encoded_format": { "type": "integer" },
+            "channels": { "type": "integer" },
+            "display_width": { "type": "integer" },
+            "display_height": { "type": "integer" },
+            "progressive": { "type": "integer" },
+            "key_frame": { "type": "integer" },
+            "sdk_version": { "type": "integer" },
+            "encode_version": { "type": "integer" },
+            "bayer_format": { "type": "integer" },
+            "bayer_format_error": { "type": "string" },
+            "encode_curve": { "type": "integer" },
+            "decode_curve": { "type": "integer" },
+            "encode_preset": { "type": "integer" }
+          }
+        },
+        "decode": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["threw", "thrown_error_code", "prepare_error", "decode_error", "offered_output_formats", "requested_output_format", "output_format", "width", "height", "pitch", "component_bits", "layout", "decoded_sha256", "decoded_byte_length"],
+          "properties": {
+            "threw": { "type": "boolean" },
+            "thrown_error_code": { "type": "integer" },
+            "prepare_error": { "type": "string" },
+            "decode_error": { "type": "string" },
+            "offered_output_formats": { "type": "array", "items": { "type": "string" } },
+            "requested_output_format": { "type": "string" },
+            "output_format": { "type": "string" },
+            "width": { "type": "integer" },
+            "height": { "type": "integer" },
+            "pitch": { "type": "integer" },
+            "component_bits": { "type": "integer" },
+            "layout": { "type": "string" },
+            "decoded_sha256": { "$ref": "#/definitions/sha256" },
+            "decoded_byte_length": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "comparison": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["comparable", "note", "psnr_db", "max_abs_diff", "exact_match_ratio"],
+          "properties": {
+            "comparable": { "type": "boolean" },
+            "note": { "type": "string" },
+            "psnr_db": {
+              "type": "object",
+              "additionalProperties": { "type": "number" }
+            },
+            "max_abs_diff": { "type": "integer" },
+            "exact_match_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "alpha_exact_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "alpha_max_abs_diff": { "type": "integer" }
+          }
+        },
+        "status": { "type": "string" }
+      }
+    }
+  }
+}

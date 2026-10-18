@@ -165,6 +165,33 @@ if(WIN32 AND TARGET CFHDCodecStatic)
         TIMEOUT 900)
 endif()
 
+# Issue #36 stage F1: real SDK golden corpora. The full matrix is an on-demand
+# run against a corpus directory outside Git; CTest only writes one tiny case
+# into the build tree and verifies its manifest.
+if(WIN32 AND TARGET CFHDCodecStatic)
+    add_executable(format_corpus_export ../tools/format_corpus_export.cpp)
+    target_link_libraries(format_corpus_export PRIVATE CFHDCodecStatic bcrypt)
+    add_executable(test_format_corpus_export test_format_corpus_export.cpp)
+    target_link_libraries(test_format_corpus_export PRIVATE bcrypt)
+    add_test(NAME format_corpus_export_helpers COMMAND test_format_corpus_export)
+    if(MSVC)
+        target_compile_options(format_corpus_export PRIVATE /EHs)
+    endif()
+    set(f1_smoke_dir "${CMAKE_CURRENT_BINARY_DIR}/f1-smoke")
+    add_test(NAME format_corpus_export_smoke COMMAND format_corpus_export
+        --out "${f1_smoke_dir}" --width 128 --height 128
+        --family RGB_444 --source RG48 --pattern asymmetric --quality filmscan1)
+    set_tests_properties(format_corpus_export_smoke PROPERTIES
+        PASS_REGULAR_EXPRESSION "exported=1 encode_failed=0 decode_failed=0 write_failed=0"
+        TIMEOUT 600)
+    add_test(NAME format_corpus_export_smoke_verify COMMAND format_corpus_export
+        --verify "${f1_smoke_dir}")
+    set_tests_properties(format_corpus_export_smoke_verify PROPERTIES
+        PASS_REGULAR_EXPRESSION "Verified [1-9][0-9]* manifest artifacts"
+        DEPENDS format_corpus_export_smoke
+        TIMEOUT 120)
+endif()
+
 # Actual GoPro decode of packets produced by the independent SDK-free encoder.
 # Windows CI uses the existing reference workflow; no workflow changes needed.
 if(WIN32 AND TARGET CFHDCodecStatic)
