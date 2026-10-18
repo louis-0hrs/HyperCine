@@ -21,7 +21,8 @@ def budget(width, height, padding=0):
             buffers.extend([((w + 7) // 8 * 8) * h * 2] * 4)
     scratch = ((width // 2 + 7) // 8 * 8) * height * 2
     buffers.extend([scratch, scratch])
-    assert len(buffers) == 42
+    if len(buffers) != 42:
+        raise ValueError('resident Metal buffer inventory mismatch')
     return dict(width=width, height=height, stride_bytes=stride,
                 buffer_count=len(buffers), resident_bytes=sum(buffers),
                 largest_buffer_bytes=max(buffers),
@@ -36,7 +37,8 @@ def main():
     # Check padding accounting independently: one input copy, no trailing pad.
     for row in rows:
         padded = budget(row['width'], row['height'], 16)
-        assert padded['resident_bytes'] - row['resident_bytes'] == 16 * (row['height'] - 1)
+        if padded['resident_bytes'] - row['resident_bytes'] != 16 * (row['height'] - 1):
+            raise ValueError('resident Metal input padding accounting mismatch')
     # Atomic replacement keeps both workspaces alive until assignment completes.
     # This transient estimate excludes allocator/driver overhead and host copies.
     transitions = [dict(old=old['width'], new=new['width'],
