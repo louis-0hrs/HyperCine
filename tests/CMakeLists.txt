@@ -11,6 +11,13 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+add_executable(test_gpu_diagnostic_report
+    test_gpu_diagnostic_report.cpp
+    ${CMAKE_SOURCE_DIR}/benchmarks/gpu_diagnostic_report.cpp
+)
+target_include_directories(test_gpu_diagnostic_report PRIVATE ${CMAKE_SOURCE_DIR}/benchmarks)
+add_test(NAME test_gpu_diagnostic_report COMMAND test_gpu_diagnostic_report)
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
