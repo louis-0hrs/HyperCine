@@ -5,7 +5,8 @@ Dual-licensed under MIT OR Apache-2.0; see LICENSE-MIT and LICENSE-APACHE.
 
 **Status: REVIEW. Test-only measurement; classification and release state unchanged.**
 
-Draft PR on branch `claude/issue120-registered-triangulation`.
+Draft PR: [#170](https://github.com/louis-0hrs/HyperCine/pull/170) on branch
+`claude/issue120-registered-triangulation`.
 Parent: [#120](https://github.com/louis-0hrs/HyperCine/issues/120); campaign:
 [#161](https://github.com/louis-0hrs/HyperCine/issues/161); frozen control:
 [#138](https://github.com/louis-0hrs/HyperCine/pull/138).
