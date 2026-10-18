@@ -10,6 +10,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def budget(width, height, padding=0):
+    if (type(width) is not int or width <= 0 or width % 2 or
+            type(height) is not int or height <= 0 or
+            type(padding) is not int or padding < 0):
+        raise ValueError('invalid Metal memory-model geometry or padding')
     row = width * 4
     stride = row + padding
     buffers = [stride * (height - 1) + row]

@@ -28,5 +28,13 @@ class ModelContract(unittest.TestCase):
             self.assertEqual(row['buffer_count'],42)
             self.assertEqual(padded['resident_bytes']-row['resident_bytes'],16*(h-1))
 
+    def test_invalid_model_geometry_rejected(self):
+        for width, height, padding in ((0,1080,0), (-1920,1080,0),
+                (1921,1080,0), (1920,0,0), (1920,-1080,0),
+                (True,1080,0), (1920,1080.0,0), (1920,1080,-1),
+                (1920,1080,False), (1920,1080,0.5)):
+            with self.subTest(width=width,height=height,padding=padding), self.assertRaises(ValueError):
+                metal_budget.budget(width,height,padding)
+
 if __name__ == '__main__':
     unittest.main()
