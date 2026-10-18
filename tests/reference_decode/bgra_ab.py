@@ -49,7 +49,7 @@ def validate(row, active, width, height):
     return row
 
 
-def collect(worker, packet, source, case, active, processes, root):
+def collect(worker, packet, source, case, active, processes, root, runner=run):
     width, height = {'128':(128,128),'256':(256,256),'1080':(1920,1080)}[case]
     immutable = packet.read_bytes()
     mode = 'decode-bgra-on' if active else 'decode-bgra-off'
@@ -58,7 +58,7 @@ def collect(worker, packet, source, case, active, processes, root):
     for process in range(1, processes+1):
         prefix = root/(mode+'-'+str(process))
         rows = [contract.strict_document(line.decode()) for line in
-                run([worker, mode, case, packet, prefix]).splitlines()]
+                runner([worker, mode, case, packet, prefix]).splitlines()]
         if len(rows) != 5 or [r['ordinal'] for r in rows] != list(range(1, 6)):
             raise ValueError('incomplete worker')
         for row in rows:

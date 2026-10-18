@@ -7,6 +7,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <chrono>
 #include "test_vectors.h"
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
@@ -96,6 +97,7 @@ int main(int argc, char** argv) {
             bool valid=status==CFHD_ERROR_OKAY && w==width && h==height && format==requested && pitch==width*(bgra?4:2) && pitch%16==0;
             int metadata_open=-1, metadata_init=-1, metadata_set=-1;
             Metadata metadata;
+            long long decode_ns=0;
             unsigned int processflags = PROCESSING_ALL_ON;
             if (valid && active) {
                 CFHD_MetadataRef ref=nullptr;
@@ -115,7 +117,10 @@ int main(int argc, char** argv) {
 #ifdef HYPERCINE_TEMPORAL_TRACE
                 TemporalBegin(raw,output+"-"+std::to_string(ordinal));
 #endif
+                const auto decode_begin=std::chrono::steady_clock::now();
                 status=CFHD_DecodeSample(raw,sample.data(),sample.size(),pixels.data(),pitch);
+                decode_ns=std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    std::chrono::steady_clock::now()-decode_begin).count();
 #ifdef HYPERCINE_TEMPORAL_TRACE
                 if (status==CFHD_ERROR_OKAY) TemporalEnd();
 #endif
@@ -128,6 +133,7 @@ int main(int argc, char** argv) {
                 if (valid) Write(output+"-"+std::to_string(ordinal)+(bgra?".bgra":".yuy2"),pixels);
             }
             std::cout << "{\"ordinal\":" << ordinal << ",\"decoder_status\":" << status
+                << ",\"decode_ns\":" << decode_ns
                 << ",\"output_valid\":" << (valid?"true":"false") << ",\"width\":" << w
                 << ",\"height\":" << h << ",\"pitch\":" << pitch << ",\"buffer_size\":" << pixels.size()
                 << ",\"actual_format_code\":" << static_cast<uint32_t>(format)

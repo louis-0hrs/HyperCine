@@ -10,6 +10,10 @@ import bgra_ab
 import trace_bands
 import priority_probe
 import analyze_dependency
+import dependency_ab
+import subprocess
+import sys
+import time
 
 
 class MeasurementTests(unittest.TestCase):
@@ -54,6 +58,31 @@ class MeasurementTests(unittest.TestCase):
 
 
 class BgraTests(unittest.TestCase):
+    def test_bounded_child_timeout_is_an_error(self):
+        began=time.monotonic()
+        with self.assertRaises(subprocess.TimeoutExpired):
+            dependency_ab.bounded([sys.executable,'-c','import time; time.sleep(30)'],timeout=0.05)
+        self.assertLess(time.monotonic()-began,5)
+
+    def test_intervention_cannot_accept_corrupt_or_premature_stable_output(self):
+        summary=dict(dependencies=45,inverse_events=90,missing_lowpass_at_any_inverse_entry=0,
+            missing_producer_publication=0,consumer_entry_before_producer_return=0,
+            consumer_return_before_producer_entry=0,mismatched_consumer_lowpass=0,inputs_changed_during_call=0)
+        calls=[dict(decoder_status=0,output_valid=True,source_pixels_exact=False,psnr_db=43.8) for _ in range(15)]
+        case=dict(calls=calls,summary=dict(distinct_rgb_hashes=1),dependency_summary=summary)
+        self.assertTrue(dependency_ab.intervention_observed(case))
+        for key in ('missing_lowpass_at_any_inverse_entry','missing_producer_publication',
+                    'consumer_entry_before_producer_return','mismatched_consumer_lowpass','inputs_changed_during_call'):
+            summary[key]=1
+            self.assertFalse(dependency_ab.intervention_observed(case))
+            summary[key]=0
+        for delta in (dict(psnr_db=35.0),dict(psnr_db=None),dict(decoder_status=7),dict(output_valid=False)):
+            changed=dict(case,calls=[dict(calls[0],**delta)]+calls[1:])
+            self.assertFalse(dependency_ab.intervention_observed(changed))
+        self.assertFalse(dependency_ab.intervention_observed(dict(case,calls=calls[:-1])))
+        with self.assertRaises(ValueError):
+            dependency_ab.timing([dict(decode_ns=0)])
+
     def test_equality_completion_macro_does_not_imply_lowpass_ready(self):
         producer=dict(channel=0,input_wavelet=2,begin=4,end=6,output_width=2,output_height=2,
             output_after=dict(sha256='a'*64))
