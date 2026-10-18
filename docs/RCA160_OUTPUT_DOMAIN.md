@@ -117,14 +117,92 @@ looks like an incompletely reconstructed band.
   run used a single oversubscribed condition to obtain states, not to measure
   frequency.
 
+## Second pass — the fault crosses output formats and survives a bypassed transform
+
+The offset measurement above does not say which stage produces the offset. Two
+cheap contrasts narrow it: change the **output pixel format** (different packing
+and conversion code) and change the **decoded resolution** (different subset of
+the transform chain).
+
+### Output format does not select the fault
+
+24 fresh processes per format, same packet, same oversubscription, one decode
+each. Frames are compared to the modal frame of their own format; `rand()`-based
+rounding noise is separated from structured error by magnitude (±1 count is
+dither, anything larger is structured).
+
+| output format | calls | distinct | structured | dither / identical |
+| --- | --- | --- | --- | --- |
+| BGRA 8-bit | 24 | 3 | 3 | 20 |
+| RG24 RGB444 8-bit | 24 | 24 | 2 | 21 |
+| RG48 RGB444 16-bit | 24 | 4 | 3 | 20 |
+| YUY2 8-bit 4:2:2 | 24 | 18 | 6 | 17 |
+
+Every format produces the same structured error, including the 16-bit RGB path
+that has no 8-bit clamp. Two consequences:
+
+* the fault is **not** created by the BGRA packing stage, and
+* the earlier `ZEROED` planes were genuinely a **clamp** artefact, not the fault
+  itself — with 16 bits of headroom the same corruption appears as large signed
+excursions instead of a constant plane.
+
+The distinct-frame counts for RG24 (24/24) and YUY2 (18/24) look alarming but are
+not evidence of extra corruption: their per-call variation is ±1 count on 32 %
+and 4 % of samples respectively, which is the decoder's `rand()` dither. The
+structured minority in each format is what matches the BGRA finding.
+
+Across bit depths the offset stays roughly the same **fraction of full scale**
+(8-bit median 38 %, 16-bit median 41 %), which is what an error applied after the
+value has been scaled into the output range looks like — not an error in the
+integer coefficient domain.
+
+### HALF resolution still corrupts, QUARTER did not
+
+| resolution | work per call | calls | distinct | structured |
+| --- | --- | --- | --- | --- |
+| FULL 1920×1080 | 28.6 ms median | 24 | 3 | 3 |
+| HALF 960×540 | 11.2 ms median | 48 | 4 | **4** |
+| QUARTER 480×270 | 5.2 ms median | 88 | 1 | **0** |
+
+HALF resolution **skips the inverse frame transform entirely** and copies the
+lowpass image straight to the output (`decoder.c`, `DECODED_RESOLUTION_HALF`
+branch). It still corrupts, with the same separable signature (offset explained
+75–98 % of the per-plane error). That excludes the inverse frame transform as the
+sole origin — the fault is reachable from the lowpass copy path too.
+
+QUARTER was stable in 88 calls, including 24 at `TAG_CPU_MAX=16` (20 workers on
+one CPU, i.e. harsher oversubscription than the failing cells). Tempting as that
+looks, **it is not proof of exclusion**: QUARTER does about five times less work
+per call, so a per-call race window simply has fewer opportunities. Recorded as a
+lead, not a result.
+
+### What the second pass adds
+
+* The fault survives a change of output packing and a change of the transform
+  subset, so it belongs to something **shared** by those paths — the lowpass
+  coefficient data itself, or the per-row scaling/offset applied when that data
+  is written out.
+* The clamp story is now closed: `ZEROED` planes were saturation, and 16-bit
+  output shows the same fault unclipped.
+* Still **no mechanism and no source line**. The remaining discriminator is
+  whether the lowpass band's *content* differs between a corrupt and a correct
+  call, or only the term applied while writing it.
+
 ## One next action
 
-Instrument the row-level output path in a private copy: capture, per output row,
-the DC/prescale term actually applied and the first and last sample written, and
-log the term per successful call. If a corrupt call's applied row term differs
-from the modal call's while the transform-stage band hashes match, the fault is
-localised to the output conversion rather than the inverse wavelet — and the
-`ZEROED` states become the natural forced-positive control for that instrument.
+Instrument the **lowpass write path** in a private copy, not the inverse wavelet
+(which HALF bypasses): per output row, log the scale/prescale term actually
+applied and a hash of the source lowpass row being read. Compare a corrupt call
+against a correct call at the same settings.
+
+* If the lowpass row hashes match but the applied term differs, the fault is in
+  the row scaling/offset computation.
+* If the lowpass row hashes differ, the corruption is already in the coefficient
+  data before any output conversion, and the search moves to band production.
+
+`TAG_CPU_MAX=1` is the negative control (single worker, no oversubscription); the
+`ZEROED`/saturated states no longer serve as a forced positive here, because this
+pass showed they are a clamp artefact rather than a distinct fault.
 
 ## Artefacts
 
@@ -133,6 +211,8 @@ localised to the output conversion rather than the inverse wavelet — and the
 * `docs/validation/rca160_output_domain_m2_2026-10-18.json` — 40 calls.
 * `docs/validation/rca160_output_domain_combined_2026-10-18.json` — recurring
   states across batches, sanitised relative IDs and hashes only.
+* `docs/validation/rca160_format_path_matrix_2026-10-18.json` — four output
+  formats and three decoded resolutions, same packet and condition.
 
 Raw decoded frames stay outside the repository; only relative IDs and hashes are
 published.
