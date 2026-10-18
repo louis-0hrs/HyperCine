@@ -2,12 +2,16 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include <vector>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <chrono>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "test_vectors.h"
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
@@ -38,6 +42,28 @@ Buffer Read(const std::string& path) {
 }
 void Check(CFHD_Error status) { if (status != CFHD_ERROR_OKAY) throw std::runtime_error("encoder API error"); }
 
+// Test-only diagnostic: apply and verify process affinity before any SDK object
+// is created. Failure is fatal so an unrestricted arm can never look restricted.
+struct AffinityState { bool requested; unsigned long long requested_mask, effective_mask, system_mask; };
+AffinityState ApplyAffinity(bool requested, unsigned long long mask) {
+    AffinityState state{requested, requested ? mask : 0, 0, 0};
+#if defined(_WIN32)
+    if (requested && (!mask || !SetProcessAffinityMask(GetCurrentProcess(),
+                                                       static_cast<DWORD_PTR>(mask))))
+        throw std::runtime_error("affinity set failed");
+    DWORD_PTR process_mask = 0, system_mask = 0;
+    if (!GetProcessAffinityMask(GetCurrentProcess(), &process_mask, &system_mask))
+        throw std::runtime_error("affinity query failed");
+    state.effective_mask = static_cast<unsigned long long>(process_mask);
+    state.system_mask = static_cast<unsigned long long>(system_mask);
+    if (requested && state.effective_mask != state.requested_mask)
+        throw std::runtime_error("affinity verification failed");
+#else
+    if (requested) throw std::runtime_error("affinity unsupported");
+#endif
+    return state;
+}
+
 #ifdef HYPERCINE_REFERENCE_TRACE
 #include "trace_snapshot.h"
 #endif
@@ -48,7 +74,16 @@ void Check(CFHD_Error status) { if (status != CFHD_ERROR_OKAY) throw std::runtim
 int main(int argc, char** argv) {
     try {
         // Fixed bounded geometries; no unbounded allocations or GPU linkage.
-        if (argc != 5) throw std::runtime_error("arguments");
+        if (argc != 5 && argc != 6) throw std::runtime_error("arguments");
+        const bool affinity_requested = argc == 6;
+        unsigned long long affinity_mask = 0;
+        if (affinity_requested) {
+            char* end = nullptr;
+            affinity_mask = std::strtoull(argv[5], &end, 0);
+            if (end == argv[5] || *end || !affinity_mask) throw std::runtime_error("affinity mask");
+        }
+        // Must precede every encoder/decoder/metadata creation below.
+        const AffinityState affinity = ApplyAffinity(affinity_requested, affinity_mask);
         const std::string geometry=argv[2];
         const int width = geometry=="128"?128:geometry=="256"?256:geometry=="1080"?1920:0;
         const int height = width==1920?1080:width;
@@ -139,7 +174,11 @@ int main(int argc, char** argv) {
                 << ",\"actual_format_code\":" << static_cast<uint32_t>(format)
                 << ",\"requested_format\":\"" << (bgra?"BGRA":"YUY2") << "\",\"active_metadata\":" << (active?"true":"false")
                 << ",\"metadata_open_status\":" << metadata_open << ",\"metadata_init_status\":" << metadata_init
-                << ",\"metadata_set_status\":" << metadata_set << ",\"processing_flags\":" << (active?processflags:0) << "}\n";
+                << ",\"metadata_set_status\":" << metadata_set << ",\"processing_flags\":" << (active?processflags:0)
+                << ",\"affinity_requested\":" << (affinity.requested?"true":"false")
+                << ",\"affinity_requested_mask\":" << affinity.requested_mask
+                << ",\"affinity_effective_mask\":" << affinity.effective_mask
+                << ",\"affinity_system_mask\":" << affinity.system_mask << "}\n";
         }
         return 0;
     } catch (...) { std::cerr << "bounded reference worker error\n"; return 2; }
