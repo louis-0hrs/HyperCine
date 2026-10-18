@@ -1,0 +1,22 @@
+# Issue #13 Windows instrumentation environment
+
+## Tool versions
+```
+compute-sanitizer: NVIDIA (R) Compute Sanitizer Copyright (c) 2020-2025 NVIDIA Corporation Version 2025.1.0.0 (build 35351055) (public-release) 
+Cuda compilation tools, release 12.8, V12.8.61
+Build cuda_12.8.r12.8/compiler.35404655_0
+cmake version 3.31.6-msvc6
+cl (MSVC toolset 14.44.35207, version reported by the IDE): 19.44.35229.0
+```
+
+## GPU and driver
+```
+NVIDIA GeForce RTX 4090 Laptop GPU, 610.62, 16376 MiB
+OS build: Windows 11 Home 25H2, build 26200
+```
+
+## ASan runtime
+```
+clang_rt.asan_dynamic-x86_64.dll
+clang_rt.asan_dynamic-x86_64.pdb
+```

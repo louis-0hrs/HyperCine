@@ -101,6 +101,7 @@ The canonical 64×64 fixture also discriminates both format-specific base-LL off
 Historical snapshot (through 2026-10-15): the progressive flat-Automatic case was reported at +5.14% and the interlaced baseline comparison was pending. The follow-up below supersedes that intermediate state.
 
 Historical snapshot (through 2026-10-15): sanitizer and interlaced GOP-1 evidence were incomplete. The separate safety status remains tracked by Issues #13/#38; Issue #14 is updated in section 14.
+
 ## 14. Issue #14 final qualification (2026-10-16)
 
 **Issue #14 performance, resource, and provenance gates: PASS.** The former progressive 1920×1080 flat-Automatic +5.144% case was rerun with 12 100-request block means per build in two A-B-B-A cycles. Median change is +0.647%; the approximate Welch 95% interval for the mean delta is -0.0083 to +0.0453 ms, below the +0.052696 ms five-percent limit.
@@ -112,3 +113,11 @@ Both compared commits configured and built CUDA Release benchmarks with CUDA 12.
 Memory evidence records 1080p/4K device, pinned, and pageable footprints; lazy per-slot FIELDPLUS first-use growth; zero warmed steady-state allocation delta; and a source-level count of 13 streams/197 events per slot (zero delta). The API documents first-use behavior and recommends warming every slot before latency-sensitive use. The complete CUDA CTest suite passed 44/44 in 767.02 seconds. FIELDPLUS per-stage timing remains a non-blocking follow-up.
 
 Raw JSON, telemetry, and the aggregate decision are in benchmarks/results/decode_phase3b2a_issue14_qualification_20261016/. The interlaced harness source and CMake target are identical across both benchmark builds. This PASS is limited to Issue #14; PR #12 remains Draft/HOLD for the separate safety qualification tracked by Issues #13/#38.
+
+## 15. Issue #13 Windows host instrumentation and Compute Sanitizer evidence (2026-10-16)
+
+The Windows part of issue #13 is complete. Host AddressSanitizer (MSVC 19.44) ran `test_decode_phase3b0` 20 times at 297 cases per run with exit code 0 and zero reports, so the historical heap-corruption exit did not reproduce. The only reproducible host ASan finding is an upstream oracle read-ahead: `InvertTemporalQuant16s` (`upstream/Codec/temporal.c:9606`) reads 16 bytes past a plane allocation for the 1920×1080 and 4K FIELDPLUS captures into a YU64 target. It is a read inside the frozen reference decoder, it does not change the frozen reference hashes in a non-ASan Release build, and up to 64×64 the path stays inside its allocation.
+
+Compute Sanitizer 2025.1.0.0 now attaches on this machine. Because this build cannot enumerate kernel launches, a diagnostics-only control binary (`tests/sanitizer_launch_control.cu`) demonstrates that device code is instrumented and that a `--kernel-name` filter selects which kernels are checked. With that control, memcheck plus leak checking, initcheck, racecheck and synccheck report zero findings on the temporal and production reconstruction targets; racecheck/synccheck on the full production target cover the first 400 kernel launches each, and the target verified its hashes and 400-request alternation inside the instrumented process. The same four tools report zero findings on the mixed `test_decode_phase3b1_acceptance --sanitizer` profile, which exercises GOP-1 interlaced, FIELDPLUS frames 0/1, a 44-frame mixed sequence, 1/2/Auto/4 slots, two and four decoder instances, lifetime handling and malformed rejection in one instrumented process.
+
+The #13 safety gate stays HOLD: PR #52 still has not integrated the native A2 test patch #80. Details, exact commands and sanitized logs are in [DECODE_PHASE3B2A_ISSUE13_WINDOWS.md](DECODE_PHASE3B2A_ISSUE13_WINDOWS.md) and `benchmarks/results/decode_phase3b2a_issue13_windows_20261016/`.
