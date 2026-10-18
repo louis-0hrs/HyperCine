@@ -17,6 +17,15 @@ the exact FFmpeg/ffprobe tools chosen by the outer gate. Preserve the separate
 project and the tests-disabled configuration. No Python verifier, fixture,
 manifest, codec kernel, production API or frozen upstream file is changed.
 
+Enabling the existing P7 tests on hosted Python 3.12 also exposed a portability
+assumption in the parent recursion regression: JSON parsing could accept the
+chosen depth, and its malformed field was ignored by the comparison. Move the
+real nested-input damage into a compared field. Separately inject RecursionError
+through the actual entry point to verify its exact sanitized failure
+independently of the parser's runtime-specific recursion threshold. The verifier
+and baseline remain unchanged. The old hosted head failed that one regression;
+its real public packet/pixel baseline passed.
+
 The new helper regression fails on the parent for all three missing names.
 After correction every individual omission is rejected. Real CMake inventories
 confirm the change from 32 registrations with no P7 tests to 35 containing all
@@ -34,7 +43,12 @@ Python 3.9.6 with optimization enabled, FFmpeg n8.0:
   required external decode, including all 24 actual public CFHD packets/frames
   with frozen complete-output and plane hashes.
 - Separate P7.A project remains **3/3 PASS**; tests-OFF registers **zero** tests.
-- Corrected CI helpers **7/7 PASS**; JSON/plane methods **9/9 PASS**.
+- Corrected CI helpers **7/7 PASS**; JSON/plane methods **10/10 PASS**.
+- Native Python **3.12.14** reproduces the original one-of-six JSON-method
+  failure; corrected JSON/plane methods **10/10 PASS** and the complete P7
+  public-oracle project **3/3 PASS** on that interpreter as well.
+  The deterministic RecursionError regression fails against the pre-handler
+  baseline from #172; the exception-handling correction remains required.
 
 Configure/build the existing SDK-free Release configuration with tests and
 required external decode enabled, upstream/CUDA/Metal/benchmarks disabled, and
@@ -65,3 +79,4 @@ Raw logs, media output and machine-specific paths remain outside Git.
 - `tests/macos_decode_portability/CMakeLists.txt`: `bc891a3b64a4dd350f211f55fe70534c4894ea47b12d9eb8d7dc26b0985f0732`
 - `ci/run_standalone.py`: `9eb72ffb95f16088e08d06480de03f27d2dac62ca670e07fd26fe7f045f8529c`
 - `ci/test_standalone_gate.py`: `d8fef6c35c268d12aabdeff879815ab4945924182c56eb2bb1087b28b7abf18d`
+- `tests/macos_decode_portability/test_json_contract.py`: `9afc94416ae9672f7645995e02a4146900dd91688581b9d84698861c002157a2`
