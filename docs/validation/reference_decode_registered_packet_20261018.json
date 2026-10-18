@@ -1,0 +1,5707 @@
+{
+  "schema_version": 1,
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "protocol": {
+    "id": "registered-1080-bgra-second-decoder-20261018",
+    "version": 1,
+    "input_preregistered": true,
+    "packet_sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52",
+    "packet_bytes": 900396,
+    "source_sha256": "45c166c3d6a3710d620ff5d738980224edf53cf9ce1bceb87267e474294afff1",
+    "source_bytes": 8294400,
+    "geometry": [
+      1920,
+      1080
+    ],
+    "requested_format": "BGRA",
+    "decoded_resolution": "CFHD_DECODED_RESOLUTION_FULL",
+    "processing_flags": 65535,
+    "repeats_per_decoder": 3,
+    "delta": "GoPro minus FFmpeg",
+    "common_domain": "tight top-down yuv422p10le, LE 16-bit containers",
+    "contract": "FFmpeg is an independent triangulation only, not an oracle; encoder-packet equality and release gates are unchanged"
+  },
+  "sources": {
+    "source_commit": "97c34500324b550da5f6444fe9d28c8729dea8d2",
+    "script_sha256": "654e4683bcf90cb54333dc60c8086cc97573cf6e66667b8ed0e03b0f4b268790",
+    "sdk_dump_source_sha256": "cee89cd359fb801ff954b017c3fdc5490569e268a1071ea0610be4feb108dc3c",
+    "avi_wrapper_sha256": "1d7d8e6304a1e211c98a4ad8cc88a75c533d0db1dd12637c63e399704778e411"
+  },
+  "tools": {
+    "gopro_sdk": {
+      "baseline": "11574d0295771edccadd17af14af74a539f924c7",
+      "output": "YU64 Y0/Cr/Y1/Cb >>6, CPU_MAX=1, process_path=0xffff, colorspace 2/1/0",
+      "binary_sha256": "e83c35563f45f64452ce05b019b71627cdcab30f470e2a7010c374415a3993ed"
+    },
+    "ffmpeg": {
+      "version": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+      "version_detail": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers\r\nbuilt with gcc 16.2.0 (Rev3, Built by MSYS2 project)\r\nconfiguration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-cairo --enable-fontconfig --enable-iconv --enable-gnutls --enable-lcms2 --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-liboapv --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libsvtjpegxs --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-openal --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint --enable-whisper\r\nlibavutil      61.  1.102 / 61.  1.102\r\nlibavcodec     63.  1.102 / 63.  1.102\r\nlibavformat    63.  1.102 / 63.  1.102\r\nlibavdevice    63.  1.102 / 63.  1.102\r\nlibavfilter    12.  1.102 / 12.  1.102\r\nlibswscale     10.  1.102 / 10.  1.102\r\nlibswresample   7.  1.102 /  7.  1.102\r\n\r\nExiting with exit code 0",
+      "binary_sha256": "589e50b766d251afdf181dd664d40bd94407e200b019989fd7468c7d118a28d0"
+    },
+    "ffprobe": {
+      "version": "ffprobe version 9.0.2-full_build-www.gyan.dev Copyright (c) 2007-2026 the FFmpeg developers",
+      "version_detail": "ffprobe version 9.0.2-full_build-www.gyan.dev Copyright (c) 2007-2026 the FFmpeg developers\r\nbuilt with gcc 16.2.0 (Rev3, Built by MSYS2 project)\r\nconfiguration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-cairo --enable-fontconfig --enable-iconv --enable-gnutls --enable-lcms2 --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-liboapv --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libsvtjpegxs --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-openal --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint --enable-whisper\r\nlibavutil      61.  1.102 / 61.  1.102\r\nlibavcodec     63.  1.102 / 63.  1.102\r\nlibavformat    63.  1.102 / 63.  1.102\r\nlibavdevice    63.  1.102 / 63.  1.102\r\nlibavfilter    12.  1.102 / 12.  1.102\r\nlibswscale     10.  1.102 / 10.  1.102\r\nlibswresample   7.  1.102 /  7.  1.102",
+      "binary_sha256": "02264dfa4f56baaa31e443ece8aa16d397f6b008200e7fd184d22b9009e75fd3"
+    }
+  },
+  "host": {
+    "system": "Windows",
+    "machine": "AMD64",
+    "python": "3.10.9",
+    "model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+    "cores": 8,
+    "logical_processors": 16
+  },
+  "result": {
+    "label": "registered-1080-filmscan3",
+    "width": 1920,
+    "height": 1080,
+    "input_sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52",
+    "ffprobe": {
+      "codec_name": "cfhd",
+      "width": 1920,
+      "height": 1080,
+      "pix_fmt": "yuv422p10le"
+    },
+    "repeat_hashes": [
+      {
+        "gopro": "ca08069a5f6296745948f84257c5a1eacb05f4bb7b62f224316d72d72f9b34ed",
+        "ffmpeg": "70e62e689dffb9f33ea5ed1ebf17d651b12b1d583a0505aed9d40549f2b3d4ca"
+      },
+      {
+        "gopro": "ca08069a5f6296745948f84257c5a1eacb05f4bb7b62f224316d72d72f9b34ed",
+        "ffmpeg": "70e62e689dffb9f33ea5ed1ebf17d651b12b1d583a0505aed9d40549f2b3d4ca"
+      },
+      {
+        "gopro": "ca08069a5f6296745948f84257c5a1eacb05f4bb7b62f224316d72d72f9b34ed",
+        "ffmpeg": "70e62e689dffb9f33ea5ed1ebf17d651b12b1d583a0505aed9d40549f2b3d4ca"
+      }
+    ],
+    "stable_gopro": true,
+    "stable_ffmpeg": true,
+    "planes": {
+      "Y": {
+        "samples": 2073600,
+        "mismatches": 1035084,
+        "mismatch_fraction": 0.4991724537037037,
+        "max_abs": 3,
+        "mean_abs": 0.5121831597222222,
+        "p95_abs": 1,
+        "bias": 0.4683405671296296,
+        "rmse": 0.7336321597594624,
+        "psnr_db": 62.88794545492042,
+        "signed_histogram": {
+          "-3": 0,
+          "-2": 32,
+          "-1": 45392,
+          "0": 1038516,
+          "1": 962725,
+          "2": 26923,
+          "3": 12
+        },
+        "first_32_differences": [
+          {
+            "x": 6,
+            "y": 0,
+            "gopro": 676,
+            "ffmpeg": 675,
+            "delta": 1
+          },
+          {
+            "x": 7,
+            "y": 0,
+            "gopro": 672,
+            "ffmpeg": 671,
+            "delta": 1
+          },
+          {
+            "x": 8,
+            "y": 0,
+            "gopro": 674,
+            "ffmpeg": 673,
+            "delta": 1
+          },
+          {
+            "x": 9,
+            "y": 0,
+            "gopro": 670,
+            "ffmpeg": 669,
+            "delta": 1
+          },
+          {
+            "x": 10,
+            "y": 0,
+            "gopro": 675,
+            "ffmpeg": 673,
+            "delta": 2
+          },
+          {
+            "x": 11,
+            "y": 0,
+            "gopro": 674,
+            "ffmpeg": 672,
+            "delta": 2
+          },
+          {
+            "x": 12,
+            "y": 0,
+            "gopro": 679,
+            "ffmpeg": 678,
+            "delta": 1
+          },
+          {
+            "x": 13,
+            "y": 0,
+            "gopro": 679,
+            "ffmpeg": 678,
+            "delta": 1
+          },
+          {
+            "x": 14,
+            "y": 0,
+            "gopro": 670,
+            "ffmpeg": 669,
+            "delta": 1
+          },
+          {
+            "x": 15,
+            "y": 0,
+            "gopro": 670,
+            "ffmpeg": 669,
+            "delta": 1
+          },
+          {
+            "x": 16,
+            "y": 0,
+            "gopro": 676,
+            "ffmpeg": 675,
+            "delta": 1
+          },
+          {
+            "x": 17,
+            "y": 0,
+            "gopro": 675,
+            "ffmpeg": 674,
+            "delta": 1
+          },
+          {
+            "x": 32,
+            "y": 0,
+            "gopro": 675,
+            "ffmpeg": 674,
+            "delta": 1
+          },
+          {
+            "x": 33,
+            "y": 0,
+            "gopro": 678,
+            "ffmpeg": 677,
+            "delta": 1
+          },
+          {
+            "x": 36,
+            "y": 0,
+            "gopro": 679,
+            "ffmpeg": 678,
+            "delta": 1
+          },
+          {
+            "x": 37,
+            "y": 0,
+            "gopro": 674,
+            "ffmpeg": 673,
+            "delta": 1
+          },
+          {
+            "x": 40,
+            "y": 0,
+            "gopro": 674,
+            "ffmpeg": 675,
+            "delta": -1
+          },
+          {
+            "x": 41,
+            "y": 0,
+            "gopro": 677,
+            "ffmpeg": 678,
+            "delta": -1
+          },
+          {
+            "x": 43,
+            "y": 0,
+            "gopro": 670,
+            "ffmpeg": 669,
+            "delta": 1
+          },
+          {
+            "x": 44,
+            "y": 0,
+            "gopro": 674,
+            "ffmpeg": 673,
+            "delta": 1
+          },
+          {
+            "x": 45,
+            "y": 0,
+            "gopro": 673,
+            "ffmpeg": 672,
+            "delta": 1
+          },
+          {
+            "x": 46,
+            "y": 0,
+            "gopro": 676,
+            "ffmpeg": 675,
+            "delta": 1
+          },
+          {
+            "x": 47,
+            "y": 0,
+            "gopro": 672,
+            "ffmpeg": 671,
+            "delta": 1
+          },
+          {
+            "x": 48,
+            "y": 0,
+            "gopro": 675,
+            "ffmpeg": 674,
+            "delta": 1
+          },
+          {
+            "x": 49,
+            "y": 0,
+            "gopro": 679,
+            "ffmpeg": 678,
+            "delta": 1
+          },
+          {
+            "x": 52,
+            "y": 0,
+            "gopro": 678,
+            "ffmpeg": 677,
+            "delta": 1
+          },
+          {
+            "x": 53,
+            "y": 0,
+            "gopro": 674,
+            "ffmpeg": 673,
+            "delta": 1
+          },
+          {
+            "x": 56,
+            "y": 0,
+            "gopro": 676,
+            "ffmpeg": 675,
+            "delta": 1
+          },
+          {
+            "x": 57,
+            "y": 0,
+            "gopro": 678,
+            "ffmpeg": 677,
+            "delta": 1
+          },
+          {
+            "x": 58,
+            "y": 0,
+            "gopro": 679,
+            "ffmpeg": 678,
+            "delta": 1
+          },
+          {
+            "x": 62,
+            "y": 0,
+            "gopro": 678,
+            "ffmpeg": 679,
+            "delta": -1
+          },
+          {
+            "x": 64,
+            "y": 0,
+            "gopro": 675,
+            "ffmpeg": 674,
+            "delta": 1
+          }
+        ],
+        "groups": {
+          "border": {
+            "border": {
+              "samples": 47744,
+              "mismatches": 24088,
+              "mismatch_fraction": 0.5045241286863271,
+              "max_abs": 3,
+              "mean_abs": 0.5231233243967829,
+              "p95_abs": 1,
+              "bias": 0.46824731903485256,
+              "rmse": 0.7486023617238676,
+              "psnr_db": 62.712488816002804,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 7,
+                "-1": 1296,
+                "0": 23656,
+                "1": 21906,
+                "2": 877,
+                "3": 2
+              }
+            },
+            "interior": {
+              "samples": 2025856,
+              "mismatches": 1010996,
+              "mismatch_fraction": 0.49904632905793894,
+              "max_abs": 3,
+              "mean_abs": 0.5119253293422632,
+              "p95_abs": 1,
+              "bias": 0.46834276473747394,
+              "rmse": 0.7332756659544297,
+              "psnr_db": 62.89216721426187,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 25,
+                "-1": 44096,
+                "0": 1014860,
+                "1": 940819,
+                "2": 26046,
+                "3": 10
+              }
+            }
+          },
+          "parity": {
+            "0,0": {
+              "samples": 518400,
+              "mismatches": 257835,
+              "mismatch_fraction": 0.49736689814814816,
+              "max_abs": 3,
+              "mean_abs": 0.510162037037037,
+              "p95_abs": 1,
+              "bias": 0.46532407407407406,
+              "rmse": 0.7319563039309093,
+              "psnr_db": 62.90780956477252,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 8,
+                "-1": 11606,
+                "0": 260565,
+                "1": 239598,
+                "2": 6621,
+                "3": 2
+              }
+            },
+            "0,1": {
+              "samples": 518400,
+              "mismatches": 259450,
+              "mismatch_fraction": 0.5004822530864198,
+              "max_abs": 3,
+              "mean_abs": 0.5134895833333334,
+              "p95_abs": 1,
+              "bias": 0.470835262345679,
+              "rmse": 0.7345147785283447,
+              "psnr_db": 62.87750190878393,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 8,
+                "-1": 11040,
+                "0": 258950,
+                "1": 241669,
+                "2": 6731,
+                "3": 2
+              }
+            },
+            "1,0": {
+              "samples": 518400,
+              "mismatches": 258374,
+              "mismatch_fraction": 0.49840663580246913,
+              "max_abs": 3,
+              "mean_abs": 0.5114891975308642,
+              "p95_abs": 1,
+              "bias": 0.46652006172839505,
+              "rmse": 0.7332623071664812,
+              "psnr_db": 62.89232545490745,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 7,
+                "-1": 11642,
+                "0": 260026,
+                "1": 239955,
+                "2": 6765,
+                "3": 5
+              }
+            },
+            "1,1": {
+              "samples": 518400,
+              "mismatches": 259425,
+              "mismatch_fraction": 0.5004340277777778,
+              "max_abs": 3,
+              "mean_abs": 0.5135918209876543,
+              "p95_abs": 1,
+              "bias": 0.4706828703703704,
+              "rmse": 0.7347917946476277,
+              "psnr_db": 62.874226715556745,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 9,
+                "-1": 11104,
+                "0": 258975,
+                "1": 241503,
+                "2": 6806,
+                "3": 3
+              }
+            }
+          },
+          "reference_code_bin": {
+            "0": {
+              "samples": 8,
+              "mismatches": 4,
+              "mismatch_fraction": 0.5,
+              "max_abs": 2,
+              "mean_abs": 0.625,
+              "p95_abs": 2,
+              "bias": 0.625,
+              "rmse": 0.9354143466934853,
+              "psnr_db": 60.77743214402007,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 0,
+                "0": 4,
+                "1": 3,
+                "2": 1,
+                "3": 0
+              }
+            },
+            "1": {
+              "samples": 66660,
+              "mismatches": 33475,
+              "mismatch_fraction": 0.5021752175217522,
+              "max_abs": 2,
+              "mean_abs": 0.5165166516651665,
+              "p95_abs": 1,
+              "bias": 0.4734923492349235,
+              "rmse": 0.7383762726090236,
+              "psnr_db": 62.8319580265767,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 1434,
+                "0": 33185,
+                "1": 31085,
+                "2": 956,
+                "3": 0
+              }
+            },
+            "10": {
+              "samples": 202643,
+              "mismatches": 101507,
+              "mismatch_fraction": 0.5009154029500156,
+              "max_abs": 3,
+              "mean_abs": 0.5138445443464615,
+              "p95_abs": 1,
+              "bias": 0.46905641941739906,
+              "rmse": 0.7346514117000923,
+              "psnr_db": 62.87588632483977,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 4534,
+                "0": 101136,
+                "1": 94354,
+                "2": 2616,
+                "3": 1
+              }
+            },
+            "11": {
+              "samples": 89411,
+              "mismatches": 44738,
+              "mismatch_fraction": 0.5003634899509009,
+              "max_abs": 2,
+              "mean_abs": 0.5126103052197157,
+              "p95_abs": 1,
+              "bias": 0.4668888615494738,
+              "rmse": 0.7328737515816386,
+              "psnr_db": 62.89692932640638,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 2044,
+                "0": 44673,
+                "1": 41599,
+                "2": 1095,
+                "3": 0
+              }
+            },
+            "12": {
+              "samples": 2087,
+              "mismatches": 1035,
+              "mismatch_fraction": 0.4959271681839962,
+              "max_abs": 2,
+              "mean_abs": 0.515093435553426,
+              "p95_abs": 1,
+              "bias": 0.46909439386679447,
+              "rmse": 0.7439260516289812,
+              "psnr_db": 62.76691732261611,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 48,
+                "0": 1052,
+                "1": 947,
+                "2": 40,
+                "3": 0
+              }
+            },
+            "2": {
+              "samples": 190504,
+              "mismatches": 95058,
+              "mismatch_fraction": 0.49898164867929284,
+              "max_abs": 3,
+              "mean_abs": 0.5121204804098601,
+              "p95_abs": 1,
+              "bias": 0.4695281988829631,
+              "rmse": 0.7337776497500221,
+              "psnr_db": 62.88622308670753,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 4051,
+                "0": 95446,
+                "1": 88507,
+                "2": 2494,
+                "3": 3
+              }
+            },
+            "3": {
+              "samples": 217441,
+              "mismatches": 107954,
+              "mismatch_fraction": 0.49647490583652576,
+              "max_abs": 3,
+              "mean_abs": 0.5092875768599299,
+              "p95_abs": 1,
+              "bias": 0.46593788659912344,
+              "rmse": 0.7313837001219665,
+              "psnr_db": 62.91460712888049,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 5,
+                "-1": 4703,
+                "0": 109487,
+                "1": 100466,
+                "2": 2779,
+                "3": 1
+              }
+            },
+            "4": {
+              "samples": 217587,
+              "mismatches": 108777,
+              "mismatch_fraction": 0.499924168263729,
+              "max_abs": 3,
+              "mean_abs": 0.5129534393139296,
+              "p95_abs": 1,
+              "bias": 0.4686585136060518,
+              "rmse": 0.73418687325881,
+              "psnr_db": 62.88138036704913,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 4813,
+                "0": 108810,
+                "1": 101131,
+                "2": 2828,
+                "3": 2
+              }
+            },
+            "5": {
+              "samples": 217496,
+              "mismatches": 108902,
+              "mismatch_fraction": 0.5007080589987862,
+              "max_abs": 2,
+              "mean_abs": 0.5134485231912311,
+              "p95_abs": 1,
+              "bias": 0.46937414940964434,
+              "rmse": 0.7341181455161839,
+              "psnr_db": 62.88219349726434,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 4791,
+                "0": 108594,
+                "1": 101340,
+                "2": 2770,
+                "3": 0
+              }
+            },
+            "6": {
+              "samples": 217397,
+              "mismatches": 107268,
+              "mismatch_fraction": 0.49341987239934315,
+              "max_abs": 3,
+              "mean_abs": 0.50614773892924,
+              "p95_abs": 1,
+              "bias": 0.4618968983012645,
+              "rmse": 0.7291240439780919,
+              "psnr_db": 62.94148427434681,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 4,
+                "-1": 4802,
+                "0": 110129,
+                "1": 99701,
+                "2": 2759,
+                "3": 2
+              }
+            },
+            "7": {
+              "samples": 217587,
+              "mismatches": 108917,
+              "mismatch_fraction": 0.5005675890563315,
+              "max_abs": 2,
+              "mean_abs": 0.5136933732254225,
+              "p95_abs": 1,
+              "bias": 0.4693984475175447,
+              "rmse": 0.7348094593590943,
+              "psnr_db": 62.87401790553582,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 4815,
+                "0": 108670,
+                "1": 101246,
+                "2": 2854,
+                "3": 0
+              }
+            },
+            "8": {
+              "samples": 217396,
+              "mismatches": 108657,
+              "mismatch_fraction": 0.499811404073672,
+              "max_abs": 2,
+              "mean_abs": 0.5125393291504904,
+              "p95_abs": 1,
+              "bias": 0.4700086478132072,
+              "rmse": 0.7334815466691217,
+              "psnr_db": 62.88972883228185,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 4617,
+                "0": 108739,
+                "1": 101273,
+                "2": 2764,
+                "3": 0
+              }
+            },
+            "9": {
+              "samples": 217383,
+              "mismatches": 108792,
+              "mismatch_fraction": 0.5004623176605346,
+              "max_abs": 3,
+              "mean_abs": 0.5141800416775921,
+              "p95_abs": 1,
+              "bias": 0.47040476946219345,
+              "rmse": 0.7359640553492184,
+              "psnr_db": 62.86038059794687,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 9,
+                "-1": 4740,
+                "0": 108591,
+                "1": 101073,
+                "2": 2967,
+                "3": 3
+              }
+            }
+          },
+          "spatial_8x8": {
+            "0,0": {
+              "samples": 32400,
+              "mismatches": 16459,
+              "mismatch_fraction": 0.5079938271604938,
+              "max_abs": 2,
+              "mean_abs": 0.5226543209876543,
+              "p95_abs": 1,
+              "bias": 0.4774074074074074,
+              "rmse": 0.7429504079290725,
+              "psnr_db": 62.778316164349384,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 729,
+                "0": 15941,
+                "1": 15255,
+                "2": 473,
+                "3": 0
+              }
+            },
+            "0,1": {
+              "samples": 32400,
+              "mismatches": 16020,
+              "mismatch_fraction": 0.49444444444444446,
+              "max_abs": 2,
+              "mean_abs": 0.5072530864197531,
+              "p95_abs": 1,
+              "bias": 0.46459876543209877,
+              "rmse": 0.7299797054510285,
+              "psnr_db": 62.9312969494546,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 4,
+                "-1": 683,
+                "0": 16380,
+                "1": 14922,
+                "2": 411,
+                "3": 0
+              }
+            },
+            "0,2": {
+              "samples": 32400,
+              "mismatches": 16135,
+              "mismatch_fraction": 0.49799382716049384,
+              "max_abs": 2,
+              "mean_abs": 0.5109567901234567,
+              "p95_abs": 1,
+              "bias": 0.4653395061728395,
+              "rmse": 0.7327228098328745,
+              "psnr_db": 62.89871844547324,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 739,
+                "0": 16265,
+                "1": 14976,
+                "2": 420,
+                "3": 0
+              }
+            },
+            "0,3": {
+              "samples": 32400,
+              "mismatches": 15735,
+              "mismatch_fraction": 0.48564814814814816,
+              "max_abs": 2,
+              "mean_abs": 0.49808641975308643,
+              "p95_abs": 1,
+              "bias": 0.45697530864197533,
+              "rmse": 0.7231617820121324,
+              "psnr_db": 63.01280334867522,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 660,
+                "0": 16665,
+                "1": 14672,
+                "2": 400,
+                "3": 0
+              }
+            },
+            "0,4": {
+              "samples": 32400,
+              "mismatches": 16581,
+              "mismatch_fraction": 0.5117592592592592,
+              "max_abs": 2,
+              "mean_abs": 0.5249691358024692,
+              "p95_abs": 1,
+              "bias": 0.4797222222222222,
+              "rmse": 0.7425556469981822,
+              "psnr_db": 62.78293257092474,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 731,
+                "0": 15819,
+                "1": 15422,
+                "2": 427,
+                "3": 0
+              }
+            },
+            "0,5": {
+              "samples": 32400,
+              "mismatches": 16204,
+              "mismatch_fraction": 0.5001234567901235,
+              "max_abs": 3,
+              "mean_abs": 0.5125925925925926,
+              "p95_abs": 1,
+              "bias": 0.4645679012345679,
+              "rmse": 0.7332070598354824,
+              "psnr_db": 62.89297991415615,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 778,
+                "0": 16196,
+                "1": 15023,
+                "2": 402,
+                "3": 1
+              }
+            },
+            "0,6": {
+              "samples": 32400,
+              "mismatches": 16001,
+              "mismatch_fraction": 0.49385802469135803,
+              "max_abs": 2,
+              "mean_abs": 0.5061728395061729,
+              "p95_abs": 1,
+              "bias": 0.45987654320987653,
+              "rmse": 0.728561918532531,
+              "psnr_db": 62.948183330179816,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 750,
+                "0": 16399,
+                "1": 14852,
+                "2": 399,
+                "3": 0
+              }
+            },
+            "0,7": {
+              "samples": 32400,
+              "mismatches": 16105,
+              "mismatch_fraction": 0.4970679012345679,
+              "max_abs": 2,
+              "mean_abs": 0.5114197530864197,
+              "p95_abs": 1,
+              "bias": 0.4658024691358025,
+              "rmse": 0.734930919740164,
+              "psnr_db": 62.87258228944638,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 739,
+                "0": 16295,
+                "1": 14901,
+                "2": 465,
+                "3": 0
+              }
+            },
+            "1,0": {
+              "samples": 32400,
+              "mismatches": 16291,
+              "mismatch_fraction": 0.5028086419753086,
+              "max_abs": 2,
+              "mean_abs": 0.5158333333333334,
+              "p95_abs": 1,
+              "bias": 0.4681172839506173,
+              "rmse": 0.7361268342136311,
+              "psnr_db": 62.85845968495504,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 773,
+                "0": 16109,
+                "1": 15096,
+                "2": 422,
+                "3": 0
+              }
+            },
+            "1,1": {
+              "samples": 32400,
+              "mismatches": 16309,
+              "mismatch_fraction": 0.5033641975308641,
+              "max_abs": 2,
+              "mean_abs": 0.5171296296296296,
+              "p95_abs": 1,
+              "bias": 0.47762345679012347,
+              "rmse": 0.7380111745950467,
+              "psnr_db": 62.836253919402296,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 638,
+                "0": 16091,
+                "1": 15225,
+                "2": 445,
+                "3": 0
+              }
+            },
+            "1,2": {
+              "samples": 32400,
+              "mismatches": 16362,
+              "mismatch_fraction": 0.505,
+              "max_abs": 2,
+              "mean_abs": 0.5180864197530864,
+              "p95_abs": 1,
+              "bias": 0.4728395061728395,
+              "rmse": 0.7377392894913888,
+              "psnr_db": 62.839454411746765,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 731,
+                "0": 16038,
+                "1": 15207,
+                "2": 423,
+                "3": 0
+              }
+            },
+            "1,3": {
+              "samples": 32400,
+              "mismatches": 16037,
+              "mismatch_fraction": 0.49496913580246915,
+              "max_abs": 2,
+              "mean_abs": 0.5073765432098766,
+              "p95_abs": 1,
+              "bias": 0.45990740740740743,
+              "rmse": 0.7295144673169213,
+              "psnr_db": 62.93683449431164,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 767,
+                "0": 16363,
+                "1": 14868,
+                "2": 401,
+                "3": 0
+              }
+            },
+            "1,4": {
+              "samples": 32400,
+              "mismatches": 16174,
+              "mismatch_fraction": 0.49919753086419755,
+              "max_abs": 2,
+              "mean_abs": 0.5123765432098766,
+              "p95_abs": 1,
+              "bias": 0.4641049382716049,
+              "rmse": 0.7339854003324825,
+              "psnr_db": 62.883764244807345,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 782,
+                "0": 16226,
+                "1": 14965,
+                "2": 427,
+                "3": 0
+              }
+            },
+            "1,5": {
+              "samples": 32400,
+              "mismatches": 16449,
+              "mismatch_fraction": 0.5076851851851852,
+              "max_abs": 2,
+              "mean_abs": 0.5212654320987654,
+              "p95_abs": 1,
+              "bias": 0.4784259259259259,
+              "rmse": 0.7405578477917345,
+              "psnr_db": 62.80633290270327,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 692,
+                "0": 15951,
+                "1": 15317,
+                "2": 439,
+                "3": 0
+              }
+            },
+            "1,6": {
+              "samples": 32400,
+              "mismatches": 16187,
+              "mismatch_fraction": 0.49959876543209875,
+              "max_abs": 2,
+              "mean_abs": 0.5133024691358025,
+              "p95_abs": 1,
+              "bias": 0.4720061728395062,
+              "rmse": 0.7353297740083764,
+              "psnr_db": 62.86786965004158,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 669,
+                "0": 16213,
+                "1": 15074,
+                "2": 444,
+                "3": 0
+              }
+            },
+            "1,7": {
+              "samples": 32400,
+              "mismatches": 16021,
+              "mismatch_fraction": 0.4944753086419753,
+              "max_abs": 2,
+              "mean_abs": 0.5072222222222222,
+              "p95_abs": 1,
+              "bias": 0.4637654320987654,
+              "rmse": 0.7298739955517775,
+              "psnr_db": 62.932554862517414,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 702,
+                "0": 16379,
+                "1": 14906,
+                "2": 412,
+                "3": 0
+              }
+            },
+            "2,0": {
+              "samples": 32400,
+              "mismatches": 16215,
+              "mismatch_fraction": 0.500462962962963,
+              "max_abs": 2,
+              "mean_abs": 0.5137962962962963,
+              "p95_abs": 1,
+              "bias": 0.4705864197530864,
+              "rmse": 0.73516186174404,
+              "psnr_db": 62.8698532960111,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 700,
+                "0": 16185,
+                "1": 15083,
+                "2": 432,
+                "3": 0
+              }
+            },
+            "2,1": {
+              "samples": 32400,
+              "mismatches": 16376,
+              "mismatch_fraction": 0.505432098765432,
+              "max_abs": 2,
+              "mean_abs": 0.5193518518518518,
+              "p95_abs": 1,
+              "bias": 0.47608024691358025,
+              "rmse": 0.7397238390268974,
+              "psnr_db": 62.81612037615452,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 701,
+                "0": 16024,
+                "1": 15224,
+                "2": 451,
+                "3": 0
+              }
+            },
+            "2,2": {
+              "samples": 32400,
+              "mismatches": 16068,
+              "mismatch_fraction": 0.49592592592592594,
+              "max_abs": 2,
+              "mean_abs": 0.5082098765432099,
+              "p95_abs": 1,
+              "bias": 0.4648148148148148,
+              "rmse": 0.7299162813486063,
+              "psnr_db": 62.93205165356963,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 701,
+                "0": 16332,
+                "1": 14969,
+                "2": 397,
+                "3": 0
+              }
+            },
+            "2,3": {
+              "samples": 32400,
+              "mismatches": 16331,
+              "mismatch_fraction": 0.5040432098765432,
+              "max_abs": 2,
+              "mean_abs": 0.5175925925925926,
+              "p95_abs": 1,
+              "bias": 0.47401234567901235,
+              "rmse": 0.7380320846851385,
+              "psnr_db": 62.836007825348176,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 704,
+                "0": 16069,
+                "1": 15188,
+                "2": 438,
+                "3": 0
+              }
+            },
+            "2,4": {
+              "samples": 32400,
+              "mismatches": 15922,
+              "mismatch_fraction": 0.4914197530864198,
+              "max_abs": 2,
+              "mean_abs": 0.5035185185185185,
+              "p95_abs": 1,
+              "bias": 0.4554320987654321,
+              "rmse": 0.7264406716193114,
+              "psnr_db": 62.97350964885705,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 779,
+                "0": 16478,
+                "1": 14751,
+                "2": 392,
+                "3": 0
+              }
+            },
+            "2,5": {
+              "samples": 32400,
+              "mismatches": 16185,
+              "mismatch_fraction": 0.49953703703703706,
+              "max_abs": 2,
+              "mean_abs": 0.5122222222222222,
+              "p95_abs": 1,
+              "bias": 0.4687654320987654,
+              "rmse": 0.7332070598354824,
+              "psnr_db": 62.89297991415615,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 702,
+                "0": 16215,
+                "1": 15072,
+                "2": 410,
+                "3": 0
+              }
+            },
+            "2,6": {
+              "samples": 32400,
+              "mismatches": 15960,
+              "mismatch_fraction": 0.4925925925925926,
+              "max_abs": 2,
+              "mean_abs": 0.5048765432098765,
+              "p95_abs": 1,
+              "bias": 0.46598765432098765,
+              "rmse": 0.7276293317647692,
+              "psnr_db": 62.959308718893,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 630,
+                "0": 16440,
+                "1": 14932,
+                "2": 398,
+                "3": 0
+              }
+            },
+            "2,7": {
+              "samples": 32400,
+              "mismatches": 16130,
+              "mismatch_fraction": 0.4978395061728395,
+              "max_abs": 2,
+              "mean_abs": 0.51,
+              "p95_abs": 1,
+              "bias": 0.4661111111111111,
+              "rmse": 0.7309726312621567,
+              "psnr_db": 62.91949034204457,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 711,
+                "0": 16270,
+                "1": 15025,
+                "2": 394,
+                "3": 0
+              }
+            },
+            "3,0": {
+              "samples": 32400,
+              "mismatches": 16372,
+              "mismatch_fraction": 0.5053086419753087,
+              "max_abs": 2,
+              "mean_abs": 0.518858024691358,
+              "p95_abs": 1,
+              "bias": 0.47422839506172837,
+              "rmse": 0.7388888888888889,
+              "psnr_db": 62.825929956967606,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 721,
+                "0": 16028,
+                "1": 15212,
+                "2": 438,
+                "3": 0
+              }
+            },
+            "3,1": {
+              "samples": 32400,
+              "mismatches": 15938,
+              "mismatch_fraction": 0.49191358024691356,
+              "max_abs": 2,
+              "mean_abs": 0.5043827160493827,
+              "p95_abs": 1,
+              "bias": 0.4545679012345679,
+              "rmse": 0.7275444918727109,
+              "psnr_db": 62.96032153252143,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 805,
+                "0": 16462,
+                "1": 14729,
+                "2": 403,
+                "3": 0
+              }
+            },
+            "3,2": {
+              "samples": 32400,
+              "mismatches": 16248,
+              "mismatch_fraction": 0.5014814814814815,
+              "max_abs": 2,
+              "mean_abs": 0.5151851851851852,
+              "p95_abs": 1,
+              "bias": 0.47530864197530864,
+              "rmse": 0.7366088463985432,
+              "psnr_db": 62.852774068931794,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 646,
+                "0": 16152,
+                "1": 15158,
+                "2": 444,
+                "3": 0
+              }
+            },
+            "3,3": {
+              "samples": 32400,
+              "mismatches": 15912,
+              "mismatch_fraction": 0.4911111111111111,
+              "max_abs": 2,
+              "mean_abs": 0.5040740740740741,
+              "p95_abs": 1,
+              "bias": 0.4569135802469136,
+              "rmse": 0.7280109889280518,
+              "psnr_db": 62.95475397823531,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 764,
+                "0": 16488,
+                "1": 14728,
+                "2": 420,
+                "3": 0
+              }
+            },
+            "3,4": {
+              "samples": 32400,
+              "mismatches": 16119,
+              "mismatch_fraction": 0.4975,
+              "max_abs": 2,
+              "mean_abs": 0.5095987654320988,
+              "p95_abs": 1,
+              "bias": 0.46478395061728395,
+              "rmse": 0.7306136436559999,
+              "psnr_db": 62.923757112805525,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 726,
+                "0": 16281,
+                "1": 15001,
+                "2": 392,
+                "3": 0
+              }
+            },
+            "3,5": {
+              "samples": 32400,
+              "mismatches": 15963,
+              "mismatch_fraction": 0.49268518518518517,
+              "max_abs": 2,
+              "mean_abs": 0.5053086419753087,
+              "p95_abs": 1,
+              "bias": 0.4596296296296296,
+              "rmse": 0.7283924461137385,
+              "psnr_db": 62.9502040094388,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 738,
+                "0": 16437,
+                "1": 14816,
+                "2": 408,
+                "3": 0
+              }
+            },
+            "3,6": {
+              "samples": 32400,
+              "mismatches": 16121,
+              "mismatch_fraction": 0.49756172839506174,
+              "max_abs": 2,
+              "mean_abs": 0.5103703703703704,
+              "p95_abs": 1,
+              "bias": 0.46944444444444444,
+              "rmse": 0.7321117772041286,
+              "psnr_db": 62.90596480944272,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 661,
+                "0": 16279,
+                "1": 15045,
+                "2": 414,
+                "3": 0
+              }
+            },
+            "3,7": {
+              "samples": 32400,
+              "mismatches": 16532,
+              "mismatch_fraction": 0.5102469135802469,
+              "max_abs": 3,
+              "mean_abs": 0.524104938271605,
+              "p95_abs": 1,
+              "bias": 0.48169753086419753,
+              "rmse": 0.7428880912017521,
+              "psnr_db": 62.77904474449688,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 687,
+                "0": 15868,
+                "1": 15397,
+                "2": 447,
+                "3": 1
+              }
+            },
+            "4,0": {
+              "samples": 32400,
+              "mismatches": 16211,
+              "mismatch_fraction": 0.5003395061728395,
+              "max_abs": 2,
+              "mean_abs": 0.5130555555555556,
+              "p95_abs": 1,
+              "bias": 0.4705864197530864,
+              "rmse": 0.7338171804482283,
+              "psnr_db": 62.88575516562339,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 688,
+                "0": 16189,
+                "1": 15111,
+                "2": 412,
+                "3": 0
+              }
+            },
+            "4,1": {
+              "samples": 32400,
+              "mismatches": 16424,
+              "mismatch_fraction": 0.5069135802469136,
+              "max_abs": 3,
+              "mean_abs": 0.520216049382716,
+              "p95_abs": 1,
+              "bias": 0.4771296296296296,
+              "rmse": 0.7395986565966072,
+              "psnr_db": 62.817590401493746,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 698,
+                "0": 15976,
+                "1": 15298,
+                "2": 425,
+                "3": 3
+              }
+            },
+            "4,2": {
+              "samples": 32400,
+              "mismatches": 16219,
+              "mismatch_fraction": 0.5005864197530864,
+              "max_abs": 2,
+              "mean_abs": 0.5123456790123457,
+              "p95_abs": 1,
+              "bias": 0.46753086419753087,
+              "rmse": 0.7320274568148822,
+              "psnr_db": 62.9069652574589,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 726,
+                "0": 16181,
+                "1": 15112,
+                "2": 381,
+                "3": 0
+              }
+            },
+            "4,3": {
+              "samples": 32400,
+              "mismatches": 16100,
+              "mismatch_fraction": 0.49691358024691357,
+              "max_abs": 2,
+              "mean_abs": 0.5083950617283951,
+              "p95_abs": 1,
+              "bias": 0.46425925925925926,
+              "rmse": 0.7289430874158545,
+              "psnr_db": 62.94364023644637,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 715,
+                "0": 16300,
+                "1": 15013,
+                "2": 372,
+                "3": 0
+              }
+            },
+            "4,4": {
+              "samples": 32400,
+              "mismatches": 16254,
+              "mismatch_fraction": 0.5016666666666667,
+              "max_abs": 2,
+              "mean_abs": 0.5141666666666667,
+              "p95_abs": 1,
+              "bias": 0.4726851851851852,
+              "rmse": 0.734279692397023,
+              "psnr_db": 62.88028232803245,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 672,
+                "0": 16146,
+                "1": 15177,
+                "2": 405,
+                "3": 0
+              }
+            },
+            "4,5": {
+              "samples": 32400,
+              "mismatches": 16024,
+              "mismatch_fraction": 0.4945679012345679,
+              "max_abs": 3,
+              "mean_abs": 0.5087037037037037,
+              "p95_abs": 1,
+              "bias": 0.4673456790123457,
+              "rmse": 0.73282810879294,
+              "psnr_db": 62.89747029348333,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 670,
+                "0": 16376,
+                "1": 14897,
+                "2": 456,
+                "3": 1
+              }
+            },
+            "4,6": {
+              "samples": 32400,
+              "mismatches": 16142,
+              "mismatch_fraction": 0.49820987654320986,
+              "max_abs": 3,
+              "mean_abs": 0.5114197530864197,
+              "p95_abs": 1,
+              "bias": 0.47074074074074074,
+              "rmse": 0.7334175035870778,
+              "psnr_db": 62.89048726367216,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 657,
+                "0": 16258,
+                "1": 15058,
+                "2": 425,
+                "3": 1
+              }
+            },
+            "4,7": {
+              "samples": 32400,
+              "mismatches": 16308,
+              "mismatch_fraction": 0.5033333333333333,
+              "max_abs": 2,
+              "mean_abs": 0.5163271604938272,
+              "p95_abs": 1,
+              "bias": 0.4790432098765432,
+              "rmse": 0.7364202705078228,
+              "psnr_db": 62.854997988833105,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 602,
+                "0": 16092,
+                "1": 15285,
+                "2": 420,
+                "3": 0
+              }
+            },
+            "5,0": {
+              "samples": 32400,
+              "mismatches": 16783,
+              "mismatch_fraction": 0.5179938271604938,
+              "max_abs": 2,
+              "mean_abs": 0.5308333333333334,
+              "p95_abs": 1,
+              "bias": 0.48978395061728397,
+              "rmse": 0.7459975507191778,
+              "psnr_db": 62.74276464250811,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 665,
+                "0": 15617,
+                "1": 15702,
+                "2": 416,
+                "3": 0
+              }
+            },
+            "5,1": {
+              "samples": 32400,
+              "mismatches": 16130,
+              "mismatch_fraction": 0.4978395061728395,
+              "max_abs": 2,
+              "mean_abs": 0.5115123456790124,
+              "p95_abs": 1,
+              "bias": 0.4702777777777778,
+              "rmse": 0.7340694958185894,
+              "psnr_db": 62.882769126553804,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 664,
+                "0": 16270,
+                "1": 15023,
+                "2": 441,
+                "3": 0
+              }
+            },
+            "5,2": {
+              "samples": 32400,
+              "mismatches": 16317,
+              "mismatch_fraction": 0.5036111111111111,
+              "max_abs": 2,
+              "mean_abs": 0.5189197530864198,
+              "p95_abs": 1,
+              "bias": 0.48021604938271606,
+              "rmse": 0.7413076534321206,
+              "psnr_db": 62.7975429962066,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 627,
+                "0": 16083,
+                "1": 15194,
+                "2": 496,
+                "3": 0
+              }
+            },
+            "5,3": {
+              "samples": 32400,
+              "mismatches": 16329,
+              "mismatch_fraction": 0.5039814814814815,
+              "max_abs": 2,
+              "mean_abs": 0.5174074074074074,
+              "p95_abs": 1,
+              "bias": 0.4756172839506173,
+              "rmse": 0.7377392894913888,
+              "psnr_db": 62.839454411746765,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 677,
+                "0": 16071,
+                "1": 15217,
+                "2": 435,
+                "3": 0
+              }
+            },
+            "5,4": {
+              "samples": 32400,
+              "mismatches": 16378,
+              "mismatch_fraction": 0.5054938271604938,
+              "max_abs": 3,
+              "mean_abs": 0.5170061728395061,
+              "p95_abs": 1,
+              "bias": 0.4757716049382716,
+              "rmse": 0.7349099214139053,
+              "psnr_db": 62.87283046481255,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 668,
+                "0": 16022,
+                "1": 15338,
+                "2": 371,
+                "3": 1
+              }
+            },
+            "5,5": {
+              "samples": 32400,
+              "mismatches": 16406,
+              "mismatch_fraction": 0.506358024691358,
+              "max_abs": 2,
+              "mean_abs": 0.5189814814814815,
+              "p95_abs": 1,
+              "bias": 0.4787962962962963,
+              "rmse": 0.7377183711022306,
+              "psnr_db": 62.83970070118563,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 651,
+                "0": 15994,
+                "1": 15346,
+                "2": 409,
+                "3": 0
+              }
+            },
+            "5,6": {
+              "samples": 32400,
+              "mismatches": 16226,
+              "mismatch_fraction": 0.5008024691358025,
+              "max_abs": 2,
+              "mean_abs": 0.5142592592592593,
+              "p95_abs": 1,
+              "bias": 0.4682098765432099,
+              "rmse": 0.7356445062026717,
+              "psnr_db": 62.86415275412614,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 742,
+                "0": 16174,
+                "1": 15048,
+                "2": 434,
+                "3": 0
+              }
+            },
+            "5,7": {
+              "samples": 32400,
+              "mismatches": 16286,
+              "mismatch_fraction": 0.5026543209876543,
+              "max_abs": 2,
+              "mean_abs": 0.5160802469135802,
+              "p95_abs": 1,
+              "bias": 0.4696604938271605,
+              "rmse": 0.7368392625026384,
+              "psnr_db": 62.850057490241,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 752,
+                "0": 16114,
+                "1": 15099,
+                "2": 435,
+                "3": 0
+              }
+            },
+            "6,0": {
+              "samples": 32400,
+              "mismatches": 15997,
+              "mismatch_fraction": 0.49373456790123454,
+              "max_abs": 2,
+              "mean_abs": 0.5054938271604938,
+              "p95_abs": 1,
+              "bias": 0.459320987654321,
+              "rmse": 0.7273323488468063,
+              "psnr_db": 62.96285460043754,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 748,
+                "0": 16403,
+                "1": 14868,
+                "2": 381,
+                "3": 0
+              }
+            },
+            "6,1": {
+              "samples": 32400,
+              "mismatches": 16545,
+              "mismatch_fraction": 0.5106481481481482,
+              "max_abs": 3,
+              "mean_abs": 0.5237345679012345,
+              "p95_abs": 1,
+              "bias": 0.48009259259259257,
+              "rmse": 0.7415990397798996,
+              "psnr_db": 62.79412949796964,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 707,
+                "0": 15855,
+                "1": 15415,
+                "2": 422,
+                "3": 1
+              }
+            },
+            "6,2": {
+              "samples": 32400,
+              "mismatches": 15932,
+              "mismatch_fraction": 0.4917283950617284,
+              "max_abs": 2,
+              "mean_abs": 0.502962962962963,
+              "p95_abs": 1,
+              "bias": 0.4557407407407407,
+              "rmse": 0.7248669524577818,
+              "psnr_db": 62.99234667015979,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 763,
+                "0": 16468,
+                "1": 14805,
+                "2": 363,
+                "3": 0
+              }
+            },
+            "6,3": {
+              "samples": 32400,
+              "mismatches": 16350,
+              "mismatch_fraction": 0.5046296296296297,
+              "max_abs": 2,
+              "mean_abs": 0.5187037037037037,
+              "p95_abs": 1,
+              "bias": 0.4756172839506173,
+              "rmse": 0.7394943217171122,
+              "psnr_db": 62.8188158028221,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 698,
+                "0": 16050,
+                "1": 15196,
+                "2": 456,
+                "3": 0
+              }
+            },
+            "6,4": {
+              "samples": 32400,
+              "mismatches": 16208,
+              "mismatch_fraction": 0.5002469135802469,
+              "max_abs": 2,
+              "mean_abs": 0.5131481481481481,
+              "p95_abs": 1,
+              "bias": 0.4678395061728395,
+              "rmse": 0.7341325611113777,
+              "psnr_db": 62.88202293747049,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 734,
+                "0": 16192,
+                "1": 15056,
+                "2": 418,
+                "3": 0
+              }
+            },
+            "6,5": {
+              "samples": 32400,
+              "mismatches": 16106,
+              "mismatch_fraction": 0.49709876543209874,
+              "max_abs": 2,
+              "mean_abs": 0.5098148148148148,
+              "p95_abs": 1,
+              "bias": 0.4658024691358025,
+              "rmse": 0.7316057090948969,
+              "psnr_db": 62.911970957435656,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 713,
+                "0": 16294,
+                "1": 14981,
+                "2": 412,
+                "3": 0
+              }
+            },
+            "6,6": {
+              "samples": 32400,
+              "mismatches": 15989,
+              "mismatch_fraction": 0.4934876543209877,
+              "max_abs": 2,
+              "mean_abs": 0.5049382716049383,
+              "p95_abs": 1,
+              "bias": 0.4627777777777778,
+              "rmse": 0.726525640409779,
+              "psnr_db": 62.9724937553275,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 683,
+                "0": 16411,
+                "1": 14935,
+                "2": 371,
+                "3": 0
+              }
+            },
+            "6,7": {
+              "samples": 32400,
+              "mismatches": 15734,
+              "mismatch_fraction": 0.48561728395061726,
+              "max_abs": 2,
+              "mean_abs": 0.4996604938271605,
+              "p95_abs": 1,
+              "bias": 0.4516358024691358,
+              "rmse": 0.7264619147486309,
+              "psnr_db": 62.97325565319543,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 776,
+                "0": 16666,
+                "1": 14503,
+                "2": 454,
+                "3": 0
+              }
+            },
+            "7,0": {
+              "samples": 32400,
+              "mismatches": 16251,
+              "mismatch_fraction": 0.5015740740740741,
+              "max_abs": 2,
+              "mean_abs": 0.5148765432098765,
+              "p95_abs": 1,
+              "bias": 0.46944444444444444,
+              "rmse": 0.735854252879931,
+              "psnr_db": 62.86167658961466,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 736,
+                "0": 16149,
+                "1": 15084,
+                "2": 431,
+                "3": 0
+              }
+            },
+            "7,1": {
+              "samples": 32400,
+              "mismatches": 16043,
+              "mismatch_fraction": 0.49515432098765433,
+              "max_abs": 2,
+              "mean_abs": 0.5083024691358025,
+              "p95_abs": 1,
+              "bias": 0.46003086419753086,
+              "rmse": 0.7311626121678396,
+              "psnr_db": 62.91723315934304,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 780,
+                "0": 16357,
+                "1": 14837,
+                "2": 425,
+                "3": 0
+              }
+            },
+            "7,2": {
+              "samples": 32400,
+              "mismatches": 16223,
+              "mismatch_fraction": 0.5007098765432099,
+              "max_abs": 2,
+              "mean_abs": 0.5145061728395062,
+              "p95_abs": 1,
+              "bias": 0.47469135802469137,
+              "rmse": 0.7362735669790806,
+              "psnr_db": 62.85672849198583,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 645,
+                "0": 16177,
+                "1": 15131,
+                "2": 447,
+                "3": 0
+              }
+            },
+            "7,3": {
+              "samples": 32400,
+              "mismatches": 15947,
+              "mismatch_fraction": 0.4921913580246914,
+              "max_abs": 2,
+              "mean_abs": 0.5052777777777778,
+              "p95_abs": 1,
+              "bias": 0.46564814814814814,
+              "rmse": 0.7290065961868594,
+              "psnr_db": 62.942883515988115,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 642,
+                "0": 16453,
+                "1": 14881,
+                "2": 424,
+                "3": 0
+              }
+            },
+            "7,4": {
+              "samples": 32400,
+              "mismatches": 15749,
+              "mismatch_fraction": 0.48608024691358026,
+              "max_abs": 3,
+              "mean_abs": 0.4994753086419753,
+              "p95_abs": 1,
+              "bias": 0.45262345679012345,
+              "rmse": 0.7254840870024836,
+              "psnr_db": 62.98495485573034,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 759,
+                "0": 16651,
+                "1": 14557,
+                "2": 432,
+                "3": 1
+              }
+            },
+            "7,5": {
+              "samples": 32400,
+              "mismatches": 16043,
+              "mismatch_fraction": 0.49515432098765433,
+              "max_abs": 2,
+              "mean_abs": 0.5087654320987655,
+              "p95_abs": 1,
+              "bias": 0.465,
+              "rmse": 0.7321117772041286,
+              "psnr_db": 62.90596480944272,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 709,
+                "0": 16357,
+                "1": 14893,
+                "2": 441,
+                "3": 0
+              }
+            },
+            "7,6": {
+              "samples": 32400,
+              "mismatches": 15948,
+              "mismatch_fraction": 0.4922222222222222,
+              "max_abs": 2,
+              "mean_abs": 0.5046604938271605,
+              "p95_abs": 1,
+              "bias": 0.4570679012345679,
+              "rmse": 0.7276929551926671,
+              "psnr_db": 62.95854926364598,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 769,
+                "0": 16452,
+                "1": 14776,
+                "2": 402,
+                "3": 0
+              }
+            },
+            "7,7": {
+              "samples": 32400,
+              "mismatches": 16020,
+              "mismatch_fraction": 0.49444444444444446,
+              "max_abs": 3,
+              "mean_abs": 0.5076234567901234,
+              "p95_abs": 1,
+              "bias": 0.4633641975308642,
+              "rmse": 0.730824834191891,
+              "psnr_db": 62.92124674000786,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 717,
+                "0": 16380,
+                "1": 14878,
+                "2": 423,
+                "3": 2
+              }
+            }
+          }
+        }
+      },
+      "Cb": {
+        "samples": 1036800,
+        "mismatches": 466781,
+        "mismatch_fraction": 0.4502131558641975,
+        "max_abs": 3,
+        "mean_abs": 0.4627787422839506,
+        "p95_abs": 1,
+        "bias": 0.39553337191358023,
+        "rmse": 0.6985220563959345,
+        "psnr_db": 63.31391019695539,
+        "signed_histogram": {
+          "-3": 0,
+          "-2": 18,
+          "-1": 34824,
+          "0": 570019,
+          "1": 418941,
+          "2": 12986,
+          "3": 12
+        },
+        "first_32_differences": [
+          {
+            "x": 0,
+            "y": 0,
+            "gopro": 175,
+            "ffmpeg": 174,
+            "delta": 1
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "gopro": 176,
+            "ffmpeg": 175,
+            "delta": 1
+          },
+          {
+            "x": 2,
+            "y": 0,
+            "gopro": 177,
+            "ffmpeg": 176,
+            "delta": 1
+          },
+          {
+            "x": 6,
+            "y": 0,
+            "gopro": 178,
+            "ffmpeg": 179,
+            "delta": -1
+          },
+          {
+            "x": 7,
+            "y": 0,
+            "gopro": 178,
+            "ffmpeg": 179,
+            "delta": -1
+          },
+          {
+            "x": 10,
+            "y": 0,
+            "gopro": 178,
+            "ffmpeg": 179,
+            "delta": -1
+          },
+          {
+            "x": 11,
+            "y": 0,
+            "gopro": 179,
+            "ffmpeg": 180,
+            "delta": -1
+          },
+          {
+            "x": 12,
+            "y": 0,
+            "gopro": 181,
+            "ffmpeg": 180,
+            "delta": 1
+          },
+          {
+            "x": 13,
+            "y": 0,
+            "gopro": 181,
+            "ffmpeg": 180,
+            "delta": 1
+          },
+          {
+            "x": 14,
+            "y": 0,
+            "gopro": 178,
+            "ffmpeg": 177,
+            "delta": 1
+          },
+          {
+            "x": 15,
+            "y": 0,
+            "gopro": 178,
+            "ffmpeg": 177,
+            "delta": 1
+          },
+          {
+            "x": 16,
+            "y": 0,
+            "gopro": 181,
+            "ffmpeg": 180,
+            "delta": 1
+          },
+          {
+            "x": 17,
+            "y": 0,
+            "gopro": 182,
+            "ffmpeg": 181,
+            "delta": 1
+          },
+          {
+            "x": 18,
+            "y": 0,
+            "gopro": 181,
+            "ffmpeg": 179,
+            "delta": 2
+          },
+          {
+            "x": 19,
+            "y": 0,
+            "gopro": 182,
+            "ffmpeg": 180,
+            "delta": 2
+          },
+          {
+            "x": 20,
+            "y": 0,
+            "gopro": 184,
+            "ffmpeg": 183,
+            "delta": 1
+          },
+          {
+            "x": 22,
+            "y": 0,
+            "gopro": 183,
+            "ffmpeg": 182,
+            "delta": 1
+          },
+          {
+            "x": 23,
+            "y": 0,
+            "gopro": 183,
+            "ffmpeg": 181,
+            "delta": 2
+          },
+          {
+            "x": 24,
+            "y": 0,
+            "gopro": 183,
+            "ffmpeg": 181,
+            "delta": 2
+          },
+          {
+            "x": 25,
+            "y": 0,
+            "gopro": 184,
+            "ffmpeg": 182,
+            "delta": 2
+          },
+          {
+            "x": 26,
+            "y": 0,
+            "gopro": 185,
+            "ffmpeg": 184,
+            "delta": 1
+          },
+          {
+            "x": 28,
+            "y": 0,
+            "gopro": 185,
+            "ffmpeg": 184,
+            "delta": 1
+          },
+          {
+            "x": 29,
+            "y": 0,
+            "gopro": 185,
+            "ffmpeg": 184,
+            "delta": 1
+          },
+          {
+            "x": 30,
+            "y": 0,
+            "gopro": 186,
+            "ffmpeg": 185,
+            "delta": 1
+          },
+          {
+            "x": 32,
+            "y": 0,
+            "gopro": 187,
+            "ffmpeg": 186,
+            "delta": 1
+          },
+          {
+            "x": 36,
+            "y": 0,
+            "gopro": 189,
+            "ffmpeg": 188,
+            "delta": 1
+          },
+          {
+            "x": 40,
+            "y": 0,
+            "gopro": 191,
+            "ffmpeg": 190,
+            "delta": 1
+          },
+          {
+            "x": 41,
+            "y": 0,
+            "gopro": 187,
+            "ffmpeg": 186,
+            "delta": 1
+          },
+          {
+            "x": 46,
+            "y": 0,
+            "gopro": 195,
+            "ffmpeg": 194,
+            "delta": 1
+          },
+          {
+            "x": 47,
+            "y": 0,
+            "gopro": 195,
+            "ffmpeg": 194,
+            "delta": 1
+          },
+          {
+            "x": 48,
+            "y": 0,
+            "gopro": 196,
+            "ffmpeg": 195,
+            "delta": 1
+          },
+          {
+            "x": 49,
+            "y": 0,
+            "gopro": 197,
+            "ffmpeg": 196,
+            "delta": 1
+          }
+        ],
+        "groups": {
+          "border": {
+            "border": {
+              "samples": 23872,
+              "mismatches": 11474,
+              "mismatch_fraction": 0.48064678284182305,
+              "max_abs": 3,
+              "mean_abs": 0.5082104557640751,
+              "p95_abs": 1,
+              "bias": 0.41420911528150134,
+              "rmse": 0.7512277707452474,
+              "psnr_db": 62.68207999061321,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 18,
+                "-1": 1086,
+                "0": 12398,
+                "1": 9742,
+                "2": 616,
+                "3": 12
+              }
+            },
+            "interior": {
+              "samples": 1012928,
+              "mismatches": 455307,
+              "mismatch_fraction": 0.44949591678776774,
+              "max_abs": 2,
+              "mean_abs": 0.4617080384785493,
+              "p95_abs": 1,
+              "bias": 0.39509323466228596,
+              "rmse": 0.6972318709440299,
+              "psnr_db": 63.329968058474016,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 33738,
+                "0": 557621,
+                "1": 409199,
+                "2": 12370,
+                "3": 0
+              }
+            }
+          },
+          "parity": {
+            "0,0": {
+              "samples": 259200,
+              "mismatches": 128630,
+              "mismatch_fraction": 0.49625771604938274,
+              "max_abs": 3,
+              "mean_abs": 0.5087770061728395,
+              "p95_abs": 1,
+              "bias": 0.3982908950617284,
+              "rmse": 0.7306532465312575,
+              "psnr_db": 62.92328630736097,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 7,
+                "-1": 14305,
+                "0": 130570,
+                "1": 111085,
+                "2": 3228,
+                "3": 5
+              }
+            },
+            "0,1": {
+              "samples": 259200,
+              "mismatches": 98841,
+              "mismatch_fraction": 0.3813310185185185,
+              "max_abs": 3,
+              "mean_abs": 0.3908101851851852,
+              "p95_abs": 1,
+              "bias": 0.3549228395061728,
+              "rmse": 0.6401436952882407,
+              "psnr_db": 64.07196322375358,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 4649,
+                "0": 160359,
+                "1": 91737,
+                "2": 2452,
+                "3": 2
+              }
+            },
+            "1,0": {
+              "samples": 259200,
+              "mismatches": 121261,
+              "mismatch_fraction": 0.46782793209876544,
+              "max_abs": 3,
+              "mean_abs": 0.49119984567901237,
+              "p95_abs": 1,
+              "bias": 0.39807484567901236,
+              "rmse": 0.7334727350668324,
+              "psnr_db": 62.889833179916906,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 10,
+                "-1": 12049,
+                "0": 137939,
+                "1": 103159,
+                "2": 6038,
+                "3": 5
+              }
+            },
+            "1,1": {
+              "samples": 259200,
+              "mismatches": 118049,
+              "mismatch_fraction": 0.45543595679012344,
+              "max_abs": 2,
+              "mean_abs": 0.46032793209876544,
+              "p95_abs": 1,
+              "bias": 0.4308449074074074,
+              "rmse": 0.6856470540416909,
+              "psnr_db": 63.47550038714712,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 3821,
+                "0": 141151,
+                "1": 112960,
+                "2": 1268,
+                "3": 0
+              }
+            }
+          },
+          "reference_code_bin": {
+            "10": {
+              "samples": 115590,
+              "mismatches": 51958,
+              "mismatch_fraction": 0.4495025521238861,
+              "max_abs": 3,
+              "mean_abs": 0.462150705078294,
+              "p95_abs": 1,
+              "bias": 0.3950514750410935,
+              "rmse": 0.6981864461029954,
+              "psnr_db": 63.31808440226274,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 3872,
+                "0": 63632,
+                "1": 46625,
+                "2": 1457,
+                "3": 1
+              }
+            },
+            "11": {
+              "samples": 83117,
+              "mismatches": 37494,
+              "mismatch_fraction": 0.45109905314195653,
+              "max_abs": 2,
+              "mean_abs": 0.46374387911017,
+              "p95_abs": 1,
+              "bias": 0.3977645968935356,
+              "rmse": 0.6993093242954772,
+              "psnr_db": 63.304126294678625,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 2740,
+                "0": 45623,
+                "1": 33703,
+                "2": 1050,
+                "3": 0
+              }
+            },
+            "12": {
+              "samples": 50717,
+              "mismatches": 22825,
+              "mismatch_fraction": 0.45004633554823825,
+              "max_abs": 3,
+              "mean_abs": 0.4626259439635625,
+              "p95_abs": 1,
+              "bias": 0.3955084094090739,
+              "rmse": 0.6984444110330829,
+              "psnr_db": 63.31487574490383,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 4,
+                "-1": 1694,
+                "0": 27892,
+                "1": 20494,
+                "2": 632,
+                "3": 1
+              }
+            },
+            "13": {
+              "samples": 18265,
+              "mismatches": 8278,
+              "mismatch_fraction": 0.4532165343553244,
+              "max_abs": 3,
+              "mean_abs": 0.4668491650698056,
+              "p95_abs": 1,
+              "bias": 0.39687927730632355,
+              "rmse": 0.7031663555833841,
+              "psnr_db": 63.2563510169459,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 635,
+                "0": 9987,
+                "1": 7397,
+                "2": 241,
+                "3": 3
+              }
+            },
+            "14": {
+              "samples": 64,
+              "mismatches": 31,
+              "mismatch_fraction": 0.484375,
+              "max_abs": 2,
+              "mean_abs": 0.515625,
+              "p95_abs": 1,
+              "bias": 0.421875,
+              "rmse": 0.7603453162872774,
+              "psnr_db": 62.577295173412125,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 3,
+                "0": 33,
+                "1": 26,
+                "2": 2,
+                "3": 0
+              }
+            },
+            "2": {
+              "samples": 1257,
+              "mismatches": 634,
+              "mismatch_fraction": 0.5043754972155927,
+              "max_abs": 2,
+              "mean_abs": 0.5250596658711217,
+              "p95_abs": 1,
+              "bias": 0.4518695306284805,
+              "rmse": 0.7526141130633811,
+              "psnr_db": 62.66606551473422,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 44,
+                "0": 623,
+                "1": 564,
+                "2": 25,
+                "3": 0
+              }
+            },
+            "3": {
+              "samples": 25247,
+              "mismatches": 11405,
+              "mismatch_fraction": 0.4517368400205965,
+              "max_abs": 3,
+              "mean_abs": 0.46619400324791066,
+              "p95_abs": 1,
+              "bias": 0.39759179308432685,
+              "rmse": 0.7037519196194378,
+              "psnr_db": 63.24912082457935,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 864,
+                "0": 13842,
+                "1": 10178,
+                "2": 360,
+                "3": 2
+              }
+            },
+            "4": {
+              "samples": 57659,
+              "mismatches": 26140,
+              "mismatch_fraction": 0.45335507032726896,
+              "max_abs": 3,
+              "mean_abs": 0.46582493626320265,
+              "p95_abs": 1,
+              "bias": 0.3990877399885534,
+              "rmse": 0.7006202453629364,
+              "psnr_db": 63.28785902053689,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 1922,
+                "0": 31519,
+                "1": 23502,
+                "2": 712,
+                "3": 3
+              }
+            },
+            "5": {
+              "samples": 90120,
+              "mismatches": 40260,
+              "mismatch_fraction": 0.44673768308921435,
+              "max_abs": 3,
+              "mean_abs": 0.45944296493564135,
+              "p95_abs": 1,
+              "bias": 0.39297603195739017,
+              "rmse": 0.69634611644827,
+              "psnr_db": 63.34100951708233,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 2989,
+                "0": 49860,
+                "1": 36128,
+                "2": 1138,
+                "3": 2
+              }
+            },
+            "6": {
+              "samples": 122415,
+              "mismatches": 55136,
+              "mismatch_fraction": 0.450402319977127,
+              "max_abs": 2,
+              "mean_abs": 0.46254135522607526,
+              "p95_abs": 1,
+              "bias": 0.3947718825307356,
+              "rmse": 0.6977244626096836,
+              "psnr_db": 63.323833677175585,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 4148,
+                "0": 67279,
+                "1": 49502,
+                "2": 1486,
+                "3": 0
+              }
+            },
+            "7": {
+              "samples": 154919,
+              "mismatches": 69686,
+              "mismatch_fraction": 0.4498221651314558,
+              "max_abs": 2,
+              "mean_abs": 0.46188007926722996,
+              "p95_abs": 1,
+              "bias": 0.3948902329604503,
+              "rmse": 0.6971340671196454,
+              "psnr_db": 63.331186552418814,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 5187,
+                "0": 85233,
+                "1": 62631,
+                "2": 1867,
+                "3": 0
+              }
+            },
+            "8": {
+              "samples": 169568,
+              "mismatches": 76367,
+              "mismatch_fraction": 0.45036209662200416,
+              "max_abs": 2,
+              "mean_abs": 0.4629529156444612,
+              "p95_abs": 1,
+              "bias": 0.39328175127382525,
+              "rmse": 0.6986662677483259,
+              "psnr_db": 63.31211716179438,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 5905,
+                "0": 93201,
+                "1": 68327,
+                "2": 2134,
+                "3": 0
+              }
+            },
+            "9": {
+              "samples": 147862,
+              "mismatches": 66567,
+              "mismatch_fraction": 0.45019680512910687,
+              "max_abs": 2,
+              "mean_abs": 0.4629248894239223,
+              "p95_abs": 1,
+              "bias": 0.3977154373672749,
+              "rmse": 0.6988426561204985,
+              "psnr_db": 63.30992456049345,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 4821,
+                "0": 81295,
+                "1": 59864,
+                "2": 1882,
+                "3": 0
+              }
+            }
+          },
+          "spatial_8x8": {
+            "0,0": {
+              "samples": 16200,
+              "mismatches": 7326,
+              "mismatch_fraction": 0.45222222222222225,
+              "max_abs": 2,
+              "mean_abs": 0.4659259259259259,
+              "p95_abs": 1,
+              "bias": 0.39555555555555555,
+              "rmse": 0.7023769168568492,
+              "psnr_db": 63.26610806749025,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 568,
+                "0": 8874,
+                "1": 6536,
+                "2": 221,
+                "3": 0
+              }
+            },
+            "0,1": {
+              "samples": 16200,
+              "mismatches": 7383,
+              "mismatch_fraction": 0.4557407407407407,
+              "max_abs": 3,
+              "mean_abs": 0.46944444444444444,
+              "p95_abs": 1,
+              "bias": 0.3984567901234568,
+              "rmse": 0.7050523139683316,
+              "psnr_db": 63.233085828745246,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 573,
+                "0": 8817,
+                "1": 6590,
+                "2": 217,
+                "3": 2
+              }
+            },
+            "0,2": {
+              "samples": 16200,
+              "mismatches": 7184,
+              "mismatch_fraction": 0.4434567901234568,
+              "max_abs": 3,
+              "mean_abs": 0.45611111111111113,
+              "p95_abs": 1,
+              "bias": 0.38969135802469135,
+              "rmse": 0.6940220937885672,
+              "psnr_db": 63.37004675051416,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 536,
+                "0": 9016,
+                "1": 6445,
+                "2": 200,
+                "3": 2
+              }
+            },
+            "0,3": {
+              "samples": 16200,
+              "mismatches": 7122,
+              "mismatch_fraction": 0.43962962962962965,
+              "max_abs": 3,
+              "mean_abs": 0.4523456790123457,
+              "p95_abs": 1,
+              "bias": 0.3817283950617284,
+              "rmse": 0.6913932971601798,
+              "psnr_db": 63.403009376666134,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 572,
+                "0": 9078,
+                "1": 6346,
+                "2": 202,
+                "3": 2
+              }
+            },
+            "0,4": {
+              "samples": 16200,
+              "mismatches": 7454,
+              "mismatch_fraction": 0.46012345679012345,
+              "max_abs": 3,
+              "mean_abs": 0.4719753086419753,
+              "p95_abs": 1,
+              "bias": 0.405679012345679,
+              "rmse": 0.7041324230113271,
+              "psnr_db": 63.24442582166007,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 531,
+                "0": 8746,
+                "1": 6732,
+                "2": 187,
+                "3": 1
+              }
+            },
+            "0,5": {
+              "samples": 16200,
+              "mismatches": 7292,
+              "mismatch_fraction": 0.45012345679012344,
+              "max_abs": 2,
+              "mean_abs": 0.462037037037037,
+              "p95_abs": 1,
+              "bias": 0.3921604938271605,
+              "rmse": 0.6970395953824031,
+              "psnr_db": 63.332363695707244,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 566,
+                "0": 8908,
+                "1": 6533,
+                "2": 193,
+                "3": 0
+              }
+            },
+            "0,6": {
+              "samples": 16200,
+              "mismatches": 7050,
+              "mismatch_fraction": 0.4351851851851852,
+              "max_abs": 2,
+              "mean_abs": 0.4461728395061728,
+              "p95_abs": 1,
+              "bias": 0.3739506172839506,
+              "rmse": 0.6842135252595846,
+              "psnr_db": 63.493679576369416,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 585,
+                "0": 9150,
+                "1": 6287,
+                "2": 178,
+                "3": 0
+              }
+            },
+            "0,7": {
+              "samples": 16200,
+              "mismatches": 7385,
+              "mismatch_fraction": 0.4558641975308642,
+              "max_abs": 2,
+              "mean_abs": 0.47086419753086417,
+              "p95_abs": 1,
+              "bias": 0.39814814814814814,
+              "rmse": 0.7077175973019635,
+              "psnr_db": 63.20031278598644,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 587,
+                "0": 8815,
+                "1": 6555,
+                "2": 242,
+                "3": 0
+              }
+            },
+            "1,0": {
+              "samples": 16200,
+              "mismatches": 7396,
+              "mismatch_fraction": 0.45654320987654323,
+              "max_abs": 2,
+              "mean_abs": 0.4695679012345679,
+              "p95_abs": 1,
+              "bias": 0.4069753086419753,
+              "rmse": 0.7040009118961547,
+              "psnr_db": 63.24604824051427,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 507,
+                "0": 8804,
+                "1": 6678,
+                "2": 211,
+                "3": 0
+              }
+            },
+            "1,1": {
+              "samples": 16200,
+              "mismatches": 7257,
+              "mismatch_fraction": 0.44796296296296295,
+              "max_abs": 2,
+              "mean_abs": 0.45944444444444443,
+              "p95_abs": 1,
+              "bias": 0.3954938271604938,
+              "rmse": 0.6945555466680886,
+              "psnr_db": 63.363372996117455,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 518,
+                "0": 8943,
+                "1": 6553,
+                "2": 186,
+                "3": 0
+              }
+            },
+            "1,2": {
+              "samples": 16200,
+              "mismatches": 7182,
+              "mismatch_fraction": 0.44333333333333336,
+              "max_abs": 2,
+              "mean_abs": 0.4554320987654321,
+              "p95_abs": 1,
+              "bias": 0.38308641975308644,
+              "rmse": 0.6925529796554409,
+              "psnr_db": 63.388452631660364,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 586,
+                "0": 9018,
+                "1": 6400,
+                "2": 196,
+                "3": 0
+              }
+            },
+            "1,3": {
+              "samples": 16200,
+              "mismatches": 7291,
+              "mismatch_fraction": 0.45006172839506176,
+              "max_abs": 2,
+              "mean_abs": 0.46283950617283953,
+              "p95_abs": 1,
+              "bias": 0.39753086419753086,
+              "rmse": 0.698852675267395,
+              "psnr_db": 63.30980003377828,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 529,
+                "0": 8909,
+                "1": 6555,
+                "2": 207,
+                "3": 0
+              }
+            },
+            "1,4": {
+              "samples": 16200,
+              "mismatches": 7304,
+              "mismatch_fraction": 0.4508641975308642,
+              "max_abs": 2,
+              "mean_abs": 0.46444444444444444,
+              "p95_abs": 1,
+              "bias": 0.39666666666666667,
+              "rmse": 0.7011454473014889,
+              "psnr_db": 63.2813503061158,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 549,
+                "0": 8896,
+                "1": 6535,
+                "2": 220,
+                "3": 0
+              }
+            },
+            "1,5": {
+              "samples": 16200,
+              "mismatches": 7251,
+              "mismatch_fraction": 0.4475925925925926,
+              "max_abs": 2,
+              "mean_abs": 0.46030864197530863,
+              "p95_abs": 1,
+              "bias": 0.3957407407407407,
+              "rmse": 0.696951031809797,
+              "psnr_db": 63.33346736656935,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 523,
+                "0": 8949,
+                "1": 6522,
+                "2": 206,
+                "3": 0
+              }
+            },
+            "1,6": {
+              "samples": 16200,
+              "mismatches": 7246,
+              "mismatch_fraction": 0.44728395061728393,
+              "max_abs": 2,
+              "mean_abs": 0.4587037037037037,
+              "p95_abs": 1,
+              "bias": 0.3967283950617284,
+              "rmse": 0.6939331451058836,
+              "psnr_db": 63.371160040655866,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 502,
+                "0": 8954,
+                "1": 6559,
+                "2": 185,
+                "3": 0
+              }
+            },
+            "1,7": {
+              "samples": 16200,
+              "mismatches": 7236,
+              "mismatch_fraction": 0.44666666666666666,
+              "max_abs": 2,
+              "mean_abs": 0.4587037037037037,
+              "p95_abs": 1,
+              "bias": 0.39438271604938274,
+              "rmse": 0.6948221195225277,
+              "psnr_db": 63.36003996078959,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 521,
+                "0": 8964,
+                "1": 6520,
+                "2": 195,
+                "3": 0
+              }
+            },
+            "2,0": {
+              "samples": 16200,
+              "mismatches": 7284,
+              "mismatch_fraction": 0.44962962962962966,
+              "max_abs": 2,
+              "mean_abs": 0.4619135802469136,
+              "p95_abs": 1,
+              "bias": 0.3946296296296296,
+              "rmse": 0.6974822445636029,
+              "psnr_db": 63.32684954461219,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 545,
+                "0": 8916,
+                "1": 6540,
+                "2": 199,
+                "3": 0
+              }
+            },
+            "2,1": {
+              "samples": 16200,
+              "mismatches": 7095,
+              "mismatch_fraction": 0.43796296296296294,
+              "max_abs": 2,
+              "mean_abs": 0.45135802469135805,
+              "p95_abs": 1,
+              "bias": 0.38851851851851854,
+              "rmse": 0.6914825725556272,
+              "psnr_db": 63.40188789316887,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 509,
+                "0": 9105,
+                "1": 6369,
+                "2": 217,
+                "3": 0
+              }
+            },
+            "2,2": {
+              "samples": 16200,
+              "mismatches": 7192,
+              "mismatch_fraction": 0.44395061728395063,
+              "max_abs": 2,
+              "mean_abs": 0.4579012345679012,
+              "p95_abs": 1,
+              "bias": 0.38679012345679015,
+              "rmse": 0.6969953150027642,
+              "psnr_db": 63.33291549607886,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 576,
+                "0": 9008,
+                "1": 6390,
+                "2": 226,
+                "3": 0
+              }
+            },
+            "2,3": {
+              "samples": 16200,
+              "mismatches": 7304,
+              "mismatch_fraction": 0.4508641975308642,
+              "max_abs": 2,
+              "mean_abs": 0.46209876543209877,
+              "p95_abs": 1,
+              "bias": 0.3976543209876543,
+              "rmse": 0.6961091158967593,
+              "psnr_db": 63.34396625221699,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 522,
+                "0": 8896,
+                "1": 6600,
+                "2": 182,
+                "3": 0
+              }
+            },
+            "2,4": {
+              "samples": 16200,
+              "mismatches": 7340,
+              "mismatch_fraction": 0.45308641975308644,
+              "max_abs": 2,
+              "mean_abs": 0.4656172839506173,
+              "p95_abs": 1,
+              "bias": 0.3983333333333333,
+              "rmse": 0.7004848409106931,
+              "psnr_db": 63.28953784983224,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 545,
+                "0": 8860,
+                "1": 6592,
+                "2": 203,
+                "3": 0
+              }
+            },
+            "2,5": {
+              "samples": 16200,
+              "mismatches": 7267,
+              "mismatch_fraction": 0.4485802469135802,
+              "max_abs": 2,
+              "mean_abs": 0.46141975308641975,
+              "p95_abs": 1,
+              "bias": 0.3924074074074074,
+              "rmse": 0.6979246130006441,
+              "psnr_db": 63.32134238584857,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 559,
+                "0": 8933,
+                "1": 6500,
+                "2": 208,
+                "3": 0
+              }
+            },
+            "2,6": {
+              "samples": 16200,
+              "mismatches": 7335,
+              "mismatch_fraction": 0.4527777777777778,
+              "max_abs": 2,
+              "mean_abs": 0.4649382716049383,
+              "p95_abs": 1,
+              "bias": 0.3932098765432099,
+              "rmse": 0.6994706993572063,
+              "psnr_db": 63.30212213968781,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 581,
+                "0": 8865,
+                "1": 6557,
+                "2": 197,
+                "3": 0
+              }
+            },
+            "2,7": {
+              "samples": 16200,
+              "mismatches": 7166,
+              "mismatch_fraction": 0.44234567901234567,
+              "max_abs": 2,
+              "mean_abs": 0.4545679012345679,
+              "p95_abs": 1,
+              "bias": 0.3877777777777778,
+              "rmse": 0.6921071778843305,
+              "psnr_db": 63.394045607087634,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 541,
+                "0": 9034,
+                "1": 6427,
+                "2": 198,
+                "3": 0
+              }
+            },
+            "3,0": {
+              "samples": 16200,
+              "mismatches": 7330,
+              "mismatch_fraction": 0.4524691358024691,
+              "max_abs": 2,
+              "mean_abs": 0.4650617283950617,
+              "p95_abs": 1,
+              "bias": 0.3991358024691358,
+              "rmse": 0.7001763446305844,
+              "psnr_db": 63.293363992390866,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 534,
+                "0": 8870,
+                "1": 6592,
+                "2": 204,
+                "3": 0
+              }
+            },
+            "3,1": {
+              "samples": 16200,
+              "mismatches": 7313,
+              "mismatch_fraction": 0.45141975308641974,
+              "max_abs": 2,
+              "mean_abs": 0.46185185185185185,
+              "p95_abs": 1,
+              "bias": 0.39666666666666667,
+              "rmse": 0.6947776978161547,
+              "psnr_db": 63.360595289071036,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 528,
+                "0": 8887,
+                "1": 6616,
+                "2": 169,
+                "3": 0
+              }
+            },
+            "3,2": {
+              "samples": 16200,
+              "mismatches": 7228,
+              "mismatch_fraction": 0.4461728395061728,
+              "max_abs": 2,
+              "mean_abs": 0.4567283950617284,
+              "p95_abs": 1,
+              "bias": 0.39141975308641974,
+              "rmse": 0.6912593624485961,
+              "psnr_db": 63.40469214510271,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 529,
+                "0": 8972,
+                "1": 6528,
+                "2": 171,
+                "3": 0
+              }
+            },
+            "3,3": {
+              "samples": 16200,
+              "mismatches": 7293,
+              "mismatch_fraction": 0.4501851851851852,
+              "max_abs": 2,
+              "mean_abs": 0.46141975308641975,
+              "p95_abs": 1,
+              "bias": 0.3929012345679012,
+              "rmse": 0.6956212251569736,
+              "psnr_db": 63.350056175199626,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 555,
+                "0": 8907,
+                "1": 6556,
+                "2": 182,
+                "3": 0
+              }
+            },
+            "3,4": {
+              "samples": 16200,
+              "mismatches": 7485,
+              "mismatch_fraction": 0.462037037037037,
+              "max_abs": 2,
+              "mean_abs": 0.4738888888888889,
+              "p95_abs": 1,
+              "bias": 0.4061111111111111,
+              "rmse": 0.7054024330781633,
+              "psnr_db": 63.228773608141196,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 549,
+                "0": 8715,
+                "1": 6744,
+                "2": 192,
+                "3": 0
+              }
+            },
+            "3,5": {
+              "samples": 16200,
+              "mismatches": 7106,
+              "mismatch_fraction": 0.43864197530864196,
+              "max_abs": 2,
+              "mean_abs": 0.45055555555555554,
+              "p95_abs": 1,
+              "bias": 0.38228395061728393,
+              "rmse": 0.6887544671719978,
+              "psnr_db": 63.43622410131188,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 553,
+                "0": 9094,
+                "1": 6360,
+                "2": 193,
+                "3": 0
+              }
+            },
+            "3,6": {
+              "samples": 16200,
+              "mismatches": 7387,
+              "mismatch_fraction": 0.45598765432098765,
+              "max_abs": 2,
+              "mean_abs": 0.46660493827160493,
+              "p95_abs": 1,
+              "bias": 0.39796296296296296,
+              "rmse": 0.6984550852938501,
+              "psnr_db": 63.31474300027726,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 556,
+                "0": 8813,
+                "1": 6659,
+                "2": 172,
+                "3": 0
+              }
+            },
+            "3,7": {
+              "samples": 16200,
+              "mismatches": 7297,
+              "mismatch_fraction": 0.4504320987654321,
+              "max_abs": 2,
+              "mean_abs": 0.4641358024691358,
+              "p95_abs": 1,
+              "bias": 0.39685185185185184,
+              "rmse": 0.701101426240557,
+              "psnr_db": 63.28189566240696,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 545,
+                "0": 8903,
+                "1": 6530,
+                "2": 222,
+                "3": 0
+              }
+            },
+            "4,0": {
+              "samples": 16200,
+              "mismatches": 7218,
+              "mismatch_fraction": 0.44555555555555554,
+              "max_abs": 2,
+              "mean_abs": 0.4582098765432099,
+              "p95_abs": 1,
+              "bias": 0.3909259259259259,
+              "rmse": 0.6953549586495508,
+              "psnr_db": 63.35338155424345,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 545,
+                "0": 8982,
+                "1": 6468,
+                "2": 205,
+                "3": 0
+              }
+            },
+            "4,1": {
+              "samples": 16200,
+              "mismatches": 7331,
+              "mismatch_fraction": 0.45253086419753086,
+              "max_abs": 2,
+              "mean_abs": 0.4645679012345679,
+              "p95_abs": 1,
+              "bias": 0.3923456790123457,
+              "rmse": 0.6990293093344813,
+              "psnr_db": 63.307604964325925,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 585,
+                "0": 8869,
+                "1": 6551,
+                "2": 195,
+                "3": 0
+              }
+            },
+            "4,2": {
+              "samples": 16200,
+              "mismatches": 7499,
+              "mismatch_fraction": 0.4629012345679012,
+              "max_abs": 2,
+              "mean_abs": 0.4762345679012346,
+              "p95_abs": 1,
+              "bias": 0.41117283950617284,
+              "rmse": 0.7091552965097992,
+              "psnr_db": 63.18268565656308,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 527,
+                "0": 8701,
+                "1": 6756,
+                "2": 216,
+                "3": 0
+              }
+            },
+            "4,3": {
+              "samples": 16200,
+              "mismatches": 7223,
+              "mismatch_fraction": 0.4458641975308642,
+              "max_abs": 2,
+              "mean_abs": 0.4579012345679012,
+              "p95_abs": 1,
+              "bias": 0.38666666666666666,
+              "rmse": 0.694244415636147,
+              "psnr_db": 63.367264773083164,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 577,
+                "0": 8977,
+                "1": 6451,
+                "2": 195,
+                "3": 0
+              }
+            },
+            "4,4": {
+              "samples": 16200,
+              "mismatches": 7347,
+              "mismatch_fraction": 0.45351851851851854,
+              "max_abs": 2,
+              "mean_abs": 0.4671604938271605,
+              "p95_abs": 1,
+              "bias": 0.4012345679012346,
+              "rmse": 0.7031674369909662,
+              "psnr_db": 63.256337658827135,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 534,
+                "0": 8853,
+                "1": 6592,
+                "2": 221,
+                "3": 0
+              }
+            },
+            "4,5": {
+              "samples": 16200,
+              "mismatches": 7272,
+              "mismatch_fraction": 0.4488888888888889,
+              "max_abs": 2,
+              "mean_abs": 0.46141975308641975,
+              "p95_abs": 1,
+              "bias": 0.3983333333333333,
+              "rmse": 0.6974822445636029,
+              "psnr_db": 63.32684954461219,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 511,
+                "0": 8928,
+                "1": 6558,
+                "2": 203,
+                "3": 0
+              }
+            },
+            "4,6": {
+              "samples": 16200,
+              "mismatches": 7410,
+              "mismatch_fraction": 0.45740740740740743,
+              "max_abs": 2,
+              "mean_abs": 0.4688888888888889,
+              "p95_abs": 1,
+              "bias": 0.4039506172839506,
+              "rmse": 0.7013215039137556,
+              "psnr_db": 63.27916956551309,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 526,
+                "0": 8790,
+                "1": 6698,
+                "2": 186,
+                "3": 0
+              }
+            },
+            "4,7": {
+              "samples": 16200,
+              "mismatches": 7367,
+              "mismatch_fraction": 0.4547530864197531,
+              "max_abs": 2,
+              "mean_abs": 0.46641975308641975,
+              "p95_abs": 1,
+              "bias": 0.398641975308642,
+              "rmse": 0.6998236109333216,
+              "psnr_db": 63.29774085828819,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 549,
+                "0": 8833,
+                "1": 6629,
+                "2": 189,
+                "3": 0
+              }
+            },
+            "5,0": {
+              "samples": 16200,
+              "mismatches": 7290,
+              "mismatch_fraction": 0.45,
+              "max_abs": 2,
+              "mean_abs": 0.4627777777777778,
+              "p95_abs": 1,
+              "bias": 0.3904320987654321,
+              "rmse": 0.6988085097745543,
+              "psnr_db": 63.31034897453854,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 586,
+                "0": 8910,
+                "1": 6497,
+                "2": 207,
+                "3": 0
+              }
+            },
+            "5,1": {
+              "samples": 16200,
+              "mismatches": 7144,
+              "mismatch_fraction": 0.44098765432098763,
+              "max_abs": 2,
+              "mean_abs": 0.4532098765432099,
+              "p95_abs": 1,
+              "bias": 0.387037037037037,
+              "rmse": 0.6911254017815105,
+              "psnr_db": 63.40637556581725,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 536,
+                "0": 9056,
+                "1": 6410,
+                "2": 198,
+                "3": 0
+              }
+            },
+            "5,2": {
+              "samples": 16200,
+              "mismatches": 7286,
+              "mismatch_fraction": 0.4497530864197531,
+              "max_abs": 2,
+              "mean_abs": 0.4619135802469136,
+              "p95_abs": 1,
+              "bias": 0.39067901234567903,
+              "rmse": 0.6973052186103548,
+              "psnr_db": 63.32905436497634,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 577,
+                "0": 8914,
+                "1": 6512,
+                "2": 197,
+                "3": 0
+              }
+            },
+            "5,3": {
+              "samples": 16200,
+              "mismatches": 7448,
+              "mismatch_fraction": 0.4597530864197531,
+              "max_abs": 2,
+              "mean_abs": 0.4732098765432099,
+              "p95_abs": 1,
+              "bias": 0.4071604938271605,
+              "rmse": 0.7071940729319806,
+              "psnr_db": 63.20674043119382,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 535,
+                "0": 8752,
+                "1": 6695,
+                "2": 218,
+                "3": 0
+              }
+            },
+            "5,4": {
+              "samples": 16200,
+              "mismatches": 7229,
+              "mismatch_fraction": 0.44623456790123456,
+              "max_abs": 2,
+              "mean_abs": 0.46012345679012345,
+              "p95_abs": 1,
+              "bias": 0.3937037037037037,
+              "rmse": 0.6984992731334094,
+              "psnr_db": 63.314193503873796,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 538,
+                "0": 8971,
+                "1": 6466,
+                "2": 225,
+                "3": 0
+              }
+            },
+            "5,5": {
+              "samples": 16200,
+              "mismatches": 7379,
+              "mismatch_fraction": 0.4554938271604938,
+              "max_abs": 2,
+              "mean_abs": 0.46641975308641975,
+              "p95_abs": 1,
+              "bias": 0.4012345679012346,
+              "rmse": 0.6987643414902277,
+              "psnr_db": 63.31089798469275,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 528,
+                "0": 8821,
+                "1": 6674,
+                "2": 177,
+                "3": 0
+              }
+            },
+            "5,6": {
+              "samples": 16200,
+              "mismatches": 7136,
+              "mismatch_fraction": 0.44049382716049384,
+              "max_abs": 2,
+              "mean_abs": 0.4529012345679012,
+              "p95_abs": 1,
+              "bias": 0.3895679012345679,
+              "rmse": 0.6911700582220819,
+              "psnr_db": 63.40581435307253,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 513,
+                "0": 9064,
+                "1": 6422,
+                "2": 201,
+                "3": 0
+              }
+            },
+            "5,7": {
+              "samples": 16200,
+              "mismatches": 7098,
+              "mismatch_fraction": 0.4381481481481482,
+              "max_abs": 2,
+              "mean_abs": 0.4512962962962963,
+              "p95_abs": 1,
+              "bias": 0.3830246913580247,
+              "rmse": 0.6910807424553173,
+              "psnr_db": 63.40693685109351,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 551,
+                "0": 9102,
+                "1": 6334,
+                "2": 212,
+                "3": 0
+              }
+            },
+            "6,0": {
+              "samples": 16200,
+              "mismatches": 7402,
+              "mismatch_fraction": 0.4569135802469136,
+              "max_abs": 2,
+              "mean_abs": 0.470679012345679,
+              "p95_abs": 1,
+              "bias": 0.4038888888888889,
+              "rmse": 0.7058398377416861,
+              "psnr_db": 63.22338934657996,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 541,
+                "0": 8798,
+                "1": 6638,
+                "2": 223,
+                "3": 0
+              }
+            },
+            "6,1": {
+              "samples": 16200,
+              "mismatches": 7339,
+              "mismatch_fraction": 0.4530246913580247,
+              "max_abs": 2,
+              "mean_abs": 0.46487654320987654,
+              "p95_abs": 1,
+              "bias": 0.3954938271604938,
+              "rmse": 0.6989851550022935,
+              "psnr_db": 63.30815362768576,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 562,
+                "0": 8861,
+                "1": 6585,
+                "2": 192,
+                "3": 0
+              }
+            },
+            "6,2": {
+              "samples": 16200,
+              "mismatches": 7157,
+              "mismatch_fraction": 0.44179012345679014,
+              "max_abs": 2,
+              "mean_abs": 0.45438271604938274,
+              "p95_abs": 1,
+              "bias": 0.38969135802469135,
+              "rmse": 0.692508412392635,
+              "psnr_db": 63.38901160518827,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 524,
+                "0": 9043,
+                "1": 6429,
+                "2": 204,
+                "3": 0
+              }
+            },
+            "6,3": {
+              "samples": 16200,
+              "mismatches": 7313,
+              "mismatch_fraction": 0.45141975308641974,
+              "max_abs": 2,
+              "mean_abs": 0.46197530864197534,
+              "p95_abs": 1,
+              "bias": 0.3971604938271605,
+              "rmse": 0.6950441854681517,
+              "psnr_db": 63.3572643840229,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 525,
+                "0": 8887,
+                "1": 6617,
+                "2": 171,
+                "3": 0
+              }
+            },
+            "6,4": {
+              "samples": 16200,
+              "mismatches": 7286,
+              "mismatch_fraction": 0.4497530864197531,
+              "max_abs": 2,
+              "mean_abs": 0.46209876543209877,
+              "p95_abs": 1,
+              "bias": 0.39185185185185184,
+              "rmse": 0.69770346384176,
+              "psnr_db": 63.32409509229747,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 569,
+                "0": 8914,
+                "1": 6517,
+                "2": 200,
+                "3": 0
+              }
+            },
+            "6,5": {
+              "samples": 16200,
+              "mismatches": 7536,
+              "mismatch_fraction": 0.4651851851851852,
+              "max_abs": 2,
+              "mean_abs": 0.47802469135802467,
+              "p95_abs": 1,
+              "bias": 0.41358024691358025,
+              "rmse": 0.7097208632298361,
+              "psnr_db": 63.1757612321309,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 522,
+                "0": 8664,
+                "1": 6806,
+                "2": 208,
+                "3": 0
+              }
+            },
+            "6,6": {
+              "samples": 16200,
+              "mismatches": 7330,
+              "mismatch_fraction": 0.4524691358024691,
+              "max_abs": 2,
+              "mean_abs": 0.4664814814814815,
+              "p95_abs": 1,
+              "bias": 0.4026543209876543,
+              "rmse": 0.7032113287195437,
+              "psnr_db": 63.255795502304494,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 517,
+                "0": 8870,
+                "1": 6586,
+                "2": 227,
+                "3": 0
+              }
+            },
+            "6,7": {
+              "samples": 16200,
+              "mismatches": 7259,
+              "mismatch_fraction": 0.44808641975308644,
+              "max_abs": 2,
+              "mean_abs": 0.4597530864197531,
+              "p95_abs": 1,
+              "bias": 0.3937037037037037,
+              "rmse": 0.6950441854681517,
+              "psnr_db": 63.3572643840229,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 535,
+                "0": 8941,
+                "1": 6535,
+                "2": 189,
+                "3": 0
+              }
+            },
+            "7,0": {
+              "samples": 16200,
+              "mismatches": 7245,
+              "mismatch_fraction": 0.44722222222222224,
+              "max_abs": 2,
+              "mean_abs": 0.46185185185185185,
+              "p95_abs": 1,
+              "bias": 0.38728395061728393,
+              "rmse": 0.7007932013876212,
+              "psnr_db": 63.28571507514553,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 602,
+                "0": 8955,
+                "1": 6406,
+                "2": 236,
+                "3": 0
+              }
+            },
+            "7,1": {
+              "samples": 16200,
+              "mismatches": 7358,
+              "mismatch_fraction": 0.4541975308641975,
+              "max_abs": 2,
+              "mean_abs": 0.4674074074074074,
+              "p95_abs": 1,
+              "bias": 0.41160493827160494,
+              "rmse": 0.7027283689263065,
+              "psnr_db": 63.26176294975007,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 452,
+                "0": 8842,
+                "1": 6692,
+                "2": 214,
+                "3": 0
+              }
+            },
+            "7,2": {
+              "samples": 16200,
+              "mismatches": 7380,
+              "mismatch_fraction": 0.45555555555555555,
+              "max_abs": 3,
+              "mean_abs": 0.4701851851851852,
+              "p95_abs": 1,
+              "bias": 0.4027777777777778,
+              "rmse": 0.7068011751791079,
+              "psnr_db": 63.21156741574399,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 542,
+                "0": 8820,
+                "1": 6602,
+                "2": 233,
+                "3": 1
+              }
+            },
+            "7,3": {
+              "samples": 16200,
+              "mismatches": 7305,
+              "mismatch_fraction": 0.45092592592592595,
+              "max_abs": 2,
+              "mean_abs": 0.465,
+              "p95_abs": 1,
+              "bias": 0.39524691358024694,
+              "rmse": 0.7022450769839175,
+              "psnr_db": 63.26773860808348,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 563,
+                "0": 8895,
+                "1": 6514,
+                "2": 227,
+                "3": 0
+              }
+            },
+            "7,4": {
+              "samples": 16200,
+              "mismatches": 7324,
+              "mismatch_fraction": 0.45209876543209876,
+              "max_abs": 2,
+              "mean_abs": 0.46617283950617283,
+              "p95_abs": 1,
+              "bias": 0.397037037037037,
+              "rmse": 0.7030796453136167,
+              "psnr_db": 63.257422174956886,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 558,
+                "0": 8876,
+                "1": 6538,
+                "2": 227,
+                "3": 0
+              }
+            },
+            "7,5": {
+              "samples": 16200,
+              "mismatches": 7312,
+              "mismatch_fraction": 0.45135802469135805,
+              "max_abs": 2,
+              "mean_abs": 0.463641975308642,
+              "p95_abs": 1,
+              "bias": 0.3937654320987654,
+              "rmse": 0.698720170413886,
+              "psnr_db": 63.31144706425843,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 560,
+                "0": 8888,
+                "1": 6553,
+                "2": 196,
+                "3": 0
+              }
+            },
+            "7,6": {
+              "samples": 16200,
+              "mismatches": 7374,
+              "mismatch_fraction": 0.4551851851851852,
+              "max_abs": 3,
+              "mean_abs": 0.4673456790123457,
+              "p95_abs": 1,
+              "bias": 0.4046296296296296,
+              "rmse": 0.7012774939043674,
+              "psnr_db": 63.27971464801384,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 506,
+                "0": 8826,
+                "1": 6672,
+                "2": 194,
+                "3": 1
+              }
+            },
+            "7,7": {
+              "samples": 16200,
+              "mismatches": 7403,
+              "mismatch_fraction": 0.45697530864197533,
+              "max_abs": 3,
+              "mean_abs": 0.4709259259259259,
+              "p95_abs": 1,
+              "bias": 0.4030246913580247,
+              "rmse": 0.706539121962965,
+              "psnr_db": 63.214788388563356,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 548,
+                "0": 8797,
+                "1": 6632,
+                "2": 219,
+                "3": 3
+              }
+            }
+          }
+        }
+      },
+      "Cr": {
+        "samples": 1036800,
+        "mismatches": 516925,
+        "mismatch_fraction": 0.4985773533950617,
+        "max_abs": 3,
+        "mean_abs": 0.5121894290123457,
+        "p95_abs": 1,
+        "bias": 0.4676716820987654,
+        "rmse": 0.7344517460554849,
+        "psnr_db": 62.87824732141799,
+        "signed_histogram": {
+          "-3": 0,
+          "-2": 24,
+          "-1": 23030,
+          "0": 519875,
+          "1": 479785,
+          "2": 14083,
+          "3": 3
+        },
+        "first_32_differences": [
+          {
+            "x": 2,
+            "y": 0,
+            "gopro": 258,
+            "ffmpeg": 257,
+            "delta": 1
+          },
+          {
+            "x": 3,
+            "y": 0,
+            "gopro": 268,
+            "ffmpeg": 267,
+            "delta": 1
+          },
+          {
+            "x": 12,
+            "y": 0,
+            "gopro": 266,
+            "ffmpeg": 264,
+            "delta": 2
+          },
+          {
+            "x": 13,
+            "y": 0,
+            "gopro": 263,
+            "ffmpeg": 261,
+            "delta": 2
+          },
+          {
+            "x": 14,
+            "y": 0,
+            "gopro": 265,
+            "ffmpeg": 264,
+            "delta": 1
+          },
+          {
+            "x": 15,
+            "y": 0,
+            "gopro": 266,
+            "ffmpeg": 265,
+            "delta": 1
+          },
+          {
+            "x": 16,
+            "y": 0,
+            "gopro": 264,
+            "ffmpeg": 263,
+            "delta": 1
+          },
+          {
+            "x": 24,
+            "y": 0,
+            "gopro": 269,
+            "ffmpeg": 268,
+            "delta": 1
+          },
+          {
+            "x": 25,
+            "y": 0,
+            "gopro": 270,
+            "ffmpeg": 269,
+            "delta": 1
+          },
+          {
+            "x": 26,
+            "y": 0,
+            "gopro": 271,
+            "ffmpeg": 270,
+            "delta": 1
+          },
+          {
+            "x": 27,
+            "y": 0,
+            "gopro": 271,
+            "ffmpeg": 270,
+            "delta": 1
+          },
+          {
+            "x": 30,
+            "y": 0,
+            "gopro": 268,
+            "ffmpeg": 267,
+            "delta": 1
+          },
+          {
+            "x": 31,
+            "y": 0,
+            "gopro": 273,
+            "ffmpeg": 272,
+            "delta": 1
+          },
+          {
+            "x": 32,
+            "y": 0,
+            "gopro": 268,
+            "ffmpeg": 267,
+            "delta": 1
+          },
+          {
+            "x": 33,
+            "y": 0,
+            "gopro": 266,
+            "ffmpeg": 265,
+            "delta": 1
+          },
+          {
+            "x": 34,
+            "y": 0,
+            "gopro": 267,
+            "ffmpeg": 266,
+            "delta": 1
+          },
+          {
+            "x": 35,
+            "y": 0,
+            "gopro": 265,
+            "ffmpeg": 264,
+            "delta": 1
+          },
+          {
+            "x": 36,
+            "y": 0,
+            "gopro": 263,
+            "ffmpeg": 262,
+            "delta": 1
+          },
+          {
+            "x": 37,
+            "y": 0,
+            "gopro": 268,
+            "ffmpeg": 267,
+            "delta": 1
+          },
+          {
+            "x": 38,
+            "y": 0,
+            "gopro": 272,
+            "ffmpeg": 271,
+            "delta": 1
+          },
+          {
+            "x": 39,
+            "y": 0,
+            "gopro": 270,
+            "ffmpeg": 269,
+            "delta": 1
+          },
+          {
+            "x": 42,
+            "y": 0,
+            "gopro": 266,
+            "ffmpeg": 265,
+            "delta": 1
+          },
+          {
+            "x": 43,
+            "y": 0,
+            "gopro": 268,
+            "ffmpeg": 267,
+            "delta": 1
+          },
+          {
+            "x": 44,
+            "y": 0,
+            "gopro": 275,
+            "ffmpeg": 274,
+            "delta": 1
+          },
+          {
+            "x": 50,
+            "y": 0,
+            "gopro": 267,
+            "ffmpeg": 266,
+            "delta": 1
+          },
+          {
+            "x": 60,
+            "y": 0,
+            "gopro": 272,
+            "ffmpeg": 271,
+            "delta": 1
+          },
+          {
+            "x": 61,
+            "y": 0,
+            "gopro": 265,
+            "ffmpeg": 264,
+            "delta": 1
+          },
+          {
+            "x": 62,
+            "y": 0,
+            "gopro": 275,
+            "ffmpeg": 274,
+            "delta": 1
+          },
+          {
+            "x": 63,
+            "y": 0,
+            "gopro": 276,
+            "ffmpeg": 275,
+            "delta": 1
+          },
+          {
+            "x": 65,
+            "y": 0,
+            "gopro": 262,
+            "ffmpeg": 263,
+            "delta": -1
+          },
+          {
+            "x": 68,
+            "y": 0,
+            "gopro": 264,
+            "ffmpeg": 263,
+            "delta": 1
+          },
+          {
+            "x": 69,
+            "y": 0,
+            "gopro": 266,
+            "ffmpeg": 265,
+            "delta": 1
+          }
+        ],
+        "groups": {
+          "border": {
+            "border": {
+              "samples": 23872,
+              "mismatches": 12416,
+              "mismatch_fraction": 0.5201072386058981,
+              "max_abs": 3,
+              "mean_abs": 0.542308981233244,
+              "p95_abs": 1,
+              "bias": 0.4782171581769437,
+              "rmse": 0.766026270208009,
+              "psnr_db": 62.51263940141506,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 9,
+                "-1": 747,
+                "0": 11456,
+                "1": 11140,
+                "2": 519,
+                "3": 1
+              }
+            },
+            "interior": {
+              "samples": 1012928,
+              "mismatches": 504509,
+              "mismatch_fraction": 0.4980699516648765,
+              "max_abs": 3,
+              "mean_abs": 0.5114795918367347,
+              "p95_abs": 1,
+              "bias": 0.4674231534719151,
+              "rmse": 0.7336912301019083,
+              "psnr_db": 62.887246115593875,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 15,
+                "-1": 22283,
+                "0": 508419,
+                "1": 468645,
+                "2": 13564,
+                "3": 2
+              }
+            }
+          },
+          "parity": {
+            "0,0": {
+              "samples": 259200,
+              "mismatches": 129402,
+              "mismatch_fraction": 0.4992361111111111,
+              "max_abs": 3,
+              "mean_abs": 0.5126041666666666,
+              "p95_abs": 1,
+              "bias": 0.46807484567901236,
+              "rmse": 0.7344031548319768,
+              "psnr_db": 62.87882199765683,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 4,
+                "-1": 5763,
+                "0": 129798,
+                "1": 120175,
+                "2": 3459,
+                "3": 1
+              }
+            },
+            "0,1": {
+              "samples": 259200,
+              "mismatches": 129152,
+              "mismatch_fraction": 0.4982716049382716,
+              "max_abs": 2,
+              "mean_abs": 0.5121296296296296,
+              "p95_abs": 1,
+              "bias": 0.4673688271604938,
+              "rmse": 0.7347419131996933,
+              "psnr_db": 62.87481637845403,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 7,
+                "-1": 5787,
+                "0": 130048,
+                "1": 119773,
+                "2": 3585,
+                "3": 0
+              }
+            },
+            "1,0": {
+              "samples": 259200,
+              "mismatches": 129262,
+              "mismatch_fraction": 0.498695987654321,
+              "max_abs": 3,
+              "mean_abs": 0.5123533950617284,
+              "p95_abs": 1,
+              "bias": 0.4678935185185185,
+              "rmse": 0.734631636927861,
+              "psnr_db": 62.876120127971696,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 6,
+                "-1": 5750,
+                "0": 129938,
+                "1": 119974,
+                "2": 3530,
+                "3": 2
+              }
+            },
+            "1,1": {
+              "samples": 259200,
+              "mismatches": 129109,
+              "mismatch_fraction": 0.49810570987654323,
+              "max_abs": 2,
+              "mean_abs": 0.511670524691358,
+              "p95_abs": 1,
+              "bias": 0.467349537037037,
+              "rmse": 0.7340300772590913,
+              "psnr_db": 62.883235559844636,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 7,
+                "-1": 5730,
+                "0": 130091,
+                "1": 119863,
+                "2": 3509,
+                "3": 0
+              }
+            }
+          },
+          "reference_code_bin": {
+            "4": {
+              "samples": 88983,
+              "mismatches": 44976,
+              "mismatch_fraction": 0.5054448602542059,
+              "max_abs": 2,
+              "mean_abs": 0.519942011395435,
+              "p95_abs": 1,
+              "bias": 0.47719227268129866,
+              "rmse": 0.7409023644704432,
+              "psnr_db": 62.80229305893438,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 1896,
+                "0": 44007,
+                "1": 41790,
+                "2": 1287,
+                "3": 0
+              }
+            },
+            "5": {
+              "samples": 252216,
+              "mismatches": 126799,
+              "mismatch_fraction": 0.5027397151647794,
+              "max_abs": 3,
+              "mean_abs": 0.5163550290227424,
+              "p95_abs": 1,
+              "bias": 0.47341564373394235,
+              "rmse": 0.7372879942395033,
+              "psnr_db": 62.84476943326211,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 7,
+                "-1": 5401,
+                "0": 125417,
+                "1": 117965,
+                "2": 3425,
+                "3": 1
+              }
+            },
+            "6": {
+              "samples": 260968,
+              "mismatches": 129306,
+              "mismatch_fraction": 0.49548603660218876,
+              "max_abs": 3,
+              "mean_abs": 0.508725207688299,
+              "p95_abs": 1,
+              "bias": 0.46339397933846294,
+              "rmse": 0.7315813103376742,
+              "psnr_db": 62.91226063320471,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 4,
+                "-1": 5907,
+                "0": 131662,
+                "1": 119945,
+                "2": 3449,
+                "3": 1
+              }
+            },
+            "7": {
+              "samples": 260872,
+              "mismatches": 129827,
+              "mismatch_fraction": 0.4976655217884633,
+              "max_abs": 2,
+              "mean_abs": 0.5112277285412002,
+              "p95_abs": 1,
+              "bias": 0.46637814713729336,
+              "rmse": 0.7337248408270461,
+              "psnr_db": 62.88684822019796,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 4,
+                "-1": 5842,
+                "0": 131045,
+                "1": 120447,
+                "2": 3534,
+                "3": 0
+              }
+            },
+            "8": {
+              "samples": 166643,
+              "mismatches": 82579,
+              "mismatch_fraction": 0.4955443673001566,
+              "max_abs": 3,
+              "mean_abs": 0.5094303391081534,
+              "p95_abs": 1,
+              "bias": 0.4634038033400743,
+              "rmse": 0.7329490326266819,
+              "psnr_db": 62.89603715464224,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 6,
+                "-1": 3823,
+                "0": 84064,
+                "1": 76443,
+                "2": 2306,
+                "3": 1
+              }
+            },
+            "9": {
+              "samples": 7118,
+              "mismatches": 3438,
+              "mismatch_fraction": 0.4830008429334083,
+              "max_abs": 2,
+              "mean_abs": 0.49452093284630516,
+              "p95_abs": 1,
+              "bias": 0.4492835066029784,
+              "rmse": 0.7194172034863351,
+              "psnr_db": 63.05789629567336,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 161,
+                "0": 3680,
+                "1": 3195,
+                "2": 82,
+                "3": 0
+              }
+            }
+          },
+          "spatial_8x8": {
+            "0,0": {
+              "samples": 16200,
+              "mismatches": 8261,
+              "mismatch_fraction": 0.5099382716049383,
+              "max_abs": 2,
+              "mean_abs": 0.5264814814814814,
+              "p95_abs": 1,
+              "bias": 0.48104938271604936,
+              "rmse": 0.7480427135094412,
+              "psnr_db": 62.71898473535423,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 364,
+                "0": 7939,
+                "1": 7629,
+                "2": 266,
+                "3": 0
+              }
+            },
+            "0,1": {
+              "samples": 16200,
+              "mismatches": 8265,
+              "mismatch_fraction": 0.5101851851851852,
+              "max_abs": 2,
+              "mean_abs": 0.5241358024691358,
+              "p95_abs": 1,
+              "bias": 0.4821604938271605,
+              "rmse": 0.7429919495102467,
+              "psnr_db": 62.77783051214658,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 338,
+                "0": 7935,
+                "1": 7701,
+                "2": 225,
+                "3": 0
+              }
+            },
+            "0,2": {
+              "samples": 16200,
+              "mismatches": 8147,
+              "mismatch_fraction": 0.5029012345679013,
+              "max_abs": 2,
+              "mean_abs": 0.5167283950617284,
+              "p95_abs": 1,
+              "bias": 0.4733950617283951,
+              "rmse": 0.7378229571173445,
+              "psnr_db": 62.83846939363889,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 351,
+                "0": 8053,
+                "1": 7572,
+                "2": 224,
+                "3": 0
+              }
+            },
+            "0,3": {
+              "samples": 16200,
+              "mismatches": 8122,
+              "mismatch_fraction": 0.501358024691358,
+              "max_abs": 2,
+              "mean_abs": 0.5170370370370371,
+              "p95_abs": 1,
+              "bias": 0.4706172839506173,
+              "rmse": 0.7405370090200726,
+              "psnr_db": 62.80657732090515,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 370,
+                "0": 8078,
+                "1": 7498,
+                "2": 251,
+                "3": 0
+              }
+            },
+            "0,4": {
+              "samples": 16200,
+              "mismatches": 8145,
+              "mismatch_fraction": 0.5027777777777778,
+              "max_abs": 2,
+              "mean_abs": 0.5167283950617284,
+              "p95_abs": 1,
+              "bias": 0.4716666666666667,
+              "rmse": 0.737990263912492,
+              "psnr_db": 62.836500027402195,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 365,
+                "0": 8055,
+                "1": 7554,
+                "2": 226,
+                "3": 0
+              }
+            },
+            "0,5": {
+              "samples": 16200,
+              "mismatches": 7982,
+              "mismatch_fraction": 0.49271604938271607,
+              "max_abs": 2,
+              "mean_abs": 0.5067901234567901,
+              "p95_abs": 1,
+              "bias": 0.4591358024691358,
+              "rmse": 0.7313947440369928,
+              "psnr_db": 62.91447597268595,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 386,
+                "0": 8218,
+                "1": 7368,
+                "2": 228,
+                "3": 0
+              }
+            },
+            "0,6": {
+              "samples": 16200,
+              "mismatches": 8107,
+              "mismatch_fraction": 0.5004320987654322,
+              "max_abs": 2,
+              "mean_abs": 0.5123456790123457,
+              "p95_abs": 1,
+              "bias": 0.4651851851851852,
+              "rmse": 0.7322382395820181,
+              "psnr_db": 62.90446456940741,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 382,
+                "0": 8093,
+                "1": 7532,
+                "2": 193,
+                "3": 0
+              }
+            },
+            "0,7": {
+              "samples": 16200,
+              "mismatches": 8007,
+              "mismatch_fraction": 0.49425925925925923,
+              "max_abs": 2,
+              "mean_abs": 0.5075308641975309,
+              "p95_abs": 1,
+              "bias": 0.4634567901234568,
+              "rmse": 0.7308037178846821,
+              "psnr_db": 62.92149771199897,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 3,
+                "-1": 351,
+                "0": 8193,
+                "1": 7441,
+                "2": 212,
+                "3": 0
+              }
+            },
+            "1,0": {
+              "samples": 16200,
+              "mismatches": 7698,
+              "mismatch_fraction": 0.4751851851851852,
+              "max_abs": 2,
+              "mean_abs": 0.48790123456790124,
+              "p95_abs": 1,
+              "bias": 0.44209876543209875,
+              "rmse": 0.7164728420068226,
+              "psnr_db": 63.0935180130752,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 369,
+                "0": 8502,
+                "1": 7123,
+                "2": 205,
+                "3": 0
+              }
+            },
+            "1,1": {
+              "samples": 16200,
+              "mismatches": 8161,
+              "mismatch_fraction": 0.5037654320987655,
+              "max_abs": 2,
+              "mean_abs": 0.5181481481481481,
+              "p95_abs": 1,
+              "bias": 0.4795061728395062,
+              "rmse": 0.7395360574352772,
+              "psnr_db": 62.818325600799,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 313,
+                "0": 8039,
+                "1": 7615,
+                "2": 233,
+                "3": 0
+              }
+            },
+            "1,2": {
+              "samples": 16200,
+              "mismatches": 8250,
+              "mismatch_fraction": 0.5092592592592593,
+              "max_abs": 2,
+              "mean_abs": 0.523641975308642,
+              "p95_abs": 1,
+              "bias": 0.48462962962962963,
+              "rmse": 0.7432411502382033,
+              "psnr_db": 62.77491773885227,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 316,
+                "0": 7950,
+                "1": 7701,
+                "2": 233,
+                "3": 0
+              }
+            },
+            "1,3": {
+              "samples": 16200,
+              "mismatches": 7990,
+              "mismatch_fraction": 0.49320987654320986,
+              "max_abs": 2,
+              "mean_abs": 0.5044444444444445,
+              "p95_abs": 1,
+              "bias": 0.4528395061728395,
+              "rmse": 0.7258881320471589,
+              "psnr_db": 62.98011875550537,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 418,
+                "0": 8210,
+                "1": 7390,
+                "2": 182,
+                "3": 0
+              }
+            },
+            "1,4": {
+              "samples": 16200,
+              "mismatches": 7836,
+              "mismatch_fraction": 0.4837037037037037,
+              "max_abs": 2,
+              "mean_abs": 0.49635802469135804,
+              "p95_abs": 1,
+              "bias": 0.4547530864197531,
+              "rmse": 0.7222649560006816,
+              "psnr_db": 63.023581802615155,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 337,
+                "0": 8364,
+                "1": 7294,
+                "2": 205,
+                "3": 0
+              }
+            },
+            "1,5": {
+              "samples": 16200,
+              "mismatches": 8116,
+              "mismatch_fraction": 0.5009876543209877,
+              "max_abs": 2,
+              "mean_abs": 0.5137654320987655,
+              "p95_abs": 1,
+              "bias": 0.4730246913580247,
+              "rmse": 0.7343847681252117,
+              "psnr_db": 62.8790394625519,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 330,
+                "0": 8084,
+                "1": 7579,
+                "2": 207,
+                "3": 0
+              }
+            },
+            "1,6": {
+              "samples": 16200,
+              "mismatches": 8064,
+              "mismatch_fraction": 0.49777777777777776,
+              "max_abs": 2,
+              "mean_abs": 0.5121604938271604,
+              "p95_abs": 1,
+              "bias": 0.47055555555555556,
+              "rmse": 0.7354766657929577,
+              "psnr_db": 62.86613470273739,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 337,
+                "0": 8136,
+                "1": 7494,
+                "2": 233,
+                "3": 0
+              }
+            },
+            "1,7": {
+              "samples": 16200,
+              "mismatches": 7985,
+              "mismatch_fraction": 0.49290123456790125,
+              "max_abs": 2,
+              "mean_abs": 0.5062962962962962,
+              "p95_abs": 1,
+              "bias": 0.45567901234567904,
+              "rmse": 0.7301276735976294,
+              "psnr_db": 62.929536483047585,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 410,
+                "0": 8215,
+                "1": 7358,
+                "2": 217,
+                "3": 0
+              }
+            },
+            "2,0": {
+              "samples": 16200,
+              "mismatches": 7949,
+              "mismatch_fraction": 0.490679012345679,
+              "max_abs": 2,
+              "mean_abs": 0.5037654320987655,
+              "p95_abs": 1,
+              "bias": 0.45858024691358024,
+              "rmse": 0.7279685924577641,
+              "psnr_db": 62.955259824700164,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 366,
+                "0": 8251,
+                "1": 7371,
+                "2": 212,
+                "3": 0
+              }
+            },
+            "2,1": {
+              "samples": 16200,
+              "mismatches": 8385,
+              "mismatch_fraction": 0.5175925925925926,
+              "max_abs": 2,
+              "mean_abs": 0.5301851851851852,
+              "p95_abs": 1,
+              "bias": 0.4888271604938272,
+              "rmse": 0.7452317561472876,
+              "psnr_db": 62.751685614877616,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 335,
+                "0": 7815,
+                "1": 7846,
+                "2": 204,
+                "3": 0
+              }
+            },
+            "2,2": {
+              "samples": 16200,
+              "mismatches": 8140,
+              "mismatch_fraction": 0.5024691358024691,
+              "max_abs": 2,
+              "mean_abs": 0.5162962962962963,
+              "p95_abs": 1,
+              "bias": 0.47074074074074074,
+              "rmse": 0.7375300789011596,
+              "psnr_db": 62.84191793488222,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 369,
+                "0": 8060,
+                "1": 7547,
+                "2": 224,
+                "3": 0
+              }
+            },
+            "2,3": {
+              "samples": 16200,
+              "mismatches": 8224,
+              "mismatch_fraction": 0.5076543209876543,
+              "max_abs": 2,
+              "mean_abs": 0.5194444444444445,
+              "p95_abs": 1,
+              "bias": 0.4758641975308642,
+              "rmse": 0.7369020907542769,
+              "psnr_db": 62.84931689996169,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 353,
+                "0": 7976,
+                "1": 7680,
+                "2": 191,
+                "3": 0
+              }
+            },
+            "2,4": {
+              "samples": 16200,
+              "mismatches": 8139,
+              "mismatch_fraction": 0.5024074074074074,
+              "max_abs": 2,
+              "mean_abs": 0.5153703703703704,
+              "p95_abs": 1,
+              "bias": 0.4721604938271605,
+              "rmse": 0.7357284120491041,
+              "psnr_db": 62.86316211889853,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 348,
+                "0": 8061,
+                "1": 7581,
+                "2": 209,
+                "3": 0
+              }
+            },
+            "2,5": {
+              "samples": 16200,
+              "mismatches": 8099,
+              "mismatch_fraction": 0.49993827160493826,
+              "max_abs": 2,
+              "mean_abs": 0.5133333333333333,
+              "p95_abs": 1,
+              "bias": 0.4739506172839506,
+              "rmse": 0.734930919740164,
+              "psnr_db": 62.87258228944638,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 319,
+                "0": 8101,
+                "1": 7563,
+                "2": 217,
+                "3": 0
+              }
+            },
+            "2,6": {
+              "samples": 16200,
+              "mismatches": 8213,
+              "mismatch_fraction": 0.5069753086419753,
+              "max_abs": 2,
+              "mean_abs": 0.5204938271604939,
+              "p95_abs": 1,
+              "bias": 0.4776543209876543,
+              "rmse": 0.7399532851454413,
+              "psnr_db": 62.81342662135224,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 347,
+                "0": 7987,
+                "1": 7647,
+                "2": 219,
+                "3": 0
+              }
+            },
+            "2,7": {
+              "samples": 16200,
+              "mismatches": 7933,
+              "mismatch_fraction": 0.4896913580246914,
+              "max_abs": 2,
+              "mean_abs": 0.5032098765432099,
+              "p95_abs": 1,
+              "bias": 0.4582716049382716,
+              "rmse": 0.7281805501249308,
+              "psnr_db": 62.952731181357095,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 362,
+                "0": 8267,
+                "1": 7352,
+                "2": 218,
+                "3": 0
+              }
+            },
+            "3,0": {
+              "samples": 16200,
+              "mismatches": 8150,
+              "mismatch_fraction": 0.5030864197530864,
+              "max_abs": 2,
+              "mean_abs": 0.5164814814814814,
+              "p95_abs": 1,
+              "bias": 0.47228395061728395,
+              "rmse": 0.7370696065761169,
+              "psnr_db": 62.8473426097497,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 358,
+                "0": 8050,
+                "1": 7575,
+                "2": 217,
+                "3": 0
+              }
+            },
+            "3,1": {
+              "samples": 16200,
+              "mismatches": 8126,
+              "mismatch_fraction": 0.5016049382716049,
+              "max_abs": 3,
+              "mean_abs": 0.5151234567901235,
+              "p95_abs": 1,
+              "bias": 0.47203703703703703,
+              "rmse": 0.7363993146501998,
+              "psnr_db": 62.85524516135638,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 347,
+                "0": 8074,
+                "1": 7561,
+                "2": 216,
+                "3": 1
+              }
+            },
+            "3,2": {
+              "samples": 16200,
+              "mismatches": 8200,
+              "mismatch_fraction": 0.5061728395061729,
+              "max_abs": 2,
+              "mean_abs": 0.5214197530864197,
+              "p95_abs": 1,
+              "bias": 0.47672839506172837,
+              "rmse": 0.7429088640249984,
+              "psnr_db": 62.77880187086659,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 360,
+                "0": 8000,
+                "1": 7593,
+                "2": 246,
+                "3": 0
+              }
+            },
+            "3,3": {
+              "samples": 16200,
+              "mismatches": 8074,
+              "mismatch_fraction": 0.49839506172839504,
+              "max_abs": 2,
+              "mean_abs": 0.5122839506172839,
+              "p95_abs": 1,
+              "bias": 0.4656172839506173,
+              "rmse": 0.7348889224876517,
+              "psnr_db": 62.87307865436138,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 378,
+                "0": 8126,
+                "1": 7471,
+                "2": 225,
+                "3": 0
+              }
+            },
+            "3,4": {
+              "samples": 16200,
+              "mismatches": 8155,
+              "mismatch_fraction": 0.5033950617283951,
+              "max_abs": 2,
+              "mean_abs": 0.5157407407407407,
+              "p95_abs": 1,
+              "bias": 0.4753703703703704,
+              "rmse": 0.7351408700143341,
+              "psnr_db": 62.87010131547486,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 327,
+                "0": 8045,
+                "1": 7628,
+                "2": 200,
+                "3": 0
+              }
+            },
+            "3,5": {
+              "samples": 16200,
+              "mismatches": 8053,
+              "mismatch_fraction": 0.49709876543209874,
+              "max_abs": 2,
+              "mean_abs": 0.5115432098765432,
+              "p95_abs": 1,
+              "bias": 0.4695679012345679,
+              "rmse": 0.7351408700143341,
+              "psnr_db": 62.87010131547486,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 340,
+                "0": 8147,
+                "1": 7479,
+                "2": 234,
+                "3": 0
+              }
+            },
+            "3,6": {
+              "samples": 16200,
+              "mismatches": 8071,
+              "mismatch_fraction": 0.49820987654320986,
+              "max_abs": 2,
+              "mean_abs": 0.5120370370370371,
+              "p95_abs": 1,
+              "bias": 0.47055555555555556,
+              "rmse": 0.7346368885542649,
+              "psnr_db": 62.87605803578559,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 334,
+                "0": 8129,
+                "1": 7513,
+                "2": 223,
+                "3": 0
+              }
+            },
+            "3,7": {
+              "samples": 16200,
+              "mismatches": 8256,
+              "mismatch_fraction": 0.5096296296296297,
+              "max_abs": 2,
+              "mean_abs": 0.5248765432098765,
+              "p95_abs": 1,
+              "bias": 0.4772222222222222,
+              "rmse": 0.7452317561472876,
+              "psnr_db": 62.751685614877616,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 384,
+                "0": 7944,
+                "1": 7625,
+                "2": 246,
+                "3": 0
+              }
+            },
+            "4,0": {
+              "samples": 16200,
+              "mismatches": 8082,
+              "mismatch_fraction": 0.4988888888888889,
+              "max_abs": 2,
+              "mean_abs": 0.5122839506172839,
+              "p95_abs": 1,
+              "bias": 0.4682098765432099,
+              "rmse": 0.7342166397420274,
+              "psnr_db": 62.881028218084786,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 357,
+                "0": 8118,
+                "1": 7508,
+                "2": 217,
+                "3": 0
+              }
+            },
+            "4,1": {
+              "samples": 16200,
+              "mismatches": 7975,
+              "mismatch_fraction": 0.49228395061728397,
+              "max_abs": 2,
+              "mean_abs": 0.507962962962963,
+              "p95_abs": 1,
+              "bias": 0.46944444444444444,
+              "rmse": 0.7343847681252117,
+              "psnr_db": 62.8790394625519,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 312,
+                "0": 8225,
+                "1": 7409,
+                "2": 254,
+                "3": 0
+              }
+            },
+            "4,2": {
+              "samples": 16200,
+              "mismatches": 8093,
+              "mismatch_fraction": 0.4995679012345679,
+              "max_abs": 2,
+              "mean_abs": 0.5142592592592593,
+              "p95_abs": 1,
+              "bias": 0.4680864197530864,
+              "rmse": 0.7373208089486163,
+              "psnr_db": 62.84438285623735,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 374,
+                "0": 8107,
+                "1": 7481,
+                "2": 238,
+                "3": 0
+              }
+            },
+            "4,3": {
+              "samples": 16200,
+              "mismatches": 8028,
+              "mismatch_fraction": 0.4955555555555556,
+              "max_abs": 2,
+              "mean_abs": 0.5083950617283951,
+              "p95_abs": 1,
+              "bias": 0.4685185185185185,
+              "rmse": 0.7308037178846821,
+              "psnr_db": 62.92149771199897,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 323,
+                "0": 8172,
+                "1": 7497,
+                "2": 208,
+                "3": 0
+              }
+            },
+            "4,4": {
+              "samples": 16200,
+              "mismatches": 7887,
+              "mismatch_fraction": 0.48685185185185187,
+              "max_abs": 2,
+              "mean_abs": 0.49901234567901237,
+              "p95_abs": 1,
+              "bias": 0.4550617283950617,
+              "rmse": 0.7234178138070235,
+              "psnr_db": 63.00972869734749,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 356,
+                "0": 8313,
+                "1": 7334,
+                "2": 197,
+                "3": 0
+              }
+            },
+            "4,5": {
+              "samples": 16200,
+              "mismatches": 8100,
+              "mismatch_fraction": 0.5,
+              "max_abs": 2,
+              "mean_abs": 0.5132098765432099,
+              "p95_abs": 1,
+              "bias": 0.468641975308642,
+              "rmse": 0.7345948744918043,
+              "psnr_db": 62.87655479813317,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 361,
+                "0": 8100,
+                "1": 7525,
+                "2": 214,
+                "3": 0
+              }
+            },
+            "4,6": {
+              "samples": 16200,
+              "mismatches": 7826,
+              "mismatch_fraction": 0.4830864197530864,
+              "max_abs": 2,
+              "mean_abs": 0.4955555555555556,
+              "p95_abs": 1,
+              "bias": 0.45271604938271603,
+              "rmse": 0.7214525813665745,
+              "psnr_db": 63.033356840984794,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 347,
+                "0": 8374,
+                "1": 7277,
+                "2": 202,
+                "3": 0
+              }
+            },
+            "4,7": {
+              "samples": 16200,
+              "mismatches": 8156,
+              "mismatch_fraction": 0.5034567901234568,
+              "max_abs": 3,
+              "mean_abs": 0.5169135802469136,
+              "p95_abs": 1,
+              "bias": 0.4714814814814815,
+              "rmse": 0.7375300789011596,
+              "psnr_db": 62.84191793488222,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 368,
+                "0": 8044,
+                "1": 7571,
+                "2": 216,
+                "3": 1
+              }
+            },
+            "5,0": {
+              "samples": 16200,
+              "mismatches": 8140,
+              "mismatch_fraction": 0.5024691358024691,
+              "max_abs": 2,
+              "mean_abs": 0.5166666666666667,
+              "p95_abs": 1,
+              "bias": 0.47185185185185186,
+              "rmse": 0.7382829595724539,
+              "psnr_db": 62.833055783893826,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 363,
+                "0": 8060,
+                "1": 7547,
+                "2": 230,
+                "3": 0
+              }
+            },
+            "5,1": {
+              "samples": 16200,
+              "mismatches": 8049,
+              "mismatch_fraction": 0.4968518518518519,
+              "max_abs": 2,
+              "mean_abs": 0.5082716049382716,
+              "p95_abs": 1,
+              "bias": 0.4650617283950617,
+              "rmse": 0.7287737036358481,
+              "psnr_db": 62.94565880251526,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 350,
+                "0": 8151,
+                "1": 7514,
+                "2": 185,
+                "3": 0
+              }
+            },
+            "5,2": {
+              "samples": 16200,
+              "mismatches": 8170,
+              "mismatch_fraction": 0.504320987654321,
+              "max_abs": 2,
+              "mean_abs": 0.5184567901234568,
+              "p95_abs": 1,
+              "bias": 0.4717901234567901,
+              "rmse": 0.7394108432135198,
+              "psnr_db": 62.81979637289153,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 378,
+                "0": 8030,
+                "1": 7563,
+                "2": 229,
+                "3": 0
+              }
+            },
+            "5,3": {
+              "samples": 16200,
+              "mismatches": 7880,
+              "mismatch_fraction": 0.48641975308641977,
+              "max_abs": 2,
+              "mean_abs": 0.49944444444444447,
+              "p95_abs": 1,
+              "bias": 0.45228395061728394,
+              "rmse": 0.7249095303280912,
+              "psnr_db": 62.9918364857458,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 382,
+                "0": 8320,
+                "1": 7287,
+                "2": 211,
+                "3": 0
+              }
+            },
+            "5,4": {
+              "samples": 16200,
+              "mismatches": 8285,
+              "mismatch_fraction": 0.5114197530864197,
+              "max_abs": 2,
+              "mean_abs": 0.5251234567901235,
+              "p95_abs": 1,
+              "bias": 0.48277777777777775,
+              "rmse": 0.743324198581972,
+              "psnr_db": 62.773947248385866,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 343,
+                "0": 7915,
+                "1": 7720,
+                "2": 222,
+                "3": 0
+              }
+            },
+            "5,5": {
+              "samples": 16200,
+              "mismatches": 8137,
+              "mismatch_fraction": 0.5022839506172839,
+              "max_abs": 2,
+              "mean_abs": 0.5140740740740741,
+              "p95_abs": 1,
+              "bias": 0.47012345679012346,
+              "rmse": 0.7332491534176185,
+              "psnr_db": 62.89248126959288,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 356,
+                "0": 8063,
+                "1": 7590,
+                "2": 191,
+                "3": 0
+              }
+            },
+            "5,6": {
+              "samples": 16200,
+              "mismatches": 7953,
+              "mismatch_fraction": 0.49092592592592593,
+              "max_abs": 2,
+              "mean_abs": 0.5062345679012346,
+              "p95_abs": 1,
+              "bias": 0.463641975308642,
+              "rmse": 0.7327017482249185,
+              "psnr_db": 62.898968118922916,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 345,
+                "0": 8247,
+                "1": 7360,
+                "2": 248,
+                "3": 0
+              }
+            },
+            "5,7": {
+              "samples": 16200,
+              "mismatches": 7666,
+              "mismatch_fraction": 0.4732098765432099,
+              "max_abs": 2,
+              "mean_abs": 0.4867283950617284,
+              "p95_abs": 1,
+              "bias": 0.43808641975308643,
+              "rmse": 0.7167743243858317,
+              "psnr_db": 63.08986387334003,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 394,
+                "0": 8534,
+                "1": 7053,
+                "2": 219,
+                "3": 0
+              }
+            },
+            "6,0": {
+              "samples": 16200,
+              "mismatches": 8062,
+              "mismatch_fraction": 0.49765432098765433,
+              "max_abs": 2,
+              "mean_abs": 0.5108024691358025,
+              "p95_abs": 1,
+              "bias": 0.47055555555555556,
+              "rmse": 0.7328702241407402,
+              "psnr_db": 62.8969711331105,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 326,
+                "0": 8138,
+                "1": 7523,
+                "2": 213,
+                "3": 0
+              }
+            },
+            "6,1": {
+              "samples": 16200,
+              "mismatches": 8053,
+              "mismatch_fraction": 0.49709876543209874,
+              "max_abs": 2,
+              "mean_abs": 0.5085802469135803,
+              "p95_abs": 1,
+              "bias": 0.4695679012345679,
+              "rmse": 0.729070099425661,
+              "psnr_db": 62.94212692735886,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 314,
+                "0": 8147,
+                "1": 7553,
+                "2": 185,
+                "3": 0
+              }
+            },
+            "6,2": {
+              "samples": 16200,
+              "mismatches": 7983,
+              "mismatch_fraction": 0.49277777777777776,
+              "max_abs": 2,
+              "mean_abs": 0.5058024691358025,
+              "p95_abs": 1,
+              "bias": 0.45753086419753086,
+              "rmse": 0.7292817369520862,
+              "psnr_db": 62.93960591677026,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 391,
+                "0": 8217,
+                "1": 7381,
+                "2": 211,
+                "3": 0
+              }
+            },
+            "6,3": {
+              "samples": 16200,
+              "mismatches": 7976,
+              "mismatch_fraction": 0.49234567901234566,
+              "max_abs": 2,
+              "mean_abs": 0.5076543209876543,
+              "p95_abs": 1,
+              "bias": 0.45641975308641974,
+              "rmse": 0.7336699564097413,
+              "psnr_db": 62.887497970343844,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 413,
+                "0": 8224,
+                "1": 7315,
+                "2": 247,
+                "3": 0
+              }
+            },
+            "6,4": {
+              "samples": 16200,
+              "mismatches": 7903,
+              "mismatch_fraction": 0.4878395061728395,
+              "max_abs": 2,
+              "mean_abs": 0.5007407407407407,
+              "p95_abs": 1,
+              "bias": 0.454320987654321,
+              "rmse": 0.7256329718780309,
+              "psnr_db": 62.98317250799428,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 376,
+                "0": 8297,
+                "1": 7318,
+                "2": 209,
+                "3": 0
+              }
+            },
+            "6,5": {
+              "samples": 16200,
+              "mismatches": 8066,
+              "mismatch_fraction": 0.49790123456790125,
+              "max_abs": 2,
+              "mean_abs": 0.5146296296296297,
+              "p95_abs": 1,
+              "bias": 0.47030864197530864,
+              "rmse": 0.7403285890421134,
+              "psnr_db": 62.80902225978582,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 359,
+                "0": 8134,
+                "1": 7436,
+                "2": 271,
+                "3": 0
+              }
+            },
+            "6,6": {
+              "samples": 16200,
+              "mismatches": 7937,
+              "mismatch_fraction": 0.48993827160493825,
+              "max_abs": 2,
+              "mean_abs": 0.5050617283950617,
+              "p95_abs": 1,
+              "bias": 0.46358024691358024,
+              "rmse": 0.7316478948068591,
+              "psnr_db": 62.911470127726396,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 336,
+                "0": 8263,
+                "1": 7356,
+                "2": 245,
+                "3": 0
+              }
+            },
+            "6,7": {
+              "samples": 16200,
+              "mismatches": 8184,
+              "mismatch_fraction": 0.5051851851851852,
+              "max_abs": 2,
+              "mean_abs": 0.5180246913580246,
+              "p95_abs": 1,
+              "bias": 0.4749382716049383,
+              "rmse": 0.7373626676905359,
+              "psnr_db": 62.84388976003256,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 349,
+                "0": 8016,
+                "1": 7627,
+                "2": 208,
+                "3": 0
+              }
+            },
+            "7,0": {
+              "samples": 16200,
+              "mismatches": 8259,
+              "mismatch_fraction": 0.5098148148148148,
+              "max_abs": 2,
+              "mean_abs": 0.5233950617283951,
+              "p95_abs": 1,
+              "bias": 0.47969135802469137,
+              "rmse": 0.7419943096517355,
+              "psnr_db": 62.789501180423514,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 350,
+                "0": 7941,
+                "1": 7689,
+                "2": 218,
+                "3": 0
+              }
+            },
+            "7,1": {
+              "samples": 16200,
+              "mismatches": 8110,
+              "mismatch_fraction": 0.5006172839506173,
+              "max_abs": 2,
+              "mean_abs": 0.5140123456790123,
+              "p95_abs": 1,
+              "bias": 0.4689506172839506,
+              "rmse": 0.7353927312231217,
+              "psnr_db": 62.86712601632742,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 365,
+                "0": 8090,
+                "1": 7528,
+                "2": 217,
+                "3": 0
+              }
+            },
+            "7,2": {
+              "samples": 16200,
+              "mismatches": 7969,
+              "mismatch_fraction": 0.49191358024691356,
+              "max_abs": 3,
+              "mean_abs": 0.5050617283950617,
+              "p95_abs": 1,
+              "bias": 0.45493827160493827,
+              "rmse": 0.7290277645477444,
+              "psnr_db": 62.94263130513296,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 406,
+                "0": 8231,
+                "1": 7351,
+                "2": 211,
+                "3": 1
+              }
+            },
+            "7,3": {
+              "samples": 16200,
+              "mismatches": 8101,
+              "mismatch_fraction": 0.5000617283950617,
+              "max_abs": 2,
+              "mean_abs": 0.5125308641975309,
+              "p95_abs": 1,
+              "bias": 0.4664814814814815,
+              "rmse": 0.7331228654205714,
+              "psnr_db": 62.89397737507442,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 371,
+                "0": 8099,
+                "1": 7528,
+                "2": 201,
+                "3": 0
+              }
+            },
+            "7,4": {
+              "samples": 16200,
+              "mismatches": 7972,
+              "mismatch_fraction": 0.49209876543209874,
+              "max_abs": 2,
+              "mean_abs": 0.5081481481481481,
+              "p95_abs": 1,
+              "bias": 0.4537037037037037,
+              "rmse": 0.7350149070462768,
+              "psnr_db": 62.87158972977596,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 1,
+                "-1": 439,
+                "0": 8228,
+                "1": 7273,
+                "2": 259,
+                "3": 0
+              }
+            },
+            "7,5": {
+              "samples": 16200,
+              "mismatches": 8197,
+              "mismatch_fraction": 0.5059876543209877,
+              "max_abs": 2,
+              "mean_abs": 0.519753086419753,
+              "p95_abs": 1,
+              "bias": 0.4691358024691358,
+              "rmse": 0.7397864222985469,
+              "psnr_db": 62.81538555003635,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 410,
+                "0": 8003,
+                "1": 7564,
+                "2": 223,
+                "3": 0
+              }
+            },
+            "7,6": {
+              "samples": 16200,
+              "mismatches": 8278,
+              "mismatch_fraction": 0.5109876543209877,
+              "max_abs": 2,
+              "mean_abs": 0.5255555555555556,
+              "p95_abs": 1,
+              "bias": 0.4762962962962963,
+              "rmse": 0.7447760455497285,
+              "psnr_db": 62.756998677099446,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 2,
+                "-1": 395,
+                "0": 7922,
+                "1": 7647,
+                "2": 234,
+                "3": 0
+              }
+            },
+            "7,7": {
+              "samples": 16200,
+              "mismatches": 8145,
+              "mismatch_fraction": 0.5027777777777778,
+              "max_abs": 2,
+              "mean_abs": 0.515679012345679,
+              "p95_abs": 1,
+              "bias": 0.47160493827160493,
+              "rmse": 0.735854252879931,
+              "psnr_db": 62.86167658961466,
+              "signed_histogram": {
+                "-3": 0,
+                "-2": 0,
+                "-1": 357,
+                "0": 8055,
+                "1": 7579,
+                "2": 209,
+                "3": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "cause": "CAUSE_UNKNOWN",
+    "quality": "filmscan3",
+    "pattern": "REGISTERED_PACKET",
+    "packet_bytes": 900396,
+    "source_bytes": 8294400,
+    "source_sha256": "45c166c3d6a3710d620ff5d738980224edf53cf9ce1bceb87267e474294afff1"
+  },
+  "classification": {
+    "reference_stability": "STABLE_3_REPEATS",
+    "cross_decoder_agreement": "MEASURED",
+    "encoder_packet_comparison": "UNAVAILABLE",
+    "release_gate": "UNRESOLVED",
+    "release_blocked": true
+  }
+}
