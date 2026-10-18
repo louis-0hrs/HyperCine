@@ -1,58 +1,58 @@
 $ ctest --test-dir build/macos-cpu -C Release --output-on-failure
-Internal ctest changing into directory: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu
-Test project /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu
+Internal ctest changing into directory: <repo>/build/macos-cpu
+Test project <repo>/build/macos-cpu
     Start 1: test_transform_wavelet
 1/4 Test #1: test_transform_wavelet ...........   Passed    0.39 sec
     Start 2: test_codec_roundtrip
-Could not find executable /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
+Could not find executable <repo>/build/macos-cpu/tests/test_codec_roundtrip
 Looked in the following places:
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_codec_roundtrip
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_codec_roundtrip
-Release//Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-Release//Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_codec_roundtrip
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_codec_roundtrip
-Release/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-Release/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
-Unable to find executable: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/Release/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/Release/test_codec_roundtrip
+Release/<repo>/build/macos-cpu/tests/test_codec_roundtrip
+Release/<repo>/build/macos-cpu/tests/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/Release/test_codec_roundtrip
+<repo>/build/macos-cpu/tests/Release/test_codec_roundtrip
+Release/<repo>/build/macos-cpu/tests/test_codec_roundtrip
+Release/<repo>/build/macos-cpu/tests/test_codec_roundtrip
+Unable to find executable: <repo>/build/macos-cpu/tests/test_codec_roundtrip
 2/4 Test #2: test_codec_roundtrip .............***Not Run   0.00 sec
     Start 3: test_yuy2_stability
-Could not find executable /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
+Could not find executable <repo>/build/macos-cpu/tests/test_yuy2_stability
 Looked in the following places:
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_yuy2_stability
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_yuy2_stability
-Release//Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-Release//Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_yuy2_stability
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_yuy2_stability
-Release/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-Release/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
-Unable to find executable: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_yuy2_stability
+<repo>/build/macos-cpu/tests/test_yuy2_stability
+<repo>/build/macos-cpu/tests/test_yuy2_stability
+<repo>/build/macos-cpu/tests/Release/test_yuy2_stability
+<repo>/build/macos-cpu/tests/Release/test_yuy2_stability
+Release/<repo>/build/macos-cpu/tests/test_yuy2_stability
+Release/<repo>/build/macos-cpu/tests/test_yuy2_stability
+<repo>/build/macos-cpu/tests/test_yuy2_stability
+<repo>/build/macos-cpu/tests/test_yuy2_stability
+<repo>/build/macos-cpu/tests/Release/test_yuy2_stability
+<repo>/build/macos-cpu/tests/Release/test_yuy2_stability
+Release/<repo>/build/macos-cpu/tests/test_yuy2_stability
+Release/<repo>/build/macos-cpu/tests/test_yuy2_stability
+Unable to find executable: <repo>/build/macos-cpu/tests/test_yuy2_stability
 3/4 Test #3: test_yuy2_stability ..............***Not Run   0.00 sec
     Start 4: test_avi_sample
-Could not find executable /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
+Could not find executable <repo>/build/macos-cpu/tests/test_avi_sample
 Looked in the following places:
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_avi_sample
-/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_avi_sample
-Release//Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-Release//Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_avi_sample
-Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/Release/test_avi_sample
-Release/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-Release/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
-Unable to find executable: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_avi_sample
+<repo>/build/macos-cpu/tests/test_avi_sample
+<repo>/build/macos-cpu/tests/test_avi_sample
+<repo>/build/macos-cpu/tests/Release/test_avi_sample
+<repo>/build/macos-cpu/tests/Release/test_avi_sample
+Release/<repo>/build/macos-cpu/tests/test_avi_sample
+Release/<repo>/build/macos-cpu/tests/test_avi_sample
+<repo>/build/macos-cpu/tests/test_avi_sample
+<repo>/build/macos-cpu/tests/test_avi_sample
+<repo>/build/macos-cpu/tests/Release/test_avi_sample
+<repo>/build/macos-cpu/tests/Release/test_avi_sample
+Release/<repo>/build/macos-cpu/tests/test_avi_sample
+Release/<repo>/build/macos-cpu/tests/test_avi_sample
+Unable to find executable: <repo>/build/macos-cpu/tests/test_avi_sample
 4/4 Test #4: test_avi_sample ..................***Not Run   0.00 sec
 
 25% tests passed, 3 tests failed out of 4

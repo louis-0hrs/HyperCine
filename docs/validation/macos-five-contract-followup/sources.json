@@ -1,0 +1,50 @@
+{
+  "license": "MIT OR Apache-2.0; Copyright (c) 2026 HyperCine Contributors",
+  "sources": [
+    {
+      "issue": 23,
+      "branch": "codex/macos-five-contract-followup",
+      "parent": "6e6fe42734f8f2dd9900aa89ce7a1ff8e4448b4c",
+      "files": {
+        "tests/test_trace_contract.py": "a44dd02d951c6d5ac9f2f7a3b077870258f0f3253bfb93238c5d9349cd17d132",
+        "tests/validate_filmscan3.py": "d308c44b80f3c6fd01531df559e8da6902ce37654255a42fdbac79b078f938df"
+      }
+    },
+    {
+      "issue": 44,
+      "branch": "codex/p4-sequence-contract-followup",
+      "parent": "070359edee1ba748614bcb821139120e4f7312ec",
+      "files": {
+        "tests/test_filmscan3_geometry_validation.py": "a81dd110d736548b7aa6e04866d34d9d5b98eb6df304a4990a0e5192c2f64938",
+        "tests/validate_filmscan3_geometry.py": "645ccca8eeed9051468cc2b980a92a993645c469bbaa059fe3b8b2f5d5a066c1"
+      }
+    },
+    {
+      "issue": 45,
+      "branch": "codex/metal-budget-contract-followup",
+      "parent": "89ddd8a221d487852dd50ffe8ca54bcb406f07a6",
+      "files": {
+        "tests/macos_contracts/metal_budget.py": "9841583b4b0bdcd71e3731e55ff8e4aff9195959660524175a5a5148940e5cfd",
+        "tests/macos_contracts/test_metal_model.py": "1c2c8831581aa983860fa96f9508546d789a9c63b3c1140c833dfb7a5568c754"
+      }
+    },
+    {
+      "issue": 47,
+      "branch": "codex/p7-json-number-followup",
+      "parent": "77b8715fd702043bc04863c9bbf975540aa95cf2",
+      "files": {
+        "tests/macos_decode_portability/baseline.py": "8b47ba77f3b394400bedc4a4f196fdc5ee1ed01b184f1f12ee136424cf5603ba",
+        "tests/macos_decode_portability/test_json_contract.py": "88e64ca94d2b4bf84947ce4837baf3784ee2d1cc395b675c91361b9838592fea"
+      }
+    },
+    {
+      "issue": 70,
+      "branch": "codex/macos-corpus-cmake-followup",
+      "parent": "28762285953d79d860d0fb3fa14cbff7db64a8e3",
+      "files": {
+        "ci/run_standalone.py": "349906df0b400bbe48616db1753452bbb42d9a44c551ed9dd0df335cb20afdb5",
+        "ci/test_standalone_gate.py": "5af3790836279699bc99f7391e2ab5367e75f1b55057ef475f2d1249e322a931"
+      }
+    }
+  ]
+}

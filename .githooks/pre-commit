@@ -1,0 +1,18 @@
+#!/bin/sh
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under the MIT License or Apache License, Version 2.0.
+# See LICENSE-MIT and LICENSE-APACHE for details.
+# Activate per worktree: git config --worktree core.hooksPath .githooks
+# Git for Windows can expose a python3 Windows Store alias without an interpreter.
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+  python3 ci/privacy_guard.py --staged
+elif python -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+  python ci/privacy_guard.py --staged
+elif py -3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+  py -3 ci/privacy_guard.py --staged
+else
+  echo "Privacy guard: no working Python 3.8+ interpreter; commit blocked." >&2
+  exit 2
+fi

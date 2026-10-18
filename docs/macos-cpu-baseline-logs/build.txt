@@ -3,16 +3,16 @@ $ cmake --build build/macos-cpu --config Release --parallel 4
 [  0%] Building C object upstream/CMakeFiles/WaveletDemo.dir/Example/WaveletDemo/utils.c.o
 [  1%] Building CXX object tests/CMakeFiles/test_transform_wavelet.dir/test_transform_wavelet.cpp.o
 [  1%] Building CXX object upstream/CMakeFiles/CFHDCodecStatic.dir/Codec/DemoasicFrames.cpp.o
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+In file included from <repo>/upstream/Codec/DemoasicFrames.cpp:29:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
    14 | #error "This header is only meant to be used on x86 and x64 architecture"
       |  ^
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+In file included from <repo>/upstream/Codec/DemoasicFrames.cpp:29:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
    14 | #error "This header is only meant to be used on x86 and x64 architecture"
       |  ^
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+In file included from <repo>/upstream/Codec/DemoasicFrames.cpp:29:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
@@ -24,7 +24,7 @@ In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/inclu
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__math/traits.h:165:10: note: '__builtin_isless' declared here
   165 |   return __builtin_isless((type)__x, (type)__y);
       |          ^
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/DemoasicFrames.cpp:29:
+In file included from <repo>/upstream/Codec/DemoasicFrames.cpp:29:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:74:23: error: too few arguments to function call, expected 2, have 0
@@ -88,25 +88,25 @@ make[1]: *** Waiting for unfinished jobs....
 [  8%] Building C object tests/CMakeFiles/test_transform_wavelet.dir/__/upstream/Example/WaveletDemo/utils.c.o
 [  8%] Built target WaveletDemo
 [ 10%] Building CXX object src/CMakeFiles/hypercine_wavelet.dir/cuda/wavelet_cuda_stub.cpp.o
-In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+In file included from <repo>/src/cpu/upstream_wrapper.cpp:9:
+In file included from <repo>/upstream/Codec/spatial.h:25:
+In file included from <repo>/upstream/Codec/image.h:38:
+In file included from <repo>/upstream/Codec/allocator.h:28:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
    14 | #error "This header is only meant to be used on x86 and x64 architecture"
       |  ^
-In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+In file included from <repo>/src/cpu/upstream_wrapper.cpp:9:
+In file included from <repo>/upstream/Codec/spatial.h:25:
+In file included from <repo>/upstream/Codec/image.h:38:
+In file included from <repo>/upstream/Codec/allocator.h:28:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
    14 | #error "This header is only meant to be used on x86 and x64 architecture"
       |  ^
-In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+In file included from <repo>/src/cpu/upstream_wrapper.cpp:9:
+In file included from <repo>/upstream/Codec/spatial.h:25:
+In file included from <repo>/upstream/Codec/image.h:38:
+In file included from <repo>/upstream/Codec/allocator.h:28:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:14:2: error: "This header is only meant to be used on x86 and x64 architecture"
@@ -118,10 +118,10 @@ In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/inclu
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__math/traits.h:165:10: note: '__builtin_isless' declared here
   165 |   return __builtin_isless((type)__x, (type)__y);
       |          ^
-In file included from /Users/louis/Documents/GitHub/HyperCine/src/cpu/upstream_wrapper.cpp:9:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/spatial.h:25:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/image.h:38:
-In file included from /Users/louis/Documents/GitHub/HyperCine/upstream/Codec/allocator.h:28:
+In file included from <repo>/src/cpu/upstream_wrapper.cpp:9:
+In file included from <repo>/upstream/Codec/spatial.h:25:
+In file included from <repo>/upstream/Codec/image.h:38:
+In file included from <repo>/upstream/Codec/allocator.h:28:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/emmintrin.h:17:
 In file included from /Library/Developer/CommandLineTools/usr/lib/clang/21/include/xmmintrin.h:17:
 /Library/Developer/CommandLineTools/usr/lib/clang/21/include/mmintrin.h:74:23: error: too few arguments to function call, expected 2, have 0

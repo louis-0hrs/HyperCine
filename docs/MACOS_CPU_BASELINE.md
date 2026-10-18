@@ -36,9 +36,9 @@ arm64** for `wavelet_cpu.cpp.o`. No x86_64/Rosetta configuration was substituted
 Raw outputs: [toolchain](macos-cpu-baseline-logs/toolchain.txt),
 [Rosetta check](macos-cpu-baseline-logs/rosetta.txt),
 [binary and fixture identification](macos-cpu-baseline-logs/architecture.txt).
-Logs preserve actual stdout/stderr, commands and exit codes (trailing line
-whitespace removed for Git whitespace checks); project sources
-were unchanged during these attempts. Compiler diagnostic paths reflect this host.
+Logs preserve commands, results and exit codes with local paths sanitized.
+`<repo>` denotes the repository root; `<local-path>` denotes other private paths.
+Project sources were unchanged during these attempts.
 
 ## Reproduction and observed results
 

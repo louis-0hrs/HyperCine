@@ -1,8 +1,8 @@
 $ ctest --test-dir build/macos-cpu -C Release -R ^test_transform_wavelet$ -V
-Internal ctest changing into directory: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu
-UpdateCTestConfiguration  from :/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/DartConfiguration.tcl
-UpdateCTestConfiguration  from :/Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/DartConfiguration.tcl
-Test project /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu
+Internal ctest changing into directory: <repo>/build/macos-cpu
+UpdateCTestConfiguration  from :<repo>/build/macos-cpu/DartConfiguration.tcl
+UpdateCTestConfiguration  from :<repo>/build/macos-cpu/DartConfiguration.tcl
+Test project <repo>/build/macos-cpu
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -12,8 +12,8 @@ Checking test dependency graph end
 test 1
     Start 1: test_transform_wavelet
 
-1: Test command: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests/test_transform_wavelet
-1: Working Directory: /Users/louis/Documents/GitHub/HyperCine/build/macos-cpu/tests
+1: Test command: <repo>/build/macos-cpu/tests/test_transform_wavelet
+1: Working Directory: <repo>/build/macos-cpu/tests
 1: Test timeout computed to be: 10000000
 1: =========================================================
 1:  HyperCine Reference Test: 2-6 Wavelet Transform Suite
