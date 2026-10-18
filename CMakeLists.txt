@@ -24,6 +24,25 @@ option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
 option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
 
+# Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
+option(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY "Build only the synthetic decode task graph" OFF)
+if(HYPERCINE_BUILD_TESTS OR HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
+    find_package(Threads REQUIRED)
+    add_subdirectory(tests/decode_task_graph)
+endif()
+if(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
+    # Keep the regular SDK/CPU tests on the project's advertised CMake range.
+    cmake_minimum_required(VERSION 3.25)
+    if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA OR HYPERCINE_ENABLE_METAL OR
+       HYPERCINE_BUILD_STANDALONE OR HYPERCINE_BUILD_QUALITY_STATE_ONLY OR HYPERCINE_REQUIRE_EXTERNAL_DECODE)
+        message(FATAL_ERROR "Task graph only mode requires SDK/GPU/other standalone modes OFF")
+    endif()
+    if(HYPERCINE_BUILD_TESTS)
+        enable_testing()
+    endif()
+    return()
+endif()
+
 # Internal P0 probe/selection boundary, built without ISA flags or SDK headers.
 # Codec targets deliberately do not dispatch through it until lane validation.
 add_library(hypercine_cpu_isa STATIC src/cpu/cpu_isa.cpp)
