@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "license": "MIT OR Apache-2.0",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "platform": {
+    "system": "macOS 26.5.2",
+    "architecture": "arm64",
+    "compiler": "AppleClang 21",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0",
+    "git": "2.50.1"
+  },
+  "review_heads": {
+    "143": "2d0b396ba323eacd40dfefbd7665339f95c4d73b",
+    "142": "eb9fe2ed101f7e470022b8632abd155df90e99e0",
+    "128": "ae39cce531a2cfa5f14036f4c08fd595992b6b79",
+    "125": "aa0c61373e34d945bb084a6150d65e76534fb930",
+    "137": "6af34d01e42d68717c00482d079d67b4ac016afd"
+  },
+  "full_release_ctest": {
+    "rgb": {
+      "passed": 30,
+      "total": 30,
+      "seconds": 81.12
+    },
+    "p10": {
+      "passed": 29,
+      "total": 29,
+      "seconds": 83.89
+    },
+    "evidence": {
+      "passed": 29,
+      "total": 29,
+      "seconds": 77.93
+    }
+  },
+  "p10_python_optimization": true,
+  "rgb_asan_ubsan": {
+    "passed": 2,
+    "total": 2,
+    "seconds": 0.6,
+    "detect_leaks": false
+  },
+  "optimized_p10_methods": 14,
+  "decoder_methods_normal_and_optimized": 16,
+  "privacy_methods": 99,
+  "privacy_seconds": 53.156,
+  "privacy_installed_hook_methods": 46,
+  "ci_helper_methods": 19,
+  "report_consistency_checks": 33,
+  "finding": {
+    "pr": 128,
+    "priority": "P2",
+    "before": "uncaught OverflowError for JSON PSNR integer beyond float range, exposes local source paths in traceback",
+    "after": "finite measurement validation; generic INVALID_EVIDENCE, exit 2, empty stderr",
+    "new_regression_before_fix": "two uncaught errors"
+  },
+  "limits": [
+    "Native macOS only",
+    "No private SDK corpus configured",
+    "No NVIDIA/CUDA/Metal execution",
+    "Scoped RGB sanitizer run only; no leak qualification",
+    "No historical runtime recertification for PR137",
+    "Parent features and integration remain open"
+  ],
+  "changed_source_sha256": {
+    "tests/reference_decode/contract.py": "5f7cffc63ddfc5de02cc2f2d366f9a6fe08029d6634300c820cff78a279d0f37",
+    "tests/reference_decode/test_contract.py": "69b8fc590245928616c6afce8ce66015bdb1f7ab05b925b68455d4380de8d4c9",
+    "docs/validation/macos-five-final-review/check_report.py": "e15bbdbcc3c388c641627570196e52b6f2ee7bf3dd650327b1db8cd79ee42700"
+  }
+}
