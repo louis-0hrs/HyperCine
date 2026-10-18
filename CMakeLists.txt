@@ -115,6 +115,10 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_link_libraries(test_rgb444_frame PRIVATE hypercine_rgb444_frame)
         add_test(NAME rgb444_frame_storage COMMAND test_rgb444_frame storage)
         add_test(NAME rgb444_frame_rejection COMMAND test_rgb444_frame rejection)
+        add_executable(test_rgb444_rg48 tests/test_rgb444_rg48.cpp)
+        target_link_libraries(test_rgb444_rg48 PRIVATE hypercine_rgb444_frame)
+        add_test(NAME rgb444_rg48_import COMMAND test_rgb444_rg48 import)
+        add_test(NAME rgb444_rg48_rejection COMMAND test_rgb444_rg48 rejection)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
@@ -147,6 +151,17 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME rgb444_rg48_replay_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_rgb444_rg48_replay.py"
+            --probe $<TARGET_FILE:test_rgb444_rg48>)
+        set(HYPERCINE_RGB444_F1_ROOT "" CACHE PATH "Optional existing F1 root with 128 and 1080p-RGB_444 directories")
+        if(HYPERCINE_RGB444_F1_ROOT)
+            add_test(NAME rgb444_rg48_f1_sources COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_rgb444_rg48.py"
+                --f1-root "${HYPERCINE_RGB444_F1_ROOT}" --probe $<TARGET_FILE:test_rgb444_rg48>
+                --report "${CMAKE_CURRENT_BINARY_DIR}/rgb444-rg48-f1-report.json")
+            set_tests_properties(rgb444_rg48_f1_sources PROPERTIES TIMEOUT 300)
+        endif()
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)

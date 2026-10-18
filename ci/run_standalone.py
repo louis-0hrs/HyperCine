@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 
 REQUIRED = {
     'rgb444_frame_storage', 'rgb444_frame_rejection',
+    'rgb444_rg48_import', 'rgb444_rg48_rejection', 'rgb444_rg48_replay_contract',
     'cpu_isa_selection',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'standalone_oracle_fixtures', 'windows_reference_inputs',

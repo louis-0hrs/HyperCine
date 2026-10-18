@@ -5,9 +5,11 @@
 Issue [#37](https://github.com/louis-0hrs/HyperCine/issues/37) explicitly permits
 API/test architecture before the original Windows F1 corpus exists. This slice
 implements `hypercine::rgb444::Rgb444Frame`, an owning, immutable source-frame
-snapshot. **BITEXACT_PENDING / PENDING_REFERENCE:** there is no RGB444 CFHD
-encoder, packet exporter, packed-pixel adapter, quality adapter or decoder in
-this change. A successful frame copy never reports codec compatibility.
+snapshot, and a packed RG48 source importer. **BITEXACT_PENDING:** original F1
+source/packet/decoded artifacts are now accessible and pinned; signed internal
+stages remain **PENDING_SDK_INTERNAL_STAGE**. There is no RGB444 CFHD encoder,
+packet exporter, quality adapter or decoder in this change. A successful source
+import never reports codec compatibility.
 
 ## Source contract
 
@@ -43,6 +45,39 @@ padded destination planes. 1920x1080 fits. 3840x2160 and larger frames are
 rejected. Odd/small dimensions can be stored; this does not assert that they
 are legal RGB CFHD encoder inputs. No existing YUV geometry limit is changed.
 
+## Packed RG48 import
+
+`Rgb444Frame::CopyRg48(Rg48View)` accepts packed **R,G,B** native-endian unsigned
+16-bit components with top-down rows. It requires a 16-byte-aligned base address
+and positive 16-byte-multiple pitch containing `width*6` active bytes. Its
+minimum readable extent is `(height-1)*stride_bytes + width*6`; final-row
+padding need not exist. Geometry, span overflow and pointer-offset
+representability are checked before allocating or reading input. The returned
+frame uses the same bounded, separately owned and deterministically padded
+storage as planar `Copy`.
+
+Each source component becomes `floor(value / 16)`, dropping the lower four
+bits without rounding. This is an explicit reduction from full-range 16-bit
+RG48 to the existing unsigned p12 **source** API. It preserves R/G/B labels
+and row orientation. It does not perform the codec's G/R/B channel permutation,
+signed wavelet mapping, color transform, transfer curve or range adjustment.
+All `uint16_t` inputs are legal; unlike planar p12 `Copy`, values above 4095
+are expected and reduced. An imported frame cannot recover the discarded bits.
+
+The frozen `upstream/Codec/frame.c::ConvertRGB48ToFrame16s` reference reads
+packed R,G,B and shifts by `16-precision` (four for p12), then stores G,R,B
+internally. The importer implements only the declared source reduction, keeping
+canonical R/G/B. No original SDK internal-stage dump was available to certify
+the subsequent codec stages; source-byte replay must not be cited as one.
+
+New C++ tests exhaust all 65,536 input values independently per channel, check
+alignment boundaries, tight final rows, padded pitches, asymmetric channels,
+zero output padding, source preservation, independent ownership, 1080p and the
+storage edge. Malformed views, dimensions, extents, overflow and failed
+replacement/retry are checked separately. Allocation-failure injection remains
+in the separately reviewed #167/#176 child stack; this update does not absorb
+those branches.
+
 ## Reuse and remaining oracle gates
 
 | Component | P0 behavior / next required evidence |
@@ -52,19 +87,36 @@ are legal RGB CFHD encoder inputs. No existing YUV geometry limit is changed.
 | `EncodingQuality` / `QualityState` | Existing calculator is explicitly p10 YUV422; no p12 table or state is fabricated |
 | Metadata / writer / Table17 | No RGB packet/header or band framing emitted; qualify reuse against F1 bytes first |
 | Internal G,R,B order / 40-band observation | Hypothesis from #17, not verified or encoded by this source API |
-| Original SDK / FFmpeg RGB decode | NOT RUN: no RGB packet produced |
+| Original SDK RGB output artifacts | F1 stored bytes verified by size/SHA; no new SDK decode invocation |
+| FFmpeg RGB decode | NOT RUN: no RGB packet produced |
 | CUDA / Metal / Vulkan | No adapter or kernel introduced |
 
-Current dependency [#36](https://github.com/louis-0hrs/HyperCine/issues/36): F0
-capability probe exists in PR #82; F1 RGB source, original SDK sample and native
-decoded bytes remain pending. Do not infer F1 from an F0 encode/decode count.
+Current dependency [#36](https://github.com/louis-0hrs/HyperCine/issues/36): F1
+exporter PR #156 at `f17355f2f391410fc2cf27065e54dcffe1ae45e7` supplied real
+RGB source, pristine SDK packet and native decoded bytes. The stored F1 snapshot
+is pinned in `tests/reference_rgb444/rg48_f1_pins.json` and replayed with
+`tests/validate_rgb444_rg48.py`. It covers all eight RG48 patterns at 128x128
+and 1920x1080, FilmScan1 and FilmScan3: 32 cases, 128 artifacts and two original
+manifest files. The replay checks exact sizes/SHA before invoking the importer,
+compares every imported sample to integer division of the source value, and
+checks three pinned canonical-plane hashes per case. Outputs have explicit
+tight little-endian R/G/B plane domains. Each invocation requires a fresh
+output file. Regression tests reject corrupt artifacts, missing/stale output,
+wrong output extents/digests and malformed source geometry.
+
+`REFERENCE_ARTIFACTS_PINNED / SOURCE_IMPORT_PASS` is the source boundary's
+proof scope. The stored decoded bytes are lossy output evidence from the F1
+exporter, not expected source planes and not a new macOS SDK-decoder run.
+Internal-stage and bitstream equality remain pending. Do not infer either
+from verified source or packet hashes.
 External corpora belong outside Git, privately resolved through
 `HYPERCINE_GOLDEN_DIR`.
 
-Next executable encoder step once F1 is supplied: pin source+packet+decoded
-hashes and exact layout, verify canonical-to-SDK input mapping, then qualify
-signed transform/prescale/channel/band/quant/framing semantics with first-stage
-diffs. Only then add a genuine `Encode`/metadata/quality interface and CLI. The
+Next encoder step: obtain qualified signed internal RGB stage dumps and then
+qualify transform/prescale/channel/band/quant/framing semantics with first-stage
+diffs. The F1 exporter explicitly reports `PENDING_SDK_INTERNAL_STAGE`; its
+source/packet/decoded files do not contain those planes. Only then add a genuine
+`Encode`/metadata/quality interface and CLI. The
 existing p10 writer/36-entry tables must not be assumed valid for RGB p12.
 
 ## Tests and integration
@@ -72,9 +124,19 @@ existing p10 writer/36-entry tables must not be assumed valid for RGB p12.
 The separate `hypercine_rgb444_frame` target is built in SDK-free standalone
 mode. It does not link the YUV writer or `hypercine_quality_state`.
 `rgb444_frame_storage` and `rgb444_frame_rejection` are registered with CTest
-and mandatory in `ci/run_standalone.py`, including the existing Windows/Linux/
+along with `rgb444_rg48_import`, `rgb444_rg48_rejection` and
+`rgb444_rg48_replay_contract`; all five are mandatory in `ci/run_standalone.py`,
+including the existing Windows/Linux/
 macOS standalone matrix. Missing or skipped registrations cannot certify this
 slice. Existing fixture files and p10 math are unchanged.
+
+For the optional actual F1 replay, configure
+`-DHYPERCINE_RGB444_F1_ROOT="$HYPERCINE_GOLDEN_DIR/golden/windows/format-f1"`.
+This adds `rgb444_rg48_f1_sources` to full CTest. The directory must contain
+the existing loose `128` and `1080p-RGB_444` snapshots; no copy, archive,
+regeneration or corpus overwrite is required. A configured missing or altered
+snapshot fails. Hosted runners without the private corpus still execute the
+exhaustive importer and replay-contract tests; they do not certify F1 replay.
 
 Tests use deterministic asymmetric channels seeded with `0x1337BEEF`, min/max
 samples, widths on both sides of alignment boundaries, top/down distinctions,
@@ -89,3 +151,4 @@ frame after rejection, and successful retry.
 Portable reproduction and measured native evidence are in
 `docs/validation/rgb444-frame-p0/`. Parent #37 remains open and partially
 implemented; this API/storage slice does not satisfy its packet-export DoD.
+RG48 continuation evidence is in `docs/validation/rgb444-rg48-source/`.

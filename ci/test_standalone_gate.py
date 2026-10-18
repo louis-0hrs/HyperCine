@@ -23,6 +23,11 @@ class StandaloneGateTests(unittest.TestCase):
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
+    def test_rg48_registrations_required(self):
+        for missing in ('rgb444_rg48_import', 'rgb444_rg48_rejection', 'rgb444_rg48_replay_contract'):
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
+
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.xml'

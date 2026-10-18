@@ -29,6 +29,18 @@ void ValidatePlane(const PlaneView& plane, std::size_t row_bytes, int height) {
     if (required > static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()))
         throw std::length_error("RGB444 source offset is not representable");
 }
+std::size_t DestinationStride(int width, int height) {
+    if (width <= 0 || height <= 0)
+        throw std::invalid_argument("RGB444 source dimensions must be positive");
+    if (width > kMaxFrameDimension || height > kMaxFrameDimension ||
+        Multiply(static_cast<std::size_t>(width), height) > kMaxFramePixels)
+        throw std::length_error("RGB444 source exceeds the P0 storage budget");
+    const auto row_bytes = Multiply(static_cast<std::size_t>(width), sizeof(std::uint16_t));
+    const auto stride = Add(row_bytes, 15) & ~std::size_t{15};
+    if (Multiply(Multiply(stride, height), 3) > kMaxFrameStorageBytes)
+        throw std::length_error("RGB444 destination exceeds the P0 storage budget");
+    return stride;
+}
 } // namespace
 
 Rgb444Frame::Rgb444Frame(int width, int height, std::size_t stride_bytes)
@@ -39,15 +51,8 @@ Rgb444Frame::Rgb444Frame(int width, int height, std::size_t stride_bytes)
 }
 
 Rgb444Frame Rgb444Frame::Copy(const FrameView& source) {
-    if (source.width <= 0 || source.height <= 0)
-        throw std::invalid_argument("RGB444 source dimensions must be positive");
-    if (source.width > kMaxFrameDimension || source.height > kMaxFrameDimension ||
-        Multiply(static_cast<std::size_t>(source.width), source.height) > kMaxFramePixels)
-        throw std::length_error("RGB444 source exceeds the P0 storage budget");
+    const auto stride = DestinationStride(source.width, source.height);
     const auto row_bytes = Multiply(static_cast<std::size_t>(source.width), sizeof(std::uint16_t));
-    const auto stride = Add(row_bytes, 15) & ~std::size_t{15};
-    if (Multiply(Multiply(stride, source.height), 3) > kMaxFrameStorageBytes)
-        throw std::length_error("RGB444 destination exceeds the P0 storage budget");
     const std::array<PlaneView, 3> inputs{source.red, source.green, source.blue};
     // Validate every span before allocating or reading any source sample.
     for (const auto& input : inputs) ValidatePlane(input, row_bytes, source.height);
@@ -66,6 +71,21 @@ Rgb444Frame Rgb444Frame::Copy(const FrameView& source) {
                 output[x] = value;
             }
         }
+    }
+    return result;
+}
+
+Rgb444Frame Rgb444Frame::CopyRg48(const Rg48View& source) {
+    const auto stride = DestinationStride(source.width, source.height);
+    const auto row_bytes = Multiply(static_cast<std::size_t>(source.width), 6);
+    ValidatePlane({source.data, source.bytes, source.stride_bytes}, row_bytes, source.height);
+    Rgb444Frame result(source.width, source.height, stride);
+    for (int y = 0; y < source.height; ++y) {
+        const auto* input = source.data + static_cast<std::size_t>(y) * (source.stride_bytes / 2);
+        const auto offset = static_cast<std::size_t>(y) * (stride / 2);
+        for (int x = 0; x < source.width; ++x)
+            for (std::size_t c = 0; c < 3; ++c)
+                result.planes_[c][offset + x] = input[static_cast<std::size_t>(x) * 3 + c] >> 4;
     }
     return result;
 }
