@@ -1,5 +1,8 @@
 # HyperCine GPU Acceleration Roadmap (Phase 1)
 
+> [!NOTE]
+> **Historical proposal — not a current product roadmap or benchmark.** The CPU measurements and GPU FPS *targets* below are the original Phase 1 planning inputs; the targets are **not verified performance results**. For current source-backed capabilities and data, consult the [documentation index](README.md), [compatibility matrix](COMPATIBILITY.md), and [Phase 3A.2c canonical benchmark](../benchmarks/phase3a2c_release_candidate.json).
+
 This document outlines the concrete architectural roadmap and implementation plan for Phase 1 GPU acceleration in HyperCine, transitioning from the pristine CPU baseline to high-throughput hardware compute.
 
 ---
