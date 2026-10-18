@@ -12,6 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    'p7_plane_contract', 'p7_json_contract', 'p7_public_sdk_fixture',
     'cpu_isa_selection',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
