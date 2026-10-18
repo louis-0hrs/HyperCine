@@ -139,6 +139,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME filmscan3_trace_contract COMMAND "${Python3_EXECUTABLE}"
+            -O "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_trace_contract.py")
         add_test(NAME validation_input_contracts COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_validation_contracts.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
