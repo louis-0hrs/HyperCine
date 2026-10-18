@@ -4,8 +4,7 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """Test actual autonomous CPU FilmScan3 samples; no manifest tables enter encoder."""
 import argparse
-from validation_support import portable_command
-import array
+from validation_support import portable_command, p10_samples
 import math
 import struct
 import hashlib
@@ -20,6 +19,16 @@ import tempfile
 import reference_sample as sample
 import validate_windows_reference as gate
 from validate_standalone import avi
+
+
+def decoded_psnr(actual, reference, width=1920, height=1080):
+    pixels = p10_samples(actual, width, height)
+    expected = p10_samples(reference, width, height)
+    square = sum((int(a)-int(b))**2 for a, b in zip(pixels, expected))
+    psnr = 10*math.log10(1023.0**2*len(pixels)/square) if square else None
+    if psnr is not None and psnr <= 35:
+        raise ValueError('FS3 decoded p10 PSNR does not exceed 35 dB: '+str(psnr))
+    return psnr
 
 
 def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None):
@@ -107,17 +116,8 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
             packet = output/('frame_%04d.avi' % index);packet.write_bytes(avi(raw, 1920, 1080))
             decoded = output/('frame_%04d.yuv' % index)
             subprocess.run([str(ffmpeg), '-v', 'error', '-xerror', '-y', '-i', str(packet), '-frames:v', '1', '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', str(decoded)], check=True)
-            if decoded.stat().st_size != 1920*1080*4:
-                raise ValueError('FFmpeg output storage mismatch')
-            actual_pixels=array.array('H', decoded.read_bytes());reference_pixels=array.array('H', (output/('frame_%04d.reference.yuv' % index)).read_bytes())
-            if sys.byteorder != 'little':
-                actual_pixels.byteswap();reference_pixels.byteswap()
-            if len(actual_pixels) != len(reference_pixels):
-                raise ValueError('reference plane length mismatch')
-            square=sum((int(a)-int(b))**2 for a,b in zip(actual_pixels, reference_pixels))
-            psnr=10*math.log10(1023.0**2*len(actual_pixels)/square) if square else None
-            if psnr is not None and psnr <= 35:
-                raise ValueError('FS3 decoded p10 PSNR does not exceed 35 dB: '+str(psnr))
+            psnr = decoded_psnr(decoded.read_bytes(),
+                                (output/('frame_%04d.reference.yuv' % index)).read_bytes())
             row['external_ffmpeg'] = 'PASS';row['decoded_sha256'] = gate.sha(decoded.read_bytes())
             row['yuv_p10_psnr_db'] = psnr
 

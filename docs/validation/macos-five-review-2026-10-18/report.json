@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "license": "MIT OR Apache-2.0",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "platform": {
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "compiler": "AppleClang 21.0.0",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0"
+  },
+  "reviews": [
+    {
+      "pr": 133,
+      "head": "be0d01ddad0b9a6c8700efe56b75f06a470081ac",
+      "scope": "quality probe integer parsing"
+    },
+    {
+      "pr": 135,
+      "head": "59da896391137d50ba147df617c763e40f51ddfb",
+      "scope": "bounded geometry, wavelet, quality and Metal memory contracts"
+    },
+    {
+      "pr": 139,
+      "head": "f295160d0b94bb71d3b17eab02da14613cc07be8",
+      "scope": "portable input and evidence validation"
+    },
+    {
+      "pr": 140,
+      "head": "1755796abc0dd007de27eb936c2dfae5ed6d3548",
+      "scope": "complete standalone test prerequisites"
+    },
+    {
+      "pr": 141,
+      "head": "28762285953d79d860d0fb3fa14cbff7db64a8e3",
+      "scope": "Metal CMake boolean prerequisite selection"
+    }
+  ],
+  "finding": {
+    "parent_pr": 139,
+    "severity": "P2",
+    "description": "p10 comparison accepts out-of-range pixels, including identical invalid outputs with perfect metrics",
+    "reproduced_before_fix": {
+      "failed_subcases": 6,
+      "values": [
+        1024,
+        65535
+      ]
+    },
+    "resolution": "Check exact planar storage and all samples in both actual and reference before PSNR or equality."
+  },
+  "tests": {
+    "optimized_validation_methods": 14,
+    "quality_probe_ctest": {
+      "passed": 3,
+      "total": 3
+    },
+    "pr135_contract_ctest": {
+      "passed": 5,
+      "total": 5
+    },
+    "pr140_runner_methods": 11,
+    "pr141_runner_methods": 12,
+    "child_standalone_ctest": {
+      "passed": 29,
+      "total": 29,
+      "seconds": 81.83,
+      "python_optimization": true
+    },
+    "privacy_methods": 13,
+    "pr141_native_metal_ctest": {
+      "passed": 34,
+      "total": 34,
+      "seconds": 112.79,
+      "metal_cache_value": "TRUE",
+      "gpu_required_tests": 4
+    }
+  },
+  "limits": [
+    "No new codec algorithm, SIMD dispatch or P4/P5 dependency acceptance",
+    "No external private Windows corpus configured",
+    "Native evidence only; hosted CI and Windows/Linux execution not certified",
+    "Metal memory numbers remain estimates, not measured device limits"
+  ],
+  "changed_source_sha256": {
+    "tests/validation_support.py": "2960522b824c4d584007afc4781cfae2e4d73d97588f7effc4369d1ea479a77a",
+    "tests/compare_sdk_oracle.py": "af582ee45859dd8445cc36d721e79416217bc4dbd08d53c38669d8640eb927ef",
+    "tests/validate_filmscan3.py": "315885d7a2c7c80279e4847573dfb0d8e3e780f7e3f49c266fea6634211f214f",
+    "tests/test_validation_contracts.py": "e607c09fd8b4c9f26140bc50ae3b93a1dafcc1a2513ad7811eaac7c26536c96f"
+  }
+}

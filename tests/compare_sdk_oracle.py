@@ -7,13 +7,12 @@ Windows never needs FFmpeg. Its real SDK control packet and unmasked pixel plane
 are carried in log records and decoded/compared on Mac. No SDK is emulated.
 """
 import argparse
-from validation_support import require
+from validation_support import require, p10_samples
 import base64
 import hashlib
 import json
 import math
 from pathlib import Path
-import struct
 import subprocess
 from validate_standalone import avi, reference
 
@@ -30,7 +29,7 @@ def metric(a, b, peak=1023):
 
 
 def p10_metrics(actual, expected):
-    a, b = struct.unpack('<32768H', actual), struct.unpack('<32768H', expected)
+    a, b = p10_samples(actual, 128, 128), p10_samples(expected, 128, 128)
     bounds = (0, 16384, 24576, 32768)
     return dict(overall=metric(a, b), planes={name: metric(a[bounds[i]:bounds[i+1]], b[bounds[i]:bounds[i+1]])
                 for i, name in enumerate(('Y', 'Cb', 'Cr'))})
