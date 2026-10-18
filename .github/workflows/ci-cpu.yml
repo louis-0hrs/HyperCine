@@ -1,9 +1,9 @@
 name: CPU Reference CI
 
-# Cancel superseded runs of the same event/ref, not the required check of
-# another event type. All push, tag and pull_request triggers remain active.
+# Cancel superseded runs per PR number (or push ref), not the required check
+# of another event type. Distinct fork PRs cannot cancel each other.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 on:
