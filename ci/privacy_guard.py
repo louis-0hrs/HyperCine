@@ -28,8 +28,8 @@ IP_CANDIDATE = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")
 def is_private_network_address(address):
     a, b, _, _ = address.packed
     return a == 10 or (a == 172 and 16 <= b <= 31) or (a == 192 and b == 168)
-UNIX_HOME = re.compile(r"(?<![\w/])/(?:Users|home|root)/[^/\s\"'<>]+")
-WINDOWS_HOME = re.compile(r"\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>]+")
+UNIX_HOME = re.compile(r"(?<![\w/])/(?:Users|home|root)/[^/\s\"'<>]+", re.IGNORECASE)
+WINDOWS_HOME = re.compile(r"\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>]+", re.IGNORECASE)
 # Git Bash/MSYS mounts Windows drives with POSIX-like home paths.
 MSYS_HOME = re.compile(r"(?<![\w/])/[a-z]/" r"Users/[^/\s\"'<>]+", re.IGNORECASE)
 TILDE_HOME = re.compile(r"(?<![\w/])~/(?=[A-Za-z._])[^\s\"'<>]+")
