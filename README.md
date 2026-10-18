@@ -154,6 +154,6 @@ The decoder reproducibility and release-gating investigations are tracked separa
 
 HyperCine is dual-licensed under the [MIT License](LICENSE-MIT) or [Apache License 2.0](LICENSE-APACHE), at your option. See [third-party notices](THIRD_PARTY_NOTICES.md).
 
-Original GoPro CineForm SDK: Copyright © 2017 GoPro, Inc.; original [MIT](upstream/LICENSE.txt) and [Apache 2.0](upstream/LICENSE-APACHE.txt) license texts.
+Original GoPro CineForm SDK: Copyright © 2017 GoPro, Inc.; original [MIT](upstream/LICENSE.txt) and [Apache 2.0](upstream/LICENSE-APACHE) license texts.
 
 HyperCine additions: Copyright © 2026 HyperCine Contributors.
