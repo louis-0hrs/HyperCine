@@ -30,5 +30,20 @@ class TraceContract(unittest.TestCase):
         with self.assertRaises(ValueError):
             fs3.validate_trace([],[])
 
+    def test_duplicate_json_keys_rejected_before_trace_validation(self):
+        import json
+        valid = json.dumps({'profile': 'FilmScan3', 'frames': [self.row]})
+        self.assertEqual(fs3.load_trace(valid), [self.row])
+        for raw in (valid.replace('"frames":', '"frames": [], "frames":', 1),
+                    valid.replace('"frame_index":', '"frame_index": 999, "frame_index":', 1)):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                fs3.load_trace(raw)
+
+    def test_invalid_trace_json_roots_and_constants(self):
+        for raw in ('[]', 'null', '{}', '{"frames": [], "ignored": NaN}',
+                    '{"frames": [], "ignored": 1e400}'):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                fs3.load_trace(raw)
+
 if __name__ == '__main__':
     unittest.main()
