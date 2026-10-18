@@ -54,5 +54,16 @@ class SequenceTests(unittest.TestCase):
                     self.check_sequence(b''.join(self.frames) + suffix)
 
 
+    def test_empty_or_invalid_sequence_contract_rejected(self):
+        empty_sha = hashlib.sha256(b'').hexdigest()
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / 'sequence.yuv'
+            path.write_bytes(b'')
+            for hashes, size in (([], 12), ([empty_sha], 0),
+                    ([empty_sha], False), ([empty_sha], -1), ([empty_sha], 1.0),
+                    (['invalid'], 12), (None, 12)):
+                with self.subTest(hashes=hashes, size=size), self.assertRaises(ValueError):
+                    verify_sequence(path, hashes, size)
+
 if __name__ == '__main__':
     unittest.main()

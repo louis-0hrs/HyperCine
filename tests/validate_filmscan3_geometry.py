@@ -9,6 +9,7 @@ import sys
 import hashlib
 import json
 import math
+import re
 from pathlib import Path
 import platform
 import struct
@@ -40,6 +41,12 @@ def sha(path):
 
 def verify_sequence(path, expected_hashes, frame_bytes):
     """Compare decoded frames in order, using at most 1 MiB of read storage."""
+    if type(frame_bytes) is not int or frame_bytes <= 0:
+        raise ValueError('invalid sequence frame extent')
+    if (type(expected_hashes) is not list or not expected_hashes or
+            any(type(value) is not str or re.fullmatch('[0-9a-f]{64}', value) is None
+                for value in expected_hashes)):
+        raise ValueError('empty or invalid sequence hash inventory')
     hashes = []
     with path.open('rb') as stream:
         for index, expected in enumerate(expected_hashes):
