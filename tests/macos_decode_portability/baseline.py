@@ -5,6 +5,7 @@
 import argparse
 import hashlib
 import json
+import math
 import pathlib
 import struct
 import subprocess
@@ -32,8 +33,14 @@ def load_object(text):
     def reject_constant(value):
         raise ValueError('nonstandard JSON constant')
 
+    def finite_float(value):
+        result = float(value)
+        if not math.isfinite(result):
+            raise ValueError('nonfinite JSON number')
+        return result
+
     result = json.loads(text, object_pairs_hook=unique_pairs,
-                        parse_constant=reject_constant)
+                        parse_constant=reject_constant, parse_float=finite_float)
     if not isinstance(result, dict):
         raise ValueError('expected JSON object')
     return result

@@ -83,5 +83,14 @@ class JsonContract(unittest.TestCase):
                 self.assertNotIn('Traceback', stderr.getvalue())
 
 
+    def test_overflowing_json_numbers_fail_closed(self):
+        raw = json.dumps(self.report)
+        for value in ('1e400', '-1e400'):
+            with self.subTest(value=value):
+                self.verify(raw[:-1] + ', "ignored": ' + value + '}')
+                with self.assertRaises(ValueError):
+                    baseline.load_object('{"streams": [{"value": ' + value + '}]}')
+        self.assertEqual(baseline.load_object('{"value": 1.5}'), {'value': 1.5})
+
 if __name__ == '__main__':
     unittest.main()
