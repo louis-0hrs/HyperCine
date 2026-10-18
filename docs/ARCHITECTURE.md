@@ -137,18 +137,19 @@ The upstream reference code (`upstream/`) is organized as follows:
 
 | Directory | Responsibilities | Key Source Files |
 |-----------|------------------|------------------|
-| `upstream/Codec/` | Core encoder and decoder pipelines, frame state, entropy coding, bitstream packaging | `encoder.c`, `decoder.c`, `frame.c`, `bitstream.c`, `entropy.c`, `quantize.c`, `spatial.c`, `wavelet.c` |
-| `upstream/Common/` | Cross-platform utilities, thread abstractions, locks, dynamic array allocators, metadata parsing | `thread.c`, `lock.c`, `config.h`, `mem.h`, `metadata.c` |
-| `upstream/Convert/` | Color space conversion kernels (RGB to YUV, YUV to RGB, Bayer demosaic, pedestal adjustments) | `RGB2YUV.c`, `YUV2RGB.c`, `convert.c`, `bayer.c` |
-| `upstream/Wavelet/` | Historical wavelet routines, demo harnesses, standalone transform tests | `wavelet.c`, `subband.c` |
-| `upstream/Example/` | Command-line test harness (`TestCFHD`), demo apps, sample AVI test bitstream | `TestCFHD/TestCFHD.cpp`, `videos/CFHDsample422.AVI` |
+| [`upstream/Codec/`](../upstream/Codec/) | Core encode/decode, wavelets, quantization, color conversion and C thread primitives | `encoder.c`, `decoder.c`, `spatial.c`, `wavelet.c`, `quantize.c`, `RGB2YUV.c`, `convert.c`, `bayer.c`, `thread.c` |
+| [`upstream/Common/`](../upstream/Common/) | Public SDK types, allocator contracts and C++ synchronization helpers | `CFHDTypes.h`, `IAllocator.h`, `ThreadPool.cpp`, `MessageQueue.cpp`, `Lock.h` |
+| [`upstream/ConvertLib/`](../upstream/ConvertLib/) | C++ pixel conversion, scaling and DPX helpers | `ImageConverter.cpp`, `ConvertYUV8.cpp`, `ColorMatrix.cpp`, `ImageScaler.cpp`, `DPXConverter.cpp` |
+| [`upstream/EncoderSDK/`](../upstream/EncoderSDK/) | Public encoder API, sample encoding and asynchronous queues | `CFHDEncoder.cpp`, `SampleEncoder.cpp`, `EncoderPool.cpp` |
+| [`upstream/DecoderSDK/`](../upstream/DecoderSDK/) | Public decoder API, sample decoding, metadata and output conversion | `CFHDDecoder.cpp`, `SampleDecoder.cpp`, `CFHDMetadata.cpp`, `Conversion.cpp` |
+| [`upstream/Example/`](../upstream/Example/) | Sample CLI and reference AVI | `TestCFHD.cpp`, `videos/CFHDsample422.AVI` |
 
 ---
 
 ## 4. Concurrency and Threading Model
 
 ### Upstream CPU Model
-- **Thread Pools:** Uses native platform worker threads (Win32 worker threads on Windows via `Common/thread.c`).
+- **Thread Pools:** Uses platform worker abstractions in `Codec/thread.c` and C++ helpers in `Common/ThreadPool.cpp`; codec worker orchestration also lives in `Codec/entropy_threading.c`.
 - **Slice / Band Parallelism:** Video frames are vertically partitioned into horizontal bands or slices. Each worker thread processes a set of slices independently through the wavelet decomposition and quantization stages.
 - **Entropy Coding Serialization:** Entropy coding of subband bitstreams is performed per-slice or per-subband, then concatenated into the master bitstream sequentially.
 
