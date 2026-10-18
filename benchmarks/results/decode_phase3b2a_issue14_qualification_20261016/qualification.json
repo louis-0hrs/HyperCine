@@ -1,0 +1,162 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "issue": 14,
+  "date": "2026-10-16",
+  "status": "PASS_ISSUE14_PERFORMANCE_RESOURCE_AND_PROVENANCE_GATES",
+  "tested_source_commits": {
+    "baseline": "f1d0fe4258ad70113a9de57e85ab9834d29312cc",
+    "current": "1d78fc183ea28c4268345521e83fb2bca3226381"
+  },
+  "build": {
+    "generator": "Visual Studio 17 2022",
+    "architecture": "x64",
+    "toolset": "v143, host=x64",
+    "configuration": "Release",
+    "cmake": "3.31.6",
+    "cuda_toolkit": "12.8.61",
+    "nvcc_host_msvc": "19.44.35229.0",
+    "cuda_architecture": 89,
+    "cuda": "ON",
+    "upstream": "ON (default; upstream targets were built)",
+    "tests": "ON",
+    "benchmarks": "ON",
+    "machine": "Windows 11 x64, NVIDIA GeForce RTX 4090 Laptop GPU",
+    "driver": "610.62",
+    "power": "AC verified within each benchmark block"
+  },
+  "c1902": {
+    "reproduced_in_restricted_environment": true,
+    "phase": "CMake CUDA compiler identification / MSVC host PDB creation",
+    "diagnostic": "fatal error C1902 (program database manager mismatch); MSB3721; compiler-id invocation requested Debug /Zi /RTC1 /FS and Debug\\vc143.pdb",
+    "resolution": "Fresh isolated baseline and current worktrees both configured with CUDA enabled and built Release targets successfully with normal local process access.",
+    "decoder_change": "none",
+    "classification": "host compiler PDB/toolchain initialization issue observed in restricted environment; clean local CUDA configure/build passed. Not a decoder runtime failure."
+  },
+  "provenance": {
+    "interlaced_harness_sha256": "DC742E168C912A2392C167966B72A0B2FEE5B7ECBBD555B57610E920562DAD96",
+    "benchmark_cmake_sha256": "DA32A289D5B3B0BAE01DC47F712D64F00C7414B3F4A35BBB022F63A5A84CBEA2",
+    "decoder_support_sha256": "5C13F3FB74711C511BF51393388C31F6D49AF94A38D2BF75D8B913C282A797EE",
+    "decode_phase0_support_sha256": "89B7BD28B2CCD2D5061E2975B173285638D760FA2053C0D03CFA0C494DB6BF9E",
+    "decode_phase1_support_sha256": "DDB9A0752AC8AF4F2805E109B18EC776D23E7F80914E39929142509DEE4AD5A2",
+    "decode_phase3a_rc_support_sha256": "61D937B52D45F5C360EA2D78122277094FBB9E47FCB9526CD225405401677520",
+    "harness_and_benchmark_cmake_match_across_builds": true,
+    "current_vs_baseline_acceptance_source_diff": "test_decode_phase3b1_acceptance.cpp differs across commits; the new comparison uses the identical harness and support headers listed above."
+  },
+  "progressive_boundary": {
+    "id": "1920x1080 progressive flat Automatic",
+    "previous_reported_regression_percent": 5.144,
+    "ordering": "A-B-B-A cycles, two cycles; 12 100-request block means per build",
+    "sample_hash": "95b06b63ffcdce70",
+    "baseline_median_ms": 1.053925,
+    "current_median_ms": 1.06074,
+    "median_regression_percent": 0.64663,
+    "baseline_mean_ms": 1.050933,
+    "current_mean_ms": 1.069428,
+    "mean_delta_ms": 0.018494,
+    "approximate_welch_95_ci_mean_delta_ms": [
+      -0.0083,
+      0.0453
+    ],
+    "five_percent_threshold_ms": 0.052696,
+    "baseline_block_p95_ms": 1.08379,
+    "current_block_p95_ms": 1.14034,
+    "per_block_requests": 100,
+    "ac_before_and_after_every_repeat": true,
+    "decision": "PASS: median regression below 5%; upper approximate 95% mean-difference bound remains below 5% threshold.",
+    "raw_blocks": "progressive/"
+  },
+  "interlaced_gop1": {
+    "ordering": "Three A-B-B-A cycles: A-B-B-A repeated three times",
+    "blocks_per_build": 6,
+    "requests_per_block_per_strategy": 100,
+    "pooled_requests_per_build_per_strategy": 600,
+    "sample_source_hash": "2d12a276f3594b09",
+    "sample_hash": "356ad5c204104b7d",
+    "exact_upstream_bgra_output_hash": "41a4e58b09555e3e",
+    "timer": "QueueDecode -> WaitForDecode -> D2H Download -> ReleaseOutput",
+    "ac_checked_before_and_after_each_block": true,
+    "timing_metrics": [
+      {
+        "strategy": "Lightweight",
+        "baseline_mean_ms": 54.026335,
+        "current_mean_ms": 53.993232,
+        "mean_delta_ms": -0.033103,
+        "regression_percent": -0.0613,
+        "baseline_median_ms": 53.7083,
+        "current_median_ms": 53.64595,
+        "baseline_p95_ms": 56.3874,
+        "current_p95_ms": 56.6865,
+        "baseline_sd_ms": 1.33635,
+        "current_sd_ms": 1.32513,
+        "welch_95_ci_mean_delta_ms": [
+          -0.184,
+          0.1178
+        ]
+      },
+      {
+        "strategy": "Hybrid",
+        "baseline_mean_ms": 41.303368,
+        "current_mean_ms": 41.183339,
+        "mean_delta_ms": -0.120028,
+        "regression_percent": -0.2906,
+        "baseline_median_ms": 41.253,
+        "current_median_ms": 41.1286,
+        "baseline_p95_ms": 42.1488,
+        "current_p95_ms": 41.9697,
+        "baseline_sd_ms": 0.47193,
+        "current_sd_ms": 0.42914,
+        "welch_95_ci_mean_delta_ms": [
+          -0.1712,
+          -0.0689
+        ]
+      },
+      {
+        "strategy": "Auto",
+        "baseline_mean_ms": 41.189115,
+        "current_mean_ms": 41.124404,
+        "mean_delta_ms": -0.06471,
+        "regression_percent": -0.1571,
+        "baseline_median_ms": 41.1438,
+        "current_median_ms": 41.08185,
+        "baseline_p95_ms": 41.9527,
+        "current_p95_ms": 41.7642,
+        "baseline_sd_ms": 0.42208,
+        "current_sd_ms": 0.40568,
+        "welch_95_ci_mean_delta_ms": [
+          -0.1116,
+          -0.0178
+        ]
+      }
+    ],
+    "power_telemetry": "Captured for final A-B-B-A cycle at about 1 s intervals; loaded clocks 1995 MHz/P2, temperature 59-63 C. One idle power.draw sample read 593.51 W and is retained as a telemetry outlier; loaded samples were about 32-36 W.",
+    "decision": "PASS: no repeatable regression; all three pooled mean deltas are negative and all per-strategy medians and p95 are within 5%.",
+    "raw_blocks": "interlaced/e2e/"
+  },
+  "stage_measurement": {
+    "cases": "Frozen interlaced GOP-1, 100 frames per strategy and build; exact upstream BGRA match.",
+    "baseline": "interlaced/stages/baseline.json",
+    "current": "interlaced/stages/current.json",
+    "fieldplus_stage_timing": "Deferred: current FIELDPLUS diagnostics do not expose these stages; not a promotion blocker under Issue #14."
+  },
+  "memory_and_resources": {
+    "status": "PASS",
+    "progressive_fieldplus_policy": "Intentionally lazy per slot on first progressive FIELDPLUS decode; first-use memory growth and latency recorded; warmed steady state has zero allocation delta.",
+    "api": "No explicit prewarm API; public API comment recommends submitting/releasing a FIELDPLUS request on each slot before latency-sensitive use.",
+    "resource_snapshot": "resources/issue14_memory_resource_snapshot.json",
+    "fresh_4k_exact_smoke": "resources/4k_smoke.json",
+    "fresh_1080_latency": "resources/1080_performance.json",
+    "fresh_mixed_stress": "resources/current_stress.json",
+    "fresh_stress_memory": "resources/current_stress_memory.json",
+    "source_level_stream_event_audit": "13 streams and 197 events per slot; 0 delta from baseline; 26/394 for two slots. Counts are call-site accounting because runtime diagnostics do not expose native handle counters.",
+    "warmed_steady_state_allocations": 0
+  },
+  "verification": {
+    "cuda_ctest": "PASS 44/44",
+    "cuda_ctest_elapsed_seconds": 767.02,
+    "production_decoder_changes": 0,
+    "upstream_worktree_clean": true,
+    "existing_primary_worktree_changes_and_job_txt_touched": false,
+    "repository_report_files_review": "All committed JSON parses; no absolute local paths, usernames, secrets, hostnames, or raw build logs are included."
+  },
+  "recommendations": "Issue #14 performance/resource/provenance gates PASS. PR #12 remains Draft/HOLD pending the separate safety validation tracked by Issues #13/#38. No merge or release."
+}

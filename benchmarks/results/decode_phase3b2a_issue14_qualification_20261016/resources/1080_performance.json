@@ -1,0 +1,12 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS_END_TO_END_LATENCY",
+  "sample": "tests/fixtures/phase3b2a/motion_1080p_progressive.cfhd",
+  "resolution": "1920x1080",
+  "iterations_per_frame": 120,
+  "timing_scope": "QueueDecode through WaitForDecode, BGRA device-to-host copy, hash verification, and ReleaseOutput",
+  "stage_timing": "not exposed by current FIELDPLUS diagnostics",
+  "same_session_gop1_regression_percent": null,
+  "frame0": {"mean_ms":12.1053,"median_ms":12.1223,"p95_ms":13.4743,"min_ms":11.0623,"max_ms":14.0933,"stddev_ms":0.702117,"fps_equivalent":82.6086},
+  "frame1": {"mean_ms":11.8916,"median_ms":11.6514,"p95_ms":13.008,"min_ms":11.0288,"max_ms":14.0763,"stddev_ms":0.656665,"fps_equivalent":84.093}
+}
