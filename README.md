@@ -1,5 +1,9 @@
 # HyperCine
 
+[![CPU reference CI](https://github.com/louis-0hrs/HyperCine/actions/workflows/ci-cpu.yml/badge.svg)](https://github.com/louis-0hrs/HyperCine/actions/workflows/ci-cpu.yml)  
+[![SDK-free standalone CI](https://github.com/louis-0hrs/HyperCine/actions/workflows/ci-standalone.yml/badge.svg)](https://github.com/louis-0hrs/HyperCine/actions/workflows/ci-standalone.yml)  
+[![Privacy guard](https://github.com/louis-0hrs/HyperCine/actions/workflows/privacy-guard.yml/badge.svg)](https://github.com/louis-0hrs/HyperCine/actions/workflows/privacy-guard.yml)
+
 **GPU-accelerated CineForm encoding with upstream-compatible CFHD output.**
 
 HyperCine is an independent C++17 / NVIDIA CUDA engineering and research project built alongside the open-source [GoPro CineForm SDK](https://github.com/gopro/cineform-sdk). It accelerates the CineForm (`CFHD` / SMPTE VC-5) intra-frame wavelet encoder and validates its bitstreams against the upstream reference.
