@@ -68,6 +68,11 @@ class JsonContract(unittest.TestCase):
             with self.subTest(raw=raw):
                 self.verify(raw)
 
+    def test_deeply_nested_baseline_fails_without_traceback(self):
+        depth = sys.getrecursionlimit() + 100
+        raw = json.dumps(self.report)[:-1] + ', "ignored": ' + '[' * depth + '0' + ']' * depth + '}'
+        self.verify(raw)
+
     def test_malformed_tool_json_fails_without_traceback(self):
         import subprocess
         for raw in [b'[]', b'{"streams":[],"streams":[]}',
