@@ -4,6 +4,8 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """C0 arithmetic model only: allocates no frames and invokes no codec/GPU."""
 import json
+import argparse
+from pathlib import Path
 
 U64_MAX = (1 << 64) - 1
 CHUNK_MAX = ((1 << 24) - 1) * 4
@@ -102,5 +104,40 @@ def report():
                 geometries=[geometry(w, h) for w, h in GEOMETRIES])
 
 
+def verify_report(text):
+    """Check the recorded C0 evidence without Python's numeric type aliases."""
+    def unique_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError('duplicate report key')
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError('nonstandard report constant')
+
+    try:
+        recorded = json.loads(text, object_pairs_hook=unique_pairs,
+                              parse_constant=reject_constant)
+        # Canonical JSON preserves integer/float/bool types and list order,
+        # while allowing inconsequential object-key order and whitespace.
+        if (json.dumps(recorded, sort_keys=True, allow_nan=False) !=
+                json.dumps(report(), sort_keys=True, allow_nan=False)):
+            raise ValueError('recorded report mismatch')
+    except (ValueError, TypeError, RecursionError):
+        raise ValueError('invalid recorded C0 report') from None
+
+
 if __name__ == '__main__':
-    print(json.dumps(report(), indent=2, sort_keys=True))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--verify', type=Path)
+    args = parser.parse_args()
+    if args.verify:
+        try:
+            verify_report(args.verify.read_text(encoding='utf-8'))
+        except (ValueError, OSError):
+            parser.exit(1, 'FAIL: invalid or unavailable recorded C0 report\n')
+        print('PASS: recorded C0 geometry report matches the arithmetic model')
+    else:
+        print(json.dumps(report(), indent=2, sort_keys=True))

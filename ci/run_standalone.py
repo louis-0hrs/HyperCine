@@ -12,6 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    'extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report',
     'cpu_isa_selection',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
