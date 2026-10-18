@@ -209,6 +209,20 @@ struct DecodeSlot2E {
     bool GpuIndex() const { return pipeline_mode == Phase2EPipelineMode::Phase2FAGpuIndexBatch; }
     uint32_t* ErrorGuard() const { return (GpuIndex() || production_guard) ? d_frame_error : nullptr; }
 
+    // Records the first CUDA submission error of the current frame. A failed
+    // stream/event/copy submission poisons the frame: callers must stop
+    // advancing the DAG and must not publish ev_ready.
+    bool NoteCudaFailure(cudaError_t err) {
+        if (err == cudaSuccess) return false;
+        int expected = static_cast<int>(cudaSuccess);
+        first_cuda_error.compare_exchange_strong(expected, static_cast<int>(err));
+        has_error.store(true, std::memory_order_relaxed);
+        return true;
+    }
+    bool CudaFailurePending() const {
+        return first_cuda_error.load(std::memory_order_relaxed) != static_cast<int>(cudaSuccess);
+    }
+
     // Reusable per-band host checkpoint buffers
     std::vector<GpuEntropySegmentDescriptor> band_segments[kMaxBandSegmentScratch];
     std::vector<GpuEntropyBandDescriptor> host_bands;
@@ -278,6 +292,9 @@ struct DecodeSlot2E {
     bool color_enqueued = false;
 
     std::atomic<bool> has_error{false};
+    // First CUDA submission error of the current frame. Once set, the frame
+    // fails closed: no ready event is published and waiters report failure.
+    std::atomic<int> first_cuda_error{static_cast<int>(cudaSuccess)};
     std::atomic<int> active_index_workers{0}, peak_index_workers{0};
     double host_dispatch_cpu_ms = 0;
     std::string error_msg;
@@ -619,7 +636,9 @@ struct DecodeSlot2E {
     }
 
     void CheckAdvanceInverseDag(int ch) {
-        // Must be called with dispatch_mutex held
+        // Must be called with dispatch_mutex held. Every submission call is
+        // checked: the first CUDA error poisons the frame, stops further DAG
+        // stages and suppresses ev_ready publication.
         if (has_error.load(std::memory_order_relaxed)) return;
 
         // 1. Check Level 2 Inverse
@@ -632,14 +651,14 @@ struct DecodeSlot2E {
                 band_state[b3] == BandState::GpuQueued)
             {
                 cudaStream_t s = channel_streams[ch];
-                cudaStreamWaitEvent(s, ev_ll_ready, 0);
-                cudaStreamWaitEvent(s, ev_band_done[b1], 0);
-                cudaStreamWaitEvent(s, ev_band_done[b2], 0);
-                cudaStreamWaitEvent(s, ev_band_done[b3], 0);
-
-                cudaEventRecord(ev_inv_l2_start[ch], s);
+                if (NoteCudaFailure(cudaStreamWaitEvent(s, ev_ll_ready, 0)) ||
+                    NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b1], 0)) ||
+                    NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b2], 0)) ||
+                    NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b3], 0)) ||
+                    NoteCudaFailure(cudaEventRecord(ev_inv_l2_start[ch], s))) return;
                 LaunchLevel2Inverse(ch, s);
-                cudaEventRecord(ev_inv_l2_stop[ch], s);
+                if (NoteCudaFailure(cudaGetLastError()) ||
+                    NoteCudaFailure(cudaEventRecord(ev_inv_l2_stop[ch], s))) return;
 
                 ch_state[ch].l2_enqueued = true;
             }
@@ -655,13 +674,13 @@ struct DecodeSlot2E {
                 band_state[b3] == BandState::GpuQueued)
             {
                 cudaStream_t s = channel_streams[ch];
-                cudaStreamWaitEvent(s, ev_band_done[b1], 0);
-                cudaStreamWaitEvent(s, ev_band_done[b2], 0);
-                cudaStreamWaitEvent(s, ev_band_done[b3], 0);
-
-                cudaEventRecord(ev_inv_l1_start[ch], s);
+                if (NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b1], 0)) ||
+                    NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b2], 0)) ||
+                    NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b3], 0)) ||
+                    NoteCudaFailure(cudaEventRecord(ev_inv_l1_start[ch], s))) return;
                 LaunchLevel1Inverse(ch, s);
-                cudaEventRecord(ev_inv_l1_stop[ch], s);
+                if (NoteCudaFailure(cudaGetLastError()) ||
+                    NoteCudaFailure(cudaEventRecord(ev_inv_l1_stop[ch], s))) return;
 
                 ch_state[ch].l1_enqueued = true;
             }
@@ -677,15 +696,15 @@ struct DecodeSlot2E {
                 band_state[b3] == BandState::GpuQueued)
             {
                 cudaStream_t s = channel_streams[ch];
-                cudaStreamWaitEvent(s, ev_band_done[b1], 0);
-                cudaStreamWaitEvent(s, ev_band_done[b2], 0);
-                cudaStreamWaitEvent(s, ev_band_done[b3], 0);
-
-                cudaEventRecord(ev_inv_l0_start[ch], s);
+                if (NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b1], 0)) ||
+                    NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b2], 0)) ||
+                    NoteCudaFailure(cudaStreamWaitEvent(s, ev_band_done[b3], 0)) ||
+                    NoteCudaFailure(cudaEventRecord(ev_inv_l0_start[ch], s))) return;
                 LaunchLevel0Inverse(ch, s);
-                cudaEventRecord(ev_inv_l0_stop[ch], s);
+                if (NoteCudaFailure(cudaGetLastError()) ||
+                    NoteCudaFailure(cudaEventRecord(ev_inv_l0_stop[ch], s)) ||
+                    NoteCudaFailure(cudaEventRecord(ev_ch_done[ch], s))) return;
 
-                cudaEventRecord(ev_ch_done[ch], s);
                 ch_state[ch].l0_enqueued = true;
             }
         }
@@ -696,27 +715,33 @@ struct DecodeSlot2E {
             ch_state[1].l0_enqueued &&
             ch_state[2].l0_enqueued)
         {
-            cudaStreamWaitEvent(main_stream, ev_ch_done[0], 0);
-            cudaStreamWaitEvent(main_stream, ev_ch_done[1], 0);
-            cudaStreamWaitEvent(main_stream, ev_ch_done[2], 0);
+            if (NoteCudaFailure(cudaStreamWaitEvent(main_stream, ev_ch_done[0], 0)) ||
+                NoteCudaFailure(cudaStreamWaitEvent(main_stream, ev_ch_done[1], 0)) ||
+                NoteCudaFailure(cudaStreamWaitEvent(main_stream, ev_ch_done[2], 0))) return;
 
             if (surface_type == DeviceSurfaceType::BGRA8) {
-                cudaEventRecord(ev_color_start, main_stream);
-                LaunchYuv422ToBgra8(
-                    channels[0].d_final_plane, channels[0].final_plane_pitch,
-                    channels[1].d_final_plane, channels[1].final_plane_pitch,
-                    channels[2].d_final_plane, channels[2].final_plane_pitch,
-                    d_bgra, bgra_pitch,
-                    width, height,
-                    matrix, range, orientation,
-                    main_stream, ErrorGuard(), interlaced_gop1
-                );
-                cudaEventRecord(ev_color_stop, main_stream);
+                if (NoteCudaFailure(cudaEventRecord(ev_color_start, main_stream))) return;
+                // LaunchYuv422ToBgra8 consumes its own launch error; clear any
+                // stale value first so a false return is attributable to it.
+                (void)cudaGetLastError();
+                if (!LaunchYuv422ToBgra8(
+                        channels[0].d_final_plane, channels[0].final_plane_pitch,
+                        channels[1].d_final_plane, channels[1].final_plane_pitch,
+                        channels[2].d_final_plane, channels[2].final_plane_pitch,
+                        d_bgra, bgra_pitch,
+                        width, height,
+                        matrix, range, orientation,
+                        main_stream, ErrorGuard(), interlaced_gop1)) {
+                    NoteCudaFailure(cudaErrorUnknown);
+                    return;
+                }
+                if (NoteCudaFailure(cudaEventRecord(ev_color_stop, main_stream))) return;
             }
 
-            if (GpuIndex())
-                cudaMemcpyAsync(host_frame_error, d_frame_error, sizeof(uint32_t), cudaMemcpyDeviceToHost, main_stream);
-            cudaEventRecord(ev_ready, main_stream);
+            if (GpuIndex() &&
+                NoteCudaFailure(cudaMemcpyAsync(host_frame_error, d_frame_error,
+                    sizeof(uint32_t), cudaMemcpyDeviceToHost, main_stream))) return;
+            if (NoteCudaFailure(cudaEventRecord(ev_ready, main_stream))) return;
             color_enqueued = true;
         }
     }
@@ -749,7 +774,7 @@ struct DecodeSlot2E {
         cudaEventRecord(ev_band_done[b], stream);
         band_state[b] = BandState::GpuQueued;
         CheckAdvanceInverseDag(vlc_descs[b].channel);
-        return cudaGetLastError() == cudaSuccess;
+        return !CudaFailurePending() && cudaGetLastError() == cudaSuccess;
     }
 
     void DispatchBandGpu(int band_idx, int worker_id) {
@@ -962,6 +987,7 @@ struct CudaDecoderPipelinePhase2E::Impl {
                 s->fc_chunk_size = fc_chunk_size;
                 s->fc_oracle_decisions = fc_oracle_decisions;
                 s->has_error.store(false);
+                s->first_cuda_error.store(static_cast<int>(cudaSuccess));
                 s->active_index_workers = 0; s->peak_index_workers = 0;
                 s->host_dispatch_cpu_ms = 0;
                 s->error_msg.clear();
@@ -1952,20 +1978,26 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed
         }
 
         if (slot->surface_type == DeviceSurfaceType::BGRA8) {
-            cudaEventRecord(slot->ev_color_start, slot->main_stream);
-            LaunchYuv422ToBgra8(
-                slot->channels[0].d_final_plane, slot->channels[0].final_plane_pitch,
-                slot->channels[1].d_final_plane, slot->channels[1].final_plane_pitch,
-                slot->channels[2].d_final_plane, slot->channels[2].final_plane_pitch,
-                slot->d_bgra, slot->bgra_pitch,
-                frame_width, frame_height,
-                matrix, range, orientation,
-                slot->main_stream, slot->ErrorGuard(), slot->interlaced_gop1
-            );
-            cudaEventRecord(slot->ev_color_stop, slot->main_stream);
+            if (cudaEventRecord(slot->ev_color_start, slot->main_stream) != cudaSuccess ||
+                !LaunchYuv422ToBgra8(
+                    slot->channels[0].d_final_plane, slot->channels[0].final_plane_pitch,
+                    slot->channels[1].d_final_plane, slot->channels[1].final_plane_pitch,
+                    slot->channels[2].d_final_plane, slot->channels[2].final_plane_pitch,
+                    slot->d_bgra, slot->bgra_pitch,
+                    frame_width, frame_height,
+                    matrix, range, orientation,
+                    slot->main_stream, slot->ErrorGuard(), slot->interlaced_gop1) ||
+                cudaEventRecord(slot->ev_color_stop, slot->main_stream) != cudaSuccess) {
+                slot->NoteCudaFailure(cudaGetLastError());
+                impl_->AbandonSlot(slot);
+                return 0;
+            }
         }
 
-        cudaEventRecord(slot->ev_ready, slot->main_stream);
+        if (slot->NoteCudaFailure(cudaEventRecord(slot->ev_ready, slot->main_stream))) {
+            impl_->AbandonSlot(slot);
+            return 0;
+        }
     } else if (slot->pipeline_mode == Phase2EPipelineMode::Phase2EEntropyOverlap) {
         // Variant A: All bands were streamed to GPU as soon as indexed.
         // Retain inverse barrier: wait for all 27 bands before starting inverse transforms.
@@ -1998,20 +2030,26 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed
         }
 
         if (slot->surface_type == DeviceSurfaceType::BGRA8) {
-            cudaEventRecord(slot->ev_color_start, slot->main_stream);
-            LaunchYuv422ToBgra8(
-                slot->channels[0].d_final_plane, slot->channels[0].final_plane_pitch,
-                slot->channels[1].d_final_plane, slot->channels[1].final_plane_pitch,
-                slot->channels[2].d_final_plane, slot->channels[2].final_plane_pitch,
-                slot->d_bgra, slot->bgra_pitch,
-                frame_width, frame_height,
-                matrix, range, orientation,
-                slot->main_stream, nullptr, slot->interlaced_gop1
-            );
-            cudaEventRecord(slot->ev_color_stop, slot->main_stream);
+            if (cudaEventRecord(slot->ev_color_start, slot->main_stream) != cudaSuccess ||
+                !LaunchYuv422ToBgra8(
+                    slot->channels[0].d_final_plane, slot->channels[0].final_plane_pitch,
+                    slot->channels[1].d_final_plane, slot->channels[1].final_plane_pitch,
+                    slot->channels[2].d_final_plane, slot->channels[2].final_plane_pitch,
+                    slot->d_bgra, slot->bgra_pitch,
+                    frame_width, frame_height,
+                    matrix, range, orientation,
+                    slot->main_stream, nullptr, slot->interlaced_gop1) ||
+                cudaEventRecord(slot->ev_color_stop, slot->main_stream) != cudaSuccess) {
+                slot->NoteCudaFailure(cudaGetLastError());
+                impl_->AbandonSlot(slot);
+                return 0;
+            }
         }
 
-        cudaEventRecord(slot->ev_ready, slot->main_stream);
+        if (slot->NoteCudaFailure(cudaEventRecord(slot->ev_ready, slot->main_stream))) {
+            impl_->AbandonSlot(slot);
+            return 0;
+        }
     } else {
         // Variant B (Phase2EFullOverlap):
         // Inverse DAG advanced automatically as dependencies became complete.
@@ -2022,13 +2060,27 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t* compressed
         }
     }
 
+    // A failed submission in any pipeline mode must never be published as a
+    // ready frame: abandon the slot and report an invalid ticket instead.
+    if (slot->CudaFailurePending()) {
+        impl_->AbandonSlot(slot);
+        return 0;
+    }
+
     if (production_guard) {
-        cudaMemcpyAsync(slot->host_frame_error, slot->d_frame_error, sizeof(uint32_t),
-                        cudaMemcpyDeviceToHost, slot->main_stream);
-        if (slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame)
-            cudaMemcpyAsync(slot->host_pinned_fc_errors, slot->d_fc_errors,
+        cudaError_t submit = cudaMemcpyAsync(slot->host_frame_error, slot->d_frame_error,
+            sizeof(uint32_t), cudaMemcpyDeviceToHost, slot->main_stream);
+        if (submit == cudaSuccess &&
+            slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame) {
+            submit = cudaMemcpyAsync(slot->host_pinned_fc_errors, slot->d_fc_errors,
                 kMaxVlcBands * sizeof(uint32_t), cudaMemcpyDeviceToHost, slot->main_stream);
-        cudaEventRecord(slot->ev_ready, slot->main_stream);
+        }
+        if (submit == cudaSuccess)
+            submit = cudaEventRecord(slot->ev_ready, slot->main_stream);
+        if (slot->NoteCudaFailure(submit)) {
+            impl_->AbandonSlot(slot);
+            return 0;
+        }
     }
     if (caller_stream) {
         cudaStreamWaitEvent(caller_stream, slot->ev_ready, 0);
@@ -2267,18 +2319,20 @@ uint64_t CudaDecoderPipelinePhase2E::QueueDecodeFieldPlusParsed(const uint8_t* c
     }
 
     if (requested_surface == DeviceSurfaceType::BGRA8) {
-        cudaEventRecord(slot->ev_color_start, slot->main_stream);
-        LaunchYuv422ToBgra8(slot->channels[0].d_final_plane, slot->channels[0].final_plane_pitch,
-            slot->channels[1].d_final_plane, slot->channels[1].final_plane_pitch,
-            slot->channels[2].d_final_plane, slot->channels[2].final_plane_pitch,
-            slot->d_bgra, slot->bgra_pitch, parsed.width, parsed.height, matrix, range,
-            orientation, slot->main_stream, slot->ErrorGuard(), false);
-        cudaEventRecord(slot->ev_color_stop, slot->main_stream);
+        if (cudaEventRecord(slot->ev_color_start, slot->main_stream) != cudaSuccess ||
+            !LaunchYuv422ToBgra8(slot->channels[0].d_final_plane, slot->channels[0].final_plane_pitch,
+                slot->channels[1].d_final_plane, slot->channels[1].final_plane_pitch,
+                slot->channels[2].d_final_plane, slot->channels[2].final_plane_pitch,
+                slot->d_bgra, slot->bgra_pitch, parsed.width, parsed.height, matrix, range,
+                orientation, slot->main_stream, slot->ErrorGuard(), false) ||
+            cudaEventRecord(slot->ev_color_stop, slot->main_stream) != cudaSuccess)
+            return fail_gpu();
     }
     if (production_guard && cudaMemcpyAsync(slot->host_frame_error, slot->d_frame_error,
             sizeof(uint32_t), cudaMemcpyDeviceToHost, slot->main_stream) != cudaSuccess)
         return fail_gpu();
-    cudaEventRecord(slot->ev_ready, slot->main_stream);
+    if (cudaEventRecord(slot->ev_ready, slot->main_stream) != cudaSuccess)
+        return fail_gpu();
     return slot->ticket;
 }
 
@@ -2291,6 +2345,10 @@ DecodeTicketStatus CudaDecoderPipelinePhase2E::PollDecode(uint64_t ticket) {
 
     if (slot->status == DecodeTicketStatus::Complete) return DecodeTicketStatus::Complete;
     if (slot->status == DecodeTicketStatus::Failed) return DecodeTicketStatus::Failed;
+    if (slot->CudaFailurePending()) {
+        slot->status = DecodeTicketStatus::Failed;
+        return DecodeTicketStatus::Failed;
+    }
 
     cudaError_t err = cudaEventQuery(slot->ev_ready);
     if (err == cudaSuccess) {
@@ -2323,8 +2381,18 @@ bool CudaDecoderPipelinePhase2E::WaitForDecode(uint64_t ticket) {
         std::lock_guard<std::mutex> lock(impl_->mutex);
         slot = impl_->FindSlot(ticket);
         if (!slot) return false;
-        if (slot->status == DecodeTicketStatus::Complete) return true;
+        if (slot->status == DecodeTicketStatus::Complete) {
+            if (slot->CudaFailurePending()) {
+                slot->status = DecodeTicketStatus::Failed;
+                return false;
+            }
+            return true;
+        }
         if (slot->status == DecodeTicketStatus::Failed) return false;
+        if (slot->CudaFailurePending()) {
+            slot->status = DecodeTicketStatus::Failed;
+            return false;
+        }
     }
 
     auto t0 = Clock::now();
@@ -2335,7 +2403,9 @@ bool CudaDecoderPipelinePhase2E::WaitForDecode(uint64_t ticket) {
     slot->timings.ready_overhead_ms = std::chrono::duration<float, std::milli>(t1 - t0).count();
 
     if (err == cudaSuccess) {
-        if ((slot->GpuIndex() || slot->production_guard) && *slot->host_frame_error) {
+        if (slot->CudaFailurePending()) {
+            slot->status = DecodeTicketStatus::Failed;
+        } else if ((slot->GpuIndex() || slot->production_guard) && *slot->host_frame_error) {
             slot->status = DecodeTicketStatus::Failed;
         } else if (slot->pipeline_mode == Phase2EPipelineMode::Phase2FCHybridFullFrame) {
             if (!slot->production_guard)
