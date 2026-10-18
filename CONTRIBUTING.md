@@ -1,6 +1,6 @@
 # Contributing to HyperCine
 
-HyperCine is an experimental CineForm (`CFHD` / SMPTE VC-5) engineering project. Contributions are welcome, but each platform and format has its **own verification scope**. Start with the [architecture](docs/ARCHITECTURE.md), [compatibility matrix](docs/COMPATIBILITY.md), and [open work queue](https://github.com/louis-0hrs/HyperCine/issues/62).
+HyperCine is an experimental CineForm (`CFHD` / SMPTE VC-5) engineering project. Contributions are welcome, but each platform and format has its **own verification scope**. Start with the [documentation index](docs/README.md), [architecture](docs/ARCHITECTURE.md), [compatibility matrix](docs/COMPATIBILITY.md), and [open work queue](https://github.com/louis-0hrs/HyperCine/issues/62).
 
 > [!IMPORTANT]
 > The GoPro SDK under [`upstream/`](upstream/) is a **frozen reference**. Do not patch, refactor, reformat or update any file there. Handle integration quirks outside that directory; document reference behavior in [`docs/UPSTREAM.md`](docs/UPSTREAM.md).
