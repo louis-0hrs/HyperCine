@@ -13,6 +13,10 @@ include_directories(
 
 # 1. Transform-level test
 if(WIN32 AND TARGET CFHDCodecStatic)
+    add_executable(test_decoder_sdk_lifetime decoder_differential/test_sdk_lifetime.cpp)
+    add_test(NAME decoder_differential_sdk_lifetime COMMAND test_decoder_sdk_lifetime
+        "${CMAKE_CURRENT_BINARY_DIR}/sdk-lifetime")
+    set_tests_properties(decoder_differential_sdk_lifetime PROPERTIES LABELS "synthetic;reference-decoder-contract")
     add_executable(decoder_sdk_dump decoder_differential/sdk_dump.cpp)
     target_link_libraries(decoder_sdk_dump PRIVATE CFHDCodecStatic)
     add_test(NAME decoder_differential_yu64_unpack COMMAND decoder_sdk_dump --self-test)
