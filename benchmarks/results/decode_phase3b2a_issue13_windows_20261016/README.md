@@ -66,12 +66,14 @@ not re-executed against the GPU in this change.
 
 ## compute-sanitizer
 
-All runs used `--error-exitcode 99` and `--launch-timeout 0`.
+All runs used `--error-exitcode 99` and `--launch-timeout 0`; memcheck runs also used
+`--leak-check full` so each committed log carries an explicit leak summary.
 
 | File | Content |
 | --- | --- |
 | `control-*.log` | instrumentation controls from `tests/sanitizer_launch_control.cu` |
 | `temporal-*.log` | four tools on the minimal CUDA temporal target |
+| `acceptance-matrix.txt` | sanitized output of all four tools on the mixed acceptance profile: GOP-1 interlaced 1080 and field luma/chroma, FIELDPLUS frames 0/1, 44 mixed frames, slot modes 1/2/Auto/4, two and four instances, lifetime and malformed rejection |
 | `reconstruction-memcheck.log`, `-target-output.txt`, `reconstruction-initcheck.log` | full production reconstruction target with leak checking |
 | `reconstruction-racecheck-bounded-400-launches.log`, `reconstruction-synccheck-bounded-400-launches.log` | production target, first 400 kernel launches |
 | `reconstruction-64-matrix-*.log` | 64x64 `--matrix-range` production decode |
@@ -79,8 +81,11 @@ All runs used `--error-exitcode 99` and `--launch-timeout 0`.
 | `upstream-temporal-memcheck.log` | target terminates before the first instrumented API call |
 
 Result: attach resolved; instrumentation proven active by the controls; memcheck plus leak
-checking, initcheck, racecheck and synccheck report zero findings on the decoder targets within
-the coverage documented above.
+checking, initcheck, racecheck and synccheck report zero findings on the decoder targets and on
+the mixed acceptance profile within the coverage documented above. The acceptance profile is the
+issue #13 matrix item that exercises GOP-1 interlaced, FIELDPLUS frames 0/1, mixed GOP-1/FIELDPLUS
+frames, slot reuse with 1/2/Auto/4 slots, two and four decoder instances, lifetime handling and
+malformed rejection inside one instrumented process.
 
 ## ctest-release-summary.txt
 

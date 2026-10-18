@@ -123,17 +123,45 @@
         "racecheck": "PASS, 0 hazards displayed (0 errors, 0 warnings)",
         "synccheck": "PASS, 0 errors"
       },
+      "test_decode_phase3b1_acceptance.exe --sanitizer (mixed matrix profile)": {
+        "run_date": "2026-10-18",
+        "memcheck_leak_full": "PASS, 0 errors, 0 leaked bytes in 0 allocations",
+        "initcheck": "PASS, 0 errors",
+        "racecheck": "PASS, 0 hazards displayed (0 errors, 0 warnings)",
+        "synccheck": "PASS, 0 errors",
+        "profile": {
+          "coverage": [
+            "committed 64x64 GOP-1 interlaced fixture and frozen 1920x1080 interlaced FilmScan-3 fixture with difference-coded, Peak-carrying subband",
+            "field-asymmetric luma and chroma cases",
+            "44-frame mix of progressive FIELDPLUS frame 0/1, GOP-1 progressive, GOP-1 interlaced and noise",
+            "slot reuse with 1, 2, Auto and 4 slots; alternating/FIFO/reverse release order; delayed release and drain",
+            "two and four concurrent decoder instances",
+            "malformed-sample rejection with a failed ticket and no output"
+          ],
+          "target_reported": "frozen64, frozen1080, field_luma, field_chroma, noise PASS; steady-state deltas cpp=0 cuda_calls=0 device=0 pinned=0 pageable=0",
+          "elapsed_seconds": {"memcheck": 70, "initcheck": 85, "racecheck": 188, "synccheck": 14},
+          "logs": "compute-sanitizer/acceptance-matrix.txt (sanitized); raw tool logs stay local"
+        }
+      },
       "test_decode_phase3b2a_reconstruction.exe .": {
         "memcheck_leak_full": "PASS, 0 errors, 0 leaked bytes in 0 allocations; the executable verified its BGRA hashes, 400-request alternation and zero-allocation accounting inside the instrumented process and printed its pass line",
         "initcheck": "PASS, 0 errors",
-        "racecheck": "SEE limitations",
-        "synccheck": "SEE limitations"
+        "racecheck": "PASS, 0 hazards over the first 400 kernel launches (bounded coverage)",
+        "synccheck": "PASS, 0 errors over the first 400 kernel launches (bounded coverage)"
+      },
+      "test_decode_phase3b2a_reconstruction.exe --matrix-range .": {
+        "racecheck": "PASS, 0 hazards",
+        "synccheck": "PASS, 0 errors"
+      },
+      "test_decode_phase3b0.exe (297-case probe)": {
+        "memcheck_leak_full": "PASS, 0 errors, 0 leaked bytes in 0 allocations"
       },
       "test_decode_phase3b2a_upstream_temporal.exe": "SEE limitations"
     },
     "limitations": [
       "Compute Sanitizer 2025.1.0.0 in this installation does not provide --dump-kernel-launches, so no kernel-launch list can be recorded; kernel-launch coverage is evidenced by the instrumentation controls plus the decoded, hash-verified GPU output produced inside the instrumented process, not by a launch enumeration.",
-      "racecheck on the full production reconstruction target and the upstream temporal target did not complete within the session time budget and is reported as not run rather than as a pass."
+      "racecheck on the full production reconstruction target was run in bounded mode (first 400 kernel launches) and on the mixed acceptance profile without a launch bound; an unbounded racecheck on the full reconstruction target did not complete within the session time budget.",
+      "The upstream temporal reference target terminates before the first instrumented CUDA API call, so it has no sanitizer coverage to report."
     ],
     "logs": "compute-sanitizer/*.log and compute-sanitizer/*.stdout"
   },
@@ -149,7 +177,7 @@
   "remaining_blockers": [
     "PR #52 still has not integrated the native A2 test patch #80",
     "The #13 safety gate remains HOLD until the stacked integration and the resulting-parent native tests exist",
-    "racecheck/synccheck on the full production reconstruction target and the upstream temporal target are not run on Windows"
+    "The Windows mixed matrix is covered by the acceptance --sanitizer profile; racecheck on the full production reconstruction target remains bounded to the first 400 kernel launches and the upstream temporal target has no instrumented CUDA call to check"
   ],
   "sanitized": "Host paths, user names and the machine name were redacted from the committed logs; raw logs remain local.",
   "windows_cuda_ctest": {

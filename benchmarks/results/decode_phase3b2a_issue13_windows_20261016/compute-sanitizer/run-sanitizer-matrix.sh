@@ -51,6 +51,7 @@ T=$PWD
 B=${HYPERCINE_SANITIZER_BIN:-$T/build-release-sm89/tests/Release}
 [ -d "$B" ] || fail "sanitizer test binary directory not found; build it first"
 for exe in sanitizer_launch_control test_decode_phase3b2a_temporal \
+           test_decode_phase3b1_acceptance \
            test_decode_phase3b2a_reconstruction test_decode_phase3b2a_upstream_temporal; do
   [ -f "$B/$exe.exe" ] || fail "missing test binary $exe.exe; build the sanitizer configuration first"
 done
@@ -59,8 +60,12 @@ ROOT="$T"
 run() { # run <name> <logfile> <target> <args...>
   local name="$1"; local log="$2"; shift 2
   local start end rc
+  local leak=""
+  # memcheck performs leak checking; ask for the explicit summary so a
+  # committed log shows the leak result instead of only the error count.
+  [ "$name" = memcheck ] && leak="--leak-check full"
   start=$(date +%s)
-  "$CS" --tool "$name" --error-exitcode 99 --launch-timeout 0 --log-file "$log" "$@" >"$log.stdout" 2>&1
+  "$CS" --tool "$name" $leak --error-exitcode 99 --launch-timeout 0 --log-file "$log" "$@" >"$log.stdout" 2>&1
   rc=$?
   end=$(date +%s)
   local errors
@@ -85,6 +90,13 @@ echo "control violate filtered to clean kernel rc=$?"
 echo "== decoder: minimal temporal target =="
 for tool in memcheck initcheck racecheck synccheck; do
   run "$tool" "$EV/temporal-$tool.log" "$B/test_decode_phase3b2a_temporal.exe"
+done
+
+echo "== decoder: mixed acceptance profile =="
+for tool in memcheck initcheck racecheck synccheck; do
+  mkdir -p "$EV/acceptance-$tool"
+  run "$tool" "$EV/acceptance-$tool.log" "$B/test_decode_phase3b1_acceptance.exe" \
+    "$ROOT" "$EV/acceptance-$tool" --sanitizer
 done
 
 echo "== decoder: production reconstruction target =="

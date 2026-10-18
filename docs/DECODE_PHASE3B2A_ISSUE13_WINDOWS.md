@@ -103,17 +103,26 @@ Decoder targets, all with `--error-exitcode 99`:
 | Target | memcheck + leak check | initcheck | racecheck | synccheck |
 | --- | --- | --- | --- | --- |
 | `test_decode_phase3b2a_temporal.exe` | 0 errors, 0 leaked bytes in 0 allocations | 0 errors | 0 hazards (0 errors, 0 warnings) | 0 errors |
+| `test_decode_phase3b1_acceptance.exe . <evidence> --sanitizer` | 0 errors, 0 leaked bytes in 0 allocations | 0 errors | 0 hazards (0 errors, 0 warnings) | 0 errors |
 | `test_decode_phase3b2a_reconstruction.exe .` | 0 errors, 0 leaked bytes in 0 allocations | 0 errors | 0 hazards over the first 400 kernel launches | 0 errors over the first 400 kernel launches |
 | `test_decode_phase3b2a_reconstruction.exe --matrix-range .` (64×64) | — | — | 0 hazards | 0 errors |
 | `test_decode_phase3b0.exe` (297-case probe) | 0 errors, 0 leaked bytes in 0 allocations | — | — | — |
 | `test_decode_phase3b2a_upstream_temporal.exe` | not applicable: the target terminates before the first instrumented CUDA API call | — | — | — |
 
-The production reconstruction target verified its BGRA hashes, the 200/100-repeat determinism checks, the 400-request zero-allocation alternation and its resource accounting **inside the instrumented process**, so its zero-error result is not a vacuous "no kernel ran" result. The unbounded racecheck on that target did not finish within the session budget; the bounded runs above are the reported coverage.
+The `--sanitizer` acceptance profile is the issue's mixed matrix item and runs in one instrumented process:
+
+- committed 64×64 GOP-1 interlaced fixture and the frozen 1920×1080 interlaced FilmScan-3 fixture with a genuine difference-coded, Peak-carrying subband;
+- field-asymmetric luma and chroma cases;
+- a 44-frame mix of progressive FIELDPLUS frame 0/1, GOP-1 progressive, GOP-1 interlaced and noise;
+- slot reuse with 1, 2, Auto and 4 slots, two and four concurrent decoder instances, alternating/FIFO/reverse release order, delayed release and drain;
+- malformed-sample rejection with a failed ticket and no output.
+
+Each tool took 14 s (synccheck) to 188 s (racecheck) on the RTX 4090; the target printed its pass line and all four tools reported zero findings. The production reconstruction target verified its BGRA hashes, the 200/100-repeat determinism checks, the 400-request zero-allocation alternation and its resource accounting **inside the instrumented process**, so its zero-error result is not a vacuous "no kernel ran" result. The unbounded racecheck on that target did not finish within the session budget; the bounded runs above are the reported coverage.
 
 ## 6. Session result
 
 - Full CUDA CTest on this branch: **44/44 PASS** in 773.46 s (Release, CUDA 12.8.61, RTX 4090 Laptop GPU).
-- Windows host instrumentation part of #13: **PASS**. Attach is demonstrated, instrumentation is proven active with controls, all four tools plus leak checking report zero on the decoder targets within the documented coverage, and the historical heap corruption did not reproduce in 20 instrumented repetitions.
+- Windows host instrumentation part of #13: **PASS**. Attach is demonstrated, instrumentation is proven active with controls, all four tools plus leak checking report zero on the decoder targets and on the mixed acceptance profile (GOP-1 interlaced, FIELDPLUS 0/1, slot reuse, 1/2/Auto/4 slots, two and four instances, lifetime, malformed rejection) within the documented coverage, and the historical heap corruption did not reproduce in 20 instrumented repetitions.
 - The reproducible host finding is an upstream oracle read-ahead, documented rather than fixed, with a bounded effect claim: it is a read, it does not change HyperCine production decode, and the frozen reference hashes still reproduce in the non-ASan Release build.
 - The #13 safety gate stays **HOLD** overall: PR #52 still has not integrated the native A2 test patch #80, and the resulting-parent native tests do not exist yet. No production promotion is recommended from this evidence.
 
@@ -121,7 +130,7 @@ The production reconstruction target verified its BGRA hashes, the 200/100-repea
 
 - `benchmarks/results/decode_phase3b2a_issue13_windows_20261016/decode_phase3b2a_issue13_windows.json` — machine-readable record
 - `benchmarks/results/decode_phase3b2a_issue13_windows_20261016/host-asan/` — ASan reports, run matrix, runner script
-- `benchmarks/results/decode_phase3b2a_issue13_windows_20261016/compute-sanitizer/` — sanitizer logs and target output
+- `benchmarks/results/decode_phase3b2a_issue13_windows_20261016/compute-sanitizer/` — sanitizer logs and target output, including `acceptance-matrix.txt` with the sanitized output of the four mixed-matrix runs
 - `tests/sanitizer_launch_control.cu` — sanitizer instrumentation control (diagnostics only)
 
 Committed logs are sanitized: host paths, user names and the machine name are redacted. Raw logs stay local.
