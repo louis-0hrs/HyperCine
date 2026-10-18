@@ -7,6 +7,7 @@ import argparse
 import json
 from pathlib import Path
 import platform
+import shlex
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -36,9 +37,9 @@ def cmake_enabled(value):
 
 def required_tests(cache):
     required = set(REQUIRED)
-    if cache.get('HYPERCINE_REFERENCE_CORPUS_ROOT'):
+    if cmake_enabled(cache.get('HYPERCINE_REFERENCE_CORPUS_ROOT', '')):
         required |= {'windows_reference_binaries', 'filmscan3_actual_tier_a'}
-    if cache.get('HYPERCINE_FS3_SEQUENCE_ROOT'):
+    if cmake_enabled(cache.get('HYPERCINE_FS3_SEQUENCE_ROOT', '')):
         required.add('filmscan3_actual_sequence')
     if cmake_enabled(cache.get('HYPERCINE_ENABLE_METAL', '')):
         required.add('filmscan3_metal_required')
@@ -54,6 +55,27 @@ def validate_architecture(cache, system, machine):
     # Require one explicit native Apple target; universal builds are a separate gate.
     if system == 'Darwin' and cache.get('CMAKE_OSX_ARCHITECTURES') != machine:
         raise ValueError('CMake Apple target architecture differs from the declared job')
+
+
+def validate_compile_architecture(commands, system, machine):
+    # Per-target OSX_ARCHITECTURES can override a correct global cache entry.
+    if system != 'Darwin':
+        return
+    for command in commands:
+        args = command.get('arguments')
+        if args is None:
+            args = shlex.split(command['command'])
+        architectures = []
+        for index, arg in enumerate(args):
+            if arg in ('-arch', '-target', '--target'):
+                if index + 1 >= len(args):
+                    raise ValueError('missing Apple compiler architecture')
+                target = args[index + 1]
+                architectures.append(target if arg == '-arch' else target.split('-')[0])
+            elif arg.startswith(('--target=', '-target=')):
+                architectures.append(arg.split('=', 1)[1].split('-')[0])
+        if not architectures or any(value != machine for value in architectures):
+            raise ValueError('Apple compile target differs from the declared native job')
 
 
 def invalidate_results(build):
@@ -110,6 +132,7 @@ def main():
     commands = json.loads((build / 'compile_commands.json').read_text())
     if not commands:
         raise ValueError('empty compile database')
+    validate_compile_architecture(commands, args.system, args.machine)
     for command in commands:
         if any(part in json.dumps(command).replace('\\\\', '/').replace('\\', '/')
                for part in ('/upstream/', '/src/cuda/')):

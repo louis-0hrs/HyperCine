@@ -10,7 +10,7 @@ import subprocess
 import unittest
 from unittest.mock import patch
 from run_standalone import (REQUIRED, registered_tests, completed_tests,
-                            required_tests, validate_architecture, invalidate_results, main)
+                            required_tests, validate_architecture, validate_compile_architecture, invalidate_results, main)
 
 
 class StandaloneGateTests(unittest.TestCase):
@@ -146,6 +146,35 @@ class StandaloneGateTests(unittest.TestCase):
     def test_completed_pass(self):
         self.check_xml('<testsuite><testcase name="decode" status="run"/></testsuite>', {'decode'}, False)
 
+
+    def test_optional_corpus_truth_matches_actual_cmake(self):
+        keys = ('HYPERCINE_REFERENCE_CORPUS_ROOT', 'HYPERCINE_FS3_SEQUENCE_ROOT')
+        values = ('', 'OFF', 'false', '0', 'NOTFOUND', 'corpus-NOTFOUND', 'corpus', 'corpus-notfound')
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / 'truth.cmake'
+            script.write_text('if(ROOT)\nmessage(STATUS "ENABLED")\nendif()\n')
+            for key in keys:
+                for value in values:
+                    with self.subTest(key=key,value=value):
+                        result = subprocess.run(['cmake', '-DROOT:STRING='+value, '-P', str(script)],
+                            check=True, capture_output=True, text=True)
+                        enabled = 'ENABLED' in result.stdout
+                        required = required_tests({key:value})
+                        self.assertEqual(required != REQUIRED, enabled)
+                        if not enabled:
+                            registered_tests({'tests':[{'name':n} for n in REQUIRED]}, required)
+
+    def test_target_override_cannot_bypass_native_apple_gate(self):
+        good = [{'command': 'clang++ -arch arm64 -c unit.cpp'}]
+        validate_compile_architecture(good, 'Darwin', 'arm64')
+        validate_compile_architecture([{'arguments': ['clang++', '-arch', 'arm64', '-c', 'a b.cpp']}], 'Darwin', 'arm64')
+        validate_compile_architecture([{'command': 'c++ -c unit.cpp'}], 'Linux', 'x86_64')
+        for command in ('clang++ -arch x86_64 -c unit.cpp',
+                        'clang++ -arch arm64 -arch x86_64 -c unit.cpp',
+                        'clang++ -c unit.cpp', 'clang++ -arch',
+                        'clang++ -arch arm64 --target=x86_64-apple-darwin -c unit.cpp'):
+            with self.subTest(command=command), self.assertRaises(ValueError):
+                validate_compile_architecture([{'command': command}], 'Darwin', 'arm64')
 
 if __name__ == '__main__':
     unittest.main()
