@@ -7,6 +7,7 @@
 #include "decode_inverse_kernels.cuh"
 
 #include <cuda_runtime.h>
+#include <cstring>
 #include <vector>
 #include <memory>
 #include <mutex>
