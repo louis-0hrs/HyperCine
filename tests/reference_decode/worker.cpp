@@ -1,0 +1,146 @@
+// Copyright (c) 2026 HyperCine Contributors.
+// Dual-licensed under the MIT License or Apache License, Version 2.0.
+// See LICENSE-MIT and LICENSE-APACHE for details.
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <chrono>
+#include "test_vectors.h"
+#include "CFHDEncoder.h"
+#include "CFHDDecoder.h"
+#include "CFHDMetadata.h"
+#include "hypercine/canonical.h"
+
+using Buffer = HyperCineTest::AlignedVector<uint8_t>;
+struct EncoderDelete { void operator()(void* p) const { CFHD_CloseEncoder(p); } };
+struct DecoderDelete { void operator()(void* p) const { CFHD_CloseDecoder(p); } };
+struct MetadataDelete { void operator()(void* p) const { CFHD_CloseMetadata(p); } };
+using Encoder = std::unique_ptr<void, EncoderDelete>;
+using Decoder = std::unique_ptr<void, DecoderDelete>;
+using Metadata = std::unique_ptr<void, MetadataDelete>;
+
+void Write(const std::string& path, const Buffer& bytes) {
+    std::ofstream out(path, std::ios::binary);
+    out.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    if (!out) throw std::runtime_error("output error");
+}
+Buffer Read(const std::string& path) {
+    std::ifstream in(path, std::ios::binary | std::ios::ate);
+    const auto size = in.tellg();
+    if (!in || size <= 0 || size > 16*1024*1024) throw std::runtime_error("input error");
+    Buffer bytes(static_cast<size_t>(size));
+    in.seekg(0); in.read(reinterpret_cast<char*>(bytes.data()), bytes.size());
+    if (!in) throw std::runtime_error("input error");
+    return bytes;
+}
+void Check(CFHD_Error status) { if (status != CFHD_ERROR_OKAY) throw std::runtime_error("encoder API error"); }
+
+#ifdef HYPERCINE_REFERENCE_TRACE
+#include "trace_snapshot.h"
+#endif
+#ifdef HYPERCINE_TEMPORAL_TRACE
+#include "temporal_api.h"
+#endif
+
+int main(int argc, char** argv) {
+    try {
+        // Fixed bounded geometries; no unbounded allocations or GPU linkage.
+        if (argc != 5) throw std::runtime_error("arguments");
+        const std::string geometry=argv[2];
+        const int width = geometry=="128"?128:geometry=="256"?256:geometry=="1080"?1920:0;
+        const int height = width==1920?1080:width;
+        if (!width) throw std::runtime_error("geometry");
+        const std::string mode = argv[1], packet_path = argv[3], output = argv[4];
+        const bool bgra = mode == "generate-bgra" || mode == "decode-bgra-off" || mode == "decode-bgra-on";
+        const bool active = mode == "decode-bgra-on";
+        if (mode == "generate" || mode == "generate-bgra") {
+            Buffer source(static_cast<size_t>(width)*height*2);
+            uint32_t seed = 0x1337BEEF;
+            for (int y=0; y<height; ++y) for (int x=0; x<width; x+=2) {
+                seed = seed*1664525u+1013904223u;
+                const size_t i = (static_cast<size_t>(y)*width+x)*2;
+                source[i] = static_cast<uint8_t>(16+(x*219/width));
+                source[i+1] = static_cast<uint8_t>(112+((seed>>24)&31));
+                source[i+2] = static_cast<uint8_t>(16+(y*219/height));
+                source[i+3] = static_cast<uint8_t>(112+((seed>>16)&31));
+            }
+            if (bgra) {
+                const auto canonical = hypercine::MakeFrame(width,height,hypercine::CanonicalPattern::Canonical);
+                source.assign(canonical.begin(),canonical.end());
+            }
+            CFHD_EncoderRef raw=nullptr; const auto opened=CFHD_OpenEncoder(&raw,nullptr); Encoder encoder(raw); Check(opened);
+            Check(CFHD_PrepareToEncode(raw,width,height,bgra?CFHD_PIXEL_FORMAT_BGRA:CFHD_PIXEL_FORMAT_YUY2,CFHD_ENCODED_FORMAT_YUV_422,
+                                      CFHD_ENCODING_FLAGS_NONE,CFHD_ENCODING_QUALITY_FILMSCAN3));
+            Check(CFHD_EncodeSample(raw,source.data(),width*(bgra?4:2)));
+            void* data=nullptr; size_t size=0; Check(CFHD_GetSampleData(raw,&data,&size));
+            if (!data || !size || size>16*1024*1024) throw std::runtime_error("sample");
+            Buffer packet(static_cast<uint8_t*>(data),static_cast<uint8_t*>(data)+size);
+            Write(packet_path,packet); Write(output,source);
+            return 0;
+        }
+        if (mode != "decode" && mode != "decode-bgra-off" && mode != "decode-bgra-on") throw std::runtime_error("mode");
+        const auto requested = bgra?CFHD_PIXEL_FORMAT_BGRA:CFHD_PIXEL_FORMAT_YUY2;
+        const Buffer immutable = Read(packet_path);
+        // Reopen the original decoder each call, retaining original CRT/process state.
+        for (int ordinal=1; ordinal<=5; ++ordinal) {
+            Buffer sample=immutable; // protect immutable input from API writes
+            Buffer pixels; // Both sample and output outlive decoder teardown.
+            CFHD_DecoderRef raw=nullptr;
+            CFHD_Error status=CFHD_OpenDecoder(&raw,nullptr); Decoder decoder(raw);
+            int w=0,h=0; int32_t pitch=0; CFHD_PixelFormat format=CFHD_PIXEL_FORMAT_UNKNOWN;
+            if (status==CFHD_ERROR_OKAY) status=CFHD_PrepareToDecode(raw,0,0,requested,
+                CFHD_DECODED_RESOLUTION_FULL,CFHD_DECODING_FLAGS_NONE,sample.data(),sample.size(),&w,&h,&format);
+            if (status==CFHD_ERROR_OKAY) status=CFHD_GetImagePitch(w,format,&pitch);
+            bool valid=status==CFHD_ERROR_OKAY && w==width && h==height && format==requested && pitch==width*(bgra?4:2) && pitch%16==0;
+            int metadata_open=-1, metadata_init=-1, metadata_set=-1;
+            Metadata metadata;
+            long long decode_ns=0;
+            unsigned int processflags = PROCESSING_ALL_ON;
+            if (valid && active) {
+                CFHD_MetadataRef ref=nullptr;
+                status=CFHD_OpenMetadata(&ref); metadata.reset(ref); metadata_open=status;
+                if (status==CFHD_ERROR_OKAY) {
+                    status=CFHD_InitSampleMetadata(ref,METADATATYPE_ORIGINAL,sample.data(),static_cast<uint32_t>(sample.size()));
+                    metadata_init=status;
+                }
+                if (status==CFHD_ERROR_OKAY) {
+                    status=CFHD_SetActiveMetadata(raw,ref,TAG_PROCESS_PATH,METADATATYPE_UINT32,&processflags,sizeof(processflags));
+                    metadata_set=status;
+                }
+                valid=status==CFHD_ERROR_OKAY;
+            }
+            if (valid) {
+                pixels.resize(static_cast<size_t>(pitch)*h);
+#ifdef HYPERCINE_TEMPORAL_TRACE
+                TemporalBegin(raw,output+"-"+std::to_string(ordinal));
+#endif
+                const auto decode_begin=std::chrono::steady_clock::now();
+                status=CFHD_DecodeSample(raw,sample.data(),sample.size(),pixels.data(),pitch);
+                decode_ns=std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    std::chrono::steady_clock::now()-decode_begin).count();
+#ifdef HYPERCINE_TEMPORAL_TRACE
+                if (status==CFHD_ERROR_OKAY) TemporalEnd();
+#endif
+#ifdef HYPERCINE_REFERENCE_TRACE
+                if (status==CFHD_ERROR_OKAY) Snapshot(raw,output+"-"+std::to_string(ordinal));
+#endif
+                metadata.reset();
+                decoder.reset(); // Match existing tests: close before inspecting pixels.
+                valid=status==CFHD_ERROR_OKAY && sample==immutable;
+                if (valid) Write(output+"-"+std::to_string(ordinal)+(bgra?".bgra":".yuy2"),pixels);
+            }
+            std::cout << "{\"ordinal\":" << ordinal << ",\"decoder_status\":" << status
+                << ",\"decode_ns\":" << decode_ns
+                << ",\"output_valid\":" << (valid?"true":"false") << ",\"width\":" << w
+                << ",\"height\":" << h << ",\"pitch\":" << pitch << ",\"buffer_size\":" << pixels.size()
+                << ",\"actual_format_code\":" << static_cast<uint32_t>(format)
+                << ",\"requested_format\":\"" << (bgra?"BGRA":"YUY2") << "\",\"active_metadata\":" << (active?"true":"false")
+                << ",\"metadata_open_status\":" << metadata_open << ",\"metadata_init_status\":" << metadata_init
+                << ",\"metadata_set_status\":" << metadata_set << ",\"processing_flags\":" << (active?processflags:0) << "}\n";
+        }
+        return 0;
+    } catch (...) { std::cerr << "bounded reference worker error\n"; return 2; }
+}

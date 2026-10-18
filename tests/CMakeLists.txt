@@ -50,6 +50,43 @@ add_executable(test_yuy2_stability
 target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
 add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 
+# Manual bounded measurement worker; observations never count as a quality PASS.
+add_executable(reference_decode_worker reference_decode/worker.cpp)
+target_link_libraries(reference_decode_worker PRIVATE CFHDCodecStatic)
+if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+    add_executable(reference_decoder_completion_flags reference_decode/test_completion_flags.cpp)
+    target_compile_definitions(reference_decoder_completion_flags PRIVATE _ALLOCATOR=1 WARPSTUFF=1)
+    add_test(NAME reference_decoder_completion_flags COMMAND reference_decoder_completion_flags)
+    set_tests_properties(reference_decoder_completion_flags PROPERTIES LABELS "synthetic;reference-decoder-contract")
+    add_executable(reference_decode_temporal EXCLUDE_FROM_ALL reference_decode/worker.cpp
+        reference_decode/decoder_temporal.c reference_decode/temporal_observer.cpp)
+    target_compile_definitions(reference_decode_temporal PRIVATE HYPERCINE_TEMPORAL_TRACE=1 _ALLOCATOR=1 WARPSTUFF=1
+        _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
+    target_include_directories(reference_decode_temporal PRIVATE ${CMAKE_SOURCE_DIR}/upstream/WarpLib
+        ${CMAKE_SOURCE_DIR}/upstream/ConvertLib)
+    target_link_libraries(reference_decode_temporal PRIVATE CFHDCodecStatic)
+    target_link_options(reference_decode_temporal PRIVATE "/MAP:${CMAKE_CURRENT_BINARY_DIR}/reference_decode_temporal.map")
+    # Causal A/B arm: queue-local per-channel completion, never production.
+    add_executable(reference_decode_dependency EXCLUDE_FROM_ALL reference_decode/worker.cpp
+        reference_decode/decoder_temporal.c reference_decode/temporal_observer.cpp
+        reference_decode/entropy_dependency.c)
+    target_compile_definitions(reference_decode_dependency PRIVATE HYPERCINE_TEMPORAL_TRACE=1
+        HYPERCINE_DEPENDENCY_ENFORCED=1 _ALLOCATOR=1 WARPSTUFF=1
+        _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
+    target_include_directories(reference_decode_dependency PRIVATE ${CMAKE_SOURCE_DIR}/upstream/WarpLib
+        ${CMAKE_SOURCE_DIR}/upstream/ConvertLib)
+    target_link_libraries(reference_decode_dependency PRIVATE CFHDCodecStatic)
+    target_link_options(reference_decode_dependency PRIVATE "/MAP:${CMAKE_CURRENT_BINARY_DIR}/reference_decode_dependency.map")
+    add_executable(reference_phase2c_packet EXCLUDE_FROM_ALL reference_decode/phase2c_packet.cpp
+        ${CMAKE_SOURCE_DIR}/src/cpu/entropy_parallel.cpp)
+    target_compile_definitions(reference_phase2c_packet PRIVATE _ALLOCATOR=1 WARPSTUFF=1)
+    target_link_libraries(reference_phase2c_packet PRIVATE CFHDCodecStatic)
+    # Manual read-only internal observer, never linked into production targets.
+    add_executable(reference_decode_trace EXCLUDE_FROM_ALL reference_decode/worker.cpp)
+    target_compile_definitions(reference_decode_trace PRIVATE HYPERCINE_REFERENCE_TRACE=1 _ALLOCATOR=1 WARPSTUFF=1)
+    target_link_libraries(reference_decode_trace PRIVATE CFHDCodecStatic)
+endif()
+
 # 3. Upstream sample AVI decode test
 add_executable(test_avi_sample
     test_avi_sample.cpp

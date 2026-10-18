@@ -35,6 +35,10 @@ if(HYPERCINE_BUILD_TESTS)
         COMMAND "${Python3_EXECUTABLE}" -B
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_decode/test_contract.py")
     set_tests_properties(reference_decode_contract PROPERTIES LABELS "synthetic;reference-decoder-contract")
+    add_test(NAME reference_decode_measurement_unit
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_decode/test_measure.py")
+    set_tests_properties(reference_decode_measurement_unit PROPERTIES LABELS "synthetic;reference-decoder-contract")
     add_executable(test_cpu_isa tests/test_cpu_isa.cpp)
     target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
