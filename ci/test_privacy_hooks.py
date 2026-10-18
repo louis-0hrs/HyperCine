@@ -370,6 +370,19 @@ class InstalledHookTests(unittest.TestCase):
         self.rejected(result, "PERSONAL_ABSOLUTE_PATH", value)
         self.unpublished()
 
+    def test_case_variant_home_ref_is_rejected_before_publication(self):
+        value = 'users/' + 'synthetic-agent/review'
+        self.git('branch', value)
+        result = self.git('push', '-q', 'public', value +
+                          ':refs/heads/review', expected=1)
+        self.rejected(result, 'PERSONAL_ABSOLUTE_PATH', value)
+        self.unpublished()
+
+    def test_case_variant_home_in_annotated_tag_is_rejected(self):
+        value = 'C:' + '/uSeRs/' + 'synthetic-agent/report'
+        self.tag(message='local artifact ' + value)
+        self.push_rejected('refs/tags/release-test', 'TAG_METADATA', value)
+
     def test_clean_repointed_annotated_tag_passes(self):
         self.tag()
         self.git("push", "-q", "public", "refs/tags/release-test")
