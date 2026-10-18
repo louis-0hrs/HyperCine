@@ -93,12 +93,91 @@ Four independent sweep series, 36 cells, 840 calls:
 Fisher exact, two-sided: **p ≈ 2.3 × 10⁻¹⁵**. There is no cell in either direction that
 contradicts the split, and all 36 cells share one modal digest.
 
-The boundary is sharp and sits where the ratio crosses 1.0:
+> **Corrected by the follow-up pass below.** The two-group split above is supported,
+> but the claim that the boundary is *sharp at ratio 1.0* was not. That grid had no
+> cell between ratio 1.0 and ratio 2.0, so the transition was never sampled. It is a
+> gradient, not a step — see [Ratio sweep](#ratio-sweep--where-the-transition-actually-is).
 
-- 8 workers on 8 CPUs → 0/20 and 0/40 divergent across two series
-- 8 workers on 4 CPUs → 2/20 and 2/40
-- 8 workers on 2 CPUs → 4/20 and 1/40
-- 8 workers on 1 CPU → 1/20 and 7/40
+## Ratio sweep — where the transition actually is
+
+**Evidence:** [`docs/validation/rca159_ratio_boundary_2026-10-18.json`](validation/rca159_ratio_boundary_2026-10-18.json).
+**Sweeps:** `ci/rca159_ratio_sweep.sh`, `ci/rca159_interleaved.sh`,
+`ci/rca159_smt_control.sh`, `ci/rca159_cliff.sh`.
+**Builder:** `ci/build_rca159_ratio_evidence.py`.
+
+95 cells, **6 060 decode calls**, one fresh process per call, same pinned packet and
+the same pristine SDK revision as above. All 6 060 calls return `CFHD_ERROR_OKAY`
+(code 0) at 1920×1080 / pitch 7680 and share **one** modal digest,
+`12ed7b2b…480fd`; only the divergent minority differs.
+
+### The previously unmeasured band is clean
+
+`1 < workers/cpus < 2` was the gap in the coarse grid. Measured directly now:
+
+| band | cells | calls | divergent | rate |
+| --- | --- | --- | --- | --- |
+| `ratio ≤ 1.0` | 29 | 1 220 | 0 | **0.00%** |
+| `1 < ratio < 2` | 23 | 1 220 | 1 | **0.08%** |
+| `ratio = 2.0` | 15 | 1 410 | 18 | **1.28%** |
+| `ratio ≥ 4` | 18 | 1 300 | 194 | **14.92%** |
+
+So oversubscription is still necessary — nothing diverged at or below ratio 1.0 in
+1 220 calls — but a *mild* oversubscription is nearly harmless. The step in the data
+is between ratio 2 and ratio 4, **not** at 1.0. Stated as a boundary "exactly where
+the ratio crosses 1.0", the earlier wording overstated the sharpness by two whole
+ratio units.
+
+### Absolute CPU count, not just the ratio
+
+Grouped by the number of CPUs the process may run on, the same data looks like this:
+
+| affinity CPUs | cells | calls | divergent | rate |
+| --- | --- | --- | --- | --- |
+| 1 | 8 | 510 | 78 | **15.29%** |
+| 2 | 10 | 710 | 94 | **13.24%** |
+| 3 | 9 | 540 | 54 | **10.00%** |
+| 4 | 12 | 1060 | 32 | **3.02%** |
+| 5 | 7 | 430 | 1 | **0.23%** |
+| 6 | 11 | 730 | 1 | **0.14%** |
+| 7 | 4 | 220 | 0 | **0.00%** |
+| 8–16 | 34 | 1860 | 0 | **0.00%** |
+
+`cpus ≤ 4` → 262/3 020 (**8.68%**); `cpus ≥ 5` → 2/3 040 (**0.07%**),
+Fisher two-sided **p ≈ 9.5 × 10⁻¹⁹**. At ratio 2.0 specifically, 12 workers on
+6 CPUs gave **0/290** while 8 workers on 4 CPUs produced divergent frames — same
+ratio, different absolute width, different outcome.
+
+This does **not** establish "absolute CPU count instead of ratio". A dedicated paired
+run (4 rounds × 50 calls per arm, interleaved) of the cleanest case — 12 workers on
+6 CPUs versus 8 workers on 4 CPUs, both ratio 2.0 — gave **0/200 vs 4/200**,
+Fisher **p = 0.12**. That is a suggestive direction, not a result. What the data does
+support is that ratio alone is an incomplete predictor: at equal ratio, more
+available CPUs never diverged in these runs.
+
+### Controls that remove two alternative explanations
+
+1. **General CPU contention is not the trigger.** 8 busy-loop processes pinned one
+   per allowed CPU, against 8 workers on 8 CPUs: **0/40 divergent**, identical to the
+   quiet run of the same cell (0/40). Saturation from *outside* the decoder produced
+   nothing. The trigger is the decoder's own thread-to-CPU oversubscription.
+2. **SMT placement is not the confound.** Every arm here counts logical processors,
+   and on this host the sibling pairs are `0-1, 2-3, 4-5, …`, so `taskset -c 0-3`
+   grants two physical cores, not four. Holding the *reported* logical count equal:
+   8 workers on 8 logical CPUs gave 0/120 whether those were 8 physical cores
+   (`0,2,4,…,14`) or 4 cores with both siblings (`0-7`); 4 workers on 4 logical CPUs
+   likewise (0/120 vs 2/120); and 8 workers on 2 logical CPUs gave 19.2% (1 core with
+   SMT) versus 15.8% (2 physical cores). The logical count is the quantity that
+   tracks the rate.
+
+### Method correction to this lane's own record
+
+Two cells were measured twice at identical settings and disagreed: 4 workers on
+1 CPU gave **5/30** in one sequential series and **0/30** in the next (and 4 workers
+on 2 CPUs gave 4/60 versus 0/110). A sequential sweep cannot tell a real boundary
+effect from slow host drift, so every arm in the follow-up was run **interleaved by
+round** — all cells back to back, several times — before any comparison was drawn.
+The `interleaved` and `cliff` sweeps are that design. Single-cell numbers from a
+sequential pass should not be quoted on their own.
 
 ## What this means for the campaign
 
@@ -106,7 +185,9 @@ The boundary is sharp and sits where the ratio crosses 1.0:
    defect reproduces when the decoder creates more runnable threads than there are
    CPUs to run them on. `TAG_CPU_MAX=1` does not "fix" the worker path by removing a
    race window in the usual sense — it removes oversubscription by leaving a single
-   worker, which is why it has looked like a fix in every previous pass.
+   worker, which is why it has looked like a fix in every previous pass. The follow-up
+   sweep refines this: the risk is negligible up to ratio 2 and rises steeply by
+   ratio 4, so "oversubscribed" and "dangerous" are not the same statement.
 
 2. **No cross-frame state is required.** The first decode in a fresh process, with a
    fresh decoder, already diverges. Any hypothesis that needs a previous frame's
@@ -156,8 +237,17 @@ interpreted without knowing how it was launched.
 
 ## Suggested next step
 
-Pin `TAG_CPU_MAX` so that `worker_threads <= affinity_cpus`, then vary one thing:
-the number of CPUs. If the rate tracks the ratio through 1.0 and collapses above it,
-oversubscription is confirmed as the trigger for the prefix mode independently of
-thread-pool internals — and the remaining question becomes why a preempted worker
-produces a *partially reconstructed frame* rather than no frame at all.
+The ratio walk requested by the previous pass is done, and it replaced the "sharp at
+1.0" boundary with a gradient. The remaining questions, in the order the evidence
+supports them:
+
+1. **Why does a preempted worker produce a partially reconstructed frame at all?**
+   That is the mechanism question this lane keeps deferring, and it is now the only
+   one that can turn the rate table into a fix. It needs code-level tracing of the
+   inverse stage under a forced preemption, not more rate measurement.
+2. **Is the clean `1 < ratio < 2` band clean because of the ratio, or because those
+   cells had at least 5 CPUs?** The paired arm was underpowered (p = 0.12). Splitting
+   the two variables needs a host with more spare CPUs than this one, or longer runs
+   than a bounded evidence budget allows here.
+3. **Nothing in this document changes product behaviour.** The gate stays
+   `REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED` until a mechanism is understood.
