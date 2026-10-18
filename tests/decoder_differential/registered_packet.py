@@ -23,7 +23,13 @@ PACKET_BYTES = 900396
 SOURCE_BYTES = 8294400
 GEOMETRY = (1920, 1080)
 PROTOCOL_ID = 'registered-1080-bgra-second-decoder-20261018'
-PROTOCOL_VERSION = 1
+PROTOCOL_VERSION = 2
+FFMPEG_SHA256 = '589e50b766d251afdf181dd664d40bd94407e200b019989fd7468c7d118a28d0'
+FFPROBE_SHA256 = '02264dfa4f56baaa31e443ece8aa16d397f6b008200e7fd184d22b9009e75fd3'
+
+
+class PinnedToolUnavailable(RuntimeError):
+    """The pre-registered second decoder is missing or has another identity."""
 
 
 def sha_file(path):
@@ -37,11 +43,24 @@ def verify_inputs(packet, source):
         raise ValueError('pre-registered source identity or length mismatch')
 
 
-def tool_identity(path, arguments):
+def tool_identity(path, arguments, expected_sha256):
+    try:
+        actual = sha_file(path)
+    except OSError:
+        raise PinnedToolUnavailable('pinned tool unavailable') from None
+    if actual != expected_sha256:
+        raise PinnedToolUnavailable('pinned tool identity mismatch')
     version = run([path] + list(arguments))
     return dict(version=version.splitlines()[0] if version else 'UNKNOWN',
                 version_detail=version.strip(),
-                binary_sha256=sha_file(path))
+                binary_sha256=actual)
+
+
+def verify_tools(args):
+    # Pin both tools before executing a decoder, rather than labeling whatever
+    # happened to be supplied as the pre-registered FFmpeg after the run.
+    return dict(ffmpeg=tool_identity(args.ffmpeg, ['-version'], FFMPEG_SHA256),
+                ffprobe=tool_identity(args.ffprobe, ['-version'], FFPROBE_SHA256))
 
 
 def cpu_model():
@@ -80,6 +99,7 @@ def main():
         packet = args.packet.read_bytes()
         source = args.source.read_bytes()
         verify_inputs(packet, source)
+        pinned_tools = verify_tools(args)
         if args.work.exists():
             raise ValueError('work directory must be fresh')
         args.work.mkdir(parents=True)
@@ -102,17 +122,22 @@ def main():
                 input_preregistered=True,
                 packet_sha256=PACKET_SHA256, packet_bytes=PACKET_BYTES,
                 source_sha256=SOURCE_SHA256, source_bytes=SOURCE_BYTES,
-                geometry=list(GEOMETRY), requested_format='BGRA',
+                geometry=list(GEOMETRY), source_format='BGRA', requested_format='YU64',
                 decoded_resolution='CFHD_DECODED_RESOLUTION_FULL',
                 processing_flags=65535,
                 repeats_per_decoder=3,
+                command_timeout_seconds=20,
                 delta='GoPro minus FFmpeg',
                 common_domain='tight top-down yuv422p10le, LE 16-bit containers',
                 contract='FFmpeg is an independent triangulation only, not an oracle; '
                          'encoder-packet equality and release gates are unchanged'),
             sources=dict(
                 source_commit=source_commit,
+                source_repository_dirty=bool(subprocess.run(
+                    ['git', 'status', '--porcelain'], cwd=root, capture_output=True,
+                    timeout=20, check=True).stdout.strip()),
                 script_sha256=sha_file(Path(__file__)),
+                compare_source_sha256=sha_file(Path(__file__).with_name('compare.py')),
                 sdk_dump_source_sha256=sha_file(Path(__file__).with_name('sdk_dump.cpp')),
                 avi_wrapper_sha256=sha_file(root / 'tests/validate_standalone.py')),
             tools=dict(
@@ -120,8 +145,7 @@ def main():
                                output='YU64 Y0/Cr/Y1/Cb >>6, CPU_MAX=1, '
                                       'process_path=0xffff, colorspace 2/1/0',
                                binary_sha256=sha_file(args.sdk_dump)),
-                ffmpeg=tool_identity(args.ffmpeg, ['-version']),
-                ffprobe=tool_identity(args.ffprobe, ['-version'])),
+                **pinned_tools),
             host=dict(system=platform.system(), machine=platform.machine(),
                       python=platform.python_version(), **cpu_model()),
             result=record,
@@ -145,7 +169,12 @@ def main():
                                         'psnr_db', 'bias', 'mismatch_fraction')}
                     for plane in ('Y', 'Cb', 'Cr')})))
         return 0 if record['stable_gopro'] and record['stable_ffmpeg'] else 1
-    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+    except PinnedToolUnavailable:
+        print(json.dumps(dict(classification='ALTERNATE_DECODER_UNAVAILABLE',
+                              alternate_decoder=dict(status='UNAVAILABLE'),
+                              release_gate='UNRESOLVED', release_blocked=True)))
+        return 2
+    except (OSError, ValueError, KeyError, TypeError, RuntimeError, subprocess.SubprocessError):
         print('INVALID_REGISTERED_TRIANGULATION: release blocked', file=sys.stderr)
         return 2
 

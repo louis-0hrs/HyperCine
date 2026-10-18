@@ -86,7 +86,7 @@ def compare(gopro, ffmpeg, width, height):
 
 
 def run(command):
-    result = subprocess.run([str(x) for x in command], capture_output=True, timeout=300)
+    result = subprocess.run([str(x) for x in command], capture_output=True, timeout=20)
     if result.returncode:
         # Verbose tool diagnostics may contain local paths; keep them out of reports.
         raise RuntimeError(f'Decoder command failed: exit {result.returncode}')
@@ -116,7 +116,11 @@ def audit_case(packet, width, height, label, args):
         raise ValueError('FFprobe source format/geometry differs from audit contract')
     hashes, first = [], None
     for repeat in range(3):
-        sdk, ff = work/'gopro.p10', work/'ffmpeg.p10'
+        # Every process must produce its own fresh file. Exit zero without a
+        # new output cannot reuse the previous call's pixels and look stable.
+        sdk, ff = work/f'gopro-{repeat+1}.p10', work/f'ffmpeg-{repeat+1}.p10'
+        if sdk.exists() or ff.exists():
+            raise ValueError('Decoder repeat output already exists')
         run([args.sdk_dump, sample, sdk, width, height])
         run([args.ffmpeg, '-v', 'error', '-y', '-threads', '1', '-i', wrapped,
              '-frames:v', '1', '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', ff])
