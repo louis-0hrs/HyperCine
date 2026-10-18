@@ -1,5 +1,8 @@
 # HyperCine Phase 2B: GPU Entropy
 
+> [!NOTE]
+> **Historical Phase 2B benchmark record.** This document captures a single early GPU-entropy development stage and its local tests, not the current release-candidate performance or decoder certification. See the [documentation index](README.md) and [Phase 3A.2c canonical benchmark](../benchmarks/phase3a2c_release_candidate.json).
+
 Phase 2B moves highpass entropy onto the GPU one stage at a time. The wavelet and the quantizer are the Phase 2A kernels. The bitstream is still the stock CineForm coder: same run symbols, same codebook, same MSB-first 32-bit words, same band header and trailer. `upstream/` was not modified. `_THREADED_ENCODER` is 0. There is no functioning threaded upstream build, so every speedup below is against the default `CFHD_EncodeSample` path. See `docs/UPSTREAM.md`.
 
 The algorithm and the golden band hashes are in `docs/ENTROPY.md`. Numbers below are the Release run that wrote `benchmarks/results/phase2b.json` on the RTX 4090 Laptop, CUDA 12.8, `sm_89`, canonical BGRA, FilmScan 3, GOP 1, progressive, seed `0x1337BEEF`. Upstream uses two warm-up frames and four timed frames at 1080p and 4K, two at 8K. Phase 2A and Phase 2B rows in that file use one warm-up frame and four, three, and two timed frames, plus one verified frame before the window. Phase 1C and the full Phase 2A matrix are the separate files written in the same sitting: `benchmarks/results/hybrid_phase1c.json` and `benchmarks/results/phase2a.json`.
