@@ -27,11 +27,12 @@ option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state
 # Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
 option(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY "Build only the synthetic decode task graph" OFF)
 if(HYPERCINE_BUILD_TESTS OR HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
-    cmake_minimum_required(VERSION 3.25)
     find_package(Threads REQUIRED)
     add_subdirectory(tests/decode_task_graph)
 endif()
 if(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
+    # Keep the regular SDK/CPU tests on the project's advertised CMake range.
+    cmake_minimum_required(VERSION 3.25)
     if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA OR HYPERCINE_ENABLE_METAL OR
        HYPERCINE_BUILD_STANDALONE OR HYPERCINE_BUILD_QUALITY_STATE_ONLY OR HYPERCINE_REQUIRE_EXTERNAL_DECODE)
         message(FATAL_ERROR "Task graph only mode requires SDK/GPU/other standalone modes OFF")

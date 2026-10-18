@@ -118,6 +118,34 @@ inferred from ASan. Hosted checks are recorded separately on the Draft PR.
 No acceleration/performance improvement is claimed, so benchmark_codec was not
 run for this scheduler-only change.
 
+### CMake compatibility correction and independent macOS validation
+
+The review correction confines the CMake 3.25 minimum to graph-only mode.
+Regular SDK/CPU tests retain the root's advertised 3.16...3.31 range and still
+register all four graph tests. The standalone mode's existing 3.25 minimum is
+unchanged. No scheduler or codec source changed in this correction.
+
+Native macOS 26.5.2 arm64, Apple Clang 21.0.0, 2026-10-18:
+
+| Gate | Result |
+| --- | --- |
+| CMake 3.24.3 regular SDK/tests-ON configure | PASS; graph target builds, graph CTest 4/4 PASS |
+| CMake 3.24.3 regular tests-OFF configure | PASS |
+| CMake 3.24.3 quality-state-only build/CTest | 6/6 PASS, zero skips |
+| CMake 3.24.3 graph-only configure | Expected rejection: requires 3.25+ |
+| CMake 3.31.5 SDK-free standalone Release full CTest | 22/22 PASS, zero skips, 18.38 s |
+| CMake 3.31.5 graph-only ASan/UBSan | 4/4 PASS, zero diagnostics, 0.90 s |
+| CMake 3.31.5 graph-only TSan | 4/4 PASS, zero diagnostics, 3.29 s |
+| CMake 3.31.5 graph-only tests-OFF build | PASS; zero registered tests |
+| Regular SDK full build, CMake 3.24.3 and 3.31.5 | BLOCKED: existing x86 intrinsics in src/cpu/upstream_wrapper.cpp do not compile on arm64 |
+| Corrected-head native Windows/Linux | PENDING; unavailable on this host |
+
+The regular full CTest command was run, but missing SDK executables after the
+build failure prevent a full pass. This is not native SDK qualification.
+CMake 3.16 itself was not tested. Windows and hosted results above refer to the
+original implementation, not this correction. Sanitizer runs cover only the
+synthetic graph and its harness. Upstream remains untouched.
+
 Portable isolated build (CMake 3.25+):
 
 ```sh
