@@ -69,6 +69,22 @@ def probe(executable, path, frames):
     return streams[0]
 
 
+def decoded_psnr(actual_bytes, reference_bytes):
+    if not actual_bytes or len(actual_bytes) % 2 or len(reference_bytes) % 2:
+        raise ValueError('empty or odd p10 storage')
+    actual = array.array('H', actual_bytes)
+    expected = array.array('H', reference_bytes)
+    if sys.byteorder != 'little':
+        actual.byteswap();expected.byteswap()
+    if len(actual) != len(expected) or any(value > 1023 for value in actual) or any(value > 1023 for value in expected):
+        raise ValueError('invalid decoded p10 values/length')
+    square = sum((int(a)-int(b))**2 for a, b in zip(actual, expected))
+    psnr = 10*math.log10(1023.0**2*len(actual)/square) if square else math.inf
+    if psnr <= 35:
+        raise ValueError('4K p10 PSNR <=35 dB: ' + str(psnr))
+    return psnr
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--encoder', required=True)
@@ -113,16 +129,7 @@ def main():
                 '-frames:v', '1', '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', str(decoded)], check=True)
             if decoded.stat().st_size != 3840*2160*4:
                 raise ValueError('decoded p10 extent')
-            actual = array.array('H', decoded.read_bytes())
-            expected = array.array('H', stem.with_suffix('.reference.yuv').read_bytes())
-            if sys.byteorder != 'little':
-                actual.byteswap();expected.byteswap()
-            if len(actual) != len(expected) or any(value > 1023 for value in actual):
-                raise ValueError('invalid decoded p10 values/length')
-            square = sum((int(a)-int(b))**2 for a, b in zip(actual, expected))
-            psnr = 10*math.log10(1023.0**2*len(actual)/square) if square else math.inf
-            if psnr <= 35:
-                raise ValueError('4K p10 PSNR <=35 dB: ' + str(psnr))
+            psnr = decoded_psnr(decoded.read_bytes(), stem.with_suffix('.reference.yuv').read_bytes())
             row['psnr_db'] = psnr if math.isfinite(psnr) else None
             row['lossless'] = math.isinf(psnr)
             row['decoded_sha256'] = sha(decoded)
