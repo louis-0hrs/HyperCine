@@ -78,8 +78,10 @@ changes between calls or arms, or if the launcher itself is already restricted.
 
 - Per arm: **3 fresh processes x 5 opens** (primary) plus a pre-registered
   **6 fresh processes x 5 opens** extension, 45 calls total.
-- Primary phase order: **A, B, C, D**.
-- Extension phase order: **D, C, B, A**.
+- Arm order: **A, B, C, D**; inside each arm the three primary processes run
+  before the six extension processes.
+- A confirmatory rerun reverses the arm order and runs the extension processes
+  before the primary processes.
 - Each process is independent and bounded by a **20 s** child timeout.
 - No soak, no repeated arm after failure, no host/VM reconfiguration.
 - Decode timings are VM observations, not a Ryzen-vs-VM benchmark.
