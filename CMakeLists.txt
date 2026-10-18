@@ -413,7 +413,12 @@ endif()
 # RCA #159: test-only probe that reports the decoder's real thread count next to
 # the CPUs the process may run on, and fingerprints each decoded frame.
 # Diagnostic tool only; it does not change decoding behaviour.
-if(TARGET CFHDCodecStatic)
+#
+# Linux-only by construction: the measurement reads sched_getaffinity() and
+# /proc/self/status, so there is no honest Windows or macOS equivalent to report.
+# Building it elsewhere would only produce a tool that prints -1, so the target is
+# restricted instead of silently emitting meaningless numbers.
+if(TARGET CFHDCodecStatic AND UNIX AND NOT APPLE)
     add_executable(hypercine_decoder_thread_probe tools/hypercine_decoder_thread_probe.cpp)
     target_link_libraries(hypercine_decoder_thread_probe PRIVATE CFHDCodecStatic)
 endif()

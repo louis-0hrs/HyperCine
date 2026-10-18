@@ -235,6 +235,26 @@ The packet is supplied by the operator and is not part of this repository. The s
 records `affinity_cpus` and `worker_threads` on every call so a cell can be
 interpreted without knowing how it was launched.
 
+**Platform:** the probe target is built only on Linux (`UNIX AND NOT APPLE`). It reads
+`sched_getaffinity()` and `/proc/self/status`, so on Windows or macOS it would have to
+report `-1` for the two quantities it exists to measure. Building it there would
+produce numbers that look like data and are not, so the target is restricted rather
+than stubbed. The previous head of this branch built it unconditionally and the
+Windows job failed on `Cannot open include file: 'sched.h'`; that is the reason for
+the guard, not a formatting preference.
+
+The follow-up sweeps take the same environment variables:
+
+```sh
+./ci/rca159_ratio_sweep.sh   # series a..d, one-step CPU walk at fixed caps
+./ci/rca159_interleaved.sh   # every arm per round (drift control)
+./ci/rca159_smt_control.sh   # physical cores vs SMT siblings
+./ci/rca159_cliff.sh         # fixed cap, CPUs 3..6
+
+python3 ci/build_rca159_ratio_evidence.py evidence.json \
+  coarse=<dir> one-step=<dir> interleaved=<dir> smt=<dir> cliff=<dir>
+```
+
 ## Suggested next step
 
 The ratio walk requested by the previous pass is done, and it replaced the "sharp at
