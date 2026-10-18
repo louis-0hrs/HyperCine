@@ -1,0 +1,1020 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "issue": "https://github.com/louis-0hrs/HyperCine/issues/159",
+  "measured_utc": "2026-10-18",
+  "scope": "Linux CPU-only, pristine frozen upstream SDK. Measurement only: no production change, no merge, no release.",
+  "disclaimer": "Thread count and CPU affinity are separate variables. The frozen SDK sizes its worker pools from sysconf(_SC_NPROCESSORS_ONLN), which ignores an affinity mask. An arm described as '1 logical processor' and implemented with affinity alone therefore does not limit the decoder.",
+  "environment": {
+    "os": "Linux x86_64",
+    "distribution": "Debian GNU/Linux 13",
+    "logical_cpus": 48,
+    "compiler": "GCC 14.2.0",
+    "cmake": "3.31.6",
+    "build_type": "Release",
+    "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+    "sdk_tree_unmodified": true,
+    "packet_bytes": 900396,
+    "packet_sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52"
+  },
+  "method": {
+    "probe": "tools/hypercine_decoder_thread_probe.cpp",
+    "sweep": "ci/rca159_thread_sweep.sh",
+    "calls_per_process": 1,
+    "note": "One decode call per fresh process: no state from a previous frame can be involved. Decodes report OKAY (code 0) even when the frame digest differs.",
+    "affinity_source": "sched_getaffinity(0)",
+    "thread_source": "/proc/self/status Threads after the decode returns",
+    "significance_test": "Fisher exact, two-sided, on divergent calls vs oversubscription"
+  },
+  "summary": {
+    "total_cells": 36,
+    "total_calls": 840,
+    "oversubscribed_cells": 14,
+    "oversubscribed_calls": 340,
+    "oversubscribed_divergent": 36,
+    "oversubscribed_rate_pct": 10.59,
+    "saturated_cells": 22,
+    "saturated_calls": 500,
+    "saturated_divergent": 0,
+    "saturated_rate_pct": 0.0,
+    "fisher_exact_two_sided_p": 2.2662386969200103e-15,
+    "distinct_modal_frame_digests_across_all_cells": 1,
+    "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd",
+    "status_codes_observed": [
+      0
+    ]
+  },
+  "cells": [
+    {
+      "experiment": "sweep_repo",
+      "cell": "cm4_aff0",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 19,
+      "divergent_calls": 1,
+      "divergence_rate_pct": 5.0,
+      "distinct_frame_digests": 2,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "cm4_aff0-1",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 2,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 18,
+      "divergent_calls": 2,
+      "divergence_rate_pct": 10.0,
+      "distinct_frame_digests": 2,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "cm4_aff0-15",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 16,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "cm4_aff0-3",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 4,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 18,
+      "divergent_calls": 2,
+      "divergence_rate_pct": 10.0,
+      "distinct_frame_digests": 3,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "cm4_aff0-47",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "cm4_aff0-7",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 8,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "wide_cm0",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 37,
+      "worker_threads": 36,
+      "cpu_max_metadata": 0,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "wide_cm1",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 2,
+      "worker_threads": 1,
+      "cpu_max_metadata": 1,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "wide_cm16",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 21,
+      "worker_threads": 20,
+      "cpu_max_metadata": 16,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "wide_cm2",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 5,
+      "worker_threads": 4,
+      "cpu_max_metadata": 2,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "wide_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep_repo",
+      "cell": "wide_cm8",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 13,
+      "worker_threads": 12,
+      "cpu_max_metadata": 8,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0-47_cm0",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 37,
+      "worker_threads": 36,
+      "cpu_max_metadata": 0,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0-47_cm1",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 2,
+      "worker_threads": 1,
+      "cpu_max_metadata": 1,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0-47_cm16",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 21,
+      "worker_threads": 20,
+      "cpu_max_metadata": 16,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0-47_cm2",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 5,
+      "worker_threads": 4,
+      "cpu_max_metadata": 2,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0-47_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0-47_cm8",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 13,
+      "worker_threads": 12,
+      "cpu_max_metadata": 8,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0_cm0",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 37,
+      "worker_threads": 36,
+      "cpu_max_metadata": 0,
+      "oversubscribed": true,
+      "modal_frame_calls": 18,
+      "divergent_calls": 2,
+      "divergence_rate_pct": 10.0,
+      "distinct_frame_digests": 3,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0_cm1",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 2,
+      "worker_threads": 1,
+      "cpu_max_metadata": 1,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0_cm16",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 21,
+      "worker_threads": 20,
+      "cpu_max_metadata": 16,
+      "oversubscribed": true,
+      "modal_frame_calls": 16,
+      "divergent_calls": 4,
+      "divergence_rate_pct": 20.0,
+      "distinct_frame_digests": 5,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0_cm2",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 5,
+      "worker_threads": 4,
+      "cpu_max_metadata": 2,
+      "oversubscribed": true,
+      "modal_frame_calls": 16,
+      "divergent_calls": 4,
+      "divergence_rate_pct": 20.0,
+      "distinct_frame_digests": 4,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 19,
+      "divergent_calls": 1,
+      "divergence_rate_pct": 5.0,
+      "distinct_frame_digests": 2,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "sweep6",
+      "cell": "aff0_cm8",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 13,
+      "worker_threads": 12,
+      "cpu_max_metadata": 8,
+      "oversubscribed": true,
+      "modal_frame_calls": 17,
+      "divergent_calls": 3,
+      "divergence_rate_pct": 15.0,
+      "distinct_frame_digests": 4,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "oversub6",
+      "cell": "aff0-15_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 16,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "oversub6",
+      "cell": "aff0-1_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 2,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 16,
+      "divergent_calls": 4,
+      "divergence_rate_pct": 20.0,
+      "distinct_frame_digests": 4,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "oversub6",
+      "cell": "aff0-3_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 4,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 18,
+      "divergent_calls": 2,
+      "divergence_rate_pct": 10.0,
+      "distinct_frame_digests": 2,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "oversub6",
+      "cell": "aff0-47_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "oversub6",
+      "cell": "aff0-7_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 8,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 20,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "oversub6",
+      "cell": "aff0_cm4",
+      "fresh_processes": 20,
+      "decode_calls": 20,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 19,
+      "divergent_calls": 1,
+      "divergence_rate_pct": 5.0,
+      "distinct_frame_digests": 2,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "repl6",
+      "cell": "aff0-15_cm4",
+      "fresh_processes": 40,
+      "decode_calls": 40,
+      "calls_per_process": 1,
+      "affinity_cpus": 16,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 40,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "repl6",
+      "cell": "aff0-1_cm4",
+      "fresh_processes": 40,
+      "decode_calls": 40,
+      "calls_per_process": 1,
+      "affinity_cpus": 2,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 39,
+      "divergent_calls": 1,
+      "divergence_rate_pct": 2.5,
+      "distinct_frame_digests": 2,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "repl6",
+      "cell": "aff0-3_cm4",
+      "fresh_processes": 40,
+      "decode_calls": 40,
+      "calls_per_process": 1,
+      "affinity_cpus": 4,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 38,
+      "divergent_calls": 2,
+      "divergence_rate_pct": 5.0,
+      "distinct_frame_digests": 3,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "repl6",
+      "cell": "aff0-47_cm4",
+      "fresh_processes": 40,
+      "decode_calls": 40,
+      "calls_per_process": 1,
+      "affinity_cpus": 48,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 40,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "repl6",
+      "cell": "aff0-7_cm4",
+      "fresh_processes": 40,
+      "decode_calls": 40,
+      "calls_per_process": 1,
+      "affinity_cpus": 8,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": false,
+      "modal_frame_calls": 40,
+      "divergent_calls": 0,
+      "divergence_rate_pct": 0.0,
+      "distinct_frame_digests": 1,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    },
+    {
+      "experiment": "repl6",
+      "cell": "aff0_cm4",
+      "fresh_processes": 40,
+      "decode_calls": 40,
+      "calls_per_process": 1,
+      "affinity_cpus": 1,
+      "decoder_threads": 9,
+      "worker_threads": 8,
+      "cpu_max_metadata": 4,
+      "oversubscribed": true,
+      "modal_frame_calls": 33,
+      "divergent_calls": 7,
+      "divergence_rate_pct": 17.5,
+      "distinct_frame_digests": 5,
+      "status_codes": [
+        0
+      ],
+      "geometry": [
+        [
+          1920,
+          1080,
+          7680
+        ]
+      ],
+      "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+    }
+  ]
+}
