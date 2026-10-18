@@ -23,6 +23,13 @@ class StandaloneGateTests(unittest.TestCase):
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
+    def test_allocation_failure_must_be_registered(self):
+        # The standalone job must execute the actual aligned allocator failures.
+        self.assertIn('rgb444_allocation_failure', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'rgb444_allocation_failure']})
+
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.xml'

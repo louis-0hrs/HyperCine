@@ -1,0 +1,42 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 37,
+  "parent_commit": "535fdeaf2df1e04a30322331bb1ad2462235fd3e",
+  "platform": {
+    "system": "macOS",
+    "architecture": "arm64",
+    "os_version": "26.5.2",
+    "compiler": "AppleClang 21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0"
+  },
+  "full_standalone_ctest": {
+    "registered": 31,
+    "passed": 31,
+    "skipped": 0,
+    "wall_seconds": 93.02,
+    "python_optimized": true,
+    "required_external_decode": true
+  },
+  "sources": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "7082471ad06229172b452c42fd8d118476047a8506538c01cf0326fa807ed2fe"
+    },
+    {
+      "path": "ci/run_standalone.py",
+      "sha256": "bd8304a15cb2b92f7661ea3647db826499ba5ed3a28f4037df19e25b971f0411"
+    },
+    {
+      "path": "ci/test_standalone_gate.py",
+      "sha256": "2ca4d9a672e699f7baeb9b90fc555a9b0f3ac9293c5dcf9f5f44cfc6862d8b01"
+    },
+    {
+      "path": "tests/rgb444_boundary/CMakeLists.txt",
+      "sha256": "1bb54a5ea4b8bd8aaa67253c226fd2efc60e0170c8d40eefb35365c4bef6c372"
+    }
+  ],
+  "scope": "Focused prerequisite fix; parent feature/reference gates remain open; no protected-main merge or release."
+}
