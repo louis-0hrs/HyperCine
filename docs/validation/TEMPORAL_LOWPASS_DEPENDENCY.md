@@ -5,6 +5,10 @@ Dual-licensed under MIT OR Apache-2.0; see LICENSE-MIT and LICENSE-APACHE.
 
 ## Result
 
+Follow-up: the [controlled dependency A/B](LOWPASS_DEPENDENCY_AB.md) now compares
+these same immutable 128/256 packets with a queue-local completion intervention.
+It preserves this historical measurement and its original source commit.
+
 **An insufficient completion predicate and out-of-order inverse dependency are
 demonstrated in the isolated diagnostic.** This is a narrower, stronger finding
 than the earlier post-decode retained-band differences. It does not establish
