@@ -78,6 +78,22 @@ exercises the AVX2-only path used by older x86 machines.
 - `HYPERCINE_BUILD_X86_WAVELET_SIMD=OFF`: scalar exactness PASS; both SIMD
   requests are rejected as unavailable, as expected.
 
+The same merged head `9cc8d54` was then re-qualified on the original
+AVX2+AVX-512 host: AMD Ryzen 9 7940HS, 8 physical cores / 16 logical threads,
+MSVC 19.44.35229, Release. This closes the native AVX-512 gate that the
+AVX2-only host could not exercise.
+
+- `wavelet_simd_exact`: `PASS ISA=1 cases=2174`, `PASS ISA=2 cases=2174`,
+  `PASS ISA=3 cases=2174`; 6,522 deterministic cases executed, AVX-512
+  executed natively rather than reported as pending.
+- `wavelet_simd_packets`: 16 ordered full FS3 frames PASS with
+  `AVX2=1 AVX512=1`; the frozen first packet is unchanged.
+- Full standalone CTest with required FFmpeg decode: 34/34 PASS.
+- Native CPU SDK suite: 15/15 PASS.
+- Native MSVC AddressSanitizer: both new CTests PASS with AVX2 and AVX-512.
+- `HYPERCINE_BUILD_X86_WAVELET_SIMD=OFF`: scalar exactness PASS; both SIMD
+  requests are rejected as unavailable.
+
 Hosted CI for the merged head is reviewed separately from these local runs.
 
 4K here means raw wavelet plane exactness, not new 4K production FS3 support
@@ -110,7 +126,11 @@ stage measurements at 1080p and 4K (31 iterations after three warmups), plus
 complete stateful 1080p FS3 sessions (16 frames after three warmups) on the
 original AVX2+AVX-512 host. `benchmarks/results/cpu_wavelet_simd_windows_avx2_only.json`
 records the AVX2-only AMD EPYC 7601 host at the merged head, with the same
-1-worker and 8-worker stages. Each entry includes median/p95,
+1-worker and 8-worker stages.
+`benchmarks/results/cpu_wavelet_simd_windows_avx512_current_main.json`
+re-measures the original AVX2+AVX-512 host at the merged head, including the
+unchanged GoPro-assisted `benchmark_codec` comparison against
+`benchmarks/results/reference_windows_msvc.json`. Each entry includes median/p95,
 average/min/max latency, FPS, megapixels/second and cumulative process peak
 working set. Memory is the process high-water mark, not an isolated per-kernel
 allocation. The ISA IDs are 1=scalar, 2=AVX2, 3=AVX-512.
