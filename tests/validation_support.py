@@ -2,6 +2,8 @@
 # Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
 """Acceptance checks stay active with Python -O; portable report provenance."""
 import re
+import array
+import sys
 
 
 def require(condition, message='validation failed'):
@@ -17,6 +19,19 @@ def integer(value, minimum=0, maximum=2**64-1):
 def hex_digest(value, length=64):
     require(isinstance(value, str) and re.fullmatch('[0-9a-f]{%d}' % length, value),
             'invalid digest field')
+
+
+def p10_samples(data, width, height):
+    """Validate tightly packed planar YUV422 p10 LE before comparing pixels."""
+    integer(width, 2)
+    integer(height, 1)
+    require(width % 2 == 0, 'p10 YUV422 width must be even')
+    require(len(data) == width * height * 4, 'p10 storage length mismatch')
+    pixels = array.array('H', data)
+    if sys.byteorder != 'little':
+        pixels.byteswap()
+    require(all(value <= 1023 for value in pixels), 'p10 sample outside 0..1023')
+    return pixels
 
 
 def portable_command(script, arguments):

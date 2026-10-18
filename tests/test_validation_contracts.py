@@ -7,11 +7,14 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import struct
 import tempfile
 import unittest
 import validate_windows_reference as windows
 import validate_quality_state_corpus as quality
 import compare_sdk_oracle as oracle
+import validate_filmscan3 as filmscan
+from validation_support import p10_samples
 
 
 class FrameContract(unittest.TestCase):
@@ -112,6 +115,14 @@ with tempfile.TemporaryDirectory() as tmp:
 
 
 class OracleContract(unittest.TestCase):
+    def test_p10_range_is_binding_even_for_identical_pixels(self):
+        for value in (1024, 65535):
+            invalid = struct.pack('<32768H', *([value]*32768))
+            valid = struct.pack('<32768H', *([1023]*32768))
+            for actual, expected in ((invalid, invalid), (invalid, valid), (valid, invalid)):
+                with self.subTest(value=value), self.assertRaises(ValueError):
+                    oracle.p10_metrics(actual, expected)
+
     def test_metric_refuses_truncated_planes(self):
         result = subprocess.run([sys.executable, '-O', '-c',
             'from compare_sdk_oracle import metric; metric([0], [0, 1023])'],
@@ -162,6 +173,34 @@ class OracleContract(unittest.TestCase):
                 oracle.extract_log(lines, root)
             with self.assertRaises(ValueError):
                 oracle.extract_log(lines[:1], root)
+
+
+class PixelStorageContract(unittest.TestCase):
+    def test_little_endian_and_all_plane_boundaries(self):
+        values = [0, 1, 255, 256, 511, 512, 1022, 1023]
+        raw = struct.pack('<8H', *values)
+        self.assertEqual(list(p10_samples(raw, 2, 2)), values)
+        self.assertIsNone(filmscan.decoded_psnr(raw, raw, 2, 2))
+        for index in range(8):
+            bad = values[:]
+            bad[index] = 1024
+            invalid = struct.pack('<8H', *bad)
+            for actual, reference in ((invalid, raw), (raw, invalid), (invalid, invalid)):
+                with self.subTest(index=index), self.assertRaises(ValueError):
+                    filmscan.decoded_psnr(actual, reference, 2, 2)
+
+    def test_truncated_extra_and_empty_storage(self):
+        raw = bytes(16)
+        for invalid in (b'', raw[:-1], raw[:-2], raw + b'\x00\x00', raw + raw):
+            for actual, reference in ((invalid, raw), (raw, invalid), (invalid, invalid)):
+                with self.subTest(length=len(invalid)), self.assertRaises(ValueError):
+                    filmscan.decoded_psnr(actual, reference, 2, 2)
+
+    def test_quality_threshold_still_binding(self):
+        black = bytes(16)
+        white = struct.pack('<8H', *([1023]*8))
+        with self.assertRaises(ValueError):
+            filmscan.decoded_psnr(black, white, 2, 2)
 
 
 class ProvenanceContract(unittest.TestCase):
