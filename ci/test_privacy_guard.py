@@ -34,6 +34,15 @@ class RuleTests(unittest.TestCase):
     def codes(self, value):
         return set(guard.rules_for(value))
 
+    def test_case_variants_of_home_paths_are_private(self):
+        # Default macOS and Windows home volumes commonly ignore case.
+        for value in ('/users/' + 'synthetic-agent/report',
+                      '/USERS/' + 'synthetic-agent/report',
+                      'c:' + '\\users\\' + 'synthetic-agent\\report',
+                      'C:' + '/uSeRs/' + 'synthetic-agent/report'):
+            with self.subTest(value=value):
+                self.assertIn('PERSONAL_ABSOLUTE_PATH', self.codes(value))
+
     def test_rfc1918_only(self):
         for candidate in ("192." + "168.12.8", "10." + "0.20.3",
                           "172." + "31.9.8"):

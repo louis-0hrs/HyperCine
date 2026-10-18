@@ -1,0 +1,38 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 96,
+  "parent_commit": "adcdb14bffe59166df98f61916c7f97eb1768df6",
+  "platform": {
+    "system": "macOS",
+    "architecture": "arm64",
+    "os_version": "26.5.2",
+    "compiler": "AppleClang 21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0"
+  },
+  "full_standalone_ctest": {
+    "registered": 28,
+    "passed": 28,
+    "skipped": 0,
+    "wall_seconds": 92.06,
+    "python_optimized": true,
+    "required_external_decode": true
+  },
+  "sources": [
+    {
+      "path": "ci/privacy_guard.py",
+      "sha256": "9788a516348c65213344785cc05f1341c8c45ce903bac4b3db48fb4719010585"
+    },
+    {
+      "path": "ci/test_privacy_guard.py",
+      "sha256": "8dcafe6550b9ef351f3cf46c7929a58f37836c810af7e0a87cdb84d7f0a958b1"
+    },
+    {
+      "path": "ci/test_privacy_hooks.py",
+      "sha256": "aa262aedf9617da53d49406ccdbb668c4b5def130e032bfac494b255b1cc9d27"
+    }
+  ],
+  "scope": "Focused prerequisite fix; parent feature/reference gates remain open; no protected-main merge or release."
+}
