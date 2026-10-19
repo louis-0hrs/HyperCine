@@ -19,7 +19,8 @@ Run it before citing this document.
 | Per-topology required bits | `SOURCE_DERIVED`, and **insufficient** as specified — see §4 |
 | Output-boundary readiness | `HOLLOW` — the always-on gate checks only for NULL; the correct gate is compiled out |
 | Thread-level access pattern | `SANITIZER_CONFIRMED` — pre-existing TSan logs show the unlocked reads and concurrent double reconstruction |
-| Production-safe contract | `NOT_DESIGNED_YET` — requirements in §6 |
+| Silent drop with a success return | `FALSE_OKAY_DEMONSTRATED` — induced, 120/120 calls in four arms (§8) |
+| Production-safe contract | `NOT_DESIGNED_YET` — requirements in §9 |
 | Portable patch | `NONE`. The published spin gate is not a candidate |
 
 `DESIGN_ONLY` is the honest status: the mechanism is named and bounded, the fix
@@ -319,9 +320,168 @@ Therefore, for any contract that is allowed near production:
 * a refused admission must surface as an explicit bounded error, never as
   `CFHD_ERROR_OKAY` with wrong pixels.
 
-## 6. What a contract has to state (design requirements, not a patch)
+## 6. Channel × mode matrix
 
-Derived from §2–§5, in the order the issue asks for. Nothing here is implemented.
+The guard predicate is **channel-agnostic**; what differs per channel is only when
+a given wavelet's bands become available. Verified, not assumed:
+
+- YUV422 sets `codec->num_channels = 3` (`decoder.c:11272`). ch0/ch1/ch2 are the
+  three planes; nothing in the readiness path branches on which one it is.
+- The guard block at `:13032`, `:13097` and `:13157` contains **no reference to
+  `channel`** at all. Same code, same predicate, three instantiations.
+- At HALF the probe counts exactly **9 claims per decode** (`free_entry = 9`,
+  `claimed = 9`), i.e. 3 queue points × 3 channels. That is the measured
+  instantiation count, not a derivation.
+
+Wavelet sets per mode, from the subband tables and the resolution masks:
+
+| Transform | Resolution | Subbands decoded | Wavelets present | Queue points/ch |
+| --- | --- | --- | --- | --- |
+| field-plus | FULL | 0–16 (`17`) | {0, 1, 3, 4, 5} | 5 |
+| field-plus | HALF | 0–10 (`11`) | {3, 4, 5} | 3 |
+| spatial | FULL | 0–9 | {0, 1, 2} | 3 |
+| spatial | HALF | 0–6 (`0x7F`) | {1, 2} | 2 |
+
+The temporal wavelet (index 2) is created only when an empty-band record
+(`subband == 255`) arrives, and the two frame wavelets (0 and 1) get their band 0
+from the temporal inversion. At HALF, wavelet 0 does not exist until that
+happens — which is why the measured fault surfaced at `index == 1` and `index == 2`
+rather than at the frame wavelets.
+
+**What differs per channel is arrival order, not code.** The three channels are
+decoded in bitstream order and each queues its own transforms; the fault needs one
+channel's producer to lag its consumer within the same window. That is consistent
+with the measured evidence (Linux waited on `ch1/index1`, Windows on `ch0/index1`
+and `ch2/index1`) without requiring any channel-specific defect.
+
+## 7. The five traces, separately
+
+The issue asks for these stated separately from measured frequency. They are.
+
+**(a) Expected valid/started transitions.** A highpass band raises `started` when
+decoding begins (`UpdateWaveletBandStartedFlags`, `:24127`, lock compiled out) and
+`valid` when decoding completes (`UpdateWaveletBandValidFlags`, `:24098`, under the
+lock). A lowpass band raises both together at `:24098-24099`. The released
+predicate compares the two words, so a band that reached only `started` cancels
+out on both sides: `0xE` reads as "complete" while band 0 has not begun.
+
+**(b) Claim vs ownership vs execution vs publication.** `done = 1` and
+`num_entries--` at `:271` is a **claim**, taken under the lock, before the inverse
+runs. Execution happens at `:302`, **after** `Unlock()`, behind an unlocked
+re-check at `:285`. Publication is the `valid` write inside the reconstruction.
+Nothing records completion: `queue[].done` is written at `:271` and read only in
+that same admission condition — it is not a completion acknowledgement. The probe
+measures the gap directly: `claimed = 9`, `executed = 7`.
+
+**(c) Source-buffer generation and reuse.** Bands share one allocation per wavelet
+(`IMAGE_ALLOC_ONE_MALLOC`, `wavelet.c:204-209`). The lowpass branch writes
+`wavelet[index-1]->band[0]` while reading `wavelet[index]->band[0]`
+(`:12997-13009`), so two adjacent pyramid levels touch the same plane — the
+double-reconstruction the sanitizer reported. Flags are zeroed per group in
+`ClearTransformFlags` (`:1393`) and on (re)creation (`wavelet.c:924`); a wait that
+is not tied to the generation can therefore be satisfied by a recycled bit.
+
+**(d) Synchronisation and ordering.** `valid` is written under
+`entropy_worker_new.lock`; `started` is written with its lock compiled out
+(`_DELAYED_THREAD_START == 1`); both are plain `uint32_t`, not atomics. The
+consumer reads them unlocked at `:13039` and at `:285`. **Correction to an earlier
+verbal claim of mine:** an enqueue-side race is *not* established. `QueueThreadedTransform`
+is reached only from the parser path (`DecodeSampleSubband` ← `UpdateCodecState` ←
+`DecodeSampleGroup` / `DecodeSampleIntraFrame`), the worker never calls it, and the
+only live `THREAD_MESSAGE_START` for that pool is sent from `WaitForTransformThread`
+*after* enqueueing. Absence of the lock there is a smell, not a demonstrated race,
+and I am labelling it unobserved.
+
+**(e) First terminal error and cleanup.** This is where the design fails worst.
+The drain loop contains **zero** assignments to `decoder->error`. `WaitForTransformThread`
+(`:24291-24296`) calls `ThreadPoolWaitAllDone` and then zeroes `started`,
+`num_entries`, `next_entry` and `free_entry` **without checking whether anything
+was left unadmitted or unexecuted**. The output boundary cannot compensate:
+`AllTransformBandsValid` only tests for non-NULL pointers. So a dropped transform
+produces a frame that is reported as successfully decoded — measured in §8.
+
+## 8. Bounded fail-closed counterexample
+
+The review asked for a deterministic absent/delayed-producer probe on a private
+scratch SDK, recording queue state and the public return **on the same call**.
+That exists now, and it confirms the silent drop.
+
+### What was built
+
+- `tools/rca195_probe.h` — test-only counters: `CLAIM` logged right after
+  `done = 1; num_entries--;`, `EXEC` logged immediately before the reconstruction,
+  and a queue record immediately before `WaitForTransformThread` discards it.
+- `tools/apply_rca195_probe.py` — applies the probe to a private out-of-repo copy
+  by line anchors, failing closed on ambiguity. `upstream/` is never touched.
+- `tools/rca195_probe_harness.cpp` and `tools/run_rca195_probe.py` — one decode per
+  fresh process, one JSON record per call, classification and verdict rules.
+
+The private copy was byte-identical to the frozen tree before patching
+(`decoder.c` `acd477cb…`, `entropy_threading.c` `32033d23…`).
+
+### Protocol honesty
+
+Two registrations exist, and neither is rewritten after the fact:
+
+| Version | SHA-256 | Outcome |
+| --- | --- | --- |
+| v1 | `3001720e…` | **`INCONCLUSIVE`** |
+| v2 | `00b5748e…` | `FALSE_OKAY_DEMONSTRATED` |
+
+v1 required `num_entries > 0` at the reset. The injection hook consumes the entry
+exactly as production does, so that value is legitimately 0 — **the rule was
+unfulfillable by my own construction**. The v1 run stands as `INCONCLUSIVE` in the
+record; v2 replaced the witness with `claimed > executed`. That is the same
+bookkeeping discipline I applied to #192, applied here to my own work.
+
+### Result — 30 calls per arm, fixed order
+
+| Arm | Injection | `claimed` | `executed` | `sdk_ok` | `guard_ok` | classified |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | none | 9 | 9 | 30/30 | 30/30 | 28 `OK`, 2 `NATURAL_VARIANT` |
+| B | skip `ch1/index2` | 8–9 | 7 | 30/30 | 30/30 | **30 `DROPPED_FALSE_OKAY`** |
+| C | skip `ch0/index2` | 9 | 7 | 30/30 | 30/30 | **30 `DROPPED_FALSE_OKAY`** |
+| D | skip `ch2/index2` | 8–9 | 7 | 30/30 | 30/30 | **30 `DROPPED_FALSE_OKAY`** |
+| E | skip `ch1/index1` | 9 | 8 | 30/30 | 30/30 | **30 `DROPPED_FALSE_OKAY`** |
+
+**120 of 120 induced calls returned `CFHD_ERROR_OKAY` with an output that differs
+from the control mode, while the witness recorded a claimed transform that was
+never executed.** The control arm has zero such calls. Control modal digest
+`38d1c149…`; natural-variant rate 2/30, reported separately and **not** counted as
+evidence — that is the known #160 behaviour.
+
+Ledger: `docs/validation/rca195_probe_ledger_2026-10-20.json`.
+
+### Two instrument defects, found and fixed before the final run
+
+Recorded because they are the kind of thing that turns a measurement into a
+comfortable story:
+
+1. The probe state was `static` in a header included by two translation units, so
+   `skipped` read 0 where two skips had occurred. Fixed with a single definition
+   (`RCA195_PROBE_OWNER`).
+2. The skip hook ran unguarded at loop exit, where `channel` and `index` are loop
+   leftovers, firing 18 times for 9 claims. Fixed by guarding on `wavelet != NULL`.
+
+Both were caught because the counters disagreed with the log lines — not because
+the verdict looked wrong.
+
+### What this does and does not establish
+
+It establishes that **the state is reachable and that the public API reports
+success in it**. It does not establish how often the unmodified decoder reaches it
+on its own: the injection fabricates the condition. It is also a different claim
+from the #160 rate — those runs measured corrupt output under contention, these
+measure a dropped transform under a forced drop.
+
+**A digest match is corroboration only.** The registered limitation says so
+explicitly, and the data showed why: the control arm's natural variants produced
+byte-identical digests to the induced arms (`fad4a643…` appeared 3× in control and
+29× in arm B). Identical bytes therefore do **not** prove a drop — the counter does.
+
+## 9. What a contract has to state (design requirements, not a patch)
+
+Derived from §2–§8, in the order the issue asks for. Nothing here is implemented.
 
 1. **A single publication point per band.** One writer raises *both* words while
    holding one lock, so no reader can observe the pair torn. The current split
@@ -347,7 +507,7 @@ Derived from §2–§5, in the order the issue asks for. Nothing here is impleme
    sees a bounded error — never a partially reconstructed frame reported as
    success.
 
-## 7. What this pass does not establish
+## 10. What this pass does not establish
 
 * No decode was executed; every statement about timing is a citation of the
   #160 / #192 ledgers, not a new measurement.
@@ -363,7 +523,7 @@ Derived from §2–§5, in the order the issue asks for. Nothing here is impleme
 * The Windows per-channel attribution gap (#192) is still open on that side and
   is not repaired here.
 
-## 8. Reproduce
+## 11. Reproduce
 
 ```
 python3 tools/verify_rca195_band0_contract.py --check
@@ -391,9 +551,9 @@ CTest as `rca195_band0_contract` and `rca195_band0_contract_selftest`.
 Machine-readable output of this pass:
 `docs/validation/rca195_band0_contract_2026-10-19.json`.
 
-## 9. One next action
+## 12. One next action
 
-Nothing on this lane should build a candidate from §6 yet. The cheapest correct
+Nothing on this lane should build a candidate from §9 yet. The cheapest correct
 next step is the one #195 already names for another lane: the **#158 owner
 closes the two disclosure gaps** on #192 — per-channel output-plane digests for
 the five corrupt calls, and the `EXPECTED_PUBLISH_BAND0` correction — so a

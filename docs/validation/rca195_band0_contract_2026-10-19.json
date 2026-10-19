@@ -2,7 +2,7 @@
  "issue": 195,
  "milestone": 1,
  "verdict": "DESIGN_ONLY",
- "repo_head": "b8cc3206f9ecae4c31b612b1cb8d3049d05de33c",
+ "repo_head": "50af67d4c96237d6a48f3a0face32898ccda5b3f",
  "sources": {
   "upstream/Codec/decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
   "upstream/Codec/image.h": "93ed2e580030274dda46257eaf08ac90717f2a526ccc11fb5b471dcdb3bf1d52",
@@ -164,6 +164,28 @@
    "reason": "both call sites are in the #else branch of #if _THREADED_DECODER, which config.h enables",
    "still_vacuous": "it forwards to BANDS_ALL_VALID, the released macro"
   }
+ },
+ "queue_shutdown": {
+  "function": "WaitForTransformThread",
+  "file": "upstream/Codec/decoder.c",
+  "line": 24283,
+  "waits_for_pool": true,
+  "completeness_check_before_reset": false,
+  "error_set_on_unadmitted_entry": false,
+  "resets": [
+   "decoder->transform_queue.started = 0;",
+   "decoder->transform_queue.num_entries = 0;",
+   "decoder->transform_queue.next_entry = 0;",
+   "decoder->transform_queue.free_entry = 0;"
+  ],
+  "done_is_a_claim_not_a_completion_record": true,
+  "done_write_lines": [
+   271
+  ],
+  "done_read_lines": [
+   269
+  ],
+  "consequence": "a transform that is never admitted or never executed is discarded without a diagnostic, and the frame can still be reported as decoded successfully"
  },
  "required_bit_matrix": {
   "function": "DecodedBandsValid",

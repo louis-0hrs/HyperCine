@@ -486,6 +486,83 @@ def parse_liveness(repo):
     }
 
 
+# ------------------------------------------------------- queue shutdown path
+
+def parse_queue_shutdown(repo):
+    """The path that discards the queue, and the absence of an error for it.
+
+    This is the anchor set the maintainer review asked to be mutated and tested:
+    if someone later adds a completeness check before the reset, or adds an error
+    assignment in the drain loop, this verifier must fail so the finding is
+    re-derived rather than silently kept.
+    """
+    decoder = read(repo, DECODER)
+    threading = read(repo, THREADING)
+
+    start = decoder.find('void WaitForTransformThread(DECODER *decoder)')
+    require(start >= 0, 'WaitForTransformThread is missing')
+    end = decoder.find('\n}\n', start)
+    require(end > start, 'WaitForTransformThread body could not be delimited')
+    body = decoder[start:end]
+
+    require('ThreadPoolWaitAllDone(&decoder->entropy_worker_new.pool);' in body,
+            'WaitForTransformThread no longer waits for the pool')
+
+    # The four resets must all be present, and none may be conditioned on a check.
+    resets = (
+        'decoder->transform_queue.started = 0;',
+        'decoder->transform_queue.num_entries = 0;',
+        'decoder->transform_queue.next_entry = 0;',
+        'decoder->transform_queue.free_entry = 0;',
+    )
+    for statement in resets:
+        require(statement in body, 'queue reset statement vanished: %s' % statement)
+
+    # The whole point: no completeness test guards the discard.
+    guard_markers = ('num_entries > 0', 'num_entries != 0', 'next_entry <',
+                     'free_entry !=', 'unadmitted', 'CODEC_ERROR_BAD_FRAME')
+    present = [marker for marker in guard_markers if marker in body]
+    require(present == [],
+            'WaitForTransformThread now appears to check completeness before the '
+            'reset (%r); the silent-drop finding must be re-derived' % (present,))
+
+    # The drain loop must not report an error for an entry it fails to admit.
+    drain_start = threading.find('if(data->queue[curr_entry].done == 0 && BANDS_ALL_VALID(wavelet))')
+    require(drain_start >= 0, 'the drain admission condition is missing')
+    drain_end = threading.find('} while(wavelet && BANDS_ALL_VALID(wavelet));', drain_start)
+    require(drain_end > drain_start, 'the drain loop tail could not be delimited')
+    drain_body = threading[drain_start:drain_end]
+    require('decoder->error' not in drain_body,
+            'the drain loop now assigns decoder->error; the silent-drop finding '
+            'must be re-derived')
+
+    # done is a claim, not a completion record.
+    done_writes = [i for i, line in enumerate(threading.split('\n'), 1)
+                   if '.done = 1;' in line]
+    done_reads = [i for i, line in enumerate(threading.split('\n'), 1)
+                  if '.done == 0' in line]
+    require(len(done_writes) == 1,
+            'expected exactly one `done = 1` claim site, found %d' % len(done_writes))
+    require(len(done_reads) == 1,
+            'expected exactly one `done == 0` read, found %d' % len(done_reads))
+
+    return {
+        'function': 'WaitForTransformThread',
+        'file': str(DECODER),
+        'line': line_of(decoder, 'void WaitForTransformThread(DECODER *decoder)'),
+        'waits_for_pool': True,
+        'completeness_check_before_reset': False,
+        'error_set_on_unadmitted_entry': False,
+        'resets': list(resets),
+        'done_is_a_claim_not_a_completion_record': True,
+        'done_write_lines': done_writes,
+        'done_read_lines': done_reads,
+        'consequence': 'a transform that is never admitted or never executed is '
+                       'discarded without a diagnostic, and the frame can still be '
+                       'reported as decoded successfully',
+    }
+
+
 # ------------------------------------------------------------- output path
 
 def preprocessor_contexts(text):
@@ -728,6 +805,7 @@ def build_report(repo):
         'writers': parse_writers(repo),
         'readers': parse_readers(repo),
         'output_path': parse_output_path(repo),
+        'queue_shutdown': parse_queue_shutdown(repo),
         'required_bit_matrix': parse_mask_logic(repo),
         'liveness': parse_liveness(repo),
     }
@@ -806,6 +884,38 @@ SELF_TESTS = (
      CONFIG_H,
      '#define _THREADED_DECODER\t1',
      '#define _THREADED_DECODER\t0', 1),
+    # --- queue shutdown path (Milestone-1 completion) ---------------------
+    ('completeness check added before the queue reset',
+     DECODER,
+     'ThreadPoolWaitAllDone(&decoder->entropy_worker_new.pool);',
+     'ThreadPoolWaitAllDone(&decoder->entropy_worker_new.pool);\n'
+     '\t\tif (decoder->transform_queue.num_entries > 0)',
+     1),
+    ('drain loop starts reporting an error',
+     THREADING,
+     'data->queue[curr_entry].done = 1;',
+     'data->queue[curr_entry].done = 1;\n'
+     '\t\t\t\t\t\t\t\tdecoder->error = CODEC_ERROR_BAD_FRAME;',
+     1),
+    # The four reset statements also appear in the per-group init, so the
+    # mutation is anchored on the whole block and must actually land in
+    # WaitForTransformThread. An unanchored single-line mutation hit the other
+    # copy and the verifier correctly kept passing.
+    ('queue reset statement removed',
+     DECODER,
+     'ThreadPoolWaitAllDone(&decoder->entropy_worker_new.pool);\n'
+     '\t\n'
+     '\t\tdecoder->transform_queue.started = 0;\n'
+     '\t\tdecoder->transform_queue.num_entries = 0;\n'
+     '\t\tdecoder->transform_queue.next_entry = 0;\n'
+     '\t\tdecoder->transform_queue.free_entry = 0;',
+     'ThreadPoolWaitAllDone(&decoder->entropy_worker_new.pool);\n'
+     '\t\n'
+     '\t\tdecoder->transform_queue.started = 0;\n'
+     '\t\tdecoder->transform_queue.num_entries = 0;\n'
+     '\t\tdecoder->transform_queue.next_entry = 0;\n'
+     '\t\t/* reset removed */',
+     1),
 )
 
 

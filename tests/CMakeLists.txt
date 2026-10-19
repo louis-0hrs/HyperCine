@@ -26,8 +26,13 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME rca195_tsan_reduction_selftest COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/analyze_rca195_tsan_log.py"
         --self-test --repo "${CMAKE_SOURCE_DIR}")
+    # The probe is applied to a scratch copy only; this test proves the anchors
+    # still land and that a removed anchor fails closed.
+    add_test(NAME rca195_probe_applier_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/apply_rca195_probe.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
     set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
-        rca195_tsan_reduction_selftest
+        rca195_tsan_reduction_selftest rca195_probe_applier_selftest
         PROPERTIES TIMEOUT 300
         PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS")
 endif()
