@@ -323,5 +323,127 @@ are not comparable with the #159 sweep cells or with passes 1–2.
   calls, three states, per-plane digests, output rank-1 statistics for each
   corrupt state, and the substitution result.
 
+## Fourth pass — the lowpass consumer is admitted before its input is complete
+
+The third pass located the fault to a coefficient plane and deliberately stopped
+at "the producer is not identified". This pass answers that, and corrects one
+omission in my own earlier text.
+
+### Correction to the third pass
+
+The third pass said the wrong chroma plane was "already present before
+conversion". That is true and was measured, but the retained per-call logs also
+show something I did not state then: the entropy-decoded band 0 (`I1`) is
+byte-identical in **all 60** calls of that pass, including the six corrupt ones.
+The near-zero plane is therefore **not** produced by entropy decoding. Reading
+the third-pass note as "the producer wrote a wrong plane" would be a
+misreading; the producer wrote the correct plane every time.
+
+### Method
+
+Private instrumentation copy; `upstream/` untouched. Four read-only, env-gated
+probes:
+
+| probe | site | records |
+| --- | --- | --- |
+| `P0` | entry of `ReconstructWaveletBand` | channel, wavelet index, dims, pitch, level, both flag words, image pointer, digest of input band 0 |
+| `P1a` | after each inverse spatial lowpass | output wavelet, flags, digest of the resulting band 0 |
+| `P3` | every `UpdateWaveletBandValidFlags` | flags before/after and the plane digest |
+| `P4` | `GetWaveletThreadSafe` | reuse vs fresh allocation and the buffer content before the caller writes |
+
+Same pinned packet, HALF/BGRA, `TAG_CPU_MAX=4` against one permitted CPU, one
+decode per fresh process.
+
+Probe coverage is stated, not assumed: `P0` observes ch0, ch1 and ch2, and its
+`in0` digest for wavelet index 2 matches the third pass's entropy digest exactly.
+The single-worker control reproduces the modal digest `38d1c149…`.
+
+### Result 1 — the consumer starts while its input band is not valid
+
+The plane the output stage reads for ch1 is `transform[1]->wavelet[0]->band[0]`
+(480×540). It is produced by the `index == 1` reconstruction, which consumes
+`wavelet[1]->band[0]` (240×270), produced by the `index == 2` reconstruction.
+
+In every corrupt call of arm A, that `index == 1` entry happened while band 0 of
+its input was **not valid**:
+
+```
+P0 ch=1 idx=1 ttype=0 alloc=0 w=240 h=270 lvl=2 nb=4 flags=0000000e started=0000000e
+```
+
+`0xE` means bands 1, 2 and 3 are valid and band 0 is not. The digest at that
+moment is the buffer's pre-existing content, not the lowpass. In the modal case
+the same entry reads `flags=0000000f started=0000000f` with the correct lowpass
+digest.
+
+Over 120 calls:
+
+| | premature entry | no premature entry |
+| --- | --- | --- |
+| corrupt output | 25 | 0 |
+| modal output | 7 | 88 |
+
+A premature entry is **necessary** for corruption on this sample but **not
+sufficient** — seven modal calls had one. In those, the reconstruction was
+entered early but its frame-plane write landed after the lowpass was published,
+and the output was correct. The outcome therefore depends on whether the reader
+consumed stale rows inside that window, which is what a race over an incomplete
+plane predicts. I do not claim "premature start always corrupts".
+
+### Result 2 — why the consumer is admitted: a vacuous gate
+
+`Codec/image.h:230`:
+
+```c
+#define BANDS_ALL_VALID(wavelet)  ((wavelet)->band_valid_flags == (wavelet)->band_started_flags)
+```
+
+When band 0 is neither started nor valid, both words are `0xE`, the comparison
+is true, and the reconstruction proceeds. The predicate this call site needs is
+that **band 0** is valid. `AllLowpassBandsValid()` does test band 0 explicitly,
+but it is only reached from assert paths that `NDEBUG` removes; the two spatial
+branches at `decoder.c:13044` and `decoder.c:13109` rely on the macro directly.
+
+### Result 3 — the pre-registered intervention
+
+One change, test-only and env-gated: require band 0 of the input wavelet to be
+valid before entering the inverse spatial lowpass, with a bounded wait that
+counts its spins. No change to transform math, to the writer, or to scheduling.
+
+| arm | condition | calls | distinct outputs | corrupt |
+| --- | --- | --- | --- | --- |
+| A | original | 120 | 6 | **25** |
+| B | strict band-0 gate | 120 | **1** | **0** |
+| A′ | gate off, same binary | 120 | 3 | **30** |
+
+B produced a single output digest across all 120 calls. A and A′ share one
+binary; only the environment variable differs, so the difference between them is
+not a build effect.
+
+The gate demonstrably waited: 22 of 120 calls spun, **always on ch1 `index == 1`**
+— the channel and stage that corrupt. No call spun where no incomplete lowpass
+existed, so this is not a blanket sleep that would "fix" any race by slowing the
+program down. The spin counts are small (one yield), which is consistent with a
+narrow window rather than a structural stall.
+
+### Limits
+
+* One packet, one resolution (HALF), one output format (BGRA), Linux CPU only.
+  No Windows, macOS or EPYC parity is claimed.
+* No rate or throughput statement: the gate is diagnostic and was not
+  benchmarked, and it is not a production patch.
+* The upstream defect is unchanged. This is a controlled intervention that
+  removes the symptom on this sample; it is not a fix proposal, and it does not
+  claim the gate is the right long-term design.
+* The seven modal calls with a premature entry show the mechanism is a window,
+  not a switch; a deterministic statement about which rows get read is not made.
+* Longer stalls on slower or more contended hardware are not characterised.
+
+### Artefacts
+
+* `tools/analyze_rca160_wavelet_order.py` — ordering classifier, stdlib only.
+* `docs/validation/rca160_fourth_pass_intervention_2026-10-19.json` — three-arm
+  counts, gate records and spin distribution.
+
 Raw decoded frames stay outside the repository; only relative IDs and hashes are
 published.
