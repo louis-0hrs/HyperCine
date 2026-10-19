@@ -34,7 +34,11 @@ CHILD_TIMEOUT_SECONDS = 60
 GATE_MAX_SPINS = 50000000
 GATE_MAX_WAIT_MS = 5000
 EXPECTED_GATE_ENTRIES = 9  # 3 channels x (one index1 + two index2 sites)
-EXPECTED_PUBLISH_BAND0 = 6
+# Original pre-registration value, retained only to re-evaluate that rule.
+# It was derived from the two spatial lowpass sites and omitted the entropy
+# lowpass and frame-wavelet publishers, so the literal rule is reported
+# separately and is expected to be INCONCLUSIVE on the published ledger.
+REGISTERED_PUBLISH_BAND0 = 6
 
 LINE = re.compile(r'^(\w+) (.*)$')
 FIELD = re.compile(r'(\w+)=([^\s]+)')
@@ -82,8 +86,23 @@ def parse_probe_log(path):
 
 
 def producer_coverage(events):
-    """Match every real wait to a band-0 publication on the same IMAGE object."""
+    """Match every real wait to a band-0 publication on the same IMAGE object.
+
+    The publication count is descriptive. The probe observes every call to the
+    flag publisher, including calls that do not change band 0, so no fixed
+    per-call count is a source-derived invariant. Operation identity is:
+    gate entry, then a same-IMAGE band-0 invalid->valid transition inside the
+    wait window.
+    """
     publishes = [e for e in events if e['event'] == 'BAND_PUBLISH' and e.get('band') == 0]
+    transitions = [e for e in publishes
+                   if (e.get('old_valid', 0) & 1) == 0 and (e.get('new_valid', 0) & 1) == 1]
+    entry_events = [e for e in events if e['event'] == 'GATE_ENTRY']
+    first_entry_ns = min((e.get('t_ns', 0) for e in entry_events), default=None)
+    entropy_transitions = (sum(1 for e in transitions
+                               if first_entry_ns is not None and
+                               e.get('t_ns', 0) < first_entry_ns)
+                           if first_entry_ns is not None else 0)
     entries = {}
     waits = []
     coverage = []
@@ -116,12 +135,16 @@ def producer_coverage(events):
     premature_entries = [e for e in events
                          if e['event'] == 'GATE_ENTRY' and ((e.get('valid', 0) & 1) == 0)]
     return {
-        'gate_entries': sum(1 for e in events if e['event'] == 'GATE_ENTRY'),
+        'gate_entries': len(entry_events),
         'waits': waits,
         'coverage': coverage,
         'timeouts': timeouts,
         'premature_entries': premature_entries,
         'publishes': len(publishes),
+        'publish_calls_band0': len(publishes),
+        'transitions_band0': len(transitions),
+        'transition_pointers_band0': len({e.get('wptr') for e in transitions}),
+        'entropy_transitions_band0': entropy_transitions,
     }
 
 
@@ -181,6 +204,10 @@ def run_call(worker, packet, out_dir, arm, index):
             'waits': len(coverage['waits']),
             'timeouts': len(coverage['timeouts']),
             'publishes_band0': coverage['publishes'],
+            'publish_calls_band0': coverage['publish_calls_band0'],
+            'transitions_band0': coverage['transitions_band0'],
+            'transition_pointers_band0': coverage['transition_pointers_band0'],
+            'entropy_transitions_band0': coverage['entropy_transitions_band0'],
             'waits_matched': sum(1 for c in coverage['coverage']
                                  if c['producer_publish_matched']),
             'coverage': coverage['coverage'],
@@ -214,6 +241,13 @@ def summarize(records):
         corrupt = sum(1 for r in calls
                       if 'output' in r and r['output_valid'] and
                       r['output']['sha256'] != modal)
+        publish_counts = Counter(
+            r['gate'].get('publish_calls_band0', r['gate'].get('publishes_band0', 0))
+            for r in calls)
+        transition_counts = Counter(
+            r['gate'].get('transitions_band0', 0) for r in calls)
+        pointer_counts = Counter(
+            r['gate'].get('transition_pointers_band0', 0) for r in calls)
         arms[arm] = {
             'calls': len(calls),
             'valid_outputs': sum(1 for r in calls if r['output_valid']),
@@ -229,11 +263,23 @@ def summarize(records):
             'gate_timeouts': sum(r['gate']['timeouts'] for r in calls),
             'waits_matched': sum(r['gate']['waits_matched'] for r in calls),
             'publishes_band0': sum(r['gate']['publishes_band0'] for r in calls),
+            'publish_calls_band0': sum(r['gate'].get('publish_calls_band0',
+                                                     r['gate'].get('publishes_band0', 0))
+                                       for r in calls),
+            'publish_call_counts': {str(key): value
+                                    for key, value in sorted(publish_counts.items())},
+            'transition_counts': {str(key): value
+                                  for key, value in sorted(transition_counts.items())},
+            'transition_pointer_counts': {str(key): value
+                                          for key, value in sorted(pointer_counts.items())},
+            'entropy_transitions_band0': sum(r['gate'].get('entropy_transitions_band0', 0)
+                                             for r in calls),
         }
     return arms
 
 
-def classify(arms):
+def classify(arms, records=None):
+    """Apply the corrected rule: operation identity, not a fixed count."""
     reasons = []
     o, b, ap = arms['O'], arms['B'], arms['AP']
     if o['decode_failures'] or ap['decode_failures'] or b['decode_failures']:
@@ -252,12 +298,39 @@ def classify(arms):
         reasons.append('at least one B wait has no matched band-0 publication')
     if b['gate_entries'] != b['calls'] * EXPECTED_GATE_ENTRIES:
         reasons.append('B gate-entry coverage incomplete')
+    if records is not None:
+        if any(r['gate'].get('gate_entries', 0) == 0 for r in records):
+            reasons.append('probe records missing in at least one call')
+        if any(r['gate'].get('gate_entries', 0) != EXPECTED_GATE_ENTRIES
+               for r in records):
+            reasons.append('per-call gate-entry coverage is not exactly %d'
+                           % EXPECTED_GATE_ENTRIES)
     for arm in ARM_ORDER:
         if arms[arm]['gate_entries'] == 0:
             reasons.append(f'probe records missing in arm {arm}')
     if reasons:
         return 'INCONCLUSIVE', reasons
     return 'CROSS_HOST_CONFIRMATION_PASS', []
+
+
+def classify_registered_publication_rule(arms):
+    """Re-evaluate the literal pre-registered fixed-count rule.
+
+    This is disclosure, not the accepted rule. The registered expectation of
+    six band-0 publications per call omitted the entropy and frame publishers.
+    """
+    reasons = []
+    for arm in ARM_ORDER:
+        counts = arms[arm].get('publish_call_counts')
+        if not counts:
+            reasons.append(f'publication-count distribution unavailable in arm {arm}')
+            continue
+        observed = sorted({int(key) for key in counts})
+        if observed != [REGISTERED_PUBLISH_BAND0]:
+            reasons.append(
+                f'registered rule expected {REGISTERED_PUBLISH_BAND0} band-0 '
+                f'publications per call in arm {arm}; observed {observed}')
+    return ('INCONCLUSIVE' if reasons else 'CROSS_HOST_CONFIRMATION_PASS', reasons)
 
 
 def main():
@@ -311,6 +384,12 @@ def main():
         },
         'digest_domain': 'SHA-256 over the complete written output buffer; '
                          'width/height/pitch recorded per call',
+        'coverage_rule': 'corrected operation-identity rule: 9 gate entries per '
+                         'call; every B wait matched to a same-IMAGE band-0 '
+                         'invalid->valid transition inside the wait window; no '
+                         'gate timeout; missing per-call probe log is INCONCLUSIVE. '
+                         'Band-0 publication counts are descriptive, not a fixed '
+                         'pass condition.',
     }
     if args.preflight_only:
         print(json.dumps(preflight, indent=1))
@@ -322,19 +401,27 @@ def main():
             records.append(run_call(worker, packet, out_dir, arm, index))
 
     arms = summarize(records)
-    verdict, reasons = classify(arms)
+    verdict, reasons = classify(arms, records)
+    registered_verdict, registered_reasons = classify_registered_publication_rule(arms)
     report = dict(preflight)
     report.update({
         'arms': arms,
         'verdict': verdict,
         'reasons': reasons,
+        'registered_rule_verdict': registered_verdict,
+        'registered_rule_reasons': registered_reasons,
         'ledger': records,
-        'note': 'Diagnostic only. Not a production decoder patch or release gate.',
+        'note': 'Diagnostic only. Not a production decoder patch or release gate. '
+                'The corrected operation-identity rule is authoritative; the '
+                'original six-publication rule is re-evaluated for disclosure.',
     })
     Path(args.json).write_text(json.dumps(report, indent=1), encoding='utf-8')
     concise = {arm: {key: value for key, value in arms[arm].items()
                      if key != 'output_counts'} for arm in ARM_ORDER}
-    print(json.dumps({'verdict': verdict, 'reasons': reasons, 'arms': concise,
+    print(json.dumps({'verdict': verdict, 'reasons': reasons,
+                      'registered_rule_verdict': registered_verdict,
+                      'registered_rule_reasons': registered_reasons,
+                      'arms': concise,
                       'worker_sha256': checks['worker_sha256']}, indent=1))
     return 0 if verdict == 'CROSS_HOST_CONFIRMATION_PASS' else 1
 

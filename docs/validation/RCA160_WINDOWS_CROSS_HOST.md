@@ -11,6 +11,12 @@ host. It is not a production decoder patch, a general original-SDK repair, or a
 release qualification. The #120 gate stays
 `REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED`.
 
+A 2026-10-19 correction restates the coverage rule: the original fixed
+six-publication count was a derivation error and returns `INCONCLUSIVE` when
+applied literally. The corrected operation-identity rule reproduces the same
+verdict. Codec channel identity for the five corrupt calls is
+`CHANNEL_IDENTITY_UNAVAILABLE`; see the correction sections below.
+
 ## What was measured
 
 [`band0_1080.py`](../../tests/reference_decode/band0_1080.py) ran the
@@ -107,6 +113,75 @@ No call waited where band 0 was already valid. The Windows guest exercised the
 same vacuous-gate window as Linux, but on ch0 and ch2 rather than the Linux
 lane's ch1-only waits.
 
+## Correction 2026-10-19 — publication-count rule and channel identity
+
+The pre-registration required "9 gate entries **and 6 band-0 publications**" per
+call. The 6 was a derivation error and `classify()` never enforced it. It covered
+only the two spatial lowpass sites, omitting the entropy lowpass publishers and
+the two frame-wavelet publishers after the inverse temporal transform, and it
+assumed one publisher call per site. The probe observes every
+`UpdateWaveletBandValidFlags` call, including no-op calls where band 0 was
+already valid.
+
+Re-derived from the preserved sanitized ledger, the 360 retained probe logs and
+the 360 retained outputs
+([evidence JSON](rca160_windows_coverage_correction_2026-10-19.json)):
+
+| arm | publisher calls/call | invalid→valid transitions/call | distinct transition `IMAGE` pointers/call | gate entries/call |
+| --- | --- | --- | --- | --- |
+| O | 9–12 | 9–11 | 9 (120/120 calls) | 9 (120/120) |
+| B | 9–12 | 9–12 | 9 (120/120) | 9 (120/120) |
+| A′ | 9–12 | 9–11 | 9 (120/120) | 9 (120/120) |
+
+Three entropy-stage band-0 transitions precede the first gate entry in every
+call (360/360), which is the source-derived per-channel entropy publisher.
+
+- **Literal registered rule** (exactly 6 publications per call): `INCONCLUSIVE`
+  in all three arms. This is what the original protocol would have returned had
+  its rule been enforced. It is not relabelled as a pass and is not used as the
+  accepted verdict.
+- **Corrected rule**: 9 gate entries per call; every real B wait matched to a
+  same-`IMAGE` band-0 invalid→valid transition inside the wait window; no gate
+  timeout; no missing per-call probe log. Re-derived independently: **PASS**,
+  unchanged from the published verdict. B waits 60, matched 60, timeouts 0; all
+  360 calls have 9 gate entries and a present probe log.
+
+The verifier now enforces the corrected operation-identity rule
+([`band0_1080.py`](../../tests/reference_decode/band0_1080.py)); publication
+counts are descriptive and the literal rule is reported separately.
+
+## Channel identity for the five corrupt calls
+
+`CHANNEL_IDENTITY_UNAVAILABLE`. The retained artifacts are converted 960×540
+BGRA outputs and probe events. No internal ch0/ch1/ch2 lowpass coefficient
+planes were retained, so codec channel identity cannot be reconstructed exactly
+from the converted output. The same `0xE` admission window is not proof of the
+same corrupt channel or state.
+
+Post-conversion full-domain digests (one SHA-256 per interleaved BGRA byte lane,
+518,400 bytes each) and the diff profile are in the evidence JSON:
+
+| call | touched rows | B max_abs/rows | G max_abs/rows | R max_abs/rows | A |
+| --- | --- | --- | --- | --- | --- |
+| O/094 | 376–539, 2 gaps | 228 / 90 | 228 / 90 | 134 / 90 | identical |
+| O/103 | 532–539, contiguous | 228 / 8 | 228 / 8 | 134 / 8 | identical |
+| O/108 | 508–539, contiguous | 228 / 32 | 228 / 32 | 134 / 32 | identical |
+| O/112 | 512–539, contiguous | 228 / 28 | 228 / 28 | 134 / 28 | identical |
+| A′/037 | 480–539, 1 gap | 228 / 50 | 228 / 50 | 134 / 50 | identical |
+
+Every touched row lies in a bottom tail ending at row 539 and the differing
+bytes are strongly rank-1 (0.94–0.9997). Sampled corrupt rows are near-black
+where the modal output is not, consistent with the consumer reading unwritten or
+near-zero tail data.
+
+The characterized Linux chroma states each leave one output lane unchanged:
+ch1 affects G/R with B max 0; ch2 affects B/G with R max 0. Neither matches the
+Windows signature: all three Windows color lanes change and A is unchanged.
+Every corrupt Windows call had a premature **ch0/index1** entry (A′/037 also
+ch2/index1), so the observed state is associated with ch0, not the Linux
+ch1/ch2 states. Cross-host confirmation therefore remains "the same admission
+window", not "the same corruption state".
+
 ## Cross-host comparison
 
 | observation | Linux #160 | EPYC Windows #158 |
@@ -154,15 +229,29 @@ python tests/reference_decode/band0_1080.py \
   --packet "$HYPERCINE_GOLDEN_DIR/decoder-rca/2026-10-18/matched-sha-1080-bgra-full-20261018/sample_1080p_filmscan3_gop1.cfhd" \
   --source "$HYPERCINE_GOLDEN_DIR/decoder-rca/2026-10-18/matched-sha-1080-bgra-full-20261018/source_1080p_bgra.raw" \
   --out <local-output> --json <local-json> --calls 120
+python tests/reference_decode/analyze_rca160_correction.py \
+  --ledger docs/validation/rca160_windows_cross_host_band0_2026-10-19.json \
+  --output-root <local-output> --probe-root <local-output> \
+  --json <local-correction-json>
 ```
+
+The second command performs no decode. It recomputes output digests, re-parses
+the retained probe logs, and reports both coverage-rule verdicts.
 
 ## Verification performed
 
 - Full native Release build: PASS.
 - `ctest --test-dir build-pristine -C Release --output-on-failure`: **14/14 PASS**.
 - `tests/reference_decode/test_affinity_protocol.py`: **5/5 PASS**.
-- `tests/reference_decode/test_band0_protocol.py`: **14/14 PASS** (parser, coverage matching and fail-closed verdict rules).
+- `tests/reference_decode/test_band0_protocol.py`: **19/19 PASS** (parser,
+  coverage matching, corrected operation-identity rule, literal registered-rule
+  re-evaluation, and missing-log/per-call-entry fail-closed cases).
+- Correction re-evaluation: 360/360 ledger records, 360/360 retained outputs and
+  360/360 retained probe logs checked; no artifact problems; digest recomputation
+  matched; literal registered rule `INCONCLUSIVE`, corrected rule `PASS`.
 - Protocol preflight hashes: PASS.
 - `git status --porcelain upstream/`: empty before and after.
 - Sanitized per-call ledger:
   [`rca160_windows_cross_host_band0_2026-10-19.json`](rca160_windows_cross_host_band0_2026-10-19.json).
+- Correction evidence:
+  [`rca160_windows_coverage_correction_2026-10-19.json`](rca160_windows_coverage_correction_2026-10-19.json).

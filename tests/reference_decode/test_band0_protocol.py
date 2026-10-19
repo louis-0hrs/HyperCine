@@ -8,12 +8,15 @@ import unittest
 import band0_1080 as protocol
 
 
-def arm(corrupt=0, waits=0, matched=None, entries=None, failures=0, timeouts=0):
+def arm(corrupt=0, waits=0, matched=None, entries=None, failures=0, timeouts=0,
+        publish_counts=None):
     calls = 120
     if matched is None:
         matched = waits
     if entries is None:
         entries = calls * protocol.EXPECTED_GATE_ENTRIES
+    if publish_counts is None:
+        publish_counts = {'11': calls}
     return {
         'calls': calls,
         'valid_outputs': calls - failures,
@@ -28,7 +31,12 @@ def arm(corrupt=0, waits=0, matched=None, entries=None, failures=0, timeouts=0):
         'real_waits': waits,
         'gate_timeouts': timeouts,
         'waits_matched': matched,
-        'publishes_band0': calls * protocol.EXPECTED_PUBLISH_BAND0,
+        'publishes_band0': sum(int(k) * v for k, v in publish_counts.items()),
+        'publish_calls_band0': sum(int(k) * v for k, v in publish_counts.items()),
+        'publish_call_counts': publish_counts,
+        'transition_counts': publish_counts,
+        'transition_pointer_counts': {'9': calls},
+        'entropy_transitions_band0': calls * 3,
     }
 
 
@@ -87,6 +95,15 @@ class CoverageTest(unittest.TestCase):
         coverage = protocol.producer_coverage(self.events)
         self.assertEqual(len(coverage['premature_entries']), 1)
 
+    def test_publication_calls_and_transitions_are_counted_separately(self):
+        noop = protocol.parse_record(
+            'BAND_PUBLISH wptr=0000000000000100 band=0 old_valid=0000000f '
+            'old_started=0000000f new_valid=0000000f new_started=0000000f tid=2 t_ns=160')
+        coverage = protocol.producer_coverage(self.events + [noop])
+        self.assertEqual(coverage['publish_calls_band0'], 2)
+        self.assertEqual(coverage['transitions_band0'], 1)
+        self.assertEqual(coverage['transition_pointers_band0'], 1)
+
 
 class VerdictTest(unittest.TestCase):
     def test_registered_pass(self):
@@ -127,6 +144,42 @@ class VerdictTest(unittest.TestCase):
         verdict, reasons = protocol.classify(arms(B=arm(waits=60, failures=1)))
         self.assertEqual(verdict, 'INCONCLUSIVE')
         self.assertTrue(any('decode failure' in reason for reason in reasons))
+
+    def test_missing_probe_log_in_one_call_is_inconclusive(self):
+        records = [{'gate': {'gate_entries': protocol.EXPECTED_GATE_ENTRIES}}
+                   for _ in range(119)]
+        records.append({'gate': {'gate_entries': 0}})
+        verdict, reasons = protocol.classify(arms(), records)
+        self.assertEqual(verdict, 'INCONCLUSIVE')
+        self.assertTrue(any('missing in at least one call' in reason
+                            for reason in reasons))
+
+    def test_per_call_entry_shortfall_is_inconclusive(self):
+        records = [{'gate': {'gate_entries': protocol.EXPECTED_GATE_ENTRIES}}
+                   for _ in range(119)]
+        records.append({'gate': {'gate_entries': 8}})
+        verdict, reasons = protocol.classify(arms(), records)
+        self.assertEqual(verdict, 'INCONCLUSIVE')
+        self.assertTrue(any('per-call gate-entry coverage' in reason
+                            for reason in reasons))
+
+    def test_registered_six_publication_rule_is_inconclusive(self):
+        observed = {'9': 40, '10': 40, '11': 30, '12': 10}
+        verdict, reasons = protocol.classify_registered_publication_rule(
+            arms(O=arm(corrupt=4, publish_counts=observed),
+                 B=arm(waits=60, publish_counts=observed),
+                 AP=arm(corrupt=1, publish_counts=observed)))
+        self.assertEqual(verdict, 'INCONCLUSIVE')
+        self.assertEqual(len(reasons), 3)
+        self.assertTrue(all('expected 6' in reason for reason in reasons))
+
+    def test_corrected_rule_ignores_publication_count(self):
+        observed = {'9': 40, '10': 40, '11': 30, '12': 10}
+        verdict, reasons = protocol.classify(
+            arms(O=arm(corrupt=4, publish_counts=observed),
+                 B=arm(waits=60, publish_counts=observed),
+                 AP=arm(corrupt=1, publish_counts=observed)))
+        self.assertEqual(verdict, 'CROSS_HOST_CONFIRMATION_PASS', reasons)
 
 
 if __name__ == '__main__':
