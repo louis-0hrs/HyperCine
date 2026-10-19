@@ -18,6 +18,7 @@ Run it before citing this document.
 | Root mechanism (vacuous readiness predicate) | `SOURCE_CONFIRMED` — this pass |
 | Per-topology required bits | `SOURCE_DERIVED`, and **insufficient** as specified — see §4 |
 | Output-boundary readiness | `HOLLOW` — the always-on gate checks only for NULL; the correct gate is compiled out |
+| Thread-level access pattern | `SANITIZER_CONFIRMED` — pre-existing TSan logs show the unlocked reads and concurrent double reconstruction |
 | Production-safe contract | `NOT_DESIGNED_YET` — requirements in §6 |
 | Portable patch | `NONE`. The published spin gate is not a candidate |
 
@@ -176,6 +177,69 @@ before or after the consumer's first read of that plane. That window — not a
 deterministic switch — is what the 25/120 vs 30/120 (Linux) and 4/120 vs 1/120
 (Windows) counts measure, and it is why some calls with a premature entry still
 produced correct output.
+
+### 3.5 Sanitizer evidence: the unlocked reads and a concurrent double reconstruction
+
+Everything above was read out of the source. Three pre-existing ThreadSanitizer
+logs on this host then confirm the access pattern directly. They were produced
+on 2026-10-18 from a different worktree, so before using them the tool checks
+that every frame they cite resolves to the same line in this tree. It does: the
+cited `upstream/Codec` files are byte-identical
+(`decoder.c` `acd477cb…`, `entropy_threading.c` `32033d23…`, `spatial.c`
+`97555d73…`), so the logs are evidence about these sources.
+
+| Log | `cpu_max` | Race blocks | Same address | Both sides in the inverse | Flag-writer blocks |
+| --- | --- | --- | --- | --- | --- |
+| control | 1 | **0** | – | – | – |
+| run A | default | **36** | 35 | 33 | 2 |
+| run B | default | **32** | 32 | 30 | 1 |
+
+The control and run B decode the *same* sample (286 596 B, `10c7e2b5…`), so the
+contrast is not a fixture difference: one worker, no races; four workers, 32.
+
+**The flag pair is confirmed as a data race, with the lock on exactly one side.**
+Every flag-writer block shows the writer holding `entropy_worker_new.lock`
+(`mutexes: write M0` at `decoder.c:24098`) while the other side reads without
+any lock, at precisely the two places predicted from source:
+
+* `decoder.c:13039` — `if ((lowpass->band_valid_flags & BAND_VALID_MASK(0)) == 0)`,
+  the "has this wavelet already been reconstructed" test; no `Lock()` exists
+  anywhere in that function.
+* `entropy_threading.c:285` — the post-`Unlock()` re-check of `BANDS_ALL_VALID`
+  described in §3.4.
+
+So the pair is read torn, in the shipped build, on real decodes. That is no
+longer an inference.
+
+**A second, unanticipated finding: the same reconstruction runs twice at once.**
+In 33 and 30 blocks respectively, *both* stacks pass through
+`ReconstructWaveletBand` at `decoder.c:13107`, i.e.
+`TransformInverseSpatialQuantLowpass`. Two workers are inside the inverse
+transform for overlapping memory simultaneously. The two sides reach it through
+different `scale` branches — `wavelet.c:5756` (`scale > 1`,
+`InvertSpatialQuantDescale16s`) versus `wavelet.c:5778` (`scale == 0`,
+`InvertSpatialQuant16s`) — writing and reading the same heap block.
+
+That is consistent with the indexing in §3.2: the lowpass branch writes
+`wavelet[index-1]->band[0]` while reading `wavelet[index]->band[0]`, so the
+entry at `index` and the entry at `index+1` share one allocation, and their
+`prescale` values are indexed by different wavelet numbers. Two levels of the
+pyramid therefore touch the same plane. I did not predict this from source and
+am not claiming which index pair each report corresponds to — the sanitizer
+does not record it. What the logs establish is that it happens.
+
+**What these logs do not show.** All of them decoded cleanly and produced
+byte-identical output across repeats; the guard band was intact. They used
+185 648-byte and 286 596-byte samples, **not** the pinned 900 396-byte packet,
+and no gate patch. With eight decodes in total they also have little power
+against a defect seen in roughly one call in five, so this is not evidence
+against the causal link — it is simply a different question. The sanitizer
+confirms the mechanism; the A/B/A′ ledgers measure the symptom. Neither
+substitutes for the other.
+
+The reduction is reproducible:
+`tools/analyze_rca195_tsan_log.py --log <log>`, which emits no paths, addresses
+or thread ids.
 
 ## 4. Required-bit matrix — the matrix exists, and it is not enough
 

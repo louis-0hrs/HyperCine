@@ -2,7 +2,7 @@
  "issue": 195,
  "milestone": 1,
  "verdict": "DESIGN_ONLY",
- "repo_head": "be470f79b5042d95f6f3f6e704c4d0e5aced5844",
+ "repo_head": "b8cc3206f9ecae4c31b612b1cb8d3049d05de33c",
  "sources": {
   "upstream/Codec/decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
   "upstream/Codec/image.h": "93ed2e580030274dda46257eaf08ac90717f2a526ccc11fb5b471dcdb3bf1d52",

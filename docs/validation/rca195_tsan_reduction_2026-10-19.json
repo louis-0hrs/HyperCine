@@ -1,0 +1,311 @@
+{
+ "issue": 195,
+ "milestone": 1,
+ "evidence": "pre-existing ThreadSanitizer logs, reduced by tools/analyze_rca195_tsan_log.py",
+ "arms": [
+  {
+   "log_basename": "tsan_cpmax1.err",
+   "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "log_bytes": 0,
+   "clean": true,
+   "reduction": {
+    "race_blocks": 0,
+    "same_address_blocks": 0,
+    "both_sides_in_inverse_reconstruct": 0,
+    "flag_writer_blocks": 0,
+    "flag_writer_under_mutex": null,
+    "flag_reader_under_mutex": null,
+    "flag_reader_sites": [],
+    "distinct_site_pairs": 0,
+    "site_pairs": []
+   },
+   "cited_lines_resolved_against_this_tree": {},
+   "cited_lines_missing": [],
+   "tree_source_sha256": {
+    "decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+    "entropy_threading.c": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+    "spatial.c": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+    "wavelet.c": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd"
+   },
+   "arm": "control",
+   "note": "cpu_max=1, same sample as runB"
+  },
+  {
+   "log_basename": "tsan_frame_0000.err",
+   "log_sha256": "77e1f0cf560d4418888f4f215076acfc7b425f5a8b11b7d928dd65c55d793222",
+   "log_bytes": 276826,
+   "clean": false,
+   "reduction": {
+    "race_blocks": 36,
+    "same_address_blocks": 35,
+    "both_sides_in_inverse_reconstruct": 33,
+    "flag_writer_blocks": 2,
+    "flag_writer_under_mutex": true,
+    "flag_reader_under_mutex": false,
+    "flag_reader_sites": [
+     "decoder.c:13039",
+     "entropy_threading.c:285"
+    ],
+    "distinct_site_pairs": 32,
+    "site_pairs": [
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 2
+     },
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 2
+     },
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:810",
+      "count": 2
+     },
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:833",
+      "count": 2
+     },
+     {
+      "a": "decoder.c:24098",
+      "b": "decoder.c:13039",
+      "count": 1
+     },
+     {
+      "a": "entropy_threading.c:264",
+      "b": "decoder.c:23322",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22529",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22530",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22531",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22529",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22530",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22531",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 1
+     }
+    ]
+   },
+   "cited_lines_resolved_against_this_tree": {
+    "InvertHorizontalStrip16s.c:680": "_mm_store_si128(outptr++, out_epi16);",
+    "InvertHorizontalStrip16s.c:778": "_mm_store_si128(outptr++, out_epi16);",
+    "InvertHorizontalStrip16s.c:810": "*(colptr++) = SATURATE(even);",
+    "InvertHorizontalStrip16s.c:833": "*(colptr++) = SATURATE(even);",
+    "InvertHorizontalStrip16s.c:847": "*(colptr++) = SATURATE(odd);",
+    "InvertHorizontalStrip16s.c:869": "*(colptr++) = SATURATE(even);",
+    "decoder.c:1159": "transform = (TRANSFORM *)Alloc(allocator, sizeof(TRANSFORM));",
+    "decoder.c:1625": "AllocDecoderGroup(decoder);",
+    "decoder.c:1716": "CreateLock(&decoder->entropy_worker_new.lock);",
+    "decoder.c:1719": "ThreadPoolCreate(&decoder->entropy_worker_new.pool,",
+    "decoder.c:10839": "DecodeEntropyInit(decoder);",
+    "decoder.c:11091": "result = DecodeSampleIntraFrame(local_decoder, input, local_output, local_pitch, colorpara",
+    "decoder.c:11638": "error = UpdateCodecState(decoder, input, codec, tag, value);",
+    "decoder.c:12136": "ReconstructWaveletBand(decoder, transform, codec->channel, wavelet, index,",
+    "decoder.c:13013": "lowpass = GetWaveletThreadSafe(decoder, transform, lowpass_index,",
+    "decoder.c:13039": "if ((lowpass->band_valid_flags & BAND_VALID_MASK(0)) == 0)",
+    "decoder.c:13107": "TransformInverseSpatialQuantLowpass(wavelet, lowpass, scratch, prescale, inverse_prescale)",
+    "decoder.c:13112": "UpdateWaveletBandValidFlags(decoder, lowpass, 0);",
+    "decoder.c:23317": "wavelet = ReallocWaveletEx(decoder->allocator, wavelet, width, height, level, type);",
+    "decoder.c:23322": "transform->wavelet[index] = wavelet;",
+    "decoder.c:23464": "result = DecodeSampleSubband(decoder, input, subband);",
+    "decoder.c:24073": "void UpdateWaveletBandValidFlags(DECODER *decoder, IMAGE *wavelet, int band)",
+    "decoder.c:24098": "wavelet->band_valid_flags |= BAND_VALID_MASK(band);",
+    "entropy_threading.c:224": "UpdateWaveletBandValidFlags(decoder, wavelet, band_index);",
+    "entropy_threading.c:264": "wavelet = transform->wavelet[index];",
+    "entropy_threading.c:285": "if(wavelet && BANDS_ALL_VALID(wavelet))",
+    "entropy_threading.c:302": "ReconstructWaveletBand(decoder, transform, channel, wavelet, index, precision,",
+    "entropy_threading.c:362": "DecodeEntropy(decoder, work_index, thread_index, &fsm, &initFsm);",
+    "image.c:169": "image->memory = (PIXEL *)AllocAligned(allocator, image_size, alignment);",
+    "spatial.c:22062": "InvertHorizontalStrip16s(lowpass, lowpass_pitch,",
+    "spatial.c:22290": "InvertHorizontalStrip16s(lowpass, lowpass_pitch,",
+    "spatial.c:22407": "InvertHorizontalStrip16s(lowpass, lowpass_pitch,",
+    "spatial.c:22529": "even += 11 * lowlow[column + 0 * lowlow_pitch];",
+    "spatial.c:22530": "even -=  4 * lowlow[column + 1 * lowlow_pitch];",
+    "spatial.c:22531": "even +=  1 * lowlow[column + 2 * lowlow_pitch];",
+    "spatial.c:22694": "low2_epi16 = _mm_loadu_si128(lowlow_ptr); // get 8 lowpass coefficients",
+    "spatial.c:23079": "even += 5 * lowlow[column + 0 * lowlow_pitch];",
+    "spatial.c:23080": "even += 4 * lowlow[column - 1 * lowlow_pitch];",
+    "spatial.c:23081": "even -= 1 * lowlow[column - 2 * lowlow_pitch];",
+    "wavelet.c:478": "AllocImage(allocator, wavelet, image_width, image_height);",
+    "wavelet.c:844": "wavelet = (IMAGE *)Alloc(allocator, sizeof(IMAGE));",
+    "wavelet.c:853": "AllocWaveletStack(allocator, wavelet, width, height, level, type);",
+    "wavelet.c:915": "wavelet = CreateWaveletEx(allocator, width, height, level, type);",
+    "wavelet.c:5756": "InvertSpatialQuantDescale16s((PIXEL *)input->band[0], input->pitch,",
+    "wavelet.c:5778": "InvertSpatialQuant16s((PIXEL *)input->band[0], input->pitch,   (PIXEL *)input->band[1], in"
+   },
+   "cited_lines_missing": [],
+   "tree_source_sha256": {
+    "decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+    "entropy_threading.c": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+    "spatial.c": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+    "wavelet.c": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd"
+   },
+   "arm": "runA",
+   "note": "default worker count, 185648 B sample"
+  },
+  {
+   "log_basename": "tsan_frame_0004.err",
+   "log_sha256": "3425c002b98726268eb7502f5bbf50a2997b4935f114136fc15ad7618e941e09",
+   "log_bytes": 246104,
+   "clean": false,
+   "reduction": {
+    "race_blocks": 32,
+    "same_address_blocks": 32,
+    "both_sides_in_inverse_reconstruct": 30,
+    "flag_writer_blocks": 1,
+    "flag_writer_under_mutex": true,
+    "flag_reader_under_mutex": false,
+    "flag_reader_sites": [
+     "decoder.c:13039"
+    ],
+    "distinct_site_pairs": 28,
+    "site_pairs": [
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 2
+     },
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 2
+     },
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:810",
+      "count": 2
+     },
+     {
+      "a": "spatial.c:22694",
+      "b": "InvertHorizontalStrip16s.c:833",
+      "count": 2
+     },
+     {
+      "a": "decoder.c:24098",
+      "b": "decoder.c:13039",
+      "count": 1
+     },
+     {
+      "a": "entropy_threading.c:264",
+      "b": "decoder.c:23322",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22529",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22530",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22531",
+      "b": "InvertHorizontalStrip16s.c:680",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22529",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22530",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 1
+     },
+     {
+      "a": "spatial.c:22531",
+      "b": "InvertHorizontalStrip16s.c:778",
+      "count": 1
+     }
+    ]
+   },
+   "cited_lines_resolved_against_this_tree": {
+    "InvertHorizontalStrip16s.c:680": "_mm_store_si128(outptr++, out_epi16);",
+    "InvertHorizontalStrip16s.c:778": "_mm_store_si128(outptr++, out_epi16);",
+    "InvertHorizontalStrip16s.c:810": "*(colptr++) = SATURATE(even);",
+    "InvertHorizontalStrip16s.c:833": "*(colptr++) = SATURATE(even);",
+    "InvertHorizontalStrip16s.c:847": "*(colptr++) = SATURATE(odd);",
+    "decoder.c:1159": "transform = (TRANSFORM *)Alloc(allocator, sizeof(TRANSFORM));",
+    "decoder.c:1625": "AllocDecoderGroup(decoder);",
+    "decoder.c:1716": "CreateLock(&decoder->entropy_worker_new.lock);",
+    "decoder.c:1719": "ThreadPoolCreate(&decoder->entropy_worker_new.pool,",
+    "decoder.c:10839": "DecodeEntropyInit(decoder);",
+    "decoder.c:11091": "result = DecodeSampleIntraFrame(local_decoder, input, local_output, local_pitch, colorpara",
+    "decoder.c:11638": "error = UpdateCodecState(decoder, input, codec, tag, value);",
+    "decoder.c:12136": "ReconstructWaveletBand(decoder, transform, codec->channel, wavelet, index,",
+    "decoder.c:13013": "lowpass = GetWaveletThreadSafe(decoder, transform, lowpass_index,",
+    "decoder.c:13039": "if ((lowpass->band_valid_flags & BAND_VALID_MASK(0)) == 0)",
+    "decoder.c:13107": "TransformInverseSpatialQuantLowpass(wavelet, lowpass, scratch, prescale, inverse_prescale)",
+    "decoder.c:23317": "wavelet = ReallocWaveletEx(decoder->allocator, wavelet, width, height, level, type);",
+    "decoder.c:23322": "transform->wavelet[index] = wavelet;",
+    "decoder.c:23464": "result = DecodeSampleSubband(decoder, input, subband);",
+    "decoder.c:24073": "void UpdateWaveletBandValidFlags(DECODER *decoder, IMAGE *wavelet, int band)",
+    "decoder.c:24098": "wavelet->band_valid_flags |= BAND_VALID_MASK(band);",
+    "entropy_threading.c:224": "UpdateWaveletBandValidFlags(decoder, wavelet, band_index);",
+    "entropy_threading.c:264": "wavelet = transform->wavelet[index];",
+    "entropy_threading.c:302": "ReconstructWaveletBand(decoder, transform, channel, wavelet, index, precision,",
+    "entropy_threading.c:362": "DecodeEntropy(decoder, work_index, thread_index, &fsm, &initFsm);",
+    "image.c:169": "image->memory = (PIXEL *)AllocAligned(allocator, image_size, alignment);",
+    "spatial.c:22062": "InvertHorizontalStrip16s(lowpass, lowpass_pitch,",
+    "spatial.c:22290": "InvertHorizontalStrip16s(lowpass, lowpass_pitch,",
+    "spatial.c:22407": "InvertHorizontalStrip16s(lowpass, lowpass_pitch,",
+    "spatial.c:22529": "even += 11 * lowlow[column + 0 * lowlow_pitch];",
+    "spatial.c:22530": "even -=  4 * lowlow[column + 1 * lowlow_pitch];",
+    "spatial.c:22531": "even +=  1 * lowlow[column + 2 * lowlow_pitch];",
+    "spatial.c:22694": "low2_epi16 = _mm_loadu_si128(lowlow_ptr); // get 8 lowpass coefficients",
+    "spatial.c:23079": "even += 5 * lowlow[column + 0 * lowlow_pitch];",
+    "spatial.c:23080": "even += 4 * lowlow[column - 1 * lowlow_pitch];",
+    "spatial.c:23081": "even -= 1 * lowlow[column - 2 * lowlow_pitch];",
+    "wavelet.c:478": "AllocImage(allocator, wavelet, image_width, image_height);",
+    "wavelet.c:844": "wavelet = (IMAGE *)Alloc(allocator, sizeof(IMAGE));",
+    "wavelet.c:853": "AllocWaveletStack(allocator, wavelet, width, height, level, type);",
+    "wavelet.c:915": "wavelet = CreateWaveletEx(allocator, width, height, level, type);",
+    "wavelet.c:5756": "InvertSpatialQuantDescale16s((PIXEL *)input->band[0], input->pitch,",
+    "wavelet.c:5778": "InvertSpatialQuant16s((PIXEL *)input->band[0], input->pitch,   (PIXEL *)input->band[1], in"
+   },
+   "cited_lines_missing": [],
+   "tree_source_sha256": {
+    "decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+    "entropy_threading.c": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+    "spatial.c": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+    "wavelet.c": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd"
+   },
+   "arm": "runB",
+   "note": "default worker count, same sample as control"
+  }
+ ],
+ "caveats": [
+  "sanitizer logs predate this pass and were produced from a different worktree; the cited upstream/Codec files are byte-identical, which is why they apply",
+  "none of these runs used the pinned 900396-byte packet and none applied a gate patch",
+  "all arms produced byte-identical output across repeats, so these logs confirm the access pattern, not the corruption",
+  "eight decodes in total: too few to test a defect seen in roughly one call in five",
+  "the sanitizer does not record which wavelet index each racing pair belongs to"
+ ]
+}

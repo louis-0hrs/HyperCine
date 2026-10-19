@@ -23,7 +23,11 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME rca195_band0_contract_selftest COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/verify_rca195_band0_contract.py"
         --self-test --repo "${CMAKE_SOURCE_DIR}")
+    add_test(NAME rca195_tsan_reduction_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/analyze_rca195_tsan_log.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
     set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
+        rca195_tsan_reduction_selftest
         PROPERTIES TIMEOUT 300
         PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS")
 endif()
