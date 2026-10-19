@@ -6,6 +6,10 @@ on:
     tags: [ "*" ]
   pull_request:
 
+concurrency:
+  group: cpu-reference-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cpu-only-windows-msvc:
     name: Windows MSVC (CPU-Only Build & Tests)
