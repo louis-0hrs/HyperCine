@@ -1,0 +1,99 @@
+{
+  "schema": "hypercine.gop2.windows_readonly_review/1",
+  "license": "MIT OR Apache-2.0",
+  "date": "2026-10-19",
+  "issue": 189,
+  "reference_parent": "4bba30eeba106bdc9e96042d02694c026351a624",
+  "representation_fix": "4a9f3f116f1d9202c63b997a971dc5b7199d0e7c",
+  "candidate_sha": "7ed4a82ed97598454c2680bd264dedf259e6e7dc",
+  "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+  "geometries": [
+    {
+      "geometry": "1920x1080",
+      "phase_a_artifacts_rehashed": 82,
+      "phase_a_comparisons_reverified": 112,
+      "phase_b_original_stages_rehashed": 57,
+      "phase_b_comparisons_reverified": 90,
+      "phase_b_direct_byte_comparisons": 90,
+      "mismatched": 0,
+      "input_packet": {
+        "byte_length": 897552,
+        "sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2"
+      },
+      "public_private_index_identity": "PASS",
+      "toolchain_identity": "PASS"
+    },
+    {
+      "geometry": "3840x2160",
+      "phase_a_artifacts_rehashed": 82,
+      "phase_a_comparisons_reverified": 112,
+      "phase_b_original_stages_rehashed": 57,
+      "phase_b_comparisons_reverified": 90,
+      "phase_b_direct_byte_comparisons": 90,
+      "mismatched": 0,
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "public_private_index_identity": "PASS",
+      "toolchain_identity": "PASS"
+    }
+  ],
+  "archived_tools_rehashed": 22,
+  "observer_patch_reproduction": "PASS",
+  "corpus_modified": false,
+  "encoder_executed": false,
+  "native_candidate_replayed": false,
+  "native_observer_replayed": false,
+  "review_scope": "Two pinned original SDK packets and named stages only",
+  "promotion_gate": "OWNER_2_16_DECISION_REQUIRED",
+  "verifier_integration": "PR_196_REQUIRED_BEFORE_PR_190_ACCEPTANCE",
+  "snapshot_readback": {
+    "schema": "hypercine.gop2.review_snapshot/1",
+    "files": 2144,
+    "byte_length": 1377743781,
+    "sorted_file_inventory_sha256": "9be8c2f1e0a64c5c3e28a111bffbe4df1dfd5c03c83cad10f934b5e4c5f0b2c0",
+    "source_open_mode": "rb",
+    "destination_readback": "SHA256_AND_LENGTH_PASS",
+    "private_corpus_modified": false
+  },
+  "validator_sources": {
+    "gop2_reference_inventory.py": {
+      "byte_length": 23926,
+      "sha256": "a05c8c451f1a0d9552469ba0af26c37507ddffadb6acfdb31c3f7a18ac823fec"
+    },
+    "gop2_stage_contract.py": {
+      "byte_length": 19765,
+      "sha256": "4f30205281c7e7cb8b279220fd5b0d12437ee00f3c91702e45fa9c2564a538a8"
+    },
+    "prepare_gop2_stage_sdk.py": {
+      "byte_length": 5862,
+      "sha256": "c72edd48048d4d62b1ea41373eb758f4a20caee027bfd4b8b9b086ce20d9946a"
+    }
+  },
+  "native_windows_cpu_ctest": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 26.51
+  },
+  "sdk_free_gop2_ctest": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "optimized_python_methods": {
+    "stage_contract": 14,
+    "reference_integrity": 20,
+    "ci_inventory": 8
+  },
+  "exact_parent_representation_rejections": {
+    "methods": 3,
+    "expected_failures": 15,
+    "errors": 0
+  },
+  "full_sdk_free_external_decode_rerun": false,
+  "external_decode_limitation": "FFmpeg and ffprobe unavailable",
+  "scoped_reference_review": "PINNED_GOP2_1080_4K_REFERENCE_GATE_ACCEPTED",
+  "scope_condition": "Reviewed #196 head includes representation checks; integrate #196 before accepting #190 verifier"
+}
