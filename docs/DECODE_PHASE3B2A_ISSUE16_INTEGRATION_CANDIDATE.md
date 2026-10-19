@@ -125,3 +125,59 @@ ctest --test-dir build-candidate -C Release --output-on-failure
 
 Raw Compute Sanitizer logs stay local; only the bounded summary is recorded
 here.
+
+## 7. Failure injection and host ASan at `7ed4a82`
+
+Date: 2026-10-19. Code SHA under test:
+`7ed4a82ed97598454c2680bd264dedf259e6e7dc` (`40bd410` fix, `7ed4a82` tests).
+`upstream/` is unchanged.
+
+The fail-closed fix now stores every checked submission error exactly as
+returned. The blocking and FIELDPLUS paths no longer re-read
+`cudaGetLastError()` after a failed direct call, and
+`LaunchYuv422ToBgra8()` returns its launch result through an optional
+out-parameter instead of only a boolean. A per-slot `TestCudaSubmitSite`
+failpoint allows the negative paths to fail deterministically on the host;
+it is a no-op and an exact pass-through unless a test installs a hook.
+
+| Check | Result |
+| --- | --- |
+| Native CUDA CTest at `7ed4a82` | **45/45 passed**, 0 failed, 757.41 s |
+| CPU-only CTest | **7/7 passed**, 4.80 s |
+| Failure-injection test, native | 18 negative cases PASS, exit 0 |
+| Host ASan `test_decode_phase3b2a_failclosed` | 0 ASan reports, exit 0 |
+| Host ASan `test_decode_phase3b2a_reconstruction --matrix-range` | 0 ASan reports, exit 0, 8 cases |
+| Host ASan `test_decode_phase3b2a_api` | 0 ASan reports, exit 0 |
+| Host ASan `test_decode_phase3b2a_reconstruction` default | 1 report, known upstream-oracle read (see below) |
+
+Every negative case asserts that `QueueDecodeParsed` returns ticket `0`,
+`PollDecode`/`WaitForDecode` reject the zero ticket, the first submission
+error is preserved, and the same slot decodes successfully afterwards.
+
+- Inverse DAG: failed stream wait (guarded and unguarded), event record,
+  launch result, color launch and `ev_ready` record.
+- Blocking modes: color start/stop event, color launch, frame-error copy
+  and ready event. These are the attribution regression cases: the injected
+  value must survive verbatim.
+- Progressive FIELDPLUS: color start/stop event, color launch, frame-error
+  copy and ready event.
+- Poll/Wait: a failure injected on an already published ticket must yield
+  `Failed`/`false` even though the reused `ev_ready` completed for the
+  previous frame.
+- Inert failpoint: BGRA FNV-1a hash is identical with and without a hook.
+
+Host ASan used `/fsanitize=address` for both the C++ and CUDA host passes
+with the toolset's `clang_rt.asan_dynamic-x86_64.dll`. The default
+reconstruction mode stops `==ABORTING` in
+`upstream/Codec/temporal.c:9606` (`InvertTemporalQuant16s`), reading 16
+bytes just past a 2,073,680-byte allocation from
+`CaptureUpstreamFieldPlusBands` before any production decode. This is the
+same size-dependent upstream read-ahead already recorded in
+[UPSTREAM.md](UPSTREAM.md); it is not a HyperCine defect and is not
+introduced by this change. The 64x64 matrix/range, API and failpoint
+targets stay inside their allocations and report nothing.
+
+Not run at `7ed4a82`: the Compute Sanitizer matrix, Linux A2 acceptance,
+and the external GOP-2 1080p/4K golden parity gate.
+
+Raw logs: `benchmarks/results/decode_phase3b2a_issue16_failclosed_windows_20261019.json`.

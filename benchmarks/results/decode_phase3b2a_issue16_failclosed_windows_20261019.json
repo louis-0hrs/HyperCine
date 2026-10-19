@@ -1,0 +1,75 @@
+{
+  "issue": 16,
+  "pr": 187,
+  "title": "Fail-closed CUDA submission failure injection and Windows host ASan",
+  "outcome": "FAIL_CLOSED_NEGATIVE_PATHS_PASS; host ASan clean on the changed submission and failure paths; the known upstream-oracle read reproduces unchanged in default reconstruction mode",
+  "license": "MIT OR Apache-2.0",
+  "seed": "0x1337BEEF",
+  "source": {
+    "branch": "integration/issue16-pr52-failclosed-20261018",
+    "parent_sha": "66dc0b9c984b7c2fa58e6ad4dde692d61add0b40",
+    "fix_sha": "40bd410",
+    "code_sha_under_test": "7ed4a82ed97598454c2680bd264dedf259e6e7dc",
+    "upstream_modified": false
+  },
+  "host": {
+    "os": "Windows 11 Home 25H2 build 26200 (WDDM)",
+    "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU 16,376 MiB",
+    "driver_version": "610.62",
+    "cuda_toolkit": "12.8.61",
+    "msvc": "19.44.35229.0 (toolset 14.44.35207)",
+    "cmake": "3.31.6",
+    "host_asan_runtime": "clang_rt.asan_dynamic-x86_64.dll from toolset 14.44.35207"
+  },
+  "native_build": {
+    "configure": "cmake -B build-candidate -S . -G \"Visual Studio 17 2022\" -A x64 -DHYPERCINE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=89 -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_BUILD_BENCHMARKS=ON",
+    "cuda_ctest": {"tests": 45, "passed": 45, "failed": 0, "skipped": 0, "seconds": 757.41},
+    "cpu_ctest": {"tests": 7, "passed": 7, "failed": 0, "seconds": 4.80},
+    "failclosed_test": {"exit": 0, "negative_cases": 18, "success_path_parity": true}
+  },
+  "failure_injection": {
+    "seam": "TestCudaSubmitSite hook installed per slot; no-op and exact pass-through when unset",
+    "assertions_per_case": [
+      "QueueDecodeParsed returns ticket 0 (no publishable frame)",
+      "the first submission error is preserved exactly",
+      "PollDecode(0) is Invalid and WaitForDecode(0) is false",
+      "the same slot decodes successfully after the hook is removed"
+    ],
+    "cases": [
+      "dag_stream_wait_failure",
+      "dag_stream_wait_failure_guarded",
+      "dag_event_record_failure",
+      "dag_launch_result_failure",
+      "dag_color_launch_failure",
+      "dag_ready_event_failure",
+      "blocking_color_start_event_failure",
+      "blocking_color_launch_failure",
+      "blocking_color_stop_event_failure",
+      "blocking_frame_error_copy_failure",
+      "blocking_ready_event_failure",
+      "fieldplus_color_start_event_failure",
+      "fieldplus_color_launch_failure",
+      "fieldplus_color_stop_event_failure",
+      "fieldplus_frame_error_copy_failure",
+      "fieldplus_ready_event_failure",
+      "poll_stale_ev_ready",
+      "wait_stale_ev_ready"
+    ],
+    "attribution": "blocking and FIELDPLUS cases assert the exact injected error survives; the former cudaGetLastError() re-read is removed and the color launcher now returns its launch result to the caller"
+  },
+  "host_asan": {
+    "configure": "cmake -B build-asan -S . -G \"Visual Studio 17 2022\" -A x64 -DHYPERCINE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=89 -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_BUILD_BENCHMARKS=OFF -DCMAKE_CXX_FLAGS=\"/fsanitize=address /Zi /Dfseeko=_fseeki64\" -DCMAKE_CUDA_FLAGS=\"-Xcompiler=/fsanitize=address -Xcompiler=/Zi\" -DCMAKE_EXE_LINKER_FLAGS=\"/DEBUG\"",
+    "runs": [
+      {"target": "test_decode_phase3b2a_failclosed .", "exit": 0, "asan_reports": 0, "negative_cases": 18},
+      {"target": "test_decode_phase3b2a_reconstruction --matrix-range . <out.json>", "exit": 0, "asan_reports": 0, "cases": 8},
+      {"target": "test_decode_phase3b2a_api .", "exit": 0, "asan_reports": 0},
+      {"target": "test_decode_phase3b2a_reconstruction .", "exit": 3, "asan_reports": 1, "classification": "UPSTREAM_ORACLE_OUT_OF_ALLOCATION_READ", "site": "upstream/Codec/temporal.c:9606 InvertTemporalQuant16s", "note": "same finding documented in docs/UPSTREAM.md; triggered by CaptureUpstreamFieldPlusBands (test line 135) before any production decode"}
+    ],
+    "tool_limits": "MSVC ASan on Windows does not support detect_leaks or halt_on_error=0"
+  },
+  "not_run": [
+    "Compute Sanitizer matrix on 7ed4a82",
+    "Linux A2 acceptance on 7ed4a82",
+    "External real GOP-2 1080p/4K golden parity"
+  ]
+}
