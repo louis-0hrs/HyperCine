@@ -1,5 +1,8 @@
 # HyperCine Phase 2C: Pipelined GPU Entropy Encoder
 
+> [!NOTE]
+> **Historical Phase 2C research snapshot.** Performance, test status and terminology below are retained as measured at the time; they are not the current release gate. Current benchmark source: [Phase 3A.2c](../benchmarks/phase3a2c_release_candidate.json). Decoder reproducibility remains under separate [investigation #120](https://github.com/louis-0hrs/HyperCine/issues/120).
+
 Phase 2C combines **Phase 2A's multi-frame overlap throughput** with **Phase 2B's GPU entropy encoder and compressed coefficient D2H transfer** into a unified, production-oriented CUDA pipeline.
 
 The pristine [`upstream/`](../upstream) tree remains 100% untouched (`git status --porcelain upstream/` is empty). All measurements below come from [`benchmarks/results/phase2c.json`](../benchmarks/results/phase2c.json), produced by [`benchmarks/benchmark_phase2c.cpp`](../benchmarks/benchmark_phase2c.cpp) and verified by [`tests/test_phase2c.cpp`](../tests/test_phase2c.cpp).
