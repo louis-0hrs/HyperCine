@@ -16,11 +16,16 @@ import gop2_reference_inventory as base
 CANDIDATE = '7ed4a82ed97598454c2680bd264dedf259e6e7dc'
 
 
+def identical(left, right):
+    # JSON identities must not accept Python's False == 0 or 1920 == 1920.0.
+    return json.dumps(left, sort_keys=True) == json.dumps(right, sort_keys=True)
+
+
 def validate_observations(report):
     if report.get('schema') != 'hypercine.gop2.original_stages/1' or report.get('observer_version') != 2:
         raise ValueError('unknown original stage observer')
     w, h = report['width'], report['height']
-    if (w, h) not in ((1920, 1080), (3840, 2160)):
+    if type(w) is not int or type(h) is not int or (w, h) not in ((1920, 1080), (3840, 2160)):
         raise ValueError('unsupported geometry')
     required = {'neutrality_frame_checks': 12, 'neutrality_resident_checks': 198,
                 'alternate_original_path_checks': 18, 'fresh_decoders_per_format': 3,
@@ -29,7 +34,7 @@ def validate_observations(report):
                 'sample_reencoded': False, 'stability': 'PASS', 'instrumentation_neutrality': 'PASS',
                 'sdk_revision': base.SDK, 'stage_output_format': 'YU64',
                 'signed_path': 'alternate_original_SDK_spatial_signed_path_with_default_output_parity'}
-    if any(report.get(k) != v for k, v in required.items()):
+    if any(not identical(report.get(k), v) for k, v in required.items()):
         raise ValueError('original SDK neutrality/stability/control incomplete')
     bands = report['pre_inverse_bands']
     planes = report['signed_planes']
@@ -41,12 +46,20 @@ def validate_observations(report):
         raise ValueError('signed original matrix incomplete or duplicated')
     for stage in bands + planes:
         base.safe_id(stage['id'])
+        fields = ('width', 'height', 'pitch', 'channel')
+        if any(type(stage.get(k)) is not int for k in fields):
+            raise ValueError('stage numeric identity type invalid')
         if (stage['width'] <= 0 or stage['height'] <= 0 or stage['pitch'] != stage['width'] * 2 or
                 stage.get('original_pitch', stage['pitch']) < stage['pitch']):
             raise ValueError('stage dimensions/pitch invalid')
     for plane in planes:
+        if type(plane.get('frame_index')) is not int or plane['id'] != f'signed_frame{plane["frame_index"]}_ch{plane["channel"]}.i16le':
+            raise ValueError('signed-plane identity invalid')
         if (plane['width'], plane['height']) != (w if plane['channel'] == 0 else w//2, h):
             raise ValueError('signed-plane geometry invalid')
+    for band in bands:
+        if type(band.get('logical_band')) is not int or band['id'] != f'pre_ch{band["channel"]}_band{band["logical_band"]}.i16le':
+            raise ValueError('pre-inverse band identity invalid')
     return {s['id']: s for s in bands + planes}
 
 
@@ -62,12 +75,44 @@ def validate_comparison(report):
                     continue
                 expected.add((f, f'pre_ch{c}_band{b}.i16le'))
     records = report['comparisons']
+    if type(report.get('compared')) is not int or any(type(r.get('frame_index')) is not int for r in records):
+        raise ValueError('comparison identity types invalid')
     if (len(records) != 90 or report.get('compared') != 90 or
             {(r['frame_index'], r['reference_id']) for r in records} != expected):
         raise ValueError('new-stage comparison matrix incomplete or duplicated')
     if (report.get('pre_inverse_band_comparisons'), report.get('signed_plane_comparisons'),
             report.get('unique_pre_inverse_band_oracles')) != (84, 6, 51):
         raise ValueError('new-stage totals invalid')
+
+
+def validate_binding(index, observations, comparison, reference_manifest):
+    validate_observations(observations)
+    validate_comparison(comparison)
+    geometry = [observations['width'], observations['height']]
+    if (index.get('candidate_sha') != CANDIDATE or not identical(index.get('geometry'), geometry) or
+            not identical(reference_manifest.get('geometry'), geometry) or
+            not identical([comparison.get('width'), comparison.get('height')], geometry) or
+            not identical(index.get('observations'), observations)):
+        raise ValueError('stage evidence producer/geometry/observation binding differs')
+    if (type(index.get('mismatched')) is not int or type(comparison.get('mismatched')) is not int or
+            index['mismatched'] != comparison['mismatched']):
+        raise ValueError('stage report/index totals differ')
+    expected = validate_observations(observations)
+    for item in index['original_stages']:
+        if (not identical(item.get('stage'), expected.get(item['id'])) or
+                not identical(item.get('input_packet'), index['input_packet']) or
+                item.get('producer') != 'original_sdk_private_observer_overlay_v2' or item.get('status') != 'AVAILABLE'):
+            raise ValueError('original stage provenance differs')
+    report_items = {(r['frame_index'], r['reference_id']): r for r in comparison['comparisons']}
+    for item in index['comparisons']:
+        original = report_items.get((item['frame_index'], item['reference_id']))
+        if original is None or any(not identical(item.get(k), value) for k, value in original.items()):
+            raise ValueError('comparison report/index fields disagree')
+        if (type(item.get('equal')) is not bool or item['equal'] != (item['actual'] == item['expected']) or
+                item.get('actual_bytes') != item['actual']['byte_length'] or
+                item.get('expected_bytes') != item['expected']['byte_length'] or
+                item.get('width') != expected[item['reference_id']]['width']):
+            raise ValueError('stage comparison equality/storage claims inconsistent')
 
 
 def sha_sidecar(path, digest):
@@ -180,8 +225,10 @@ def verify(args):
     index = json.loads(path.read_text())
     if index.get('schema') != 'hypercine.gop2.phaseb_index/1':
         raise ValueError('unknown Phase-B index')
-    validate_observations(index['observations'])
-    validate_comparison(json.loads((args.candidate / 'stage_comparison.json').read_text()))
+    observations = json.loads((args.stages / 'stage_observations.json').read_text())
+    report = json.loads((args.candidate / 'stage_comparison.json').read_text())
+    reference_manifest = json.loads((args.reference / 'manifest.json').read_text())
+    validate_binding(index, observations, report, reference_manifest)
     if (base.digest(args.reference / 'original_sdk.cfhd') != index['input_packet'] or
             base.digest(args.reference / 'manifest.json') != index['phase_a_manifest'] or
             base.digest(args.stages / 'stage_observations.json') != index['observations_file'] or
@@ -215,6 +262,10 @@ def verify(args):
         mismatches += actual != expected
     if mismatches != index['mismatched']:
         raise ValueError('verified mismatch total invalid')
+    expected_result = 'PASS' if mismatches == 0 else 'MISMATCH'
+    expected_gate = 'OWNER_REVIEW_REQUIRED' if mismatches == 0 else 'BLOCKED'
+    if index.get('reference_result') != expected_result or index.get('release_gate') != expected_gate:
+        raise ValueError('stage gate claims inconsistent')
     return index
 
 

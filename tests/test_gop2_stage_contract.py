@@ -75,6 +75,48 @@ class StageContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             observer.prepare(ROOT, ROOT / 'upstream/private-observer-forbidden')
 
+    def binding_fixture(self):
+        index = copy.deepcopy(self.indices[0])
+        observations = copy.deepcopy(index['observations'])
+        report = {'schema': 'hypercine.gop2.stage_comparison/1', 'candidate_sha': contract.CANDIDATE,
+                  'width': 1920, 'height': 1080, 'compared': 90, 'mismatched': 0,
+                  'pre_inverse_band_comparisons': 84, 'signed_plane_comparisons': 6,
+                  'unique_pre_inverse_band_oracles': 51,
+                  'comparisons': [{k: v for k, v in item.items() if k not in ('actual', 'expected')}
+                                  for item in index['comparisons']]}
+        return index, observations, report, {'geometry': [1920, 1080]}
+
+    def test_actual_stage_binding_control(self):
+        contract.validate_binding(*self.binding_fixture())
+
+    def test_reject_relabelled_candidate_or_geometry(self):
+        for field, value in (('candidate_sha', '0'*40), ('geometry', [3840, 2160]),
+                             ('geometry', [1920.0, 1080.0])):
+            values = self.binding_fixture()
+            values[0][field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                contract.validate_binding(*values)
+
+    def test_reject_detached_observation_and_source_provenance(self):
+        values = self.binding_fixture()
+        values[0]['observations']['neutrality_frame_checks'] = 11
+        with self.assertRaises(ValueError):
+            contract.validate_binding(*values)
+        values = self.binding_fixture()
+        values[0]['original_stages'][0]['input_packet']['sha256'] = '0'*64
+        with self.assertRaises(ValueError):
+            contract.validate_binding(*values)
+
+    def test_reject_resealed_false_equal_or_report_disagreement(self):
+        values = self.binding_fixture()
+        values[0]['comparisons'][0]['actual']['sha256'] = '0'*64
+        with self.assertRaises(ValueError):
+            contract.validate_binding(*values)
+        values = self.binding_fixture()
+        values[2]['comparisons'][0]['equal'] = False
+        with self.assertRaises(ValueError):
+            contract.validate_binding(*values)
+
 
 if __name__ == '__main__':
     unittest.main()

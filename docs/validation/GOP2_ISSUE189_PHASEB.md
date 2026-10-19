@@ -170,8 +170,22 @@ still required, and **1** for absent/invalid/changed evidence. A successful
 verification never grants decoder promotion or release approval.
 
 Full isolated native CPU Release CTest after this change: **16/16 PASS, zero
-skips**, including seven additional negative/shape tests for the new stage
-contract. These schema tests do not substitute for the native stage run.
+skips**, including 11 negative/shape/binding methods for the new stage contract.
+The independent [#191](https://github.com/louis-0hrs/HyperCine/pull/191) verifier
+fix (`52cb246`) was reviewed and integrated into the #190 test branch. Its
+20 integrity methods pass natively on Windows; the new stage verifier also
+binds raw report/index semantics, candidate/geometry identities, original stage
+producer/input identity, actual equality and aggregate gate claims. Resealed
+contradictory metadata and bool/float identity aliases are rejected.
+Both GOP2 CTests are now mandatory in SDK-free standalone CI; the configured
+Windows SDK-free GOP2 subset passed **2/2**, and CI inventory helpers **8/8**.
+FFmpeg/ffprobe were unavailable, so this is not a rerun of the child's full
+macOS external-decode suite. Both actual Phase-A indices (224 stored comparisons)
+and Phase-B indices (180) were reverified with the hardened checkers without
+running a native decoder or regenerating any reference. The verifier revision
+and its source hashes are separately indexed by
+`gop2_issue189_verifier_revision_2026-10-19.json`; original tool archives remain
+unchanged. These schema tests do not substitute for the native stage run.
 No performance claim or unchanged full CUDA-suite rerun is made.
 
 ## Handoff

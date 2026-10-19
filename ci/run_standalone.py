@@ -12,7 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
-    'cpu_isa_selection',
+    'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
