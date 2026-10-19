@@ -117,6 +117,39 @@ class StageContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             contract.validate_binding(*values)
 
+    def test_reject_relabelled_original_representation(self):
+        for field, value in (('representation', 'unsigned_p10'), ('sdk_channel_order', ['Y', 'U', 'V']),
+                             ('orientation', 'bottom_up'), ('matrix', 'BT601'), ('range', 'full'),
+                             ('output_format_context', 'BGRA'), ('signed_path_if_applicable', 'default_unsigned')):
+            values = self.binding_fixture()
+            values[0]['original_stages'][0][field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                contract.validate_binding(*values)
+
+    def test_reject_relabelled_observation_representation(self):
+        for field, value in (('signed_plane_storage', 'unsigned_p10'),
+                             ('signed_plane_channel_order', ['Y', 'U', 'V']),
+                             ('signed_plane_orientation', 'bottom_up'),
+                             ('native_signed16_saturation_retained', False),
+                             ('matrix', 'BT601'), ('range', 'full')):
+            values = self.binding_fixture()
+            values[1][field] = value
+            values[0]['observations'] = copy.deepcopy(values[1])
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                contract.validate_binding(*values)
+
+    def test_reject_relabelled_capture_points(self):
+        for family in ('pre_inverse_bands', 'signed_planes'):
+            values = self.binding_fixture()
+            values[1][family][0]['capture_point'] = 'after_output_clipping'
+            values[0]['observations'] = copy.deepcopy(values[1])
+            identifier = values[1][family][0]['id']
+            for item in values[0]['original_stages']:
+                if item['id'] == identifier:
+                    item['stage']['capture_point'] = 'after_output_clipping'
+            with self.subTest(family=family), self.assertRaises(ValueError):
+                contract.validate_binding(*values)
+
 
 if __name__ == '__main__':
     unittest.main()

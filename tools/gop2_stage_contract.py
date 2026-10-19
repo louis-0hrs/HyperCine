@@ -33,6 +33,11 @@ def validate_observations(report):
                 'cpu_affinity_count': 1, 'allowed_cpus': 1, 'entropy_pool': 0, 'worker_pool': 1,
                 'sample_reencoded': False, 'stability': 'PASS', 'instrumentation_neutrality': 'PASS',
                 'sdk_revision': base.SDK, 'stage_output_format': 'YU64',
+                'matrix': 'BT709', 'range': 'video',
+                'signed_plane_channel_order': ['Y', 'V', 'U'],
+                'signed_plane_orientation': 'top_down',
+                'signed_plane_storage': 'signed_int16_little_endian_before_p10_clipping_and_YU64_packing',
+                'native_signed16_saturation_retained': True,
                 'signed_path': 'alternate_original_SDK_spatial_signed_path_with_default_output_parity'}
     if any(not identical(report.get(k), v) for k, v in required.items()):
         raise ValueError('original SDK neutrality/stability/control incomplete')
@@ -53,11 +58,15 @@ def validate_observations(report):
                 stage.get('original_pitch', stage['pitch']) < stage['pitch']):
             raise ValueError('stage dimensions/pitch invalid')
     for plane in planes:
+        if plane.get('capture_point') != 'TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210':
+            raise ValueError('signed-plane capture boundary invalid')
         if type(plane.get('frame_index')) is not int or plane['id'] != f'signed_frame{plane["frame_index"]}_ch{plane["channel"]}.i16le':
             raise ValueError('signed-plane identity invalid')
         if (plane['width'], plane['height']) != (w if plane['channel'] == 0 else w//2, h):
             raise ValueError('signed-plane geometry invalid')
     for band in bands:
+        if band.get('capture_point') != 'DecodeSampleSubband_after_entropy_before_inverse_submission':
+            raise ValueError('pre-inverse capture boundary invalid')
         if type(band.get('logical_band')) is not int or band['id'] != f'pre_ch{band["channel"]}_band{band["logical_band"]}.i16le':
             raise ValueError('pre-inverse band identity invalid')
     return {s['id']: s for s in bands + planes}
@@ -99,6 +108,12 @@ def validate_binding(index, observations, comparison, reference_manifest):
         raise ValueError('stage report/index totals differ')
     expected = validate_observations(observations)
     for item in index['original_stages']:
+        representation = {'representation': 'signed_int16_little_endian_compact_rows',
+                          'sdk_channel_order': ['Y', 'V', 'U'], 'orientation': 'top_down',
+                          'matrix': 'BT709', 'range': 'video', 'output_format_context': 'YU64',
+                          'signed_path_if_applicable': observations['signed_path']}
+        if any(not identical(item.get(key), value) for key, value in representation.items()):
+            raise ValueError('original stage representation differs')
         if (not identical(item.get('stage'), expected.get(item['id'])) or
                 not identical(item.get('input_packet'), index['input_packet']) or
                 item.get('producer') != 'original_sdk_private_observer_overlay_v2' or item.get('status') != 'AVAILABLE'):
