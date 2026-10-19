@@ -204,6 +204,112 @@ against a correct call at the same settings.
 `ZEROED`/saturated states no longer serve as a forced positive here, because this
 pass showed they are a clamp artefact rather than a distinct fault.
 
+## Third pass — the fault is already in the coefficient plane
+
+The action above was executed, with one correction to its premise. The premise
+was that HALF resolution reaches the output stage through
+`Row16uHalf2OutputFormat` (worker pool) or `CopyLowpassRGB444ToBuffer`
+(single-threaded). A route marker showed **neither ran** for this packet: it is a
+GOP-1 / non-progressive sample with `ENCODED_FORMAT_YUV_422`, so the output goes
+
+```
+ReconstructSampleFrameToBuffer
+  -> !progressive branch
+    -> CopyLowpass16sToBuffer
+      -> ConvertLowpass16sToRGBNoIPPFast   (RGB32 arm, BGRA)
+```
+
+The registration named the other two routes; this is reported as a deviation
+rather than relabelled after the fact. Instrumentation (I0 route markers, I1b
+digest of every plane handed to the converter, I2s/I2d converter-side plane and
+row digests, plus an optional raw-plane dump and an optional plane-substitution
+hook) lives only in a private copy; `upstream/` is untouched.
+
+### Result 1 — every corrupt call differs in exactly one **chroma** plane
+
+60 fresh processes, one decode each, `TAG_CPU_MAX=4` against one permitted CPU,
+BGRA, HALF. Three states, stable across the batch:
+
+| calls | frame digest (16) | ch0 luma | ch1 | ch2 |
+| --- | --- | --- | --- | --- |
+| 54 | `38d1c149…` | `70ba3759` | `e8195619` | `3eec2575` |
+| 4 | `2660eae7…` | `70ba3759` | `e8195619` | **`2cf86acf`** |
+| 2 | `fad4a643…` | `70ba3759` | **`8d6dbdc0`** | `3eec2575` |
+
+Luma is byte-identical in **every** call. Each corruption is one chroma plane.
+This is the opposite of the reading that a partially reconstructed band is at
+fault: no band is missing, one plane is filled with the wrong content.
+
+### Result 2 — the wrong content is a near-zeroed plane, not a shifted one
+
+For the ch2 state (`2660eae7…`), against the modal plane of the same run:
+
+| | modal | corrupt |
+| --- | --- | --- |
+| min / max | 708 / 3604 | **-12 / 12** |
+| mean | 2154.5 | **0.00** |
+| exactly zero | 0 % | **67.6 %** |
+| correlation with modal | — | **0.003** |
+
+The plane is not a copy, a crop or a rescaled version of any other channel (all
+cross-channel comparisons differ by ≥ 2386 counts). It is a plane of near-zero
+residual values with the same dimensions and pitch. The ch1 state has the same
+shape.
+
+### Result 3 — the plane content determines the output (substitution, not correlation)
+
+Correlation alone would not settle this, so the plane was overwritten before the
+converter read it:
+
+* force both chroma planes to the modal ones on a fresh run: **40/40 calls**,
+  and the output is the modal frame in 39 of them. The one exception had a
+differing **luma** plane (see below), not a chroma one.
+* force ch1 modal but **ch2 corrupt**: `2660eae7…` reproduced **3/3** — the
+  corrupt chroma plane alone recreates the corrupt frame.
+
+So for the two chroma states the coefficient-plane content is both necessary and
+sufficient. Nothing downstream needs to be blamed.
+
+### Result 4 — the rank-1 output signature is what this plane produces
+
+The first pass measured the output difference as a separable per-row offset
+(0.99+ rank-1 energy). That is reproduced here from a wrong-plane cause:
+
+| call | plane | B rank-1 | G rank-1 | rows touched |
+| --- | --- | --- | --- | --- |
+| `2660eae7…` | ch2 | 0.99996 (resid 0.69) | 0.99848 (resid 0.90) | 540 / 540 |
+| `fad4a643…` | ch1 | — (B unchanged) | 0.99983 (resid 0.58) | 540 / 540 |
+
+A plane that is wrong as a whole, fed through fixed-point YUV→RGB, yields a
+row-varying offset in the packed output. The two measurements are consistent; the
+rank-1 shape was never evidence of a missing band.
+
+### Result 5 — one further state, recorded and not explained
+
+One call in the substitution series had a **luma** plane differing while chroma
+was modal (`985fc4a4…`, output `936c5e71…`). It did not reappear in the 60-call
+dump run. It is recorded as an observed fourth state and deliberately not
+modelled; no claim is made that it shares a cause with the chroma states.
+
+### Negative control
+
+`TAG_CPU_MAX=1`, 10 calls in one process: **1 distinct frame, 1 plane set**. The
+instrumentation is neutral — with a single worker the digests are stable, and the
+harness reproduces the known modal digest `38d1c149…` exactly.
+
+### What this pass changes in the search
+
+The earlier note said the remaining discriminator was "lowpass row hashes versus
+applied term". That is now answered: the row hashes differ, the applied term does
+not. The search moves to **band production** — specifically to whichever producer
+writes a chroma lowpass plane of near-zero residual values for one channel while
+luma is correct.
+
+That producer is **not** identified here. No source line, no mechanism, no
+Windows parity, and no rate claim are made. The state counts in this pass come
+from one deliberately oversubscribed condition chosen to obtain states, so they
+are not comparable with the #159 sweep cells or with passes 1–2.
+
 ## Artefacts
 
 * `tools/analyze_decoder_output_domain.py` — classifier, stdlib only.
@@ -213,6 +319,9 @@ pass showed they are a clamp artefact rather than a distinct fault.
   states across batches, sanitised relative IDs and hashes only.
 * `docs/validation/rca160_format_path_matrix_2026-10-18.json` — four output
   formats and three decoded resolutions, same packet and condition.
+* `docs/validation/rca160_third_pass_half_coefficient_2026-10-19.json` — 60
+  calls, three states, per-plane digests, output rank-1 statistics for each
+  corrupt state, and the substitution result.
 
 Raw decoded frames stay outside the repository; only relative IDs and hashes are
 published.
