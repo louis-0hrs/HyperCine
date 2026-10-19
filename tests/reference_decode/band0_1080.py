@@ -231,16 +231,26 @@ def run_call(worker, packet, out_dir, arm, index):
     return record
 
 
+def recorded_digest(record):
+    """Return a usable output digest, or None when the record has no output."""
+    if not record.get('output_valid'):
+        return None
+    output = record.get('output')
+    if not isinstance(output, dict):
+        return None
+    digest = output.get('sha256')
+    return digest if isinstance(digest, str) and digest else None
+
+
 def summarize(records):
     arms = {}
     for arm in ARM_ORDER:
         calls = [r for r in records if r['arm'] == arm]
-        hashes = Counter(r['output']['sha256'] for r in calls
-                         if 'output' in r and r['output_valid'])
+        digests = [recorded_digest(r) for r in calls]
+        hashes = Counter(digest for digest in digests if digest is not None)
         modal = hashes.most_common(1)[0][0] if hashes else None
-        corrupt = sum(1 for r in calls
-                      if 'output' in r and r['output_valid'] and
-                      r['output']['sha256'] != modal)
+        corrupt = sum(1 for digest in digests
+                      if digest is not None and digest != modal)
         publish_counts = Counter(
             r['gate'].get('publish_calls_band0', r['gate'].get('publishes_band0', 0))
             for r in calls)
@@ -305,6 +315,9 @@ def classify(arms, records=None):
                for r in records):
             reasons.append('per-call gate-entry coverage is not exactly %d'
                            % EXPECTED_GATE_ENTRIES)
+        if any(r.get('output_valid') and recorded_digest(r) is None
+               for r in records):
+            reasons.append('output digest missing in at least one call')
     for arm in ARM_ORDER:
         if arms[arm]['gate_entries'] == 0:
             reasons.append(f'probe records missing in arm {arm}')

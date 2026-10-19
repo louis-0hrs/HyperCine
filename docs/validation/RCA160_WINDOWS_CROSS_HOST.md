@@ -20,8 +20,11 @@ verdict. Codec channel identity for the five corrupt calls is
 A follow-up tooling pass hardened that re-evaluation: records without a valid
 or retained output now fail closed to `INCONCLUSIVE` while still writing JSON,
 and the diagnostic worker binary digest is published as `worker_sha256` instead
-of being labelled a source head. The numeric evidence is unchanged; the
-evidence JSON is schema `rca160_windows_coverage_correction_v2`.
+of being labelled a source head. The same digest extraction now also guards the
+harness's own `summarize()` path, so a record marked valid whose `output` object
+lacks a usable digest yields `INCONCLUSIVE` instead of aborting before JSON is
+written. The numeric evidence is unchanged; the evidence JSON is schema
+`rca160_windows_coverage_correction_v2`.
 
 ## What was measured
 
@@ -249,10 +252,11 @@ the retained probe logs, and reports both coverage-rule verdicts.
 - Full native Release build: PASS.
 - `ctest --test-dir build-pristine -C Release --output-on-failure`: **14/14 PASS**.
 - `tests/reference_decode/test_affinity_protocol.py`: **5/5 PASS**.
-- `tests/reference_decode/test_band0_protocol.py`: **23/23 PASS** (parser,
+- `tests/reference_decode/test_band0_protocol.py`: **25/25 PASS** (parser,
   coverage matching, corrected operation-identity rule, literal registered-rule
-  re-evaluation, missing-log/per-call-entry fail-closed cases, and the analyzer's
-  digest-less-record, missing-corrupt-artifact and provenance regressions).
+  re-evaluation, missing-log/per-call-entry fail-closed cases, the analyzer's
+  digest-less-record, missing-corrupt-artifact and provenance regressions, and
+  the `summarize()` malformed-output fail-closed regressions).
 - Correction re-evaluation: 360/360 ledger records, 360/360 retained outputs and
   360/360 retained probe logs checked; no artifact problems; digest recomputation
   matched; literal registered rule `INCONCLUSIVE`, corrected rule `PASS`.

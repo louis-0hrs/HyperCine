@@ -206,6 +206,44 @@ def ledger_record(arm, call, digest=None, valid=True):
     return record
 
 
+def covered_record(arm, call, digest, waits=0, matched=0):
+    record = ledger_record(arm, call, digest)
+    record['gate'].update({
+        'gate_entries': protocol.EXPECTED_GATE_ENTRIES,
+        'waits': waits, 'waits_matched': matched,
+    })
+    return record
+
+
+class SummarizeFailClosedTest(unittest.TestCase):
+    def test_summarize_ignores_output_without_digest(self):
+        malformed = ledger_record('O', 3)
+        malformed['output'] = {'bytes': 1}
+        records = [ledger_record('O', 1, 'a' * 64),
+                   ledger_record('O', 2, 'a' * 64),
+                   malformed]
+        arms = protocol.summarize(records)
+        self.assertEqual(arms['O']['modal_sha256'], 'a' * 64)
+        self.assertEqual(arms['O']['distinct_outputs'], 1)
+        self.assertEqual(arms['O']['corrupt'], 0)
+        self.assertEqual(arms['O']['valid_outputs'], 3)
+
+    def test_digest_less_valid_record_fails_closed(self):
+        malformed = covered_record('O', 3, None)
+        malformed['output'] = {'bytes': 1}
+        records = [
+            covered_record('O', 1, 'a' * 64),
+            covered_record('O', 2, 'b' * 64),
+            malformed,
+            covered_record('B', 1, 'a' * 64, waits=1, matched=1),
+            covered_record('AP', 1, 'a' * 64),
+            covered_record('AP', 2, 'c' * 64),
+        ]
+        verdict, reasons = protocol.classify(protocol.summarize(records), records)
+        self.assertEqual(verdict, 'INCONCLUSIVE')
+        self.assertIn('output digest missing in at least one call', reasons)
+
+
 class CorrectionToolTest(unittest.TestCase):
     def run_tool(self, ledger, root):
         ledger_path = root / 'ledger.json'
