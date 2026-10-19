@@ -16,6 +16,7 @@ from pathlib import Path, PurePosixPath
 import re
 import sys
 
+CANDIDATE = '7ed4a82ed97598454c2680bd264dedf259e6e7dc'
 SDK = '11574d0295771edccadd17af14af74a539f924c7'
 SAFE_ID = re.compile(r'[A-Za-z0-9_. /-]+\Z')
 
@@ -262,6 +263,10 @@ def validate_comparison_shape(report):
             for stage in ('wavelet4_ll', 'temporal_low', 'temporal_high', f'frame{frame}_base_ll'):
                 expected.add((frame, f'ch{channel}_{stage}'))
     comparisons = report.get('comparisons', [])
+    if (type(report.get('compared')) is not int or
+            any(type(item.get('frame_index')) is not int or
+                not isinstance(item.get('id'), str) for item in comparisons)):
+        raise ValueError('invalid comparison identity types')
     actual = {(item['frame_index'], item['id']) for item in comparisons}
     if actual != expected or len(comparisons) != len(expected) or report.get('compared') != len(expected):
         raise ValueError('comparison matrix incomplete or duplicated')
@@ -275,7 +280,7 @@ def seal_comparison(root, references, binary, source):
     report = json.loads(report_path.read_text(encoding='utf-8'))
     validate_comparison_shape(report)
     if (report.get('schema') != 'hypercine.gop2.comparison/1' or
-            report.get('candidate_sha') != '7ed4a82ed97598454c2680bd264dedf259e6e7dc' or
+            report.get('candidate_sha') != CANDIDATE or
             report.get('compared') != 112 or len(report.get('comparisons', [])) != 112):
         raise ValueError('incomplete candidate comparison')
     result = {'schema': 'hypercine.gop2.comparison_index/1', 'issue': 189,
@@ -321,7 +326,9 @@ def seal_comparison(root, references, binary, source):
 
 
 def verify_comparison(root, references):
-    verify(references)
+    reference_result = verify(references)
+    if reference_result['reference_status'] != 'AVAILABLE':
+        raise ValueError('untrustworthy original reference')
     index_path = root / 'comparison_index.json'
     index = json.loads(index_path.read_text(encoding='utf-8'))
     validate_comparison_shape(index)
@@ -335,7 +342,39 @@ def verify_comparison(root, references):
         raise ValueError('comparison report digest mismatch')
     if digest(references / 'original_sdk.cfhd') != index['input_packet']:
         raise ValueError('comparison input mismatch')
+    if digest(references / 'manifest.json') != index['reference_manifest']:
+        raise ValueError('comparison reference manifest mismatch')
+    manifest = json.loads((references / 'manifest.json').read_text(encoding='utf-8'))
+    report = json.loads((root / 'comparison.json').read_text(encoding='utf-8'))
+    validate_comparison_shape(report)
+    if (index.get('candidate_sha') != CANDIDATE or
+            index.get('reference_status') != 'AVAILABLE' or
+            index.get('geometry') not in ([1920, 1080], [3840, 2160]) or
+            any(type(value) is not int for value in index['geometry']) or
+            type(report.get('width')) is not int or type(report.get('height')) is not int or
+            index['geometry'] != manifest.get('geometry') or
+            index['geometry'] != [report.get('width'), report.get('height')] or
+            report.get('schema') != 'hypercine.gop2.comparison/1' or
+            report.get('candidate_sha') != CANDIDATE):
+        raise ValueError('comparison provenance mismatch')
+    report_items = {(item['frame_index'], item['id']): item for item in report['comparisons']}
+    mismatched = 0
     for item in index['comparisons']:
+        identifier = item['id']
+        if identifier in ('BGRA', 'YU64_clipped'):
+            fmt = 'BGRA' if identifier == 'BGRA' else 'YU64'
+            reference_id = f'{fmt}_call0_frame{item["frame_index"]}.raw'
+        else:
+            reference_id = f'stages/{identifier}.i16le'
+        equal = item['actual'] == item['expected']
+        original = report_items[(item['frame_index'], identifier)]
+        if (item['reference_id'] != reference_id or type(item.get('equal')) is not bool or
+                item['equal'] != equal or type(item.get('actual_bytes')) is not int or
+                item['actual_bytes'] != item['actual']['byte_length'] or
+                item.get('input_sha256') != index['input_packet']['sha256'] or
+                any(item.get(key) != value for key, value in original.items())):
+            raise ValueError('comparison result inconsistent')
+        mismatched += not equal
         path = under(root, item['artifact'])
         if digest(path) != item['actual'] or digest(under(references, item['reference_id'])) != item['expected']:
             raise ValueError('comparison artifact digest mismatch')
@@ -343,7 +382,10 @@ def verify_comparison(root, references):
             raise ValueError('comparison sidecar mismatch')
         if path.with_name(path.name + '.sha256').read_text(encoding='ascii') != item['actual']['sha256'] + '  ' + path.name + '\n':
             raise ValueError('comparison SHA sidecar mismatch')
-    return {'verified_artifacts': 112, 'mismatched': index['mismatched'], 'release_gate': 'BLOCKED'}
+    if (type(index.get('mismatched')) is not int or type(report.get('mismatched')) is not int or
+            index['mismatched'] != mismatched or report['mismatched'] != mismatched):
+        raise ValueError('comparison mismatch total inconsistent')
+    return {'verified_artifacts': 112, 'mismatched': mismatched, 'release_gate': 'BLOCKED'}
 
 
 def main():
