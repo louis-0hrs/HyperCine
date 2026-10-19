@@ -57,7 +57,7 @@ The upstream C codebase was authored for older compilers (C99 / MSVC 2015). Unde
 - **`C4101` (Unreferenced Local Variables):** Several legacy scratch variables. Suppressed (`/wd4101`).
 
 ### 2. Multi-Core Processor Detection (`GetProcessorCount`)
-In `upstream/Common/thread.c`, processor core counts are queried using `GetSystemInfo` or `GetActiveProcessorCount`. On modern systems with >64 logical processors or asymmetric P/E cores, legacy logic limits thread counts to 32 or 64. HyperCine's host wrappers handle thread pool allocation externally rather than modifying this upstream routine.
+Processor detection is implemented in [`upstream/Codec/cpuid.c`](../upstream/Codec/cpuid.c), with platform-specific Windows, Linux and macOS branches. An older `CThreadLimiter::GetProcessorCount` helper is retained under `#if 0` in [`upstream/Common/ThreadPool.cpp`](../upstream/Common/ThreadPool.cpp). Worker counts and affinity are separate contracts; restricting process affinity does not itself prove a smaller decoder worker pool. See the decoder investigation below for measured limitations.
 
 ### 3. `ConvertRGBAtoRGB48` Inversion Hazard
 In `upstream/Codec/encoder.c` (lines 2398–2402), handling of inverted RGB buffers (`COLOR_FORMAT_RGB32_INVERTED` / `CFHD_PIXEL_FORMAT_BGRa`) offsets the input pointer to the bottom row (`data += (display_height - 1) * pitch; pitch = -pitch;`). In `upstream/Codec/frame.c` (`ConvertRGBAtoRGB48`, line 6364), a secondary inversion calculation (`rgb_ptr += (display_height - 1 - row) * rgb_row_pitch;`) results in reading before the beginning of the buffer.
