@@ -1,10 +1,12 @@
 {
- "schema": "rca160_windows_coverage_correction_v1",
+ "schema": "rca160_windows_coverage_correction_v2",
  "issue": 158,
  "pr": 192,
  "diagnostic_only": true,
  "source_ledger_sha256": "460bf8c2cb537d48cddf08395f034dee42f1a94820a2bbad3d03a237ef2cc3a2",
- "source_ledger_head": "e889fbd198f1b06d3615b2e712c12231097aa8950ed0721fa9a977773f2edfa6",
+ "worker_sha256": "e889fbd198f1b06d3615b2e712c12231097aa8950ed0721fa9a977773f2edfa6",
+ "source_head": null,
+ "provenance_note": "worker_sha256 is the diagnostic worker binary digest recorded by the ledger; the ledger records no source commit, so source_head is null",
  "artifacts": {
   "calls": 360,
   "output_files_checked": 360,

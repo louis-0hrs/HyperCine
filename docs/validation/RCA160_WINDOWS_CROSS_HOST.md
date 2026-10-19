@@ -17,6 +17,12 @@ applied literally. The corrected operation-identity rule reproduces the same
 verdict. Codec channel identity for the five corrupt calls is
 `CHANNEL_IDENTITY_UNAVAILABLE`; see the correction sections below.
 
+A follow-up tooling pass hardened that re-evaluation: records without a valid
+or retained output now fail closed to `INCONCLUSIVE` while still writing JSON,
+and the diagnostic worker binary digest is published as `worker_sha256` instead
+of being labelled a source head. The numeric evidence is unchanged; the
+evidence JSON is schema `rca160_windows_coverage_correction_v2`.
+
 ## What was measured
 
 [`band0_1080.py`](../../tests/reference_decode/band0_1080.py) ran the
@@ -243,12 +249,15 @@ the retained probe logs, and reports both coverage-rule verdicts.
 - Full native Release build: PASS.
 - `ctest --test-dir build-pristine -C Release --output-on-failure`: **14/14 PASS**.
 - `tests/reference_decode/test_affinity_protocol.py`: **5/5 PASS**.
-- `tests/reference_decode/test_band0_protocol.py`: **19/19 PASS** (parser,
+- `tests/reference_decode/test_band0_protocol.py`: **23/23 PASS** (parser,
   coverage matching, corrected operation-identity rule, literal registered-rule
-  re-evaluation, and missing-log/per-call-entry fail-closed cases).
+  re-evaluation, missing-log/per-call-entry fail-closed cases, and the analyzer's
+  digest-less-record, missing-corrupt-artifact and provenance regressions).
 - Correction re-evaluation: 360/360 ledger records, 360/360 retained outputs and
   360/360 retained probe logs checked; no artifact problems; digest recomputation
   matched; literal registered rule `INCONCLUSIVE`, corrected rule `PASS`.
+  Re-running the hardened tool over the same artifacts reproduced every numeric
+  field; only the schema version and the provenance fields changed.
 - Protocol preflight hashes: PASS.
 - `git status --porcelain upstream/`: empty before and after.
 - Sanitized per-call ledger:

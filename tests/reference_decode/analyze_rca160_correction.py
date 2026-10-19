@@ -101,6 +101,36 @@ def lane_diff_stats(corrupt_lane, modal_lane):
     }
 
 
+def recorded_digest(record):
+    """Return a usable output digest, or None when the record has no output."""
+    if not record.get('output_valid'):
+        return None
+    output = record.get('output')
+    if not isinstance(output, dict):
+        return None
+    digest = output.get('sha256')
+    return digest if isinstance(digest, str) and digest else None
+
+
+def modal_outputs(records, arm_order):
+    """Map each arm to its modal digest and one representative call.
+
+    Only records with a recorded digest participate, so a failed or
+    digest-less call cannot abort the re-evaluation.
+    """
+    modal = {}
+    for arm in arm_order:
+        calls = [(record['call'], recorded_digest(record))
+                 for record in records if record['arm'] == arm]
+        digests = [digest for _, digest in calls if digest]
+        if not digests:
+            continue
+        digest = Counter(digests).most_common(1)[0][0]
+        representative = next(call for call, value in calls if value == digest)
+        modal[arm] = (digest, representative)
+    return modal
+
+
 def parse_probe(path):
     events = []
     with path.open('r', encoding='utf-8', errors='replace') as stream:
@@ -180,10 +210,14 @@ def main():
         else:
             outputs_checked += 1
             if record.get('output_valid'):
-                digest = sha256_file(output_path)
-                if digest != record['output']['sha256']:
-                    problems.append(f'output digest mismatch: {label}')
-                record['output']['sha256'] = digest
+                recorded = recorded_digest(record)
+                if recorded is None:
+                    problems.append(f'output digest missing: {label}')
+                else:
+                    digest = sha256_file(output_path)
+                    if digest != recorded:
+                        problems.append(f'output digest mismatch: {label}')
+                    record['output']['sha256'] = digest
         if not probe_path.is_file():
             problems.append(f'{ARTIFACT_MISSING}: probe {label}')
             record['gate']['gate_entries'] = 0
@@ -207,22 +241,16 @@ def main():
         protocol.classify_registered_publication_rule(arms))
 
     # Recompute the corrupt calls from retained output digests, arm by arm.
+    modal_by_arm = modal_outputs(records, protocol.ARM_ORDER)
     corrupt_by_arm = {}
-    modal_by_arm = {}
-    for arm in protocol.ARM_ORDER:
-        calls = [r for r in records if r['arm'] == arm and r.get('output_valid')]
-        counts = Counter(r['output']['sha256'] for r in calls)
-        if not counts:
-            continue
-        modal = counts.most_common(1)[0][0]
-        modal_by_arm[arm] = modal
+    for arm, (modal, _) in modal_by_arm.items():
         corrupt_by_arm[arm] = sorted(
-            r['call'] for r in calls if r['output']['sha256'] != modal)
+            record['call'] for record in records
+            if record['arm'] == arm and recorded_digest(record) not in (None, modal))
 
     corrupt_records = []
     for arm, calls in corrupt_by_arm.items():
-        modal_call = next(r['call'] for r in records
-                          if r['arm'] == arm and r['output']['sha256'] == modal_by_arm[arm])
+        modal_call = modal_by_arm[arm][1]
         modal_path = output_root / arm / f'{modal_call:03d}-1.bgra'
         for call in calls:
             output_path = output_root / arm / f'{call:03d}-1.bgra'
@@ -231,7 +259,10 @@ def main():
                 'premature_entries': topology_by_call.get(
                     f'{arm}/{call:03d}', {}).get('premature_entries', []),
             }
-            entry.update(lane_digest_record(output_path, modal_path))
+            if output_path.is_file() and modal_path.is_file():
+                entry.update(lane_digest_record(output_path, modal_path))
+            else:
+                entry['lane_identity_status'] = ARTIFACT_MISSING
             corrupt_records.append(entry)
 
     premature_channels = Counter()
@@ -242,13 +273,18 @@ def main():
     def distribution(key):
         return {arm: arms[arm].get(key, {}) for arm in protocol.ARM_ORDER}
 
+    checks = report.get('checks') or {}
     evidence = {
-        'schema': 'rca160_windows_coverage_correction_v1',
+        'schema': 'rca160_windows_coverage_correction_v2',
         'issue': 158,
         'pr': 192,
         'diagnostic_only': True,
         'source_ledger_sha256': sha256_file(ledger_path),
-        'source_ledger_head': report.get('checks', {}).get('worker_sha256'),
+        'worker_sha256': checks.get('worker_sha256'),
+        'source_head': None,
+        'provenance_note': 'worker_sha256 is the diagnostic worker binary digest '
+                           'recorded by the ledger; the ledger records no source '
+                           'commit, so source_head is null',
         'artifacts': {
             'calls': len(records),
             'output_files_checked': outputs_checked,

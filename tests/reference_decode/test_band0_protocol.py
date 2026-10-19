@@ -3,8 +3,14 @@
 # Dual-licensed under the MIT License or Apache License, Version 2.0.
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """Unit checks for the RCA-160 band-0 evidence parser and verdict rules."""
+import json
+import sys
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
+import analyze_rca160_correction as correction
 import band0_1080 as protocol
 
 
@@ -180,6 +186,90 @@ class VerdictTest(unittest.TestCase):
                  B=arm(waits=60, publish_counts=observed),
                  AP=arm(corrupt=1, publish_counts=observed)))
         self.assertEqual(verdict, 'CROSS_HOST_CONFIRMATION_PASS', reasons)
+
+
+def ledger_record(arm, call, digest=None, valid=True):
+    record = {
+        'arm': arm,
+        'call': call,
+        'timed_out': False,
+        'output_valid': valid,
+        'gate': {
+            'gate_entries': 0, 'premature_entries': 0, 'waits': 0,
+            'timeouts': 0, 'publishes_band0': 11, 'publish_calls_band0': 11,
+            'transitions_band0': 11, 'transition_pointers_band0': 9,
+            'waits_matched': 0, 'entropy_transitions_band0': 3,
+        },
+    }
+    if digest is not None:
+        record['output'] = {'sha256': digest, 'bytes': 1}
+    return record
+
+
+class CorrectionToolTest(unittest.TestCase):
+    def run_tool(self, ledger, root):
+        ledger_path = root / 'ledger.json'
+        ledger_path.write_text(json.dumps(ledger), encoding='utf-8')
+        json_path = root / 'correction.json'
+        argv = ['analyze_rca160_correction.py',
+                '--ledger', str(ledger_path),
+                '--output-root', str(root / 'retained'),
+                '--probe-root', str(root / 'retained'),
+                '--json', str(json_path)]
+        with mock.patch.object(sys, 'argv', argv):
+            code = correction.main()
+        self.assertTrue(json_path.is_file(), 'tool must write JSON on failure')
+        return code, json.loads(json_path.read_text(encoding='utf-8'))
+
+    def test_invalid_output_before_modal_record_does_not_crash(self):
+        # The old generator scanned every record for output.sha256 and raised
+        # KeyError on the leading digest-less record before reaching the modal.
+        ledger = {'ledger': [
+            ledger_record('O', 1, valid=False),
+            ledger_record('O', 2, 'a' * 64),
+            ledger_record('B', 1, 'b' * 64),
+            ledger_record('AP', 1, 'c' * 64),
+        ]}
+        with tempfile.TemporaryDirectory() as directory:
+            code, evidence = self.run_tool(ledger, Path(directory))
+        self.assertEqual(code, 1)
+        self.assertEqual(evidence['corrected_rule']['verdict'], 'INCONCLUSIVE')
+
+    def test_modal_output_ignores_digest_less_record(self):
+        records = [ledger_record('O', 1, valid=False),
+                   ledger_record('O', 2, 'a' * 64),
+                   ledger_record('O', 3, 'a' * 64)]
+        modal = correction.modal_outputs(records, protocol.ARM_ORDER)
+        self.assertEqual(modal['O'], ('a' * 64, 2))
+
+    def test_missing_corrupt_artifact_still_writes_inconclusive(self):
+        ledger = {'ledger': [
+            ledger_record('O', 1, 'a' * 64),
+            ledger_record('O', 2, 'd' * 64),
+            ledger_record('B', 1, 'b' * 64),
+            ledger_record('AP', 1, 'c' * 64),
+            ledger_record('AP', 2, 'e' * 64),
+        ]}
+        with tempfile.TemporaryDirectory() as directory:
+            code, evidence = self.run_tool(ledger, Path(directory))
+        self.assertEqual(code, 1)
+        self.assertEqual(evidence['corrected_rule']['verdict'], 'INCONCLUSIVE')
+        self.assertTrue(any('artifact missing' in problem
+                            for problem in evidence['artifacts']['problems']))
+        self.assertEqual({entry['lane_identity_status']
+                          for entry in evidence['corrupt_calls']},
+                         {correction.ARTIFACT_MISSING})
+
+    def test_worker_digest_is_not_reported_as_source_head(self):
+        ledger = {'ledger': [], 'checks': {'worker_sha256': 'f' * 64}}
+        with tempfile.TemporaryDirectory() as directory:
+            code, evidence = self.run_tool(ledger, Path(directory))
+        self.assertEqual(code, 1)
+        self.assertEqual(evidence['worker_sha256'], 'f' * 64)
+        self.assertIsNone(evidence['source_head'])
+        self.assertNotIn('source_ledger_head', evidence)
+        self.assertEqual(evidence['schema'],
+                         'rca160_windows_coverage_correction_v2')
 
 
 if __name__ == '__main__':
