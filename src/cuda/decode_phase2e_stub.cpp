@@ -34,6 +34,9 @@ GpuEntropyMode CudaDecoderPipelinePhase2E::GetEntropyMode() const { return GpuEn
 int CudaDecoderPipelinePhase2E::GetFixedSegmentsPerBand() const { return 32; }
 
 void CudaDecoderPipelinePhase2E::SetTestDelayHook(DelayHookFn) {}
+void CudaDecoderPipelinePhase2E::SetTestCudaFailureHook(TestCudaFailureFn) {}
+bool CudaDecoderPipelinePhase2E::InjectTestCudaFailure(uint64_t, cudaError_t) { return false; }
+cudaError_t CudaDecoderPipelinePhase2E::GetTestLastCudaSubmitError() const { return static_cast<cudaError_t>(0); }
 
 uint64_t CudaDecoderPipelinePhase2E::QueueDecode(const uint8_t*, size_t, DeviceSurfaceType, ColorMatrix, ColorRange, RowOrientation, cudaStream_t) { return 0; }
 uint64_t CudaDecoderPipelinePhase2E::QueueDecodeParsed(const uint8_t*, size_t,

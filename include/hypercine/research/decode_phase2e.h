@@ -200,6 +200,30 @@ struct Phase2eSlotStageTimings {
     std::vector<Phase2FCBandRecord> fc_band_records;
 };
 
+// Deterministic CUDA submission failpoint for failure-path tests. The hook is
+// consulted before each checked submission on the fail-closed paths; returning
+// cudaSuccess submits normally, any other value fails that submission with the
+// returned error without calling the real CUDA API.
+enum class TestCudaSubmitSite : uint32_t {
+    DagStreamWait = 1,
+    DagEventRecord,
+    DagLaunchResult,
+    DagColorLaunch,
+    DagFrameErrorCopy,
+    DagReadyEvent,
+    BlockingColorStartEvent,
+    BlockingColorLaunch,
+    BlockingColorStopEvent,
+    BlockingFrameErrorCopy,
+    BlockingReadyEvent,
+    FieldPlusColorStartEvent,
+    FieldPlusColorLaunch,
+    FieldPlusColorStopEvent,
+    FieldPlusFrameErrorCopy,
+    FieldPlusReadyEvent
+};
+using TestCudaFailureFn = std::function<cudaError_t(TestCudaSubmitSite)>;
+
 // Phase 2E Accelerated CUDA Decoder Pipeline with Asynchronous Band Streaming & Overlap
 class CudaDecoderPipelinePhase2E {
 public:
@@ -251,6 +275,19 @@ public:
     // Synthetic race testing hook (Section 36)
     using DelayHookFn = std::function<void(int band_idx, int channel, int level, int band)>;
     void SetTestDelayHook(DelayHookFn hook);
+
+    // Deterministic submission failpoint for failure-path tests. The hook is
+    // copied into each acquired slot; nullptr disables it.
+    void SetTestCudaFailureHook(TestCudaFailureFn hook);
+
+    // Test/research only: store a submission failure against an already
+    // published ticket so PollDecode/WaitForDecode fail-closed behavior can be
+    // exercised even when no host-safe CUDA call can be made to fail.
+    bool InjectTestCudaFailure(uint64_t ticket, cudaError_t error);
+
+    // Test/research only: first submission error persisted by the most recent
+    // queue attempt, or cudaSuccess.
+    cudaError_t GetTestLastCudaSubmitError() const;
 
     // Asynchronously queue compressed sample decode onto an available slot
     uint64_t QueueDecode(

@@ -269,9 +269,10 @@ bool LaunchYuv422ToBgra8(
     ColorRange range,
     RowOrientation orientation,
     cudaStream_t stream, uint32_t* frame_error,
-    bool interlaced_row16)
+    bool interlaced_row16, cudaError_t* launch_error)
 {
     if (!d_y || !d_v || !d_u || !d_bgra || width <= 0 || height <= 0) {
+        if (launch_error) *launch_error = cudaErrorInvalidValue;
         return false;
     }
 
@@ -299,7 +300,9 @@ bool LaunchYuv422ToBgra8(
             width, height, post_column_pixels, coeff, row16, orientation, frame_error);
     }
 
-    return cudaGetLastError() == cudaSuccess;
+    cudaError_t err = cudaGetLastError();
+    if (launch_error) *launch_error = err;
+    return err == cudaSuccess;
 }
 
 } // namespace HyperCine
