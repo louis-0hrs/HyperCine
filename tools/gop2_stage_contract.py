@@ -108,6 +108,10 @@ def validate_binding(index, observations, comparison, reference_manifest):
         raise ValueError('stage report/index totals differ')
     expected = validate_observations(observations)
     for item in index['original_stages']:
+        stage = expected.get(item['id'])
+        if (stage is None or type(item.get('byte_length')) is not int or
+                item['byte_length'] != stage['pitch'] * stage['height']):
+            raise ValueError('original stage byte length differs from declared rows')
         representation = {'representation': 'signed_int16_little_endian_compact_rows',
                           'sdk_channel_order': ['Y', 'V', 'U'], 'orientation': 'top_down',
                           'matrix': 'BT709', 'range': 'video', 'output_format_context': 'YU64',
@@ -120,6 +124,14 @@ def validate_binding(index, observations, comparison, reference_manifest):
             raise ValueError('original stage provenance differs')
     report_items = {(r['frame_index'], r['reference_id']): r for r in comparison['comparisons']}
     for item in index['comparisons']:
+        stage = expected.get(item['reference_id'])
+        if stage is None:
+            raise ValueError('comparison references unknown stage')
+        required_bytes = stage['pitch'] * stage['height']
+        for field in ('actual', 'expected'):
+            if (type(item[field].get('byte_length')) is not int or
+                    item[field]['byte_length'] != required_bytes):
+                raise ValueError('comparison byte length differs from reference rows')
         original = report_items.get((item['frame_index'], item['reference_id']))
         if original is None or any(not identical(item.get(k), value) for k, value in original.items()):
             raise ValueError('comparison report/index fields disagree')

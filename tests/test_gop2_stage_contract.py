@@ -117,6 +117,46 @@ class StageContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             contract.validate_binding(*values)
 
+    def test_reject_stage_length_detached_from_declared_rows(self):
+        for family in ('pre_inverse_bands', 'signed_planes'):
+            values = self.binding_fixture()
+            stage = values[1][family][0]
+            if family == 'signed_planes':
+                # Keep valid full-plane geometry; change its measured length instead.
+                item = next(i for i in values[0]['original_stages'] if i['id'] == stage['id'])
+                item['byte_length'] -= 2
+            else:
+                stage['height'] += 1
+                values[0]['observations'] = copy.deepcopy(values[1])
+                item = next(i for i in values[0]['original_stages'] if i['id'] == stage['id'])
+                item['stage'] = copy.deepcopy(stage)
+            with self.subTest(family=family), self.assertRaises(ValueError):
+                contract.validate_binding(*values)
+
+    def test_reject_comparison_lengths_detached_from_reference_rows(self):
+        for position in (0, 89):
+            values = self.binding_fixture()
+            item = values[0]['comparisons'][position]
+            # Reseal both sides and the raw report consistently; equality is still true.
+            for digest in ('actual', 'expected'):
+                item[digest]['byte_length'] -= 2
+            item['actual_bytes'] -= 2
+            item['expected_bytes'] -= 2
+            values[2]['comparisons'][position]['actual_bytes'] -= 2
+            values[2]['comparisons'][position]['expected_bytes'] -= 2
+            with self.subTest(position=position), self.assertRaises(ValueError):
+                contract.validate_binding(*values)
+
+    def test_actual_stage_binding_both_geometries(self):
+        for source in self.indices:
+            values = self.binding_fixture()
+            values = (copy.deepcopy(source), copy.deepcopy(source['observations']),
+                      values[2], {'geometry': source['geometry']})
+            values[2]['width'], values[2]['height'] = source['geometry']
+            values[2]['comparisons'] = [{k: v for k, v in i.items() if k not in ('actual', 'expected')}
+                                       for i in source['comparisons']]
+            contract.validate_binding(*values)
+
     def test_reject_relabelled_original_representation(self):
         for field, value in (('representation', 'unsigned_p10'), ('sdk_channel_order', ['Y', 'U', 'V']),
                              ('orientation', 'bottom_up'), ('matrix', 'BT601'), ('range', 'full'),
