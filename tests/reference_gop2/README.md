@@ -3,6 +3,11 @@ Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE. -->
 
 # Original SDK GOP-2 reference contract
 
+**Current Phase B:** both previously missing stage families are extracted from
+the original SDK and compared exactly (180/180 new checks). See
+[the Phase-B path qualification and owner handoff](../../docs/validation/GOP2_ISSUE189_PHASEB.md).
+The Phase-A indices below remain immutable historical records.
+
 See [the measured #189 report](../../docs/validation/GOP2_ISSUE189.md) for inventory,
 producers, byte layouts, actual pool sizes, independent comparisons, commands and
 remaining blocked gates. Raw bytes live only under the private

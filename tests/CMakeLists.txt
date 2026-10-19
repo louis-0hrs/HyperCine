@@ -181,3 +181,9 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME gop2_reference_inventory_integrity
         COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_reference_inventory.py")
 endif()
+
+# Phase-B oracle contract: missing stages/neutrality evidence never pass.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME gop2_original_stage_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_stage_contract.py")
+endif()

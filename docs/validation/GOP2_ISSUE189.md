@@ -3,6 +3,11 @@ Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE. -->
 
 # Original-SDK FIELDPLUS references — issue #189
 
+**Phase-B update:** both formerly missing original stage families are now
+extracted and compared (180/180 new exact checks). See
+[the current extraction-path qualification and handoff](GOP2_ISSUE189_PHASEB.md).
+The report below and sealed Phase-A indices preserve the earlier collection state.
+
 Native Windows Ryzen x64 measurement, 2026-10-19. **Release gate: BLOCKED.**
 This is independent original-SDK data collection for [#189](https://github.com/louis-0hrs/HyperCine/issues/189),
 not a promotion of [#187](https://github.com/louis-0hrs/HyperCine/pull/187).

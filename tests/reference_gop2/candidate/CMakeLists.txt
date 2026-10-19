@@ -20,3 +20,9 @@ target_compile_features(gop2_candidate_compare PRIVATE cxx_std_17)
 target_include_directories(gop2_candidate_compare PRIVATE "${CMAKE_SOURCE_DIR}/src/core")
 target_include_directories(gop2_candidate_compare PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../..")
 target_link_libraries(gop2_candidate_compare PRIVATE hypercine_decoder hypercine_wavelet CFHDCodecStatic CUDA::cudart)
+
+# Phase B only: do not rerun the unchanged 224 Phase-A comparisons.
+add_executable(gop2_stage_compare "${CMAKE_CURRENT_LIST_DIR}/../../../tools/gop2_stage_compare.cpp")
+target_compile_features(gop2_stage_compare PRIVATE cxx_std_17)
+target_include_directories(gop2_stage_compare PRIVATE "${CMAKE_SOURCE_DIR}/src/core" "${CMAKE_CURRENT_LIST_DIR}/../..")
+target_link_libraries(gop2_stage_compare PRIVATE hypercine_decoder hypercine_wavelet CFHDCodecStatic CUDA::cudart)
