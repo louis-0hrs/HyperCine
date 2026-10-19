@@ -486,6 +486,233 @@ def parse_liveness(repo):
     }
 
 
+# ------------------------------------------------------------- output path
+
+def preprocessor_contexts(text):
+    """Map 1-based line number -> [(directive, branch), ...] nesting context.
+
+    `branch` is 'if', 'elif' or 'else'. Nested conditionals are reported from
+    outermost to innermost. A line inside `#if A` / `#else` yields both entries,
+    which is what the callers need to ask "is this the else of A?".
+    """
+    contexts = {}
+    stack = []
+    for number, line in enumerate(text.split('\n'), 1):
+        stripped = line.strip()
+        if not stripped.startswith('#'):
+            if stack:
+                contexts[number] = list(stack)
+            continue
+
+        directive = stripped[1:].strip()
+        keyword, _, rest = directive.partition(' ')
+        keyword = keyword.strip()
+        rest = rest.strip()
+
+        if keyword in ('if', 'ifdef', 'ifndef'):
+            stack.append((rest, 'if'))
+        elif keyword == 'elif':
+            if stack:
+                inner = stack.pop()
+                stack.append((inner[0], 'elif'))
+        elif keyword == 'else':
+            if stack:
+                inner = stack.pop()
+                stack.append((inner[0], 'else'))
+        elif keyword == 'endif':
+            if stack:
+                stack.pop()
+
+        if stack:
+            contexts[number] = list(stack)
+
+    require(not stack, 'unbalanced preprocessor conditionals in the parsed file')
+    return contexts
+
+
+def parse_output_path(repo):
+    """The frame-output readiness gates, which the Milestone-1 report omitted.
+
+    Two helpers dominate the output path and they fail in opposite directions:
+
+    * `AllTransformBandsValid` is always compiled (`#if DEBUG || 1`) and is
+      called at seven live runtime sites, but its real band check is commented
+      out -- it only tests `wavelet != NULL`. A hollow gate that is always on
+      and always passes.
+    * `AllLowpassBandsValid` is the only helper that inspects
+      `band_valid_flags & BAND_VALID_MASK(0)` per channel, and its single call
+      site sits behind `#if DEBUG`. `DEBUG` is `(1 && _DEBUG)` and `_DEBUG` is
+      an MSVC-only macro that no build file in this repository defines, so the
+      only correct output check is compiled out everywhere.
+    """
+    text = read(repo, DECODER)
+
+    # decoder.c defines DEBUG itself; capture the defining expression.
+    match = re.search(r'#ifndef DEBUG\n#define DEBUG\s+(.+?)\n#endif', text)
+    require(match is not None, 'the decoder DEBUG definition is missing')
+    debug_def = match.group(1).strip()
+    require('_DEBUG' in debug_def,
+            'DEBUG no longer derives from _DEBUG; re-derive the output gates')
+
+    # No build file in the tree may define _DEBUG, or the analysis inverts.
+    defined_in_build = []
+    for pattern in ('CMakeLists.txt', 'cmake/*.cmake', 'tests/CMakeLists.txt'):
+        for path in sorted(repo.glob(pattern)):
+            body = path.read_text(encoding='utf-8', errors='replace')
+            for line in body.split('\n'):
+                if '_DEBUG' in line and re.search(r'\bD_DEBUG\b|_DEBUG=', line):
+                    defined_in_build.append('%s: %s' % (path.name, line.strip()[:60]))
+    require(defined_in_build == [],
+            'a build file now defines _DEBUG, which would enable the real output '
+            'gate: %r' % (defined_in_build,))
+
+    # The wrapper macro that keeps both helpers compiled unconditionally.
+    require('#if DEBUG || 1' in text,
+            'the always-true wrapper around the output helpers is gone')
+
+    # --- hollow helper -----------------------------------------------------
+    start = text.find('static bool AllTransformBandsValid(')
+    require(start >= 0, 'AllTransformBandsValid is missing')
+    end = text.find('\n}\n', start)
+    body = text[start:end]
+
+    require('//if (!AllBandsValid(wavelet))' in body,
+            'the commented-out band check in AllTransformBandsValid changed; '
+            're-derive whether the output gate is still hollow')
+    require('band_valid_flags' not in body,
+            'AllTransformBandsValid now inspects band flags; the hollow-gate '
+            'finding no longer holds')
+    require('if(wavelet == NULL)' in body or 'if (wavelet == NULL)' in body,
+            'AllTransformBandsValid no longer even tests for NULL')
+
+    live_calls = [line_of(text, 'if (!AllTransformBandsValid(transform_array')
+                  for _ in [0]]
+    call_lines = []
+    for found in re.finditer(r'if \(!AllTransformBandsValid\(transform_array', text):
+        call_lines.append(text.count('\n', 0, found.start()) + 1)
+    require(len(call_lines) == 7,
+            'expected 7 live AllTransformBandsValid call sites, found %d'
+            % len(call_lines))
+
+    # At least one of them must be on the HALF output path that #160 measured.
+    half_dispatch = text.find('case DECODED_RESOLUTION_HALF:')
+    require(half_dispatch > 0, 'DECODED_RESOLUTION_HALF dispatch is missing')
+    require(any(line > half_dispatch for line in call_lines),
+            'no live output gate on the HALF path')
+
+    # --- the only correct helper, compiled out ----------------------------
+    lp_start = text.find('static bool AllLowpassBandsValid(')
+    require(lp_start >= 0, 'AllLowpassBandsValid is missing')
+    lp_end = text.find('\n}\n', lp_start)
+    lp_body = text[lp_start:lp_end]
+    require('band_valid_flags & BAND_VALID_MASK(0)' in lp_body,
+            'AllLowpassBandsValid no longer checks band 0')
+
+    lp_calls = []
+    for found in re.finditer(r'AllLowpassBandsValid\(transform_array', text):
+        line = text.count('\n', 0, found.start()) + 1
+        line_start = text.rfind('\n', 0, found.start()) + 1
+        lp_calls.append((line, text[line_start:text.find('\n', found.start())].strip()))
+    require(len(lp_calls) == 1,
+            'expected exactly one AllLowpassBandsValid call site, found %d'
+            % len(lp_calls))
+    call_line, call_text = lp_calls[0]
+    require(call_text.startswith('assert('),
+            'the AllLowpassBandsValid call is no longer assert-only')
+
+    # Require the call to be *inside* a `#if DEBUG` block, and that block to end
+    # on the next line. A backwards scan for the nearest `#if` is not enough:
+    # three `#if DEBUG` blocks sit within a dozen lines of each other in this
+    # dispatch, so text proximity would keep passing after the guard is removed.
+    contexts = preprocessor_contexts(text)
+    call_context = contexts.get(call_line, [])
+    require(call_context == [('DEBUG', 'if')],
+            'the AllLowpassBandsValid call is no longer the sole body of a '
+            '#if DEBUG block (actual nesting: %r)' % (call_context,))
+
+    following = text.split('\n')[call_line].strip()  # 0-based index -> next line
+    require(following == '#endif',
+            'the #if DEBUG block no longer closes immediately after the call '
+            '(next line: %r)' % (following,))
+
+    # One more line of defence: the guard must disappear together with its call.
+    require('#if DEBUG\n\t\t\tassert(AllLowpassBandsValid(transform_array, '
+            'num_channels, frame_index));\n#endif' in text,
+            'the guarded three-line unit around AllLowpassBandsValid changed')
+
+    # --- the third dead-but-correct reader --------------------------------
+    # Both call sites sit in an `#else` branch of a `#if _THREADED_DECODER`
+    # conditional. Resolve the actual preprocessor nesting instead of trusting
+    # a text offset: the file contains many earlier `#if _THREADED_DECODER`
+    # blocks, so "after the first one" proves nothing.
+    dead_reader = []
+    for found in re.finditer(r'if \(AllBandsValid\(wavelet\)\)', text):
+        dead_reader.append(text.count('\n', 0, found.start()) + 1)
+    require(len(dead_reader) == 2,
+            'expected the two non-threaded AllBandsValid call sites, found %d'
+            % len(dead_reader))
+
+    contexts = preprocessor_contexts(text)
+    for line in dead_reader:
+        branches = contexts.get(line, [])
+        in_else_of_threaded = any(
+            directive == '_THREADED_DECODER' and branch == 'else'
+            for directive, branch in branches)
+        require(in_else_of_threaded,
+                'AllBandsValid call at line %d is no longer inside the #else of a '
+                '#if _THREADED_DECODER conditional (context: %r)'
+                % (line, branches))
+
+    config = read(repo, CONFIG_H)
+    require(re.search(r'#ifndef _THREADED_DECODER\n#define _THREADED_DECODER\s+1',
+                      config) is not None,
+            '_THREADED_DECODER is no longer defaulted to 1; the two AllBandsValid '
+            'sites would become reachable')
+
+    return {
+        'debug_macro': {
+            'definition': '#define DEBUG ' + debug_def,
+            'defined_by_build_file': defined_in_build,
+            'evaluates_true_on_linux': False,
+            'reason': '_DEBUG is an MSVC Debug-configuration macro; gcc and clang '
+                      'builds in this tree never define it, so `(1 && _DEBUG)` is 0',
+        },
+        'hollow_gate': {
+            'symbol': 'AllTransformBandsValid',
+            'line': line_of(text, 'static bool AllTransformBandsValid('),
+            'always_compiled': True,
+            'wrapper': '#if DEBUG || 1',
+            'checks_band_flags': False,
+            'real_check_present_as_comment': True,
+            'tests_only': 'wavelet != NULL',
+            'live_call_sites': call_lines,
+            'note': 'seven runtime guards on the frame-output path that cannot '
+                    'detect an unreconstructed band',
+        },
+        'correct_gate_compiled_out': {
+            'symbol': 'AllLowpassBandsValid',
+            'line': line_of(text, 'static bool AllLowpassBandsValid('),
+            'checks_band0': True,
+            'call_site_line': call_line,
+            'call_site_form': 'assert()',
+            'guard': '#if DEBUG',
+            'nesting': call_context,
+            'active_in_any_build': False,
+            'note': 'the only per-channel band-0 output check is behind #if DEBUG, '
+                    'which no configuration in this tree enables',
+        },
+        'dead_reader': {
+            'symbol': 'AllBandsValid',
+            'line': line_of(text, 'static bool AllBandsValid('),
+            'call_sites': dead_reader,
+            'reachable': False,
+            'reason': 'both call sites are in the #else branch of '
+                      '#if _THREADED_DECODER, which config.h enables',
+            'still_vacuous': 'it forwards to BANDS_ALL_VALID, the released macro',
+        },
+    }
+
+
 # ------------------------------------------------------------------- assemble
 
 def build_report(repo):
@@ -500,6 +727,7 @@ def build_report(repo):
         'band_counts': parse_band_counts(repo),
         'writers': parse_writers(repo),
         'readers': parse_readers(repo),
+        'output_path': parse_output_path(repo),
         'required_bit_matrix': parse_mask_logic(repo),
         'liveness': parse_liveness(repo),
     }
@@ -561,6 +789,23 @@ SELF_TESTS = (
      CONFIG_H,
      '#define _DELAYED_THREAD_START\t1',
      '#define _DELAYED_THREAD_START\t0', 1),
+    # --- output-path findings (Milestone 1 correction) --------------------
+    ('hollow output gate actually checks bands',
+     DECODER,
+     '\t\t//if (!AllBandsValid(wavelet))\n\t\tif(wavelet == NULL)',
+     '\t\tif (!AllBandsValid(wavelet))', 1),
+    ('correct output gate moved out of #if DEBUG',
+     DECODER,
+     '#if DEBUG\n\t\t\tassert(AllLowpassBandsValid(transform_array, num_channels, frame_index));\n#endif',
+     'assert(AllLowpassBandsValid(transform_array, num_channels, frame_index));', 1),
+    ('build file starts defining _DEBUG',
+     Path('CMakeLists.txt'),
+     'add_subdirectory(src)',
+     'add_compile_definitions(_DEBUG=1)\nadd_subdirectory(src)', 1),
+    ('threaded decoder disabled, reviving AllBandsValid',
+     CONFIG_H,
+     '#define _THREADED_DECODER\t1',
+     '#define _THREADED_DECODER\t0', 1),
 )
 
 
@@ -569,11 +814,18 @@ def run_self_test(repo):
     failures = []
     build_report(repo)  # baseline must pass first
 
+    # Files the verifier reads. The self-test copies exactly these, so a
+    # mutation can never be masked by an unrelated file that was left behind.
+    VERIFIER_INPUTS = (DECODER, IMAGE_H, WAVELET_C, WAVELET_H, THREADING, CONFIG_H,
+                       Path('upstream/Codec/codec.h'), Path('CMakeLists.txt'))
+
     for name, rel, old, new, count in SELF_TESTS:
         with tempfile.TemporaryDirectory() as tmp:
             copy = Path(tmp) / 'tree'
-            for sub in ('upstream/Codec',):
-                shutil.copytree(repo / sub, copy / sub)
+            for source in VERIFIER_INPUTS:
+                target = copy / source
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(repo / source, target)
             target = copy / rel
             text = target.read_text(encoding='utf-8', errors='replace')
             text = text.replace('\r\n', '\n')

@@ -17,6 +17,7 @@ Run it before citing this document.
 | Causal admission window on HALF 1080p YUV422 | `DEMONSTRATED` (Linux 25/120 → 0/120; Windows 4/120 → 0/120) |
 | Root mechanism (vacuous readiness predicate) | `SOURCE_CONFIRMED` — this pass |
 | Per-topology required bits | `SOURCE_DERIVED`, and **insufficient** as specified — see §4 |
+| Output-boundary readiness | `HOLLOW` — the always-on gate checks only for NULL; the correct gate is compiled out |
 | Production-safe contract | `NOT_DESIGNED_YET` — requirements in §6 |
 | Portable patch | `NONE`. The published spin gate is not a candidate |
 
@@ -95,7 +96,58 @@ temporal inversion (`decoder.c:13253-13254`), so the unguarded temporal path is
 upstream of the pixels that were actually measured. That exposure is
 **source-level only** — it was not measured, on either host, in this campaign.
 
-### 3.3 The queue drain, which is where the race is decided
+### 3.3 The output path: a hollow gate that is always on, and a real gate that is always off
+
+> **Correction to this report's first revision.** It described the inverse-stage
+> gaps above as the only unguarded sites and stopped there. That was incomplete.
+> The frame-output path carries a pair of helpers that fail in opposite
+> directions, and one of them sits directly on the measured HALF route.
+
+**`AllTransformBandsValid` (`decoder.c:2050`) — always compiled, never checks a
+band.** It is wrapped in `#if DEBUG || 1`, which is unconditionally true, and it
+has **seven live runtime call sites** (`:13303`, `:13315`, `:13329`, `:13534`,
+`:13555`, `:13576`, `:13599`) — including the `DECODED_RESOLUTION_HALF` and
+`HALF_HORIZONTAL` branches that `ReconstructSampleFrameToBuffer` and
+`ComputeOutputDimensions` take. Its body does exactly this:
+
+```c
+//if (!AllBandsValid(wavelet))
+if(wavelet == NULL)
+{
+    return false;
+}
+```
+
+The band test is **commented out**. Every caller therefore believes it has
+validated the output frame and receives a `true` that only means "the pointer is
+non-NULL". This is not a rare path: HALF 1080p — the exact condition #160 and
+#192 measured — goes through it.
+
+**`AllLowpassBandsValid` (`decoder.c:2078`) — the only correct output check,
+compiled out everywhere.** It is the one helper that inspects
+`band_valid_flags & BAND_VALID_MASK(0)` per channel. Its single call site
+(`:24533`) is an `assert()` inside `#if DEBUG`. `decoder.c` defines
+`DEBUG` as `(1 && _DEBUG)`, and `_DEBUG` is an MSVC Debug-configuration macro
+that **no build file in this repository defines** — verified by scanning
+`CMakeLists.txt`, `cmake/*.cmake` and `tests/CMakeLists.txt`. On gcc and clang
+the expression is therefore `0`, and the block does not exist. The tool checks
+that the call is the *sole body* of that conditional block, so removing the
+guard does not leave a neighbouring `#if DEBUG` behind to satisfy the test.
+
+Consequence, stated carefully: the release build has **no** per-channel band-0
+check at the output boundary, and the seven guards it *does* have cannot detect
+the condition they appear to guard. That is a source-level statement about what
+the code can check, not a claim that the measured corruption came through this
+path — that was not measured, on either host.
+
+**`AllBandsValid` (`decoder.c:2044`)** is the third reader. It forwards to the
+vacuous macro, and both of its call sites (`:11327`, `:11725`) sit in the `#else`
+branch of `#if _THREADED_DECODER`, which `config.h` sets to 1. Dead in the
+shipped build, and vacuous even if reached. The verifier resolves real
+preprocessor nesting for these two lines rather than searching for the nearest
+`#if` in the file.
+
+### 3.4 The queue drain, which is where the race is decided
 
 `upstream/Codec/entropy_threading.c`, inside `EntropyWorkerThreadProc`:
 
@@ -235,8 +287,10 @@ Derived from §2–§5, in the order the issue asks for. Nothing here is impleme
 
 * No decode was executed; every statement about timing is a citation of the
   #160 / #192 ledgers, not a new measurement.
-* The temporal branch and the `index == 3` highpass site are characterised from
-  source. Their real exposure is unmeasured on both hosts.
+* The temporal branch, the `index == 3` highpass site and the output-boundary
+  gates are characterised from source. Their real exposure is unmeasured on
+  both hosts — in particular, nothing here shows that the measured corruption
+  passed through the hollow output gate.
 * Only HALF 1080p BGRA on the pinned 900 396-byte YUV422 packet was ever
   measured. FULL was not exercised on either host.
 * No claim about other formats, resolutions, GOP structures or channel counts.
@@ -253,12 +307,22 @@ python3 tools/verify_rca195_band0_contract.py --check --json docs/validation/rca
 python3 tools/verify_rca195_band0_contract.py --self-test
 ```
 
-`--self-test` copies `upstream/Codec` into a scratch directory and applies six
-mutations (released macro rewritten, band-count table altered, spatial guard
-deleted, started-writer lock made unconditional, `DecodedBandsValid` given a
-live caller, delayed thread start disabled). Each must be rejected; the run
-fails if any mutation still verifies. Both checks are registered in CTest as
-`rca195_band0_contract` and `rca195_band0_contract_selftest`.
+`--self-test` copies the files the verifier reads into a scratch directory and
+applies ten mutations, each of which must be rejected:
+
+1. released macro rewritten to the strict form;
+2. band-count table altered;
+3. spatial guard deleted;
+4. started-writer lock made unconditional;
+5. `DecodedBandsValid` given a live caller;
+6. delayed thread start disabled;
+7. the hollow output gate made to check bands for real;
+8. the correct output gate moved out of `#if DEBUG`;
+9. a build file starts defining `_DEBUG`;
+10. `_THREADED_DECODER` disabled, reviving the dead `AllBandsValid` path.
+
+The run fails if any mutation still verifies. Both checks are registered in
+CTest as `rca195_band0_contract` and `rca195_band0_contract_selftest`.
 
 Machine-readable output of this pass:
 `docs/validation/rca195_band0_contract_2026-10-19.json`.

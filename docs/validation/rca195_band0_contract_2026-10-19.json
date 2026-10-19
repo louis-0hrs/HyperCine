@@ -2,7 +2,7 @@
  "issue": 195,
  "milestone": 1,
  "verdict": "DESIGN_ONLY",
- "repo_head": "a987f679f7e17a88aebe60375c37c843d7095152",
+ "repo_head": "be470f79b5042d95f6f3f6e704c4d0e5aced5844",
  "sources": {
   "upstream/Codec/decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
   "upstream/Codec/image.h": "93ed2e580030274dda46257eaf08ac90717f2a526ccc11fb5b471dcdb3bf1d52",
@@ -109,6 +109,60 @@
    "recheck_under_lock": false,
    "execute_line": 302,
    "note": "the admission decision is taken under the entropy worker lock, but the transform itself runs after Unlock() and is re-gated by an unlocked, non-atomic re-read of both flag words; the do/while condition at the loop tail repeats that unlocked read"
+  }
+ },
+ "output_path": {
+  "debug_macro": {
+   "definition": "#define DEBUG (1 && _DEBUG)",
+   "defined_by_build_file": [],
+   "evaluates_true_on_linux": false,
+   "reason": "_DEBUG is an MSVC Debug-configuration macro; gcc and clang builds in this tree never define it, so `(1 && _DEBUG)` is 0"
+  },
+  "hollow_gate": {
+   "symbol": "AllTransformBandsValid",
+   "line": 2050,
+   "always_compiled": true,
+   "wrapper": "#if DEBUG || 1",
+   "checks_band_flags": false,
+   "real_check_present_as_comment": true,
+   "tests_only": "wavelet != NULL",
+   "live_call_sites": [
+    13303,
+    13315,
+    13329,
+    13534,
+    13555,
+    13576,
+    13599
+   ],
+   "note": "seven runtime guards on the frame-output path that cannot detect an unreconstructed band"
+  },
+  "correct_gate_compiled_out": {
+   "symbol": "AllLowpassBandsValid",
+   "line": 2078,
+   "checks_band0": true,
+   "call_site_line": 24533,
+   "call_site_form": "assert()",
+   "guard": "#if DEBUG",
+   "nesting": [
+    [
+     "DEBUG",
+     "if"
+    ]
+   ],
+   "active_in_any_build": false,
+   "note": "the only per-channel band-0 output check is behind #if DEBUG, which no configuration in this tree enables"
+  },
+  "dead_reader": {
+   "symbol": "AllBandsValid",
+   "line": 2044,
+   "call_sites": [
+    11327,
+    11725
+   ],
+   "reachable": false,
+   "reason": "both call sites are in the #else branch of #if _THREADED_DECODER, which config.h enables",
+   "still_vacuous": "it forwards to BANDS_ALL_VALID, the released macro"
   }
  },
  "required_bit_matrix": {
