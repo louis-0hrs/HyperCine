@@ -11,6 +11,23 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+# RCA-195 Milestone 1: re-derive the band-0 publication contract from the frozen
+# SDK source. Source reading only -- this test never decodes and never writes to
+# upstream/. It fails closed if a macro, guard, writer lock or band-count entry
+# moves, so the published dependency map cannot silently drift from the tree.
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME rca195_band0_contract COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/verify_rca195_band0_contract.py"
+        --check --repo "${CMAKE_SOURCE_DIR}")
+    add_test(NAME rca195_band0_contract_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/verify_rca195_band0_contract.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
+    set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
+        PROPERTIES TIMEOUT 300
+        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS")
+endif()
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
