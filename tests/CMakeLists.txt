@@ -138,6 +138,33 @@ if(HYPERCINE_ENABLE_CUDA AND WIN32)
         HYPERCINE_SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
 endif()
 
+# Issue #36 stage F0: real GoPro SDK capability probe over every compressed
+# CineForm family. Isolated tool; it reuses no existing corpus export contract
+# and changes no existing schema. Run it manually on a host with the SDK build.
+if(WIN32 AND TARGET CFHDCodecStatic)
+    add_executable(format_corpus_probe ../tools/format_corpus_probe.cpp)
+    target_link_libraries(format_corpus_probe PRIVATE CFHDCodecStatic)
+    add_executable(test_format_corpus_probe test_format_corpus_probe.cpp)
+    target_link_libraries(test_format_corpus_probe PRIVATE CFHDCodecStatic)
+    add_test(NAME format_corpus_probe_faults COMMAND test_format_corpus_probe)
+    if(MSVC)
+        # The pristine sample layer throws CFHD_ERROR_BADFORMAT out of extern "C"
+        # entry points such as CFHD_GetImagePitch (see docs/UPSTREAM.md). MSVC's
+        # default /EHsc lets the compiler assume extern "C" functions never throw,
+        # which makes that unwind undefined behaviour and crashes Release builds.
+        # /EHs drops the assumption. MSVC reports D9025 for overriding /EHsc.
+        target_compile_options(format_corpus_probe PRIVATE /EHs)
+        target_compile_options(test_format_corpus_probe PRIVATE /EHs)
+    endif()
+    # Cheap guard for the probe itself: one family and one source format must still
+    # encode and decode all six qualities. The full matrix stays an on-demand run.
+    add_test(NAME format_corpus_probe_smoke COMMAND format_corpus_probe
+        --family YUV_422 --source BGRA --width 256 --height 256)
+    set_tests_properties(format_corpus_probe_smoke PROPERTIES
+        PASS_REGULAR_EXPRESSION "total=6 bidirectional_pass=6"
+        TIMEOUT 900)
+endif()
+
 # Actual GoPro decode of packets produced by the independent SDK-free encoder.
 # Windows CI uses the existing reference workflow; no workflow changes needed.
 if(WIN32 AND TARGET CFHDCodecStatic)
