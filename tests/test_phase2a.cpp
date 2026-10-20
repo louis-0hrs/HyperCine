@@ -38,6 +38,7 @@ extern "C" {
 
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -200,8 +201,10 @@ void PrintDecode(const char* label, const DecodeResult& result, const std::vecto
 
 void PrintPixelDiffs(const std::vector<uint8_t>& a, int a_pitch,
                      const std::vector<uint8_t>& b, int b_pitch, int width, int height) {
-    if (a_pitch <= 0 || b_pitch <= 0) {
-        std::cout << "pixel comparison unavailable (pitch " << a_pitch << " vs " << b_pitch << ")\n";
+    if (width <= 0 || height <= 0 || a_pitch <= 0 || b_pitch <= 0 ||
+        static_cast<size_t>(a_pitch) < static_cast<size_t>(width) * 4u ||
+        static_cast<size_t>(b_pitch) < static_cast<size_t>(width) * 4u) {
+        std::cout << "pixel comparison unavailable (invalid BGRA geometry/pitch)\n";
         return;
     }
     const size_t rows = static_cast<size_t>(height);
@@ -281,10 +284,19 @@ bool WritePacket(const std::string& directory, const char* name, const std::vect
 }
 
 bool ReadPacket(const char* path, std::vector<uint8_t>* packet) {
-    std::ifstream in(path, std::ios::binary);
+    // This is a 1080p synthetic-sample diagnostic, not a general-purpose
+    // decoder for untrusted external packet sizes.
+    constexpr std::streamoff max_capture_bytes = 2 * 1024 * 1024;
+    std::ifstream in(path, std::ios::binary | std::ios::ate);
     if (!in) return false;
-    packet->assign(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
-    return !packet->empty();
+    const std::streampos end = in.tellg();
+    if (end <= std::streampos(0) || end > std::streampos(max_capture_bytes))
+        return false;
+    const auto bytes = static_cast<size_t>(static_cast<std::streamoff>(end));
+    packet->resize(bytes);
+    in.seekg(0, std::ios::beg);
+    return static_cast<bool>(in.read(reinterpret_cast<char*>(packet->data()),
+                                     static_cast<std::streamsize>(bytes)));
 }
 
 int DecodePacketFile(const char* path) {
@@ -295,11 +307,22 @@ int DecodePacketFile(const char* path) {
     }
     PrintPacket("packet", packet);
     PrintSampleHeader("packet header", packet);
+    const SampleHeaderInfo header = ParseSample(packet);
+    if (!header.parsed || header.error || header.width != 1920 || header.height != 1080) {
+        std::cerr << "packet is not the expected 1920x1080 synthetic fixture\n";
+        return 1;
+    }
     std::vector<uint8_t> image;
     DecodeResult result;
     const bool ok = Decode(packet, 0, 0, &image, &result);
     PrintDecode("packet decode", result, image);
-    if (ok && result.decoded_width > 0 && result.decoded_height > 0 && result.pitch > 0) {
+    if (!ok || result.decoded_width != 1920 || result.decoded_height != 1080 ||
+        result.pitch < 1920 * 4 ||
+        image.size() < static_cast<size_t>(result.pitch) * 1080u) {
+        std::cerr << "packet decode failed or returned invalid BGRA geometry\n";
+        return 1;
+    }
+    if (ok) {
         const int w = result.decoded_width;
         const int h = result.decoded_height;
         const auto frame = hypercine::MakeFrame(w, h, hypercine::CanonicalPattern::Canonical);
@@ -475,6 +498,13 @@ int main(int argc, char** argv) {
     PrintSampleHeader("device compact header", resident.bitstream);
     PrintPacketDiffs(compact.bitstream, resident.bitstream);
     if (const char* capture = std::getenv("HYPERCINE_PHASE2A_CAPTURE_DIR")) {
+        // Atomically reserve a *new* capture directory. A second invocation
+        // must fail rather than truncating an immutable prior packet pair.
+        std::error_code create_error;
+        if (!std::filesystem::create_directory(capture, create_error)) {
+            std::cerr << "capture directory must be new and writable\n";
+            return 1;
+        }
         if (WritePacket(capture, "phase2a_host.cfhd", compact.bitstream) &&
             WritePacket(capture, "phase2a_device.cfhd", resident.bitstream)) {
             std::cout << "captured immutable packets under HYPERCINE_PHASE2A_CAPTURE_DIR\n";
