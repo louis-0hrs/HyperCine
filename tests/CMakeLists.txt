@@ -165,3 +165,25 @@ if(WIN32 AND TARGET CFHDCodecStatic)
             DEPENDS test_standalone_sdk_oracle VERBATIM)
     endif()
 endif()
+
+# Issue #189: isolated original-SDK reference collector; no CUDA linkage.
+if(WIN32 AND MSVC AND TARGET CFHDCodecStatic)
+    add_executable(gop2_reference_export ../tools/gop2_reference_export.cpp)
+    target_include_directories(gop2_reference_export PRIVATE "${CMAKE_SOURCE_DIR}/upstream/DecoderSDK")
+    target_compile_definitions(gop2_reference_export PRIVATE _ALLOCATOR=1 WARPSTUFF=1
+        HYPERCINE_SOURCE_COMMIT="${HYPERCINE_SOURCE_COMMIT}")
+    target_compile_options(gop2_reference_export PRIVATE /EHs)
+    target_link_libraries(gop2_reference_export PRIVATE CFHDCodecStatic)
+endif()
+
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME gop2_reference_inventory_integrity
+        COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_reference_inventory.py")
+endif()
+
+# Phase-B oracle contract: missing stages/neutrality evidence never pass.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME gop2_original_stage_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_stage_contract.py")
+endif()
