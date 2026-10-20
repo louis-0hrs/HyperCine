@@ -153,3 +153,57 @@ Windows CPU-only Release CTest **16/16 PASS, zero skips, 1.89 s**. Direct
 CPU reference runner: CTest **2/2 PASS**, four absent CUDA tests BLOCKED,
 independent oracle BLOCKED, runner exit **77**. No GPU rerun was needed for
 this Python-only behavior change. Frozen `upstream/` status is empty.
+
+## Follow-up: registration-bound coverage (2026-10-20, schema 3)
+
+Schema 2 still trusted the JUnit file alone. A `status="run"` entry for a
+test the exact build never registered with the `reference-oracle` label and
+`SKIP_RETURN_CODE=77` could therefore be read as execution coverage, and every
+`<skipped>` entry was labelled `BLOCKED` without checking the skip reason.
+
+Schema 3 binds each run to `ctest --show-only=json-v1` for the same build,
+configuration and `reference-oracle` label:
+
+- Each required test must be registered with the lane label; the four Phase 2
+  tests must also carry `SKIP_RETURN_CODE=77`. A missing registration is
+  `REGISTRATION_MISSING`; a changed label or skip property is
+  `REGISTRATION_MISMATCH`. Neither is coverage.
+- Every registered lane test must produce exactly one result. A registered
+  test without a result is `NOT_RUN`.
+- A result with no registration on this build is `UNREGISTERED_RESULT` and
+  fails the lane with exit 1 (stale or foreign evidence).
+- A skip is `REFERENCE_ORACLE_BLOCKED` only when its reason contains
+  `SKIP_RETURN_CODE=77`. Any other skip is `UNEXPECTED_SKIP`. Both remain
+  BLOCKED=77 and neither certifies pixels.
+- An executed test is `PASS_EXECUTION_ONLY`. Execution provenance is not
+  quality proof, and the release gate stays BLOCKED=77 without a reviewed
+  independent pixel oracle.
+
+The inventory now also emits `counts` and `coverage` (required registrations,
+lane registrations, results, missing/mismatched entries, `complete`), and
+itemises every test in the label, not just the five required gates. Each row
+carries `required`. Strict failure and nonzero CTest exit still take precedence
+at exit 1. Missing or malformed registration output fails closed. Regression
+coverage is 15 cases.
+
+### Native M4 evidence (2026-10-20)
+
+Windows 11 x64 QEMU guest, AMD EPYC 7601 8 LP no SMT; Tesla M4 CC 5.2
+(3,840 MiB, driver 582.78; 10 MiB used, 0 % utilization before the run);
+CUDA 12.8.93 `sm_52`; MSVC 19.44.35229; CMake 3.31.12; Ninja 1.13.2;
+Release with upstream SDK and tests ON.
+
+- Registration for the exact build/label: 6 tests. All five required tests
+  registered; the four Phase 2 tests carried both `reference-oracle` and
+  `SKIP_RETURN_CODE=77`.
+- Focused Python regression: **15/15 PASS**.
+- One native reference-lane inventory (direct runner): **2 PASS, 1 FAIL,
+  3 BLOCKED**, `coverage.complete=true`, runner exit **1**.
+  `test_phase2a`, `test_phase2b` and `test_phase2d` were
+  `REFERENCE_ORACLE_BLOCKED` via `SKIP_RETURN_CODE=77`; `test_phase2c`
+  was a `STRICT_FAILURE` (the known M4 8K 3-slot/4-stream capacity gate);
+  `test_reference_oracle` and `test_reference_release_inventory` were
+  `PASS_EXECUTION_ONLY`. The independent oracle remains BLOCKED.
+- This is inventory/classification evidence, not a pixel-quality or
+  full-suite qualification. The strict resource failure stays visible and
+  was not retried away. `upstream/` status is empty.
