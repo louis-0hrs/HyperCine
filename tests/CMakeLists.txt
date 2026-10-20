@@ -88,6 +88,7 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2a test_phase2a.cpp)
     target_link_libraries(test_phase2a PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2a COMMAND test_phase2a)
+    add_test(NAME test_diagnostic_geometry_guard COMMAND test_phase2a --self-test-geometry-guard)
 
     add_executable(test_phase2b test_phase2b.cpp)
     target_link_libraries(test_phase2b PRIVATE hypercine_wavelet CFHDCodecStatic)

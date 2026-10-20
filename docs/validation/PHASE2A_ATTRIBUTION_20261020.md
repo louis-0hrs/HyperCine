@@ -31,9 +31,19 @@ Two bounded diagnostic options support fresh-process trials:
 - `test_phase2a --decode <packet>` performs exactly one decode per process and prints
   the same diagnostics plus PSNR and first difference against the synthetic source.
   This diagnostic accepts only 0 < packet length <= 2 MiB and an original
-  sample header declaring exactly 1920x1080; it fails on unexpected decoded
-  BGRA geometry, stride smaller than four bytes per pixel, or a short image.
+  sample header declaring exactly 1920x1080. After `CFHD_PrepareToDecode` it
+  requires the returned geometry to be exactly 1920x1080 BGRA with a successful
+  `CFHD_GetImagePitch` and the expected 7680-byte row pitch **before** allocating
+  output storage or calling `CFHD_DecodeSample`; otherwise it closes the decoder
+  and fails closed. The post-decode checks still reject an unexpected BGRA
+  geometry, stride smaller than four bytes per pixel, or a short image.
   This is **not a general CineForm decoder or an untrusted-file fuzz target**.
+- `test_phase2a --self-test-geometry-guard` exercises the pre-allocation decision
+  directly. `test_diagnostic_geometry_guard` registers it in CTest. The SDK
+  prepare result cannot be forced to a wrong geometry without changing frozen
+  `upstream/` or constructing an inconsistent bitstream, so the negative coverage
+  is on the fail-closed predicate (wrong width, height, format, pitch error,
+  short/zero/negative/unpadded pitch) rather than on a live SDK prepare failure.
 
 ## Packet comparison
 
