@@ -104,10 +104,18 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2b test_phase2b.cpp)
     target_link_libraries(test_phase2b PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2b COMMAND test_phase2b)
+    set_tests_properties(test_phase2b PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2c test_phase2c.cpp)
     target_link_libraries(test_phase2c PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2c COMMAND test_phase2c)
+    set_tests_properties(test_phase2c PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2d test_phase2d.cpp)
     target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
