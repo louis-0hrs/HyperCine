@@ -28,6 +28,11 @@ The fix inspects each component as the start of a bounded three-component
 window and scans both the raw and the `/`-prefixed form. Existing literal and
 single-suffix scanning is preserved.
 
+End to end, with the installed pre-push hook and a disposable bare remote, the
+parent head accepted a push of that synthetic nested ref. This child rejects
+the same push with `[LOCAL_REF]:0: PERSONAL_ABSOLUTE_PATH`, does not echo the
+raw ref, and leaves the destination ref absent.
+
 ## Changes
 
 Only the reviewed #109 content is added: `ci/privacy_guard.py`,
