@@ -52,7 +52,9 @@ GitHub, and diagnostics were checked for redaction.
   zero failures, 335.427 s.
 - Child nested-ref hook cases: 3 passed, 70.222 s, covering local and
   destination refs plus clean nested ref and delete.
-- Child full installed-hook matrix: see the run recorded in the PR handoff.
+- Child full installed-hook matrix: 102 tests, all passed, zero failures and
+  zero skips, 2001.860 s. The six additional cases are the three new nested-ref
+  methods in both the SHA-1 and SHA-256 matrices.
 - PR #114 evidence: the hosted Ubuntu `Publication privacy` job in run
   39013709166 lists all ten `WorkflowIdentityTests` as `ok` (`Ran 93 tests`,
   `OK`). The same file also passed 10/10 under native Windows Python with Git
