@@ -11,6 +11,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+# 0. SDK-free fail-closed reference-oracle contract.
+# Runs on every platform and does not require the original GoPro SDK.
+add_executable(test_reference_oracle test_reference_oracle.cpp)
+add_test(NAME test_reference_oracle COMMAND test_reference_oracle)
+set_tests_properties(test_reference_oracle PROPERTIES LABELS "reference-oracle")
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
@@ -88,6 +94,12 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2a test_phase2a.cpp)
     target_link_libraries(test_phase2a PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2a COMMAND test_phase2a)
+    # Exit 77 means the strict encoder gates passed but the original-SDK pixel
+    # gate is BLOCKED_ORACLE. CTest reports it as skipped, never as passed.
+    set_tests_properties(test_phase2a PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2b test_phase2b.cpp)
     target_link_libraries(test_phase2b PRIVATE hypercine_wavelet CFHDCodecStatic)
