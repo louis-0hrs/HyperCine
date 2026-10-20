@@ -1,0 +1,176 @@
+{
+  "schema": "hypercine.scalar_inverse_research_validation/1",
+  "license": "MIT OR Apache-2.0",
+  "issue": 144,
+  "timestamp_utc": "2026-10-20T09:27:44.169569+00:00",
+  "architecture_parent_sha": "1acf35bf42431084e3bd8d30017bbeebcdf452a8",
+  "reference_index_sha": "77acadbd497a490c034440709390807087147d64",
+  "status": "RESEARCH_PROTOTYPE_SYNTHETICALLY_QUALIFIED",
+  "platform": {
+    "os": "macOS26.5.2",
+    "architecture": "arm64",
+    "compiler": "AppleClang21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0"
+  },
+  "full_native_ctest": {
+    "release": {
+      "status": "PASS",
+      "registered": 40,
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "ctest_seconds": 74.89,
+      "original_stage_replay": "NOT_RUN"
+    },
+    "asan": {
+      "status": "PASS",
+      "registered": 40,
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "ctest_seconds": 135.66,
+      "original_stage_replay": "NOT_RUN"
+    }
+  },
+  "asan_ubsan": {
+    "compiled_cpp_entries_instrumented": 20,
+    "recovery": false,
+    "leak_detection": false,
+    "asan_runtime_linkage_verified": true,
+    "python_and_ffmpeg_instrumented": false
+  },
+  "tsan": {
+    "status": "PASS",
+    "scope": "four scalar synthetic graph worker cases only",
+    "workers": [
+      1,
+      2,
+      4,
+      16
+    ],
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "ctest_seconds": 1.43
+  },
+  "synthetic_fixtures": {
+    "static_operator_vectors": 3,
+    "seeded_vectors": [
+      322420463,
+      322420464
+    ],
+    "forced_border_vectors": 1,
+    "actual_probe_dc_cases": 6,
+    "original_sdk_data": false
+  },
+  "mutation_sensitivity": [
+    {
+      "mutation": "negative_division_truncates",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "vertical_wraps_instead_of_saturates",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "left_border_saturates",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "right_border_wraps",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "no_short_tail",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "band_order_swapped",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "left_border_coefficient_wrong",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "tail_saturates",
+      "status": "REJECTED"
+    },
+    {
+      "mutation": "SSE_wraps",
+      "status": "REJECTED"
+    }
+  ],
+  "replay_guard_methods": 7,
+  "ci_inventory_methods": 6,
+  "tests_off_registered": 0,
+  "original_six_pairs": {
+    "status": "NOT_RUN_BLOCKED_ACCESS",
+    "binding": "HYPERCINE_GOLDEN_DIR",
+    "binding_state": "ENOENT",
+    "actual_requested_replay_exit": 1,
+    "missing_original_ctest_request": "EXPECTED_FAILURE",
+    "original_bits_claimed": false,
+    "archived_compiler_simd_path_confirmation": "PENDING_WINDOWS_REFERENCE_OWNER"
+  },
+  "source_files": [
+    {
+      "id": "CMakeLists.txt",
+      "byte_length": 24408,
+      "sha256": "74695e78b4f45e2f3cb98573fe88edf47f0eec54b458982c882930a1c76c0de2"
+    },
+    {
+      "id": "ci/run_standalone.py",
+      "byte_length": 6076,
+      "sha256": "baa475bd6bb307e46b5352f8a9121fb267485724becb3919a33160fae1eaf7fc"
+    },
+    {
+      "id": "src/cpu/decode_spatial_scalar.cpp",
+      "byte_length": 8842,
+      "sha256": "94bfb7d6bbcfb7dbdc681fd0bf31c98aad745d497683592a9745d1e12e50381c"
+    },
+    {
+      "id": "src/cpu/decode_spatial_scalar.h",
+      "byte_length": 2593,
+      "sha256": "71ec8308707c28cc9f0bfee5c8840af281ec638a6729ef61b169875fa01f8c8d"
+    },
+    {
+      "id": "tests/test_decode_spatial_scalar.cpp",
+      "byte_length": 15466,
+      "sha256": "9fe77b2052c8fea04a391f7915cd3332c1e23fb470ef263625897a2ce418fc8f"
+    },
+    {
+      "id": "tests/test_scalar_inverse_replay.py",
+      "byte_length": 5764,
+      "sha256": "6a33122a109c906574a05bc0ca1df29ced59157ce510821a4ee5ae7f01144827"
+    },
+    {
+      "id": "tests/validate_decode_spatial_scalar.py",
+      "byte_length": 5912,
+      "sha256": "ea371e6a3df19f500ebd146af08fc4d4d8d02bd9ef99cb632df19cf8d4d172e4"
+    },
+    {
+      "id": "tests/reference_scalar_inverse/generate_vectors.py",
+      "byte_length": 4613,
+      "sha256": "8bf74f3869f588129d0ac4b36370fad63227afd777165c9829bcb5adc5f1363d"
+    },
+    {
+      "id": "tests/reference_scalar_inverse/synthetic_vectors.h",
+      "byte_length": 7688,
+      "sha256": "65bcd3bf2f33d1ac97cd4b0715a530aab08ced807cbb1933836d79d96f7817de"
+    },
+    {
+      "id": "tests/scalar_inverse_research/CMakeLists.txt",
+      "byte_length": 1955,
+      "sha256": "7273ee94032c4534365ae6979b3a2ce5b12b3e43bac80e7f77792110f5c43f47"
+    }
+  ],
+  "limits": [
+    "Full native suites overlap; counts are not distinct test totals.",
+    "Source fingerprints identify tested precommit bytes; publication SHA is recorded on the child PR.",
+    "Private original fixtures and actual original SDK were not executed.",
+    "No public decoder API/profile, production Milestone2 or performance claim."
+  ]
+}
