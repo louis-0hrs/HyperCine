@@ -17,6 +17,22 @@ add_executable(test_reference_oracle test_reference_oracle.cpp)
 add_test(NAME test_reference_oracle COMMAND test_reference_oracle)
 set_tests_properties(test_reference_oracle PROPERTIES LABELS "reference-oracle")
 
+# Optional validation tooling only; the codec has no Python dependency.
+find_package(Python3 QUIET COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME test_reference_release_inventory
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_reference_release.py")
+    set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
+    # Explicit qualification entrypoint: unlike ordinary CTest, a skipped or
+    # missing Phase 2 reference test makes this target fail (runner exit 77).
+    add_custom_target(reference_release_gate
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_reference_release.py"
+            --build "${CMAKE_BINARY_DIR}" --config "$<CONFIG>"
+            --output "${CMAKE_BINARY_DIR}/reference-release.json"
+        DEPENDS test_reference_oracle
+        USES_TERMINAL VERBATIM)
+endif()
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
@@ -124,6 +140,9 @@ if(HYPERCINE_ENABLE_CUDA)
         SKIP_RETURN_CODE 77
         LABELS "reference-oracle"
     )
+    if(TARGET reference_release_gate)
+        add_dependencies(reference_release_gate test_phase2a test_phase2b test_phase2c test_phase2d)
+    endif()
 
     add_executable(test_entropy_capacity test_entropy_capacity.cpp)
     target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic)
