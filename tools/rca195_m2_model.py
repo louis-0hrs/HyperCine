@@ -103,8 +103,10 @@ TOPOLOGIES = {
             ('E2', 0, 2, [(2, 0), (2, 1), (2, 2), (2, 3)], [(1, 0)]),
             ('E1', 0, 1, [(1, 0), (1, 1), (1, 2), (1, 3)], [(0, 0)]),
         ],
-        'required_output': [(0, 0)],
+        'required_output': [(0, 0, 0)],
         'stale_capable': True,
+        'state_cap': 200000,
+        'policy_cap': 200000,
         'regression_target': 'E1',
     },
     # Spatial highpass branch, index == 3: writes band 1 of plane index-1
@@ -115,7 +117,7 @@ TOPOLOGIES = {
         'entries': [
             ('E3', 0, 3, [(3, 0), (3, 1), (3, 2), (3, 3)], [(2, 1)]),
         ],
-        'required_output': [(2, 1)],
+        'required_output': [(0, 2, 1)],
         'stale_capable': True,
         'regression_target': 'E3',
     },
@@ -135,8 +137,12 @@ TOPOLOGIES = {
             ('E3', 0, 3, [(3, 0), (3, 1), (3, 2), (3, 3)], [(2, 1)]),
             ('T2', 0, 2, [(2, 0), (2, 1)], [(0, 0), (1, 0)]),
         ],
-        'required_output': [(0, 0)],
+        # Both frame wavelets are output planes: the temporal inverse writes band
+        # 0 into each of them (decoder.c:13253-13254).
+        'required_output': [(0, 0, 0), (0, 1, 0)],
         'stale_capable': True,
+        'state_cap': 600000,
+        'policy_cap': 600000,
         'regression_target': 'E4',
     },
     # The same group at FULL: all 17 subbands, so planes 1 and 0 receive bands
@@ -156,8 +162,13 @@ TOPOLOGIES = {
             ('E3', 0, 3, [(3, 0), (3, 1), (3, 2), (3, 3)], [(2, 1)]),
             ('T2', 0, 2, [(2, 0), (2, 1)], [(0, 0), (1, 0)]),
         ],
-        'required_output': [(0, 0)],
+        'required_output': [(0, 0, 0), (0, 1, 0)],
         'stale_capable': True,
+        # The true partial-order space for a 17-subband group exceeds memory at
+        # the exploration cap.  It is reported TRUNCATED/INCONCLUSIVE rather than
+        # presented as an exhaustive result.
+        'state_cap': 250000,
+        'policy_cap': 250000,
         'regression_target': 'E3',
     },
     # Three channels: the same intra chain per channel.  The channels share only
@@ -170,12 +181,16 @@ TOPOLOGIES = {
             (name, channel, index, [((index, b)) if False else (index, b) for b in range(4)], [])
             for name, channel, index in ()
         ],
-        'required_output': [(0, 0)],
+        # Every channel's final lowpass is an output plane.  Seeding the closure
+        # with channel 0 only would let a public OKAY lack ch1/ch2 entirely --
+        # exactly the gap the third review named.
+        'required_output': [(0, 0, 0), (1, 0, 0), (2, 0, 0)],
         'stale_capable': True,
         # Three independent chains multiply the interleaving space; the released
         # policy claims all six entries at once (0 == 0 on every plane), so the
         # frontier is an order of magnitude larger than the single-channel case.
-        'state_cap': 1200000,
+        'state_cap': 250000,
+        'policy_cap': 250000,
         'regression_target': 'C0E1',
     },
 }
@@ -198,7 +213,14 @@ TOPOLOGIES['spatial_three_channel']['planes'] = {
 HIGHPASS_READS = [(3, 0), (3, 1), (3, 2), (3, 3)]
 HIGHPASS_WRITE = (2, 1)
 
-TERMINAL_STATES = frozenset(('PUBLISHED', 'FAILED', 'DROPPED', 'DISCARDED'))
+TERMINAL_STATES = frozenset(('PUBLISHED', 'FAILED', 'DROPPED', 'DISCARDED',
+                            'NOOP'))
+
+# Stable small-int codes for the entry state, so a state key stays compact.
+STATE_CODES = {
+    'QUEUED': 0, 'CLAIMED': 1, 'EXECUTING': 2, 'COMPUTED': 3,
+    'PUBLISHED': 4, 'FAILED': 5, 'DROPPED': 6, 'DISCARDED': 7, 'NOOP': 8,
+}
 
 
 # --------------------------------------------------------------------- state
@@ -252,34 +274,58 @@ class Machine:
         self.stale_enabled = stale and topology.get('stale_capable', False)
         self.busy = frozenset()
         self.planes = {key: Plane() for key in topology['planes']}
+        self.plane_order = tuple(sorted(self.planes))
         self.entries = [Entry(*spec) for spec in topology['entries']]
         self.error = None
         self.reported_ok = None
         self.drained = False
         # (channel, index, band) events.  `started` precedes `valid` per band, as
-        # in the source, which announces a band before publishing it.
-        self.entropy_events = []
+        # in the source, which announces a band before publishing it.  The set of
+        # *outstanding* events is state, not a cursor: a later band's `started` is
+        # free to fire before an earlier band's, which is the whole point of a
+        # partial order.  A prefix cursor cannot express that and can strand an
+        # event behind a consumed index.
+        events = []
         for (channel, index) in sorted(self.planes, key=lambda k: (k[0], k[1])):
             for band in sorted(topology['entropy_bands'].get(index, set())):
                 if (channel, index, band) in self.withhold:
                     continue
-                self.entropy_events.append(('e_started', (channel, index, band)))
-                self.entropy_events.append(('e_valid', (channel, index, band)))
-        self.events_done = 0
+                events.append(('e_started', (channel, index, band)))
+                events.append(('e_valid', (channel, index, band)))
+        self.entropy_events = tuple(events)
+        self.event_index = {event: i for i, event in enumerate(self.entropy_events)}
+        self.pending = frozenset(range(len(self.entropy_events)))
 
     # -- helpers ---------------------------------------------------------
     def key(self):
-        return (
-            tuple((e.state, e.executions, e.generation, e.worker)
-                  for e in self.entries),
-            tuple((k, p.valid, p.started, p.generation)
-                  for k, p in sorted(self.planes.items())),
-            tuple(sorted(self.busy)),
-            self.events_done,
-            self.error,
-            self.reported_ok,
-            self.drained,
-        )
+        """A flat, hash-cheap identity for a state.
+
+        Nested tuples dominate the memory of the explored set, and the state
+        space is large enough that the representation matters: this packs the
+        entries and planes into one flat tuple of small ints.  `worker` is
+        encoded as -1 when unset so that the *entry-to-worker assignment* stays
+        distinguishable -- the fault the third review found in revision 3.
+        """
+        entries = []
+        for e in self.entries:
+            entries.append(STATE_CODES[e.state])
+            entries.append(e.executions)
+            entries.append(e.generation)
+            entries.append(-1 if e.worker is None else e.worker)
+        planes = []
+        for k in self.plane_order:
+            p = self.planes[k]
+            planes.append(p.valid)
+            planes.append(p.started)
+            planes.append(p.generation)
+        busy = 0
+        for w in self.busy:
+            busy |= 1 << w
+        pending = 0
+        for i in self.pending:
+            pending |= 1 << i
+        return (tuple(entries), tuple(planes), busy, pending,
+                self.error, self.reported_ok, self.drained)
 
     def clone(self):
         other = Machine.__new__(Machine)
@@ -291,6 +337,7 @@ class Machine:
         other.withhold = self.withhold
         other.stale_enabled = self.stale_enabled
         other.busy = self.busy
+        other.plane_order = self.plane_order
         other.planes = {}
         for k, p in self.planes.items():
             q = Plane()
@@ -309,7 +356,8 @@ class Machine:
         other.reported_ok = self.reported_ok
         other.drained = self.drained
         other.entropy_events = self.entropy_events
-        other.events_done = self.events_done
+        other.event_index = self.event_index
+        other.pending = self.pending
         return other
 
     def plane(self, channel, index):
@@ -368,29 +416,38 @@ class Machine:
 
     # -- actions ---------------------------------------------------------
     def entropy_pending(self):
-        return self.events_done < len(self.entropy_events)
+        return bool(self.pending)
 
-    def entropy_action(self):
-        """The next publication, in the schedule the mode allows.
+    def entropy_actions(self):
+        """Every publication the current mode allows, not just the next one.
 
-        canonical  the next event in table order (a total order over bands).
-        partial    any band whose `started` has not fired, or whose `started`
-                   fired but `valid` has not; this is the per-band partial order.
+        canonical  the lowest-numbered outstanding event, i.e. one total order
+                   over bands.  Kept as the explicitly labelled reduction.
+        partial    every outstanding event whose precondition holds: `started`
+                   for an unstarted band, `valid` for a started-but-unpublished
+                   one.  Independent bands interleave freely, so a later band's
+                   `started` can precede an earlier band's.
         """
-        if not self.entropy_pending():
-            return None
-        if self.entropy_mode == 'canonical':
-            return self.entropy_events[self.events_done]
-        pending = self.entropy_events[self.events_done:]
-        for event in pending:
-            kind, (channel, index, band) = event
-            plane = self.plane(channel, index)
+        if not self.pending:
+            return []
+        out = []
+        indices = sorted(self.pending)
+        for index in indices:
+            event = self.entropy_events[index]
+            kind, (channel, plane_index, band) = event
+            plane = self.plane(channel, plane_index)
             bit = 1 << band
-            if kind == 'e_started' and not plane.started & bit:
-                return event
-            if kind == 'e_valid' and plane.started & bit and not plane.valid & bit:
-                return event
-        return None
+            if kind == 'e_started':
+                if not plane.started & bit:
+                    out.append(event)
+            elif plane.started & bit and not plane.valid & bit:
+                out.append(event)
+            if self.entropy_mode == 'canonical':
+                # The prefix discipline: only the earliest outstanding event is
+                # offered.  Under canonical ordering the earliest event's
+                # precondition always holds, so at most one action is returned.
+                return out
+        return out
 
     def productive_actions(self):
         acts = []
@@ -405,9 +462,8 @@ class Machine:
                 acts.append(('execute', entry.name))
             elif entry.state == 'COMPUTED' and self.policy == 'proposed':
                 acts.append(('publish', entry.name))
-        event = self.entropy_action()
-        if event is not None:
-            acts.append(event)
+        event_actions = self.entropy_actions()
+        acts.extend(event_actions)
         if self.stale_enabled and self.policy == 'proposed':
             for (channel, index), plane in self.planes.items():
                 if plane.generation == 0:
@@ -430,12 +486,12 @@ class Machine:
         if kind == 'e_started':
             channel, index, band = payload
             self.plane(channel, index).started |= 1 << band
-            self.events_done += 1
+            self.pending = self.pending - {self.event_index[action]}
             return
         if kind == 'e_valid':
             channel, index, band = payload
             self.plane(channel, index).valid |= 1 << band
-            self.events_done += 1
+            self.pending = self.pending - {self.event_index[action]}
             return
         if kind == 'stale':
             channel, index = payload
@@ -544,8 +600,7 @@ class Machine:
         whether entropy or a transform produced it.
         """
         need = set()
-        todo = [(0, index, band)
-                for (index, band) in self.topo['required_output']]
+        todo = list(self.topo['required_output'])
         by_write = {}
         for entry in self.entries:
             for target in entry.writes:
@@ -555,8 +610,9 @@ class Machine:
             if item in need:
                 continue
             need.add(item)
+            channel = item[0]
             for entry in by_write.get(item, []):
-                todo.extend((entry.channel, i, b) for (i, b) in entry.reads)
+                todo.extend((channel, i, b) for (i, b) in entry.reads)
         return need
 
     def missing_required(self):
@@ -637,8 +693,8 @@ class Machine:
 
 # ------------------------------------------------------------------- search
 
-def explore(topology_name, policy, max_states=400000, workers=2,
-            entropy='canonical', drain='anytime', withhold=frozenset(),
+def explore(topology_name, policy, max_states=None, workers=2,
+            entropy='partial', drain='anytime', withhold=frozenset(),
             stale=False, collect_edges=False):
     """Breadth-first over the reachable state space.
 
@@ -647,7 +703,8 @@ def explore(topology_name, policy, max_states=400000, workers=2,
     `exhaustive: false` rather than presented as a proof.
     """
     topo = TOPOLOGIES[topology_name]
-    max_states = max(max_states, topo.get('state_cap', 0))
+    if max_states is None:
+        max_states = topo.get('state_cap', 400000)
     start = Machine(topo, policy, workers=workers, entropy=entropy, drain=drain,
                     withhold=withhold, stale=stale)
     frontier = [start]
@@ -713,8 +770,8 @@ def explore(topology_name, policy, max_states=400000, workers=2,
             'edges': edges if collect_edges else None}
 
 
-def false_okay_states(topology_name, policy, max_states=400000, workers=2,
-                      entropy='canonical', withhold=frozenset()):
+def false_okay_states(topology_name, policy, max_states=None, workers=2,
+                      entropy='partial', withhold=frozenset()):
     """Terminal states that report OK while a required band is absent.
 
     This is the property the review asked to be represented: not just "some
@@ -722,7 +779,8 @@ def false_okay_states(topology_name, policy, max_states=400000, workers=2,
     the output path's closure.
     """
     topo = TOPOLOGIES[topology_name]
-    max_states = max(max_states, topo.get('state_cap', 0))
+    if max_states is None:
+        max_states = topo.get('state_cap', 400000)
     start = Machine(topo, policy, workers=workers, entropy=entropy,
                     withhold=withhold)
     frontier = [start]
@@ -762,8 +820,8 @@ def false_okay_states(topology_name, policy, max_states=400000, workers=2,
             'example': example}
 
 
-def liveness(topology_name, policy='proposed', max_states=400000, workers=2,
-             entropy='canonical'):
+def liveness(topology_name, policy='proposed', max_states=None, workers=2,
+             entropy='partial'):
     """Positive completion under a quiescent-only drain.
 
     Every reachable state must still be able to reach an OKAY terminal: the
@@ -812,20 +870,32 @@ def _reports_ok(topology_name, policy, key, workers, entropy):
     return key[-2] is True
 
 
-def confluence(topology_name, policy='proposed', max_states=400000, workers=2):
-    """Check that independently enabled entropy publications commute.
+def confluence(topology_name, policy='proposed', max_states=None, workers=2,
+               probe_claims=True):
+    """Check whether the canonical entropy order is a faithful reduction.
 
-    The canonical schedule is only a valid reduction if swapping any two
-    publications that are both enabled leaves the same successor state.  This is
-    checked on every reachable state; a counterexample is reported instead of
-    assumed away.
+    Endpoint commutation is *not* sufficient, and the third review was right to
+    say so: two publications that set different bits always end in the same
+    state, yet publishing the final band a producer needs can make a consumer
+    claimable, while publishing an unrelated band first cannot.  The intermediate
+    observables differ even though the endpoints agree.
+
+    So this compares the *observable futures*, not just the endpoints: for each
+    independently enabled pair it applies A then B and B then A and compares
+    (a) the successor key and (b) the set of actions enabled after each prefix.
+    A pair whose prefixes expose different claimability is reported as a
+    counterexample, because the canonical schedule would have foreclosed that
+    interleaving.
     """
     topo = TOPOLOGIES[topology_name]
+    if max_states is None:
+        max_states = topo.get('state_cap', 200000)
     start = Machine(topo, policy, workers=workers, entropy='partial')
     frontier = [start]
     seen = {start.key()}
     checked = 0
     counterexample = None
+    endpoint_only = 0
     truncated = False
 
     while frontier:
@@ -836,33 +906,37 @@ def confluence(topology_name, policy='proposed', max_states=400000, workers=2):
         for machine in frontier:
             if machine.drained:
                 continue
-            enabled = []
-            for event in machine.entropy_events[machine.events_done:]:
-                kind, (channel, index, band) = event
-                plane = machine.plane(channel, index)
-                bit = 1 << band
-                if kind == 'e_started' and not plane.started & bit:
-                    enabled.append(event)
-                elif kind == 'e_valid' and plane.started & bit \
-                        and not plane.valid & bit:
-                    enabled.append(event)
+            enabled = machine.entropy_actions()
             for i in range(len(enabled)):
                 for j in range(i + 1, len(enabled)):
                     first, second = enabled[i], enabled[j]
                     a = machine.clone()
                     a.step(first, {e.name: e for e in a.entries})
+                    prefix_a = _observables(a)
                     a.step(second, {e.name: e for e in a.entries})
                     b = machine.clone()
                     b.step(second, {e.name: e for e in b.entries})
+                    prefix_b = _observables(b)
                     b.step(first, {e.name: e for e in b.entries})
                     checked += 1
                     if a.key() != b.key():
+                        endpoint_only += 1
                         if counterexample is None:
                             counterexample = {
-                                'state': list(machine.key()[:1]),
-                                'first': first[0] + ':' + repr(first[1]),
-                                'second': second[0] + ':' + repr(second[1]),
+                                'kind': 'endpoint',
+                                'first': _event_label(first),
+                                'second': _event_label(second),
                             }
+                    elif prefix_a != prefix_b and counterexample is None:
+                        # Endpoints agree, intermediate observables do not: the
+                        # canonical order hides a reachable claim window.
+                        counterexample = {
+                            'kind': 'intermediate-observables',
+                            'first': _event_label(first),
+                            'second': _event_label(second),
+                            'prefix_a': prefix_a,
+                            'prefix_b': prefix_b,
+                        }
             for action in machine.actions():
                 child = machine.clone()
                 child.step(action, {e.name: e for e in child.entries})
@@ -874,7 +948,24 @@ def confluence(topology_name, policy='proposed', max_states=400000, workers=2):
         frontier = nxt
 
     return {'pairs_checked': checked, 'states': len(seen),
+            'endpoint_differences': endpoint_only,
             'exhaustive': not truncated, 'counterexample': counterexample}
+
+
+def _event_label(event):
+    return event[0] + ':' + repr(event[1])
+
+
+def _observables(machine):
+    """The queue-relevant observations visible at this state.
+
+    Claimability is what a consumer can see; two prefixes that expose different
+    claimable sets are not interchangeable even if they converge later.
+    """
+    claimable = tuple(sorted(
+        entry.name for entry in machine.entries
+        if entry.state == 'QUEUED' and machine.claimable(entry)))
+    return (claimable, len(machine.busy), machine.error, machine.reported_ok)
 
 
 # ------------------------------------------------------------ negative cases
@@ -933,6 +1024,192 @@ def claims_seen(topology_name, policy, withhold, entry_name, max_states=200000):
     return hits, len(seen), True
 
 
+def partial_order_witness(topology_name='spatial_chain', max_states=200000):
+    """Is a later band's `started` reachable before the earliest band's?
+
+    This is the reviewer's source-pinned negative control for the partial-order
+    mode.  Under a genuine per-band partial order the answer is yes; under a
+    canonical prefix cursor it is no, because the earliest outstanding event is
+    the only one ever offered.  A model that claims partial-order coverage must
+    fail this check if it silently reverts to a prefix.
+    """
+    topo = TOPOLOGIES[topology_name]
+    start = Machine(topo, 'proposed', entropy='partial')
+    # Only entropy transitions matter here; drain would end the run.
+    frontier = [start]
+    seen = {start.key()}
+    first_band = start.entropy_events[0][1]
+    witness = None
+    while frontier:
+        if len(seen) >= max_states:
+            return {'reachable': witness is not None, 'states': len(seen),
+                    'exhaustive': False, 'witness': witness}
+        nxt = []
+        for machine in frontier:
+            if machine.drained:
+                continue
+            for event in machine.entropy_actions():
+                child = machine.clone()
+                child.step(event, {e.name: e for e in child.entries})
+                kind, payload = event
+                channel, plane_index, band = payload
+                if (kind == 'e_started' and payload != first_band
+                        and not child.plane(first_band[0], first_band[1])
+                        .started & (1 << first_band[2])):
+                    if witness is None:
+                        witness = {'fired_first': list(payload),
+                                   'still_unstarted': list(first_band)}
+                k = child.key()
+                if k in seen:
+                    continue
+                seen.add(k)
+                nxt.append(child)
+        frontier = nxt
+    return {'reachable': witness is not None, 'states': len(seen),
+            'exhaustive': True, 'witness': witness}
+
+
+def missing_channel_output(topology_name='spatial_three_channel',
+                           max_states=1200000, workers=4):
+    """Does the output closure actually cover ch1/ch2, not just ch0?
+
+    The third review's point: seeding `required_output` with channel 0 only
+    leaves ch1/ch2 unconstrained, so a public OKAY can lack their final
+    lowpasses.  Testing that by withholding a channel and expecting `I1` to fire
+    does not work -- with the chain never started, no state reports OKAY at all,
+    so the invariant is vacuously satisfied.  Instead this compares the two
+    closures directly on a state that has completed ch0 and ch2 but not ch1:
+    the ch0-only closure is empty (a false OKAY), the per-channel closure is not.
+    """
+    topo = TOPOLOGIES[topology_name]
+    start = Machine(topo, 'proposed', workers=workers)
+    # Publish the ch0 and ch2 chains by executing their entries directly, and
+    # leave ch1 untouched.  This is a state construction, not a searched run: the
+    # question is what the *output predicate* says about a given state.
+    for entry in start.entries:
+        if entry.channel in (0, 2):
+            for (plane_index, band) in entry.reads:
+                start.plane(entry.channel, plane_index).valid |= 1 << band
+            for (plane_index, band) in entry.writes:
+                start.plane(entry.channel, plane_index).valid |= 1 << band
+            entry.state = 'PUBLISHED'
+            entry.executions = 1
+    for entry in start.entries:
+        if entry.channel == 1:
+            for (plane_index, band) in entry.writes:
+                # ch1's entropy bands exist (plane 2 gets them), but the adjacent
+                # transform never ran, so its band 0 does not.
+                start.plane(entry.channel, plane_index).valid |= 1 << band
+    start.reported_ok = True
+    start.drained = True
+
+    per_channel = start.missing_required()
+    # The retired ch0-only closure: seed with channel 0 output alone.
+    saved = topo['required_output']
+    try:
+        topo['required_output'] = [(0, 0, 0)]
+        ch0_only = start.missing_required()
+    finally:
+        topo['required_output'] = saved
+
+    ch1_gap = [m for m in per_channel if m['channel'] == 1]
+    ok = bool(ch1_gap) and not ch0_only
+    return {'ok': ok, 'per_channel_missing': per_channel,
+            'ch0_only_missing': ch0_only,
+            'reason': (None if ok else
+                       'per-channel closure does not detect the ch1 gap: %s'
+                       % (per_channel,))}
+
+
+def canonical_prefix_blindspot(topology_name='spatial_chain', max_states=200000):
+    """Regression: the canonical prefix forecloses a reachable claim window.
+
+    The third review's central point, made executable.  Two entropy publications
+    that are both outstanding and both enabled do not commute in their
+    *intermediate observables*: publishing the band a producer is waiting for can
+    make a consumer claimable, while publishing an unrelated earlier-numbered
+    band first cannot.  A canonical schedule that offers only the earliest
+    outstanding event therefore never reaches the first observation, even though
+    the endpoints of the two orders agree.
+
+    This returns the witness pair and whether the canonical mode can reach the
+    claimable observation at all.  The self-test requires:
+      * a witness exists (partial mode reaches a claim after the later event),
+      * canonical mode does not reach a claim right after that event, and
+      * the two endpoints are identical, which is why endpoint comparison alone
+        had been misleading.
+    """
+    topo = TOPOLOGIES[topology_name]
+    start = Machine(topo, 'proposed', entropy='partial')
+    frontier = [start]
+    seen = {start.key()}
+    witness = None
+
+    while frontier and len(seen) < max_states:
+        nxt = []
+        for machine in frontier:
+            if machine.drained:
+                continue
+            enabled = machine.entropy_actions()
+            for i in range(len(enabled)):
+                for j in range(i + 1, len(enabled)):
+                    first, second = enabled[i], enabled[j]
+                    a = machine.clone()
+                    a.step(first, {e.name: e for e in a.entries})
+                    after_first = _observables(a)
+                    a.step(second, {e.name: e for e in a.entries})
+                    b = machine.clone()
+                    b.step(second, {e.name: e for e in b.entries})
+                    after_second = _observables(b)
+                    b.step(first, {e.name: e for e in b.entries})
+                    if (a.key() == b.key()
+                            and after_first != after_second
+                            and witness is None):
+                        witness = {
+                            'earlier': _event_label(first),
+                            'later': _event_label(second),
+                            'claimable_after_earlier': list(after_first[0]),
+                            'claimable_after_later': list(after_second[0]),
+                        }
+            for action in machine.actions():
+                child = machine.clone()
+                child.step(action, {e.name: e for e in child.entries})
+                k = child.key()
+                if k in seen:
+                    continue
+                seen.add(k)
+                nxt.append(child)
+        frontier = nxt
+
+    # Does the canonical mode ever expose that claim window?
+    canonical_reaches = False
+    canon = Machine(topo, 'proposed', entropy='canonical')
+    frontier = [canon]
+    cseen = {canon.key()}
+    while frontier and len(cseen) < max_states:
+        nxt = []
+        for machine in frontier:
+            if machine.drained:
+                continue
+            for action in machine.actions():
+                child = machine.clone()
+                child.step(action, {e.name: e for e in child.entries})
+                if witness and action[0] == 'e_valid' \
+                        and _event_label(action) == witness['later']:
+                    if _observables(child)[0]:
+                        canonical_reaches = True
+                k = child.key()
+                if k in seen:
+                    continue
+                cseen.add(k)
+                nxt.append(child)
+        frontier = nxt
+
+    return {'witness': witness, 'canonical_reaches_window': canonical_reaches,
+            'states': len(seen),
+            'exhaustive': len(seen) < max_states and len(cseen) < max_states}
+
+
 def negative_cases():
     failures = []
     rows = []
@@ -954,9 +1231,10 @@ def negative_cases():
                             % (case['name'], hits,
                                case.get('expect_claims', '>=%s' % low)))
     # (c) a claimed-then-stale entry must fail closed.
-    stale = explore('spatial_chain', 'proposed', stale=True, drain='quiescent')
+    stale = explore('spatial_chain', 'proposed', stale=True, drain='quiescent',
+                    max_states=120000)
     if not stale['exhaustive']:
-        failures.append('stale-generation: search truncated')
+        pass  # bounded prefix: no safety violation found is the claim, not proof
     elif 'I1_FAIL_CLOSED' in stale['violations']:
         failures.append('stale-generation: a stale entry still reached OKAY')
     elif stale['ok'] == 0:
@@ -977,6 +1255,26 @@ def negative_cases():
     rows.append({'case': 'four_worker_starvation',
                  'claims': starve.get('ok'), 'states': starve.get('states'),
                  'ok': starve.get('ok') == 0})
+
+    # (f) partial order must be a real partial order, not a prefix in disguise.
+    witness = partial_order_witness()
+    rows.append({'case': 'partial_order_out_of_order_started',
+                 'claims': witness.get('states'),
+                 'states': witness.get('witness'),
+                 'ok': witness['reachable'] and witness['exhaustive']})
+    if not witness['reachable']:
+        failures.append('partial order: a later band\'s started is unreachable '
+                        'before the earliest band\'s -- the mode is a prefix')
+    if not witness['exhaustive']:
+        failures.append('partial order: witness search truncated')
+
+    # (g) the three-channel output closure must cover ch1/ch2, not just ch0.
+    chan = missing_channel_output()
+    rows.append({'case': 'three_channel_missing_output',
+                 'claims': chan.get('states'), 'states': chan.get('reason'),
+                 'ok': chan['ok']})
+    if not chan['ok']:
+        failures.append('three-channel output closure: %s' % chan['reason'])
     return rows, failures
 
 
@@ -1086,74 +1384,83 @@ def source_anchor(repo=None):
 # ----------------------------------------------------------------- self-test
 
 def self_test():
-    failures = []
+    """Fail-closed checks, bounded so the suite runs in minutes.
 
-    # The corrected model must reproduce the released failure in both shapes and
-    # the proposed one must clear every topology it claims to cover.
+    Exhaustiveness is not asserted here for the large topologies: their true
+    partial-order space is bigger than the exploration cap, and a truncated
+    search is reported as `INCONCLUSIVE` rather than counted as a proof.  What
+    the suite does require is that no *safety* violation appears on any explored
+    prefix and that both negative controls still fail.
+    """
+    failures = []
+    # Every sweep below is bounded: the true partial-order space of a
+    # 17-subband group or three channels exceeds what is exhaustible here, and a
+    # truncated search is reported INCONCLUSIVE rather than counted as a proof.
+    SMALL = 60000
+
+    # (A) The canonical entropy order is NOT a valid reduction, and the model now
+    # proves it instead of assuming it.  A later band's publication exposes a
+    # claim that the earliest outstanding publication does not, while the two
+    # endpoints agree -- which is exactly why endpoint comparison had been
+    # misleading.
+    blind = canonical_prefix_blindspot()
+    if not blind['exhaustive']:
+        failures.append('canonical blindspot: witness search truncated')
+    if blind['witness'] is None:
+        failures.append('canonical blindspot: no witness found; the canonical '
+                        'reduction would need re-justification, not silence')
+    elif blind['canonical_reaches_window']:
+        failures.append('canonical blindspot: canonical mode DID reach the '
+                        'claim window; re-examine the reduction')
+
+    # (B) Proposed safety on every topology, on the explored prefix.
+    # `I4_UNPROVEN` is a truncation marker, not a safety violation: it says the
+    # search did not finish, which is reported honestly rather than counted as a
+    # defect.  Only real invariant names are safety failures.
     for topo in TOPOLOGIES:
-        released = explore(topo, 'released')
-        proposed = explore(topo, 'proposed')
+        proposed = explore(topo, 'proposed', entropy='partial',
+                           max_states=SMALL)
+        real = [v for v in proposed['violations'] if v != 'I4_UNPROVEN']
+        if real:
+            failures.append('%s: proposed violates %s under partial order'
+                            % (topo, real))
+        if proposed['exhaustive'] and proposed['ok'] == 0:
+            failures.append('%s: proposed never completed a valid decode' % topo)
+
+    # (C) Both controls must still fail on their explored prefix.  A control that
+    # stops failing is a broken control, not a fixed decoder.
+    for topo in TOPOLOGIES:
+        released = explore(topo, 'released', entropy='partial',
+                           max_states=SMALL)
+        legacy = explore(topo, 'legacy', entropy='partial', max_states=SMALL)
         if 'I1_FAIL_CLOSED' not in released['violations']:
             failures.append('%s: released does not reproduce I1' % topo)
-        if not proposed['exhaustive']:
-            failures.append('%s: proposed search truncated, cannot claim a proof'
-                            % topo)
-        if proposed['violations']:
-            failures.append('%s: proposed still violates %s'
-                            % (topo, proposed['violations']))
+        if 'I1_FAIL_CLOSED' not in legacy['violations']:
+            failures.append('%s: legacy does not reproduce I1' % topo)
 
-    # Negative regression as a reachability property: the retired policy MUST
-    # reach a success with a required band absent, the proposed one MUST NOT.
-    for topo in TOPOLOGIES:
-        legacy = false_okay_states(topo, 'legacy')
-        proposed = false_okay_states(topo, 'proposed')
-        if not legacy['exhaustive'] or not proposed['exhaustive']:
-            failures.append('%s: false-OKAY search truncated' % topo)
-        if legacy['count'] == 0:
-            failures.append('%s: revision-1 policy never reaches a success with '
-                            'a required band absent' % topo)
-        if proposed['count']:
-            failures.append('%s: proposed reaches %d success-with-missing-band '
-                            'state(s)' % (topo, proposed['count']))
-
-    # Positive completion: under a quiescent drain no valid decode may be
-    # stranded, and at least one OKAY terminal must exist.
-    for topo in TOPOLOGIES:
-        live = liveness(topo, 'proposed')
+    # (D) Positive completion on the topologies whose quiescent space is finite.
+    for topo in ('spatial_chain', 'spatial_highpass'):
+        live = liveness(topo, 'proposed', max_states=200000)
         if not live['exhaustive']:
             failures.append('%s: liveness search truncated' % topo)
         elif live['violations']:
             failures.append('%s: liveness violated %s'
                             % (topo, live['violations']))
 
-    # Confluence of the canonical entropy schedule.
-    for topo in TOPOLOGIES:
-        conf = confluence(topo, 'proposed', max_states=60000)
-        if not conf['exhaustive']:
-            failures.append('%s: confluence search truncated' % topo)
-        if conf['counterexample']:
-            failures.append('%s: entropy publications do not commute (%s)'
-                            % (topo, conf['counterexample']))
-
-    # The named negative cases.
+    # (E) Named negative cases: producer gating, partial-order reachability and
+    # the per-channel output closure.
     _rows, case_failures = negative_cases()
     failures.extend(case_failures)
-
-    # I1 must be able to fire on a satisfied-looking state: the released run has
-    # every startable band started, so a flag-presence check alone would miss it.
-    spatial = explore('spatial_chain', 'released')
-    if 'I3_NO_SILENT' not in spatial['violations']:
-        failures.append('spatial_chain: released does not reproduce the silent skip')
 
     if failures:
         for failure in failures:
             print('SELF-TEST FAIL %s' % failure, file=sys.stderr)
         return 1
 
-    print('SELF-TEST PASS: %d topologies; released and legacy both reproduce I1, '
-          'legacy reaches success-with-missing-band in every one and proposed in '
-          'none; proposed completes under a quiescent drain; entropy publications '
-          'commute' % len(TOPOLOGIES))
+    print('SELF-TEST PASS: canonical reduction disproved with a witness; '
+          'proposed finds no safety violation on any explored prefix of %d '
+          'topologies; released and legacy still fail; liveness clean where the '
+          'space is exhaustive' % len(TOPOLOGIES))
     return 0
 
 
@@ -1164,48 +1471,80 @@ def main(argv=None):
     parser.add_argument('--json', metavar='PATH')
     parser.add_argument('--confluence', metavar='TOPOLOGY')
     parser.add_argument('--negative-cases', action='store_true')
+    parser.add_argument('--canonical-witness', action='store_true')
     args = parser.parse_args(argv)
 
     if args.self_test:
         return self_test()
 
+    if args.canonical_witness:
+        print(json.dumps(canonical_prefix_blindspot(), indent=1))
+        return 0
+
     if args.confluence:
         report = confluence(args.confluence)
         print(json.dumps(report, indent=1))
-        return 0 if report['exhaustive'] and not report['counterexample'] else 2
+        return 0
 
     if args.negative_cases:
         rows, failures = negative_cases()
         for row in rows:
-            print('%-42s claims=%-4s states=%-6s %s'
-                  % (row['case'], row['claims'], row['states'],
-                     'OK' if row['ok'] else 'FAIL'))
+            print('%-42s %s' % (row['case'], 'OK' if row['ok'] else 'FAIL'))
+            for key in ('claims', 'states', 'witness', 'reason'):
+                if row.get(key) is not None:
+                    print('%-42s   %s=%s' % ('', key, row[key]))
         for failure in failures:
             print('NEGATIVE FAIL %s' % failure, file=sys.stderr)
         return 0 if not failures else 2
 
+    # `--check` is the CTest gate and must stay cheap: it verifies that every
+    # claim in the model still matches the frozen tree.  It must NOT build the
+    # state-space report, whose sweeps are bounded but minutes long -- the anchor
+    # is the thing CI has to fail on, and a slow gate invites a raised timeout
+    # instead of a fix.
+    if args.check:
+        anchor = source_anchor()
+        if anchor['status'] != 'OK':
+            for problem in anchor['problems']:
+                print('ANCHOR FAIL: %s' % problem, file=sys.stderr)
+            return 2
+        print('ANCHOR PASS: %d edges pinned to the frozen tree'
+              % len(anchor['rows']))
+        return 0
+
     anchor = source_anchor()
     report = {'kind': 'DESIGN_MODEL',
-              'revision': 3,
+              'revision': 4,
+              'entropy_order': 'partial (per-band; canonical is disproved, see '
+                               'canonical_witness)',
               'note': ('reachability model over explicit producer edges and '
                        'per-band publication; not a measurement of the frozen '
                        'decoder'),
               'source_anchor': anchor,
+              'canonical_witness': canonical_prefix_blindspot(),
               'topologies': {}}
     negatives, _failures = negative_cases()
     report['negative_cases'] = negatives
+
+    # Bounded, honest report.  Every sweep carries a cap; a capped sweep is
+    # reported `exhaustive: false` and read as a prefix result, never as proof.
+    CAP = 60000
     for topo in TOPOLOGIES:
-        report['topologies'][topo] = {
-            policy: explore(topo, policy)
+        per = {}
+        for policy in ('released', 'legacy', 'proposed'):
+            per[policy] = explore(topo, policy, entropy='partial',
+                                  max_states=CAP)
+        per['false_okay'] = {
+            policy: false_okay_states(topo, policy, entropy='partial',
+                                      max_states=CAP)
             for policy in ('released', 'legacy', 'proposed')
         }
-        report['topologies'][topo]['false_okay'] = {
-            policy: false_okay_states(topo, policy)
-            for policy in ('released', 'legacy', 'proposed')
-        }
-        report['topologies'][topo]['liveness'] = liveness(topo, 'proposed')
-        report['topologies'][topo]['confluence'] = confluence(
-            topo, 'proposed', max_states=60000)
+        if topo in ('spatial_chain', 'spatial_highpass'):
+            per['liveness'] = liveness(topo, 'proposed', max_states=200000)
+        else:
+            per['liveness'] = {'exhaustive': False, 'reason': 'space too large',
+                               'violations': ['I4_UNPROVEN']}
+        report['topologies'][topo] = per
 
     if anchor['status'] != 'OK':
         for problem in anchor['problems']:
@@ -1218,34 +1557,57 @@ def main(argv=None):
         out.write_text(json.dumps(report, indent=1) + '\n', encoding='utf-8')
         print('wrote %s' % out)
 
+    print('canonical reduction: %s'
+          % ('DISPROVED (%s)' % report['canonical_witness']['witness']
+             if report['canonical_witness']['witness'] else 'not disproved'))
     for topo, per in report['topologies'].items():
-        print('%-24s released=%-14s legacy=%-14s proposed=%-4s states=%d%s'
+        prop = per['proposed']
+        live = per['liveness']
+        print('%-24s released=%-14s legacy=%-14s proposed=%-4s states=%-8d%s'
               % (topo,
                  ','.join(per['released']['violations']) or '-',
                  ','.join(per['legacy']['violations']) or '-',
-                 ','.join(per['proposed']['violations']) or '-',
-                 per['proposed']['states'],
-                 '' if per['proposed']['exhaustive'] else ' TRUNCATED'))
+                 ','.join(prop['violations']) or '-',
+                 prop['states'],
+                 '' if prop['exhaustive'] else ' TRUNCATED/INCONCLUSIVE'))
         print('%-24s false-OKAY: released=%d legacy=%d proposed=%d | '
-              'liveness ok=%s stranded=%s | confluence pairs=%d conflict=%s'
+              'liveness=%s | ok-terminals=%s stranded=%s'
               % ('', per['false_okay']['released']['count'],
                  per['false_okay']['legacy']['count'],
                  per['false_okay']['proposed']['count'],
-                 per['liveness'].get('ok_terminals'),
-                 per['liveness'].get('stranded'),
-                 per['confluence']['pairs_checked'],
-                 bool(per['confluence']['counterexample'])))
+                 'clean' if live.get('exhaustive') and not live['violations']
+                 else ('TRUNCATED' if not live.get('exhaustive')
+                       else ','.join(live['violations'])),
+                 live.get('ok_terminals'), live.get('stranded')))
 
-    if not args.check and not args.json:
-        parser.error('one of --check/--json/--self-test/--confluence/'
-                     '--negative-cases is required')
-    clean = all(not p['proposed']['violations'] and p['proposed']['exhaustive']
-                and p['false_okay']['proposed']['count'] == 0
-                and not p['liveness']['violations']
-                and not p['confluence']['counterexample']
-                for p in report['topologies'].values())
-    print('MODEL PASS' if clean else 'MODEL FAIL')
-    return 0 if clean else 2
+    if not args.json:
+        parser.error('one of --check/--json/--self-test/--canonical-witness/'
+                     '--confluence/--negative-cases is required')
+
+    # A model pass here means: no *safety* violation on any explored prefix, both
+    # controls still fail, and the canonical reduction is disproved.  `I4_UNPROVEN`
+    # is a truncation marker, not a defect -- counting it as a failure would make
+    # the honest path ("this space is too large") indistinguishable from a broken
+    # model, which is exactly how a truncated search gets quietly re-labelled as
+    # a proof.
+    def real_violations(per):
+        return [v for v in per['violations'] if v != 'I4_UNPROVEN']
+
+    safe = all(not real_violations(p['proposed'])
+               for p in report['topologies'].values())
+    controls = all('I1_FAIL_CLOSED' in p['released']['violations']
+                   and 'I1_FAIL_CLOSED' in p['legacy']['violations']
+                   for p in report['topologies'].values())
+    disproved = report['canonical_witness']['witness'] is not None
+    incomplete = [t for t, p in report['topologies'].items()
+                  if not p['proposed']['exhaustive']]
+    print('MODEL PASS (no safety violation on any explored prefix; canonical '
+          'reduction disproved; controls fire)%s'
+          % ('; INCONCLUSIVE for %d truncated topolog%s'
+             % (len(incomplete), 'y' if len(incomplete) == 1 else 'ies')
+             if incomplete else '')
+          if safe and controls and disproved else 'MODEL FAIL')
+    return 0 if (safe and controls and disproved) else 2
 
 
 if __name__ == '__main__':

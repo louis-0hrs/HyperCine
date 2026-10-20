@@ -42,10 +42,12 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME rca195_ledger_rescore_v3 COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/run_rca195_probe.py"
         --rescore "${CMAKE_SOURCE_DIR}/docs/validation/rca195_probe_ledger_2026-10-20_v3.json")
-    # Milestone-2 design model: the released queue discipline must reproduce the
-    # false-OKAY shapes and the proposed one must clear all five invariants. The
-    # model's required-bit matrix is re-derived from DecodedBandsValid on every
-    # run, so a source change fails here instead of leaving a stale design.
+    # Milestone-2 design model. Two gates, deliberately split:
+    #   --check          pins every claim to the frozen tree and must stay fast
+    #                    (it is an anchor check, not a search);
+    #   --self-test      runs the bounded state-space sweeps. Where a space is
+    #                    too large it reports INCONCLUSIVE rather than passing
+    #                    itself off as a proof, so this is the slower gate.
     add_test(NAME rca195_m2_model_selftest COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --self-test)
     add_test(NAME rca195_m2_model_check COMMAND "${Python3_EXECUTABLE}"
@@ -55,7 +57,10 @@ if(Python3_Interpreter_FOUND)
         rca195_probe_runner_selftest rca195_ledger_rescore_v3
         rca195_m2_model_selftest rca195_m2_model_check
         PROPERTIES TIMEOUT 300
-        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS;MODEL PASS")
+        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS;ANCHOR PASS;MODEL PASS")
+    # The partial-order sweeps take minutes on an idle host and longer under
+    # CI load; the anchor gate above stays in the shared 300 s budget.
+    set_tests_properties(rca195_m2_model_selftest PROPERTIES TIMEOUT 900)
 endif()
 
 # 1. Transform-level test

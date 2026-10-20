@@ -1,6 +1,7 @@
 {
  "kind": "DESIGN_MODEL",
- "revision": 3,
+ "revision": 4,
+ "entropy_order": "partial (per-band; canonical is disproved, see canonical_witness)",
  "note": "reachability model over explicit producer edges and per-band publication; not a measurement of the frozen decoder",
  "source_anchor": {
   "status": "OK",
@@ -38,55 +39,72 @@
   ],
   "problems": []
  },
+ "canonical_witness": {
+  "witness": {
+   "earlier": "e_started:(0, 0, 1)",
+   "later": "e_valid:(0, 2, 3)",
+   "claimable_after_earlier": [],
+   "claimable_after_later": [
+    "E2"
+   ]
+  },
+  "canonical_reaches_window": false,
+  "states": 128682,
+  "exhaustive": true
+ },
  "topologies": {
   "spatial_chain": {
    "released": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 962,
-    "drained": 226,
-    "terminal": 226,
-    "ok": 226,
+    "states": 78709,
+    "drained": 7132,
+    "terminal": 7132,
+    "ok": 7132,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "legacy": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 146,
-    "drained": 58,
-    "terminal": 58,
-    "ok": 58,
+    "states": 78440,
+    "drained": 25194,
+    "terminal": 25194,
+    "ok": 25194,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "proposed": {
-    "violations": [],
-    "states": 70,
-    "drained": 35,
-    "terminal": 35,
-    "ok": 1,
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 76440,
+    "drained": 25050,
+    "terminal": 25050,
+    "ok": 0,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "false_okay": {
     "released": {
-     "count": 225,
-     "states": 962,
-     "exhaustive": true,
+     "count": 7132,
+     "states": 78709,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
@@ -143,9 +161,9 @@
      }
     },
     "legacy": {
-     "count": 58,
-     "states": 146,
-     "exhaustive": true,
+     "count": 25194,
+     "states": 78440,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
@@ -203,25 +221,19 @@
     },
     "proposed": {
      "count": 0,
-     "states": 70,
-     "exhaustive": true,
+     "states": 76440,
+     "exhaustive": false,
      "example": null
     }
    },
    "liveness": {
     "exhaustive": true,
-    "states": 36,
+    "states": 64342,
     "ok_terminals": 1,
-    "can_reach_ok": 36,
+    "can_reach_ok": 64342,
     "stranded": 0,
     "stranded_example": [],
     "violations": []
-   },
-   "confluence": {
-    "pairs_checked": 330,
-    "states": 70,
-    "exhaustive": true,
-    "counterexample": null
    }
   },
   "spatial_highpass": {
@@ -230,10 +242,10 @@
      "I1_FAIL_CLOSED",
      "I3_NO_SILENT"
     ],
-    "states": 99,
-    "drained": 36,
-    "terminal": 36,
-    "ok": 36,
+    "states": 972,
+    "drained": 405,
+    "terminal": 405,
+    "ok": 405,
     "deadlocks": 0,
     "exhaustive": true,
     "bounded": true,
@@ -245,10 +257,10 @@
      "I1_FAIL_CLOSED",
      "I3_NO_SILENT"
     ],
-    "states": 26,
-    "drained": 12,
-    "terminal": 12,
-    "ok": 12,
+    "states": 186,
+    "drained": 90,
+    "terminal": 90,
+    "ok": 90,
     "deadlocks": 0,
     "exhaustive": true,
     "bounded": true,
@@ -257,9 +269,9 @@
    },
    "proposed": {
     "violations": [],
-    "states": 32,
-    "drained": 16,
-    "terminal": 16,
+    "states": 176,
+    "drained": 88,
+    "terminal": 88,
     "ok": 1,
     "deadlocks": 0,
     "exhaustive": true,
@@ -269,8 +281,8 @@
    },
    "false_okay": {
     "released": {
-     "count": 35,
-     "states": 99,
+     "count": 404,
+     "states": 972,
      "exhaustive": true,
      "example": {
       "missing": [
@@ -307,8 +319,8 @@
      }
     },
     "legacy": {
-     "count": 12,
-     "states": 26,
+     "count": 90,
+     "states": 186,
      "exhaustive": true,
      "example": {
       "missing": [
@@ -346,80 +358,83 @@
     },
     "proposed": {
      "count": 0,
-     "states": 32,
+     "states": 176,
      "exhaustive": true,
      "example": null
     }
    },
    "liveness": {
     "exhaustive": true,
-    "states": 17,
+    "states": 89,
     "ok_terminals": 1,
-    "can_reach_ok": 17,
+    "can_reach_ok": 89,
     "stranded": 0,
     "stranded_example": [],
     "violations": []
-   },
-   "confluence": {
-    "pairs_checked": 20,
-    "states": 32,
-    "exhaustive": true,
-    "counterexample": null
    }
   },
   "fieldplus_half": {
    "released": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 18126,
-    "drained": 1902,
-    "terminal": 1902,
-    "ok": 1902,
+    "states": 102560,
+    "drained": 5248,
+    "terminal": 5248,
+    "ok": 5248,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "legacy": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 1980,
-    "drained": 596,
-    "terminal": 596,
-    "ok": 596,
+    "states": 122754,
+    "drained": 15800,
+    "terminal": 15800,
+    "ok": 15800,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "proposed": {
-    "violations": [],
-    "states": 422,
-    "drained": 211,
-    "terminal": 211,
-    "ok": 1,
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 83507,
+    "drained": 17469,
+    "terminal": 17469,
+    "ok": 0,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "false_okay": {
     "released": {
-     "count": 1901,
-     "states": 18126,
-     "exhaustive": true,
+     "count": 5248,
+     "states": 102560,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
         "channel": 0,
         "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
         "band": 0
        },
        {
@@ -503,14 +518,19 @@
      }
     },
     "legacy": {
-     "count": 596,
-     "states": 1980,
-     "exhaustive": true,
+     "count": 15800,
+     "states": 122754,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
         "channel": 0,
         "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
         "band": 0
        },
        {
@@ -595,80 +615,81 @@
     },
     "proposed": {
      "count": 0,
-     "states": 422,
-     "exhaustive": true,
+     "states": 83507,
+     "exhaustive": false,
      "example": null
     }
    },
    "liveness": {
-    "exhaustive": true,
-    "states": 212,
-    "ok_terminals": 1,
-    "can_reach_ok": 212,
-    "stranded": 0,
-    "stranded_example": [],
-    "violations": []
-   },
-   "confluence": {
-    "pairs_checked": 1224,
-    "states": 422,
-    "exhaustive": true,
-    "counterexample": null
+    "exhaustive": false,
+    "reason": "space too large",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
    }
   },
   "fieldplus_full": {
    "released": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 22410,
-    "drained": 2154,
-    "terminal": 2154,
-    "ok": 2154,
+    "states": 116702,
+    "drained": 2722,
+    "terminal": 2722,
+    "ok": 2722,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "legacy": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 2100,
-    "drained": 644,
-    "terminal": 644,
-    "ok": 644,
+    "states": 175994,
+    "drained": 7943,
+    "terminal": 7943,
+    "ok": 7943,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "proposed": {
-    "violations": [],
-    "states": 446,
-    "drained": 223,
-    "terminal": 223,
-    "ok": 1,
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 105130,
+    "drained": 5679,
+    "terminal": 5679,
+    "ok": 0,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "false_okay": {
     "released": {
-     "count": 2153,
-     "states": 22410,
-     "exhaustive": true,
+     "count": 2722,
+     "states": 116702,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
         "channel": 0,
         "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
         "band": 0
        },
        {
@@ -752,14 +773,19 @@
      }
     },
     "legacy": {
-     "count": 644,
-     "states": 2100,
-     "exhaustive": true,
+     "count": 7943,
+     "states": 175994,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
         "channel": 0,
         "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
         "band": 0
        },
        {
@@ -844,75 +870,71 @@
     },
     "proposed": {
      "count": 0,
-     "states": 446,
-     "exhaustive": true,
+     "states": 105130,
+     "exhaustive": false,
      "example": null
     }
    },
    "liveness": {
-    "exhaustive": true,
-    "states": 224,
-    "ok_terminals": 1,
-    "can_reach_ok": 224,
-    "stranded": 0,
-    "stranded_example": [],
-    "violations": []
-   },
-   "confluence": {
-    "pairs_checked": 2416,
-    "states": 446,
-    "exhaustive": true,
-    "counterexample": null
+    "exhaustive": false,
+    "reason": "space too large",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
    }
   },
   "spatial_three_channel": {
    "released": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 768728,
-    "drained": 40644,
-    "terminal": 40644,
-    "ok": 40644,
+    "states": 146695,
+    "drained": 898,
+    "terminal": 898,
+    "ok": 898,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "legacy": {
     "violations": [
      "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
     ],
-    "states": 21792,
-    "drained": 5844,
-    "terminal": 5844,
-    "ok": 5844,
+    "states": 355198,
+    "drained": 5426,
+    "terminal": 5426,
+    "ok": 5426,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "proposed": {
-    "violations": [],
-    "states": 8758,
-    "drained": 4379,
-    "terminal": 4379,
-    "ok": 1,
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 355198,
+    "drained": 5426,
+    "terminal": 5426,
+    "ok": 0,
     "deadlocks": 0,
-    "exhaustive": true,
-    "bounded": true,
-    "truncated_at": null,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
     "edges": null
    },
    "false_okay": {
     "released": {
-     "count": 37037,
-     "states": 768728,
-     "exhaustive": true,
+     "count": 898,
+     "states": 146695,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
@@ -957,6 +979,96 @@
        },
        {
         "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
         "index": 2,
         "band": 3
        }
@@ -973,9 +1085,9 @@
      }
     },
     "legacy": {
-     "count": 5844,
-     "states": 21792,
-     "exhaustive": true,
+     "count": 5426,
+     "states": 355198,
+     "exhaustive": false,
      "example": {
       "missing": [
        {
@@ -1020,6 +1132,96 @@
        },
        {
         "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
         "index": 2,
         "band": 3
        }
@@ -1037,25 +1239,17 @@
     },
     "proposed": {
      "count": 0,
-     "states": 8758,
-     "exhaustive": true,
+     "states": 355198,
+     "exhaustive": false,
      "example": null
     }
    },
    "liveness": {
-    "exhaustive": true,
-    "states": 4380,
-    "ok_terminals": 1,
-    "can_reach_ok": 4380,
-    "stranded": 0,
-    "stranded_example": [],
-    "violations": []
-   },
-   "confluence": {
-    "pairs_checked": 91770,
-    "states": 8758,
-    "exhaustive": true,
-    "counterexample": null
+    "exhaustive": false,
+    "reason": "space too large",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
    }
   }
  },
@@ -1086,14 +1280,37 @@
   },
   {
    "case": "stale_generation_fail_closed",
-   "claims": 1,
-   "states": 325,
+   "claims": 0,
+   "states": 169194,
    "ok": true
   },
   {
    "case": "four_worker_starvation",
    "claims": 0,
-   "states": 38,
+   "states": 39366,
+   "ok": true
+  },
+  {
+   "case": "partial_order_out_of_order_started",
+   "claims": 59049,
+   "states": {
+    "fired_first": [
+     0,
+     0,
+     2
+    ],
+    "still_unstarted": [
+     0,
+     0,
+     1
+    ]
+   },
+   "ok": true
+  },
+  {
+   "case": "three_channel_missing_output",
+   "claims": null,
+   "states": null,
    "ok": true
   }
  ]
