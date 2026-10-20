@@ -57,13 +57,25 @@ if(Python3_Interpreter_FOUND)
         "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --check)
     add_test(NAME rca195_m2_model_verdict COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --verdict-regression)
+    # Scratch-SDK contract candidate. The applier is applied to a private
+    # out-of-repo copy only; this test proves its anchors still land and that a
+    # removed anchor fails closed instead of producing an uninstrumented build.
+    add_test(NAME rca195_contract_applier_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/apply_rca195_contract.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
+    # The runner's verdict logic must fail the shapes its rules name: a broken
+    # control, a surviving injected OKAY, an unattributed failure, a hang, a
+    # dirty guard band and a changed control digest.
+    add_test(NAME rca195_contract_runner_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/run_rca195_contract.py" --self-test)
     set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
         rca195_tsan_reduction_selftest rca195_probe_applier_selftest
         rca195_probe_runner_selftest rca195_ledger_rescore_v3
         rca195_m2_model_selftest rca195_m2_model_check
-        rca195_m2_model_verdict
+        rca195_m2_model_verdict rca195_contract_applier_selftest
+        rca195_contract_runner_selftest
         PROPERTIES TIMEOUT 300
-        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS;ANCHOR PASS;VERDICT-REGRESSION PASS;MODEL PASS;NEGATIVE-CASES PASS_EXHAUSTIVE")
+        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS;ANCHOR PASS;VERDICT-REGRESSION PASS;MODEL PASS;NEGATIVE-CASES PASS_EXHAUSTIVE;RUNNER SELF-TEST PASS")
     # The partial-order sweeps take minutes on an idle host and longer under
     # CI load; the anchor gate above stays in the shared 300 s budget.
     set_tests_properties(rca195_m2_model_selftest PROPERTIES TIMEOUT 900)
