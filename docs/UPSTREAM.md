@@ -131,3 +131,20 @@ remain unchanged. The test-only negative regression preserves this oracle
 limitation and checks prefix independence at larger tested widths, without
 granting new full-frame parity claims. See [diagnosis and reproduction](SMALL_CHROMA_ORACLE.md).
 
+### 11. Position-dependent signed narrowing in inverse horizontal synthesis
+
+Source review for [issue #144](https://github.com/louis-0hrs/HyperCine/issues/144)
+found that `InvertHorizontalStrip16s.c`, with the default Pentium-4/SSE2 path,
+uses different signed16 storage rules along a row. Interior SIMD operations
+saturate after each add/subtract; the scalar tail uses wrapping `short`
+assignments on the pinned x86/MSVC model. The first border's SSE insertion
+retains low bits, while the last border stores a saturated result. These paths
+can differ from a uniform wide-accumulator formula on signed extrema.
+
+The [scalar-stage proposal](SCALAR_INVERSE_STAGE_144.md) pins the source,
+operation order, border/tail positions and integer counterexamples. This is a
+source-derived portability constraint, not an observed defect on the selected
+real references or a claim about decoder nondeterminism. A future owned CPU
+adapter must explicitly model the reviewed narrowing rules, or obtain separate
+approval and oracle qualification for a changed arithmetic contract. No SDK or
+production implementation is patched here; the proposed stage remains gated.

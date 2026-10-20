@@ -203,9 +203,11 @@ PSNR, GOP1/GOP2 product support, or acceleration; performance remains unmeasured
 
 ## Validation of this proposal
 
-Only this document and its JSON selection are changed. Native macOS 26.5.2
+This document, its JSON selection and the required upstream-quirk note in
+`docs/UPSTREAM.md` are changed. Native macOS 26.5.2
 ARM64, AppleClang 21, CMake 3.31.5, Python 3.9.6 with optimization and external
 FFmpeg n8.0: SDK-free Release full CTest **32/32 PASS**, zero skips, **73.87 s**.
+Full pre-follow-up-commit CTest also passed **32/32**, zero skips, **71.07 s**.
 This is unchanged-main infrastructure/encoder coverage, not scalar decoder
 execution. The 34-test reference branch inventory belongs to #190 and is not
 silently attributed to this main-based documentation branch.
