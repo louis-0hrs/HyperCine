@@ -24,8 +24,18 @@ def report(overrides=None):
 
 
 class ReleaseGateTests(unittest.TestCase):
-    def test_real_pass(self):
-        self.assertEqual(gate.inventory(report(), 0)["gate_exit"], 0)
+    def test_all_pass_execution_without_independent_oracle_is_blocked(self):
+        data = gate.inventory(report(), 0)
+        self.assertEqual(data["reference_lane"], "PASS")
+        self.assertTrue(all(row["state"] == "PASS" for row in data["tests"]))
+        self.assertEqual(data["gate_exit"], 77)
+        self.assertEqual(data["release_gate"], "BLOCKED")
+        self.assertFalse(data["independent_pixel_oracle"]["qualified"])
+
+    def test_test_named_qualified_cannot_grant_release(self):
+        xml = report().replace("</testsuite>",
+            '<testcase name="independent_oracle_qualified" status="run"/></testsuite>')
+        self.assertEqual(gate.inventory(xml, 0)["gate_exit"], 77)
 
     def test_green_ctest_with_skips_is_blocked(self):
         data = gate.inventory(report({"test_phase2a": '<skipped message="SKIP_RETURN_CODE=77"/>'}), 0)
