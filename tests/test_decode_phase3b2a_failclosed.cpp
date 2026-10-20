@@ -144,6 +144,40 @@ void CheckBlockingFailure(const char* name, TestCudaSubmitSite site) {
     Say(name, true, "ticket 0, error preserved, slot recovered");
 }
 
+void CheckGpuIndexFrameErrorCopy() {
+    Pipe p(Phase2EPipelineMode::Phase2FAGpuIndexBatch);
+    const Gop1Fixture f = LoadGop1();
+    // Seed this single slot's ev_ready with a completed frame. Recovery must
+    // reuse the same slot and reproduce its bytes after actual abandonment.
+    const std::string baseline = DecodeOk(p.pipeline, f, "Phase2FA baseline decode");
+    int copy_hits = 0;
+    int ready_hits = 0;
+    p.pipeline.SetTestCudaFailureHook([&](TestCudaSubmitSite site) {
+        if (site == TestCudaSubmitSite::DagReadyEvent) ++ready_hits;
+        if (site == TestCudaSubmitSite::DagFrameErrorCopy) {
+            ++copy_hits;
+            return cudaErrorInvalidValue;
+        }
+        return cudaSuccess;
+    });
+    // With the production guard disabled, only GpuIndex() can reach the
+    // targeted DAG copy. A missing/unreachable hook must fail this test.
+    const uint64_t ticket = p.Queue(f, false);
+    Require(copy_hits == 1, "Phase2FA DAG frame-error copy failpoint reached exactly once");
+    Require(ready_hits == 0, "failed DAG copy must suppress ready event submission");
+    Require(ticket == 0, "failed Phase2FA DAG copy must not publish a ticket");
+    Require(p.pipeline.GetTestLastCudaSubmitError() == cudaErrorInvalidValue,
+        "direct DAG copy error preserved");
+    Require(p.pipeline.PollDecode(ticket) == DecodeTicketStatus::Invalid,
+        "failed Phase2FA queue ticket is invalid despite stale ev_ready");
+    Require(!p.pipeline.WaitForDecode(ticket), "failed Phase2FA queue cannot wait successfully");
+    p.pipeline.SetTestCudaFailureHook(nullptr);
+    Require(DecodeOk(p.pipeline, f, "Phase2FA slot recovery") == baseline,
+        "same-slot Phase2FA recovery must reproduce baseline BGRA hash");
+    Say("dag_frame_error_copy_failure", true,
+        "Phase2FA, copy hits=1, ready hits=0, ticket 0, error preserved, same-slot hash unchanged");
+}
+
 void CheckFieldPlusFailure(const char* name, TestCudaSubmitSite site, const FieldPlusFixture& f) {
     Pipe p;
     p.pipeline.SetTestCudaFailureHook([site](TestCudaSubmitSite s) {
@@ -214,6 +248,7 @@ int Run(const std::filesystem::path& root) {
     CheckDagFailure("dag_launch_result_failure", TestCudaSubmitSite::DagLaunchResult, false);
     CheckDagFailure("dag_color_launch_failure", TestCudaSubmitSite::DagColorLaunch, false);
     CheckDagFailure("dag_ready_event_failure", TestCudaSubmitSite::DagReadyEvent, false);
+    CheckGpuIndexFrameErrorCopy();
 
     CheckBlockingFailure("blocking_color_start_event_failure", TestCudaSubmitSite::BlockingColorStartEvent);
     CheckBlockingFailure("blocking_color_launch_failure", TestCudaSubmitSite::BlockingColorLaunch);
@@ -229,7 +264,7 @@ int Run(const std::filesystem::path& root) {
     CheckFieldPlusFailure("fieldplus_ready_event_failure", TestCudaSubmitSite::FieldPlusReadyEvent, fp);
 
     CheckStaleReady();
-    Say("all_failclosed_cases", true, "18 negative cases exercised");
+    Say("all_failclosed_cases", true, "19 negative cases exercised");
     return 0;
 }
 

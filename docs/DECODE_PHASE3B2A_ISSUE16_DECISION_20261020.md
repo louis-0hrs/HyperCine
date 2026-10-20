@@ -11,8 +11,11 @@ or a cryptographic/human signature on a qualification exception.
 
 **Reference disposition: ACCEPT the bounded original-SDK observer contract at
 #190 `77acadbd497a490c034440709390807087147d64`. Recommend phase-only acceptance
-of #187, conditional on explicit maintainer ratification of the exception below
-and resulting-head checks.** Keep #187/#190 Draft and #2/#13/#16 open pending
+of #187, conditional on resolving the current full-suite failure described
+below, explicit maintainer merge authorization and resulting-head checks.**
+The targeted follow-up below closes the previously
+proposed DAG-copy coverage exception with a real Phase2FA-path test; no waiver
+is now requested for that site. Keep #187/#190 Draft and #2/#13/#16 open pending
 that decision. No phase/main merge, promotion, tag or release is performed.
 
 This supersedes the previous review's private-byte/provenance HOLD: #200's
@@ -37,7 +40,8 @@ The #187 base delta contains 41 files, including #52's Linux compatibility
 and test work. Its `upstream/`, encoder implementation and public
 `include/hypercine/decoder.h` deltas are empty. The `7ed4a82..f6c04f2`
 delta contains only the Windows evidence JSON and integration report.
-This follow-up changes documentation only.
+The original review changed documentation only; the subsequent targeted
+follow-up adds the single negative case described below, without codec changes.
 
 ## Five #187 review dispositions
 
@@ -50,17 +54,17 @@ is consistent with that source.
 
 | Observation | Disposition for the proposed phase landing | Rationale / excluded claim |
 | --- | --- | --- |
-| `DagFrameErrorCopy` negative case absent | PHASE_ONLY_EXCEPTION_PROPOSED; maintainer ratification required | The site is gated by `GpuIndex()` / Phase2FA; the test selects Phase2E and Phase2D. The checked copy result reaches `NoteCudaFailure`, and queue-time failure abandons before publication. Blocking/FIELDPLUS copy failures are exercised. The 18 cases do not exercise this DAG copy site. Accept only as an explicitly bounded experimental-phase coverage exception; broader Phase2FA negative-coverage acceptance requires a targeted test. |
+| `DagFrameErrorCopy` negative case absent at `7ed4a82` | CLOSED_BY_TARGETED_TEST in this follow-up | The added Phase2FA case reaches the copy failpoint exactly once with production guard disabled, sees no ready-event submission, preserves the direct error, returns ticket zero and reproduces the baseline image after same-slot recovery. The original 18 cases are preserved, now 19. The earlier `PHASE_ONLY_EXCEPTION_PROPOSED` is superseded; no coverage waiver is requested. |
 | Synthetic failed-ticket async lifetime | ACCEPT_AS_TEST_ONLY_LIMIT | `InjectTestCudaFailure` records an error without draining work; `ReleaseOutput` synchronizes only Pending. Identical-input sequential recovery is not proof of safe different-input or concurrent staging-buffer reuse. Do not extend seam use without an explicit drain/lifecycle fix. Actual queue-time checked submission failure calls `AbandonSlot`, which attempts synchronization of all owned slot streams before reuse; this does not certify arbitrary driver/context failure recovery. |
 | Global test error accessor | ACCEPT_AS_TEST_ONLY_LIMIT | Atomic storage prevents a plain data race, but concurrent queues can overwrite attribution and early invalid input can retain an old value. Only the single-threaded valid-queue assertions are accepted. Production first-error state is per slot. |
 | Empty human diagnostic on some DAG failures | ACCEPT_NONBLOCKING_DIAGNOSTIC_LIMIT | This is a production observability limitation, not literally test-only. Stored first error still prevents successful ticket publication. Complete human-readable CUDA failure diagnostics are not claimed. |
 | Poll Complete fast path after late injection | ACCEPT_AS_TEST_ONLY_LIMIT | Poll can remain Complete while Wait rejects a newly injected error after completion. The production submission-error path abandons before publication. This does not establish production success for that path; post-completion injection cannot support Poll/Wait equivalence claims. |
 
 No source defect established by these observations requires changing decode
-math for this proposal. The proposed exception is not a signed maintainer
-waiver. Until it is ratified, the phase landing remains HOLD. Alternatively,
-the maintainer can require the single targeted Phase2FA negative test; any
-source/test change must receive applicable new-head validation.
+math for this proposal. The targeted Phase2FA negative test resolves the
+unratified coverage-exception proposal. The phase landing remains HOLD for
+explicit maintainer authorization. The other four limited dispositions remain
+in force; this test does not establish arbitrary submission/driver-failure safety.
 
 ## Bounded original-reference decision
 
@@ -117,8 +121,8 @@ silent-drop/race risk and `temporal.c:9606` ASan finding remain separate.
 | --- | --- |
 | #13 own CUDA safety | Scoped ACCEPT at `7ed4a82`: reported RTX4090 45/45, CPU 7/7, A2 44/44 zero skips + 12/12 real sanitizer cells, M4 scoped 3/3; own exercised host-ASan paths clean. Synthetic injection is not arbitrary physical-driver-failure proof. Retain original-SDK ASan finding separately. Formal issue closure remains with maintainer. |
 | #2 external oracle | Bounded source/reference contract ACCEPT at integrated #190 head. No missing named stages or remaining #199/#196 integration task. Broader production promotion remains a separate decision. |
-| #14 performance/resources | Retain existing closed, scoped qualification and merged #56 evidence. This docs-only change does not alter inverse math, dispatch, allocations or stream/event topology. Preserve lazy first-use versus warmed allocation distinction. No new throughput/latency/peak-memory claim; no optimization milestone declared. |
-| #16 phase integration | Proposal prepared; HOLD until explicit exception ratification and phase merge authorization, followed by resulting-head checks. |
+| #14 performance/resources | Retain existing closed, scoped qualification and merged #56 evidence. The test/documentation follow-up does not alter inverse math, dispatch, allocations or stream/event topology. Preserve lazy first-use versus warmed allocation distinction. No new throughput/latency/peak-memory claim; no optimization milestone declared. |
+| #16 phase integration | Targeted test resolves the coverage exception. HOLD for the current full-suite `test_phase2a` comparison failure, explicit phase merge authorization and resulting-head checks. Three isolated passes do not turn the full run green. |
 | Protected main / release | Separate HOLD; acceptance above does not authorize either. |
 
 ## Exact phase landing and resulting-head validation proposal
@@ -128,8 +132,9 @@ Ancestry checks succeeded for every adjacent pair:
 `3AF 9eb9e3d -> 3B0 7296f6f -> 3B1 f1d0fe4 -> 3B2R f433a74 -> 3B2A aec37c1 -> #187 f6c04f2`.
 
 1. Recheck live #187/#190 heads and bases before an authorized landing. Scope
-   approval to the reviewed code SHA plus documentation-only descendants;
-   source drift requires fresh review. Confirm #56/#90 already in `aec37c1`
+   approval to the reviewed decoder code plus this isolated test follow-up and
+   documentation-only descendants; other source drift requires fresh review.
+   Confirm #56/#90 already in `aec37c1`
    and #52 already in #187; do not merge them again.
 2. After explicit maintainer decision, merge #187 into **`decode-phase3b2a`**,
    preserving ancestry with a merge commit. Record both parents, resulting
@@ -158,7 +163,7 @@ Ancestry checks succeeded for every adjacent pair:
    Validate each actual resulting tree before commit/merge. Keep milestone
    branches until descendants and provenance are safe. No release is implied.
 
-## Validation in this follow-up
+## Validation in the original documentation-only review (`ee0ef05`)
 
 - Complete PR-branch CPU Release CTest: **7/7 PASS**, zero skips, 4.57 s.
 - Integrated #190 optimized Python stage contract: **17/17 PASS**; Phase-A
@@ -171,4 +176,90 @@ Ancestry checks succeeded for every adjacent pair:
 
 Existing GPU/sanitizer/reference-run numbers above are explicitly attributed
 to their historical evidence. No new GPU, sanitizer, benchmark or export run
-was performed for this documentation change.
+was performed for the original documentation-only review at `ee0ef05`.
+
+## Targeted Phase2FA follow-up after independent next-step review
+
+The [new review request](https://github.com/louis-0hrs/HyperCine/pull/187#issuecomment-6287302822)
+was addressed by adding `CheckGpuIndexFrameErrorCopy` to the existing failclosed
+test. Production codec/header/build files are unchanged. All original 18
+negative cases remain; the added case raises the total to 19, not the number
+of CTest targets.
+
+The test initializes one slot in `Phase2FAGpuIndexBatch`, decodes and releases
+a baseline frame, then installs a hook for `DagFrameErrorCopy`. The failing
+queue disables the production guard so that `GpuIndex()` is the actual gate
+to the targeted branch. It requires exactly one copy-site hit and zero
+`DagReadyEvent` hits. It checks ticket zero, the exact `cudaErrorInvalidValue`,
+Invalid Poll and unsuccessful Wait despite a previously completed ready event.
+After removing the hook, the same pipeline's only slot must decode/release
+successfully and reproduce the baseline BGRA hash.
+
+The hook models a direct CUDA API error before that copy is submitted. It does
+not deliberately break a physical driver, inject after publication or rely on
+the synthetic failed-ticket release seam discussed above. Normal abandonment
+and same-slot recovery execute through production queue handling.
+
+Test identity: parent `ee0ef05151f7effc1f3c5f73bd2ac3ef7390ac21` plus Git blob
+`2ec81a715a3d224261654a21ee410cb57b4ca96e` for
+`tests/test_decode_phase3b2a_failclosed.cpp`. Decoder implementation remains
+`7ed4a82ed97598454c2680bd264dedf259e6e7dc`; the new test is not claimed to have
+run in the historical Linux A2 qualification.
+
+Native Windows RTX4090 Laptop, CUDA 12.8.61, MSVC 19.44.35229, Release:
+
+- Targeted native CTest: 1/1 PASS, zero skips, all 19 cases exercised; output
+  explicitly reports `copy hits=1, ready hits=0` and same-slot hash parity.
+- Targeted MSVC host-ASan CTest: 1/1 PASS, zero reports, all 19 cases.
+- Compute Sanitizer: four actual runs of the updated failclosed executable,
+  `memcheck`, `initcheck`, `racecheck`, `synccheck`, each with
+  `--error-exitcode 99`, exit zero and parsed zero-error/hazard summaries.
+  This is four tools on one target, not a replacement 12-cell A2 matrix.
+- Full CPU-only Release CTest: 7/7 PASS, zero skips, 4.61 s.
+- Full CUDA Release CTest: **44/45 PASS, one FAIL, zero skips**, 753.65 s,
+  exit 1. All decoder targets, including the extended failclosed test and
+  Phase2FA corpus (461.23 s), pass. See the unresolved encoder-test result below.
+
+Native test executable SHA-256:
+`20c7058661f81e85a1b94b94f276dec2e5250420314996f8dab030a05a2622e8`.
+Host-ASan executable SHA-256:
+`60403b05a24d4da59b3ec47859eb1077480fc8f5f1e64f58a4c0058eb6e97f22`.
+Compute Sanitizer version 2025.1.0.0, NVIDIA driver 610.62, sm_89.
+
+The first sandbox build was interrupted before compilation; a sandbox
+Compute Sanitizer attempt was interrupted before target output/summary.
+Neither counts as a successful instrumented run. Successful native builds
+and all four reported sanitizer runs used the permitted native execution path.
+No benchmark, reference export or original-observer replay is claimed. The
+native suites do invoke the original SDK as part of their existing tests;
+those calls are not another execution of the pinned reference producer.
+
+### Unresolved full-suite encoder comparison failure
+
+`test_phase2a` failed in the full run with:
+
+```text
+device-resident decode differs from host compact (1 bitstream bytes)
+```
+
+Its preceding host/device encoder checks reported success and zero coefficient
+or expansion mismatches. This assertion compares outputs of two fresh original
+SDK BGRA decoders; the one differing bitstream byte is reported by the test,
+not proof of which component caused the decoded-image difference.
+
+The same executable then passed **3/3 isolated CTest invocations**, with no
+source, executable, input or test-criterion change (1.06 / 0.70 / 0.60 s).
+Its binary timestamp is 2026-10-19, before this follow-up, and its SHA-256 is
+`d0b0b654130c54da56986fed57f3b54cf71387efbeba1ae4a7b2fd0aef31fe2a`.
+`tests/test_phase2a.cpp`, all codec sources, headers and build registrations
+have empty diffs against parent `ee0ef05`.
+
+This establishes an intermittent result in an unchanged, separate executable;
+it does not establish a root cause or authorize dismissing the failed full
+run. Known original-SDK threading/dither caveats in `docs/UPSTREAM.md` are
+context, not a demonstrated diagnosis of this occurrence. Do not report 45/45,
+weaken equality, count retries as a clean full pass, or clear the integration
+gate from those retries. Keep this Draft test-only follow-up reviewable while
+the independent encoder/oracle comparison is investigated. The narrow DAG-copy
+test request is fulfilled; resulting-head/native integration acceptance remains
+HOLD. No unrelated encoder or frozen SDK fix is included here.
