@@ -24,7 +24,16 @@ are gone with the general band0 bottom-endpoint rule.
 | 3840 x 2160 | ch2 U | PASS |
 
 Machine-readable hashes and lineage are in
-[`scalar_inverse_windows_review_2026-10-20.json`](scalar_inverse_windows_review_2026-10-20.json).
+[`scalar_inverse_endpoint_windows_2026-10-20.json`](scalar_inverse_endpoint_windows_2026-10-20.json).
+The JSON candidate hashes describe the corrected Windows working tree, not
+verified Git-blob identities of the integrated child. On integration review,
+four of its five candidate hashes match neither the committed LF bytes nor
+a uniform CRLF conversion; the synthetic vector header matches CRLF bytes.
+The Windows run therefore remains working-tree evidence, not an exact-child-SHA
+replay certification. This does not change its archived original SDK provenance
+or the separately recorded native Mac original-pair results. The recorded
+Windows hashes are preserved for source-owner reconciliation.
+
 No reference was regenerated, resealed or changed. No encoder was executed.
 At the historical baseline, the requested stock replay exited 1; the corrected
 replay passes with exact equality and no tolerance or expected-output change.
