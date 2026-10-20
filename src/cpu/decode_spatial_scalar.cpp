@@ -49,16 +49,19 @@ std::int32_t at(SignedPlaneView p, std::uint32_t x, std::uint32_t y) {
 }
 // Overflow-protected vertical: all intermediates are int32 until final S16.
 void vertical(SignedPlaneView low, SignedPlaneView high, std::uint32_t y,
-              std::int16_t* even, std::int16_t* odd) {
+              std::int16_t* even, std::int16_t* odd, bool original_ll_endpoint) {
     for (std::uint32_t x = 0; x < low.width; ++x) {
         std::int32_t e, o;
-        const auto l = at(low, x, y), h = at(high, x, y);
+        // The original scalar loop leaves the LL pointer one row behind
+        // its LH ring at the lower endpoint (spatial.c:21824-21880).
+        const auto source_y = original_ll_endpoint && y+1 == low.height ? y-1 : y;
+        const auto l = at(low, x, source_y), h = at(high, x, y);
         if (y == 0) {
             const auto b = at(low, x, 1), c = at(low, x, 2);
             e = floor_shift(11*l - 4*b + c + 4, 3);
             o = floor_shift(5*l + 4*b - c + 4, 3);
         } else if (y + 1 == low.height) {
-            const auto b = at(low, x, y-1), c = at(low, x, y-2);
+            const auto b = at(low, x, source_y-1), c = at(low, x, source_y-2);
             e = floor_shift(5*l + 4*b - c + 4, 3);
             o = floor_shift(11*l - 4*b + c + 4, 3);
         } else {
@@ -132,7 +135,7 @@ SpatialStageResult InverseWavelet5To4(const std::array<SpatialBandInput, 4>& inp
                                     SpatialLowpassOutput output, const std::function<bool()>& canceled) {
     const auto& first = input[0];
     const auto w = first.plane.width, h = first.plane.height;
-    if (w < 16 || w > 480 || w % 8 || h < 3 || h > 270 || first.channel > 2 ||
+    if (w < 16 || w > 480 || w % 8 || h < 4 || h > 270 || first.channel > 2 ||
         !first.generation.session || !first.generation.value || output.wavelet != 4 || output.band != 0 ||
         output.channel != first.channel || !(output.generation == first.generation) ||
         output.plane.width != w*2 || output.plane.height != h*2)
@@ -155,8 +158,8 @@ SpatialStageResult InverseWavelet5To4(const std::array<SpatialBandInput, 4>& inp
     auto* le = s.data; auto* he = le+s.pitch/2; auto* lo = he+s.pitch/2; auto* ho = lo+s.pitch/2;
     for (std::uint32_t y = 0; y < h; ++y) {
         if (canceled && canceled()) return SpatialStageResult::Canceled;
-        vertical(input[0].plane, input[2].plane, y, le, lo);
-        vertical(input[1].plane, input[3].plane, y, he, ho);
+        vertical(input[0].plane, input[2].plane, y, le, lo, true);
+        vertical(input[1].plane, input[3].plane, y, he, ho, false);
         auto* even = output.plane.data+std::size_t(2*y)*(output.plane.pitch/2);
         auto* odd = even+output.plane.pitch/2;
         horizontal(le, he, even, w); horizontal(lo, ho, odd, w);

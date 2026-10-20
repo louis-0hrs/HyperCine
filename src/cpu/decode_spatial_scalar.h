@@ -52,7 +52,7 @@ enum class SpatialStageResult { Complete, Canceled };
 
 // Inputs must be entropy-completed/dequantized wavelet5 bands0..3, scale0.
 // Four distinct input allocations and a distinct output allocation are required.
-// Width 16..480, multiple of8; height3..270. Output has doubled dimensions.
+// Width 16..480, multiple of8; height4..270. Output has doubled dimensions.
 // Pointers/pitches are 32-byte aligned; storage covers all rows, <=2MiB/plane.
 // Invalid identity/storage is rejected before writes. Allocation failure throws.
 // Cancellation/exception may leave partial output: callers MUST NOT publish it.

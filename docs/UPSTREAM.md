@@ -148,3 +148,19 @@ real references or a claim about decoder nondeterminism. A future owned CPU
 adapter must explicitly model the reviewed narrowing rules, or obtain separate
 approval and oracle qualification for a changed arithmetic contract. No SDK or
 production implementation is patched here; the proposed stage remains gated.
+
+
+### 12. Asymmetric lower vertical endpoint in overflow-protected inverse
+
+`InvertSpatialQuantOverflowProtected16s` in `Codec/spatial.c` leaves the LL
+pointer at row n-2 after its scalar middle loop, while the three-row LH ring
+contains rows n-3,n-2,n-1. Its final vertical lowpass filter therefore reads
+LL rows n-2,n-3,n-4 and highpass row n-1; the horizontal-highpass pair reads
+LH rows n-1,n-2,n-3 and HH row n-1. This is pointer progression, not a change
+to the +4 rounding rule or a horizontal arithmetic difference.
+
+The owned research stage preserves that asymmetry explicitly and requires at
+least four input rows. Three rows would make the original LL endpoint read
+before row zero. An independent synthetic ramp and pinned original replay
+cover this behavior; frozen upstream remains unchanged. See
+[the numerical diagnosis](validation/SCALAR_INVERSE_RESEARCH_144.md).

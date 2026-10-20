@@ -13,6 +13,46 @@ No packet parser, temporal inverse, output conversion, public decoder API,
 real graph profile, second scheduler or GPU path is added. The graph remains
 Synthetic and its implementation is unchanged.
 
+## Original replay correction (2026-10-20)
+
+Restored private read-only corpus access supersedes the historical NOT RUN
+statements below. At original head `a085c43fd1ba63d555997abbef16e1de9f52040b`,
+all 30 originals authenticated but only five of six cases matched. For 1080p U,
+rows266/267 had zero differences; row268 had 240 candidate-minus-original -1
+values, row269 had 240 +1 values, spanning x0..239 in each row.
+
+The cause is original pointer progression in `spatial.c:21766-21883`:
+`lowlow` starts the middle loop at row0 and advances n-2 times to row n-2;
+there is no enabled post-loop increment. Its final LL filter consequently
+uses n-2,n-3,n-4, while the LH ring uses n-1,n-2,n-3. Both highpass corrections
+still use row n-1. The former model incorrectly used n-1 for both low bands.
+For diagnostic x0,1,60,118,119, the old LL vertical raw sums 133232/133232
+became 16654/16654 after +4 and floor /8, then 8327/8327 after highpass0
+and floor /2. Actual source-pointer sums 133264/133200 become16658/16650,
+then8329/8325. The right pair is zero. Horizontal synthesis yields4164/4162,
+exactly the original, instead of4163/4163. First/interior/tail/right-border
+samples agree with this explanation. No horizontal operation was changed.
+
+The owned correction applies the original LL endpoint at every supported
+geometry/channel. It rejects height3 before reads/writes; height4 is now the
+minimum since LL[n-4] must exist. Synthetic fixtures now have >=4 rows.
+An independent LL ramp 0,8,16,24 produces final output3/4 rather than the
+incorrect5/6; a separate LH ramp verifies that its ring is not shifted.
+All original data and expected hashes remain unchanged. Original archived
+compiler/ISA provenance remains a separate Windows owner signoff.
+
+Current correction validation, native macOS26.5.2 ARM64 / AppleClang21:
+Release full required-external-decode CTest **41/41 PASS**, zero skips,76.94s;
+ASan/UBSan full CTest **41/41 PASS**, zero skips,136.15s (leak detection off,
+Python/FFmpeg uninstrumented); scoped TSan graph **4/4 PASS**,1.68s.
+Both full suites include actual original **6/6 exact** with all30 artifacts
+verified unchanged. Eleven numerical mutations are rejected, including undoing
+the LL endpoint correction and incorrectly shifting the LH ring. C++17
+warnings-as-errors and synthetic vector regeneration pass. These suites overlap.
+See [the correction report](scalar_inverse_endpoint_correction_2026-10-20.json)
+for tested source fingerprints. Historical results below belong to the earlier
+head; hosted current-correction results are pending publication.
+
 ## Interface and numerical model
 
 `src/cpu/decode_spatial_scalar.{h,cpp}` defines move-only `OwnedSignedPlane`,
@@ -21,7 +61,7 @@ const input views and a mutable output view. The private research function
 channel/generation, wavelet5 bands0..3 in order, and a disjoint wavelet4/band0
 output of doubled dimensions. It rejects invalid identity, unsupported shape,
 short storage, aliasing, misalignment, pitch/extent overflow and address wrap
-before writes. Input width is 16..480, divisible by8; height is 3..270. No
+before writes. Input width is 16..480, divisible by8; height is 4..270. No
 arbitrary profile or extreme frame allocation is accepted.
 
 Each allocation has 32-byte alignment, padded pitch, zero initial padding and

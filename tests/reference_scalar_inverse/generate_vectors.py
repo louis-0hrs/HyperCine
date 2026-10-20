@@ -28,16 +28,19 @@ def row(low, high, mode):
     n = len(low)
     for x in range(n):
         if x == 0 or x == n-1:
-            a, b, c = (low[:3] if x == 0 else low[-1:-4:-1])
+            # The original LL pointer stops at the penultimate row; the
+            # LH ring reaches the final row. Preserve this source asymmetry.
+            a, b, c = (low[:3] if x == 0 else
+                       low[-2:-5:-1] if mode == 'vertical_ll' else low[-1:-4:-1])
             weights = ((11,-4,1),(5,4,-1)) if x == 0 else ((5,4,-1),(11,-4,1))
             for sign, weights_one in zip((1,-1), weights):
                 v = floor(sum(i*j for i,j in zip((a,b,c), weights_one))+4,3)
                 v = floor(v+sign*high[x],1)
-                result.append(narrow(v, 'S' if mode == 'vertical' or x == n-1 else 'W'))
+                result.append(narrow(v, 'S' if mode.startswith('vertical') or x == n-1 else 'W'))
         else:
             # Vertical is wide until final storage; the selected horizontal
             # original changes operator semantics at the vector/tail boundary.
-            kind = None if mode == 'vertical' else ('S' if x <= 8*((n-1)//8) else 'W')
+            kind = None if mode.startswith('vertical') else ('S' if x <= 8*((n-1)//8) else 'W')
             for sign in (1,-1):
                 if sign == 1:
                     v = narrow(low[x-1]-low[x+1],kind)
@@ -71,7 +74,7 @@ def synth(w,h,seed,force_borders=False):
     strips = []
     for b in (0,1):
         columns = [row([planes[b][y*w+x] for y in range(h)],
-                       [planes[b+2][y*w+x] for y in range(h)], 'vertical') for x in range(w)]
+                       [planes[b+2][y*w+x] for y in range(h)], 'vertical_ll' if b == 0 else 'vertical') for x in range(w)]
         strips.append([[columns[x][y] for x in range(w)] for y in range(2*h)])
     output = [v for y in range(2*h) for v in row(strips[0][y],strips[1][y],'horizontal')]
     return planes,output
@@ -85,7 +88,7 @@ def render():
              'namespace ScalarSynthetic {',
              'struct Case { unsigned width, height; std::vector<std::int16_t> input[4]; std::vector<std::int16_t> expected; };',
              'inline const std::vector<Case> cases{']
-    for w,h,seed,forced in [(16,3,0x1337BEEF,False),(24,4,0x1337BEF0,False),(16,3,0,True)]:
+    for w,h,seed,forced in [(16,4,0x1337BEEF,False),(24,4,0x1337BEF0,False),(16,4,0,True)]:
         planes,out = synth(w,h,seed,forced)
         values = lambda a: '{'+','.join(map(str,a))+'}'
         lines += ['{'+f'{w},{h},'+'{'+','.join(values(a) for a in planes)+'},'+values(out)+'},']

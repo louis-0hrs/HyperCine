@@ -115,7 +115,13 @@ with the first member providing L and the second H. For index i along height n:
 Store vertical even = S(F(E + Hi,1)) and odd = S(F(O - Hi,1)).
 There is no intermediate 16-bit wrap in this overflow-protected vertical loop;
 the disabled MMX block is not the selected path. Rounding is always +4,
-including negative sums. Require n >= 3; the selected heights are 135/270.
+including negative sums. At the final row, the table applies directly only to
+(band1,band3): its three-row LH ring reaches n-1. The original scalar loop
+leaves the LL pointer at n-2, so for (band0,band2) substitute L[n-2], L[n-3],
+L[n-4] in the final-row filter while retaining H[n-1]. See spatial.c:21766-21883.
+This source-pointer asymmetry corrects the original symmetric proposal after
+actual original replay exposed its 1080p U lower-pair mismatch. Require n >= 4
+to avoid a negative LL row; the selected heights are 135/270.
 The resulting even/odd lowpass and highpass rows feed `InvertHorizontalStrip16s`.
 
 **Horizontal arithmetic is position-dependent in the pinned x86 original.**

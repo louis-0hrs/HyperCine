@@ -98,6 +98,24 @@ void arithmetic() {
         auto v=f.output.view();
         for(unsigned y=0;y<v.height;++y) for(unsigned x=0;x<v.width;++x) check(v.data[y*v.pitch/2+x]==1000);
     }
+    // Independent analytic lower-boundary ramp: LL rows 0,8,16,24.
+    // Original LL pointer stops at row2, so the final vertical pair is
+    // (5*16+4*8-0+4)/8/2=7 and (11*16-4*8+0+4)/8/2=9.
+    // Horizontal DC halves those to 3 and 4; a symmetric endpoint gives 5,6.
+    // The separate LH ring is tested independently.
+    for (unsigned band : {0u,1u}) {
+        Frame f(16,4);
+        auto low=f.input[band].view();
+        for(unsigned y=0;y<4;++y) for(unsigned x=0;x<16;++x)
+            low.data[y*low.pitch/2+x]=static_cast<std::int16_t>(8*y);
+        check(InverseWavelet5To4(f.bands(),f.out())==SpatialStageResult::Complete);
+        auto out=f.output.view();
+        for(unsigned x=0;x<32;++x) {
+            const int sign=(band==1 && x%2)?-1:1;
+            check(out.data[6*out.pitch/2+x]==(band==0?3:(sign==1?5:-6)));
+            check(out.data[7*out.pitch/2+x]==(band==0?4:(sign==1?6:-7)));
+        }
+    }
     OwnedSignedPlane a(17,3); auto before=a.view().data;
     OwnedSignedPlane b(std::move(a)); check(!a.view().data && !a.view().bytes && b.view().data==before);
     a=std::move(b);check(!b.view().data && !b.view().pitch && a.view().data==before);
@@ -135,7 +153,7 @@ void rejections() {
     run([](auto&,auto& o){o.band=1;});
     run([](auto& i,auto& o){for(auto& b:i)b.generation.session=0;o.generation.session=0;});
     run([](auto& i,auto& o){for(auto& b:i)b.channel=3;o.channel=3;});
-    for(auto size:std::vector<std::pair<unsigned,unsigned>>{{8,3},{17,3},{488,3},{16,2},{16,271}}) {
+    for(auto size:std::vector<std::pair<unsigned,unsigned>>{{8,3},{17,3},{488,3},{16,2},{16,3},{16,271}}) {
         invalid([&]{Frame other(size.first,size.second);InverseWavelet5To4(other.bands(),other.out());});
     }
     const auto live=aligned_live.load(); bool failed=false;
