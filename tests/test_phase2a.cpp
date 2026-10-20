@@ -35,6 +35,7 @@ extern "C" {
 
 #include "bitstream.h"
 #include "decoder.h"
+#include "diagnostic_decode_guard.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -58,9 +59,11 @@ struct DecodeResult {
     int decoded_height = 0;
     int pitch = 0;
     CFHD_PixelFormat format = CFHD_PIXEL_FORMAT_UNKNOWN;
+    bool geometry_rejected = false;
 };
 
-bool Decode(const std::vector<uint8_t>& sample, int width, int height, std::vector<uint8_t>* image, DecodeResult* result) {
+bool Decode(const std::vector<uint8_t>& sample, int width, int height, bool strict_diagnostic_geometry,
+            std::vector<uint8_t>* image, DecodeResult* result) {
     CFHD_DecoderRef decoder = nullptr;
     result->open_error = CFHD_OpenDecoder(&decoder, nullptr);
     if (result->open_error != CFHD_ERROR_OKAY) return false;
@@ -78,8 +81,19 @@ bool Decode(const std::vector<uint8_t>& sample, int width, int height, std::vect
     result->decoded_height = ah;
     result->format = fmt;
     int32_t pitch = 0;
-    CFHD_GetImagePitch(aw > 0 ? aw : width, fmt, &pitch);
-    if (pitch <= 0) pitch = width * 4;
+    const CFHD_Error pitch_error =
+        CFHD_GetImagePitch(static_cast<uint32_t>(aw > 0 ? aw : width), fmt, &pitch);
+    result->pitch = pitch;
+    if (strict_diagnostic_geometry &&
+        !hypercine::test::IsAcceptedDiagnosticDecodeGeometry(aw, ah, fmt, pitch_error, pitch)) {
+        // Reject an unexpected SDK prepare result before allocating storage or
+        // entering the decoder. The exact 1920x1080 BGRA extent is bounded, so
+        // no unchecked pitch x height multiplication reaches the allocator.
+        result->geometry_rejected = true;
+        CFHD_CloseDecoder(decoder);
+        return false;
+    }
+    if (pitch_error != CFHD_ERROR_OKAY || pitch <= 0) pitch = width * 4;
     result->pitch = pitch;
     image->assign(static_cast<size_t>(pitch) * static_cast<size_t>(ah > 0 ? ah : height), 0);
     CFHD_MetadataRef metadata = nullptr;
@@ -314,12 +328,16 @@ int DecodePacketFile(const char* path) {
     }
     std::vector<uint8_t> image;
     DecodeResult result;
-    const bool ok = Decode(packet, 0, 0, &image, &result);
+    const bool ok = Decode(packet, 0, 0, true, &image, &result);
     PrintDecode("packet decode", result, image);
     if (!ok || result.decoded_width != 1920 || result.decoded_height != 1080 ||
         result.pitch < 1920 * 4 ||
         image.size() < static_cast<size_t>(result.pitch) * 1080u) {
-        std::cerr << "packet decode failed or returned invalid BGRA geometry\n";
+        if (result.geometry_rejected) {
+            std::cerr << "SDK prepare geometry rejected before allocation/decode\n";
+        } else {
+            std::cerr << "packet decode failed or returned invalid BGRA geometry\n";
+        }
         return 1;
     }
     if (ok) {
@@ -352,10 +370,49 @@ int DecodePacketFile(const char* path) {
     return ok ? 0 : 1;
 }
 
+int RunGeometryGuardSelfTest() {
+    struct Case {
+        const char* name;
+        int width;
+        int height;
+        CFHD_PixelFormat format;
+        CFHD_Error pitch_error;
+        int32_t pitch;
+        bool accepted;
+    };
+    const Case cases[] = {
+        {"accepted_1920x1080_bgra", 1920, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 7680, true},
+        {"reject_width_1921", 1921, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 7680, false},
+        {"reject_width_0", 0, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 7680, false},
+        {"reject_height_1081", 1920, 1081, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 7680, false},
+        {"reject_height_0", 1920, 0, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 7680, false},
+        {"reject_yuy2_format", 1920, 1080, CFHD_PIXEL_FORMAT_YUY2, CFHD_ERROR_OKAY, 7680, false},
+        {"reject_unknown_format", 1920, 1080, CFHD_PIXEL_FORMAT_UNKNOWN, CFHD_ERROR_OKAY, 7680, false},
+        {"reject_pitch_error", 1920, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_INVALID_ARGUMENT, 7680, false},
+        {"reject_pitch_short", 1920, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 7679, false},
+        {"reject_pitch_zero", 1920, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 0, false},
+        {"reject_pitch_negative", 1920, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, -7680, false},
+        {"reject_pitch_unpadded_extra", 1920, 1080, CFHD_PIXEL_FORMAT_BGRA, CFHD_ERROR_OKAY, 7696, false},
+    };
+    int failures = 0;
+    for (const Case& test : cases) {
+        const bool accepted = hypercine::test::IsAcceptedDiagnosticDecodeGeometry(
+            test.width, test.height, test.format, test.pitch_error, test.pitch);
+        std::cout << "geometry guard case=" << test.name
+                  << " accepted=" << (accepted ? 1 : 0)
+                  << " expected=" << (test.accepted ? 1 : 0) << "\n";
+        if (accepted != test.accepted) ++failures;
+    }
+    std::cout << "geometry guard cases=" << (sizeof(cases) / sizeof(cases[0]))
+              << " failures=" << failures << "\n";
+    return failures == 0 ? 0 : 1;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
     if (argc == 3 && std::string(argv[1]) == "--decode") return DecodePacketFile(argv[2]);
+    if (argc == 2 && std::string(argv[1]) == "--self-test-geometry-guard") return RunGeometryGuardSelfTest();
 
     const int width = 1920;
     const int height = 1080;
@@ -516,8 +573,8 @@ int main(int argc, char** argv) {
 
     std::vector<uint8_t> host_image, device_image;
     DecodeResult host_decode, device_decode;
-    const bool host_ok = Decode(compact.bitstream, width, height, &host_image, &host_decode);
-    const bool device_ok = Decode(resident.bitstream, width, height, &device_image, &device_decode);
+    const bool host_ok = Decode(compact.bitstream, width, height, false, &host_image, &host_decode);
+    const bool device_ok = Decode(resident.bitstream, width, height, false, &device_image, &device_decode);
     PrintDecode("host compact decode", host_decode, host_image);
     PrintDecode("device compact decode", device_decode, device_image);
     if (host_ok && device_ok) {
@@ -546,7 +603,7 @@ int main(int argc, char** argv) {
 
     std::vector<uint8_t> image;
     DecodeResult compact_decode;
-    if (!Decode(compact.bitstream, width, height, &image, &compact_decode)) {
+    if (!Decode(compact.bitstream, width, height, false, &image, &compact_decode)) {
         PrintDecode("host compact decode repeat", compact_decode, image);
         std::cerr << "upstream decoder rejected compact bitstream\n";
         return 1;
