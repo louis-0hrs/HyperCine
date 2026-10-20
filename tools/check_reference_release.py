@@ -46,9 +46,19 @@ def inventory(xml_text, ctest_exit):
     failed = any(row["state"] == "FAIL" for row in rows)
     blocked = any(row["state"] == "BLOCKED" for row in rows)
     # CTest may fail before producing a complete result file. Never hide that.
-    code = 1 if failed or ctest_exit != 0 else 77 if blocked else 0
-    return dict(schema_version=1, scope="reference-oracle lane only",
+    lane_code = 1 if failed or ctest_exit != 0 else 77 if blocked else 0
+    # There is currently no reviewed independent pixel-oracle adapter. Passing
+    # test processes is execution evidence, not positive oracle qualification.
+    # Keep this closed until an actual reviewed implementation supplies bound
+    # same-packet quality evidence; do not add a CLI flag or trust a manifest
+    # that merely asserts qualification.
+    oracle = dict(state="BLOCKED", qualified=False,
+                  reason="no reviewed independent pixel-oracle adapter implemented")
+    code = 1 if lane_code == 1 else 77
+    return dict(schema_version=2, scope="reference-oracle lane only",
                 ctest_exit=ctest_exit, gate_exit=code,
+                reference_lane="PASS" if lane_code == 0 else "FAIL" if lane_code == 1 else "BLOCKED",
+                independent_pixel_oracle=oracle,
                 release_gate="PASS" if code == 0 else "FAIL" if code == 1 else "BLOCKED",
                 tests=rows)
 
@@ -69,7 +79,7 @@ def main():
                 "--output-junit", str(report)], check=False)
             data = inventory(report.read_text(encoding="utf-8"), result.returncode)
         except (OSError, ValueError, ET.ParseError) as error:
-            data = dict(schema_version=1, scope="reference-oracle lane only",
+            data = dict(schema_version=2, scope="reference-oracle lane only",
                         release_gate="FAIL", gate_exit=1,
                         reason="missing/invalid CTest evidence: " + str(error), tests=[])
     args.output.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
