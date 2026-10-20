@@ -10,6 +10,18 @@ permissions:
   contents: read
 
 jobs:
+  windows-installed-hooks:
+    name: Installed privacy hooks (Windows)
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test native Python with Git for Windows hooks
+        run: python -m unittest discover -s ci -p 'test_privacy_hooks.py' -v
+
   publication-privacy:
     name: Publication privacy (all new commits)
     runs-on: ubuntu-24.04

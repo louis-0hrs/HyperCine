@@ -11,8 +11,8 @@ import tempfile
 import unittest
 
 
-@unittest.skipIf(os.name == "nt", "Native POSIX hook qualification")
 class InstalledHookTests(unittest.TestCase):
+    """Exercise Git's installed hooks, including Git for Windows' shell runtime."""
     object_format = "sha1"
 
     def setUp(self):
