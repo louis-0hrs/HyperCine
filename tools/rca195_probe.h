@@ -9,13 +9,19 @@
 // Two jobs, both read-only with respect to the decoder's arithmetic:
 //
 //  1. Record the transform-queue state *immediately before* the queue is reset
-//     by WaitForTransformThread, so "was every queued transform admitted and
+//     by WaitForTransformThread, so "was every queued transform claimed and
 //     executed?" becomes measurable instead of inferred.
-//  2. Optionally withhold one producer publication, so an absent producer can
-//     be induced deterministically rather than waited for.
+//  2. Optionally consume one admitted queue entry without executing its
+//     reconstruction, so a claimed-but-unexecuted transform can be induced
+//     deterministically rather than waited for.
 //
-// The withholding switch fabricates a *failure input*. It is not a fix, not a
+// The skip switch fabricates a *failure input*. It is not a fix, not a
 // candidate, and must never be enabled outside this probe.
+//
+// An earlier revision also declared a `RCA195_WITHHOLD` producer-suppression
+// hook. It had no call site in any translation unit, so it could never fire and
+// no run ever exercised it; it is removed rather than left looking like a
+// capability. The absence of a producer is covered by the skip arms instead.
 #ifndef HYPERCINE_RCA195_PROBE_H
 #define HYPERCINE_RCA195_PROBE_H
 
@@ -49,10 +55,6 @@
 
 RCA195_STATE FILE *rca195_log;
 RCA195_STATE int rca195_ready;
-RCA195_STATE int rca195_withhold_ch;
-RCA195_STATE int rca195_withhold_idx;
-RCA195_STATE int rca195_withhold_band;
-RCA195_STATE unsigned long long rca195_withheld_count;
 RCA195_STATE int rca195_skip_ch;
 RCA195_STATE int rca195_skip_idx;
 RCA195_STATE unsigned long long rca195_skip_count;
@@ -62,7 +64,6 @@ RCA195_STATE unsigned long long rca195_exec_count;
 static void RCA195Init(void)
 {
 	const char *path;
-	const char *withhold;
 	const char *skip;
 
 	if (rca195_ready)
@@ -70,9 +71,6 @@ static void RCA195Init(void)
 	rca195_ready = 1;
 
 	/* Shared state starts zeroed; set the "no target" sentinels here. */
-	rca195_withhold_ch = -1;
-	rca195_withhold_idx = -1;
-	rca195_withhold_band = -1;
 	rca195_skip_ch = -1;
 	rca195_skip_idx = -1;
 
@@ -82,18 +80,6 @@ static void RCA195Init(void)
 		rca195_log = fopen(path, "a");
 	}
 
-	/* Format: <channel>:<index>:<band>, e.g. 1:2:0 */
-	withhold = getenv("RCA195_WITHHOLD");
-	if (withhold != NULL && withhold[0] != '\0')
-	{
-		int ch = -1, idx = -1, band = -1;
-		if (sscanf(withhold, "%d:%d:%d", &ch, &idx, &band) == 3)
-		{
-			rca195_withhold_ch = ch;
-			rca195_withhold_idx = idx;
-			rca195_withhold_band = band;
-		}
-	}
 
 	/* Format: <channel>:<index>. Consumes the entry but never executes it. */
 	skip = getenv("RCA195_SKIP");
@@ -121,23 +107,6 @@ static void RCA195Log(const char *fmt, ...)
 	va_end(args);
 	fputc('\n', rca195_log);
 	fflush(rca195_log);
-}
-
-/* Returns 1 when this exact (channel, index, band) publication must be
- * withheld, so a consumer of it can be observed with an absent producer. */
-static int RCA195ShouldWithhold(int channel, int index, int band)
-{
-	RCA195Init();
-	if (rca195_withhold_ch < 0)
-		return 0;
-	if (channel != rca195_withhold_ch)
-		return 0;
-	if (index != rca195_withhold_idx)
-		return 0;
-	if (band != rca195_withhold_band)
-		return 0;
-	rca195_withheld_count++;
-	return 1;
 }
 
 /* Returns 1 when the admitted queue entry for this (channel, index) must be
@@ -173,23 +142,26 @@ static void RCA195LogExecute(int channel, int index)
 }
 
 /* Dump the queue immediately before the reset that discards it. `entries` is the
- * number the caller is about to throw away. */
+ * number the caller is about to throw away. `admitted` and `unadmitted` are
+ * passed in by the caller rather than assumed: hard-coding them made two of the
+ * reported fields constants instead of measurements. */
 static void RCA195LogQueueReset(int num_entries, int free_entry, int next_entry,
 								int admitted, int unadmitted)
 {
 	RCA195Log("QUEUE_RESET num_entries=%d free_entry=%d next_entry=%d "
-			  "admitted=%d unadmitted=%d withheld=%llu skipped=%llu "
-			  "claimed=%llu executed=%llu",
+			  "admitted=%d unadmitted=%d skipped=%llu claimed=%llu executed=%llu "
+			  "unexecuted=%lld",
 			  num_entries, free_entry, next_entry,
-			  admitted, unadmitted, rca195_withheld_count, rca195_skip_count,
-			  rca195_claim_count, rca195_exec_count);
+			  admitted, unadmitted, rca195_skip_count,
+			  rca195_claim_count, rca195_exec_count,
+			  (long long)rca195_claim_count - (long long)rca195_exec_count);
 }
 
 /* Logged once per decode, after the public entry point has returned. */
 static void RCA195LogResult(int sdk_error, int result_false, const char *stage)
 {
-	RCA195Log("RESULT stage=%s sdk_error=%d result_false=%d withheld=%llu skipped=%llu",
-			  stage, sdk_error, result_false, rca195_withheld_count, rca195_skip_count);
+	RCA195Log("RESULT stage=%s sdk_error=%d result_false=%d skipped=%llu",
+			  stage, sdk_error, result_false, rca195_skip_count);
 }
 
 #endif /* HYPERCINE_RCA195_PROBE_H */

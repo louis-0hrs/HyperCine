@@ -31,10 +31,22 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME rca195_probe_applier_selftest COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/apply_rca195_probe.py"
         --self-test --repo "${CMAKE_SOURCE_DIR}")
+    # The runner's own verdict logic must be able to return INCONCLUSIVE, and it
+    # must accept the exact queue-line format the probe header emits.
+    add_test(NAME rca195_probe_runner_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/run_rca195_probe.py"
+        --self-test)
+    # A published ledger has to reproduce from its own records. The superseded
+    # v2 ledger does not, and this test is what makes that visible instead of
+    # leaving it to a reader to notice.
+    add_test(NAME rca195_ledger_rescore_v3 COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/run_rca195_probe.py"
+        --rescore "${CMAKE_SOURCE_DIR}/docs/validation/rca195_probe_ledger_2026-10-20_v3.json")
     set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
         rca195_tsan_reduction_selftest rca195_probe_applier_selftest
+        rca195_probe_runner_selftest rca195_ledger_rescore_v3
         PROPERTIES TIMEOUT 300
-        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS")
+        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS")
 endif()
 
 # 1. Transform-level test

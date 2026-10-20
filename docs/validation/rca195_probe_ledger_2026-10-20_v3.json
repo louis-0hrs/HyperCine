@@ -1,0 +1,5971 @@
+{
+ "arms": {
+  "A": {
+   "skip": null,
+   "records": [
+    {
+     "tag": "A001",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 20.234,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A002",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 13.125,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "NATURAL_VARIANT",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A003",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.916,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A004",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.147,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A005",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.235,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A006",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.735,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A007",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.979,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A008",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.755,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A009",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.298,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A010",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 14.859,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A011",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.875,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A012",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 17.268,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A013",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.564,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A014",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 14.298,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A015",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 14.061,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A016",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.887,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A017",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.366,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "NATURAL_VARIANT",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A018",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.656,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A019",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 15.384,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A020",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.105,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A021",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 11.31,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A022",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 11.817,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A023",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.798,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A024",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.166,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A025",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.79,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A026",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 12.539,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A027",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.764,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "NATURAL_VARIANT",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A028",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.289,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A029",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.842,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "NATURAL_VARIANT",
+     "skip_target_matched": false
+    },
+    {
+     "tag": "A030",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+     "ms": 13.05,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 0,
+      "claimed": 9,
+      "executed": 9
+     },
+     "skips": [],
+     "claimed": 9,
+     "executed": 9,
+     "skipped": 0,
+     "num_entries": 0,
+     "status": "OK",
+     "skip_target_matched": false
+    }
+   ],
+   "counts": {
+    "OK": 26,
+    "NATURAL_VARIANT": 4
+   },
+   "distinct_outputs": 4,
+   "queue_reset_all_zero": true,
+   "scored_calls": 30
+  },
+  "B": {
+   "skip": "1:2",
+   "records": [
+    {
+     "tag": "B001",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.189,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B002",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 11.349,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B003",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "0f7d01bdcf995f679141f584b580f3c477f0189216bdb2f64b2954433bef1007",
+     "ms": 11.919,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B004",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.332,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B005",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 11.716,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B006",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "0f7d01bdcf995f679141f584b580f3c477f0189216bdb2f64b2954433bef1007",
+     "ms": 11.819,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B007",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 11.462,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B008",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.307,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B009",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.385,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B010",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.641,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B011",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.847,
+     "queue": {
+      "num_entries": 1,
+      "free_entry": 9,
+      "next_entry": 8,
+      "admitted": 8,
+      "unadmitted": 1,
+      "skipped": 1,
+      "claimed": 8,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 8,
+     "executed": 7,
+     "skipped": 1,
+     "num_entries": 1,
+     "status": "UNMITTED_DISCARD_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B012",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.163,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B013",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.923,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B014",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "0f7d01bdcf995f679141f584b580f3c477f0189216bdb2f64b2954433bef1007",
+     "ms": 13.064,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B015",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.603,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B016",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.709,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B017",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "0f7d01bdcf995f679141f584b580f3c477f0189216bdb2f64b2954433bef1007",
+     "ms": 13.127,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B018",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.044,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B019",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.864,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B020",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "0f7d01bdcf995f679141f584b580f3c477f0189216bdb2f64b2954433bef1007",
+     "ms": 12.802,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B021",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.94,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B022",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.966,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B023",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.066,
+     "queue": {
+      "num_entries": 1,
+      "free_entry": 9,
+      "next_entry": 8,
+      "admitted": 8,
+      "unadmitted": 1,
+      "skipped": 1,
+      "claimed": 8,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 8,
+     "executed": 7,
+     "skipped": 1,
+     "num_entries": 1,
+     "status": "UNMITTED_DISCARD_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B024",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.915,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B025",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.341,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B026",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 14.938,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B027",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.622,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B028",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.25,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B029",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 12.775,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "B030",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "fad4a6430e01485bed38dc682671fd1bc758d442aa87c698ceda43af9c380fb6",
+     "ms": 13.939,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 2
+      },
+      {
+       "ch": 1,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    }
+   ],
+   "counts": {
+    "DROPPED_FALSE_OKAY": 28,
+    "UNMITTED_DISCARD_FALSE_OKAY": 2
+   },
+   "distinct_outputs": 2,
+   "queue_reset_all_zero": false,
+   "scored_calls": 30
+  },
+  "C": {
+   "skip": "0:2",
+   "records": [
+    {
+     "tag": "C001",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.49,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C002",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.402,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C003",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.588,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C004",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.632,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C005",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 13.284,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C006",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.282,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C007",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.456,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C008",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.964,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C009",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 11.934,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C010",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.62,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C011",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.317,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C012",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.716,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C013",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.716,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C014",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.646,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C015",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.149,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C016",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.706,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C017",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 13.963,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C018",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "0f7d01bdcf995f679141f584b580f3c477f0189216bdb2f64b2954433bef1007",
+     "ms": 12.469,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C019",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.539,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C020",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.219,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C021",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 14.642,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C022",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 13.639,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C023",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.425,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C024",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.931,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C025",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.796,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C026",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.959,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C027",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.442,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C028",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.787,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C029",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 13.005,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "C030",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "936c5e7156df7c552a0a9135f420369072df8c236903f867e9c52c6940416c78",
+     "ms": 12.674,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 0,
+       "idx": 2
+      },
+      {
+       "ch": 0,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    }
+   ],
+   "counts": {
+    "DROPPED_FALSE_OKAY": 30
+   },
+   "distinct_outputs": 2,
+   "queue_reset_all_zero": true,
+   "scored_calls": 30
+  },
+  "D": {
+   "skip": "2:2",
+   "records": [
+    {
+     "tag": "D001",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.655,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D002",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.946,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D003",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.995,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D004",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.221,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D005",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.316,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D006",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.49,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D007",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.815,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D008",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.064,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D009",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.234,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D010",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.019,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D011",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.068,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D012",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.717,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D013",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.28,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D014",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.649,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D015",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 14.967,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D016",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.73,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D017",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.779,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D018",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.391,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D019",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.404,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D020",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.434,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D021",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.799,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D022",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.026,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D023",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.789,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D024",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.347,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D025",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.506,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D026",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.133,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D027",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "618a74c86a6baad0e191875517c4173016766fe6cbc6712cf8c94736a6ebee52",
+     "ms": 13.099,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D028",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 12.104,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D029",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 13.067,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "D030",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "2660eae720330aa2ccb58dd7591d216aa77f56a72794d64b72a4a6959f3d5176",
+     "ms": 14.213,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 2,
+      "claimed": 9,
+      "executed": 7
+     },
+     "skips": [
+      {
+       "ch": 2,
+       "idx": 2
+      },
+      {
+       "ch": 2,
+       "idx": 2
+      }
+     ],
+     "claimed": 9,
+     "executed": 7,
+     "skipped": 2,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    }
+   ],
+   "counts": {
+    "DROPPED_FALSE_OKAY": 30
+   },
+   "distinct_outputs": 2,
+   "queue_reset_all_zero": true,
+   "scored_calls": 30
+  },
+  "E": {
+   "skip": "1:1",
+   "records": [
+    {
+     "tag": "E001",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.09,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E002",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.507,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E003",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.236,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E004",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 11.991,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E005",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "e78a52475a8aa3d277f0f229fc8d27aa7ecb0e03152ba0848b137bf158186c59",
+     "ms": 13.14,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E006",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 13.212,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E007",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.372,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E008",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 11.908,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E009",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 15.311,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E010",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 14.079,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E011",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.593,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E012",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 11.891,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E013",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.598,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E014",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.432,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E015",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.153,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E016",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.16,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E017",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.263,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E018",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.228,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E019",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.151,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E020",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.408,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E021",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.448,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E022",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.282,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E023",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.425,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E024",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.962,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E025",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a2f1595917481039707a7c9b45847528b958ff71f4fa0137a64e605a3fceedc5",
+     "ms": 12.711,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E026",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 11.921,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E027",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 11.949,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E028",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.813,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E029",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.476,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    },
+    {
+     "tag": "E030",
+     "res": "HALF",
+     "cpu_max": 4,
+     "w": 960,
+     "h": 540,
+     "pitch": 3840,
+     "out_bytes": 2073600,
+     "guard_bytes": 65536,
+     "guard_first_dirty": 0,
+     "sdk_error": 0,
+     "sdk_ok": 1,
+     "guard_ok": 1,
+     "sha256": "a76155a4e665201b789b9847d0c474c3f3e3f86653bd712f2810c21a17b2bfda",
+     "ms": 12.416,
+     "queue": {
+      "num_entries": 0,
+      "free_entry": 9,
+      "next_entry": 9,
+      "admitted": 9,
+      "unadmitted": 0,
+      "skipped": 1,
+      "claimed": 9,
+      "executed": 8
+     },
+     "skips": [
+      {
+       "ch": 1,
+       "idx": 1
+      }
+     ],
+     "claimed": 9,
+     "executed": 8,
+     "skipped": 1,
+     "num_entries": 0,
+     "status": "DROPPED_FALSE_OKAY",
+     "skip_target_matched": true
+    }
+   ],
+   "counts": {
+    "DROPPED_FALSE_OKAY": 30
+   },
+   "distinct_outputs": 3,
+   "queue_reset_all_zero": true,
+   "scored_calls": 30
+  }
+ },
+ "packet_sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52",
+ "resolution": "HALF",
+ "cpu_max": 4,
+ "calls_per_arm": 30,
+ "control_modal_sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+ "verdict": "FALSE_OKAY_DEMONSTRATED",
+ "reasons": [],
+ "control_natural_variant_rate": "4/30"
+}

@@ -127,7 +127,13 @@ int main(int argc, char **argv) {
     int32_t pitch = 0;
     CFHD_GetImagePitch(aw, fmt, &pitch);
     if (pitch <= 0) pitch = aw * 4;
-    std::vector<uint8_t> out((size_t)pitch * ah, 0xCD);
+
+    /* The guard region must exist: a buffer sized exactly pitch*height leaves
+     * the check below with an empty range, so `guard_ok` would be vacuously 1
+     * in every call. Allocate real slack and report its size. */
+    const size_t GUARD_BYTES = 64 * 1024;
+    const size_t active_bytes = (size_t)pitch * (size_t)ah;
+    std::vector<uint8_t> out(active_bytes + GUARD_BYTES, 0xCD);
 
     CFHD_MetadataRef meta = nullptr;
     if (CFHD_OpenMetadata(&meta) == CFHD_ERROR_OKAY && meta) {
@@ -148,18 +154,21 @@ int main(int argc, char **argv) {
 
     // Guard band: bytes beyond the active image must be untouched.
     int guard_ok = 1;
-    for (size_t g = (size_t)pitch * ah; g < out.size(); ++g)
-        if (out[g] != 0xCD) { guard_ok = 0; break; }
+    size_t guard_first = out.size();
+    for (size_t g = active_bytes; g < out.size(); ++g)
+        if (out[g] != 0xCD) { guard_ok = 0; guard_first = g; break; }
 
-    std::string digest = sha256(out.data(), (size_t)pitch * (size_t)ah);
+    std::string digest = sha256(out.data(), active_bytes);
     char fn[900];
     snprintf(fn, sizeof(fn), "%s/frame_%s.bgra", outdir, tag);
-    if (FILE *of = fopen(fn, "wb")) { fwrite(out.data(), 1, out.size(), of); fclose(of); }
+    if (FILE *of = fopen(fn, "wb")) { fwrite(out.data(), 1, active_bytes, of); fclose(of); }
 
     printf("{\"tag\":\"%s\",\"res\":\"%s\",\"cpu_max\":%d,\"w\":%d,\"h\":%d,\"pitch\":%d,"
-           "\"out_bytes\":%zu,\"sdk_error\":%d,\"sdk_ok\":%d,\"guard_ok\":%d,"
+           "\"out_bytes\":%zu,\"guard_bytes\":%zu,\"guard_first_dirty\":%zu,"
+           "\"sdk_error\":%d,\"sdk_ok\":%d,\"guard_ok\":%d,"
            "\"sha256\":\"%s\",\"ms\":%.3f,\"log\":\"%s\"}\n",
-           tag, resarg, cpu_max, aw, ah, (int)pitch, out.size(),
+           tag, resarg, cpu_max, aw, ah, (int)pitch, active_bytes, GUARD_BYTES,
+           guard_ok ? 0 : guard_first,
            (int)e, e == CFHD_ERROR_OKAY ? 1 : 0, guard_ok,
            digest.c_str(), ms, logpath);
     return 0;

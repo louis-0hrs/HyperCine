@@ -58,11 +58,16 @@ EXEC_BLOCK = '''							/* RCA-195 test-only probe: the reconstruction is about t
 							RCA195LogExecute(channel, index);
 '''
 
-RESET_BLOCK = '''\t\t/* RCA-195 test-only probe: record what is about to be discarded. */
+RESET_BLOCK = '''\t\t/* RCA-195 test-only probe: record what is about to be discarded.
+\t\t   `admitted` is next_entry (one increment per successful claim in the drain
+\t\t   loop); `unadmitted` is num_entries. Both are read here, not assumed: an
+\t\t   earlier revision passed literal 0, 0 and published two constants as
+\t\t   measurements. */
 \t\tRCA195LogQueueReset(decoder->transform_queue.num_entries,
 \t\t\t\t\t\t\tdecoder->transform_queue.free_entry,
 \t\t\t\t\t\t\tdecoder->transform_queue.next_entry,
-\t\t\t\t\t\t\t0, 0);
+\t\t\t\t\t\t\tdecoder->transform_queue.next_entry,
+\t\t\t\t\t\t\tdecoder->transform_queue.num_entries);
 '''
 
 INCLUDE_LINE = '#include "rca195_probe.h"'
@@ -174,6 +179,14 @@ def self_test(repo):
             if needle not in decoder:
                 failures.append('%s missing from decoder.c' % where)
 
+        # The queue record must read the live counters. A literal passes the
+        # presence check above while publishing a constant as a measurement.
+        if 'RCA195LogQueueReset(num_entries' in decoder:
+            failures.append('queue-reset record still passes a literal entry count')
+        if 'decoder->transform_queue.next_entry,\n\t\t\t\t\t\t\tdecoder->transform_queue.next_entry,' not in decoder:
+            failures.append('queue-reset record does not derive `admitted` from '
+                            'next_entry')
+
         # The skip hook must sit *before* the gate it is meant to defeat, and the
         # claim must precede both: claim -> (unlock) -> skip -> gate -> execute.
         claim = threading.find('RCA195LogClaim(')
@@ -206,7 +219,8 @@ def self_test(repo):
         for failure in failures:
             print('SELF-TEST FAIL %s' % failure, file=sys.stderr)
         return 1
-    print('SELF-TEST PASS: 5 hook assertions and 1 fail-closed anchor check')
+    print('SELF-TEST PASS: 6 hook assertions, 1 live-counter check and 1 '
+          'fail-closed anchor check')
     return 0
 
 
