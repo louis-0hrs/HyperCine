@@ -132,7 +132,7 @@ class Plane:
 
 class Entry:
     __slots__ = ('name', 'channel', 'index', 'generation', 'reads', 'writes',
-                 'state', 'executions')
+                 'state', 'executions', 'worker')
 
     def __init__(self, name, channel, index, reads, writes):
         self.name = name
@@ -144,6 +144,11 @@ class Entry:
         # The claimable set is on the *input* plane of this entry.
         self.state = 'QUEUED'
         self.executions = 0
+        # Which worker slot this entry occupies while CLAIMED/EXECUTING. Held on
+        # the entry so releasing worker N does not free worker 0 -- the first
+        # version freed the lowest busy slot, which silently gave one worker
+        # twice the capacity whenever two claims overlapped.
+        self.worker = None
 
 
 class Machine:
@@ -202,6 +207,7 @@ class Machine:
             f.generation = e.generation
             f.state = e.state
             f.executions = e.executions
+            f.worker = e.worker
             other.entries.append(f)
         other.error = self.error
         other.reported_ok = self.reported_ok
@@ -305,6 +311,7 @@ class Machine:
             entry = entry_lookup[name]
             entry.state = 'CLAIMED'
             entry.generation = self.plane(entry.channel, entry.index).generation
+            entry.worker = worker
             self.busy = self.busy | {worker}
             return
         if kind == 'admit':
@@ -349,9 +356,9 @@ class Machine:
             return
 
     def _free_worker(self, entry):
-        # Worker occupancy is per claim; free the single worker that holds it.
-        if self.busy:
-            self.busy = frozenset(sorted(self.busy)[1:])
+        if entry.worker is not None:
+            self.busy = frozenset(w for w in self.busy if w != entry.worker)
+            entry.worker = None
 
     def _apply_writes(self, entry):
         for (plane_index, band) in entry.writes:
@@ -425,12 +432,29 @@ class Machine:
                     bad.append('I3_NO_SILENT')
                     break
 
+        # I5: no entry may starve while a worker is free and the entry is
+        # claimable. Evaluated at every drain, because that is the moment the
+        # queue is discarded: an entry that could have run and did not is the
+        # forward-progress failure, as distinct from a missing input.
+        if ok:
+            free = self.workers - len(self.busy)
+            for entry in self.entries:
+                if entry.state in ('DROPPED', 'DISCARDED', 'QUEUED'):
+                    if free > 0 and self.claimable(entry):
+                        bad.append('I5_PROGRESS')
+                        break
+
+        # I4 is a property of the search, not of one terminal state: the state
+        # space must be finite and fully explored. It is recorded by run() as
+        # `bounded`; a truncated search reports I4_UNPROVEN instead of claiming
+        # the bound.
+
         # I1 is the only invariant a *terminal* run can break; a run that ended
         # with an error is fail-closed by definition.
         if self.error is not None and self.reported_ok is False:
-            bad = [b for b in bad if b == 'I2_NO_DOUBLE']
+            bad = [b for b in bad if b in ('I2_NO_DOUBLE', 'I5_PROGRESS')]
             if not any(e.executions > 1 for e in self.entries):
-                bad = []
+                bad = [b for b in bad if b == 'I5_PROGRESS']
         return bad
 
 
@@ -506,11 +530,12 @@ def run(topology_name, policy, max_states=200000):
 
     while frontier:
         if len(seen) >= max_states:
-            return {'violations': sorted(violations),
+            return {'violations': sorted(violations) + ['I4_UNPROVEN'],
                     'states': len(seen),
                     'drained': drained_states,
                     'terminal': terminal_states,
                     'exhaustive': False,
+                    'bounded': False,
                     'truncated_at': max_states}
         nxt = []
         for machine in frontier:
@@ -522,7 +547,10 @@ def run(topology_name, policy, max_states=200000):
                 continue
             acts = machine.actions()
             if not acts:
+                # A non-drained state with no action is a deadlock, which is a
+                # forward-progress failure rather than a bound.
                 terminal_states += 1
+                violations.setdefault('I5_PROGRESS', 1)
                 for name in machine.violated():
                     violations.setdefault(name, 1)
                 continue
@@ -542,6 +570,7 @@ def run(topology_name, policy, max_states=200000):
             'drained': drained_states,
             'terminal': terminal_states,
             'exhaustive': True,
+            'bounded': True,
             'truncated_at': None}
 
 

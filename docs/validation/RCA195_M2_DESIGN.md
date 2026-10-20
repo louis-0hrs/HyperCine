@@ -101,8 +101,8 @@ band 0) and `E1` (reads plane 1, writes plane 0 band 0).
 
 | Policy | Invariants violated | Success-with-missing-band states | States |
 | --- | --- | --- | --- |
-| `released` | `I1`, `I3` | **310 / 877** | 877, exhaustive |
-| `legacy` (rev 1) | `I1`, `I3` | **46 / 110** | 110, exhaustive |
+| `released` | `I1`, `I3` | **275 / 772** | 772, exhaustive |
+| `legacy` (rev 1) | `I1`, `I3` | **45 / 107** | 107, exhaustive |
 | `proposed` | none | **0 / 480** | 480, exhaustive |
 
 **`fieldplus_temporal`** — plane 2 has two bands; `T2` reads both and writes band 0 into planes 0
@@ -137,6 +137,15 @@ result OK — the failure shape revision 1 could not see.
 - **A plane's generation may change at most once.** Without the cap the counter is unbounded, the
   state space is infinite, and "exhaustive" would be unprovable for the wrong reason. One change
   after a claim is the case the design must survive.
+
+### The five invariants are all evaluated
+
+`I1_FAIL_CLOSED` and `I3_NO_SILENT` fire in the released and legacy runs. `I4_BOUNDED` is recorded
+as `bounded: true` only when the search exhausted its frontier; a truncated search reports
+`I4_UNPROVEN` rather than claiming a bound. `I5_PROGRESS` is evaluated at every drain — an entry
+that was claimable with a free worker and was still discarded is a forward-progress failure, as
+distinct from a missing input — and it also fires on any non-drained state with no available
+action. In this revision it does not fire for `proposed`, which is the result being claimed.
 
 ### What the model still does not show
 
