@@ -6,6 +6,16 @@
 #include <algorithm>
 #include <stdexcept>
 namespace hypercine { namespace standalone {
+void ValidateFilmScan3Geometry(FilmScan3Geometry g) {
+    if (g.width < 128 || g.width > kMaxDimension || g.width % 128 ||
+        g.height < 24 || g.height > kMaxDimension || g.height % 8)
+        throw std::invalid_argument("FilmScan3 geometry requires width %128, height %8, width [128,4096], height [24,4096]; 8K unqualified");
+    if (static_cast<std::size_t>(g.width) > kMaxPlaneElements / static_cast<std::size_t>(g.height))
+        throw std::length_error("FilmScan3 exceeds 8294400-pixel CPU session budget");
+    const auto pixels=static_cast<std::size_t>(g.width)*g.height;
+    if (g.sample_capacity_bytes > 8*pixels+16384)
+        throw std::length_error("FilmScan3 sample capacity exceeds geometric bound");
+}
 // Frozen CG709 conversion semantics from hybrid_kernels.cu, kept SDK-free.
 // Explicit signed floors and uint16 wrapping reproduce the documented SIMD
 // arithmetic without platform intrinsics or implementation-defined shifts.

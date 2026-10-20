@@ -1,0 +1,118 @@
+{
+  "baseline": "2a5e94ff6120a7053621c6ab4dcb020c7934e6d4",
+  "host": {
+    "model": "Mac14,9",
+    "cpu": "Apple M2 Pro",
+    "architecture": "arm64",
+    "ram_bytes": 17179869184
+  },
+  "native_suites": {
+    "cpu_release": 32,
+    "cpu_asan_ubsan": 32,
+    "metal_release": 38
+  },
+  "asan_options": "detect_leaks=0; UBSAN_OPTIONS=halt_on_error=1; native Apple leak sanitizer unavailable",
+  "geometry_truth_table": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "api": "existing constructors + explicit geometry",
+      "sdk_raw_bytes": "PASS",
+      "tier_a_frames": 16,
+      "tier_c_frames": 120,
+      "ffmpeg": "PASS",
+      "old_header_consumer": "PASS",
+      "metal_regression": "PASS"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "api": "explicit CPU session only",
+      "status": "EXPERIMENTAL",
+      "sdk_raw_bytes": "REFERENCE_BLOCKED",
+      "ffmpeg_frames": 19,
+      "changing_sequence_frames": 16,
+      "ffmpeg_sequence_framecount": 16,
+      "min_psnr_db": 52.32134949615484,
+      "peak_rss_bytes": 242860032
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "status": "PENDING",
+      "label": "PENDING_8K",
+      "encode": "REJECTED_BEFORE_PLANE_ALLOCATION",
+      "sdk_reference": "MISSING",
+      "ffmpeg": "NOT_TESTED",
+      "peak_rss_bytes": null,
+      "sample_bound_bytes": 265437184,
+      "chunk_payload_limit_bytes": 67108860,
+      "reason": "No matching original SDK corpus in inspected NAS FS3 tree; 4096 dimension cap; conservative sample bound exceeds existing 24-bit word count; actual sample support and resources not qualified"
+    },
+    {
+      "width": 12288,
+      "height": 8040,
+      "accepted": false,
+      "width_mod_128": 0,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 768,
+      "ll3_chroma_width_mod_8": 0,
+      "sample_bound_bytes": 790380544,
+      "conservative_live_bytes": 3557687296,
+      "rate_numerator_before_div8": 2963865600,
+      "session_unchanged": true,
+      "status": "PENDING",
+      "label": "PENDING_12K",
+      "encode": "REJECTED_BEFORE_PLANE_ALLOCATION",
+      "sdk_reference": "MISSING",
+      "ffmpeg": "NOT_TESTED",
+      "follow_up_issue": 48
+    },
+    {
+      "width": 17520,
+      "height": 8040,
+      "accepted": false,
+      "width_mod_128": 112,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 1095,
+      "ll3_chroma_width_mod_8": 7,
+      "sample_bound_bytes": 1126902784,
+      "conservative_live_bytes": 5072037376,
+      "rate_numerator_before_div8": 4225824000,
+      "session_unchanged": true,
+      "status": "PENDING",
+      "label": "PENDING_17K",
+      "encode": "REJECTED_BEFORE_PLANE_ALLOCATION",
+      "sdk_reference": "MISSING",
+      "ffmpeg": "NOT_TESTED",
+      "follow_up_issue": 48
+    }
+  ],
+  "budgets": {
+    "legacy_pixels": 2097152,
+    "max_dimension": 4096,
+    "plane_elements": 8294400,
+    "max_plane_bytes": 16588800,
+    "max_sample_bytes": 66371584,
+    "conservative_live_bytes_with_caller": 299646976,
+    "sample_capacity": "session descriptor zero=geometric bound, nonzero may reduce only"
+  },
+  "nas_inspected": "HYPERCINE_GOLDEN_DIR (configured locally; value not published)",
+  "nas_entries": [
+    "tier-a/manifest.json",
+    "tier-a/reference-corpus-tier-a-20261014.zip",
+    "sequence-1080/manifest.json",
+    "sequence-1080/reference-corpus-sequence-1080-tier-c-20261015.zip"
+  ],
+  "failure_tests": [
+    "invalid dimensions including 8K and overflow-sized ints",
+    "misalignment/truncated storage/stride overflow",
+    "simulated bad_alloc after complete CPU transform",
+    "framing rejection after complete CPU transform",
+    "actual output capacity exhaustion after one successful frame, unchanged state and successful retry",
+    "Reset, padded pitch and interleaved independent HD/4K instances"
+  ],
+  "performance": "No optimization or acceleration milestone; no performance claim or benchmark comparison",
+  "hosted_ci": "PENDING",
+  "extended_geometry_gate": "Issue #48: 8K/12K/17K wire/SDK/RAM feasibility; current public descriptor has no future 8K ceiling"
+}

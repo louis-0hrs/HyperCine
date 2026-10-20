@@ -142,6 +142,10 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_api COMMAND test_filmscan3)
+        add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
+        target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
+        add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)
+
         add_test(NAME filmscan3_fixture_integrity COMMAND "${CMAKE_COMMAND}"
             "-DROOT=${CMAKE_SOURCE_DIR}" -P "${CMAKE_SOURCE_DIR}/tests/verify_filmscan3_fixtures.cmake")
         add_executable(test_entropy_bitexact tests/test_entropy_bitexact.cpp)
@@ -158,6 +162,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME filmscan3_geometry_validation COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_geometry_validation.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
@@ -191,7 +197,7 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME filmscan3_actual_sequence COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
                 --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
-                --corpus-root "${HYPERCINE_FS3_SEQUENCE_ROOT}" --sequence)
+                --corpus-root "${HYPERCINE_FS3_SEQUENCE_ROOT}" --sequence --inject-metadata)
         endif()
         find_program(HYPERCINE_FFMPEG_EXECUTABLE NAMES ffmpeg)
         find_program(HYPERCINE_FFPROBE_EXECUTABLE NAMES ffprobe)
@@ -201,6 +207,12 @@ if(HYPERCINE_BUILD_STANDALONE)
         endif()
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            add_test(NAME filmscan3_geometry_external_decode COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry.py"
+                --encoder $<TARGET_FILE:test_filmscan3_geometry>
+                --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}" --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
+                --output-dir "${CMAKE_CURRENT_BINARY_DIR}/geometry-p4")
+            set_tests_properties(filmscan3_geometry_external_decode PROPERTIES TIMEOUT 600)
             add_test(NAME filmscan3_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
                 --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>

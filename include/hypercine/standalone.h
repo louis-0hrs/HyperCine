@@ -29,7 +29,13 @@ template<class T> using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 // bounds/profile/capacity. No SDK or GPU types are part of this interface.
 // Conservative allocation budget, independent of the 16-bit wire dimensions.
 inline constexpr int kMaxDimension = 4096;
-inline constexpr std::size_t kMaxPixels = 2097152;
+inline constexpr std::size_t kMaxPixels = 2097152; // legacy frame/sample budget, unchanged
+// Separate bounded storage budget for CPU FilmScan3 4K, not wire geometry.
+inline constexpr std::size_t kMaxPlaneElements = 3840u * 2160u;
+inline bool PlaneStorageFits(int stride, int height) noexcept {
+    return stride > 0 && height > 0 &&
+        static_cast<std::size_t>(stride) <= kMaxPlaneElements / static_cast<std::size_t>(height);
+}
 // Width: multiple of 128 (deepest chroma band multiple of 8).
 // Height: multiple of 8, >=24 (six-tap input, final LL height >=3).
 void ValidateGeometry(int width, int height);
