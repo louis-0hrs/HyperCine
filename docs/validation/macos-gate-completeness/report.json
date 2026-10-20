@@ -1,0 +1,64 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "base_commit": "e87ef0258ba37f5c78f1557c59d9c7331df5521c",
+  "platform": {
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "gpu": "Apple M2 Pro",
+    "compiler": "AppleClang 21.0.0.21000101",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "external_decoder": "FFmpeg n8.0, existing CFHD validation build"
+  },
+  "parent_issues": [
+    7,
+    23,
+    46,
+    70,
+    54
+  ],
+  "parent_features_completed": false,
+  "privacy_guard_unit_tests": 13,
+  "release": {
+    "status": "PASS",
+    "tests": 30,
+    "skips": 0,
+    "seconds": 79.85
+  },
+  "asan_ubsan": {
+    "status": "PASS",
+    "tests": 30,
+    "skips": 0,
+    "seconds": 168.22,
+    "leak_detection": false
+  },
+  "initial_sandbox_metal": {
+    "status": "FAIL",
+    "passed": 30,
+    "failed": 4,
+    "reason": "No Metal device visible; direct unsandboxed device test passed"
+  },
+  "original_corpus": "NOT USED: configured-root requirements covered with synthetic cache/inventory tests",
+  "upstream_changed": false,
+  "source_sha256": {
+    "CMakeLists.txt": "bdfac39947bd7b8a8cf62ddff1110d655313aa228fbc26fd91f67edd44599e4c",
+    "ci/run_standalone.py": "0e9b26667a5ddab593820ffa590aab0d14198873978faefe49d406d8b71bef69",
+    "ci/test_standalone_gate.py": "d145687bb7c21bcc825f23c3c17fcfd41a7459607310e2c36c5acabc0707287f"
+  },
+  "runner_guardrail_unit_tests": 11,
+  "added_runner_guardrail_unit_tests": 5,
+  "native_metal": {
+    "status": "PASS",
+    "tests": 34,
+    "skips": 0,
+    "seconds": 106.47,
+    "device_access": "outside sandbox"
+  },
+  "checks": {
+    "staged_privacy_guard": "PASS",
+    "diff_whitespace": "PASS",
+    "privacy_hooks": "configured and executable",
+    "representative_binaries": "Mach-O 64-bit executable arm64"
+  }
+}

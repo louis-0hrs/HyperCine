@@ -35,7 +35,8 @@ the installed MSVC x64 developer environment and configures Ninja with `cl`.
   and `HYPERCINE_REQUIRE_EXTERNAL_DECODE=ON`. Missing FFmpeg or ffprobe is a
   configure error. Both tools' actual versions are logged and commands must
   execute successfully. Core library dependencies remain unchanged.
-- All **25 named tests** must be registered, including Q2 fixtures, geometry,
+- All **30 named tests** must be registered, including the shared quality-state
+  unit test, backend selection, exact entropy, runner guardrails, Q2 fixtures, geometry,
   signed coefficients, FS3 16-frame and **120-frame manifest comparisons**, real
   independent p10 FFmpeg decoding, and replay of the frozen Windows SDK oracle.
   The runner executes the entire configured CTest suite and checks its JUnit
@@ -55,6 +56,20 @@ the installed MSVC x64 developer environment and configures Ninja with `cl`.
 - CMake cache, compile database, registered tests, JUnit, CTest diagnostics,
   gate summary and decode metrics are retained for seven days, including on
   failure. There are no NAS credentials or corpus downloads in the workflow.
+
+The required inventory also follows the configured build. Metal-enabled runs
+require the device test and CPU/Metal manifest, sequence and external-decode
+comparisons. Configuring either original-corpus root makes its binary tests
+mandatory, including matching Metal tests when enabled. No corpus root means
+manifest-backed checks only; it does not establish original binary availability.
+For macOS the declared architecture must match the single explicit
+`CMAKE_OSX_ARCHITECTURES` target as well as the Python process architecture.
+This checks configuration, not every output binary's machine code. Native
+qualification should additionally inspect representative binaries with `file`.
+
+Each invocation removes previous gate summaries, test inventories and JUnit
+results before preflight. A rejected architecture or configuration cannot leave
+an old PASS summary behind for artifact upload. Other diagnostics are retained.
 
 The current validators retain their original quality assertions and frozen
 packet/decode hashes; this change does not relax codec acceptance criteria.
