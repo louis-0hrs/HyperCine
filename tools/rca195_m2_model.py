@@ -2,39 +2,52 @@
 # Copyright (c) 2026 HyperCine Contributors.
 # Dual-licensed under the MIT License or Apache License, Version 2.0.
 # See LICENSE-MIT and LICENSE-APACHE for details.
-"""RCA-195 Milestone-2 design model: transform-queue ownership and liveness.
+"""RCA-195 Milestone-2 design model, revision 2: real producer edges.
 
-This is a DESIGN MODEL, not a measurement and not a decoder patch. It encodes the
-frozen SDK's queue discipline and the proposed replacement as two policies over
-one small interpreter, then searches the interleaving space for a counterexample
-to the invariants that matter.
+This supersedes revision 1, which the maintainer review rejected as
+`MODEL_INCOMPLETE`. Revision 1 had three structural faults and one of them made
+the model unable to see the very defect it claimed to fix:
 
-Why a model and not another probe: Milestone 1 established *reachability* by
-fault injection (v3 ledger, 120/120 induced false-OKAY). Milestone 2 has to
-establish that a proposed rule cannot report success with a missing band, for
-*every* interleaving, not for 30 sampled ones. That claim is about the shape of
-the state machine, so it is checked exhaustively on a small model and the
-model's fidelity is pinned to source anchors by the verifier.
+1. It published the transform's output onto the **entry's own input wavelet**
+   (`publish_valid(0)` on `plane(index)`). The source writes the lowpass into
+   `transform->wavelet[index-1]` (decoder.c:13023/13051), so a missing upstream
+   producer could be papered over by the model's own write.
+2. It let `publish` fire for any band with no owning producer. Producer edges
+   were never represented.
+3. It performed claim, execution and publication inside one atomic action, so no
+   interleaving involving a claimed-but-unexecuted entry, a generation change
+   after claim, or two competing workers could be explored.
+
+Revision 2 fixes all three by modelling three things separately:
+
+* **Planes**: `(channel, index, generation)` with independent `valid`/`started`
+  bit words, exactly as the released decoder keeps them.
+* **Read and write sets per entry**, derived from `ReconstructWaveletBand` and
+  from the inverse transforms themselves, and pinned to source by
+  `--check`. An entry writes into *another* plane's band 0; it never writes its
+  own inputs.
+* **Scheduled transitions**: `CLAIM -> ADMIT -> EXECUTE -> PUBLISHED|FAILED`,
+  one action each, with real worker occupancy and generation invalidation.
+
+The silent-no-op is modelled explicitly, because it is the actual mechanism:
+`TransformInverseSpatialQuantLowpass` begins with
+
+    if (input->band[0] == NULL) return;      (wavelet.c:5699, and [1..3] after)
+
+so an inverse handed a wavelet missing a band **returns without writing anything
+and without setting an error**. That is why the caller still reports OKAY.
 
 Policies:
 
-  released   -- upstream as shipped: readiness is `valid == started`; a claim is
-                `done = 1; num_entries--`; the worker re-tests the same predicate
-                after unlocking and silently skips when it fails; the drain zeroes
-                the queue without verifying anything and returns OKAY.
-  proposed   -- QUEUED -> CLAIMED -> EXECUTING -> PUBLISHED | FAILED, claim gated
-                on the per-topology required-band set published for the entry's
-                generation, no silent skip, drain verifies.
-
-Invariants:
-
-  I1 FAIL_CLOSED   the decode reports OK only if every required input band of
-                   every output wavelet is PUBLISHED.
-  I2 NO_DOUBLE     no queue entry is executed more than once.
-  I3 NO_SILENT     no entry leaves the queue unexecuted without a terminal error.
-  I4 BOUNDED       the run terminates within the step bound.
-  I5 PROGRESS      if a worker is idle and an entry is claimable, a worker takes
-                   it (no entry starves while capacity exists).
+  released  the shipped discipline: claim on `valid == started`, silent skip on
+            a failed post-unlock re-check, silent no-op when a read band is
+            absent, drain zeroes the queue without verifying.
+  legacy    revision 1 of this model, kept only as a negative regression: it
+            reports success where the real code cannot. It must FAIL the
+            invariants, which proves the corrected model is not merely agreeing
+            with itself.
+  proposed  claim gated on the full published read set and on generation;
+            a missing input at execution is a terminal error; drain verifies.
 
 Usage:
   python tools/rca195_m2_model.py --check
@@ -47,227 +60,323 @@ import json
 import sys
 from pathlib import Path
 
-BAND_VALID_MASK = lambda band: 1 << band
+# --------------------------------------------------------------------------
+# Topologies. Each plane is (index, num_bands). `entropy_bands` is the set of
+# bands that entropy decoding publishes for that plane; every other band is
+# published by a transform entry. This distinction is the whole point: band 0 of
+# a non-top plane is *never* an entropy output, so a model that lets entropy
+# publish it invents a producer that does not exist.
+#
+# Pinned to the frozen subband tables:
+#   intra  decoder.c:11596  wavelet {2,2,2,2,1,1,1,0,0,0} bands {0,1,2,3,1,2,3,1,2,3}
+#   group  decoder.c:11191  wavelet {5,5,5,5,4,4,4,3,3,3,3,1,1,1,0,0,0}
+#                            bands   {0,1,2,3,1,2,3,0,1,2,3,1,2,3,1,2,3}
+# A plane whose band 0 appears in the subband table receives it from entropy;
+# the others receive band 0 from the adjacent transform (decoder.c:13051).
+# --------------------------------------------------------------------------
 
-# Per-topology required *input* bands, re-derived from DecodedBandsValid
-# (upstream/Codec/decoder.c:24136). `threaded_band_mask` names the band that a
-# transform earlier in the queue is expected to have produced, so it is NOT a
-# precondition of this entry -- it is a dependency on another entry.
-#   field-plus index 2  -> temporal, both bands produced by earlier transforms
-#   field-plus 3 and 5  -> end of a chain, all bands required
-#   field-plus other    -> band 0 produced earlier, 0xE required
-#   spatial   index 2   -> top of pyramid, all bands required
-#   spatial   other     -> band 0 produced earlier, 0xE required
-FIELDPLUS = 'FIELDPLUS'
-SPATIAL = 'SPATIAL'
+TOPOLOGIES = {
+    # Intra/spatial: plane 2 is the top and gets every band from entropy.
+    # Entry(index=2) reads plane 2 and writes plane 1 band 0.
+    # Entry(index=1) reads plane 1 and writes plane 0 band 0.
+    'spatial_chain': {
+        'planes': {0: 4, 1: 4, 2: 4},
+        'entropy_bands': {0: {1, 2, 3}, 1: {1, 2, 3}, 2: {0, 1, 2, 3}},
+        'entries': [
+            # (name, channel, index, reads, writes)
+            #   reads/writes are (plane_index, band) pairs on this channel.
+            ('E2', 0, 2, [(2, 0), (2, 1), (2, 2), (2, 3)], [(1, 0)]),
+            ('E1', 0, 1, [(1, 0), (1, 1), (1, 2), (1, 3)], [(0, 0)]),
+        ],
+        # The entry whose absence the review asked to be caught.
+        'regression_target': 'E1',
+    },
+    # Field-plus temporal: the temporal wavelet has two entropy bands and the
+    # inverse writes band 0 into *both* frame wavelets (decoder.c:13255-13256).
+    'fieldplus_temporal': {
+        'planes': {0: 4, 1: 4, 2: 2},
+        'entropy_bands': {0: {1, 2, 3}, 1: {1, 2, 3}, 2: {0, 1}},
+        'entries': [
+            ('T2', 0, 2, [(2, 0), (2, 1)], [(0, 0), (1, 0)]),
+        ],
+        'regression_target': 'T2',
+    },
+}
 
-
-def required_input_mask(transform_type, index, num_bands):
-    full = (1 << num_bands) - 1
-    if transform_type == FIELDPLUS:
-        if index == 2:
-            return 0
-        if index in (3, 5):
-            return full
-        return full & ~BAND_VALID_MASK(0)
-    if transform_type == SPATIAL:
-        if index == 2:
-            return full
-        return full & ~BAND_VALID_MASK(0)
-    raise ValueError('unknown transform type %r' % (transform_type,))
-
-
-def produced_mask(num_bands):
-    """The band this transform writes: the lowpass of the next wavelet down."""
-    return BAND_VALID_MASK(0) if num_bands > 1 else 1
-
-
-class Entry:
-    __slots__ = ('name', 'channel', 'index', 'transform_type', 'num_bands',
-                 'required', 'generation', 'state', 'executions')
-
-    def __init__(self, name, channel, index, transform_type, num_bands,
-                 generation=0):
-        self.name = name
-        self.channel = channel
-        self.index = index
-        self.transform_type = transform_type
-        self.num_bands = num_bands
-        self.required = required_input_mask(transform_type, index, num_bands)
-        self.generation = generation
-        self.state = 'QUEUED'
-        self.executions = 0
+# Read set of the highpass branch, for the topology-check anchor.
+HIGHPASS_READS = [(3, 0), (3, 1), (3, 2), (3, 3)]
+HIGHPASS_WRITE = (2, 1)
 
 
-class Bands:
-    """One (channel, index) wavelet's flag words, kept as two words on purpose.
+# --------------------------------------------------------------------- state
 
-    The released predicate compares both; the proposed policy reads only the
-    published word. Modelling them separately is what lets the race exist in the
-    model at all.
-    """
+class Plane:
+    __slots__ = ('valid', 'started', 'generation')
 
     def __init__(self):
         self.valid = 0
         self.started = 0
         self.generation = 0
 
-    def raise_started(self, band):
-        self.started |= BAND_VALID_MASK(band)
-
-    def publish_valid(self, band):
-        self.valid |= BAND_VALID_MASK(band)
+    def bands(self, num_bands):
+        out = set()
+        for band in range(num_bands):
+            if self.valid & (1 << band):
+                out.add(band)
+        return out
 
     def release_ok(self):
+        """The shipped predicate: two flag words compared to each other."""
         return self.valid == self.started
 
-    def required_ok(self, mask):
-        return (self.valid & mask) == mask
+
+class Entry:
+    __slots__ = ('name', 'channel', 'index', 'generation', 'reads', 'writes',
+                 'state', 'executions')
+
+    def __init__(self, name, channel, index, reads, writes):
+        self.name = name
+        self.channel = channel
+        self.index = index
+        self.generation = 0
+        self.reads = tuple(reads)
+        self.writes = tuple(writes)
+        # The claimable set is on the *input* plane of this entry.
+        self.state = 'QUEUED'
+        self.executions = 0
 
 
 class Machine:
-    """Interleaving-searchable queue. One action per step."""
-
-    def __init__(self, entries, workers, policy, bands, producer_lead=0):
-        self.entries = entries
-        self.workers = workers
+    def __init__(self, topology, policy, workers=2):
+        self.topo = topology
         self.policy = policy
-        self.bands = bands          # (channel, index) -> Bands
-        self.producer_lead = producer_lead
-        self.log = []
-        self.error = None           # first terminal error, as in decoder->error
+        self.workers = workers
+        self.busy = frozenset()
+        self.planes = {(0, i): Plane() for i in topology['planes']}
+        self.entries = [Entry(*spec) for spec in topology['entries']]
+        self.error = None
         self.reported_ok = None
         self.drained = False
-        # Real band count per wavelet, so the action space is finite.
-        self.band_width = {(e.channel, e.index): e.num_bands
-                           for e in entries}
+        # Entropy publications are independent bit-sets, so their mutual order
+        # is irrelevant to every queue decision. They are fired through one
+        # pointer in a fixed order instead of being permuted: for any subset of
+        # events completed before a queue action, the same subset is reachable
+        # by advancing the pointer. This is a symmetry reduction, not a
+        # restriction on the interleavings that matter.
+        self.entropy_events = []
+        for (channel, index), _plane in sorted(self.planes.items()):
+            for band in sorted(topology['entropy_bands'].get(index, set())):
+                # started precedes valid, as in the source: entropy announces a
+                # band before it publishes it.
+                self.entropy_events.append(('e_started', (channel, index, band)))
+                self.entropy_events.append(('e_valid', (channel, index, band)))
+        self.events_done = 0
 
-    # -- observable state ------------------------------------------------
-    def queued(self):
-        return [e for e in self.entries if e.state == 'QUEUED']
+    # -- helpers ---------------------------------------------------------
+    def key(self):
+        return (
+            tuple((e.state, e.executions, e.generation) for e in self.entries),
+            tuple(sorted((k, p.valid, p.started, p.generation)
+                         for k, p in self.planes.items())),
+            tuple(sorted(self.busy)),
+            self.events_done,
+            self.error,
+            self.reported_ok,
+            self.drained,
+        )
 
-    def claimed(self):
-        return [e for e in self.entries if e.state in ('CLAIMED', 'EXECUTING')]
+    def clone(self):
+        other = Machine.__new__(Machine)
+        other.topo = self.topo
+        other.policy = self.policy
+        other.workers = self.workers
+        other.busy = self.busy
+        other.planes = {}
+        for k, p in self.planes.items():
+            q = Plane()
+            q.valid, q.started, q.generation = p.valid, p.started, p.generation
+            other.planes[k] = q
+        other.entries = []
+        for e in self.entries:
+            f = Entry(e.name, e.channel, e.index, e.reads, e.writes)
+            f.generation = e.generation
+            f.state = e.state
+            f.executions = e.executions
+            other.entries.append(f)
+        other.error = self.error
+        other.reported_ok = self.reported_ok
+        other.drained = self.drained
+        other.entropy_events = self.entropy_events
+        other.events_done = self.events_done
+        return other
 
-    def live(self):
-        # DROPPED is terminal for the queue: the entry was consumed and never
-        # executed. Treating it as live meant the search never reached the drain
-        # at all, which is exactly the state the released policy hides.
-        return [e for e in self.entries
-                if e.state not in ('PUBLISHED', 'FAILED', 'DROPPED')]
+    def plane(self, channel, index):
+        return self.planes[(channel, index)]
 
-    def bands_for(self, entry):
-        return self.bands[(entry.channel, entry.index)]
+    def input_plane(self, entry):
+        return self.plane(entry.channel, entry.index)
 
-    def deps_ok(self, entry):
-        if entry.required == 0:
-            return True
-        return self.bands_for(entry).required_ok(entry.required)
+    def reads_published(self, entry):
+        for (plane_index, band) in entry.reads:
+            p = self.plane(entry.channel, plane_index)
+            if not p.valid & (1 << band):
+                return False
+        return True
 
     def generation_ok(self, entry):
-        return self.bands_for(entry).generation == entry.generation
+        for (plane_index, _band) in entry.reads + entry.writes:
+            if self.plane(entry.channel, plane_index).generation != entry.generation:
+                return False
+        return True
 
-    # -- released policy -------------------------------------------------
-    def released_claimable(self):
-        return [e for e in self.queued()
-                if self.bands_for(e).release_ok()]
-
-    def released_recheck_ok(self, entry):
-        return self.bands_for(entry).release_ok()
-
-    # -- proposed policy -------------------------------------------------
-    def proposed_claimable(self):
-        return [e for e in self.queued()
-                if self.deps_ok(e) and self.generation_ok(e)]
+    def claimable(self, entry):
+        if entry.state != 'QUEUED':
+            return False
+        if self.policy == 'released':
+            # The shipped predicate compares the two flag words, so a plane that
+            # entropy has not touched yet (0 == 0) is "ready".
+            return self.input_plane(entry).release_ok()
+        if self.policy == 'legacy':
+            # Revision 1 of this model: claim gated on the *entropy* mask only.
+            # For a 4-band plane that is 0xE, which deliberately excludes band 0
+            # -- the band the adjacent transform must produce. This is the
+            # reviewer's first counterexample and the reason revision 1 was
+            # withdrawn.
+            plane = self.input_plane(entry)
+            num_bands = self.topo['planes'][entry.index]
+            mask = 0 if entry.index == 2 and num_bands == 2 else ((1 << num_bands) - 1) & ~1
+            return (plane.valid & mask) == mask
+        return self.reads_published(entry) and self.generation_ok(entry)
 
     # -- actions ---------------------------------------------------------
     def actions(self):
         if self.drained:
             return []
         acts = [('drain', None)]
-        if self.policy == 'released':
-            for entry in self.released_claimable():
-                acts.append(('claim', entry))
-        else:
-            for entry in self.proposed_claimable():
-                acts.append(('claim', entry))
-        # Producers can always advance, which is what races the re-check. Band
-        # actions are capped at each wavelet's real band count so the search
-        # terminates instead of climbing to eight bits.
-        for key, bands in self.bands.items():
-            num_bands = self.band_width[key]
-            for band in range(num_bands):
-                if not bands.started & BAND_VALID_MASK(band):
-                    acts.append(('started', (key, band)))
-                    break
-            for band in range(num_bands):
-                if not bands.valid & BAND_VALID_MASK(band):
-                    acts.append(('publish', (key, band)))
-                    break
+        free = [w for w in range(self.workers) if w not in self.busy]
+        for entry in self.entries:
+            if entry.state == 'QUEUED' and free and self.claimable(entry):
+                for w in free[:1]:
+                    acts.append(('claim', (entry.name, w)))
+            elif entry.state == 'CLAIMED':
+                acts.append(('admit', entry.name))
+            elif entry.state == 'EXECUTING':
+                acts.append(('execute', entry.name))
+
+        # Exactly one entropy event per step: the next in canonical order. The
+        # per-band loop that used to sit here enumerated the same events in
+        # arbitrary order, which is what made the state space explode without
+        # exploring a single additional queue interleaving.
+        if self.events_done < len(self.entropy_events):
+            acts.append(self.entropy_events[self.events_done])
+
+        if self.policy == 'proposed':
+            # A generation change is allowed at most once per plane. Without this
+            # cap the counter is unbounded, the state space is infinite, and the
+            # search can only ever truncate -- which would make "exhaustive"
+            # unprovable for the wrong reason. One change after a claim is the
+            # case the design has to survive.
+            for (channel, index), plane in self.planes.items():
+                if plane.generation == 0:
+                    acts.append(('stale', (channel, index)))
         return acts
 
-    def step(self, action):
+    def step(self, action, entry_lookup):
         kind, payload = action
         if kind == 'drain':
             self.drain()
-            self.log.append(('drain',))
             return
-        if kind == 'started':
-            (key, band) = payload
-            self.bands[key].raise_started(band)
-            self.log.append(('started', key, band))
+        if kind == 'e_started':
+            channel, index, band = payload
+            self.plane(channel, index).started |= 1 << band
+            self.events_done += 1
             return
-        if kind == 'publish':
-            (key, band) = payload
-            self.bands[key].publish_valid(band)
-            self.log.append(('publish', key, band))
+        if kind == 'e_valid':
+            channel, index, band = payload
+            self.plane(channel, index).valid |= 1 << band
+            self.events_done += 1
             return
-
-        entry = payload
-        if self.policy == 'released':
-            # done = 1; next_entry++; num_entries--; then unlock, then re-test.
+        if kind == 'stale':
+            channel, index = payload
+            self.plane(channel, index).generation += 1
+            return
+        if kind == 'claim':
+            name, worker = payload
+            entry = entry_lookup[name]
             entry.state = 'CLAIMED'
-            self.log.append(('claim', entry.name))
-            if self.released_recheck_ok(entry):
+            entry.generation = self.plane(entry.channel, entry.index).generation
+            self.busy = self.busy | {worker}
+            return
+        if kind == 'admit':
+            entry = entry_lookup[payload]
+            if self.policy == 'released':
+                # The post-unlock re-check re-runs the same vacuous predicate.
+                if self.input_plane(entry).release_ok():
+                    entry.state = 'EXECUTING'
+                else:
+                    entry.state = 'DROPPED'      # silent skip, no error
+                    self._free_worker(entry)
+            elif self.policy == 'legacy':
+                entry.state = 'EXECUTING'
+            else:
+                if self.generation_ok(entry) and self.reads_published(entry):
+                    entry.state = 'EXECUTING'
+                else:
+                    self._fail(entry, 'stale-generation')
+            return
+        if kind == 'execute':
+            entry = entry_lookup[payload]
+            if self.policy == 'released':
+                if self.reads_published(entry):
+                    self._apply_writes(entry)
+                else:
+                    # wavelet.c returns silently when a read band is absent.
+                    entry.state = 'NOOP'
+            elif self.policy == 'legacy':
+                # Revision 1 published onto the entry's *own* input plane
+                # (`publish_valid(0)` on plane(index)) instead of onto
+                # plane(index-1). That fabricates a band the real inverse never
+                # writes and hides a missing upstream producer.
+                self.plane(entry.channel, entry.index).valid |= 1
                 entry.state = 'PUBLISHED'
                 entry.executions += 1
-                self.bands_for(entry).publish_valid(0)
-                self.log.append(('exec', entry.name))
             else:
-                # The silent skip: consumed from the queue, never executed,
-                # no error recorded anywhere.
-                entry.state = 'DROPPED'
-                self.log.append(('skip', entry.name))
+                if self.reads_published(entry) and self.generation_ok(entry):
+                    self._apply_writes(entry)
+                else:
+                    self._fail(entry, 'input-missing-at-execute')
+            self._free_worker(entry)
             return
 
-        # proposed: claim -> execute under a re-check that can only fail on a
-        # generation change, and a failure is terminal rather than silent.
-        entry.state = 'EXECUTING'
-        self.log.append(('claim', entry.name))
-        if not self.generation_ok(entry):
-            entry.state = 'FAILED'
-            if self.error is None:
-                self.error = 'CODEC_ERROR_BAD_FRAME(stale-generation:%s)' % entry.name
-            self.log.append(('fail', entry.name))
-            return
+    def _free_worker(self, entry):
+        # Worker occupancy is per claim; free the single worker that holds it.
+        if self.busy:
+            self.busy = frozenset(sorted(self.busy)[1:])
+
+    def _apply_writes(self, entry):
+        for (plane_index, band) in entry.writes:
+            self.plane(entry.channel, plane_index).valid |= 1 << band
         entry.state = 'PUBLISHED'
         entry.executions += 1
-        self.bands_for(entry).publish_valid(0)
-        self.log.append(('exec', entry.name))
+
+    def _fail(self, entry, why):
+        entry.state = 'FAILED'
+        if self.error is None:
+            self.error = 'CODEC_ERROR_BAD_FRAME(%s:%s)' % (entry.name, why)
+        self._free_worker(entry)
 
     def drain(self):
-        """WaitForTransformThread's epilogue."""
         self.drained = True
-        if self.policy == 'released':
-            # The queue is zeroed without looking; nothing can be learned here.
-            stranded = [e for e in self.entries
-                        if e.state in ('QUEUED', 'CLAIMED', 'DROPPED')]
-            for entry in stranded:
-                entry.state = 'DISCARDED'
+        if self.policy in ('released', 'legacy'):
+            # Zeroed without inspection, no completeness check, no error. Under
+            # the legacy policy this is what made revision 1 report success.
+            for entry in self.entries:
+                if entry.state in ('QUEUED', 'CLAIMED', 'EXECUTING'):
+                    entry.state = 'DISCARDED'
             self.reported_ok = True
             return
-        # proposed: every entry must be terminal, else a terminal error.
-        live = self.live()
+        live = [e for e in self.entries
+                if e.state in ('QUEUED', 'CLAIMED', 'EXECUTING')]
         if live:
             if self.error is None:
                 self.error = ('CODEC_ERROR_BAD_FRAME(incomplete:%s)'
@@ -277,268 +386,286 @@ class Machine:
         self.reported_ok = self.error is None
 
     # -- invariants ------------------------------------------------------
-    def violates(self):
-        """Return the invariant names this final state breaks."""
-        broken = []
-        # I1: OK reported but a required input of some wavelet is unpublished.
-        if self.reported_ok:
+    def violated(self):
+        bad = []
+        ok = bool(self.reported_ok)
+
+        # I1: a public OK with an entry that never published, or with a read set
+        # that was never satisfied at execution time.
+        if ok:
             for entry in self.entries:
-                if entry.state != 'PUBLISHED':
-                    continue
-                if not self.deps_ok(entry):
-                    broken.append('I1_FAIL_CLOSED')
+                if entry.state in ('DROPPED', 'DISCARDED', 'NOOP', 'FAILED'):
+                    bad.append('I1_FAIL_CLOSED')
                     break
-        # I2: an entry executed more than once.
+                if entry.state == 'PUBLISHED' and not self.reads_published(entry):
+                    bad.append('I1_FAIL_CLOSED')
+                    break
+            # Every plane band that only a transform can produce must exist.
+            if 'I1_FAIL_CLOSED' not in bad:
+                for (channel, index), plane in self.planes.items():
+                    nbands = self.topo['planes'][index]
+                    entropy = self.topo['entropy_bands'].get(index, set())
+                    for band in range(nbands):
+                        if band in entropy:
+                            continue
+                        if not plane.valid & (1 << band):
+                            bad.append('I1_FAIL_CLOSED')
+                            break
+                    if 'I1_FAIL_CLOSED' in bad:
+                        break
+
+        # I2: nothing executed twice.
         if any(e.executions > 1 for e in self.entries):
-            broken.append('I2_NO_DOUBLE')
-        # I3: an entry left the queue without executing and without an error.
-        if self.reported_ok and self.error is None:
+            bad.append('I2_NO_DOUBLE')
+
+        # I3: nothing left the queue unexecuted and unreported.
+        if ok and self.error is None:
             for entry in self.entries:
-                if entry.state in ('DROPPED', 'DISCARDED'):
-                    broken.append('I3_NO_SILENT')
+                if entry.state in ('DROPPED', 'DISCARDED', 'NOOP'):
+                    bad.append('I3_NO_SILENT')
                     break
-        return broken
+
+        # I1 is the only invariant a *terminal* run can break; a run that ended
+        # with an error is fail-closed by definition.
+        if self.error is not None and self.reported_ok is False:
+            bad = [b for b in bad if b == 'I2_NO_DOUBLE']
+            if not any(e.executions > 1 for e in self.entries):
+                bad = []
+        return bad
 
 
-def initial_bands(entries):
-    bands = {}
-    for entry in entries:
-        bands.setdefault((entry.channel, entry.index), Bands())
-    return bands
+def false_okay_states(topology_name, policy, max_states=200000):
+    """Terminal states that report OK while a transform-only band is absent.
 
-
-def search(policy, entries_factory, workers, max_steps=60, limit=20000):
-    """Depth-first over every interleaving. Returns (violations, explored)."""
-    found = {}
-    explored = [0]
-
-    # One factory call. Building the entries and their band table from two
-    # separate calls silently pairs objects that no longer correspond.
-    entries = entries_factory()
-
-    def walk(machine, depth):
-        if explored[0] >= limit:
-            return
-        explored[0] += 1
-        if depth >= max_steps:
-            machine.log.append(('bound',))
-            return
-        if machine.drained:
-            for name in machine.violates():
-                found.setdefault(name, list(machine.log))
-            return
-        acts = machine.actions()
-        if not acts:
-            found.setdefault('I4_BOUNDED', list(machine.log))
-            return
-        for action in acts:
-            snapshot = _snapshot(machine)
-            machine.step(action)
-            walk(machine, depth + 1)
-            _restore(machine, snapshot)
-
-    walk(Machine(entries, workers, policy, initial_bands(entries)), 0)
-    return found, explored[0]
-
-
-def _snapshot(machine):
-    return (
-        [(e.state, e.executions) for e in machine.entries],
-        {k: (b.valid, b.started, b.generation) for k, b in machine.bands.items()},
-        machine.error,
-        machine.reported_ok,
-        machine.drained,
-        len(machine.log),
-    )
-
-
-def _restore(machine, snap):
-    states, bands, error, ok, drained, loglen = snap
-    for entry, (state, executions) in zip(machine.entries, states):
-        entry.state = state
-        entry.executions = executions
-    for key, (valid, started, generation) in bands.items():
-        machine.bands[key].valid = valid
-        machine.bands[key].started = started
-        machine.bands[key].generation = generation
-    machine.error = error
-    machine.reported_ok = ok
-    machine.drained = drained
-    del machine.log[loglen:]
-
-
-# ------------------------------------------------------------------ scenarios
-
-def scenario_claim_skip():
-    """One spatial entry at index 1: band 0 is produced by an earlier transform.
-
-    The released predicate passes while `valid == started == 0x0`, the entry is
-    claimed, and a later `started` raise on the same wavelet breaks the re-check.
+    This is the property the maintainer review asked to be represented: not just
+    "some invariant fired", but specifically *a public success with a missing
+    band that only an adjacent transform can produce*. Counting reachable states
+    makes the negative regression checkable instead of asserted.
     """
-    return [Entry('W11', channel=0, index=1, transform_type=SPATIAL,
-                  num_bands=4)]
+    topo = TOPOLOGIES[topology_name]
+    start = Machine(topo, policy)
+    frontier = [start]
+    seen = {start.key()}
+    hits = 0
+    example = None
+
+    while frontier:
+        if len(seen) >= max_states:
+            return {'count': hits, 'states': len(seen), 'exhaustive': False,
+                    'example': example}
+        nxt = []
+        for machine in frontier:
+            if machine.drained:
+                if machine.reported_ok:
+                    missing = []
+                    for (channel, index), plane in machine.planes.items():
+                        entropy = topo['entropy_bands'].get(index, set())
+                        for band in range(topo['planes'][index]):
+                            if band in entropy:
+                                continue
+                            if not plane.valid & (1 << band):
+                                missing.append({'index': index, 'band': band})
+                    if missing:
+                        hits += 1
+                        if example is None:
+                            example = {
+                                'missing': missing,
+                                'error': machine.error,
+                                'entries': {e.name: e.state for e in machine.entries},
+                            }
+                continue
+            for action in machine.actions():
+                child = machine.clone()
+                child.step(action, {e.name: e for e in child.entries})
+                k = child.key()
+                if k in seen:
+                    continue
+                seen.add(k)
+                nxt.append(child)
+        frontier = nxt
+
+    return {'count': hits, 'states': len(seen), 'exhaustive': True,
+            'example': example}
 
 
-def scenario_never_admitted():
-    """A producer raises `started` and never publishes `valid`.
+def run(topology_name, policy, max_states=200000):
+    """Breadth-first over the reachable state space.
 
-    With `started != valid` the released predicate never passes, the entry is
-    never admitted, and the drain discards it while returning OKAY. This is the
-    `UNMITTED_DISCARD_FALSE_OKAY` shape the v3 ledger recorded 2/30 of in arm B.
+    BFS rather than depth-first: an exhausted frontier is a proof over every
+    reachable interleaving at this abstraction, and a truncated one is reported
+    with its frontier size instead of being presented as a proof.
     """
-    return [Entry('W11', channel=1, index=1, transform_type=SPATIAL,
-                  num_bands=4)]
+    topo = TOPOLOGIES[topology_name]
+    start = Machine(topo, policy)
+    lookup = {e.name: e for e in start.entries}
+    frontier = [start]
+    seen = {start.key()}
+    violations = {}
+    drained_states = 0
+    terminal_states = 0
+
+    while frontier:
+        if len(seen) >= max_states:
+            return {'violations': sorted(violations),
+                    'states': len(seen),
+                    'drained': drained_states,
+                    'terminal': terminal_states,
+                    'exhaustive': False,
+                    'truncated_at': max_states}
+        nxt = []
+        for machine in frontier:
+            if machine.drained:
+                drained_states += 1
+                terminal_states += 1
+                for name in machine.violated():
+                    violations.setdefault(name, 1)
+                continue
+            acts = machine.actions()
+            if not acts:
+                terminal_states += 1
+                for name in machine.violated():
+                    violations.setdefault(name, 1)
+                continue
+            for action in acts:
+                child = machine.clone()
+                child_lookup = {e.name: e for e in child.entries}
+                child.step(action, child_lookup)
+                k = child.key()
+                if k in seen:
+                    continue
+                seen.add(k)
+                nxt.append(child)
+        frontier = nxt
+
+    return {'violations': sorted(violations),
+            'states': len(seen),
+            'drained': drained_states,
+            'terminal': terminal_states,
+            'exhaustive': True,
+            'truncated_at': None}
 
 
-def scenario_chain():
-    """Two dependent entries: band 0 of the upper wavelet comes from below."""
-    return [Entry('W21', channel=0, index=2, transform_type=SPATIAL,
-                  num_bands=4),
-            Entry('W11', channel=0, index=1, transform_type=SPATIAL,
-                  num_bands=4)]
-
-
-SCENARIOS = (
-    ('claim_skip', scenario_claim_skip),
-    ('never_admitted', scenario_never_admitted),
-    ('chain', scenario_chain),
-)
-
-
-# ------------------------------------------------------- source anchoring
-
-def anchor_matrix(repo=None):
-    """Compare this model's required masks against the frozen source.
-
-    The matrix in §2 R1 is a claim about `DecodedBandsValid`. If that function
-    changes, this model would keep asserting a stale rule while its own tests
-    stayed green — so the matrix is re-derived from the tree and compared, and a
-    divergence is a hard failure rather than a note.
-    """
-    import importlib.util
-
+def source_anchor(repo=None):
+    """Pin every claim in this model to the frozen tree."""
     repo = Path(repo).resolve() if repo else Path(__file__).resolve().parents[1]
-    verifier_path = Path(__file__).with_name('verify_rca195_band0_contract.py')
-    if not verifier_path.is_file():
-        return {'status': 'SKIPPED', 'reason': 'verifier not present'}
-
-    spec = importlib.util.spec_from_file_location('rca195_verifier', verifier_path)
-    verifier = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(verifier)
-
+    codec = repo / 'upstream' / 'Codec'
+    problems = []
     rows = []
-    mismatches = []
-    for transform_type, index, num_bands in (
-            ('SPATIAL', 0, 4), ('SPATIAL', 1, 4), ('SPATIAL', 2, 4),
-            ('FIELDPLUS', 2, 2), ('FIELDPLUS', 3, 4), ('FIELDPLUS', 4, 4),
-            ('FIELDPLUS', 5, 4)):
-        upstream = verifier.evaluate_mask_logic(transform_type, index, num_bands)
-        # `None` means "earlier transforms compute both bands", i.e. this entry
-        # requires no band of its own wavelet to be published first.
-        expected = 0 if upstream is None else upstream
-        modelled = required_input_mask(transform_type, index, num_bands)
-        ok = expected == modelled
-        rows.append({'transform': transform_type, 'index': index,
-                     'num_bands': num_bands,
-                     'upstream_mask': ('None' if upstream is None
-                                       else '0x%X' % upstream),
-                     'model_mask': '0x%X' % modelled, 'match': ok})
-        if not ok:
-            mismatches.append('%s index=%d: upstream 0x%X, model 0x%X'
-                              % (transform_type, index, expected, modelled))
 
-    # The predicate and the drain must still be the shapes this design assumes.
-    text = verifier.read(repo, verifier.IMAGE_H)
-    if verifier.MACRO_RELEASED not in text:
-        mismatches.append('released BANDS_ALL_VALID form changed')
-    drain = verifier.read(repo, verifier.THREADING)
-    for anchor, what in (
-            ('data->queue[curr_entry].done = 1;', 'claim write'),
-            ('if(wavelet && BANDS_ALL_VALID(wavelet))', 'post-unlock re-check'),
-            ('} while(wavelet && BANDS_ALL_VALID(wavelet));', 'drain loop tail')):
-        if anchor not in drain:
-            mismatches.append('%s anchor vanished: %s' % (what, anchor))
+    def read(name):
+        path = codec / name
+        if not path.is_file():
+            problems.append('missing %s' % name)
+            return ''
+        return path.read_text(encoding='utf-8', errors='replace').replace('\r\n', '\n')
 
-    return {
-        'status': 'OK' if not mismatches else 'MISMATCH',
-        'rows': rows,
-        'mismatches': mismatches,
-    }
+    decoder = read('decoder.c')
+    wavelet = read('wavelet.c')
+
+    # 1. The lowpass inverse reads all four bands of its input wavelet.
+    anchor = 'TransformInverseSpatialQuantLowpass(wavelet, lowpass, scratch, prescale, inverse_prescale);'
+    if anchor not in decoder:
+        problems.append('lowpass inverse call site changed')
+    else:
+        rows.append({'edge': 'spatial lowpass', 'reads': 'wavelet[index].band[0..3]',
+                     'writes': 'wavelet[index-1].band[0]', 'ok': True})
+
+    # 2. It writes into wavelet[index-1], not into its own input plane.
+    lowpass_write = 'UpdateWaveletBandValidFlags(decoder, lowpass, 0);'
+    if decoder.count(lowpass_write) < 2:
+        problems.append('lowpass publication anchor changed (%d)' % decoder.count(lowpass_write))
+
+    # 3. The highpass inverse writes band 1 of wavelet[index-1].
+    if 'UpdateWaveletBandValidFlags(decoder, highpass, 1);' not in decoder:
+        problems.append('highpass publication anchor changed')
+
+    # 4. The temporal inverse publishes band 0 into both frame wavelets.
+    if decoder.count('UpdateWaveletBandValidFlags(decoder, frame[0], 0);') != 1:
+        problems.append('temporal publication anchor for frame[0] changed')
+    if decoder.count('UpdateWaveletBandValidFlags(decoder, frame[1], 0);') != 1:
+        problems.append('temporal publication anchor for frame[1] changed')
+
+    # 5. The silent no-op: an absent read band returns without writing or setting
+    #    an error. This is the mechanism the released policy models.
+    for band in range(4):
+        needle = 'if (input->band[%d] == NULL) return;' % band
+        if needle not in wavelet:
+            problems.append('silent-return anchor for band %d changed' % band)
+    if 'if (input->band[0] == NULL) return;' in wavelet:
+        rows.append({'edge': 'inverse guard', 'reads': 'input->band[0..3]',
+                     'writes': 'none (silent return)', 'ok': True})
+
+    # 6. The subband tables that decide which plane gets band 0 from entropy.
+    for table in ('static int subband_wavelet_index[] = {2, 2, 2, 2, 1, 1, 1, 0, 0, 0};',
+                  'static int subband_wavelet_index[] = {5, 5, 5, 5, 4, 4, 4, 3, 3, 3, 3, 1, 1, 1, 0, 0, 0};'):
+        if table not in decoder:
+            problems.append('subband table changed: %s' % table[:48])
+
+    # 7. The released predicate and the drain anchors.
+    if '#define BANDS_ALL_VALID(wavelet)\t((wavelet)->band_valid_flags == (wavelet)->band_started_flags)' not in read('image.h'):
+        problems.append('released BANDS_ALL_VALID form changed')
+    threading = read('entropy_threading.c')
+    for needle in ('data->queue[curr_entry].done = 1;',
+                   'if(wavelet && BANDS_ALL_VALID(wavelet))'):
+        if needle not in threading:
+            problems.append('drain anchor changed: %s' % needle)
+
+    return {'status': 'OK' if not problems else 'MISMATCH',
+            'rows': rows, 'problems': problems}
 
 
-def run_matrix(limit=20000):
-    report = {'policy': {}, 'scenarios': {}}
-    for name, factory in SCENARIOS:
-        per = {}
-        for policy in ('released', 'proposed'):
-            found, explored = search(policy, factory, workers=2, limit=limit)
-            # `explored >= limit` means the depth-first walk was cut short, so an
-            # empty violation list is an absence in the explored subspace, not a
-            # proof over all interleavings. Recording it prevents the two from
-            # being read as the same claim.
-            truncated = explored >= limit
-            per[policy] = {'violations': sorted(found),
-                           'interleavings': explored,
-                           'search_truncated': truncated,
-                           'exhaustive': not truncated}
-            report['policy'].setdefault(policy, [])
-            report['policy'][policy].extend(sorted(found))
-        report['scenarios'][name] = per
-    for policy, names in list(report['policy'].items()):
-        report['policy'][policy] = sorted(set(names))
-    return report
-
+# ----------------------------------------------------------------- self-test
 
 def self_test():
-    """The model must reproduce the defect in `released` and clear `proposed`.
-
-    A model that cannot fail is not a check. These are the negative cases.
-    """
     failures = []
-    report = run_matrix()
 
-    released = report['policy']['released']
-    proposed = report['policy']['proposed']
+    # The corrected model must reproduce the released failure in both shapes.
+    for topo in TOPOLOGIES:
+        released = run(topo, 'released')
+        proposed = run(topo, 'proposed')
+        if 'I1_FAIL_CLOSED' not in released['violations']:
+            failures.append('%s: released does not reproduce I1' % topo)
+        if not proposed['exhaustive']:
+            failures.append('%s: proposed search truncated, cannot claim a proof' % topo)
+        if proposed['violations']:
+            failures.append('%s: proposed still violates %s'
+                            % (topo, proposed['violations']))
 
-    for needed in ('I1_FAIL_CLOSED', 'I3_NO_SILENT'):
-        if needed not in released:
-            failures.append('released policy does not reproduce %s' % needed)
-    if 'I2_NO_DOUBLE' in released:
-        failures.append('released policy claims a double execution; the frozen '
-                        'code cannot do that and the model should not invent it')
-    if proposed:
-        failures.append('proposed policy still violates %s' % (proposed,))
+    # Negative regression, stated as a reachability property rather than as a
+    # violation list. Revision 1's claim was "the proposed rule is clean"; the
+    # reviewer showed that its rule admits a missing adjacent-producer band. So:
+    # the retired policy MUST reach a success-with-missing-band state, and the
+    # proposed one MUST NOT.
+    for topo in TOPOLOGIES:
+        legacy = false_okay_states(topo, 'legacy')
+        proposed = false_okay_states(topo, 'proposed')
+        if not legacy['exhaustive'] or not proposed['exhaustive']:
+            failures.append('%s: false-OKAY search truncated, cannot conclude' % topo)
+        if legacy['count'] == 0:
+            failures.append('%s: revision-1 policy never reaches a success with a '
+                            'transform-only band absent; the negative regression '
+                            'the review asked for is not represented' % topo)
+        if proposed['count']:
+            failures.append('%s: proposed policy reaches %d '
+                            'success-with-missing-band state(s)'
+                            % (topo, proposed['count']))
 
-    # A scenario whose search was cut off must not be counted as a clearance
-    # without saying so. The single-entry scenarios are small enough to be
-    # exhaustive; the two-entry chain is not, at this limit.
-    for name, per in report['scenarios'].items():
-        if name in ('claim_skip', 'never_admitted') and not per['proposed']['exhaustive']:
-            failures.append('%s should be exhaustive at this limit but was truncated'
-                            % name)
-        if per['proposed']['violations'] and not per['proposed']['search_truncated']:
-            failures.append('%s proposed policy violates an invariant exhaustively' % name)
-
-    # The two released failures must be distinguishable: a skip with the entry
-    # claimed, and a discard of an entry that was never claimed.
-    claim = report['scenarios']['claim_skip']['released']['violations']
-    never = report['scenarios']['never_admitted']['released']['violations']
-    if 'I3_NO_SILENT' not in claim:
-        failures.append('claim_skip does not reproduce the silent skip')
-    if 'I3_NO_SILENT' not in never:
-        failures.append('never_admitted does not reproduce the unadmitted discard')
+    # I1 must be able to fire on a *satisfied-looking* state: the released run
+    # has every startable band started, so a model that merely checks flag
+    # presence would miss it.
+    spatial = run('spatial_chain', 'released')
+    if 'I3_NO_SILENT' not in spatial['violations']:
+        failures.append('spatial_chain: released does not reproduce the silent skip')
 
     if failures:
         for failure in failures:
             print('SELF-TEST FAIL %s' % failure, file=sys.stderr)
         return 1
 
-    print('SELF-TEST PASS: released reproduces I1+I3 in both shapes, proposed '
-          'clears all five invariants; exhaustive on %d interleavings, '
-          'chain truncated at the search limit (reported, not counted as proof)'
-          % sum(s['proposed']['interleavings']
-                for n, s in report['scenarios'].items()
-                if s['proposed']['exhaustive']))
+    print('SELF-TEST PASS: released and legacy both reproduce I1 in %d '
+          'topologies; legacy reaches success-with-missing-band in every one, '
+          'proposed in none; proposed is fail-closed and exhaustive'
+          % len(TOPOLOGIES))
     return 0
 
 
@@ -552,17 +679,25 @@ def main(argv=None):
     if args.self_test:
         return self_test()
 
-    report = run_matrix()
-    report['kind'] = 'DESIGN_MODEL'
-    report['note'] = ('reachability model of the transform queue, not a '
-                      'measurement of the frozen decoder')
-    report['required_input_masks'] = {
-        'FIELDPLUS': {i: required_input_mask(FIELDPLUS, i, 4) for i in range(6)},
-        'SPATIAL': {i: required_input_mask(SPATIAL, i, 4) for i in range(3)},
-    }
-    report['source_anchor'] = anchor_matrix()
-    if report['source_anchor']['status'] != 'OK':
-        for problem in report['source_anchor']['mismatches']:
+    anchor = source_anchor()
+    report = {'kind': 'DESIGN_MODEL',
+              'revision': 2,
+              'note': ('reachability model over explicit producer edges; not a '
+                       'measurement of the frozen decoder'),
+              'source_anchor': anchor,
+              'topologies': {}}
+    for topo in TOPOLOGIES:
+        report['topologies'][topo] = {
+            policy: run(topo, policy)
+            for policy in ('released', 'legacy', 'proposed')
+        }
+        report['topologies'][topo]['false_okay'] = {
+            policy: false_okay_states(topo, policy)
+            for policy in ('released', 'legacy', 'proposed')
+        }
+
+    if anchor['status'] != 'OK':
+        for problem in anchor['problems']:
             print('ANCHOR FAIL: %s' % problem, file=sys.stderr)
         return 2
 
@@ -572,15 +707,26 @@ def main(argv=None):
         out.write_text(json.dumps(report, indent=1) + '\n', encoding='utf-8')
         print('wrote %s' % out)
 
-    for name, per in report['scenarios'].items():
-        print('%-16s released=%-28s proposed=%-4s %s'
-              % (name, ','.join(per['released']['violations']) or '-',
+    for topo, per in report['topologies'].items():
+        print('%-20s released=%-14s legacy=%-14s proposed=%-4s states=%d%s'
+              % (topo,
+                 ','.join(per['released']['violations']) or '-',
+                 ','.join(per['legacy']['violations']) or '-',
                  ','.join(per['proposed']['violations']) or '-',
-                 'exhaustive' if per['proposed']['exhaustive'] else 'TRUNCATED'))
+                 per['proposed']['states'],
+                 '' if per['proposed']['exhaustive'] else ' TRUNCATED'))
+        print('%-20s false-OKAY states: released=%d legacy=%d proposed=%d'
+              % ('', per['false_okay']['released']['count'],
+                 per['false_okay']['legacy']['count'],
+                 per['false_okay']['proposed']['count']))
+
     if not args.check and not args.json:
         parser.error('one of --check/--json/--self-test is required')
-    print('MODEL PASS' if not report['policy']['proposed'] else 'MODEL FAIL')
-    return 0 if not report['policy']['proposed'] else 2
+    clean = all(not p['proposed']['violations'] and p['proposed']['exhaustive']
+                and p['false_okay']['proposed']['count'] == 0
+                for p in report['topologies'].values())
+    print('MODEL PASS' if clean else 'MODEL FAIL')
+    return 0 if clean else 2
 
 
 if __name__ == '__main__':

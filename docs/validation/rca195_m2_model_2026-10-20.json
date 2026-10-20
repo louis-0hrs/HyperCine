@@ -1,141 +1,191 @@
 {
- "policy": {
-  "released": [
-   "I1_FAIL_CLOSED",
-   "I3_NO_SILENT"
-  ],
-  "proposed": []
- },
- "scenarios": {
-  "claim_skip": {
-   "released": {
-    "violations": [
-     "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
-    ],
-    "interleavings": 1596,
-    "search_truncated": false,
-    "exhaustive": true
-   },
-   "proposed": {
-    "violations": [],
-    "interleavings": 922,
-    "search_truncated": false,
-    "exhaustive": true
-   }
-  },
-  "never_admitted": {
-   "released": {
-    "violations": [
-     "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
-    ],
-    "interleavings": 1596,
-    "search_truncated": false,
-    "exhaustive": true
-   },
-   "proposed": {
-    "violations": [],
-    "interleavings": 922,
-    "search_truncated": false,
-    "exhaustive": true
-   }
-  },
-  "chain": {
-   "released": {
-    "violations": [
-     "I1_FAIL_CLOSED",
-     "I3_NO_SILENT"
-    ],
-    "interleavings": 20000,
-    "search_truncated": true,
-    "exhaustive": false
-   },
-   "proposed": {
-    "violations": [],
-    "interleavings": 20000,
-    "search_truncated": true,
-    "exhaustive": false
-   }
-  }
- },
  "kind": "DESIGN_MODEL",
- "note": "reachability model of the transform queue, not a measurement of the frozen decoder",
- "required_input_masks": {
-  "FIELDPLUS": {
-   "0": 14,
-   "1": 14,
-   "2": 0,
-   "3": 15,
-   "4": 14,
-   "5": 15
-  },
-  "SPATIAL": {
-   "0": 14,
-   "1": 14,
-   "2": 15
-  }
- },
+ "revision": 2,
+ "note": "reachability model over explicit producer edges; not a measurement of the frozen decoder",
  "source_anchor": {
   "status": "OK",
   "rows": [
    {
-    "transform": "SPATIAL",
-    "index": 0,
-    "num_bands": 4,
-    "upstream_mask": "0xE",
-    "model_mask": "0xE",
-    "match": true
+    "edge": "spatial lowpass",
+    "reads": "wavelet[index].band[0..3]",
+    "writes": "wavelet[index-1].band[0]",
+    "ok": true
    },
    {
-    "transform": "SPATIAL",
-    "index": 1,
-    "num_bands": 4,
-    "upstream_mask": "0xE",
-    "model_mask": "0xE",
-    "match": true
-   },
-   {
-    "transform": "SPATIAL",
-    "index": 2,
-    "num_bands": 4,
-    "upstream_mask": "0xF",
-    "model_mask": "0xF",
-    "match": true
-   },
-   {
-    "transform": "FIELDPLUS",
-    "index": 2,
-    "num_bands": 2,
-    "upstream_mask": "None",
-    "model_mask": "0x0",
-    "match": true
-   },
-   {
-    "transform": "FIELDPLUS",
-    "index": 3,
-    "num_bands": 4,
-    "upstream_mask": "0xF",
-    "model_mask": "0xF",
-    "match": true
-   },
-   {
-    "transform": "FIELDPLUS",
-    "index": 4,
-    "num_bands": 4,
-    "upstream_mask": "0xE",
-    "model_mask": "0xE",
-    "match": true
-   },
-   {
-    "transform": "FIELDPLUS",
-    "index": 5,
-    "num_bands": 4,
-    "upstream_mask": "0xF",
-    "model_mask": "0xF",
-    "match": true
+    "edge": "inverse guard",
+    "reads": "input->band[0..3]",
+    "writes": "none (silent return)",
+    "ok": true
    }
   ],
-  "mismatches": []
+  "problems": []
+ },
+ "topologies": {
+  "spatial_chain": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "states": 877,
+    "drained": 311,
+    "terminal": 311,
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "legacy": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "states": 110,
+    "drained": 46,
+    "terminal": 46,
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "proposed": {
+    "violations": [],
+    "states": 480,
+    "drained": 240,
+    "terminal": 240,
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "false_okay": {
+    "released": {
+     "count": 310,
+     "states": 877,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "index": 0,
+        "band": 0
+       },
+       {
+        "index": 1,
+        "band": 0
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "legacy": {
+     "count": 46,
+     "states": 110,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "index": 0,
+        "band": 0
+       },
+       {
+        "index": 1,
+        "band": 0
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "states": 480,
+     "exhaustive": true,
+     "example": null
+    }
+   }
+  },
+  "fieldplus_temporal": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "states": 129,
+    "drained": 56,
+    "terminal": 56,
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "legacy": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "states": 119,
+    "drained": 51,
+    "terminal": 51,
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "proposed": {
+    "violations": [],
+    "states": 348,
+    "drained": 174,
+    "terminal": 174,
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "false_okay": {
+    "released": {
+     "count": 55,
+     "states": 129,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "index": 0,
+        "band": 0
+       },
+       {
+        "index": 1,
+        "band": 0
+       }
+      ],
+      "error": null,
+      "entries": {
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "legacy": {
+     "count": 51,
+     "states": 119,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "index": 0,
+        "band": 0
+       },
+       {
+        "index": 1,
+        "band": 0
+       }
+      ],
+      "error": null,
+      "entries": {
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "states": 348,
+     "exhaustive": true,
+     "example": null
+    }
+   }
+  }
  }
 }
