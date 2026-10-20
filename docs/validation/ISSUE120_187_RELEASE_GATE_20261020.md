@@ -30,7 +30,13 @@ The CMake target fails on either 1 or 77; build tools may surface either as
 their own exit 1. The JSON preserves the distinction. Ordinary CTest still
 uses its normal semantics, including overall success with skips. Release
 qualification must require this explicit target as well as the full native
-suite; its PASS would cover this reference lane only. CPU-only hosted jobs
+suite. Schema 2 separates `reference_lane` execution from `release_gate`.
+Even an all-PASS lane remains release BLOCKED=77: no reviewed independent
+pixel-oracle adapter exists. `independent_pixel_oracle.qualified` is false.
+No CLI switch, test name or self-asserted manifest grants qualification. A
+future adapter requires reviewed same-packet evidence bound to implementation,
+version, normalization, scope and thresholds before release can become PASS.
+CPU-only hosted jobs
 cannot qualify the four missing CUDA tests. The target is available only
 when Python is found; absence of the target is not qualification.
 
@@ -40,7 +46,8 @@ Direct invocation, preserving runner exit 77:
 python tools/check_reference_release.py --build build --output build/reference-release.json
 ```
 
-Seven deterministic regression cases exercise all-pass evidence, green CTest
+Eight deterministic regression cases exercise all-pass evidence without an oracle,
+spoofed qualification test names, green CTest
 with skips, missing CUDA tests, strict failure precedence, runner error,
 not-run results and duplicate evidence. Python is validation tooling only.
 
@@ -127,3 +134,22 @@ required. No full CUDA/A2 sweep, sanitizer or performance claim.
 
 No protected phase/main merge, release, upstream modification, retry-to-green
 or conversion of BLOCKED into PASS is authorized by these measurements.
+
+## Follow-up: positive oracle requirement (2026-10-20)
+
+The original runner could return release PASS from five all-PASS process
+results without independent evidence of a qualified pixel oracle. Schema 2
+closes that gap: `reference_lane` may be PASS, but `release_gate` is BLOCKED
+until an actual reviewed independent adapter is implemented. Strict failure
+continues to take precedence (exit 1). Historical seven-case measurements
+above remain historical; current regression count is eight.
+
+#187 remains on its separate phase ancestry. #205 / #206 attributes the
+bounded same-packet BGRA divergence to original-SDK nondeterminism; it does
+not qualify pixels or rewrite the original 44/45 full-suite outcome.
+
+Current follow-up validation: Python regression **8/8 PASS**; complete native
+Windows CPU-only Release CTest **16/16 PASS, zero skips, 1.89 s**. Direct
+CPU reference runner: CTest **2/2 PASS**, four absent CUDA tests BLOCKED,
+independent oracle BLOCKED, runner exit **77**. No GPU rerun was needed for
+this Python-only behavior change. Frozen `upstream/` status is empty.
