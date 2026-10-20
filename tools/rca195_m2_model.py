@@ -2,7 +2,7 @@
 # Copyright (c) 2026 HyperCine Contributors.
 # Dual-licensed under the MIT License or Apache License, Version 2.0.
 # See LICENSE-MIT and LICENSE-APACHE for details.
-"""RCA-195 Milestone-2 design model, revision 3.
+"""RCA-195 Milestone-2 design model, revision 6.
 
 Revision 2 answered the first review (real producer edges, correct output plane,
 scheduled transitions).  The second review then named three remaining fidelity
@@ -18,7 +18,29 @@ faults, all of which are real:
    indistinguishable from forward progress, and no invariant required a valid
    decode to actually *complete*.
 
-Revision 3 addresses each:
+Revision 3 addressed each of those three faults (state-key worker identity,
+partial order per band, quiescent drain).  Revisions 4-6 then corrected the
+things the later reviews found in revision 3's own claims:
+
+* **rev 4** -- the "partial order" was still a canonical prefix: only the first
+  eligible event was offered, so a later band could never fire first.  Every
+  causally enabled event is now offered, the outstanding set is state rather
+  than a cursor, and a witness shows a canonical schedule foreclosing a
+  reachable claim window.  Three-channel output closure now seeds ch0/ch1/ch2.
+* **rev 5** -- the state space was reduced and the reduction *proved*: no policy
+  guard reads ``started`` under ``proposed``/``legacy``, so the word is dropped
+  and ``started_is_unobservable()`` plus ``reduction_check()`` license it.  The
+  ``released`` policy is refused rather than approximated.  Four of five
+  topologies became exhaustive on the reduced order.
+* **rev 6** -- the *reporting* path was wrong, not the model.  ``--json`` called
+  ``negative_cases()`` and discarded its failure list, so a broken control still
+  printed MODEL PASS.  `model_verdict()` is now the single predicate for both
+  paths, every control returns ``PASS_EXHAUSTIVE`` / ``PREFIX_ONLY_INCONCLUSIVE``
+  / ``FAIL`` and states the premise it constructed, and a genuinely exhaustive
+  single-entry stale control exists instead of a truncated one reported as ok.
+
+The paragraphs below describe revision 3's mechanism and are still accurate for
+it; see ``docs/validation/RCA195_M2_DESIGN.md`` for the current contract.
 
 * the state key carries the entry-to-worker assignment, and worker assignment is
   a real branch (no "lowest free slot" shortcut);
@@ -56,8 +78,13 @@ Usage:
   python tools/rca195_m2_model.py --check
   python tools/rca195_m2_model.py --json docs/validation/<file>.json
   python tools/rca195_m2_model.py --self-test
+  python tools/rca195_m2_model.py --verdict-regression
   python tools/rca195_m2_model.py --confluence spatial_chain
   python tools/rca195_m2_model.py --negative-cases
+
+Exit codes for the two control paths are 0 (all controls exhaustive and
+holding), 3 (at least one control hit its cap and decided nothing) and 2 (a
+control failed).  Truncation is never reported as a pass.
 """
 import argparse
 import json
@@ -215,6 +242,39 @@ HIGHPASS_WRITE = (2, 1)
 
 TERMINAL_STATES = frozenset(('PUBLISHED', 'FAILED', 'DROPPED', 'DISCARDED',
                             'NOOP'))
+
+# Verdicts for the named controls.  Three states, kept distinct on purpose:
+#   PASS_EXHAUSTIVE         the premise was constructed and the property held on
+#                           every reachable state -- this is the only green;
+#   PREFIX_ONLY_INCONCLUSIVE the search hit its cap, so the control decided
+#                           nothing.  A prefix that contains no counterexample is
+#                           *not* evidence for the property when the premise
+#                           itself may lie outside the prefix;
+#   FAIL                    the premise held and the property did not.
+# The fifth review found this distinction missing: a truncated stale-generation
+# run fell through `if not stale['exhaustive']: pass` and the row was published
+# as `ok` on the absence of a violation in an incomplete search.
+PASS_EXHAUSTIVE = 'PASS_EXHAUSTIVE'
+PREFIX_ONLY_INCONCLUSIVE = 'PREFIX_ONLY_INCONCLUSIVE'
+FAIL = 'FAIL'
+
+
+def _error_kind(error):
+    """Collapse a terminal error into the mechanism that produced it.
+
+    `CODEC_ERROR_BAD_FRAME(E3:stale-generation)` -> `stale-generation`;
+    `CODEC_ERROR_BAD_FRAME(incomplete:E5,E4)` -> `incomplete`.  Controls need
+    this to show they actually exercised their mechanism instead of merely
+    avoiding a violation: a stale run with zero `stale-*` terminals never built
+    the state it is supposed to test.
+    """
+    if not error:
+        return None
+    start = error.find('(')
+    inner = error[start + 1:-1] if start >= 0 and error.endswith(')') else error
+    if inner.startswith('incomplete'):
+        return 'incomplete'
+    return inner.rsplit(':', 1)[-1]
 
 # Stable small-int codes for the entry state, so a state key stays compact.
 STATE_CODES = {
@@ -745,6 +805,10 @@ def explore(topology_name, policy, max_states=None, workers=2,
     terminal_states = 0
     ok_states = 0
     deadlocks = 0
+    # How many drained terminals failed for each reason.  A negative control has
+    # to show that it reached the failure it claims to test; without this tally
+    # an "ok" row can mean "never got there".
+    error_kinds = {}
 
     while frontier:
         if len(seen) >= max_states:
@@ -753,6 +817,7 @@ def explore(topology_name, policy, max_states=None, workers=2,
                     'terminal': terminal_states, 'ok': ok_states,
                     'deadlocks': deadlocks, 'exhaustive': False,
                     'bounded': False, 'truncated_at': max_states,
+                    'error_kinds': error_kinds,
                     'edges': edges if collect_edges else None,
                     'projections': projections if collect_projections else None,
                     'false_okay': false_okay,
@@ -764,6 +829,9 @@ def explore(topology_name, policy, max_states=None, workers=2,
             if machine.drained:
                 drained_states += 1
                 terminal_states += 1
+                kind = _error_kind(machine.error)
+                if kind is not None:
+                    error_kinds[kind] = error_kinds.get(kind, 0) + 1
                 if machine.reported_ok:
                     ok_states += 1
                     if collect_false_okay:
@@ -816,7 +884,7 @@ def explore(topology_name, policy, max_states=None, workers=2,
     return {'violations': sorted(violations), 'states': len(seen),
             'drained': drained_states, 'terminal': terminal_states,
             'ok': ok_states, 'deadlocks': deadlocks, 'exhaustive': True,
-            'bounded': True, 'truncated_at': None,
+            'bounded': True, 'truncated_at': None, 'error_kinds': error_kinds,
             'edges': edges if collect_edges else None,
             'projections': projections if collect_projections else None,
             'false_okay': false_okay,
@@ -1519,72 +1587,184 @@ def canonical_prefix_blindspot(topology_name='spatial_chain', max_states=200000)
             'exhaustive': len(seen) < max_states and len(cseen) < max_states}
 
 
+STALE_KINDS = ('stale-generation', 'stale-before-publication')
+
+
+def _verdict(exhaustive, premise, holds):
+    """Three-way verdict for one control.
+
+    `premise` is whether the control actually constructed the situation it is
+    supposed to test; `holds` is whether the property survived.  A truncated
+    search can never be green, regardless of how clean its prefix looked.
+    """
+    if not exhaustive:
+        return PREFIX_ONLY_INCONCLUSIVE
+    if not premise:
+        return FAIL
+    return PASS_EXHAUSTIVE if holds else FAIL
+
+
 def negative_cases():
+    """Named controls, each with an explicit verdict and its premise.
+
+    Returns `(rows, failures, inconclusive)`.  `failures` lists real defects;
+    `inconclusive` lists controls whose search hit its cap.  They are kept apart
+    because a truncated control has decided nothing -- folding it into the pass
+    path is how a prefix becomes a proof, and folding it into the failure path is
+    how an honest bound becomes a broken model.
+    """
     failures = []
+    inconclusive = []
     rows = []
+
+    def record(row, premise_detail, blocking=True):
+        row['premise'] = premise_detail
+        row['blocking'] = blocking
+        if blocking and row['verdict'] == FAIL:
+            failures.append('%s: %s' % (row['case'], row.get('reason', 'failed')))
+        elif blocking and row['verdict'] == PREFIX_ONLY_INCONCLUSIVE:
+            inconclusive.append('%s: %s' % (row['case'], row.get('reason',
+                                                               'search truncated')))
+        rows.append(row)
+
     for case in NEGATIVE_CASES:
         hits, states, exhaustive = claims_seen(
             case['topology'], case['policy'], case['withhold'], case['entry'])
         low = case.get('expect_claims_min')
-        if not exhaustive:
-            failures.append('%s: search truncated' % case['name'])
-            continue
         if low is None:
             good = hits == case['expect_claims']
         else:
             good = hits >= low
-        rows.append({'case': case['name'], 'claims': hits, 'states': states,
-                     'ok': good})
-        if not good:
-            failures.append('%s: %d claims (expected %s)'
-                            % (case['name'], hits,
-                               case.get('expect_claims', '>=%s' % low)))
+        record({'case': case['name'], 'claims': hits, 'states': states,
+                'verdict': _verdict(exhaustive, True, good),
+                'reason': '%d claims (expected %s)'
+                          % (hits, case.get('expect_claims', '>=%s' % low))},
+               {'exhaustive': exhaustive, 'truncated_at': None if exhaustive else states})
+
     # (c) a claimed-then-stale entry must fail closed.
+    #
+    # Two controls, because the reviewer asked for one that is genuinely cheap
+    # and exhaustive *and* the larger space is worth showing.
+    #
+    # (c1) single entry: `spatial_highpass` has exactly one transform entry, so
+    #      the stale window is decidable on 366 states in milliseconds under the
+    #      true partial order.  This is the exhaustive positive the fifth review
+    #      asked for, and it is not vacuous: both stale mechanisms appear
+    #      (`stale-generation`, `stale-before-publication`) alongside one OKAY
+    #      terminal, so the run proves "a stale entry fails closed" while also
+    #      proving the control can reach success.
+    single = explore('spatial_highpass', 'proposed', stale=True,
+                     drain='quiescent', max_states=60000)
+    single_kinds = {k: v for k, v in single['error_kinds'].items()
+                    if k in STALE_KINDS}
+    single_premise = bool(single_kinds) and single['ok'] >= 1
+    if not single_premise and single['exhaustive']:
+        failures.append('stale-generation (single entry): the control never '
+                        'reached a stale failure (kinds=%s, ok=%d), so it '
+                        'proves nothing' % (single['error_kinds'], single['ok']))
+    record({'case': 'stale_generation_fail_closed_single_entry',
+            'claims': single['ok'], 'states': single['states'],
+            'error_kinds': single['error_kinds'],
+            'verdict': _verdict(single['exhaustive'], single_premise,
+                                'I1_FAIL_CLOSED' not in single['violations']),
+            'reason': ('a stale entry reached OKAY'
+                       if 'I1_FAIL_CLOSED' in single['violations'] else
+                       'no stale failure on any reachable path')},
+           {'entropy': 'partial', 'topology': 'spatial_highpass',
+            'stale_kinds': single_kinds, 'ok_terminals': single['ok'],
+            'exhaustive': single['exhaustive']})
+
+    # (c2) the chain, on the reduced order.  The partial order cannot be
+    #      exhausted there: 411 841 states against a 400 k cap, so rev 5's
+    #      version of this control only ever saw a prefix and then passed on the
+    #      *absence* of a violation -- the fifth review's finding.  The reduced
+    #      order is the same decoder under the proven quotient, and there the
+    #      space is 13 529 states and finishes in under a second.
     stale = explore('spatial_chain', 'proposed', stale=True, drain='quiescent',
-                    max_states=120000)
-    if not stale['exhaustive']:
-        pass  # bounded prefix: no safety violation found is the claim, not proof
-    elif 'I1_FAIL_CLOSED' in stale['violations']:
-        failures.append('stale-generation: a stale entry still reached OKAY')
-    elif stale['ok'] == 0:
-        failures.append('stale-generation: no scenario completed at all')
+                    entropy='reduced', max_states=120000)
+    stale_kinds = {k: v for k, v in stale['error_kinds'].items()
+                   if k in STALE_KINDS}
+    stale_premise = bool(stale_kinds) and stale['ok'] >= 1
+    if not stale_premise and stale['exhaustive']:
+        failures.append('stale-generation: the control never reached a stale '
+                        'failure (kinds=%s, ok=%d), so it proves nothing'
+                        % (stale['error_kinds'], stale['ok']))
+    record({'case': 'stale_generation_fail_closed',
+            'claims': stale['ok'], 'states': stale['states'],
+            'error_kinds': stale['error_kinds'],
+            'verdict': _verdict(stale['exhaustive'], stale_premise,
+                                'I1_FAIL_CLOSED' not in stale['violations']),
+            'reason': ('a stale entry reached OKAY'
+                       if 'I1_FAIL_CLOSED' in stale['violations'] else
+                       'no stale failure on any reachable path')},
+           {'entropy': 'reduced', 'topology': 'spatial_chain',
+            'stale_kinds': stale_kinds, 'ok_terminals': stale['ok'],
+            'exhaustive': stale['exhaustive']})
+
+    # The same control on the true partial order of the chain, kept as evidence
+    # for what the reduction bought.  Non-blocking: it is a bound, and a bound
+    # may not turn the verdict green or red.
+    stale_partial = explore('spatial_chain', 'proposed', stale=True,
+                            drain='quiescent', max_states=120000)
+    record({'case': 'stale_generation_fail_closed_partial_order',
+            'claims': stale_partial['ok'], 'states': stale_partial['states'],
+            'verdict': PREFIX_ONLY_INCONCLUSIVE,
+            'reason': 'partial-order space exceeds the cap; the reduced run '
+                      'above carries the proof'},
+           {'exhaustive': stale_partial['exhaustive'],
+            'note': 'informational, not used for the verdict'},
+           blocking=False)
+
     # (d) duplicate producer: a second owner of an already published band is
     #     refused, so no state reports two live producers.
     dup = explore('spatial_chain', 'proposed')
-    if 'I7_SINGLE_OWNER' in dup['violations']:
-        failures.append('single-owner: two live producers of one band')
-    # (e) four workers on unsatisfiable entries: drain fails closed.
+    record({'case': 'single_owner_no_duplicate_producer',
+            'claims': dup['ok'], 'states': dup['states'],
+            'verdict': _verdict(dup['exhaustive'], True,
+                                'I7_SINGLE_OWNER' not in dup['violations']),
+            'reason': 'two live producers of one band'},
+           {'exhaustive': dup['exhaustive']})
+
+    # (e) four workers on unsatisfiable entries: drain fails closed.  The premise
+    #     is that a drain was actually reachable -- `ok == 0` alone would also be
+    #     satisfied by a run that never terminated.
     starve = explore('fieldplus_half', 'proposed', workers=4,
                      withhold=[(0, 5, 0), (0, 4, 0), (0, 3, 0)])
-    if starve['ok']:
-        failures.append('starvation: an unsatisfiable decode reported OKAY')
-    rows.append({'case': 'stale_generation_fail_closed',
-                 'claims': stale.get('ok'), 'states': stale.get('states'),
-                 'ok': 'I1_FAIL_CLOSED' not in stale['violations']})
-    rows.append({'case': 'four_worker_starvation',
-                 'claims': starve.get('ok'), 'states': starve.get('states'),
-                 'ok': starve.get('ok') == 0})
+    starve_premise = starve['drained'] > 0 and \
+        starve['error_kinds'].get('incomplete', 0) > 0
+    if not starve_premise and starve['exhaustive']:
+        failures.append('starvation: no drain reached an incomplete error '
+                        '(drained=%d, kinds=%s), so it proves nothing'
+                        % (starve['drained'], starve['error_kinds']))
+    record({'case': 'four_worker_starvation',
+            'claims': starve['ok'], 'states': starve['states'],
+            'error_kinds': starve['error_kinds'],
+            'verdict': _verdict(starve['exhaustive'], starve_premise,
+                                starve['ok'] == 0),
+            'reason': 'an unsatisfiable decode reported OKAY'},
+           {'workers': 4, 'drained': starve['drained'],
+            'exhaustive': starve['exhaustive']})
 
     # (f) partial order must be a real partial order, not a prefix in disguise.
     witness = partial_order_witness()
-    rows.append({'case': 'partial_order_out_of_order_started',
-                 'claims': witness.get('states'),
-                 'states': witness.get('witness'),
-                 'ok': witness['reachable'] and witness['exhaustive']})
-    if not witness['reachable']:
-        failures.append('partial order: a later band\'s started is unreachable '
-                        'before the earliest band\'s -- the mode is a prefix')
-    if not witness['exhaustive']:
-        failures.append('partial order: witness search truncated')
+    record({'case': 'partial_order_out_of_order_started',
+            'claims': witness.get('states'),
+            'states': witness.get('witness'),
+            'verdict': _verdict(witness['exhaustive'], True,
+                                witness['reachable']),
+            'reason': 'a later band\'s started is unreachable before the '
+                      'earliest band\'s -- the mode is a prefix'},
+           {'reachable': witness['reachable'],
+            'exhaustive': witness['exhaustive']})
 
     # (g) the three-channel output closure must cover ch1/ch2, not just ch0.
     chan = missing_channel_output()
-    rows.append({'case': 'three_channel_missing_output',
-                 'claims': chan.get('states'), 'states': chan.get('reason'),
-                 'ok': chan['ok']})
-    if not chan['ok']:
-        failures.append('three-channel output closure: %s' % chan['reason'])
-    return rows, failures
+    record({'case': 'three_channel_missing_output',
+            'claims': chan.get('states'), 'states': chan.get('reason'),
+            'verdict': PASS_EXHAUSTIVE if chan['ok'] else FAIL,
+            'reason': chan.get('reason') or 'per-channel closure missing'},
+           {'constructed_state': True})
+    return rows, failures, inconclusive
 
 
 # --------------------------------------------------------------- anchoring
@@ -1757,9 +1937,13 @@ def self_test():
                             % (topo, live['violations']))
 
     # (E) Named negative cases: producer gating, partial-order reachability and
-    # the per-channel output closure.
-    _rows, case_failures = negative_cases()
+    # the per-channel output closure.  A truncated control is *not* a failure of
+    # the model and *not* a pass either: it is reported as INCONCLUSIVE and named
+    # in the closing line, so "the space was too large" never reads as "proved".
+    _rows, case_failures, case_inconclusive = negative_cases()
     failures.extend(case_failures)
+    for case in case_inconclusive:
+        print('SELF-TEST INCONCLUSIVE %s' % case, file=sys.stderr)
 
     # (F) The reduced order must be a *sound* quotient, not merely smaller.  Two
     # independent requirements: `started` is unobservable to every policy guard,
@@ -1812,6 +1996,137 @@ def self_test():
     return 0
 
 
+def model_verdict(report, negative_failures, negative_inconclusive):
+    """The single place that decides whether this model run passed.
+
+    It lives in one function for a reason.  Revision 5 computed its verdict
+    inline in `main()` and never looked at the failure list from
+    `negative_cases()`: a broken stale-generation or starvation control could
+    fail, the report would still print MODEL PASS and the process would exit 0,
+    while `--negative-cases` on the same tree reported a failure.  Two paths,
+    two verdicts, one of them wrong.
+
+    Returns `(verdict, exit_code, facts)`.  Truncation is a third outcome, not a
+    softer failure: a control that hit its cap decided nothing, so it may not
+    exit 0, and it is not a defect either.
+    """
+    def real_violations(per):
+        return [v for v in per['violations'] if v != 'I4_UNPROVEN']
+
+    tops = report['topologies']
+    facts = {
+        'safe': all(not real_violations(p['proposed']) for p in tops.values()),
+        'reduced_safe': all(not real_violations(p['reduced']['proposed'])
+                            for p in tops.values()),
+        'quotients': all(p['reduction'].get('equal')
+                         for p in tops.values()
+                         if p['reduction'].get('comparable')),
+        'unobservable': all(p['unobservable']['proposed']['unobservable']
+                            for p in tops.values()),
+        'controls_fire': all('I1_FAIL_CLOSED' in p['released']['violations']
+                             and 'I1_FAIL_CLOSED' in p['legacy']['violations']
+                             for p in tops.values()),
+        'canonical_disproved': report['canonical_witness']['witness'] is not None,
+        'compositional': bool(report['compositional']['ok']),
+        'negative_controls': not negative_failures,
+    }
+    facts['exhaustive'] = [t for t, p in tops.items()
+                           if p['reduced']['proposed']['exhaustive']]
+    facts['incomplete'] = [t for t, p in tops.items()
+                           if not p['reduced']['proposed']['exhaustive']]
+    passed = all(v if isinstance(v, bool) else True for v in facts.values())
+    if not passed:
+        return 'FAIL', 2, facts
+    if negative_inconclusive:
+        return 'INCONCLUSIVE', 3, facts
+    return 'PASS', 0, facts
+
+
+def verdict_regression():
+    """Prove the verdict can fail, and that both CLI paths agree.
+
+    The fifth review's finding was structural: `--json` discarded the failure
+    list from `negative_cases()`, so a broken control printed MODEL PASS.  A
+    check that only exercises the happy path cannot catch that, so this builds a
+    report that is green in every *other* respect and then injects exactly the
+    two control outcomes the reviewer named.  Each case asserts the exit code,
+    because an exit code is what CI actually reads.
+    """
+    def topo_entry(**over):
+        base = {'proposed': {'violations': [], 'states': 10, 'ok': 1,
+                             'exhaustive': True, 'false_okay': 0},
+                'released': {'violations': ['I1_FAIL_CLOSED'], 'states': 10},
+                'legacy': {'violations': ['I1_FAIL_CLOSED'], 'states': 10},
+                'reduced': {'proposed': {'violations': [], 'states': 5,
+                                         'exhaustive': True}},
+                'reduction': {'comparable': True, 'equal': True,
+                              'only_partial': 0, 'only_reduced': 0},
+                'unobservable': {'proposed': {'unobservable': True}}}
+        base.update(over)
+        return base
+
+    def report(topologies=None, witness=True, comp=True):
+        return {'topologies': topologies or {'t': topo_entry()},
+                'canonical_witness': {'witness': {'a': 1} if witness else None},
+                'compositional': {'ok': comp}}
+
+    failures = []
+    rows = []
+
+    def check(name, got, expected_code, expected_verdict):
+        code, verdict = got
+        good = code == expected_code and verdict == expected_verdict
+        rows.append({'case': name, 'exit': code, 'model_verdict': verdict,
+                     'expected_exit': expected_code,
+                     'expected_verdict': expected_verdict,
+                     'verdict': PASS_EXHAUSTIVE if good else FAIL})
+        if not good:
+            failures.append('%s: exit %d/verdict %s (expected %d/%s)'
+                            % (name, code, verdict, expected_code,
+                               expected_verdict))
+
+    def evaluate(rep, fails=(), inconclusive=()):
+        verdict, code, _facts = model_verdict(rep, list(fails),
+                                              list(inconclusive))
+        return code, verdict
+
+    check('clean_run_is_pass', evaluate(report()), 0, 'PASS')
+    # The reviewer's case: one control fails, everything else is green.
+    check('control_failure_fails_json',
+          evaluate(report(), ['stale_generation_fail_closed: no stale failure']),
+          2, 'FAIL')
+    # The truncation case: it may not exit 0 and it is not a defect.
+    check('control_truncation_is_inconclusive',
+          evaluate(report(), [], ['witness search truncated']), 3,
+          'INCONCLUSIVE')
+    # A real safety violation must still fail on its own.
+    check('safety_violation_fails',
+          evaluate(report({'t': topo_entry(
+              proposed={'violations': ['I1_FAIL_CLOSED'], 'states': 1,
+                        'ok': 1, 'exhaustive': True, 'false_okay': 1})})),
+          2, 'FAIL')
+    # A control that stops firing is a broken control, not a fix.
+    check('control_stops_firing_fails',
+          evaluate(report({'t': topo_entry(
+              legacy={'violations': [], 'states': 10})})), 2, 'FAIL')
+
+    # The two paths must agree: whatever the predicate says about a failed
+    # control, `--negative-cases` says too.  Both now read the same list, so the
+    # regression is that a non-empty failure list cannot produce exit 0.
+    for fails in (['x: y'], ['a: b', 'c: d']):
+        code, _v = evaluate(report(), fails)
+        if code == 0:
+            failures.append('negative failure list %r still exits 0' % (fails,))
+
+    if failures:
+        for failure in failures:
+            print('VERDICT-REGRESSION FAIL %s' % failure, file=sys.stderr)
+        return 1, rows
+    print('VERDICT-REGRESSION PASS: %d cases, control failures and truncation '
+          'both leave the green path' % len(rows))
+    return 0, rows
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
@@ -1821,10 +2136,18 @@ def main(argv=None):
     parser.add_argument('--negative-cases', action='store_true')
     parser.add_argument('--canonical-witness', action='store_true')
     parser.add_argument('--reduction', metavar='TOPOLOGY')
+    parser.add_argument('--verdict-regression', action='store_true')
     args = parser.parse_args(argv)
 
     if args.self_test:
         return self_test()
+
+    if args.verdict_regression:
+        code, rows = verdict_regression()
+        for row in rows:
+            print('%-38s exit=%d %s' % (row['case'], row['exit'],
+                                        row['verdict']))
+        return code
 
     if args.canonical_witness:
         print(json.dumps(canonical_prefix_blindspot(), indent=1))
@@ -1840,15 +2163,26 @@ def main(argv=None):
         return 0
 
     if args.negative_cases:
-        rows, failures = negative_cases()
+        rows, failures, inconclusive = negative_cases()
         for row in rows:
-            print('%-42s %s' % (row['case'], 'OK' if row['ok'] else 'FAIL'))
-            for key in ('claims', 'states', 'witness', 'reason'):
+            print('%-42s %s' % (row['case'], row['verdict']))
+            for key in ('claims', 'states', 'witness', 'reason', 'error_kinds',
+                        'premise'):
                 if row.get(key) is not None:
                     print('%-42s   %s=%s' % ('', key, row[key]))
         for failure in failures:
             print('NEGATIVE FAIL %s' % failure, file=sys.stderr)
-        return 0 if not failures else 2
+        for case in inconclusive:
+            print('NEGATIVE INCONCLUSIVE %s' % case, file=sys.stderr)
+        if failures:
+            print('NEGATIVE-CASES FAIL')
+            return 2
+        if inconclusive:
+            print('NEGATIVE-CASES INCONCLUSIVE: %d control(s) truncated, none of '
+                  'them counted as a pass' % len(inconclusive))
+            return 3
+        print('NEGATIVE-CASES PASS_EXHAUSTIVE')
+        return 0
 
     # `--check` is the CTest gate and must stay cheap: it verifies that every
     # claim in the model still matches the frozen tree.  It must NOT build the
@@ -1871,7 +2205,7 @@ def main(argv=None):
 
     anchor = source_anchor()
     report = {'kind': 'DESIGN_MODEL',
-              'revision': 5,
+              'revision': 6,
               'entropy_order': ('partial (per-band; the canonical prefix order is '
                                 'disproved, see canonical_witness)'),
               'note': ('reachability model over explicit producer edges and '
@@ -1889,8 +2223,19 @@ def main(argv=None):
                   'scope': 'proposed and legacy only',
               },
               'topologies': {}}
-    negatives, _failures = negative_cases()
+    # The fifth review: `--json` dropped these failures on the floor.  The rows
+    # went into the report, `_failures` was thrown away, and the pass predicate
+    # never looked at it -- so a stale-generation or starvation control could fail
+    # while the same run printed MODEL PASS and exited 0.  Both lists are now kept
+    # and both feed the verdict at the end of `main()`.
+    negatives, negative_failures, negative_inconclusive = negative_cases()
     report['negative_cases'] = negatives
+    report['negative_case_verdict'] = {
+        'failures': negative_failures,
+        'inconclusive': negative_inconclusive,
+        'passed_exhaustive': [r['case'] for r in negatives
+                              if r['verdict'] == PASS_EXHAUSTIVE],
+    }
 
     # Two orders are reported side by side:
     #   * `partial`  the true per-band order, capped, therefore INCONCLUSIVE for
@@ -2004,8 +2349,6 @@ def main(argv=None):
 
     out = Path(args.json)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(report, indent=1) + '\n', encoding='utf-8')
-    print('wrote %s' % out)
 
     print('canonical reduction: %s'
           % ('DISPROVED (%s)' % report['canonical_witness']['witness']
@@ -2054,34 +2397,38 @@ def main(argv=None):
     # is a truncation marker, not a defect -- counting it as a failure would make
     # the honest path ("this space is too large") indistinguishable from a broken
     # model, which is how a truncated search gets quietly re-labelled as proof.
-    def real_violations(per):
-        return [v for v in per['violations'] if v != 'I4_UNPROVEN']
-
-    safe = all(not real_violations(p['proposed'])
-               for p in report['topologies'].values())
-    reduced_safe = all(not real_violations(p['reduced']['proposed'])
-                       for p in report['topologies'].values())
-    quotients = all(p['reduction'].get('equal')
-                    for p in report['topologies'].values()
-                    if p['reduction'].get('comparable'))
-    unobservable = all(p['unobservable']['proposed']['unobservable']
-                       for p in report['topologies'].values())
-    controls = all('I1_FAIL_CLOSED' in p['released']['violations']
-                   and 'I1_FAIL_CLOSED' in p['legacy']['violations']
-                   for p in report['topologies'].values())
-    disproved = report['canonical_witness']['witness'] is not None
-    exhaustive = [t for t, p in report['topologies'].items()
-                  if p['reduced']['proposed']['exhaustive']]
-    incomplete = [t for t, p in report['topologies'].items()
-                  if not p['reduced']['proposed']['exhaustive']]
-    ok = (safe and reduced_safe and quotients and unobservable and controls
-          and disproved and comp['ok'])
+    # A pass means: no *safety* violation on any explored prefix, both controls
+    # still fail, the canonical reduction stays disproved, the reduced order is a
+    # proven quotient, the three-channel decomposition holds, and **no named
+    # control failed**.  `I4_UNPROVEN` is a truncation marker, not a defect --
+    # counting it as a failure would make the honest path ("this space is too
+    # large") indistinguishable from a broken model, which is how a truncated
+    # search gets quietly re-labelled as proof.  The predicate itself lives in
+    # `model_verdict` so this path and `--negative-cases` cannot disagree.
+    verdict, code, facts = model_verdict(report, negative_failures,
+                                         negative_inconclusive)
+    exhaustive = facts['exhaustive']
+    incomplete = facts['incomplete']
+    report['verdict'] = verdict
+    report['verdict_facts'] = {k: v for k, v in facts.items()
+                               if isinstance(v, bool)}
+    out.write_text(json.dumps(report, indent=1) + '\n', encoding='utf-8')
+    print('wrote %s (verdict %s)' % (out, verdict))
+    for failure in negative_failures:
+        print('NEGATIVE FAIL %s' % failure, file=sys.stderr)
+    for case in negative_inconclusive:
+        print('NEGATIVE INCONCLUSIVE %s' % case, file=sys.stderr)
+    if negative_failures:
+        print('negative controls: %d failure(s) -- a control that does not hold '
+              'is a model defect, not a decoder result' % len(negative_failures))
     print('MODEL %s: safety on explored prefix, exact quotient, controls fire, '
-          'three-channel decomposition holds' % ('PASS' if ok else 'FAIL'))
+          'three-channel decomposition holds%s'
+          % (verdict, '' if not negative_inconclusive else
+             '; %d control(s) INCONCLUSIVE' % len(negative_inconclusive)))
     print('reduced order exhaustive for %d/%d topologies%s'
           % (len(exhaustive), len(report['topologies']),
              ('; INCONCLUSIVE: ' + ', '.join(incomplete)) if incomplete else ''))
-    return 0 if ok else 2
+    return code
 
 
 if __name__ == '__main__':

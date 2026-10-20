@@ -1,13 +1,19 @@
-# RCA-195 Milestone 2 — liveness-safe band-0 publication contract (DESIGN, rev 5)
+# RCA-195 Milestone 2 — liveness-safe band-0 publication contract (DESIGN, rev 6)
 
-**Status: `DESIGN_ONLY` / `REDUCED_ORDER_QUOTIENT_PROVEN` / 4 of 5 topologies exhaustive.** No
+**Status: `DESIGN_ONLY` / `REDUCED_ORDER_QUOTIENT_PROVEN` / test-verdict taxonomy closed.** No
 decoder patch, no `upstream/` edit, no merge, no release.
 
-Revision 5 answers the fourth independent review. That review accepted rev 4 as
+Revision 6 answers the fifth independent review, which found one structural defect in the *reporting
+path* rather than in the model: `--json` called `negative_cases()` and discarded its failure list, so
+a broken stale-generation or starvation control could fail while the same run printed `MODEL PASS`
+and exited 0. That review also repeated the earlier request for a verdict taxonomy and for at least
+one genuinely exhaustive stale control. All three are now closed.
+
+Revision 5 answered the fourth independent review, which accepted rev 4 as
 `REV4_REVIEW_POSITIVE_FOR_HONEST_BOUND / FULL_SCHEDULER_SAFETY_PENDING` and named exactly two
 remaining engineering tasks: a **sound, observation-preserving reduction**, or a compositional
-per-`(channel,index,generation)` proof with explicit cross-channel worker interaction. Both are now
-delivered, and each comes with the proof that makes it more than a smaller space.
+per-`(channel,index,generation)` proof with explicit cross-channel worker interaction. Both were
+delivered, and each came with the proof that makes it more than a smaller space.
 
 ## 0. Revisions
 
@@ -17,7 +23,8 @@ delivered, and each comes with the proof that makes it more than a smaller space
 | 2 | `SOURCE_MODEL_REV2_IMPROVED` | real producer edges, correct output plane, scheduled transitions |
 | 3 | `REV3_STRUCTURAL_PROGRESS / ..._BLOCKED` | worker identity, COMPUTED/PUBLISHED split, field-plus HALF/FULL, three channels — but the "partial order" was a canonical prefix |
 | 4 | `REV4_REVIEW_POSITIVE_FOR_HONEST_BOUND` | true per-band order, canonical reduction **disproved**, bounded prefixes labelled `INCONCLUSIVE` |
-| 5 | this document | a **proven** reduced order (exact quotient) and a **compositional** three-channel proof |
+| 5 | rev 5 | a **proven** reduced order (exact quotient) and a **compositional** three-channel proof |
+| 6 | this document | a single verdict function, three named states, and a **proven** stale control |
 
 ## 1. The reduced order, and why it is sound rather than merely smaller
 
@@ -127,20 +134,64 @@ obtains one. The three-channel product space itself is not claimed exhaustive; t
   `decoder.c:1596`).
 - **R8** the hollow `AllTransformBandsValid` is replaced by the required-set closure.
 
-## 5. Negative controls (all passing)
+## 5. Negative controls: three verdicts, and every control has a premise
 
-| Case | Expected | Measured |
+Revision 5 published a control row as `ok` when its search had been **truncated**, on the basis
+that no violation had been found in the prefix. The fifth review named this correctly: a prefix that
+contains no counterexample is not evidence for the property, and it is certainly not a
+`NEGATIVE_TEST_PASS`. Two further defects came with it, and all three are now closed.
+
+**A single verdict function.** `model_verdict()` is the only place that decides pass/fail. It
+receives the control failures and inconclusive list explicitly, and `--json` and
+`--negative-cases` both read it, so the two paths cannot disagree. Previously `main()` computed the
+verdict from `safe and controls and disproved` and dropped `_failures` on the floor, which meant a
+broken control still printed `MODEL PASS` and exited 0.
+
+| Verdict | Meaning | Exit |
 | --- | --- | --- |
-| spatial index 1, `0xE` satisfied, index-2 band 0 withheld, `proposed` | 0 claims | 0 |
-| same state, `legacy` | ≥1 claim | 62 claim states |
-| temporal index 2, all producers withheld, `proposed` | 0 claims | 0 |
-| same state, `legacy` | ≥1 claim | 1 008 claim states |
-| stale generation after claim | terminal, never OKAY | fails closed |
-| duplicate writer of a published band | refused | `I7` never fires |
-| four workers, unsatisfiable entries | never OKAY | 0 OKAY |
-| later band's `started` before the earliest band's | reachable | reachable (59 049 states) |
-| per-channel output closure detects missing ch1 | yes | yes |
-| `reduced` against `released` | refused | `ValueError` |
+| `PASS_EXHAUSTIVE` | premise constructed, property held on **every** reachable state | 0 |
+| `PREFIX_ONLY_INCONCLUSIVE` | the search hit its cap; the control decided nothing | 3 |
+| `FAIL` | the premise held and the property did not | 2 |
+
+**Every control now states its premise.** An `ok` row used to mean "no invariant fired", which a
+run that never reached the interesting state also satisfies. Each control therefore reports what it
+actually constructed: the stale controls must show at least one `stale-generation` or
+`stale-before-publication` terminal **and** at least one OKAY terminal; the starvation control must
+show that a drain was reachable and carried an `incomplete:` error. Without those the control proves
+nothing, and the model says so instead of counting the silence as a pass.
+
+| Case | Verdict | Premise it constructed | Measured |
+| --- | --- | --- | --- |
+| spatial index 1, `0xE` satisfied, index-2 band 0 withheld, `proposed` | `PASS_EXHAUSTIVE` | 38 states | 0 claims |
+| same state, `legacy` | `PASS_EXHAUSTIVE` | 126 states | 62 claim states |
+| temporal index 2, all producers withheld, `proposed` | `PASS_EXHAUSTIVE` | 38 states | 0 claims |
+| same state, `legacy` | `PASS_EXHAUSTIVE` | 1 664 states | 1 008 claim states |
+| **stale generation, single entry** (`spatial_highpass`, true partial order) | `PASS_EXHAUSTIVE` | 366 states, 2 stale terminals + 1 OKAY | fails closed |
+| stale generation, chain (**reduced** order) | `PASS_EXHAUSTIVE` | 13 529 states, 2 `stale-generation` + 2 `stale-before-publication` + 1 OKAY | fails closed |
+| stale generation, chain (**partial** order) | `PREFIX_ONLY_INCONCLUSIVE` | 411 841 states vs 120 k cap | not counted |
+| duplicate writer of a published band | `PASS_EXHAUSTIVE` | 128 682 states | `I7` never fires |
+| four workers, unsatisfiable entries | `PASS_EXHAUSTIVE` | 39 366 states, 19 683 drains, all `incomplete:` | 0 OKAY |
+| later band's `started` before the earliest band's | `PASS_EXHAUSTIVE` | 59 049 states | reachable |
+| per-channel output closure detects missing ch1 | `PASS_EXHAUSTIVE` | constructed state | detects it |
+| `reduced` against `released` | `PASS_EXHAUSTIVE` | constructor | `ValueError` |
+
+**The exhaustive stale control the review asked for.** `spatial_highpass` has exactly one transform
+entry, so the claim→stale→execute window is decidable on **366 states in milliseconds** under the
+true partial order — no cap, no reduction, no argument. It is not vacuous: the run reaches both
+stale mechanisms *and* one OKAY terminal, so it proves "a stale entry fails closed" rather than
+"nothing ever happened".
+
+The chain cannot be exhausted on the partial order (411 841 states against the cap, measured, not
+guessed), so that control is reported as the bound it is and the **reduced** run carries the proof —
+which is legitimate only because `started_is_unobservable()` and `reduction_check()` license the
+reduction independently.
+
+**A regression for the reporting path.** `--verdict-regression` builds a report that is green in
+every other respect, injects one control failure, one truncation, one safety violation and one
+control that stopped firing, and asserts the exit code of each. It needs no BFS, so it sits in the
+300 s CTest budget next to `--check`. Mutation-tested: restoring rev 5's `negative_controls: True`
+makes it fail with `exit 0/verdict PASS (expected 2/FAIL)` on exactly the case the reviewer
+described.
 
 The canonical-prefix witness stays as a red control and still fires:
 
@@ -173,19 +224,26 @@ the released `BANDS_ALL_VALID` and `BANDS_ALL_STARTED` forms, the queue/drain an
 
 ## 8. Next action
 
-The two tasks the review named are delivered: an observation-preserving reduction with a proof that
-it is exact, and a compositional three-channel argument with explicit worker interaction. The
-private scratch-SDK intervention stays blocked until this model is accepted at its stated scope —
-it is still `DESIGN_ONLY`, still no patch, and the remaining `INCONCLUSIVE` entries are labelled
-rather than smoothed over.
+Rev 5's two tasks remain delivered: an observation-preserving reduction with a proof that it is
+exact, and a compositional three-channel argument with explicit worker interaction. Rev 6 closes
+the fifth review's reporting defect and the verdict-taxonomy request that came with rev 4.
+
+The gate the fourth review set is unchanged and is **not** claimed here: after the verdict fix, the
+Linux owner may prepare **one** preregistered, narrow private scratch-copy SDK experiment (R1 read-set
+admission, R3/R5 generation re-check, R4 missing-input `CODEC_ERROR_BAD_FRAME` propagation, R6
+drain verification; forced missing producer and claimed-without-execution must be non-OKAY, the
+complete control must succeed without hanging, at 2 and 4 workers). That is not prepared by this
+commit and not authorised by it.
 
 No production `upstream/` patch, no spin/poll fix, no merge, no release. `#120` remains
 `REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED`.
 
 ## 9. Files
 
-- `tools/rca195_m2_model.py` — revision 5; `--check`, `--json`, `--self-test`,
-  `--canonical-witness`, `--reduction`, `--confluence`, `--negative-cases`.
+- `tools/rca195_m2_model.py` — revision 6; `--check`, `--json`, `--self-test`,
+  `--verdict-regression`, `--canonical-witness`, `--reduction`, `--confluence`, `--negative-cases`.
+  `model_verdict()` is the single pass predicate for both report paths.
 - `docs/validation/rca195_m2_model_2026-10-20.json` — per-topology partial and reduced results,
-  quotient equality, unobservability probes, compositional proof and negative controls.
+  quotient equality, unobservability probes, compositional proof, per-control verdicts with their
+  premises, and `negative_case_verdict`.
 - `docs/validation/RCA195_BAND0_CONTRACT.md` — Milestone-1 source map.

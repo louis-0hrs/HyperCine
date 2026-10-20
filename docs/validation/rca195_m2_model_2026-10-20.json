@@ -1,6 +1,6 @@
 {
  "kind": "DESIGN_MODEL",
- "revision": 5,
+ "revision": 6,
  "entropy_order": "partial (per-band; the canonical prefix order is disproved, see canonical_witness)",
  "note": "reachability model over explicit producer edges and per-band publication; not a measurement of the frozen decoder",
  "source_anchor": {
@@ -73,6 +73,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 7132,
@@ -145,6 +146,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 25194,
@@ -215,6 +217,9 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 25050
+    },
     "edges": null,
     "projections": null,
     "false_okay": 0,
@@ -357,6 +362,7 @@
      "exhaustive": true,
      "bounded": true,
      "truncated_at": null,
+     "error_kinds": {},
      "edges": null,
      "projections": null,
      "false_okay": 1904,
@@ -425,6 +431,9 @@
      "exhaustive": true,
      "bounded": true,
      "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 1520
+     },
      "edges": null,
      "projections": null,
      "false_okay": 0,
@@ -557,6 +566,7 @@
     "exhaustive": true,
     "bounded": true,
     "truncated_at": null,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 404,
@@ -607,6 +617,7 @@
     "exhaustive": true,
     "bounded": true,
     "truncated_at": null,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 90,
@@ -654,6 +665,9 @@
     "exhaustive": true,
     "bounded": true,
     "truncated_at": null,
+    "error_kinds": {
+     "incomplete": 87
+    },
     "edges": null,
     "projections": null,
     "false_okay": 0,
@@ -754,6 +768,7 @@
      "exhaustive": true,
      "bounded": true,
      "truncated_at": null,
+     "error_kinds": {},
      "edges": null,
      "projections": null,
      "false_okay": 22,
@@ -801,6 +816,9 @@
      "exhaustive": true,
      "bounded": true,
      "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 22
+     },
      "edges": null,
      "projections": null,
      "false_okay": 0,
@@ -913,6 +931,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 5248,
@@ -1022,6 +1041,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 15800,
@@ -1129,6 +1149,9 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 17469
+    },
     "edges": null,
     "projections": null,
     "false_okay": 0,
@@ -1345,6 +1368,7 @@
      "exhaustive": true,
      "bounded": true,
      "truncated_at": null,
+     "error_kinds": {},
      "edges": null,
      "projections": null,
      "false_okay": 17928,
@@ -1450,6 +1474,9 @@
      "exhaustive": true,
      "bounded": true,
      "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 4237
+     },
      "edges": null,
      "projections": null,
      "false_okay": 0,
@@ -1618,6 +1645,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 2722,
@@ -1727,6 +1755,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 7943,
@@ -1834,6 +1863,9 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 5679
+    },
     "edges": null,
     "projections": null,
     "false_okay": 0,
@@ -2051,6 +2083,7 @@
      "exhaustive": false,
      "bounded": false,
      "truncated_at": 600000,
+     "error_kinds": {},
      "edges": null,
      "projections": null,
      "false_okay": 169540,
@@ -2156,6 +2189,9 @@
      "exhaustive": true,
      "bounded": true,
      "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 271168
+     },
      "edges": null,
      "projections": null,
      "false_okay": 0,
@@ -2316,6 +2352,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 898,
@@ -2482,6 +2519,7 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {},
     "edges": null,
     "projections": null,
     "false_okay": 5426,
@@ -2646,6 +2684,9 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 5426
+    },
     "edges": null,
     "projections": null,
     "false_okay": 0,
@@ -2977,6 +3018,7 @@
      "exhaustive": false,
      "bounded": false,
      "truncated_at": 100000,
+     "error_kinds": {},
      "edges": null,
      "projections": null,
      "false_okay": 4526,
@@ -3141,6 +3183,9 @@
      "exhaustive": false,
      "bounded": false,
      "truncated_at": 100000,
+     "error_kinds": {
+      "incomplete": 4526
+     },
      "edges": null,
      "projections": null,
      "false_okay": 0,
@@ -3349,37 +3394,136 @@
    "case": "spatial_index1_entropy_mask_without_producer",
    "claims": 0,
    "states": 38,
-   "ok": true
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "0 claims (expected 0)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
   },
   {
    "case": "legacy_claims_without_producer",
    "claims": 62,
    "states": 126,
-   "ok": true
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "62 claims (expected >=1)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
   },
   {
    "case": "temporal_without_inputs",
    "claims": 0,
    "states": 38,
-   "ok": true
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "0 claims (expected 0)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
   },
   {
    "case": "legacy_temporal_without_inputs",
    "claims": 1008,
    "states": 1664,
-   "ok": true
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "1008 claims (expected >=1)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
+  },
+  {
+   "case": "stale_generation_fail_closed_single_entry",
+   "claims": 1,
+   "states": 366,
+   "error_kinds": {
+    "incomplete": 1,
+    "stale-generation": 1,
+    "input-missing-at-execute": 1,
+    "stale-before-publication": 1
+   },
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "no stale failure on any reachable path",
+   "premise": {
+    "entropy": "partial",
+    "topology": "spatial_highpass",
+    "stale_kinds": {
+     "stale-generation": 1,
+     "stale-before-publication": 1
+    },
+    "ok_terminals": 1,
+    "exhaustive": true
+   },
+   "blocking": true
   },
   {
    "case": "stale_generation_fail_closed",
+   "claims": 1,
+   "states": 13529,
+   "error_kinds": {
+    "incomplete": 2,
+    "stale-generation": 2,
+    "input-missing-at-execute": 2,
+    "stale-before-publication": 2
+   },
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "no stale failure on any reachable path",
+   "premise": {
+    "entropy": "reduced",
+    "topology": "spatial_chain",
+    "stale_kinds": {
+     "stale-generation": 2,
+     "stale-before-publication": 2
+    },
+    "ok_terminals": 1,
+    "exhaustive": true
+   },
+   "blocking": true
+  },
+  {
+   "case": "stale_generation_fail_closed_partial_order",
    "claims": 0,
    "states": 169194,
-   "ok": true
+   "verdict": "PREFIX_ONLY_INCONCLUSIVE",
+   "reason": "partial-order space exceeds the cap; the reduced run above carries the proof",
+   "premise": {
+    "exhaustive": false,
+    "note": "informational, not used for the verdict"
+   },
+   "blocking": false
+  },
+  {
+   "case": "single_owner_no_duplicate_producer",
+   "claims": 27,
+   "states": 128682,
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "two live producers of one band",
+   "premise": {
+    "exhaustive": true
+   },
+   "blocking": true
   },
   {
    "case": "four_worker_starvation",
    "claims": 0,
    "states": 39366,
-   "ok": true
+   "error_kinds": {
+    "incomplete": 19683
+   },
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "an unsatisfiable decode reported OKAY",
+   "premise": {
+    "workers": 4,
+    "drained": 19683,
+    "exhaustive": true
+   },
+   "blocking": true
   },
   {
    "case": "partial_order_out_of_order_started",
@@ -3396,15 +3540,42 @@
      1
     ]
    },
-   "ok": true
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "a later band's started is unreachable before the earliest band's -- the mode is a prefix",
+   "premise": {
+    "reachable": true,
+    "exhaustive": true
+   },
+   "blocking": true
   },
   {
    "case": "three_channel_missing_output",
    "claims": null,
    "states": null,
-   "ok": true
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "per-channel closure missing",
+   "premise": {
+    "constructed_state": true
+   },
+   "blocking": true
   }
  ],
+ "negative_case_verdict": {
+  "failures": [],
+  "inconclusive": [],
+  "passed_exhaustive": [
+   "spatial_index1_entropy_mask_without_producer",
+   "legacy_claims_without_producer",
+   "temporal_without_inputs",
+   "legacy_temporal_without_inputs",
+   "stale_generation_fail_closed_single_entry",
+   "stale_generation_fail_closed",
+   "single_owner_no_duplicate_producer",
+   "four_worker_starvation",
+   "partial_order_out_of_order_started",
+   "three_channel_missing_output"
+  ]
+ },
  "compositional": {
   "ok": true,
   "independence": {
@@ -3448,5 +3619,16 @@
    2
   ],
   "problems": []
+ },
+ "verdict": "PASS",
+ "verdict_facts": {
+  "safe": true,
+  "reduced_safe": true,
+  "quotients": true,
+  "unobservable": true,
+  "controls_fire": true,
+  "canonical_disproved": true,
+  "compositional": true,
+  "negative_controls": true
  }
 }
