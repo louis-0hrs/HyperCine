@@ -166,10 +166,13 @@ Run the real-hook regression matrix with:
 python3 -m unittest discover -s ci -p 'test_privacy*.py' -v
 ```
 
-The installed-hook matrix currently requires POSIX and is skipped by native
-Windows Python; Git Bash/MSYS and Windows native execution remain separate
-qualification work. All test data is synthetic and all remotes are disposable
-local bare repositories, never public endpoints.
+The installed-hook matrix runs with native Python on Windows as well as POSIX.
+On Windows, Git for Windows launches the installed shell hooks; a working Python
+3.8+ interpreter must be available to those hooks. Both SHA-1 and SHA-256 cases
+run without a platform skip; missing prerequisites fail the tests. The separate
+Ubuntu CI-shell and POSIX interpreter-stub tests retain their platform limits.
+All test data is synthetic and all remotes are disposable local bare
+repositories, never public endpoints.
 
 ## Overlapping remote names
 
