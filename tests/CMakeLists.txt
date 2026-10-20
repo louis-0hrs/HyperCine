@@ -42,11 +42,20 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME rca195_ledger_rescore_v3 COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/run_rca195_probe.py"
         --rescore "${CMAKE_SOURCE_DIR}/docs/validation/rca195_probe_ledger_2026-10-20_v3.json")
+    # Milestone-2 design model: the released queue discipline must reproduce the
+    # false-OKAY shapes and the proposed one must clear all five invariants. The
+    # model's required-bit matrix is re-derived from DecodedBandsValid on every
+    # run, so a source change fails here instead of leaving a stale design.
+    add_test(NAME rca195_m2_model_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --self-test)
+    add_test(NAME rca195_m2_model_check COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --check)
     set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
         rca195_tsan_reduction_selftest rca195_probe_applier_selftest
         rca195_probe_runner_selftest rca195_ledger_rescore_v3
+        rca195_m2_model_selftest rca195_m2_model_check
         PROPERTIES TIMEOUT 300
-        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS")
+        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS;MODEL PASS")
 endif()
 
 # 1. Transform-level test

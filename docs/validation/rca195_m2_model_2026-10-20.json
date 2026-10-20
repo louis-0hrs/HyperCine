@@ -1,0 +1,141 @@
+{
+ "policy": {
+  "released": [
+   "I1_FAIL_CLOSED",
+   "I3_NO_SILENT"
+  ],
+  "proposed": []
+ },
+ "scenarios": {
+  "claim_skip": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "interleavings": 1596,
+    "search_truncated": false,
+    "exhaustive": true
+   },
+   "proposed": {
+    "violations": [],
+    "interleavings": 922,
+    "search_truncated": false,
+    "exhaustive": true
+   }
+  },
+  "never_admitted": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "interleavings": 1596,
+    "search_truncated": false,
+    "exhaustive": true
+   },
+   "proposed": {
+    "violations": [],
+    "interleavings": 922,
+    "search_truncated": false,
+    "exhaustive": true
+   }
+  },
+  "chain": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "interleavings": 20000,
+    "search_truncated": true,
+    "exhaustive": false
+   },
+   "proposed": {
+    "violations": [],
+    "interleavings": 20000,
+    "search_truncated": true,
+    "exhaustive": false
+   }
+  }
+ },
+ "kind": "DESIGN_MODEL",
+ "note": "reachability model of the transform queue, not a measurement of the frozen decoder",
+ "required_input_masks": {
+  "FIELDPLUS": {
+   "0": 14,
+   "1": 14,
+   "2": 0,
+   "3": 15,
+   "4": 14,
+   "5": 15
+  },
+  "SPATIAL": {
+   "0": 14,
+   "1": 14,
+   "2": 15
+  }
+ },
+ "source_anchor": {
+  "status": "OK",
+  "rows": [
+   {
+    "transform": "SPATIAL",
+    "index": 0,
+    "num_bands": 4,
+    "upstream_mask": "0xE",
+    "model_mask": "0xE",
+    "match": true
+   },
+   {
+    "transform": "SPATIAL",
+    "index": 1,
+    "num_bands": 4,
+    "upstream_mask": "0xE",
+    "model_mask": "0xE",
+    "match": true
+   },
+   {
+    "transform": "SPATIAL",
+    "index": 2,
+    "num_bands": 4,
+    "upstream_mask": "0xF",
+    "model_mask": "0xF",
+    "match": true
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 2,
+    "num_bands": 2,
+    "upstream_mask": "None",
+    "model_mask": "0x0",
+    "match": true
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 3,
+    "num_bands": 4,
+    "upstream_mask": "0xF",
+    "model_mask": "0xF",
+    "match": true
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 4,
+    "num_bands": 4,
+    "upstream_mask": "0xE",
+    "model_mask": "0xE",
+    "match": true
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 5,
+    "num_bands": 4,
+    "upstream_mask": "0xF",
+    "model_mask": "0xF",
+    "match": true
+   }
+  ],
+  "mismatches": []
+ }
+}
