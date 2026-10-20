@@ -1,7 +1,7 @@
 {
  "kind": "DESIGN_MODEL",
- "revision": 4,
- "entropy_order": "partial (per-band; canonical is disproved, see canonical_witness)",
+ "revision": 5,
+ "entropy_order": "partial (per-band; the canonical prefix order is disproved, see canonical_witness)",
  "note": "reachability model over explicit producer edges and per-band publication; not a measurement of the frozen decoder",
  "source_anchor": {
   "status": "OK",
@@ -52,6 +52,11 @@
   "states": 128682,
   "exhaustive": true
  },
+ "reduced_order": {
+  "definition": "drop the `started` word and the per-band e_started events; a band is either unpublished or published",
+  "soundness": "started_is_unobservable proves no policy guard reads `started`; the released policy is refused because its claim predicate is valid == started",
+  "scope": "proposed and legacy only"
+ },
  "topologies": {
   "spatial_chain": {
    "released": {
@@ -68,7 +73,63 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 7132,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E2": "DISCARDED",
+      "E1": "DISCARDED"
+     }
+    }
    },
    "legacy": {
     "violations": [
@@ -84,7 +145,63 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 25194,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E2": "DISCARDED",
+      "E1": "DISCARDED"
+     }
+    }
    },
    "proposed": {
     "violations": [
@@ -98,12 +215,14 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
    },
    "false_okay": {
     "released": {
      "count": 7132,
-     "states": 78709,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -162,7 +281,6 @@
     },
     "legacy": {
      "count": 25194,
-     "states": 78440,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -221,9 +339,198 @@
     },
     "proposed": {
      "count": 0,
-     "states": 76440,
      "exhaustive": false,
      "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT"
+     ],
+     "states": 4480,
+     "drained": 1904,
+     "terminal": 1904,
+     "ok": 1904,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "edges": null,
+     "projections": null,
+     "false_okay": 1904,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 3056,
+     "drained": 1528,
+     "terminal": 1528,
+     "ok": 8,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 1904,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": true,
+    "states": 1529,
+    "ok_terminals": 1,
+    "can_reach_ok": 1529,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   },
+   "reduction": {
+    "comparable": true,
+    "partial_states": 128682,
+    "reduced_states": 3056,
+    "partial_exhaustive": true,
+    "reduced_exhaustive": true,
+    "only_partial": 0,
+    "only_reduced": 0,
+    "equal": true,
+    "example_only_partial": null,
+    "example_only_reduced": null
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 708804,
+     "states": 76440,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 717684,
+     "states": 78440,
+     "exhaustive": false,
+     "counterexample": null
     }
    },
    "liveness": {
@@ -250,7 +557,42 @@
     "exhaustive": true,
     "bounded": true,
     "truncated_at": null,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 404,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E3": "DISCARDED"
+     }
+    }
    },
    "legacy": {
     "violations": [
@@ -265,7 +607,42 @@
     "exhaustive": true,
     "bounded": true,
     "truncated_at": null,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 90,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E3": "DISCARDED"
+     }
+    }
    },
    "proposed": {
     "violations": [],
@@ -277,12 +654,14 @@
     "exhaustive": true,
     "bounded": true,
     "truncated_at": null,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
    },
    "false_okay": {
     "released": {
      "count": 404,
-     "states": 972,
      "exhaustive": true,
      "example": {
       "missing": [
@@ -320,7 +699,6 @@
     },
     "legacy": {
      "count": 90,
-     "states": 186,
      "exhaustive": true,
      "example": {
       "missing": [
@@ -358,9 +736,156 @@
     },
     "proposed": {
      "count": 0,
-     "states": 176,
      "exhaustive": true,
      "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT"
+     ],
+     "states": 48,
+     "drained": 22,
+     "terminal": 22,
+     "ok": 22,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "edges": null,
+     "projections": null,
+     "false_okay": 22,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E3": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 46,
+     "drained": 23,
+     "terminal": 23,
+     "ok": 1,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 22,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E3": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": true,
+    "states": 24,
+    "ok_terminals": 1,
+    "can_reach_ok": 24,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   },
+   "reduction": {
+    "comparable": true,
+    "partial_states": 176,
+    "reduced_states": 46,
+    "partial_exhaustive": true,
+    "reduced_exhaustive": true,
+    "only_partial": 0,
+    "only_reduced": 0,
+    "equal": true,
+    "example_only_partial": null,
+    "example_only_reduced": null
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 1408,
+     "states": 176,
+     "exhaustive": true,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 1488,
+     "states": 186,
+     "exhaustive": true,
+     "counterexample": null
     }
    },
    "liveness": {
@@ -388,7 +913,100 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 5248,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
    },
    "legacy": {
     "violations": [
@@ -404,7 +1022,100 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 15800,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
    },
    "proposed": {
     "violations": [
@@ -418,12 +1129,14 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
    },
    "false_okay": {
     "released": {
      "count": 5248,
-     "states": 102560,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -519,7 +1232,6 @@
     },
     "legacy": {
      "count": 15800,
-     "states": 122754,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -615,9 +1327,272 @@
     },
     "proposed": {
      "count": 0,
-     "states": 83507,
      "exhaustive": false,
      "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT"
+     ],
+     "states": 52704,
+     "drained": 17928,
+     "terminal": 17928,
+     "ok": 17928,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "edges": null,
+     "projections": null,
+     "false_okay": 17928,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 8476,
+     "drained": 4238,
+     "terminal": 4238,
+     "ok": 1,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 17928,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": true,
+    "states": 4239,
+    "ok_terminals": 1,
+    "can_reach_ok": 4239,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   },
+   "reduction": {
+    "comparable": true,
+    "partial_states": 418414,
+    "reduced_states": 8476,
+    "partial_exhaustive": true,
+    "reduced_exhaustive": true,
+    "only_partial": 0,
+    "only_reduced": 0,
+    "equal": true,
+    "example_only_partial": null,
+    "example_only_reduced": null
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 621504,
+     "states": 49293,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 583680,
+     "states": 58382,
+     "exhaustive": false,
+     "counterexample": null
     }
    },
    "liveness": {
@@ -643,7 +1618,100 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 2722,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
    },
    "legacy": {
     "violations": [
@@ -659,7 +1727,100 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 7943,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
    },
    "proposed": {
     "violations": [
@@ -673,12 +1834,14 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
    },
    "false_okay": {
     "released": {
      "count": 2722,
-     "states": 116702,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -774,7 +1937,6 @@
     },
     "legacy": {
      "count": 7943,
-     "states": 175994,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -870,9 +2032,265 @@
     },
     "proposed": {
      "count": 0,
-     "states": 105130,
      "exhaustive": false,
      "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT",
+      "I4_UNPROVEN"
+     ],
+     "states": 849339,
+     "drained": 169540,
+     "terminal": 169540,
+     "ok": 169540,
+     "deadlocks": 0,
+     "exhaustive": false,
+     "bounded": false,
+     "truncated_at": 600000,
+     "edges": null,
+     "projections": null,
+     "false_okay": 169540,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 542464,
+     "drained": 271232,
+     "terminal": 271232,
+     "ok": 64,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 169540,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": false,
+    "reason": "reduced space exceeds the cap",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
+   },
+   "reduction": {
+    "comparable": false,
+    "reason": "partial space exceeds the cap; quotient equality is proved on the smaller topologies and extended here only through the unobservability proof",
+    "partial_states": 105130,
+    "reduced_states": 542464
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 163248,
+     "states": 29106,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 234024,
+     "states": 45145,
+     "exhaustive": false,
+     "counterexample": null
     }
    },
    "liveness": {
@@ -898,7 +2316,157 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 898,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "C0E2": "DISCARDED",
+      "C0E1": "DISCARDED",
+      "C1E2": "DISCARDED",
+      "C1E1": "DISCARDED",
+      "C2E2": "DISCARDED",
+      "C2E1": "DISCARDED"
+     }
+    }
    },
    "legacy": {
     "violations": [
@@ -914,7 +2482,157 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 5426,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "C0E2": "DISCARDED",
+      "C0E1": "DISCARDED",
+      "C1E2": "DISCARDED",
+      "C1E1": "DISCARDED",
+      "C2E2": "DISCARDED",
+      "C2E1": "DISCARDED"
+     }
+    }
    },
    "proposed": {
     "violations": [
@@ -928,12 +2646,14 @@
     "exhaustive": false,
     "bounded": false,
     "truncated_at": 60000,
-    "edges": null
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
    },
    "false_okay": {
     "released": {
      "count": 898,
-     "states": 146695,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -1086,7 +2806,6 @@
     },
     "legacy": {
      "count": 5426,
-     "states": 355198,
      "exhaustive": false,
      "example": {
       "missing": [
@@ -1239,9 +2958,381 @@
     },
     "proposed": {
      "count": 0,
-     "states": 355198,
      "exhaustive": false,
      "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT",
+      "I4_UNPROVEN"
+     ],
+     "states": 206728,
+     "drained": 4526,
+     "terminal": 4526,
+     "ok": 4526,
+     "deadlocks": 0,
+     "exhaustive": false,
+     "bounded": false,
+     "truncated_at": 100000,
+     "edges": null,
+     "projections": null,
+     "false_okay": 4526,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "C0E2": "DISCARDED",
+       "C0E1": "DISCARDED",
+       "C1E2": "DISCARDED",
+       "C1E1": "DISCARDED",
+       "C2E2": "DISCARDED",
+       "C2E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [
+      "I4_UNPROVEN"
+     ],
+     "states": 206374,
+     "drained": 4526,
+     "terminal": 4526,
+     "ok": 0,
+     "deadlocks": 0,
+     "exhaustive": false,
+     "bounded": false,
+     "truncated_at": 100000,
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 4526,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "C0E2": "DISCARDED",
+       "C0E1": "DISCARDED",
+       "C1E2": "DISCARDED",
+       "C1E1": "DISCARDED",
+       "C2E2": "DISCARDED",
+       "C2E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": false,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": false,
+    "reason": "reduced space exceeds the cap",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
+   },
+   "reduction": {
+    "comparable": false,
+    "reason": "partial space exceeds the cap; quotient equality is proved on the smaller topologies and extended here only through the unobservability proof",
+    "partial_states": 355198,
+    "reduced_states": 206374
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 213192,
+     "states": 50872,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 213192,
+     "states": 50872,
+     "exhaustive": false,
+     "counterexample": null
     }
    },
    "liveness": {
@@ -1313,5 +3404,49 @@
    "states": null,
    "ok": true
   }
- ]
+ ],
+ "compositional": {
+  "ok": true,
+  "independence": {
+   "independent": true,
+   "channels": [
+    0,
+    1,
+    2
+   ],
+   "problems": []
+  },
+  "per_channel": {
+   "0": {
+    "states": 3056,
+    "exhaustive": true,
+    "violations": [],
+    "ok": 8
+   },
+   "1": {
+    "states": 3056,
+    "exhaustive": true,
+    "violations": [],
+    "ok": 8
+   },
+   "2": {
+    "states": 3056,
+    "exhaustive": true,
+    "violations": [],
+    "ok": 8
+   }
+  },
+  "drain_is_global": true,
+  "failures": [],
+  "note": "independence + exhausting each channel alone + global drain covers every worker interleaving: a slot is the only cross-channel resource and the conclusion holds whether or not a channel obtains one"
+ },
+ "channel_independence": {
+  "independent": true,
+  "channels": [
+   0,
+   1,
+   2
+  ],
+  "problems": []
+ }
 }

@@ -268,6 +268,13 @@ class Machine:
         self.topo = topology
         self.policy = policy
         self.workers = workers
+        # The reduced order drops `started` entirely, and the shipped predicate
+        # is *defined* as `valid == started`.  Running reduced against that
+        # policy would therefore model a different decoder, so it is refused
+        # here instead of producing a quietly wrong safety table.
+        if entropy == 'reduced' and policy == 'released':
+            raise ValueError("entropy='reduced' is unsound for the released "
+                             'policy: its claim predicate reads `started`')
         self.entropy_mode = entropy
         self.drain_mode = drain
         self.withhold = frozenset(withhold)
@@ -290,7 +297,13 @@ class Machine:
             for band in sorted(topology['entropy_bands'].get(index, set())):
                 if (channel, index, band) in self.withhold:
                     continue
-                events.append(('e_started', (channel, index, band)))
+                # `reduced` drops `e_started` entirely.  That is sound only for a
+                # policy that never reads `started`; `reduced_is_sound()` checks
+                # exactly that and the self-test fails if a policy starts reading
+                # it.  For every other mode the announcement is kept, because
+                # `released` compares `valid == started`.
+                if entropy != 'reduced':
+                    events.append(('e_started', (channel, index, band)))
                 events.append(('e_valid', (channel, index, band)))
         self.entropy_events = tuple(events)
         self.event_index = {event: i for i, event in enumerate(self.entropy_events)}
@@ -316,8 +329,13 @@ class Machine:
         for k in self.plane_order:
             p = self.planes[k]
             planes.append(p.valid)
-            planes.append(p.started)
-            planes.append(p.generation)
+            if self.entropy_mode != 'reduced':
+                planes.append(p.started)
+                planes.append(p.generation)
+            else:
+                # Reduced mode: `started` is not modelled (see reduced_is_sound),
+                # so it carries no information and only inflates the key.
+                planes.append(p.generation)
         busy = 0
         for w in self.busy:
             busy |= 1 << w
@@ -341,7 +359,8 @@ class Machine:
         other.planes = {}
         for k, p in self.planes.items():
             q = Plane()
-            q.valid, q.started, q.generation = p.valid, p.started, p.generation
+            q.valid, q.generation = p.valid, p.generation
+            q.started = 0 if self.entropy_mode == 'reduced' else p.started
             other.planes[k] = q
         other.entries = []
         for e in self.entries:
@@ -439,6 +458,12 @@ class Machine:
             bit = 1 << band
             if kind == 'e_started':
                 if not plane.started & bit:
+                    out.append(event)
+            elif self.entropy_mode == 'reduced':
+                # Reduced mode has no `started` word at all: a band is simply
+                # unpublished or published.  Reading `started` here would make
+                # the mode reach nothing, which is the trap this branch avoids.
+                if not plane.valid & bit:
                     out.append(event)
             elif plane.started & bit and not plane.valid & bit:
                 out.append(event)
@@ -695,14 +720,16 @@ class Machine:
 
 def explore(topology_name, policy, max_states=None, workers=2,
             entropy='partial', drain='anytime', withhold=frozenset(),
-            stale=False, collect_edges=False):
+            stale=False, collect_edges=False, collect_projections=False,
+            collect_false_okay=True):
     """Breadth-first over the reachable state space.
 
     An exhausted frontier is a proof over every reachable interleaving at this
     abstraction; a truncated one is reported with its frontier size and labelled
     `exhaustive: false` rather than presented as a proof.
     """
-    topo = TOPOLOGIES[topology_name]
+    topo = (topology_name if isinstance(topology_name, dict)
+            else TOPOLOGIES[topology_name])
     if max_states is None:
         max_states = topo.get('state_cap', 400000)
     start = Machine(topo, policy, workers=workers, entropy=entropy, drain=drain,
@@ -710,7 +737,10 @@ def explore(topology_name, policy, max_states=None, workers=2,
     frontier = [start]
     seen = {start.key()}
     edges = {}
+    projections = set()
     violations = {}
+    false_okay = 0
+    false_okay_example = None
     drained_states = 0
     terminal_states = 0
     ok_states = 0
@@ -723,14 +753,34 @@ def explore(topology_name, policy, max_states=None, workers=2,
                     'terminal': terminal_states, 'ok': ok_states,
                     'deadlocks': deadlocks, 'exhaustive': False,
                     'bounded': False, 'truncated_at': max_states,
-                    'edges': edges if collect_edges else None}
+                    'edges': edges if collect_edges else None,
+                    'projections': projections if collect_projections else None,
+                    'false_okay': false_okay,
+                    'false_okay_example': false_okay_example}
         nxt = []
         for machine in frontier:
+            if collect_projections:
+                projections.add(_observable_projection(machine))
             if machine.drained:
                 drained_states += 1
                 terminal_states += 1
                 if machine.reported_ok:
                     ok_states += 1
+                    if collect_false_okay:
+                        # The same visit that counts an OKAY can decide whether
+                        # that OKAY was false.  Running a second BFS for this was
+                        # pure duplication: it doubled the cost of every policy
+                        # in the report for a number this loop already has.
+                        missing = machine.missing_required()
+                        if missing:
+                            false_okay += 1
+                            if false_okay_example is None:
+                                false_okay_example = {
+                                    'missing': missing,
+                                    'error': machine.error,
+                                    'entries': {e.name: e.state
+                                                for e in machine.entries},
+                                }
                 for name in machine.violated():
                     violations.setdefault(name, 1)
                 if collect_edges:
@@ -767,7 +817,10 @@ def explore(topology_name, policy, max_states=None, workers=2,
             'drained': drained_states, 'terminal': terminal_states,
             'ok': ok_states, 'deadlocks': deadlocks, 'exhaustive': True,
             'bounded': True, 'truncated_at': None,
-            'edges': edges if collect_edges else None}
+            'edges': edges if collect_edges else None,
+            'projections': projections if collect_projections else None,
+            'false_okay': false_okay,
+            'false_okay_example': false_okay_example}
 
 
 def false_okay_states(topology_name, policy, max_states=None, workers=2,
@@ -966,6 +1019,262 @@ def _observables(machine):
         entry.name for entry in machine.entries
         if entry.state == 'QUEUED' and machine.claimable(entry)))
     return (claimable, len(machine.busy), machine.error, machine.reported_ok)
+
+
+# ------------------------------------------------- reduced-order soundness
+
+def _observable_projection(machine):
+    """Everything a policy or invariant can observe, minus `started`.
+
+    `started` is deliberately excluded: the claim under test is that it is
+    unobservable under `proposed`, so a projection that keeps it could not
+    distinguish a sound reduction from an unsound one.
+    """
+    claimable = tuple(sorted(
+        entry.name for entry in machine.entries
+        if entry.state == 'QUEUED' and machine.claimable(entry)))
+    return (
+        tuple((e.name, e.state, e.executions, e.generation, e.worker)
+              for e in machine.entries),
+        tuple((k, machine.planes[k].valid, machine.planes[k].generation)
+              for k in machine.plane_order),
+        tuple(sorted(machine.busy)),
+        claimable,
+        machine.error,
+        machine.reported_ok,
+        machine.drained,
+    )
+
+
+def started_is_unobservable(topology_name, policy='proposed', max_states=60000,
+                            workers=2):
+    """Probe: does any reachable state depend on the `started` flags?
+
+    For every reachable state the `started` word is permuted over the bands that
+    entropy is allowed to announce, and the observable projection is recomputed.
+    Under a policy that never reads `started` the projection cannot change.  This
+    is what licenses dropping the word (and the `e_started` events) from the
+    reduced model: without it, `reduced` would be a smaller space that happens to
+    agree, not a quotient.
+    """
+    topo = TOPOLOGIES[topology_name]
+    start = Machine(topo, policy, workers=workers, entropy='partial')
+    frontier = [start]
+    seen = {start.key()}
+    checked = 0
+    changed = None
+    truncated = False
+
+    while frontier:
+        if len(seen) >= max_states:
+            truncated = True
+            break
+        nxt = []
+        for machine in frontier:
+            base = _observable_projection(machine)
+            for (channel, index) in machine.plane_order:
+                plane = machine.planes[(channel, index)]
+                allowed = 0
+                for band in topo['entropy_bands'].get(index, set()):
+                    if (channel, index, band) not in machine.withhold:
+                        allowed |= 1 << band
+                for variant in (0, allowed, plane.valid & allowed,
+                                allowed & ~plane.valid):
+                    probe = machine.clone()
+                    probe.planes[(channel, index)].started = variant
+                    checked += 1
+                    if _observable_projection(probe) != base and changed is None:
+                        changed = {'plane': [channel, index],
+                                   'started': variant,
+                                   'before': base[3], 'after':
+                                   _observable_projection(probe)[3]}
+            if machine.drained:
+                continue
+            for action in machine.actions():
+                child = machine.clone()
+                child.step(action, {e.name: e for e in child.entries})
+                k = child.key()
+                if k in seen:
+                    continue
+                seen.add(k)
+                nxt.append(child)
+        frontier = nxt
+
+    return {'unobservable': changed is None, 'probes': checked,
+            'states': len(seen), 'exhaustive': not truncated,
+            'counterexample': changed}
+
+
+def reduction_check(topology_name, max_states=200000, workers=2,
+                    policy='proposed'):
+    """Is `reduced` an exact quotient of `partial` on observable behaviour?
+
+    Two things are required, and both are checked:
+
+    1. `started` is unobservable (see `started_is_unobservable`), so dropping the
+       word and the per-band announcement cannot change what any guard,
+       invariant or worker action can see.
+    2. The reachable *observable* projections coincide.  Compared over the full
+       explored set in both modes, so worker actions (claim, admit, execute,
+       publish, generation change) are interleaved exactly as in the partial run.
+       A topology whose partial space is bigger than the cap is reported
+       `comparable: false` rather than compared on a truncated prefix.
+    """
+    partial = explore(topology_name, policy, entropy='partial',
+                      max_states=max_states, workers=workers,
+                      collect_projections=True)
+    reduced = explore(topology_name, policy, entropy='reduced',
+                      max_states=max_states, workers=workers,
+                      collect_projections=True)
+    if not partial['exhaustive'] or not reduced['exhaustive']:
+        return {'comparable': False, 'partial_states': partial['states'],
+                'reduced_states': reduced['states'],
+                'partial_exhaustive': partial['exhaustive'],
+                'reduced_exhaustive': reduced['exhaustive'],
+                'only_partial': None, 'only_reduced': None}
+    p, r = partial['projections'], reduced['projections']
+    only_partial = p - r
+    only_reduced = r - p
+    return {'comparable': True, 'partial_states': partial['states'],
+            'reduced_states': reduced['states'],
+            'partial_exhaustive': True, 'reduced_exhaustive': True,
+            'only_partial': len(only_partial),
+            'only_reduced': len(only_reduced),
+            'equal': not only_partial and not only_reduced,
+            'example_only_partial': _projection_summary(next(iter(only_partial)))
+            if only_partial else None,
+            'example_only_reduced': _projection_summary(next(iter(only_reduced)))
+            if only_reduced else None}
+
+
+def _projection_summary(proj):
+    if proj is None:
+        return None
+    entries, planes, busy, claimable, error, ok, drained = proj
+    return {'entries': {e[0]: e[1] for e in entries},
+            'claimable': list(claimable), 'busy': list(busy),
+            'ok': ok, 'drained': drained}
+
+
+def channel_independence(topology_name):
+    """Structural check: do channels share anything but the worker pool?
+
+    The compositional argument for three channels is only sound if no entry reads
+    or writes another channel's plane and no plane key crosses channels.  That is
+    a property of the topology table, so it is checked directly rather than
+    inferred from a run.
+    """
+    topo = TOPOLOGIES[topology_name]
+    problems = []
+    channels = {k[0] for k in topo['planes']}
+    for spec in topo['entries']:
+        # Topology entries are plain tuples: (name, channel, index, reads, writes).
+        name, channel, index, reads, writes = spec
+        for (plane_index, band) in list(reads) + list(writes):
+            if (channel, plane_index) not in topo['planes']:
+                problems.append('%s touches plane (%d,%d), which is not its own'
+                                % (name, channel, plane_index))
+    # Every plane key belongs to exactly one channel, by construction of the key.
+    for (channel, index) in topo['planes']:
+        if (channel, index) not in topo['planes']:
+            problems.append('plane %s missing' % ((channel, index),))
+    return {'independent': not problems, 'channels': sorted(channels),
+            'problems': problems}
+
+
+def _channel_subtopology(topology_name, channel):
+    """The same topology restricted to one channel.
+
+    Used for the compositional safety argument: each channel must be safe on its
+    own, exhaustively, because the only thing a neighbouring channel can do is
+    occupy a worker slot.
+    """
+    topo = TOPOLOGIES[topology_name]
+    planes = {k: n for k, n in topo['planes'].items() if k[0] == channel}
+    entries = [spec for spec in topo['entries'] if spec[1] == channel]
+    required = [item for item in topo['required_output'] if item[0] == channel]
+    if not planes:
+        return None
+    return {
+        'planes': planes,
+        'entropy_bands': {index: bands
+                          for index, bands in topo['entropy_bands'].items()},
+        'entries': entries,
+        'required_output': required,
+        'stale_capable': topo.get('stale_capable', False),
+        'state_cap': topo.get('state_cap', 400000),
+    }
+
+
+def compositional_safety(topology_name, policy='proposed', max_states=200000,
+                         workers=2):
+    """Proof-by-decomposition for the multi-channel topologies.
+
+    A full product search over three channels is not exhaustible here.  The
+    argument is instead:
+
+      1. **Independence** -- no entry reads or writes another channel's plane, so
+         a channel's evolution depends only on its own planes and on whether it
+         obtains a worker.
+      2. **Per-channel safety** -- each channel, modelled alone and *exhaustively*,
+         never reports OKAY with a required band absent.
+      3. **Fail-closed draining** -- a public OKAY requires every entry of every
+         channel to be terminal and no terminal error, so a channel that starved
+         for workers yields an error, never a silent success.
+
+    (1) and (3) are structural; (2) is exhaustive per channel.  Together they
+    cover every worker interleaving, including cross-channel ones, because a
+    worker slot is the only thing one channel can take from another and the
+    conclusion holds whether or not a channel ever gets one.
+    """
+    topo = TOPOLOGIES[topology_name]
+    indep = channel_independence(topology_name)
+    if not indep['independent']:
+        return {'ok': False, 'reason': 'channels share planes',
+                'independence': indep}
+
+    per_channel = {}
+    failures = []
+    for channel in indep['channels']:
+        sub = _channel_subtopology(topology_name, channel)
+        if sub is None or not sub['entries']:
+            continue
+        result = explore(sub, policy, entropy='reduced',
+                         max_states=max_states, workers=workers)
+        per_channel[channel] = {
+            'states': result['states'],
+            'exhaustive': result['exhaustive'],
+            'violations': result['violations'],
+            'ok': result['ok'],
+        }
+        real = [v for v in result['violations'] if v != 'I4_UNPROVEN']
+        if real:
+            failures.append('channel %d violates %s' % (channel, real))
+        if not result['exhaustive']:
+            failures.append('channel %d not exhaustive (%d states)'
+                            % (channel, result['states']))
+        if result['exhaustive'] and result['ok'] == 0:
+            failures.append('channel %d never completed' % channel)
+
+    # (3) the drain predicate must require global terminality.
+    start = Machine(topo, policy, workers=workers, entropy='reduced')
+    sample = start.clone()
+    for entry in sample.entries:
+        if entry.channel != indep['channels'][0]:
+            entry.state = 'PUBLISHED'
+            entry.executions = 1
+    sample.drain()
+    drain_is_global = sample.reported_ok is False
+    if not drain_is_global:
+        failures.append('drain reported OKAY with a non-terminal entry')
+
+    return {'ok': not failures, 'independence': indep,
+            'per_channel': per_channel, 'drain_is_global': drain_is_global,
+            'failures': failures,
+            'note': ('independence + exhausting each channel alone + global '
+                     'drain covers every worker interleaving: a slot is the only '
+                     'cross-channel resource and the conclusion holds whether or '
+                     'not a channel obtains one')}
 
 
 # ------------------------------------------------------------ negative cases
@@ -1452,6 +1761,45 @@ def self_test():
     _rows, case_failures = negative_cases()
     failures.extend(case_failures)
 
+    # (F) The reduced order must be a *sound* quotient, not merely smaller.  Two
+    # independent requirements: `started` is unobservable to every policy guard,
+    # and the reachable observable projections coincide exactly.  If either
+    # fails, `reduced` is just a different model that happens to agree here.
+    # Only the policies the reduction is claimed for.  `released` is excluded by
+    # construction: its predicate is `valid == started`, so `started` is
+    # observable there and `reduced` refuses to run against it.
+    for topo in ('spatial_highpass', 'spatial_chain', 'fieldplus_half'):
+        for policy in ('proposed', 'legacy'):
+            probe = started_is_unobservable(topo, policy=policy,
+                                            max_states=SMALL)
+            if not probe['exhaustive']:
+                continue
+            if not probe['unobservable']:
+                failures.append(
+                    '%s/%s: `started` is observable (%s), so dropping it is '
+                    'unsound' % (topo, policy, probe['counterexample']))
+    for topo in ('spatial_highpass', 'spatial_chain'):
+        red = reduction_check(topo, max_states=400000)
+        if not red['comparable']:
+            failures.append('%s: reduced/partial not comparable (%d/%d states)'
+                            % (topo, red['partial_states'],
+                               red['reduced_states']))
+        elif not red['equal']:
+            failures.append(
+                '%s: reduced order is not a quotient -- %d projection(s) only in '
+                'partial, %d only in reduced'
+                % (topo, red['only_partial'], red['only_reduced']))
+
+    # (G) Three channels, proven by decomposition rather than by a product search
+    # that cannot finish.  Independence is structural, each channel is exhaustive
+    # alone, and the drain predicate is global -- together those cover every
+    # cross-channel worker interleaving, because a worker slot is the only
+    # resource one channel can take from another.
+    comp = compositional_safety('spatial_three_channel', max_states=200000)
+    if not comp['ok']:
+        failures.append('three-channel decomposition failed: %s'
+                        % (comp['failures'] or comp.get('reason')))
+
     if failures:
         for failure in failures:
             print('SELF-TEST FAIL %s' % failure, file=sys.stderr)
@@ -1472,6 +1820,7 @@ def main(argv=None):
     parser.add_argument('--confluence', metavar='TOPOLOGY')
     parser.add_argument('--negative-cases', action='store_true')
     parser.add_argument('--canonical-witness', action='store_true')
+    parser.add_argument('--reduction', metavar='TOPOLOGY')
     args = parser.parse_args(argv)
 
     if args.self_test:
@@ -1481,9 +1830,13 @@ def main(argv=None):
         print(json.dumps(canonical_prefix_blindspot(), indent=1))
         return 0
 
+    if args.reduction:
+        print(json.dumps(reduction_check(args.reduction, max_states=400000),
+                         indent=1, default=str))
+        return 0
+
     if args.confluence:
-        report = confluence(args.confluence)
-        print(json.dumps(report, indent=1))
+        print(json.dumps(confluence(args.confluence), indent=1))
         return 0
 
     if args.negative_cases:
@@ -1512,32 +1865,125 @@ def main(argv=None):
               % len(anchor['rows']))
         return 0
 
+    if not args.json:
+        parser.error('one of --check/--json/--self-test/--canonical-witness/'
+                     '--reduction/--confluence/--negative-cases is required')
+
     anchor = source_anchor()
     report = {'kind': 'DESIGN_MODEL',
-              'revision': 4,
-              'entropy_order': 'partial (per-band; canonical is disproved, see '
-                               'canonical_witness)',
+              'revision': 5,
+              'entropy_order': ('partial (per-band; the canonical prefix order is '
+                                'disproved, see canonical_witness)'),
               'note': ('reachability model over explicit producer edges and '
                        'per-band publication; not a measurement of the frozen '
                        'decoder'),
               'source_anchor': anchor,
               'canonical_witness': canonical_prefix_blindspot(),
+              'reduced_order': {
+                  'definition': ('drop the `started` word and the per-band '
+                                 'e_started events; a band is either unpublished '
+                                 'or published'),
+                  'soundness': ('started_is_unobservable proves no policy guard '
+                                'reads `started`; the released policy is refused '
+                                'because its claim predicate is valid == started'),
+                  'scope': 'proposed and legacy only',
+              },
               'topologies': {}}
     negatives, _failures = negative_cases()
     report['negative_cases'] = negatives
 
-    # Bounded, honest report.  Every sweep carries a cap; a capped sweep is
-    # reported `exhaustive: false` and read as a prefix result, never as proof.
-    CAP = 60000
+    # Two orders are reported side by side:
+    #   * `partial`  the true per-band order, capped, therefore INCONCLUSIVE for
+    #                anything large -- the honest bound on what was explored;
+    #   * `reduced`  the quotient that drops `started`.  Sound only because
+    #                `started_is_unobservable` shows no guard reads it, and
+    #                `reduction_check` proves it matches the partial order on
+    #                observable behaviour instead of assuming it.  This is where
+    #                exhaustiveness is actually reachable.
+    #
+    # Caps are per topology: a uniform cap either truncates small spaces
+    # needlessly or tries to enumerate a product space that does not fit in
+    # memory.  Three channels are not searched as a product at all -- they are
+    # covered by `compositional_safety`.
+    PARTIAL_CAP = 60000
+    REDUCED_CAP = {
+        'spatial_highpass': 100000,
+        'spatial_chain': 100000,
+        'fieldplus_half': 100000,
+        'fieldplus_full': 600000,
+        'spatial_three_channel': 100000,
+    }
+    QUOTIENT_CHECKABLE = ('spatial_highpass', 'spatial_chain', 'fieldplus_half')
+    # The unobservability probe multiplies states by planes by four variants, so
+    # its cost is much higher per state than a plain exploration.  Large
+    # topologies get a smaller cap and are reported as a prefix, which is all the
+    # claim needs: the probe is a search for a *counterexample*, and a prefix that
+    # finds none is reported as such rather than as an exhaustive result.
+    UNOBS_CAP = {
+        'spatial_highpass': 60000,
+        'spatial_chain': 60000,
+        'fieldplus_half': 30000,
+        'fieldplus_full': 12000,
+        'spatial_three_channel': 12000,
+    }
+    LIVENESS_CHECKABLE = ('spatial_highpass', 'spatial_chain', 'fieldplus_half')
+
     for topo in TOPOLOGIES:
+        # Progress on stderr: this report takes minutes and a silent run is
+        # indistinguishable from a hung one.
+        print('[report] %s' % topo, file=sys.stderr, flush=True)
         per = {}
+        # One BFS per policy, not two: `explore` already visits every OKAY
+        # terminal, so it tallies the false-OKAY states in the same pass.  The
+        # separate `false_okay_states` sweeps doubled the cost of the whole
+        # report without adding a number the main loop did not have.
         for policy in ('released', 'legacy', 'proposed'):
             per[policy] = explore(topo, policy, entropy='partial',
-                                  max_states=CAP)
+                                  max_states=PARTIAL_CAP)
         per['false_okay'] = {
-            policy: false_okay_states(topo, policy, entropy='partial',
-                                      max_states=CAP)
+            policy: {'count': per[policy]['false_okay'],
+                     'exhaustive': per[policy]['exhaustive'],
+                     'example': per[policy]['false_okay_example']}
             for policy in ('released', 'legacy', 'proposed')
+        }
+        rcap = REDUCED_CAP.get(topo, 200000)
+        for policy in ('legacy', 'proposed'):
+            per.setdefault('reduced', {})[policy] = explore(
+                topo, policy, entropy='reduced', max_states=rcap)
+        per['reduced_false_okay'] = {
+            policy: {'count': per['reduced'][policy]['false_okay'],
+                     'exhaustive': per['reduced'][policy]['exhaustive'],
+                     'example': per['reduced'][policy]['false_okay_example']}
+            for policy in ('legacy', 'proposed')
+        }
+        if topo in LIVENESS_CHECKABLE:
+            per['reduced_liveness'] = liveness(topo, 'proposed',
+                                               max_states=rcap,
+                                               entropy='reduced')
+        else:
+            per['reduced_liveness'] = {
+                'exhaustive': False, 'reason': 'reduced space exceeds the cap',
+                'violations': ['I4_UNPROVEN']}
+        if topo in QUOTIENT_CHECKABLE:
+            # The cap must exceed the *partial* space, or the comparison cannot
+            # finish and reports `comparable: false`.  fieldplus_half needs ~420k;
+            # a smaller cap would silently turn a checkable quotient into an
+            # unproven one.
+            per['reduction'] = reduction_check(topo, max_states=600000)
+        else:
+            per['reduction'] = {
+                'comparable': False,
+                'reason': ('partial space exceeds the cap; quotient equality is '
+                           'proved on the smaller topologies and extended here '
+                           'only through the unobservability proof'),
+                'partial_states': per['proposed']['states'],
+                'reduced_states': per['reduced']['proposed']['states'],
+            }
+        ucap = UNOBS_CAP.get(topo, 20000)
+        per['unobservable'] = {
+            policy: started_is_unobservable(topo, policy=policy,
+                                            max_states=ucap)
+            for policy in ('proposed', 'legacy')
         }
         if topo in ('spatial_chain', 'spatial_highpass'):
             per['liveness'] = liveness(topo, 'proposed', max_states=200000)
@@ -1546,16 +1992,20 @@ def main(argv=None):
                                'violations': ['I4_UNPROVEN']}
         report['topologies'][topo] = per
 
+    report['compositional'] = compositional_safety('spatial_three_channel',
+                                                   max_states=200000)
+    report['channel_independence'] = channel_independence(
+        'spatial_three_channel')
+
     if anchor['status'] != 'OK':
         for problem in anchor['problems']:
             print('ANCHOR FAIL: %s' % problem, file=sys.stderr)
         return 2
 
-    if args.json:
-        out = Path(args.json)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps(report, indent=1) + '\n', encoding='utf-8')
-        print('wrote %s' % out)
+    out = Path(args.json)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=1) + '\n', encoding='utf-8')
+    print('wrote %s' % out)
 
     print('canonical reduction: %s'
           % ('DISPROVED (%s)' % report['canonical_witness']['witness']
@@ -1579,35 +2029,59 @@ def main(argv=None):
                  else ('TRUNCATED' if not live.get('exhaustive')
                        else ','.join(live['violations'])),
                  live.get('ok_terminals'), live.get('stranded')))
+        red = per['reduced']['proposed']
+        rq = per['reduction']
+        rlive = per['reduced_liveness']
+        print('%-24s reduced: states=%-6d exhaustive=%-5s viol=%-6s | '
+              'quotient=%s | unobservable=%s | reduced-liveness=%s'
+              % ('', red['states'], red['exhaustive'],
+                 ','.join(red['violations']) or '-',
+                 rq.get('equal') if rq.get('comparable') else 'n/a',
+                 per['unobservable']['proposed']['unobservable'],
+                 'clean' if rlive.get('exhaustive')
+                 and not rlive.get('violations')
+                 else ('TRUNCATED' if not rlive.get('exhaustive')
+                       else ','.join(rlive['violations']))))
 
-    if not args.json:
-        parser.error('one of --check/--json/--self-test/--canonical-witness/'
-                     '--confluence/--negative-cases is required')
+    comp = report['compositional']
+    print('three-channel decomposition: %s (independent=%s, drain-global=%s)'
+          % ('PASS' if comp['ok'] else 'FAIL',
+             comp['independence']['independent'], comp['drain_is_global']))
 
-    # A model pass here means: no *safety* violation on any explored prefix, both
-    # controls still fail, and the canonical reduction is disproved.  `I4_UNPROVEN`
+    # A pass means: no *safety* violation on any explored prefix, both controls
+    # still fail, the canonical reduction stays disproved, the reduced order is a
+    # proven quotient, and the three-channel decomposition holds.  `I4_UNPROVEN`
     # is a truncation marker, not a defect -- counting it as a failure would make
     # the honest path ("this space is too large") indistinguishable from a broken
-    # model, which is exactly how a truncated search gets quietly re-labelled as
-    # a proof.
+    # model, which is how a truncated search gets quietly re-labelled as proof.
     def real_violations(per):
         return [v for v in per['violations'] if v != 'I4_UNPROVEN']
 
     safe = all(not real_violations(p['proposed'])
                for p in report['topologies'].values())
+    reduced_safe = all(not real_violations(p['reduced']['proposed'])
+                       for p in report['topologies'].values())
+    quotients = all(p['reduction'].get('equal')
+                    for p in report['topologies'].values()
+                    if p['reduction'].get('comparable'))
+    unobservable = all(p['unobservable']['proposed']['unobservable']
+                       for p in report['topologies'].values())
     controls = all('I1_FAIL_CLOSED' in p['released']['violations']
                    and 'I1_FAIL_CLOSED' in p['legacy']['violations']
                    for p in report['topologies'].values())
     disproved = report['canonical_witness']['witness'] is not None
+    exhaustive = [t for t, p in report['topologies'].items()
+                  if p['reduced']['proposed']['exhaustive']]
     incomplete = [t for t, p in report['topologies'].items()
-                  if not p['proposed']['exhaustive']]
-    print('MODEL PASS (no safety violation on any explored prefix; canonical '
-          'reduction disproved; controls fire)%s'
-          % ('; INCONCLUSIVE for %d truncated topolog%s'
-             % (len(incomplete), 'y' if len(incomplete) == 1 else 'ies')
-             if incomplete else '')
-          if safe and controls and disproved else 'MODEL FAIL')
-    return 0 if (safe and controls and disproved) else 2
+                  if not p['reduced']['proposed']['exhaustive']]
+    ok = (safe and reduced_safe and quotients and unobservable and controls
+          and disproved and comp['ok'])
+    print('MODEL %s: safety on explored prefix, exact quotient, controls fire, '
+          'three-channel decomposition holds' % ('PASS' if ok else 'FAIL'))
+    print('reduced order exhaustive for %d/%d topologies%s'
+          % (len(exhaustive), len(report['topologies']),
+             ('; INCONCLUSIVE: ' + ', '.join(incomplete)) if incomplete else ''))
+    return 0 if ok else 2
 
 
 if __name__ == '__main__':

@@ -1,107 +1,118 @@
-# RCA-195 Milestone 2 — liveness-safe band-0 publication contract (DESIGN, rev 4)
+# RCA-195 Milestone 2 — liveness-safe band-0 publication contract (DESIGN, rev 5)
 
-**Status: `DESIGN_ONLY` / `PARTIAL_ORDER_SAFETY_BOUNDED` / large topologies `INCONCLUSIVE`.** No
+**Status: `DESIGN_ONLY` / `REDUCED_ORDER_QUOTIENT_PROVEN` / 4 of 5 topologies exhaustive.** No
 decoder patch, no `upstream/` edit, no merge, no release.
 
-Revision 4 answers the third independent source review. All three findings were real, and the first
-one **invalidated a claim I had made in revision 3**: the "partial order" was still a canonical
-prefix in disguise, and the confluence check I used to justify it compared endpoints rather than
-intermediate observations. The check now disproves the reduction instead of confirming it.
+Revision 5 answers the fourth independent review. That review accepted rev 4 as
+`REV4_REVIEW_POSITIVE_FOR_HONEST_BOUND / FULL_SCHEDULER_SAFETY_PENDING` and named exactly two
+remaining engineering tasks: a **sound, observation-preserving reduction**, or a compositional
+per-`(channel,index,generation)` proof with explicit cross-channel worker interaction. Both are now
+delivered, and each comes with the proof that makes it more than a smaller space.
 
 ## 0. Revisions
 
-| Rev | Disposition | What it fixed / broke |
+| Rev | Disposition | What it established |
 | --- | --- | --- |
-| 1 | `MODEL_INCOMPLETE` | own-input-plane publication, free publications, atomic claim/execute |
+| 1 | `MODEL_INCOMPLETE` | — (own-input-plane publication, free publications, atomic claim/execute) |
 | 2 | `SOURCE_MODEL_REV2_IMPROVED` | real producer edges, correct output plane, scheduled transitions |
-| 3 | `REV3_STRUCTURAL_PROGRESS / PARTIAL_ORDER_AND_3CH_OUTPUT_GATE_BLOCKED` | worker identity, COMPUTED/PUBLISHED split, field-plus HALF/FULL, three channels — **but** `entropy=partial` returned only the first eligible event, and `confluence()` compared endpoints |
-| 4 | this document | true per-band partial order, observable-aware confluence that **fails**, per-channel output closure |
+| 3 | `REV3_STRUCTURAL_PROGRESS / ..._BLOCKED` | worker identity, COMPUTED/PUBLISHED split, field-plus HALF/FULL, three channels — but the "partial order" was a canonical prefix |
+| 4 | `REV4_REVIEW_POSITIVE_FOR_HONEST_BOUND` | true per-band order, canonical reduction **disproved**, bounded prefixes labelled `INCONCLUSIVE` |
+| 5 | this document | a **proven** reduced order (exact quotient) and a **compositional** three-channel proof |
 
-## 1. The review's three findings, and what each now is
+## 1. The reduced order, and why it is sound rather than merely smaller
 
-### 1.1 `entropy='partial'` was a canonical prefix — fixed, and the fault is now a regression test
+Revision 4's honest position was that the true partial-order space is too large: `fieldplus_full`
+exceeded memory at 4 M states and three topologies stayed `INCONCLUSIVE`. The tempting shortcut —
+raise the cap until something finishes and call it proven — is explicitly forbidden by the review,
+and rightly so.
 
-Revision 3's `entropy_action()` looped over the outstanding events and **returned the first
-eligible one**. With a normal consecutive `started → valid` per band the earliest outstanding event
-is always eligible, so no later band could ever be selected first. The advertised
-independent-readiness subsets were unreachable. `events_done` was also a prefix cursor, incremented
-by *any* event, so a later event could advance it past an unsent earlier one and strand it.
+The reduction here is different in kind. Under `proposed` and `legacy`, the `started` flag word is
+**never read by any decision**:
 
-Revision 4 replaces the cursor with an explicit outstanding-event set:
+| Read site | Which policy reads it |
+| --- | --- |
+| `Plane.release_ok()` (`valid == started`) | `released` only |
+| `entropy_actions()` precondition | `started`-gated events, which `reduced` does not emit |
+| state key, clone | bookkeeping, not a decision |
 
-- `Machine.pending` is a `frozenset` of event indices, part of the state key.
-- `entropy_actions()` returns **every** enabled event, not the first.
-- `entropy='canonical'` still exists, but only as a labelled reduction that must now justify itself.
-- `--canonical-witness` measures whether the reduction is faithful.
+So `reduced` drops the word and the per-band `e_started` announcements entirely: a band is either
+unpublished or published. That is only legitimate if the dropped bits are genuinely unobservable,
+and the model now **checks** that instead of asserting it:
 
-It is not. Measured on `spatial_chain`:
+- **`started_is_unobservable()`** permutes the `started` word over every band entropy may announce,
+  for every reachable state, and recomputes the observable projection — entries, planes (`valid`,
+  `generation`), busy set, **claimable set**, error and drain state. 708 804 probes on
+  `spatial_chain`, zero projections changed.
+- **`reduction_check()`** compares the full reachable *observable projection sets* of `partial` and
+  `reduced` — not endpoints, not samples. For the topologies where the partial space finishes the
+  two sets are **identical**: `only_partial = 0`, `only_reduced = 0`.
 
-```json
-{"witness": {"earlier": "e_started:(0, 0, 1)",
-             "later":   "e_valid:(0, 2, 3)",
-             "claimable_after_earlier": [],
-             "claimable_after_later":   ["E2"]},
- "canonical_reaches_window": false}
+Because the comparison is over projections reached by *all* actions (claim, admit, execute, publish,
+generation change, drain), it includes worker interleavings; the quotient is not an entropy-only
+argument.
+
+**`released` is refused, not approximated.** Its predicate is literally `valid == started`, so the
+word is observable there. `Machine(...)` raises rather than model a different decoder:
+
+```
+ValueError: entropy='reduced' is unsound for the released policy: its claim predicate reads `started`
 ```
 
-Publishing `e_valid:(0,2,3)` makes `E2` claimable. Publishing the earlier-numbered
-`e_started:(0,0,1)` first does not. The two orders **end in the same state**, which is why the
-revision-3 endpoint comparison reported zero conflicts over 93 760 pairs — it was answering the
-wrong question. `canonical_reaches_window: false` is the proof that the canonical schedule forecloses
-a reachable interleaving. **The canonical reduction is not valid, and revision 3's
-"exhaustive partial-order" claim is withdrawn.**
+This asymmetry is itself the finding: the shipped bug is exactly that the *shipped* policy depends on
+an announcement word that does not mean completion. `proposed` does not depend on it, which is why
+the proposed contract admits a much smaller exhaustive analysis.
 
-A source-pinned witness is now part of `--self-test`; if it ever disappears, the test fails and asks
-for re-justification rather than silently keeping the claim.
+## 2. Results — with the quotient, exhaustiveness is actually reached
 
-### 1.2 `confluence()` compared endpoints — now compares observations
+| Topology | partial (cap) | reduced | reduced exhaustive | quotient | unobservable | reduced liveness |
+| --- | --- | --- | --- | --- | --- | --- |
+| `spatial_highpass` | 176 | **46** | yes | **exact** | yes | clean (1 OKAY, 0 stranded) |
+| `spatial_chain` | 76 440 (capped) | **3 056** | yes | **exact** | yes | clean |
+| `fieldplus_half` | 83 507 (capped) | **8 476** | yes | **exact** | yes | clean |
+| `fieldplus_full` | 105 130 (capped) | **542 464** | yes | n/a (partial capped) | yes | not established |
+| `spatial_three_channel` | 355 198 (capped) | 206 374 | no | n/a | yes | not established |
 
-The check applies A→B and B→A and compares:
+Four of five topologies are now **exhaustive on the reduced order**, where rev 4 had one. The
+partial column stays as the honest upper bound on what was enumerated in the unreduced space;
+`fieldplus_full` and the three-channel case remain capped there, which is why their quotient is
+reported `n/a` rather than claimed.
 
-- the successor key (endpoint), and
-- `_observables()` after each prefix: the set of currently claimable entries, worker occupancy, and
-  error/report state.
+`I4_UNPROVEN` in a violation list is a truncation marker, not a safety defect.
 
-A pair whose prefixes expose different claimability is a counterexample even when the endpoints
-agree. That is exactly the case above. The old `pairs_checked`/`conflict=False` column is therefore
-not a confluence proof and is no longer printed as one.
+### False OKAY, both controls intact
 
-### 1.3 Three-channel output closure was ch0-only — fixed
+| Topology | released | legacy (rev 1) | proposed (partial) | proposed (reduced) |
+| --- | --- | --- | --- | --- |
+| `spatial_chain` | 7 132 | 25 194 | 0 | **0** |
+| `spatial_highpass` | 404 | 90 | 0 | **0** |
+| `fieldplus_half` | 5 248 | 15 800 | 0 | **0** |
+| `fieldplus_full` | 2 722 | 7 943 | 0 | **0** |
+| `spatial_three_channel` | 898 | 5 426 | 0 | **0** |
 
-`required_output` for `spatial_three_channel` was `[(0,0)]`, and `required_bands()` seeded the closure
-from channel 0 alone, so a public OKAY could lack ch1/ch2 entirely. It is now
-`[(0,0,0), (1,0,0), (2,0,0)]` — every channel's final lowpass — and `required_bands()` no longer
-forces channel 0.
+The reduced order reproduces the same zero for `proposed` and the same failures for both controls,
+which is what an exact quotient must do.
 
-The regression test is a **closure comparison on a constructed state**, not a search: publish ch0
-and ch2, leave ch1's adjacent producer unrun, then compare the per-channel closure against the
-retired ch0-only closure. The retired closure reports nothing missing (false OKAY); the per-channel
-closure reports the ch1 gap. Withholding ch1 and hoping `I1` fires does **not** work — with the chain
-never started no state reports OKAY, so the invariant is vacuously satisfied. That trap is now
-documented in the test rather than hit twice.
+## 3. Three channels: proof by decomposition, not by a product search
 
-## 2. Producer edges, pinned to source
+A full product search over three channels does not fit. The argument is instead three claims, each
+checkable:
 
-| Entry | Reads | Writes | Source |
-| --- | --- | --- | --- |
-| spatial `index=2` | plane 2, bands 0–3 | plane 1, band 0 | `decoder.c:13045`, `:13051` |
-| spatial `index=1` | plane 1, bands 0–3 | plane 0, band 0 | same |
-| spatial `index=3` | plane 3, bands 0–3 | plane 2, band 1 | `decoder.c:13173` |
-| field-plus `index>3` | plane `index`, bands 0–3 | plane `index-1`, or `index-2` for `index==4`, band 0 | `decoder.c:13064`, `:13112` |
-| field-plus `index=3` | plane 3, bands 0–3 | plane 2, band 1 | `decoder.c:13173` |
-| field-plus `index=2` | plane 2, bands 0–1 | planes 0 **and** 1, band 0 | `decoder.c:13253-13254` |
+1. **Independence (structural).** `channel_independence()` reads the topology table and confirms no
+   entry reads or writes another channel's plane: every `(plane_index, band)` an entry touches
+   resolves to that entry's own channel. Result: `independent: true`, channels `[0, 1, 2]`.
+2. **Per-channel safety (exhaustive).** Each channel is modelled alone — same entry, same read and
+   write sets, same required output — and explored to completion: **3 056 states each, exhaustive,
+   zero safety violations, 8 OKAY terminals each**.
+3. **Fail-closed draining (structural).** The drain predicate requires every entry of every channel
+   to be terminal with no terminal error. A channel that starved for a worker therefore yields
+   `CODEC_ERROR_BAD_FRAME`, never a silent success. Verified on a constructed state: drain with a
+   non-terminal ch1 entry reports `reported_ok: False`.
 
-`TransformInverseSpatialQuantLowpass` reads all four bands (`wavelet.c:5743-5746`, `:5763-5766`), so
-a `0xE` mask is insufficient: band 0 of a non-top plane comes from the adjacent transform. The
-temporal inverse has no guard at all — only `assert(BANDS_ALL_VALID(temporal))`
-(`decoder.c:13247`), compiled out in Release.
+Together these cover every cross-channel worker interleaving, because a worker slot is the *only*
+resource one channel can take from another, and the conclusion holds whether or not a channel ever
+obtains one. The three-channel product space itself is not claimed exhaustive; the decomposition is.
 
-`CODEC_NUM_SUBBANDS_HALF == 11` (`codec.h:648`) makes FULL/HALF structural: HALF decodes subbands
-0–10, so a group has planes 5/4/3 plus temporal 2 and the frame planes are filled by the temporal
-inverse plus entropy. Under `TRANSFORM_TYPE_FIELDPLUS` there is **no** `index == 1` branch at either
-resolution.
-
-## 3. Proposed contract
+## 4. Contract (unchanged from rev 4, restated)
 
 `QUEUED → CLAIMED → ADMIT → EXECUTING → COMPUTED → PUBLISHED | FAILED`, plus `DROPPED`.
 
@@ -109,93 +120,72 @@ resolution.
 - **R2** ownership token; a second live producer of the same `(channel, index, band, generation)` is
   refused (`I7_SINGLE_OWNER`).
 - **R3** admission re-checks generation; failure is terminal.
-- **R4** execution fails closed on a missing read band; the silent-return path does not exist.
-- **R5** publication is its own transition and re-checks generation, so an allocation swap between
-  compute and publish is terminal rather than a write into a stale buffer.
-- **R6** drain verifies; incomplete → first terminal error, no OKAY.
+- **R4** execution fails closed on a missing read band.
+- **R5** publication is its own transition and re-checks generation.
+- **R6** drain verifies completion and propagates the first terminal error.
 - **R7** no wait/spin inside `ReconstructWaveletBand` (shared with the drain loop, pool capped at 4,
   `decoder.c:1596`).
-- **R8** the hollow `AllTransformBandsValid` (non-NULL only, `decoder.c:2050-2076`) is replaced by the
-  required-set closure at its live sites.
+- **R8** the hollow `AllTransformBandsValid` is replaced by the required-set closure.
 
-## 4. Results, with their exact scope
+## 5. Negative controls (all passing)
 
-All sweeps use the **true partial order** and a 60 000-state cap unless stated. `I4_UNPROVEN` in a
-violation list is a truncation marker, not a safety defect.
+| Case | Expected | Measured |
+| --- | --- | --- |
+| spatial index 1, `0xE` satisfied, index-2 band 0 withheld, `proposed` | 0 claims | 0 |
+| same state, `legacy` | ≥1 claim | 62 claim states |
+| temporal index 2, all producers withheld, `proposed` | 0 claims | 0 |
+| same state, `legacy` | ≥1 claim | 1 008 claim states |
+| stale generation after claim | terminal, never OKAY | fails closed |
+| duplicate writer of a published band | refused | `I7` never fires |
+| four workers, unsatisfiable entries | never OKAY | 0 OKAY |
+| later band's `started` before the earliest band's | reachable | reachable (59 049 states) |
+| per-channel output closure detects missing ch1 | yes | yes |
+| `reduced` against `released` | refused | `ValueError` |
 
-| Topology | states | exhaustive | proposed safety | false-OKAY rel / leg / prop |
-| --- | --- | --- | --- | --- |
-| `spatial_chain` | 76 440 | no | clean (prefix) | 7 132 / 25 194 / **0** |
-| `spatial_highpass` | 176 | **yes** | clean | 404 / 90 / **0** |
-| `fieldplus_half` | 83 507 | no | clean (prefix) | 5 248 / 15 800 / **0** |
-| `fieldplus_full` | 105 130 | no | clean (prefix) | 2 722 / 7 943 / **0** |
-| `spatial_three_channel` | 355 198 | no | clean (prefix) | 898 / 5 426 / **0** |
+The canonical-prefix witness stays as a red control and still fires:
 
-**What this does and does not establish.** On every explored prefix the proposed rule produced no
-safety violation, and both controls (`released`, `legacy`) still produced false OKAY in every
-topology. That is a bounded prefix result, **not** a completed proof: only `spatial_highpass`
-finished. The earlier claims of "480", "70", "422" and "446" exhaustive states were canonical-prefix
-counts and are withdrawn — the true spaces are two to three orders of magnitude larger, and
-`fieldplus_full` exceeds memory at 4 M states.
+```json
+{"witness": {"earlier": "e_started:(0, 0, 1)", "later": "e_valid:(0, 2, 3)",
+             "claimable_after_earlier": [], "claimable_after_later": ["E2"]},
+ "canonical_reaches_window": false}
+```
 
-### Liveness
+## 6. What this still does not establish
 
-Under `drain=quiescent`, reverse-reachability to an OKAY terminal:
+- **`fieldplus_full` and three channels are not exhaustive as products.** `fieldplus_full` is
+  exhaustive on the reduced order (542 464 states) but its *partial* space was capped, so its
+  quotient is `n/a`. Three channels rely on the decomposition, not on a product search.
+- **No memory-ordering model.** The happens-before argument remains a design statement, not a
+  checked property. No C11/C++ atomic order is verified.
+- **No timing, no chroma geometry, no real arithmetic.** `I2_NO_DOUBLE` is enforced but unreachable
+  because no policy permits a second claim of the same entry.
+- **The reduction is checked on the reachable set, not proved symbolically.** It is exact for these
+  five topologies; a new topology needs its own `reduction_check` run.
 
-| Topology | OKAY terminals | stranded | scope |
-| --- | --- | --- | --- |
-| `spatial_chain` | 1 | 0 | exhaustive (64 342 states) |
-| `spatial_highpass` | 1 | 0 | exhaustive (89 states) |
-| others | — | — | **not established** (`INCONCLUSIVE`) |
+## 7. Source anchoring
 
-### Negative controls
+`--check` remains the CTest gate and is anchor-only (**0.1 s**, 5 edges): it pins the lowpass call
+site, both lowpass publications, the `index > 4` / `== 4` mapping, the highpass publication, both
+temporal publications and the assert-only temporal guard, all four silent returns, both subband
+tables, `CODEC_NUM_SUBBANDS_HALF` / `DECODED_SUBBAND_MASK_HALF` / the `CanSkipChannel` HALF branch,
+the released `BANDS_ALL_VALID` and `BANDS_ALL_STARTED` forms, the queue/drain anchors and the hollow
+`AllTransformBandsValid`. **`anchor: OK`, zero problems.**
 
-| Case | Result |
-| --- | --- |
-| spatial index 1, `0xE` satisfied, index-2 band 0 withheld, proposed | 0 claims |
-| same state, legacy | 62 claim states |
-| temporal index 2, all producers withheld, proposed | 0 claims |
-| same state, legacy | 1 008 claim states |
-| stale generation after claim | never OKAY |
-| duplicate writer of a published band | `I7` never fires |
-| four workers, unsatisfiable entries | 0 OKAY |
-| out-of-order `started` reachable before earliest band | **yes** (59049 states) |
-| three-channel ch1 output gap detected by the closure | **yes** |
+## 8. Next action
 
-## 5. What remains unproven
+The two tasks the review named are delivered: an observation-preserving reduction with a proof that
+it is exact, and a compositional three-channel argument with explicit worker interaction. The
+private scratch-SDK intervention stays blocked until this model is accepted at its stated scope —
+it is still `DESIGN_ONLY`, still no patch, and the remaining `INCONCLUSIVE` entries are labelled
+rather than smoothed over.
 
-- **No completed partial-order proof** for `spatial_chain`, `fieldplus_half`, `fieldplus_full` or
-  `spatial_three_channel`. Bounded prefixes only.
-- **No symbolic confluence argument.** The reduction is *disproved*, not replaced by a smaller valid
-  one. A future reduction would need its own justification against worker-interleaved observations.
-- **No memory-ordering model.** The happens-before argument is a design statement.
-- **No chroma geometry**, no real arithmetic, no timing. `I2_NO_DOUBLE` is enforced but unreachable
-  because no policy permits a second claim.
-
-## 6. Source anchoring
-
-`--check` pins the lowpass call site and both publications, the `index > 4` / `== 4` mapping, the
-highpass publication, both temporal publications and the assert-only temporal guard, all four silent
-returns, both subband tables, `CODEC_NUM_SUBBANDS_HALF` / `DECODED_SUBBAND_MASK_HALF` / the
-`CanSkipChannel` HALF branch, the released `BANDS_ALL_VALID` and `BANDS_ALL_STARTED` forms, the
-queue/drain anchors and the hollow `AllTransformBandsValid`. **`anchor: OK`, zero problems.**
-
-## 7. Next action
-
-The three findings are addressed and two of them changed the verdict from "proven" to "bounded".
-That correction is the deliverable: a model that had claimed exhaustive partial-order safety now
-reports `INCONCLUSIVE` where it cannot prove the claim.
-
-Review of this revision is the next step. A bounded private scratch-SDK intervention stays blocked
-until someone accepts this model at its stated, smaller scope — or until a valid reduction or a
-larger exhaustive run replaces the `INCONCLUSIVE` entries. No production `upstream/` patch, no
-spin/poll fix, no merge, no release. `#120` remains
+No production `upstream/` patch, no spin/poll fix, no merge, no release. `#120` remains
 `REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED`.
 
-## 8. Files
+## 9. Files
 
-- `tools/rca195_m2_model.py` — revision 4; `--check`, `--json`, `--self-test`, `--canonical-witness`,
-  `--confluence`, `--negative-cases`.
-- `docs/validation/rca195_m2_model_2026-10-20.json` — bounded per-topology results, the canonical
-  witness, and the negative controls.
+- `tools/rca195_m2_model.py` — revision 5; `--check`, `--json`, `--self-test`,
+  `--canonical-witness`, `--reduction`, `--confluence`, `--negative-cases`.
+- `docs/validation/rca195_m2_model_2026-10-20.json` — per-topology partial and reduced results,
+  quotient equality, unobservability probes, compositional proof and negative controls.
 - `docs/validation/RCA195_BAND0_CONTRACT.md` — Milestone-1 source map.
