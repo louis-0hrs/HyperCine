@@ -1,0 +1,3582 @@
+{
+  "artifacts": [
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "BGRA",
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "BGRA_call0_frame0.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "bottom_up",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "81d19e0d5781043eb0f94826594e54853cbba929e09516aa0918d20e0ed2da87",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "BGRA",
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "BGRA_call0_frame1.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "bottom_up",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "e6d70fd44d6e5e8ce0fa477670358c08657a1311e60417755be15c8a012002e7",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "BGRA",
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "BGRA_call1_frame0.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "bottom_up",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "81d19e0d5781043eb0f94826594e54853cbba929e09516aa0918d20e0ed2da87",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "BGRA",
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "BGRA_call1_frame1.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "bottom_up",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "e6d70fd44d6e5e8ce0fa477670358c08657a1311e60417755be15c8a012002e7",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "BGRA",
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "BGRA_call2_frame0.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "bottom_up",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "81d19e0d5781043eb0f94826594e54853cbba929e09516aa0918d20e0ed2da87",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "BGRA",
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "BGRA_call2_frame1.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "bottom_up",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "e6d70fd44d6e5e8ce0fa477670358c08657a1311e60417755be15c8a012002e7",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 17676,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "observations.json",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "versioned_test_observer",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "c669b34c802d52b76ffdf797df957638bbd6dc53db1bc7d349b22945ab5056f9",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2930956,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "original_sdk.cfhd",
+      "input_sha256": [
+        "9c56564ff632fd8629327e30ca7ae7e4775d5588803056c750ac908e84698971",
+        "215ef9f6f62e6644de3fae26e17ce2966234184b0b6ff48fbd69158dfc2a5d51"
+      ],
+      "producer": "original_sdk_encoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 16588800,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YUY2",
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "source_frame0.yuy2",
+      "input_sha256": [],
+      "pitch": 7680,
+      "producer": "versioned_test_source_generator",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "9c56564ff632fd8629327e30ca7ae7e4775d5588803056c750ac908e84698971",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 16588800,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YUY2",
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "source_frame1.yuy2",
+      "input_sha256": [],
+      "pitch": 7680,
+      "producer": "versioned_test_source_generator",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "215ef9f6f62e6644de3fae26e17ce2966234184b0b6ff48fbd69158dfc2a5d51",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_frame0_base_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "718c3f136cfc9dfd5ea1fcc5cd68248d392118c8b2a2f9719c3c29758baf8f07",
+      "stage": {
+        "band": 0,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_frame0_base_ll",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_frame1_base_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "c8128ffda56140cae981e2d48c07424554336a3d5edd8fe5b8442e00fd83895b",
+      "stage": {
+        "band": 0,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_frame1_base_ll",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 259200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band0.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "b94ab39fab0e8e53e3ed6ba9b4dd7951dc3f85d7af9354894105c41b8e2bcc3d",
+      "stage": {
+        "band": 0,
+        "channel": 0,
+        "height": 270,
+        "id": "ch0_resident_band0",
+        "level": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 259200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band1.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "c3fd2781c131693c69d4cded9bb0741606e5072d12d69cc96c834d901378c440",
+      "stage": {
+        "band": 1,
+        "channel": 0,
+        "height": 270,
+        "id": "ch0_resident_band1",
+        "level": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 32,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band10.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "83e2e720c8119c502e50af9b316c7747a657cb18de48301e38ec2909695b793e",
+      "stage": {
+        "band": 3,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_resident_band10",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band11.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "stage": {
+        "band": 1,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_resident_band11",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band12.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "stage": {
+        "band": 2,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_resident_band12",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band13.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "stage": {
+        "band": 3,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_resident_band13",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 9,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band14.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "stage": {
+        "band": 1,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_resident_band14",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band15.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "stage": {
+        "band": 2,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_resident_band15",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band16.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "stage": {
+        "band": 3,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_resident_band16",
+        "level": 1,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 9,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 259200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band2.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766",
+      "stage": {
+        "band": 2,
+        "channel": 0,
+        "height": 270,
+        "id": "ch0_resident_band2",
+        "level": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 32,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 259200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band3.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766",
+      "stage": {
+        "band": 3,
+        "channel": 0,
+        "height": 270,
+        "id": "ch0_resident_band3",
+        "level": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 16,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band4.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "c919afac0ec2e8a0dc91510c9bd8b83f083c3fc093a42ad7f821ef239874de0e",
+      "stage": {
+        "band": 1,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_resident_band4",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 8,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band5.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980",
+      "stage": {
+        "band": 2,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_resident_band5",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 8,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band6.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980",
+      "stage": {
+        "band": 3,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_resident_band6",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 4,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band7.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "4f2d50a5e53619182a32d954eff3c4744a0b870be09f8477375f188cd2002c3a",
+      "stage": {
+        "band": 0,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_resident_band7",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band8.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "6a7f8152b76900e269c78ab52e9442a28fa90471e7545bc95b72a8678d096305",
+      "stage": {
+        "band": 1,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_resident_band8",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_resident_band9.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "18219d432ec2954a55078007e4b208244b42f7ec59950a012360d0d9e687891c",
+      "stage": {
+        "band": 2,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_resident_band9",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_temporal_high.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "8d53a8aae8bc98b6b5c769257f10e388fc36b678a750738adaa25256e2d10b9f",
+      "stage": {
+        "band": 1,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_temporal_high",
+        "level": 2,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 2,
+        "wavelet_type": 4,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_temporal_low.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "46e24d49acc671cbc010ccfca6cec9cba50aff8f8060bd1e2b5e9eba87d6d665",
+      "stage": {
+        "band": 0,
+        "channel": 0,
+        "height": 1080,
+        "id": "ch0_temporal_low",
+        "level": 2,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 2,
+        "wavelet_type": 4,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch0_wavelet4_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+      "stage": {
+        "band": 0,
+        "channel": 0,
+        "height": 540,
+        "id": "ch0_wavelet4_ll",
+        "level": 3,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_frame0_base_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "0234276dc059c7f4f3f637f10f9e90598fff91ba1ff5b851fc9c7e5d16e4a863",
+      "stage": {
+        "band": 0,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_frame0_base_ll",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_frame1_base_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "2411329311209eeaf808125123ccafef291be47bd5e39f9615d920ef17092e35",
+      "stage": {
+        "band": 0,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_frame1_base_ll",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band0.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "ac30aeb09db24b3416d70e273121ea470e0d7060618d6aabf376b9d9a7df3d95",
+      "stage": {
+        "band": 0,
+        "channel": 1,
+        "height": 270,
+        "id": "ch1_resident_band0",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band1.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "7a75b81b77e86609ccfc0465960b34fd4156d21847b991c9d90e3d9ed5b71232",
+      "stage": {
+        "band": 1,
+        "channel": 1,
+        "height": 270,
+        "id": "ch1_resident_band1",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 32,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band10.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 3,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_resident_band10",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band11.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 1,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_resident_band11",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band12.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 2,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_resident_band12",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band13.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 3,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_resident_band13",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band14.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 1,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_resident_band14",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band15.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 2,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_resident_band15",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band16.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 3,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_resident_band16",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band2.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "stage": {
+        "band": 2,
+        "channel": 1,
+        "height": 270,
+        "id": "ch1_resident_band2",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 32,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band3.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "stage": {
+        "band": 3,
+        "channel": 1,
+        "height": 270,
+        "id": "ch1_resident_band3",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 16,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band4.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "04aed2f59bfda03b1ce2697dda9cd1603098af6b43dc932d43e36e181a9be7e1",
+      "stage": {
+        "band": 1,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_resident_band4",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 8,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band5.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 2,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_resident_band5",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 8,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band6.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 3,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_resident_band6",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 4,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band7.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "9a3a9bbf5b0d9149a6e89bd5a943e7a629a30ea97ae01d034a4512942dfba6c7",
+      "stage": {
+        "band": 0,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_resident_band7",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band8.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 1,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_resident_band8",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_resident_band9.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 2,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_resident_band9",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_temporal_high.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "5a88eaa9925519c43bbe05f8e7feef57b72b0a798d4e759fd47f7a3f69f56d6d",
+      "stage": {
+        "band": 1,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_temporal_high",
+        "level": 2,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 2,
+        "wavelet_type": 4,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_temporal_low.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "f3a72b59810aa7d8d85923eaeb5f6b0e6e00717fbaddc4d54b6e6692cc7479e3",
+      "stage": {
+        "band": 0,
+        "channel": 1,
+        "height": 1080,
+        "id": "ch1_temporal_low",
+        "level": 2,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 2,
+        "wavelet_type": 4,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch1_wavelet4_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+      "stage": {
+        "band": 0,
+        "channel": 1,
+        "height": 540,
+        "id": "ch1_wavelet4_ll",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_frame0_base_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "b5435ae5de8ddcd17a739570278f2cc6abd729b73a4eadf2e9cafec36ae95344",
+      "stage": {
+        "band": 0,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_frame0_base_ll",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_frame1_base_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "6c7fdef8d08d91c106d0a91f247168a3cea0e59e8f31efb857bd969af7a0297c",
+      "stage": {
+        "band": 0,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_frame1_base_ll",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band0.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "0fa7028a19e92a4d181f9ba47aa90d073287119644d160f9bfc88fd7f19b1d94",
+      "stage": {
+        "band": 0,
+        "channel": 2,
+        "height": 270,
+        "id": "ch2_resident_band0",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band1.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "stage": {
+        "band": 1,
+        "channel": 2,
+        "height": 270,
+        "id": "ch2_resident_band1",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 32,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band10.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 3,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_resident_band10",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band11.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 1,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_resident_band11",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band12.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 2,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_resident_band12",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band13.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 3,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_resident_band13",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 1,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band14.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 1,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_resident_band14",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band15.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 2,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_resident_band15",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 6,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band16.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "stage": {
+        "band": 3,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_resident_band16",
+        "level": 1,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 0,
+        "wavelet_type": 5,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band2.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "e0bcc7cca8d5f7a2ef60f383dcfcba78cf46221e04d4e5dab48d848d840cd292",
+      "stage": {
+        "band": 2,
+        "channel": 2,
+        "height": 270,
+        "id": "ch2_resident_band2",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 32,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band3.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "stage": {
+        "band": 3,
+        "channel": 2,
+        "height": 270,
+        "id": "ch2_resident_band3",
+        "level": 4,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 16,
+        "wavelet": 5,
+        "wavelet_type": 3,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band4.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 1,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_resident_band4",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 8,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band5.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "83d98921afab00406c1486b2469fae655eec4ffe8b18c2e831b84c19c5e8c96c",
+      "stage": {
+        "band": 2,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_resident_band5",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 8,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band6.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 3,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_resident_band6",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 4,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band7.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "7e8661dee33997efc65bf70c92f0d0aeb4061774c6c4631c38d5c4dff6db3286",
+      "stage": {
+        "band": 0,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_resident_band7",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band8.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 1,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_resident_band8",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_resident_band9.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "stage": {
+        "band": 2,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_resident_band9",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 12,
+        "wavelet": 3,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_temporal_high.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "6b7581252f1fa97ba4a8b6a3b8784a02d8f3b4770e43e2bc4c9b68a3e5d07742",
+      "stage": {
+        "band": 1,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_temporal_high",
+        "level": 2,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 2,
+        "wavelet_type": 4,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_temporal_low.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "09eae95f0a42fc214491f8c562aeda50242a49d017f985fe24e22b318971afe9",
+      "stage": {
+        "band": 0,
+        "channel": 2,
+        "height": 1080,
+        "id": "ch2_temporal_low",
+        "level": 2,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 2,
+        "wavelet_type": 4,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "capture_point": "resident_buffer_after_original_SDK_full_inverse",
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "stages/ch2_wavelet4_ll.i16le",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+      "stage": {
+        "band": 0,
+        "channel": 2,
+        "height": 540,
+        "id": "ch2_wavelet4_ll",
+        "level": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "producer": "original_sdk_post_inverse_resident_buffer",
+        "quantization": 1,
+        "wavelet": 4,
+        "wavelet_type": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YU64",
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "YU64_call0_frame0.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "top_down",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "8cdc18689c7dc76351d9b944aebc1a64040b5fcb405e33d2f78ac010d3bea7ee",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YU64",
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "YU64_call0_frame1.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "top_down",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "c5d1f136bca36cddab4f91a7967ac1a063f3989fcc5c1a565fb363b829456c70",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YU64",
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "YU64_call1_frame0.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "top_down",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "8cdc18689c7dc76351d9b944aebc1a64040b5fcb405e33d2f78ac010d3bea7ee",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YU64",
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "YU64_call1_frame1.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "top_down",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "c5d1f136bca36cddab4f91a7967ac1a063f3989fcc5c1a565fb363b829456c70",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YU64",
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "YU64_call2_frame0.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "top_down",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "8cdc18689c7dc76351d9b944aebc1a64040b5fcb405e33d2f78ac010d3bea7ee",
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 33177600,
+      "exporter_binary": {
+        "byte_length": 1076736,
+        "sha256": "10578298137d97a1ee3d9fdfd2cb3e0b8e15ea19cbff899462a3b8c9b014bbd6"
+      },
+      "exporter_source": {
+        "byte_length": 16316,
+        "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+      },
+      "format": "YU64",
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "id": "YU64_call2_frame1.raw",
+      "input_sha256": [
+        "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      ],
+      "orientation": "top_down",
+      "pitch": 15360,
+      "producer": "original_sdk_decoder",
+      "qualification": "bounded_single_cpu_control",
+      "schema": "hypercine.gop2.artifact/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "sdk_static_library": {
+        "byte_length": 2780282,
+        "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+      },
+      "sha256": "c5d1f136bca36cddab4f91a7967ac1a063f3989fcc5c1a565fb363b829456c70",
+      "status": "AVAILABLE"
+    }
+  ],
+  "geometry": [
+    3840,
+    2160
+  ],
+  "issue": 189,
+  "limitations": [
+    "Bounded control only; no default-threading qualification.",
+    "Post-inverse resident bands are not pre-inverse entropy goldens.",
+    "No intermediate stage is synthesized from HyperCine output."
+  ],
+  "observation_v1_note": "orientation in observations/1 names the source/YU64 orientation; BGRA uses bottom-up storage",
+  "observations_sha256": "c669b34c802d52b76ffdf797df957638bbd6dc53db1bc7d349b22945ab5056f9",
+  "orientation_contract": {
+    "decoded_BGRA": "bottom_up",
+    "decoded_YU64": "top_down",
+    "source_YUY2": "top_down"
+  },
+  "reference_status": "AVAILABLE",
+  "release_gate": "BLOCKED",
+  "required_missing": [
+    "candidate_187_exact_head_comparison",
+    "pre_inverse_entropy_coefficients",
+    "final_signed_planar_oracle",
+    "parsed_chunk_topology"
+  ],
+  "schema": "hypercine.gop2.manifest/1",
+  "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7"
+}

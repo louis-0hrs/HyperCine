@@ -20,6 +20,17 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': n} for n in REQUIRED if n != 'standalone_external_decode']})
 
+    def test_missing_gop2_integrity_fails(self):
+        self.assertIn('gop2_reference_inventory_integrity', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'gop2_reference_inventory_integrity']})
+
+    def test_missing_gop2_stage_contract_fails(self):
+        self.assertIn('gop2_original_stage_contract', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'gop2_original_stage_contract']})
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
