@@ -4,8 +4,9 @@
   "date": "2026-10-20",
   "scope": "isolated GOP2-derived wavelet5-to-wavelet4 scalar inverse stage",
   "candidate": {
-    "base_commit": "a085c43fd1ba63d555997abbef16e1de9f52040b",
-    "state": "corrected working tree; source changes are not committed",
+    "tested_worktree_base_commit": "a085c43fd1ba63d555997abbef16e1de9f52040b",
+    "correction_committed_in_pr_head": "4a7ba47f0ff8b38911667e27449be88b96d18019",
+    "state": "native evidence was produced from a corrected working tree; the corrected implementation was already committed at PR head 4a7ba47 before this evidence was added",
     "files": {
       "src/cpu/decode_spatial_scalar.cpp": "ba093f6ee894a2e60eb0903845aaa8023643f867a4e32346177e164577aac92a",
       "src/cpu/decode_spatial_scalar.h": "efaaffe146954455ce1d6cc8dfb020ae1e7366347f6f5c4ce34613c03b2f3a18",
