@@ -4,6 +4,7 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """Test actual autonomous CPU FilmScan3 samples; no manifest tables enter encoder."""
 import argparse
+from validation_support import portable_command
 import array
 import math
 import struct
@@ -168,8 +169,8 @@ def main():
                    'sources': [{'path': name, 'sha256': gate.sha((gate.ROOT/name).read_bytes())}for name in
                                ['include/hypercine/filmscan3.h','src/cpu/filmscan3_frontend.cpp','src/core/filmscan3_encoder.cpp',
                                 'src/cpu/wavelet_cpu.cpp','src/cpu/standalone_frontend.cpp','src/core/standalone_encoder.cpp',
-                                'src/core/standalone_codebook.h','tools/hypercine_encode_filmscan3.cpp','tests/validate_filmscan3.py']],
-                   'command': [sys.executable]+sys.argv,
+                                'src/core/standalone_codebook.h','tools/hypercine_encode_filmscan3.cpp','tests/validate_filmscan3.py','tests/validation_support.py']],
+                   'command_template': portable_command(Path(__file__).name, sys.argv[1:]),
                    'windows_gopro_decoder': 'PENDING: actual one-worker Windows test required',
                    'unquantized_windows_intermediates': 'PENDING: Windows stage dumps not supplied'})
     if args.cpu_encoder:

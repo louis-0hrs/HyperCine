@@ -8,6 +8,7 @@ Wrap one encoder-produced CFHD packet in a minimal unindexed AVI, decode using
 FFmpeg, check geometry/format/quality against independently calculated planes.
 """
 import argparse
+from validation_support import require
 import hashlib
 import json
 import math
@@ -107,19 +108,19 @@ def main():
             encode_seconds = time.monotonic()-started
             packet = packet_path.read_bytes()
             subprocess.run([args.encoder, input_name, str(packet_path), str(width), str(height)], check=True)
-            assert packet_path.read_bytes() == packet, 'non-deterministic repeated CLI encode'
+            require(packet_path.read_bytes() == packet, 'non-deterministic repeated CLI encode')
             container = root / (pattern+'.avi')
             container.write_bytes(avi(packet, width, height))
             probe = subprocess.check_output([args.ffprobe, '-v', 'error', '-show_streams', '-of', 'json', str(container)])
             stream = json.loads(probe)['streams'][0]
-            assert (stream['codec_name'], stream['width'], stream['height'], stream['pix_fmt']) == ('cfhd', width, height, 'yuv422p10le'), stream
+            require((stream['codec_name'], stream['width'], stream['height'], stream['pix_fmt']) == ('cfhd', width, height, 'yuv422p10le'), stream)
             output = root / (pattern+'.yuv')
             subprocess.run([args.ffmpeg, '-v', 'error', '-xerror', '-y', '-i', str(container), '-frames:v', '1',
                             '-c:v', 'rawvideo', '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', str(output)], check=True)
             raw = output.read_bytes()
-            assert len(raw) == width*height*4, len(raw)
+            require(len(raw) == width*height*4, len(raw))
             decoded = struct.unpack('<%dH' % count, raw)
-            assert all(v <= 1023 for v in decoded), 'p10 range'
+            require(all(v <= 1023 for v in decoded), 'p10 range')
             expected = sum(planes, [])
             errors = [a-b for a, b in zip(decoded, expected)]
             plane_metrics = []
@@ -142,7 +143,7 @@ def main():
                             '-vf', 'scale=in_color_matrix=bt709:out_color_matrix=bt709:in_range=limited:out_range=full:flags=bicubic',
                             '-frames:v', '1', '-c:v', 'rawvideo', '-pix_fmt', 'bgra', '-f', 'rawvideo', str(rgb_path)], check=True)
             rgb = rgb_path.read_bytes()
-            assert len(rgb) == width*height*4
+            require(len(rgb) == width*height*4, 'decoded BGRA length mismatch')
             rgb_errors = [rgb[(y*width+x)*4+c]-rows[y][x][c]
                           for y in range(height) for x in range(width) for c in range(3)]
             rgb_mse = sum(e*e for e in rgb_errors)/len(rgb_errors)
@@ -157,7 +158,7 @@ def main():
                             '-vf', 'scale=in_color_matrix=bt709:out_color_matrix=bt709:in_range=limited:out_range=full:flags=bicubic',
                             '-frames:v', '1', '-c:v', 'rawvideo', '-pix_fmt', 'bgra', '-f', 'rawvideo', str(baseline_path)], check=True)
             baseline = baseline_path.read_bytes()
-            assert len(baseline) == len(rgb)
+            require(len(baseline) == len(rgb), 'reference BGRA length mismatch')
             baseline_errors = [baseline[(y*width+x)*4+c]-rows[y][x][c]
                                for y in range(height) for x in range(width) for c in range(3)]
             baseline_mse = sum(e*e for e in baseline_errors)/len(baseline_errors)
@@ -174,16 +175,16 @@ def main():
             if width == height == 128 and pattern in ('flat','gradient','canonical'):
                 evidence = json.loads((Path(__file__).resolve().parents[1]/'docs/validation/macos_standalone_2026-10-14.json').read_text())
                 golden = next(item for item in evidence['samples'] if item['pattern']==pattern)
-                assert result['sample_sha256'] == golden['sample_sha256'], 'original 128 packet changed'
-                assert result['decoded_sha256'] == golden['decoded_sha256'], 'original decoded 128 golden changed'
-            assert psnr > 35, result
+                require(result['sample_sha256'] == golden['sample_sha256'], 'original 128 packet changed')
+                require(result['decoded_sha256'] == golden['decoded_sha256'], 'original decoded 128 golden changed')
+            require(psnr > 35, result)
             if pattern == 'flat':
-                assert mse == 0, result
+                require(mse == 0, result)
             # GradientChecker has discontinuous chroma above 4:2:2's horizontal
             # bandwidth. Record its RGB loss separately; do not relabel it as
             # quantization loss or assert universal RGB quality for this format.
             if pattern in ('flat','canonical'):
-                assert rgb_psnr is None or rgb_psnr > 35, result
+                require(rgb_psnr is None or rgb_psnr > 35, result)
         if args.output_dir:
             (root/'validation.json').write_text(json.dumps(results, indent=2)+'\n')
 

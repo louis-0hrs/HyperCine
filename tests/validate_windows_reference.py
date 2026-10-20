@@ -10,6 +10,7 @@ No Windows sample bytes are inferred from hashes. Only parsed whitelist metadata
 values are normalized in copies after original file hash verification.
 """
 import argparse
+from validation_support import integer, hex_digest, require, portable_command
 import hashlib
 import json
 from pathlib import Path
@@ -56,6 +57,17 @@ def load_manifest(path):
 
 
 def validate_frame(frame):
+    for key in ('width', 'height', 'pitch', 'frame_index', 'input_byte_length',
+                'sdk_byte_length', 'cuda_byte_length', 'fs_rate_limiter', 'previous_sample_bytes'):
+        integer(frame[key])
+    require(frame['normalized_equal'] is True, 'normalized equality must be true')
+    for key in ('input_sha256', 'sdk_sha256', 'cuda_sha256',
+                'sdk_normalized_sha256', 'cuda_normalized_sha256'):
+        hex_digest(frame[key])
+    for table in ('quant', 'scale'):
+        require(type(frame[table]) is list, 'invalid table')
+        for value in frame[table]:
+            integer(value, 1, 32768)
     w, h = frame['width'], frame['height']
     if (w, h, frame['pitch']) != (1920, 1080, 7680):
         raise ValueError('only the validated 1080p oracle is supported')
@@ -64,6 +76,11 @@ def validate_frame(frame):
     if len(frame['quant']) != 36 or len(frame['scale']) != 36 or len(frame['bands']) != 30:
         raise ValueError('invalid quant/scale/band count')
     for i, b in enumerate(frame['bands']):
+        for key in ('channel', 'subband', 'wavelet', 'band', 'width', 'height', 'quant', 'scale'):
+            integer(b[key])
+        for encoder in ('sdk', 'cuda'):
+            hex_digest(b[encoder + '_coeff_fnv64'], 16)
+            hex_digest(b[encoder + '_payload_sha256'])
         channel, sub = divmod(i, 10)
         wavelet = 2 if sub <= 3 else (1 if sub <= 6 else 0)
         band = 0 if sub == 0 else ((sub-1) % 3)+1
@@ -228,10 +245,10 @@ def main():
               'probe_sha256': sha(args.probe.read_bytes()),
               'compiler': compiler_info(),
               'cmake': subprocess.check_output(['cmake', '--version'], text=True).splitlines()[0],
-              'command': [sys.executable] + sys.argv,
+              'command_template': portable_command(Path(__file__).name, sys.argv[1:]),
               'source_files': [{'path': name, 'sha256': sha((ROOT/name).read_bytes())} for name in
                                ['CMakeLists.txt', 'tests/reference_frame_generator.h',
-                                'tests/validate_windows_reference.py', 'tests/reference_sample.py', 'tools/hypercine_reference_probe.cpp',
+                                'tests/validate_windows_reference.py', 'tests/validation_support.py', 'tests/reference_sample.py', 'tools/hypercine_reference_probe.cpp',
                                 'src/cpu/standalone_frontend.cpp', 'src/core/standalone_encoder.cpp',
                                 'src/cpu/wavelet_cpu.cpp']],
               'import_provenance': json.loads((CORPUS / 'import_provenance.json').read_text()),

@@ -4,6 +4,7 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """Fail-closed replay of the pinned Windows quality-state oracle manifests."""
 import argparse
+from validation_support import integer, require
 import hashlib
 import json
 import os
@@ -21,6 +22,32 @@ def digest(path):
         for block in iter(lambda: stream.read(4 * 1024 * 1024), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def validate_probe(actual):
+    require(type(actual) is dict and set(actual) == {'limiter', 'overbitrate', 'quant', 'scale'},
+            'invalid probe result fields')
+    for key in ('limiter', 'overbitrate'):
+        integer(actual[key], 0, 2**31-1)
+    for key in ('quant', 'scale'):
+        require(type(actual[key]) is list and len(actual[key]) == 36, 'invalid probe table')
+        for value in actual[key]:
+            integer(value, 1, 32768)
+
+
+def validate_frames(frames, suite):
+    width, height, count = {'1080p-16f': (1920, 1080, 16),
+                            'sequence-120f': (1920, 1080, 120),
+                            '3840x2160-1f': (3840, 2160, 1),
+                            '7680x4320-1f': (7680, 4320, 1)}[suite]
+    require(type(frames) is list and len(frames) == count, 'frame inventory mismatch')
+    for index, frame in enumerate(frames):
+        for key in ('frame_index', 'width', 'height', 'previous_sample_bytes', 'fs_rate_limiter'):
+            integer(frame[key])
+        require((frame['frame_index'], frame['width'], frame['height']) == (index, width, height),
+                'frame order or geometry mismatch')
+        validate_probe(dict(limiter=frame['fs_rate_limiter'], overbitrate=0,
+                            quant=frame['quant'], scale=frame['scale']))
 
 
 def main():
@@ -101,6 +128,7 @@ def main():
         expected_count = 16 if suite == "1080p-16f" else (120 if suite == "sequence-120f" else 1)
         if len(frames or []) != expected_count:
             raise ValueError(f"frame inventory mismatch: {manifest_path}, expected={expected_count}, actual={len(frames or [])}")
+        validate_frames(frames, suite)
         prev_limiter = 0
         prev_overbitrate = 0
         transitions = 0
@@ -110,6 +138,7 @@ def main():
             argv = [str(args.probe.resolve()), str(enum_value), str(width), str(height), str(idx),
                     str(prev_limiter), str(prev_bytes), str(prev_overbitrate)]
             actual = json.loads(subprocess.check_output(argv, text=True))
+            validate_probe(actual)
             pairs = (("fs_rate_limiter", actual["limiter"]), ("quant", actual["quant"]), ("scale", actual["scale"]))
             for key, got in pairs:
                 want = frame["fs_rate_limiter"] if key == "fs_rate_limiter" else frame[key]
