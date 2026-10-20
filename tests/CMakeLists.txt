@@ -120,6 +120,10 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2d test_phase2d.cpp)
     target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2d COMMAND test_phase2d)
+    set_tests_properties(test_phase2d PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_entropy_capacity test_entropy_capacity.cpp)
     target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic)
