@@ -24,10 +24,16 @@ any production decoder path. Related issues: #205, #120, #160.
 
 Two bounded diagnostic options support fresh-process trials:
 
-- `HYPERCINE_PHASE2A_CAPTURE_DIR=<dir>` writes `phase2a_host.cfhd` and
-  `phase2a_device.cfhd` once;
+- `HYPERCINE_PHASE2A_CAPTURE_DIR=<new-dir>` **atomically reserves a previously
+  nonexistent directory** and writes `phase2a_host.cfhd` and `phase2a_device.cfhd`
+  once. Reusing an existing directory fails rather than truncating a prior
+  registered packet pair; its parent directory must already exist.
 - `test_phase2a --decode <packet>` performs exactly one decode per process and prints
   the same diagnostics plus PSNR and first difference against the synthetic source.
+  This diagnostic accepts only 0 < packet length <= 2 MiB and an original
+  sample header declaring exactly 1920x1080; it fails on unexpected decoded
+  BGRA geometry, stride smaller than four bytes per pixel, or a short image.
+  This is **not a general CineForm decoder or an untrusted-file fuzz target**.
 
 ## Packet comparison
 
