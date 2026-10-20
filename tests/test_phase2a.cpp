@@ -31,30 +31,55 @@ extern "C" {
 #include "hypercine/canonical.h"
 #include "hypercine/entropy_parallel.h"
 #include "hypercine/phase2a.h"
+#include "hypercine/phase2c.h"
+
+#include "bitstream.h"
+#include "decoder.h"
 
 #include <algorithm>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <cstring>
 #include <cmath>
 
 namespace {
 
-bool Decode(const std::vector<uint8_t>& sample, int width, int height, std::vector<uint8_t>* image, int* pitch_out) {
+struct DecodeResult {
+    bool opened = false;
+    CFHD_Error open_error = CFHD_ERROR_OKAY;
+    CFHD_Error prepare_error = CFHD_ERROR_OKAY;
+    CFHD_Error decode_error = CFHD_ERROR_OKAY;
+    int decoded_width = 0;
+    int decoded_height = 0;
+    int pitch = 0;
+    CFHD_PixelFormat format = CFHD_PIXEL_FORMAT_UNKNOWN;
+};
+
+bool Decode(const std::vector<uint8_t>& sample, int width, int height, std::vector<uint8_t>* image, DecodeResult* result) {
     CFHD_DecoderRef decoder = nullptr;
-    if (CFHD_OpenDecoder(&decoder, nullptr) != CFHD_ERROR_OKAY) return false;
+    result->open_error = CFHD_OpenDecoder(&decoder, nullptr);
+    if (result->open_error != CFHD_ERROR_OKAY) return false;
+    result->opened = true;
     int aw = 0, ah = 0;
     CFHD_PixelFormat fmt = CFHD_PIXEL_FORMAT_UNKNOWN;
-    CFHD_Error err = CFHD_PrepareToDecode(decoder, 0, 0, CFHD_PIXEL_FORMAT_BGRA, CFHD_DECODED_RESOLUTION_FULL,
-                                          CFHD_DECODING_FLAGS_NONE, const_cast<uint8_t*>(sample.data()), sample.size(),
-                                          &aw, &ah, &fmt);
-    if (err != CFHD_ERROR_OKAY) {
+    result->prepare_error = CFHD_PrepareToDecode(decoder, 0, 0, CFHD_PIXEL_FORMAT_BGRA, CFHD_DECODED_RESOLUTION_FULL,
+                                                 CFHD_DECODING_FLAGS_NONE, const_cast<uint8_t*>(sample.data()), sample.size(),
+                                                 &aw, &ah, &fmt);
+    if (result->prepare_error != CFHD_ERROR_OKAY) {
         CFHD_CloseDecoder(decoder);
         return false;
     }
+    result->decoded_width = aw;
+    result->decoded_height = ah;
+    result->format = fmt;
     int32_t pitch = 0;
     CFHD_GetImagePitch(aw > 0 ? aw : width, fmt, &pitch);
     if (pitch <= 0) pitch = width * 4;
+    result->pitch = pitch;
     image->assign(static_cast<size_t>(pitch) * static_cast<size_t>(ah > 0 ? ah : height), 0);
     CFHD_MetadataRef metadata = nullptr;
     CFHD_OpenMetadata(&metadata);
@@ -64,11 +89,149 @@ bool Decode(const std::vector<uint8_t>& sample, int width, int height, std::vect
         unsigned int processflags = PROCESSING_ALL_ON;
         CFHD_SetActiveMetadata(decoder, metadata, TAG_PROCESS_PATH, METADATATYPE_UINT32, &processflags, sizeof(processflags));
     }
-    err = CFHD_DecodeSample(decoder, const_cast<uint8_t*>(sample.data()), sample.size(), image->data(), pitch);
+    result->decode_error = CFHD_DecodeSample(decoder, const_cast<uint8_t*>(sample.data()), sample.size(),
+                                             image->data(), pitch);
     if (metadata) CFHD_CloseMetadata(metadata);
     CFHD_CloseDecoder(decoder);
-    if (pitch_out) *pitch_out = pitch;
-    return err == CFHD_ERROR_OKAY;
+    return result->decode_error == CFHD_ERROR_OKAY;
+}
+
+struct SampleHeaderInfo {
+    bool parsed = false;
+    int error = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t frame_number = 0;
+    uint32_t encode_quality = 0;
+    uint32_t encoder_version = 0;
+    int encoded_format = 0;
+    int input_format = 0;
+    int progressive = 0;
+    int interlaced_flags = 0;
+    size_t parsed_bytes = 0;
+};
+
+SampleHeaderInfo ParseSample(const std::vector<uint8_t>& packet) {
+    SampleHeaderInfo info;
+    BITSTREAM stream;
+    std::memset(&stream, 0, sizeof(stream));
+    InitBitstreamBuffer(&stream, const_cast<uint8_t*>(packet.data()), packet.size(), BITSTREAM_ACCESS_READ);
+    SAMPLE_HEADER header;
+    std::memset(&header, 0, sizeof(header));
+    header.find_lowpass_bands = 1;
+    info.parsed = ParseSampleHeader(&stream, &header);
+    info.error = header.error;
+    info.width = header.width;
+    info.height = header.height;
+    info.frame_number = header.frame_number;
+    info.encode_quality = header.encode_quality;
+    info.encoder_version = header.encoder_version;
+    info.encoded_format = static_cast<int>(header.encoded_format);
+    info.input_format = static_cast<int>(header.input_format);
+    info.progressive = header.hdr_progressive;
+    info.interlaced_flags = header.interlaced_flags;
+    const uint8_t* position = GetBitstreamPosition(&stream);
+    if (position) info.parsed_bytes = static_cast<size_t>(position - packet.data());
+    return info;
+}
+
+void PrintSampleHeader(const char* label, const std::vector<uint8_t>& packet) {
+    const SampleHeaderInfo info = ParseSample(packet);
+    std::cout << label << " parsed=" << (info.parsed ? 1 : 0)
+              << " error=" << info.error
+              << " width=" << info.width << " height=" << info.height
+              << " frame=" << info.frame_number
+              << " quality=" << info.encode_quality
+              << " encoder_version=0x" << std::hex << info.encoder_version << std::dec
+              << " encoded_format=" << info.encoded_format
+              << " input_format=" << info.input_format
+              << " progressive=" << info.progressive
+              << " interlaced_flags=" << info.interlaced_flags
+              << " parsed_bytes=" << info.parsed_bytes << "\n";
+}
+
+void PrintPacket(const char* label, const std::vector<uint8_t>& packet) {
+    std::cout << label << " size=" << packet.size()
+              << " sha256=" << hypercine::Sha256Hex(packet.data(), packet.size()) << "\n";
+}
+
+void PrintContext(const std::vector<uint8_t>& packet, size_t offset) {
+    const size_t begin = offset > 16 ? offset - 16 : 0;
+    const size_t end = std::min(packet.size(), offset + 17);
+    std::cout << "  context[" << begin << ".." << end << ")=";
+    for (size_t i = begin; i < end; ++i) {
+        if (i == offset) std::cout << "[";
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(packet[i]);
+        if (i == offset) std::cout << "]";
+    }
+    std::cout << std::dec << std::setfill(' ') << "\n";
+}
+
+void PrintPacketDiffs(const std::vector<uint8_t>& a, const std::vector<uint8_t>& b) {
+    size_t diffs = 0;
+    const size_t common = std::min(a.size(), b.size());
+    std::cout << "packet size delta=" << (a.size() > b.size() ? a.size() - b.size() : b.size() - a.size()) << "\n";
+    for (size_t i = 0; i < common; ++i) {
+        if (a[i] == b[i]) continue;
+        if (diffs < 32) {
+            std::cout << "packet diff offset=" << i
+                      << " host=0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(a[i])
+                      << " device=0x" << std::setw(2) << static_cast<int>(b[i])
+                      << std::dec << std::setfill(' ') << "\n";
+            if (diffs < 8) {
+                PrintContext(a, i);
+                PrintContext(b, i);
+            }
+        }
+        ++diffs;
+    }
+    std::cout << "packet differing bytes=" << diffs << "\n";
+}
+
+void PrintDecode(const char* label, const DecodeResult& result, const std::vector<uint8_t>& image) {
+    std::cout << label << " open=" << static_cast<int>(result.open_error)
+              << " prepare=" << static_cast<int>(result.prepare_error)
+              << " decode=" << static_cast<int>(result.decode_error)
+              << " width=" << result.decoded_width << " height=" << result.decoded_height
+              << " pitch=" << result.pitch << " format=" << static_cast<int>(result.format)
+              << " bytes=" << image.size()
+              << " sha256=" << hypercine::Sha256Hex(image.data(), image.size()) << "\n";
+}
+
+void PrintPixelDiffs(const std::vector<uint8_t>& a, int a_pitch,
+                     const std::vector<uint8_t>& b, int b_pitch, int width, int height) {
+    if (a_pitch <= 0 || b_pitch <= 0) {
+        std::cout << "pixel comparison unavailable (pitch " << a_pitch << " vs " << b_pitch << ")\n";
+        return;
+    }
+    const size_t rows = static_cast<size_t>(height);
+    if (a.size() < rows * static_cast<size_t>(a_pitch) || b.size() < rows * static_cast<size_t>(b_pitch)) {
+        std::cout << "pixel comparison unavailable (image smaller than height x pitch)\n";
+        return;
+    }
+    size_t differing_bytes = 0;
+    size_t differing_pixels = 0;
+    bool first = true;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            bool pixel_diff = false;
+            for (int c = 0; c < 4; ++c) {
+                const size_t off_a = static_cast<size_t>(y) * static_cast<size_t>(a_pitch) + static_cast<size_t>(x) * 4u + static_cast<size_t>(c);
+                const size_t off_b = static_cast<size_t>(y) * static_cast<size_t>(b_pitch) + static_cast<size_t>(x) * 4u + static_cast<size_t>(c);
+                if (a[off_a] == b[off_b]) continue;
+                ++differing_bytes;
+                pixel_diff = true;
+                if (first) {
+                    std::cout << "first differing pixel x=" << x << " y=" << y << " channel=" << c
+                              << " host=" << static_cast<int>(a[off_a])
+                              << " device=" << static_cast<int>(b[off_b]) << "\n";
+                    first = false;
+                }
+            }
+            if (pixel_diff) ++differing_pixels;
+        }
+    }
+    std::cout << "image differing pixels=" << differing_pixels << " bytes=" << differing_bytes << "\n";
 }
 
 double Psnr(const std::vector<uint8_t>& src, const std::vector<uint8_t>& dec, int width, int height, int pitch) {
@@ -109,9 +272,68 @@ bool Expect(const hypercine::Phase2Run& run, const char* name) {
     return true;
 }
 
+bool WritePacket(const std::string& directory, const char* name, const std::vector<uint8_t>& packet) {
+    const std::string path = directory + "/" + name;
+    std::ofstream out(path, std::ios::binary | std::ios::trunc);
+    if (!out) return false;
+    out.write(reinterpret_cast<const char*>(packet.data()), static_cast<std::streamsize>(packet.size()));
+    return out.good();
+}
+
+bool ReadPacket(const char* path, std::vector<uint8_t>* packet) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) return false;
+    packet->assign(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+    return !packet->empty();
+}
+
+int DecodePacketFile(const char* path) {
+    std::vector<uint8_t> packet;
+    if (!ReadPacket(path, &packet)) {
+        std::cerr << "cannot read packet file\n";
+        return 1;
+    }
+    PrintPacket("packet", packet);
+    PrintSampleHeader("packet header", packet);
+    std::vector<uint8_t> image;
+    DecodeResult result;
+    const bool ok = Decode(packet, 0, 0, &image, &result);
+    PrintDecode("packet decode", result, image);
+    if (ok && result.decoded_width > 0 && result.decoded_height > 0 && result.pitch > 0) {
+        const int w = result.decoded_width;
+        const int h = result.decoded_height;
+        const auto frame = hypercine::MakeFrame(w, h, hypercine::CanonicalPattern::Canonical);
+        std::cout << "packet decode psnr " << Psnr(frame, image, w, h, result.pitch) << " dB\n";
+        bool first = true;
+        size_t differing_pixels = 0;
+        for (int y = 0; y < h; ++y) {
+            for (int x = 0; x < w; ++x) {
+                bool pixel_diff = false;
+                for (int c = 0; c < 4; ++c) {
+                    const size_t source = (static_cast<size_t>(y) * static_cast<size_t>(w) + static_cast<size_t>(x)) * 4u + static_cast<size_t>(c);
+                    const size_t decoded = static_cast<size_t>(y) * static_cast<size_t>(result.pitch) + static_cast<size_t>(x) * 4u + static_cast<size_t>(c);
+                    if (frame[source] == image[decoded]) continue;
+                    pixel_diff = true;
+                    if (first) {
+                        std::cout << "first source difference x=" << x << " y=" << y << " channel=" << c
+                                  << " source=" << static_cast<int>(frame[source])
+                                  << " decoded=" << static_cast<int>(image[decoded]) << "\n";
+                        first = false;
+                    }
+                }
+                if (pixel_diff) ++differing_pixels;
+            }
+        }
+        std::cout << "source differing pixels=" << differing_pixels << "\n";
+    }
+    return ok ? 0 : 1;
+}
+
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc == 3 && std::string(argv[1]) == "--decode") return DecodePacketFile(argv[2]);
+
     const int width = 1920;
     const int height = 1080;
     const int pitch = width * 4;
@@ -247,24 +469,60 @@ int main() {
     for (size_t i = 0; i < resident.bitstream.size(); ++i) {
         if (resident.bitstream[i] != compact.bitstream[i]) ++bitstream_diffs;
     }
+    PrintPacket("host compact packet", compact.bitstream);
+    PrintSampleHeader("host compact header", compact.bitstream);
+    PrintPacket("device compact packet", resident.bitstream);
+    PrintSampleHeader("device compact header", resident.bitstream);
+    PrintPacketDiffs(compact.bitstream, resident.bitstream);
+    if (const char* capture = std::getenv("HYPERCINE_PHASE2A_CAPTURE_DIR")) {
+        if (WritePacket(capture, "phase2a_host.cfhd", compact.bitstream) &&
+            WritePacket(capture, "phase2a_device.cfhd", resident.bitstream)) {
+            std::cout << "captured immutable packets under HYPERCINE_PHASE2A_CAPTURE_DIR\n";
+        } else {
+            std::cerr << "packet capture failed\n";
+            return 1;
+        }
+    }
+
     std::vector<uint8_t> host_image, device_image;
-    int host_pitch = 0, device_pitch = 0;
-    if (!Decode(compact.bitstream, width, height, &host_image, &host_pitch) ||
-        !Decode(resident.bitstream, width, height, &device_image, &device_pitch) ||
-        host_pitch != device_pitch || host_image != device_image) {
-        std::cerr << "device-resident decode differs from host compact (" << bitstream_diffs << " bitstream bytes)\n";
+    DecodeResult host_decode, device_decode;
+    const bool host_ok = Decode(compact.bitstream, width, height, &host_image, &host_decode);
+    const bool device_ok = Decode(resident.bitstream, width, height, &device_image, &device_decode);
+    PrintDecode("host compact decode", host_decode, host_image);
+    PrintDecode("device compact decode", device_decode, device_image);
+    if (host_ok && device_ok) {
+        PrintPixelDiffs(host_image, host_decode.pitch, device_image, device_decode.pitch, width, height);
+    }
+    if (!host_ok || !device_ok) {
+        std::cerr << "device-resident decode differs from host compact (" << bitstream_diffs
+                  << " bitstream bytes):"
+                  << " host_decode=" << (host_ok ? "ok" : "failed")
+                  << " device_decode=" << (device_ok ? "ok" : "failed") << "\n";
+        return 1;
+    }
+    if (host_decode.pitch != device_decode.pitch) {
+        std::cerr << "device-resident decode differs from host compact (" << bitstream_diffs
+                  << " bitstream bytes): pitch " << host_decode.pitch
+                  << " vs " << device_decode.pitch << "\n";
+        return 1;
+    }
+    if (host_image != device_image) {
+        std::cerr << "device-resident decode differs from host compact (" << bitstream_diffs
+                  << " bitstream bytes): decoded pixels differ\n";
         return 1;
     }
     std::cout << "device and host compact decode identically (" << bitstream_diffs
-              << " header bytes differ, sample size " << compact.bitstream.size() << ")\n";
+              << " bitstream bytes differ, sample size " << compact.bitstream.size() << ")\n";
 
     std::vector<uint8_t> image;
-    int decoded_pitch = 0;
-    if (!Decode(compact.bitstream, width, height, &image, &decoded_pitch)) {
+    DecodeResult compact_decode;
+    if (!Decode(compact.bitstream, width, height, &image, &compact_decode)) {
+        PrintDecode("host compact decode repeat", compact_decode, image);
         std::cerr << "upstream decoder rejected compact bitstream\n";
         return 1;
     }
-    const double psnr = Psnr(frame, image, width, height, decoded_pitch);
+    PrintDecode("host compact decode repeat", compact_decode, image);
+    const double psnr = Psnr(frame, image, width, height, compact_decode.pitch);
     std::cout << "decoded psnr " << psnr << " dB\n";
     if (psnr < 35.0) {
         std::cerr << "psnr below 35 dB\n";
