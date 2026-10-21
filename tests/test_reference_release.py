@@ -5,9 +5,13 @@
 """Regression coverage for green CTest with blocked/missing reference tests."""
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
+import tempfile
 import unittest
 import sys
+from unittest import mock
 
 sys.dont_write_bytecode = True
 
@@ -17,7 +21,7 @@ gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gate)
 
 
-def registration(missing=(), bad_label=(), bad_skip=(), extras=()):
+def raw_registration(missing=(), bad_label=(), bad_skip=(), extras=()):
     tests = []
     for name in gate.REQUIRED:
         if name in missing:
@@ -31,7 +35,11 @@ def registration(missing=(), bad_label=(), bad_skip=(), extras=()):
     for name in extras:
         tests.append(dict(name=name,
                           properties=[dict(name="LABELS", value=[gate.LANE_LABEL])]))
-    return gate.load_registration(json.dumps(dict(tests=tests)))
+    return json.dumps(dict(tests=tests))
+
+
+def registration(**kwargs):
+    return gate.load_registration(raw_registration(**kwargs))
 
 
 def report(results=None, extras=(), omit=()):
@@ -145,6 +153,75 @@ class ReleaseGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             gate.load_registration(json.dumps(dict(tests=[
                 dict(name="x"), dict(name="x")])))
+
+
+def completed(returncode, stdout="", stderr=""):
+    return subprocess.CompletedProcess([], returncode, stdout=stdout, stderr=stderr)
+
+
+class RunnerTests(unittest.TestCase):
+    """The error path must stay a complete schema-3 document and name its CTest."""
+
+    def run_gate(self, argv, run):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "reference-release.json"
+            with mock.patch.object(gate, "_run", run):
+                code = gate.main(argv + ["--output", str(output)])
+            return code, json.loads(output.read_text(encoding="utf-8"))
+
+    def test_error_path_keeps_full_schema_and_diagnostic(self):
+        def run(command):
+            return completed(3, "ctest wrote the failure to stdout\n",
+                             "ctest stderr detail\n")
+
+        code, data = self.run_gate(["--build", "missing-build"], run)
+        self.assertEqual(code, 1)
+        for key in ("schema_version", "scope", "ctest_exit", "gate_exit",
+                    "reference_lane", "independent_pixel_oracle", "release_gate",
+                    "counts", "coverage", "reason", "tests"):
+            self.assertIn(key, data)
+        self.assertEqual(data["schema_version"], 3)
+        self.assertEqual(data["reference_lane"], "FAIL")
+        self.assertEqual(data["counts"], dict(PASS=0, FAIL=0, BLOCKED=0))
+        self.assertFalse(data["coverage"]["complete"])
+        self.assertEqual(data["coverage"]["required"], len(gate.REQUIRED))
+        self.assertIsNone(data["ctest_exit"])
+        self.assertIn("exit 3", data["reason"])
+        self.assertIn("ctest wrote the failure to stdout", data["reason"])
+
+    def test_missing_junit_report_carries_ctest_diagnostics(self):
+        def run(command):
+            if "--show-only=json-v1" in command:
+                return completed(0, raw_registration(), "")
+            return completed(2, "ctest-stdout-diagnostic\n", "ctest-stderr-diagnostic\n")
+
+        code, data = self.run_gate(["--build", "present-build"], run)
+        self.assertEqual(code, 1)
+        self.assertEqual(data["ctest_exit"], 2)
+        self.assertIn("no JUnit report", data["reason"])
+        self.assertIn("exit 2", data["reason"])
+        self.assertIn("ctest-stdout-diagnostic", data["reason"])
+
+    def test_configured_ctest_is_used(self):
+        seen = []
+
+        def run(command):
+            seen.append(list(command))
+            return completed(3, "", "")
+
+        self.run_gate(["--build", "missing-build", "--ctest", "/opt/other/ctest"], run)
+        self.assertEqual([command[0] for command in seen], ["/opt/other/ctest"])
+
+    def test_ctest_defaults_to_configured_environment(self):
+        seen = []
+
+        def run(command):
+            seen.append(list(command))
+            return completed(3, "", "")
+
+        with mock.patch.dict(os.environ, {"CTEST_COMMAND": "/env/ctest"}):
+            self.run_gate(["--build", "missing-build"], run)
+        self.assertEqual([command[0] for command in seen], ["/env/ctest"])
 
 
 if __name__ == "__main__":
