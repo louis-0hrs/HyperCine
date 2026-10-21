@@ -418,6 +418,17 @@ endif()
 # Core HyperCine library source
 add_subdirectory(src)
 
+# Bounded diagnostic probe for constrained CUDA devices (issue #116).
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(hypercine_m4_resolution_probe tools/m4_sm52_resolution_probe.cpp)
+    target_include_directories(hypercine_m4_resolution_probe PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+    target_link_libraries(hypercine_m4_resolution_probe PRIVATE hypercine_wavelet)
+    if(TARGET CFHDCodecStatic)
+        target_link_libraries(hypercine_m4_resolution_probe PRIVATE CFHDCodecStatic)
+    endif()
+endif()
+
 # Tests
 if(HYPERCINE_BUILD_TESTS)
     enable_testing()

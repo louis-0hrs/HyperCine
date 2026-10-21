@@ -157,7 +157,7 @@ if(HYPERCINE_ENABLE_CUDA)
     endif()
 
     add_executable(test_entropy_capacity test_entropy_capacity.cpp)
-    target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic)
+    target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic Threads::Threads)
     if(WIN32)
         target_link_libraries(test_entropy_capacity PRIVATE psapi)
     endif()
