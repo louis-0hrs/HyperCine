@@ -23,11 +23,22 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME test_reference_release_inventory
         COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_reference_release.py")
     set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
+    # The runner must use the CTest that configured this build. CMAKE_CTEST_COMMAND
+    # is only set by include(CTest); this project calls enable_testing() directly.
+    if(CMAKE_CTEST_COMMAND)
+        set(HYPERCINE_CTEST_COMMAND "${CMAKE_CTEST_COMMAND}")
+    else()
+        find_program(HYPERCINE_CTEST_COMMAND NAMES ctest HINTS "${CMAKE_ROOT}/bin")
+    endif()
+    if(NOT HYPERCINE_CTEST_COMMAND)
+        message(FATAL_ERROR "ctest executable not found for reference_release_gate")
+    endif()
     # Explicit qualification entrypoint: unlike ordinary CTest, a skipped or
     # missing Phase 2 reference test makes this target fail (runner exit 77).
     add_custom_target(reference_release_gate
         COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_reference_release.py"
             --build "${CMAKE_BINARY_DIR}" --config "$<CONFIG>"
+            --ctest "${HYPERCINE_CTEST_COMMAND}"
             --output "${CMAKE_BINARY_DIR}/reference-release.json"
         DEPENDS test_reference_oracle
         USES_TERMINAL VERBATIM)
