@@ -65,7 +65,8 @@ if(Python3_Interpreter_FOUND)
         --self-test --repo "${CMAKE_SOURCE_DIR}")
     # The runner's verdict logic must fail the shapes its rules name: a broken
     # control, a surviving injected OKAY, an unattributed failure, a hang, a
-    # dirty guard band and a changed control digest.
+    # dirty guard band, a changed control digest and a summary that disagrees
+    # with its own log lines.
     add_test(NAME rca195_contract_runner_selftest COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_SOURCE_DIR}/tools/run_rca195_contract.py" --self-test)
     set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
@@ -76,6 +77,19 @@ if(Python3_Interpreter_FOUND)
         rca195_contract_runner_selftest
         PROPERTIES TIMEOUT 300
         PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS;ANCHOR PASS;VERDICT-REGRESSION PASS;MODEL PASS;NEGATIVE-CASES PASS_EXHAUSTIVE;RUNNER SELF-TEST PASS")
+
+    # First-error precedence. A reviewer found that the first R6b guard stopped
+    # OKAY from erasing a failure but still let a later non-OKAY code replace an
+    # earlier one, so the reported code depended on arrival order. This asserts
+    # the rule directly against the frozen CODEC_ERROR enum, and it is
+    # mutation-tested: restoring the last-wins behaviour fails four of six cases.
+    add_executable(test_rca195_error_precedence test_rca195_error_precedence.cpp)
+    target_include_directories(test_rca195_error_precedence PRIVATE
+        "${CMAKE_SOURCE_DIR}/tools")
+    add_test(NAME rca195_contract_error_precedence
+        COMMAND test_rca195_error_precedence)
+    set_tests_properties(rca195_contract_error_precedence PROPERTIES TIMEOUT 60
+        PASS_REGULAR_EXPRESSION "ERROR-PRECEDENCE PASS")
     # The partial-order sweeps take minutes on an idle host and longer under
     # CI load; the anchor gate above stays in the shared 300 s budget.
     set_tests_properties(rca195_m2_model_selftest PROPERTIES TIMEOUT 900)
