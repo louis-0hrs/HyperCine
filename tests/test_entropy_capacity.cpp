@@ -181,11 +181,57 @@ int main() {
         return Fail("a failed entropy poll later looked pending");
     }
 
+    // Fail-closed capacity diagnostics: an induced workspace allocation failure
+    // must fail the queue with the requested bytes, device capacity and CUDA
+    // status, and must not be converted into a skip or pass.
+    {
+        hypercine::GpuEntropySession* cap_session = hypercine::CreateGpuEntropySession();
+        hypercine::GpuEntropyFrameSlot* cap_slot =
+            hypercine::CreateGpuEntropyFrameSlot(patterns_w, patterns_h);
+        if (!cap_session || !cap_slot) return Fail("capacity diagnostic slot allocation failed");
+
+        hypercine::SetGpuEntropyAllocationFailureInjectionForTest(1u);
+        if (hypercine::QueueGpuEntropyFrame(cap_session, cap_slot, &request, 1, &live, cfg, nullptr, nullptr)) {
+            return Fail("injected workspace allocation failure did not fail the queue");
+        }
+        const std::string capacity_error = hypercine::GpuEntropyFrameError(cap_slot);
+        if (capacity_error.find("UNSUPPORTED_RESOURCE_BOUND") == std::string::npos ||
+            capacity_error.find("requested") == std::string::npos ||
+            capacity_error.find("free ") == std::string::npos ||
+            capacity_error.find("CUDA ") == std::string::npos) {
+            return Fail("capacity diagnostic is incomplete: " + capacity_error);
+        }
+
+        // The injection is single-shot: the same session/slot must allocate and
+        // run normally on retry.
+        if (!hypercine::QueueGpuEntropyFrame(cap_session, cap_slot, &request, 1, &live, cfg, nullptr, nullptr)) {
+            const char* err = hypercine::GpuEntropyFrameError(cap_slot);
+            return Fail(std::string("allocation failure injection was not single-shot: ") + (err ? err : ""));
+        }
+        bool finished = false;
+        const auto cap_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(8);
+        while (std::chrono::steady_clock::now() < cap_deadline) {
+            const auto status = hypercine::PollGpuEntropyFrameD2HStatus(cap_slot);
+            if (status == hypercine::GpuStageStatus::Complete) {
+                finished = true;
+                break;
+            }
+            if (status == hypercine::GpuStageStatus::Failed) {
+                const char* err = hypercine::GpuEntropyFrameError(cap_slot);
+                return Fail(std::string("capacity retry failed: ") + (err ? err : ""));
+            }
+        }
+        if (!finished) return Fail("capacity retry did not finish");
+        hypercine::DestroyGpuEntropyFrameSlot(cap_slot);
+        hypercine::DestroyGpuEntropySession(cap_session);
+    }
+
     cudaFree(device);
     hypercine::DestroyGpuEntropyFrameSlot(slot);
     hypercine::DestroyGpuEntropySession(session);
 
     std::cout << "PASS: entropy word bound holds for " << tables_checked
-              << " codebooks, worst-case CPU patterns, and GPU overflow is Failed\n";
+              << " codebooks, worst-case CPU patterns, GPU overflow is Failed, and"
+              << " allocation capacity is diagnosed fail-closed\n";
     return 0;
 }

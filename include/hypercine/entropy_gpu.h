@@ -151,11 +151,21 @@ bool PollGpuEntropyFrameD2H(GpuEntropyFrameSlot* slot);
 const char* GpuEntropyFrameError(const GpuEntropyFrameSlot* slot);
 bool GpuEntropyFrameHasFailed(const GpuEntropyFrameSlot* slot);
 
+// Thread-local reason for the most recent failed CreateGpuEntropyFrameSlot call:
+// "UNSUPPORTED_RESOURCE_BOUND: ... requested N B; free N B of N B; CUDA ...".
+// Empty when the last call succeeded. Capacity exhaustion stays a hard failure.
+const char* GpuEntropySlotCreationError();
+
 // Test hook. A non-zero cap replaces the proven allocation for the next queue
 // so overflow returns Failed instead of writing past the buffer.
 void SetGpuEntropyCapacityOverrideForTest(GpuEntropyFrameSlot* slot,
                                           uint32_t per_band_words,
                                           uint32_t consolidated_words);
+
+// Test hook. Makes the next device allocation of at least `min_bytes` in a
+// session workspace or codebook upload fail once, so the fail-closed capacity
+// diagnostic can be exercised deterministically without exhausting the device.
+void SetGpuEntropyAllocationFailureInjectionForTest(size_t min_bytes);
 
 // Blocking progress for FrameConsolidated mode: waits on blocking event for GPU
 // entropy + compaction to complete, then queues the consolidated D2H DMA copy.
