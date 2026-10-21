@@ -39,13 +39,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 2,
-      "elapsed_s": 0.1,
+      "elapsed_s": 0.11,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 1080,
       "injections": {},
-      "ms": 25.629,
+      "ms": 39.281,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -145,13 +145,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 2,
-      "elapsed_s": 0.1,
+      "elapsed_s": 0.11,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 1080,
       "injections": {},
-      "ms": 29.177,
+      "ms": 25.253,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -257,7 +257,7 @@
       "guard_ok": 1,
       "h": 1080,
       "injections": {},
-      "ms": 29.371,
+      "ms": 28.38,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -357,13 +357,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 4,
-      "elapsed_s": 0.12,
+      "elapsed_s": 0.11,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 1080,
       "injections": {},
-      "ms": 30.194,
+      "ms": 24.633,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -463,13 +463,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 4,
-      "elapsed_s": 0.14,
+      "elapsed_s": 0.09,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 1080,
       "injections": {},
-      "ms": 23.703,
+      "ms": 18.203,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -575,7 +575,7 @@
       "guard_ok": 1,
       "h": 1080,
       "injections": {},
-      "ms": 23.216,
+      "ms": 27.07,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -681,7 +681,7 @@
       "guard_ok": 1,
       "h": 540,
       "injections": {},
-      "ms": 15.201,
+      "ms": 20.525,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -694,10 +694,6 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
           },
@@ -706,16 +702,20 @@
             "idx": 2
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
+            "ch": 1,
             "idx": 2
           },
           {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -738,10 +738,6 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
           },
@@ -750,16 +746,20 @@
             "idx": 2
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
+            "ch": 1,
             "idx": 2
           },
           {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -811,7 +811,7 @@
       "guard_ok": 1,
       "h": 540,
       "injections": {},
-      "ms": 17.486,
+      "ms": 17.659,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -836,12 +836,12 @@
             "idx": 2
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -880,12 +880,12 @@
             "idx": 2
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -935,13 +935,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 2,
-      "elapsed_s": 0.03,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 540,
       "injections": {},
-      "ms": 12.894,
+      "ms": 15.491,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -954,16 +954,16 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
           },
           {
             "ch": 1,
@@ -998,16 +998,16 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
           },
           {
             "ch": 1,
@@ -1065,13 +1065,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 4,
-      "elapsed_s": 0.05,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 540,
       "injections": {},
-      "ms": 14.183,
+      "ms": 14.869,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -1084,24 +1084,24 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
           },
           {
             "ch": 1,
-            "idx": 1
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
           },
           {
             "ch": 2,
             "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
           },
           {
             "ch": 2,
@@ -1128,24 +1128,24 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
           },
           {
             "ch": 1,
-            "idx": 1
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
           },
           {
             "ch": 2,
             "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
           },
           {
             "ch": 2,
@@ -1195,13 +1195,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 4,
-      "elapsed_s": 0.03,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 540,
       "injections": {},
-      "ms": 8.151,
+      "ms": 14.587,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -1214,6 +1214,10 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
@@ -1222,23 +1226,19 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
             "idx": 1
           },
           {
-            "ch": 1,
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
             "idx": 1
           }
         ],
@@ -1258,6 +1258,10 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
@@ -1266,23 +1270,19 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
             "idx": 1
           },
           {
-            "ch": 1,
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
             "idx": 1
           }
         ],
@@ -1325,13 +1325,13 @@
       "arm": "A",
       "arm_label": "valid control",
       "cpu_max": 4,
-      "elapsed_s": 0.05,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
       "h": 540,
       "injections": {},
-      "ms": 14.542,
+      "ms": 15.21,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -1455,7 +1455,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.13,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -1463,7 +1463,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 36.196,
+      "ms": 41.017,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -1568,7 +1568,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.12,
+      "elapsed_s": 0.09,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -1576,7 +1576,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 33.9,
+      "ms": 18.288,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -1681,7 +1681,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.11,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -1689,7 +1689,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 27.345,
+      "ms": 30.375,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -1794,7 +1794,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.1,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -1802,7 +1802,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 22.404,
+      "ms": 26.391,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -1907,7 +1907,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.09,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -1915,7 +1915,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 21.826,
+      "ms": 26.373,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2020,7 +2020,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.09,
+      "elapsed_s": 0.1,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -2028,7 +2028,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 21.218,
+      "ms": 22.875,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2141,7 +2141,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 15.253,
+      "ms": 15.043,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2154,16 +2154,16 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
           },
           {
             "ch": 1,
@@ -2270,7 +2270,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.06,
+      "elapsed_s": 0.04,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -2278,7 +2278,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 14.628,
+      "ms": 13.796,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2407,7 +2407,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.05,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -2415,7 +2415,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 15.437,
+      "ms": 17.899,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2552,7 +2552,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 15.568,
+      "ms": 16.14,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2565,12 +2565,12 @@
             "idx": 2
           },
           {
-            "ch": 0,
-            "idx": 1
-          },
-          {
             "ch": 1,
             "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
           },
           {
             "ch": 1,
@@ -2681,7 +2681,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.03,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -2689,7 +2689,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 10.473,
+      "ms": 15.129,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2706,27 +2706,27 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
+            "ch": 2,
             "idx": 1
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
+            "ch": 1,
             "idx": 1
           }
         ],
@@ -2750,23 +2750,23 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
-            "ch": 1,
+            "ch": 2,
             "idx": 1
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
+            "ch": 1,
             "idx": 1
           }
         ],
@@ -2818,7 +2818,7 @@
       "arm": "B",
       "arm_label": "skip temporal producer ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.05,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -2826,7 +2826,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:2"
       },
-      "ms": 13.379,
+      "ms": 15.297,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -2839,28 +2839,28 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
             "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -2887,20 +2887,20 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -2963,7 +2963,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 26.22,
+      "ms": 33.592,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3068,7 +3068,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 2,
-      "elapsed_s": 0.15,
+      "elapsed_s": 0.11,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3076,7 +3076,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 36.056,
+      "ms": 29.727,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3181,7 +3181,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 2,
-      "elapsed_s": 0.11,
+      "elapsed_s": 0.13,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3189,7 +3189,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 24.432,
+      "ms": 36.232,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3294,7 +3294,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 4,
-      "elapsed_s": 0.09,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3302,7 +3302,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 18.634,
+      "ms": 26.596,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3407,7 +3407,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 4,
-      "elapsed_s": 0.14,
+      "elapsed_s": 0.1,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3415,7 +3415,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 51.439,
+      "ms": 20.789,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3520,7 +3520,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 4,
-      "elapsed_s": 0.1,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3528,7 +3528,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 25.669,
+      "ms": 26.35,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3633,7 +3633,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 2,
-      "elapsed_s": 0.05,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3641,7 +3641,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 14.864,
+      "ms": 18.332,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3654,10 +3654,6 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
           },
@@ -3666,7 +3662,7 @@
             "idx": 2
           },
           {
-            "ch": 2,
+            "ch": 1,
             "idx": 2
           },
           {
@@ -3676,6 +3672,10 @@
           {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -3714,12 +3714,12 @@
             "idx": 2
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -3770,7 +3770,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 2,
-      "elapsed_s": 0.03,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3778,7 +3778,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 10.151,
+      "ms": 15.617,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3803,16 +3803,16 @@
             "idx": 1
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -3847,16 +3847,16 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -3907,7 +3907,7 @@
       "arm": "C",
       "arm_label": "skip spatial producer ch0",
       "cpu_max": 2,
-      "elapsed_s": 0.05,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -3915,7 +3915,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 13.677,
+      "ms": 17.009,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -3928,28 +3928,28 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
           },
           {
-            "ch": 2,
+            "ch": 1,
             "idx": 2
           },
           {
-            "ch": 2,
+            "ch": 1,
             "idx": 2
           },
           {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -3984,16 +3984,16 @@
             "idx": 2
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -4052,7 +4052,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 15.481,
+      "ms": 15.452,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -4065,10 +4065,6 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
           },
@@ -4077,7 +4073,7 @@
             "idx": 2
           },
           {
-            "ch": 2,
+            "ch": 1,
             "idx": 2
           },
           {
@@ -4087,6 +4083,10 @@
           {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -4125,12 +4125,12 @@
             "idx": 2
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
           },
           {
             "ch": 2,
@@ -4189,7 +4189,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 14.29,
+      "ms": 14.151,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -4210,12 +4210,12 @@
             "idx": 2
           },
           {
-            "ch": 0,
-            "idx": 1
-          },
-          {
             "ch": 2,
             "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
           },
           {
             "ch": 2,
@@ -4326,7 +4326,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "0:1"
       },
-      "ms": 15.129,
+      "ms": 15.126,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -4339,15 +4339,19 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
+            "ch": 2,
             "idx": 2
           },
           {
@@ -4357,10 +4361,6 @@
           {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -4399,12 +4399,12 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 1
-          },
-          {
             "ch": 2,
             "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
           },
           {
             "ch": 2,
@@ -4463,7 +4463,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 29.409,
+      "ms": 33.651,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -4568,7 +4568,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.11,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -4576,7 +4576,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 31.019,
+      "ms": 29.998,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -4689,7 +4689,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 34.51,
+      "ms": 33.508,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -4794,7 +4794,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.1,
+      "elapsed_s": 0.12,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -4802,7 +4802,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 22.927,
+      "ms": 28.352,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -4907,7 +4907,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.11,
+      "elapsed_s": 0.1,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -4915,7 +4915,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 27.232,
+      "ms": 23.056,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5020,7 +5020,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.09,
+      "elapsed_s": 0.11,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -5028,7 +5028,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 24.389,
+      "ms": 23.696,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5133,7 +5133,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.06,
+      "elapsed_s": 0.07,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -5141,7 +5141,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 18.6,
+      "ms": 19.747,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5154,12 +5154,12 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 2
-          },
-          {
             "ch": 0,
             "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
           },
           {
             "ch": 1,
@@ -5270,7 +5270,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.06,
+      "elapsed_s": 0.07,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -5278,7 +5278,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 18.021,
+      "ms": 19.649,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5415,7 +5415,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 19.012,
+      "ms": 15.902,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5428,16 +5428,16 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
           },
           {
             "ch": 1,
@@ -5544,7 +5544,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.06,
+      "elapsed_s": 0.05,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -5552,7 +5552,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 14.521,
+      "ms": 13.378,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5573,6 +5573,10 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
@@ -5583,10 +5587,6 @@
           {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -5613,6 +5613,10 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
@@ -5623,10 +5627,6 @@
           {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -5689,7 +5689,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 13.888,
+      "ms": 17.856,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5710,20 +5710,20 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -5750,20 +5750,20 @@
             "idx": 2
           },
           {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
-            "ch": 2,
-            "idx": 2
-          },
-          {
             "ch": 1,
             "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -5818,7 +5818,7 @@
       "arm": "D",
       "arm_label": "forced stale token ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.06,
+      "elapsed_s": 0.05,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -5826,7 +5826,7 @@
       "injections": {
         "RCA195_CONTRACT_STALE": "1:2"
       },
-      "ms": 15.432,
+      "ms": 13.169,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -5839,12 +5839,12 @@
             "idx": 2
           },
           {
-            "ch": 0,
-            "idx": 1
-          },
-          {
             "ch": 1,
             "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
           },
           {
             "ch": 1,
@@ -5963,7 +5963,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 35.054,
+      "ms": 35.129,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6076,7 +6076,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 32.059,
+      "ms": 34.385,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6181,7 +6181,7 @@
       "arm": "E",
       "arm_label": "skip consumer site ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.12,
+      "elapsed_s": 0.13,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -6189,7 +6189,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 34.254,
+      "ms": 33.421,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6294,7 +6294,7 @@
       "arm": "E",
       "arm_label": "skip consumer site ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.11,
+      "elapsed_s": 0.14,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -6302,7 +6302,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 24.142,
+      "ms": 25.052,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6415,7 +6415,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 25.117,
+      "ms": 24.629,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6520,7 +6520,7 @@
       "arm": "E",
       "arm_label": "skip consumer site ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.1,
+      "elapsed_s": 0.11,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -6528,7 +6528,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 22.879,
+      "ms": 25.313,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6633,7 +6633,7 @@
       "arm": "E",
       "arm_label": "skip consumer site ch1",
       "cpu_max": 2,
-      "elapsed_s": 0.06,
+      "elapsed_s": 0.07,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -6641,7 +6641,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 13.911,
+      "ms": 20.898,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6778,7 +6778,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 17.529,
+      "ms": 17.845,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6915,7 +6915,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 17.433,
+      "ms": 18.614,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -6940,12 +6940,12 @@
             "idx": 2
           },
           {
-            "ch": 1,
-            "idx": 1
-          },
-          {
             "ch": 2,
             "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
           },
           {
             "ch": 2,
@@ -7044,7 +7044,7 @@
       "arm": "E",
       "arm_label": "skip consumer site ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.06,
+      "elapsed_s": 0.03,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -7052,7 +7052,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 16.014,
+      "ms": 9.553,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -7065,16 +7065,16 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
           },
           {
             "ch": 1,
@@ -7113,16 +7113,16 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -7181,7 +7181,7 @@
       "arm": "E",
       "arm_label": "skip consumer site ch1",
       "cpu_max": 4,
-      "elapsed_s": 0.05,
+      "elapsed_s": 0.06,
       "guard_bytes": 65536,
       "guard_first_dirty": 0,
       "guard_ok": 1,
@@ -7189,7 +7189,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 12.14,
+      "ms": 15.073,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -7202,24 +7202,24 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
           },
           {
             "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
+            "idx": 1
           },
           {
             "ch": 2,
             "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 1
           },
           {
             "ch": 2,
@@ -7250,16 +7250,16 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -7326,7 +7326,7 @@
       "injections": {
         "RCA195_CONTRACT_SKIP": "1:1"
       },
-      "ms": 16.145,
+      "ms": 15.114,
       "observed": {
         "aba_reuse": 0,
         "claims": [
@@ -7343,24 +7343,24 @@
             "idx": 2
           },
           {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
             "ch": 0,
             "idx": 1
-          },
-          {
-            "ch": 1,
-            "idx": 2
-          },
-          {
-            "ch": 2,
-            "idx": 2
-          },
-          {
-            "ch": 1,
-            "idx": 1
-          },
-          {
-            "ch": 2,
-            "idx": 2
           },
           {
             "ch": 2,
@@ -7391,10 +7391,6 @@
             "idx": 2
           },
           {
-            "ch": 0,
-            "idx": 1
-          },
-          {
             "ch": 1,
             "idx": 2
           },
@@ -7405,6 +7401,10 @@
           {
             "ch": 2,
             "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
           },
           {
             "ch": 2,

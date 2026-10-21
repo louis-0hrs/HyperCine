@@ -67,12 +67,16 @@ RCA195_CONTRACT_STATE unsigned int rca195_contract_freed_at;
  * the precedence test includes this header, and the MSVC job failed on ten uses
  * of an undeclared identifier. The probe only needs "no lost update from worker
  * threads", not a particular memory order, so a relaxed increment is enough on
- * every compiler. MSVC gets InterlockedIncrement64; everything else keeps the
- * builtin. */
+ * every compiler.
+ *
+ * MSVC uses `_InterlockedIncrement64` (leading underscore), the intrinsic from
+ * <intrin.h>. The un-prefixed `InterlockedIncrement64` is a winnt.h declaration
+ * and is not visible from intrin.h alone -- the first Windows fix used it and
+ * failed with C3861 in CI, so the underscore is the load-bearing character. */
 #if defined(_MSC_VER)
 #include <intrin.h>
 #define RCA195_CONTRACT_INC(counter)                                          \
-	(void)InterlockedIncrement64((volatile __int64 *)&(counter))
+	(void)_InterlockedIncrement64((volatile __int64 *)&(counter))
 #else
 #define RCA195_CONTRACT_INC(counter)                                          \
 	__atomic_fetch_add(&(counter), 1, __ATOMIC_RELAXED)

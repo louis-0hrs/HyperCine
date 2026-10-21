@@ -184,9 +184,9 @@ Not established:
 
 | Item | SHA-256 |
 | --- | --- |
-| `rca195_contract_ledger_iter3_2026-10-21.json` | `4a19c3c2439ae61686eec785f9f08a527bc1469036f35ac38a93347d416917aa` |
-| `rca195_contract_ledger_iter3_second_config_2026-10-21.json` | `b468e3ec71f9cfd0c55eaaf388a5dd82fb10342ec5923ae74b56df5e007bbe21` |
-| `tools/rca195_contract.h` | `aa276ee9c9d4ef1b6249ec89a464796c83810b18fc0a2f322eb0462ea2983a1d` |
+| `rca195_contract_ledger_iter3_2026-10-21.json` | `63bae291de392e837b80130c71860b33105024dbf996a1f1d7a0b379f661f9c4` |
+| `rca195_contract_ledger_iter3_second_config_2026-10-21.json` | `0704e4f054298730e9bd26ea7ae33bf7547c58d64f58d180401850c60707773f` |
+| `tools/rca195_contract.h` | `7556385a0df9971b1b7081b471e7f72fdc8dc3859c69a1248b65820d244150bf` |
 | `tools/apply_rca195_contract.py` | `c24d78266b7aae77b7fabcc19ffe3fac90d7703fc6ef9a914139bcb678c610c0` |
 | `tools/run_rca195_contract.py` | `3f68c7640a820f536bea31a9ab2eb03a327600982b1c184167c39b2a70b6654b` |
 | `tests/test_rca195_error_precedence.cpp` | `b43accf5dd7897eaa334a86c8f015886722a1dd8b9cc828761d57411452d3795` |
@@ -203,21 +203,36 @@ that MSVC does not have, and the new precedence test includes the contract
 header, so ten uses of an undeclared identifier reached the Windows build. That
 diagnosis belongs in this document rather than only in a CI log.
 
-The fix makes the increment portable (`InterlockedIncrement64` under `_MSC_VER`,
-the builtin everywhere else). Because the header is part of the **instrument**,
-both ledgers were regenerated with the corrected header rather than left
-carrying hashes for a header that no longer exists. The regeneration is a
-declared replacement, not a silent swap:
+The fix makes the increment portable. Two rounds were needed, and both
+mistakes are mine:
 
-| | Before (`2e162fd`) | After |
-| --- | --- | --- |
-| `tools/rca195_contract.h` | `715c757c…` | `aa276ee9…` |
-| Primary ledger | `c8270054…` | `4a19c3c2…` |
-| Second-configuration ledger | `1bfed58e…` | `b468e3ec…` |
+1. **`2e162fd`** used `__atomic_fetch_add` unconditionally — a GCC/Clang builtin.
+2. **`5a2c5ea`** switched to `InterlockedIncrement64` under `_MSC_VER`. That is a
+   `winnt.h` declaration, **not** the `<intrin.h>` intrinsic, so the Windows job
+   failed again with `C3861: 'InterlockedIncrement64': identifier not found` on
+   the same ten lines. The intrinsic is `_InterlockedIncrement64`, with a
+   leading underscore. That character is load-bearing and the first Windows fix
+   did not have it.
 
-Every verdict and every counter is **bit-identical** across the two runs —
-100 calls and 60 calls, same verdicts, same `claims`/`executed`/`stale`/
-`drain_short`/`walloc`/`wfree`/`aba` totals. So the change repaired portability
-and did not alter behaviour. That equality is the check that makes the swap
-legitimate; without it, a replacement of published artefacts would be exactly
-the defect this project already found once in v2.
+Because the header is part of the **instrument**, both ledgers were regenerated
+after each header change rather than left carrying hashes for a header that no
+longer exists. Both regenerations are declared replacements, not silent swaps:
+
+| Artefact | At `2e162fd` | After first fix (`5a2c5ea`) | Final |
+| --- | --- | --- | --- |
+| `tools/rca195_contract.h` | `715c757c…` | `aa276ee9…` | `7556385a…` |
+| Primary ledger | `c8270054…` | `4a19c3c2…` | `63bae291…` |
+| Second-configuration ledger | `1bfed58e…` | `b468e3ec…` | `0704e4f0…` |
+
+Every verdict and every counter is **bit-identical** across all three
+regenerations — 100 calls and 60 calls, same verdicts, same
+`claims`/`executed`/`stale`/`drain_short`/`walloc`/`wfree`/`aba` totals. So the
+changes repaired portability and did not alter behaviour.
+
+That equality is the check that makes the swaps legitimate. Without it, replacing
+published artefacts would be exactly the defect this project already found once
+in v2. And the sequence is worth naming plainly: the first Windows "fix" was
+unverified against the actual job, so it cost a second full CI round. A builtin
+that a compiler does not have and an intrinsic whose name is off by one
+underscore look identical from Linux, and only the hosted Windows job
+distinguishes them.
