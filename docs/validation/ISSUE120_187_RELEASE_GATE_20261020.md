@@ -207,3 +207,31 @@ Release with upstream SDK and tests ON.
 - This is inventory/classification evidence, not a pixel-quality or
   full-suite qualification. The strict resource failure stays visible and
   was not retried away. `upstream/` status is empty.
+
+## Follow-up: error-path schema and explicit CTest (2026-10-21)
+
+Independent review of schema 3 raised two non-blocking hardening items; both
+are addressed without changing qualification semantics.
+
+- A registration or JUnit failure now emits the complete schema-3 key set
+  (`ctest_exit`, `reference_lane`, `independent_pixel_oracle`, `counts`,
+  `coverage`, `tests`) with empty counts and `coverage.complete=false`,
+  instead of a truncated document. The diagnostic carries the CTest exit code
+  and both output streams, because CTest can report the failure on stdout.
+  A CTest run that produces no JUnit report reports the same diagnostics.
+- The runner accepts `--ctest` and otherwise honours `CTEST_COMMAND`, falling
+  back to `ctest` on `PATH`. The CMake target passes the CTest of the
+  configuring CMake installation explicitly. This project calls
+  `enable_testing()` without `include(CTest)`, so `CMAKE_CTEST_COMMAND` may be
+  unset; CMake then resolves `ctest` under `${CMAKE_ROOT}/bin` and fails at
+  configure time if none is found.
+- Regression coverage is now 19 cases, including the error path, a missing
+  JUnit report, an explicit `--ctest` and the `CTEST_COMMAND` default.
+
+Measured at this head: focused Python regression **19/19 PASS**; one native
+M4 reference-lane run against the unchanged configured build reproduced
+**2 PASS / 1 FAIL / 3 BLOCKED**, `coverage.complete=true`, runner exit **1**,
+with the same `test_phase2c` strict 8K capacity failure. A fresh configure
+generated the target command with the CMake installation's `ctest`
+executable. This is tooling evidence only: the release gate remains BLOCKED,
+the original-SDK pixel oracle stays unqualified and #187 remains on HOLD.
