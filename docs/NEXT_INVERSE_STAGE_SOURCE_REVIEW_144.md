@@ -128,3 +128,23 @@ owner, with separate Windows provenance signoff) with the existing corpus runs
 this same-head original-function probe, reports six actual signed comparisons,
 and confirms archived build/buffer provenance. A separate own-arithmetic Draft
 can follow review of that evidence. #144/#47 remain open.
+
+
+## Windows checkout checksum correction (#220)
+
+Windows hosted CI exposed two harness failures before numeric execution:
+checked-out source/index text bytes can differ from the pinned committed blobs.
+The regression reproduces this with an actual Git `core.autocrlf=true` checkout,
+verifies CRLF-only differences, and confirms the original pins still match the
+canonical blobs. Source/support/index authentication now uses binary
+`git --no-replace-objects cat-file blob <resolved-HEAD>:<validated-relative-id>`
+with `GIT_NO_REPLACE_OBJECTS=1`. Paths reject traversal, absolute and ambiguous
+spellings; arguments are passed without a shell. Missing or mismatching blobs
+remain fatal. Regression controls commit source and index mutations and require
+failure, then restore the original bytes and require success.
+
+Original function extraction and the copied support header use committed bytes
+as well. Prepared source is written as explicit UTF-8 bytes so its reported
+SHA-256 identifies the actual file on Windows too. The private corpus continues
+to use exact file bytes and unchanged sidecar/packet/output pins. These harness
+checks provide no new original SSE2 numeric or archived Windows build signoff.

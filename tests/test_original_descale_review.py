@@ -26,6 +26,60 @@ class Contracts(unittest.TestCase):
         self.assertIn('_mm_packs_epi32',source)
         self.assertNotIn('cpu_dispatch(',source)
 
+    def test_crlf_checkout_uses_canonical_blobs_and_committed_mutation_fails(self):
+        pins=review.audit()
+        names={entry['id'] for entry in pins['source_fingerprints']+pins['reference_indices']}
+        names.update('upstream/Codec/'+name for name in review.SUPPORT_SHA256)
+        manifest=review.MANIFEST.relative_to(review.ROOT).as_posix()
+        names.add(manifest)
+        canonical={name:review.committed_bytes(name) for name in names}
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            def git(*args):
+                return subprocess.run(['git',*args],cwd=root,check=True,
+                                      stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            git('init')
+            git('config','core.autocrlf','false')
+            git('config','user.name','Contract Test')
+            git('config','user.email','contract@example.invalid')
+            for name,data in canonical.items():
+                path=root/name;path.parent.mkdir(parents=True,exist_ok=True)
+                path.write_bytes(data)
+            git('add','.')
+            git('-c','commit.gpgsign=false','commit','-m','Canonical fixture')
+            git('config','core.autocrlf','true')
+            # Force an actual Git Windows-style checkout, including JSON indices.
+            for name in names: (root/name).unlink()
+            git('checkout-index','--all','--force')
+            differing=[name for name in names if (root/name).read_bytes()!=canonical[name]]
+            self.assertTrue(differing)
+            self.assertTrue(any(name in differing for name in
+                                (entry['id'] for entry in pins['reference_indices'])))
+            for name in differing:
+                self.assertEqual((root/name).read_bytes().replace(b'\r\n',b'\n'),
+                                 canonical[name].replace(b'\r\n',b'\n'))
+            with patch.object(review,'ROOT',root), patch.object(review,'MANIFEST',root/manifest):
+                self.assertEqual(len(review.audit()['cases']),6)
+                # Uncommitted checkout bytes cannot contaminate source preparation.
+                (root/'upstream/Codec/spatial.c').write_bytes(b'checkout corruption')
+                self.assertEqual(review.committed_bytes('upstream/Codec/spatial.c'),
+                                 canonical['upstream/Codec/spatial.c'])
+                for entry in (pins['source_fingerprints'][0],pins['reference_indices'][0]):
+                    with self.subTest(committed_mutation=entry['id']):
+                        path=root/entry['id'];path.write_bytes(canonical[entry['id']]+b'\n')
+                        git('add','--',entry['id'])
+                        git('-c','commit.gpgsign=false','commit','-m','Mutated fixture')
+                        with self.assertRaises(ValueError): review.audit()
+                        path.write_bytes(canonical[entry['id']])
+                        git('add','--',entry['id'])
+                        git('-c','commit.gpgsign=false','commit','-m','Restore fixture')
+                        self.assertEqual(len(review.audit()['cases']),6)
+
+    def test_committed_paths_reject_noncanonical_and_unsafe_ids(self):
+        for name in ('../file','/file','C:/file','a\\b','a/../b','./file','a//b','', 'a\0b'):
+            with self.subTest(name=repr(name)), self.assertRaises(ValueError):
+                review.committed_bytes(name)
+
     def test_missing_binding_fails_without_disclosing_paths(self):
         env=dict(os.environ);env.pop('HYPERCINE_GOLDEN_DIR',None)
         result=subprocess.run([sys.executable,str(Path(review.__file__)),'--authenticate'],
@@ -33,6 +87,18 @@ class Contracts(unittest.TestCase):
         self.assertEqual(result.returncode,1)
         self.assertEqual(result.stdout,'')
         self.assertEqual(result.stderr,'Original Descale review BLOCKED or INVALID; paths/details redacted.\n')
+
+    def test_preparation_hash_matches_actual_file_bytes(self):
+        with tempfile.TemporaryDirectory() as d:
+            prepared=Path(d)/'prepared'
+            result=subprocess.run([sys.executable,str(Path(review.__file__)),
+                                   '--prepare-dir',str(prepared)],capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            report=json.loads(result.stdout)
+            self.assertEqual(review.identity((prepared/'original_descale.inc').read_bytes())['sha256'],
+                             report['prepared_source_sha256'])
+            self.assertEqual((prepared/'buffer.h').read_bytes(),
+                             review.committed_bytes('upstream/Codec/buffer.h'))
 
     def test_preparation_refuses_existing_directory(self):
         with tempfile.TemporaryDirectory() as d:

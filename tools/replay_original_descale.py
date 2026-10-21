@@ -11,7 +11,7 @@ import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import platform
 import re
 import struct
@@ -53,15 +53,38 @@ def require(ok):
         raise ValueError('Original binding/source mismatch')
 
 
+def committed_bytes(name, revision='HEAD'):
+    """Read canonical repository bytes; private corpus files stay byte-exact."""
+    require(isinstance(name, str) and bool(name))
+    path = PurePosixPath(name)
+    require(not path.is_absolute() and '..' not in path.parts)
+    require(str(path) == name and not any(c in name for c in ('\\', ':', '\0')))
+    require(revision == 'HEAD' or re.fullmatch(r'[0-9a-f]{40,64}', revision) is not None)
+    env = dict(os.environ, GIT_NO_REPLACE_OBJECTS='1')
+    return subprocess.run(
+        ['git', '--no-replace-objects', 'cat-file', 'blob', f'{revision}:{name}'],
+        cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        check=True, timeout=30).stdout
+
+
+def head_revision():
+    return subprocess.run(
+        ['git', '--no-replace-objects', 'rev-parse', '--verify', 'HEAD'],
+        cwd=ROOT, env=dict(os.environ, GIT_NO_REPLACE_OBJECTS='1'),
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True,
+        timeout=30).stdout.decode('ascii').strip()
+
+
 def audit():
+    revision = head_revision()
     pins = read_json(MANIFEST)
     require(pins['schema']=='hypercine.next_inverse_stage_contract/1')
     require(pins['implementation_authorized'] is False)
     for name, sha in SUPPORT_SHA256.items():
-        require(identity((ROOT/'upstream/Codec'/name).read_bytes())['sha256']==sha)
+        require(identity(committed_bytes('upstream/Codec/'+name, revision))['sha256']==sha)
     indices = {}
     for entry in pins['source_fingerprints']+pins['reference_indices']:
-        data = (ROOT/entry['id']).read_bytes()
+        data = committed_bytes(entry['id'], revision)
         require(identity(data)=={k:entry[k] for k in ('byte_length','sha256')})
         if entry in pins['reference_indices']:
             indices[entry['id']] = json.loads(data, object_pairs_hook=unique)
@@ -124,7 +147,9 @@ def function(text, signature, occurrence=0):
 
 
 def source():
-    def text(name): return (ROOT/'upstream/Codec'/name).read_text()
+    revision = head_revision()
+    def text(name):
+        return committed_bytes('upstream/Codec/'+name, revision).decode('utf-8').replace('\r\n', '\n')
     spatial=text('spatial.c'); horizontal=text('InvertHorizontalStrip16s.c')
     # Keep the original copyright/license alongside every extracted function.
     license=spatial[:spatial.index('*/')+2]
@@ -189,8 +214,8 @@ def main():
     if args.prepare_dir:
         prepared_source=source()
         args.prepare_dir.mkdir()  # Refuse reuse/overwrite of a previous capture.
-        (args.prepare_dir/'original_descale.inc').write_text(prepared_source)
-        (args.prepare_dir/'buffer.h').write_bytes((ROOT/'upstream/Codec/buffer.h').read_bytes())
+        (args.prepare_dir/'original_descale.inc').write_bytes(prepared_source.encode('utf-8'))
+        (args.prepare_dir/'buffer.h').write_bytes(committed_bytes('upstream/Codec/buffer.h'))
         report['original_source_preparation']='PASS'
         report['prepared_source_sha256']=identity(prepared_source.encode())['sha256']
     if args.authenticate or args.probe:
