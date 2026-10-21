@@ -53,12 +53,15 @@ DecodeTaskGraph::DecodeTaskGraph(Generation generation, GraphProfile profile,
             if (--counts[successor] == 0) ready_.push_back(successor);
     if (ready_.size() != nodes_.size()) invalid();
     ready_.clear();
-    for (std::size_t i = 0; i < nodes_.size(); ++i)
+    for (std::size_t i = 0; i < nodes_.size(); ++i) {
+        if (!nodes_[i].task.published) ++uncontracted_;
         if (!nodes_[i].remaining) {
             nodes_[i].state = TaskState::Ready;
             ready_.push_back(i);
         }
+    }
 }
+std::size_t DecodeTaskGraph::uncontracted_tasks() const noexcept { return uncontracted_; }
 bool TaskContext::cancellation_requested() const { return graph_.cancellation_requested(); }
 bool DecodeTaskGraph::cancellation_requested() const {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -146,9 +149,23 @@ void DecodeTaskGraph::worker() noexcept {
             ++running_;
         }
         GraphError result = GraphError::None;
+        // The callback runs with no graph lock held, so the publication
+        // predicate that follows runs on the same thread with the callback's
+        // frame and any storage it produced still live. The predicate may call
+        // the const query API; it must not mutate graph state.
         try { nodes_[index].task.execute(TaskContext(*this)); }
         catch (const std::bad_alloc&) { result = GraphError::Allocation; }
         catch (...) { result = GraphError::Callback; }
+        if (result == GraphError::None) {
+            const auto& produced = nodes_[index].task.published;
+            if (produced) {
+                bool exists = false;
+                // A predicate that cannot answer is not evidence of an output.
+                // Both a false result and a throw fail closed the same way.
+                try { exists = produced(); } catch (...) { exists = false; }
+                if (!exists) result = GraphError::OutputNotPublished;
+            }
+        }
         complete(generation_, index, result);
     }
 }

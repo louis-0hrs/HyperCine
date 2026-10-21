@@ -14,7 +14,13 @@ namespace hypercine::detail {
 // Synthetic infrastructure only: no codec profile is qualified by this module.
 enum class GraphProfile { Synthetic, Unsupported };
 enum class TaskState { Pending, Ready, Running, Completed, Failed, Canceled };
-enum class GraphError { None, InvalidGraph, Allocation, Callback, Canceled, Worker };
+// OutputNotPublished is a terminal, fail-closed error: a task declared a
+// publication predicate and that predicate reported its output does not exist.
+// The node fails, no successor is released, and run() returns false. Appended
+// last so existing enumerator values stay stable for pinned ordinal checks.
+enum class GraphError {
+    None, InvalidGraph, Allocation, Callback, Canceled, Worker, OutputNotPublished
+};
 struct Generation {
     std::uint64_t session, slot, value;
     bool operator==(const Generation& b) const noexcept {
@@ -41,6 +47,20 @@ struct TaskSpec {
     TaskKey key;
     std::vector<TaskKey> inputs;
     std::function<void(const TaskContext&)> execute;
+    // Publication predicate (rule S2). When set, the worker that ran execute()
+    // evaluates it immediately afterwards, on that same thread and with the
+    // callback's storage still live, and only then hands the result to
+    // complete(). A false or throwing predicate becomes a terminal graph error:
+    // the node is Failed, its transitive dependents are Failed, and no consumer
+    // is released. It is evaluated without the graph lock held (the callback
+    // frame is live and may legitimately call the const query API), but the
+    // Completed transition it gates is still made under the lock.
+    //
+    // An empty predicate means "no output contract declared": completion then
+    // rests on execute() returning, which is exactly the assumption RCA-195
+    // punished. Those tasks are counted by uncontracted_tasks() so the escape
+    // hatch is visible instead of silent.
+    std::function<bool()> published;
 };
 struct GraphLimits { std::size_t nodes = 4096, edges = 65536; };
 
@@ -60,6 +80,9 @@ public:
     bool quiescent() const;
     bool cancellation_requested() const;
     TaskState state(std::size_t node) const;
+    // Tasks that declared no publication predicate. Immutable after
+    // construction, so it is readable at any time without the graph lock.
+    std::size_t uncontracted_tasks() const noexcept;
 private:
     friend struct DecodeTaskGraphTestAccess;
     struct Node {
@@ -77,6 +100,7 @@ private:
     std::vector<Node> nodes_;
     std::vector<std::size_t> ready_; // reserved before any callback runs
     std::size_t next_ = 0, running_ = 0, completed_ = 0;
+    std::size_t uncontracted_ = 0;
     GraphError error_ = GraphError::None;
     bool started_ = false, drained_ = true, stop_ = false;
 };
