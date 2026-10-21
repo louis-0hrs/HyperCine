@@ -184,9 +184,9 @@ Not established:
 
 | Item | SHA-256 |
 | --- | --- |
-| `rca195_contract_ledger_iter3_2026-10-21.json` | `c82700540ccf52020c413b30926ac6be1e51e335ccfa2765d7c9d06dc1ea1cce` |
-| `rca195_contract_ledger_iter3_second_config_2026-10-21.json` | `1bfed58e5d31bb44c1cd9b0201f8580849eb6591e4514115a94673077b709163` |
-| `tools/rca195_contract.h` | `715c757c297916c7546e9a348cc1b4f515a2207892f6ec3e884873b36064b568` |
+| `rca195_contract_ledger_iter3_2026-10-21.json` | `4a19c3c2439ae61686eec785f9f08a527bc1469036f35ac38a93347d416917aa` |
+| `rca195_contract_ledger_iter3_second_config_2026-10-21.json` | `b468e3ec71f9cfd0c55eaaf388a5dd82fb10342ec5923ae74b56df5e007bbe21` |
+| `tools/rca195_contract.h` | `aa276ee9c9d4ef1b6249ec89a464796c83810b18fc0a2f322eb0462ea2983a1d` |
 | `tools/apply_rca195_contract.py` | `c24d78266b7aae77b7fabcc19ffe3fac90d7703fc6ef9a914139bcb678c610c0` |
 | `tools/run_rca195_contract.py` | `3f68c7640a820f536bea31a9ab2eb03a327600982b1c184167c39b2a70b6654b` |
 | `tests/test_rca195_error_precedence.cpp` | `b43accf5dd7897eaa334a86c8f015886722a1dd8b9cc828761d57411452d3795` |
@@ -194,3 +194,30 @@ Not established:
 Both ledgers are committed as produced; neither is regenerated at publication
 time. The scratch copy was verified byte-identical to the frozen `Codec/` before
 patching on every iteration.
+
+## 7. Post-publication correction: the header was rebuilt for MSVC
+
+The first push of iteration 3 (`2e162fd`) failed the hosted Windows MSVC job.
+The cause was mine: the counters used `__atomic_fetch_add`, a GCC/Clang builtin
+that MSVC does not have, and the new precedence test includes the contract
+header, so ten uses of an undeclared identifier reached the Windows build. That
+diagnosis belongs in this document rather than only in a CI log.
+
+The fix makes the increment portable (`InterlockedIncrement64` under `_MSC_VER`,
+the builtin everywhere else). Because the header is part of the **instrument**,
+both ledgers were regenerated with the corrected header rather than left
+carrying hashes for a header that no longer exists. The regeneration is a
+declared replacement, not a silent swap:
+
+| | Before (`2e162fd`) | After |
+| --- | --- | --- |
+| `tools/rca195_contract.h` | `715c757c…` | `aa276ee9…` |
+| Primary ledger | `c8270054…` | `4a19c3c2…` |
+| Second-configuration ledger | `1bfed58e…` | `b468e3ec…` |
+
+Every verdict and every counter is **bit-identical** across the two runs —
+100 calls and 60 calls, same verdicts, same `claims`/`executed`/`stale`/
+`drain_short`/`walloc`/`wfree`/`aba` totals. So the change repaired portability
+and did not alter behaviour. That equality is the check that makes the swap
+legitimate; without it, a replacement of published artefacts would be exactly
+the defect this project already found once in v2.

@@ -60,6 +60,24 @@ RCA195_CONTRACT_STATE unsigned long long rca195_contract_realloc_early;
 RCA195_CONTRACT_STATE void *rca195_contract_freed[RCA195_CONTRACT_ABA_RING];
 RCA195_CONTRACT_STATE unsigned int rca195_contract_freed_at;
 
+/* Portable increment.
+ *
+ * `__atomic_fetch_add` is a GCC/Clang builtin and does not exist under MSVC, so
+ * a header carrying it breaks the Windows build -- which is how this was found:
+ * the precedence test includes this header, and the MSVC job failed on ten uses
+ * of an undeclared identifier. The probe only needs "no lost update from worker
+ * threads", not a particular memory order, so a relaxed increment is enough on
+ * every compiler. MSVC gets InterlockedIncrement64; everything else keeps the
+ * builtin. */
+#if defined(_MSC_VER)
+#include <intrin.h>
+#define RCA195_CONTRACT_INC(counter)                                          \
+	(void)InterlockedIncrement64((volatile __int64 *)&(counter))
+#else
+#define RCA195_CONTRACT_INC(counter)                                          \
+	__atomic_fetch_add(&(counter), 1, __ATOMIC_RELAXED)
+#endif
+
 static void RCA195ContractInit(void)
 {
 	const char *path;
@@ -166,14 +184,14 @@ static void RCA195ContractClaim(int channel, int index)
 	 * under contention, which would make `claims != executed` fire on a valid
 	 * decode and blame the contract for the instrument. Relaxed atomics are
 	 * enough: the values are read after the pool has drained. */
-	__atomic_fetch_add(&rca195_contract_claims, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_claims);
 	RCA195ContractLog("CLAIM ch=%d idx=%d", channel, index);
 }
 
 static void RCA195ContractExecute(int channel, int index)
 {
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_executed, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_executed);
 	RCA195ContractLog("EXEC ch=%d idx=%d", channel, index);
 }
 
@@ -182,7 +200,7 @@ static void RCA195ContractExecute(int channel, int index)
 static void RCA195ContractStale(int channel, int index)
 {
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_stale, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_stale);
 	RCA195ContractLog("STALE ch=%d idx=%d", channel, index);
 }
 
@@ -191,7 +209,7 @@ static void RCA195ContractDrainShort(int remaining, unsigned long long claimed,
 									 unsigned long long executed)
 {
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_drain_short, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_drain_short);
 	RCA195ContractLog("DRAIN_SHORT remaining=%d claimed=%llu executed=%llu",
 					  remaining, claimed, executed);
 }
@@ -219,7 +237,7 @@ static void RCA195ContractDrainShort(int remaining, unsigned long long claimed,
 static void RCA195ContractPrecedence(int kept, int dropped)
 {
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_precedence, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_precedence);
 	RCA195ContractLog("PRECEDENCE kept=%d dropped=%d", kept, dropped);
 }
 
@@ -242,21 +260,21 @@ static void RCA195ContractPrecedence(int kept, int dropped)
 static void RCA195ContractReallocEnter(void *p)
 {
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_realloc_calls, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_realloc_calls);
 	RCA195ContractLog("WREALLOC_ENTER ptr=%p", p);
 }
 
 static void RCA195ContractReallocEarly(void *p)
 {
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_realloc_early, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_realloc_early);
 	RCA195ContractLog("WREALLOC_EARLY ptr=%p", p);
 }
 
 static void RCA195ContractWaveletFree(void *p)
 {
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_wfree, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_wfree);
 	rca195_contract_freed[rca195_contract_freed_at % RCA195_CONTRACT_ABA_RING] = p;
 	rca195_contract_freed_at++;
 	RCA195ContractLog("WFREE ptr=%p", p);
@@ -268,7 +286,7 @@ static void RCA195ContractWaveletAlloc(void *p)
 	unsigned int span;
 
 	RCA195ContractInit();
-	__atomic_fetch_add(&rca195_contract_walloc, 1, __ATOMIC_RELAXED);
+	RCA195_CONTRACT_INC(rca195_contract_walloc);
 	RCA195ContractLog("WALLOC ptr=%p", p);
 
 	span = rca195_contract_freed_at < RCA195_CONTRACT_ABA_RING
@@ -277,7 +295,7 @@ static void RCA195ContractWaveletAlloc(void *p)
 	{
 		if (rca195_contract_freed[i] == p)
 		{
-			__atomic_fetch_add(&rca195_contract_aba, 1, __ATOMIC_RELAXED);
+			RCA195_CONTRACT_INC(rca195_contract_aba);
 			RCA195ContractLog("ABA_REUSE ptr=%p", p);
 			return;
 		}
