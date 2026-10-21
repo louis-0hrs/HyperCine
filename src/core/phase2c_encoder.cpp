@@ -1272,7 +1272,9 @@ Phase2CResult RunPhase2C(const Phase2CConfig& cfg) {
         slots[static_cast<size_t>(i)].e_slot = CreateGpuEntropyFrameSlot(width, height);
         if (!slots[static_cast<size_t>(i)].w_slot || !slots[static_cast<size_t>(i)].e_slot) {
             cleanup_all();
+            const char* alloc_error = GpuEntropySlotCreationError();
             res.error = "failed to allocate multi-frame GPU slot";
+            if (alloc_error && alloc_error[0]) res.error += std::string(": ") + alloc_error;
             return res;
         }
         if (i == 0 && cfg.input_mode == Phase2CInputMode::DeviceInput) {
@@ -1530,7 +1532,8 @@ Phase2CResult RunPhase2C(const Phase2CConfig& cfg) {
                                           hp_tables.data(), e_cfg,
                                           (cfg.d2h_mode == CompressedD2HMode::FrameConsolidated) ? wv_done_ev : nullptr,
                                           band_evs)) {
-                    res.error = "QueueGpuEntropyFrame failed";
+                    const char* slot_error = GpuEntropyFrameError(slot.e_slot);
+                    res.error = (slot_error && slot_error[0]) ? slot_error : "QueueGpuEntropyFrame failed";
                     asm_failed.store(true);
                     break;
                 }
