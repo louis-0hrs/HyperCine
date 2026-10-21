@@ -14,4 +14,14 @@ if(HYPERCINE_BUILD_TESTS)
         # A test-process watchdog, NOT a promise to kill in-process C++ workers.
         set_tests_properties(decode_task_graph_workers_${workers} PROPERTIES TIMEOUT 30)
     endforeach()
+
+    # Scheduler contract derived from RCA-195 (PR #197). Each rule is measured
+    # against the real implementation and prints HOLDS / GAP / BROKEN. A BROKEN
+    # line fails the gate; a GAP line is a named, documented shortfall and does
+    # not -- reporting a gap as a pass is the defect RCA-195 itself is about.
+    add_executable(test_scheduler_contract_195 ../test_scheduler_contract_195.cpp)
+    target_link_libraries(test_scheduler_contract_195 PRIVATE hypercine_decode_task_graph)
+    add_test(NAME scheduler_contract_195 COMMAND test_scheduler_contract_195)
+    set_tests_properties(scheduler_contract_195 PROPERTIES TIMEOUT 60
+        PASS_REGULAR_EXPRESSION "SCHEDULER-CONTRACT PASS")
 endif()
