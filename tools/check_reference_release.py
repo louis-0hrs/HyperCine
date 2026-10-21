@@ -10,6 +10,7 @@ qualified by this runner; successful CTest execution alone cannot grant release.
 
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -73,6 +74,29 @@ def _registration_problem(name, entry):
     if name in PHASE2 and entry["skip_return_code"] != 77:
         return "registered without SKIP_RETURN_CODE=77"
     return None
+
+
+def _oracle_state():
+    return dict(state="BLOCKED", qualified=False,
+                reason="no reviewed independent pixel-oracle adapter implemented")
+
+
+def error_inventory(reason, ctest_exit=None):
+    """Emit the full schema-3 key set when no trustworthy evidence exists.
+
+    Consumers must see the same shape as a completed run, with empty counts and
+    incomplete coverage, rather than a truncated document with missing keys.
+    """
+    return dict(schema_version=3, scope="reference-oracle lane only",
+                ctest_exit=ctest_exit, gate_exit=1, reference_lane="FAIL",
+                independent_pixel_oracle=_oracle_state(),
+                release_gate="FAIL",
+                counts={state: 0 for state in ("PASS", "FAIL", "BLOCKED")},
+                coverage=dict(required=len(REQUIRED), required_registered=[],
+                              lane_registered=[], results=[], unregistered=[],
+                              registration_missing=[], registration_mismatch=[],
+                              complete=False),
+                reason=reason, tests=[])
 
 
 def inventory(xml_text, ctest_exit, registration):
@@ -155,8 +179,7 @@ def inventory(xml_text, ctest_exit, registration):
     # Keep this closed until an actual reviewed implementation supplies bound
     # same-packet quality evidence; do not add a CLI flag or trust a manifest
     # that merely asserts qualification.
-    oracle = dict(state="BLOCKED", qualified=False,
-                  reason="no reviewed independent pixel-oracle adapter implemented")
+    oracle = _oracle_state()
     code = 1 if lane_code == 1 else 77
     counts = {state: sum(row["state"] == state for row in rows)
               for state in ("PASS", "FAIL", "BLOCKED")}
@@ -177,31 +200,52 @@ def _run(command):
     return subprocess.run(command, check=False, capture_output=True, text=True)
 
 
-def main():
+def _diagnostic(result, limit=2000):
+    """Return CTest's exit code plus both streams; failures often land on stdout."""
+    parts = ["exit " + str(result.returncode)]
+    for stream in ("stdout", "stderr"):
+        text = (getattr(result, stream) or "").strip()
+        if text:
+            parts.append(stream + ": " + text[-limit:])
+    return "; ".join(parts)
+
+
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--config", default="Release")
     parser.add_argument("--output", required=True, type=Path)
-    args = parser.parse_args()
+    # Use the CTest that configured this build; a different PATH CTest could
+    # change registration or JUnit behavior on another host.
+    parser.add_argument("--ctest", default=os.environ.get("CTEST_COMMAND") or "ctest")
+    args = parser.parse_args(argv)
     lane = ["-L", "^" + LANE_LABEL + "$"]
+    ctest_exit = None
     # A fresh report prevents a failed invocation from consuming stale evidence.
     with tempfile.TemporaryDirectory(prefix="hypercine_reference_gate_") as temp:
         report = Path(temp) / "ctest.xml"
         try:
-            shown = _run(["ctest", "--test-dir", str(args.build), "-C", args.config]
+            shown = _run([args.ctest, "--test-dir", str(args.build), "-C", args.config]
                          + lane + ["--show-only=json-v1"])
             if shown.returncode != 0:
-                raise ValueError("ctest --show-only failed: " + shown.stderr.strip())
+                raise ValueError("ctest --show-only failed; " + _diagnostic(shown))
             registration = load_registration(shown.stdout)
-            result = _run(["ctest", "--test-dir", str(args.build), "-C", args.config,
+            result = _run([args.ctest, "--test-dir", str(args.build), "-C", args.config,
                            "--output-on-failure", "--no-tests=error"] + lane
                           + ["--output-junit", str(report)])
-            data = inventory(report.read_text(encoding="utf-8"), result.returncode,
-                             registration)
-        except (OSError, ValueError, json.JSONDecodeError, ET.ParseError) as error:
-            data = dict(schema_version=3, scope="reference-oracle lane only",
-                        release_gate="FAIL", gate_exit=1,
-                        reason="missing/invalid CTest evidence: " + str(error), tests=[])
+            ctest_exit = result.returncode
+            try:
+                xml_text = report.read_text(encoding="utf-8")
+            except OSError:
+                raise ValueError("ctest produced no JUnit report; "
+                                 + _diagnostic(result))
+            data = inventory(xml_text, result.returncode, registration)
+        except OSError as error:
+            data = error_inventory("failed to run " + args.ctest + ": " + str(error),
+                                   ctest_exit)
+        except (ValueError, json.JSONDecodeError, ET.ParseError) as error:
+            data = error_inventory("missing/invalid CTest evidence: " + str(error),
+                                   ctest_exit)
     args.output.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     print("reference release gate:", data["release_gate"])
     return data["gate_exit"]
