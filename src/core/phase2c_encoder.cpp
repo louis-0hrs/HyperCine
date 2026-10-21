@@ -1271,10 +1271,12 @@ Phase2CResult RunPhase2C(const Phase2CConfig& cfg) {
         slots[static_cast<size_t>(i)].w_slot = HyperCine_GpuSlotCreateForPhase2C(width, height, 1);
         slots[static_cast<size_t>(i)].e_slot = CreateGpuEntropyFrameSlot(width, height);
         if (!slots[static_cast<size_t>(i)].w_slot || !slots[static_cast<size_t>(i)].e_slot) {
+            // Copy before cleanup so the diagnostic cannot be invalidated by
+            // teardown CUDA calls.
+            const std::string alloc_error = GpuEntropySlotCreationError();
             cleanup_all();
-            const char* alloc_error = GpuEntropySlotCreationError();
             res.error = "failed to allocate multi-frame GPU slot";
-            if (alloc_error && alloc_error[0]) res.error += std::string(": ") + alloc_error;
+            if (!alloc_error.empty()) res.error += ": " + alloc_error;
             return res;
         }
         if (i == 0 && cfg.input_mode == Phase2CInputMode::DeviceInput) {

@@ -165,6 +165,8 @@ void SetGpuEntropyCapacityOverrideForTest(GpuEntropyFrameSlot* slot,
 // Test hook. Makes the next device allocation of at least `min_bytes` in a
 // session workspace or codebook upload fail once, so the fail-closed capacity
 // diagnostic can be exercised deterministically without exhausting the device.
+// The hook is process-wide and consumed atomically, so concurrent sessions
+// observe at most one injected failure.
 void SetGpuEntropyAllocationFailureInjectionForTest(size_t min_bytes);
 
 // Blocking progress for FrameConsolidated mode: waits on blocking event for GPU

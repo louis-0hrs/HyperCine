@@ -34,10 +34,12 @@ extern "C" {
 #include <cuda_runtime.h>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -45,6 +47,24 @@ namespace {
 int Fail(const std::string& message) {
     std::cerr << "FAIL: " << message << "\n";
     return 1;
+}
+
+bool WaitForTerminalStatus(hypercine::GpuEntropyFrameSlot* slot,
+                           hypercine::GpuStageStatus* status,
+                           std::string* error,
+                           int seconds = 8) {
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
+    while (std::chrono::steady_clock::now() < deadline) {
+        const auto current = hypercine::PollGpuEntropyFrameD2HStatus(slot);
+        if (current == hypercine::GpuStageStatus::Pending) continue;
+        *status = current;
+        if (current == hypercine::GpuStageStatus::Failed) {
+            const char* text = hypercine::GpuEntropyFrameError(slot);
+            *error = text ? text : "";
+        }
+        return true;
+    }
+    return false;
 }
 
 bool WordsWithinBound(const hypercine::EntropySymbols& symbols, int virtual_len, std::string* why) {
@@ -226,12 +246,118 @@ int main() {
         hypercine::DestroyGpuEntropySession(cap_session);
     }
 
+    // Production slot-creation diagnostics must survive session cleanup and
+    // retain the first actionable CUDA failure.
+    {
+        hypercine::GpuEntropySession* cleanup_session = hypercine::CreateGpuEntropySession();
+        // 1M x 1M pixels requires ~8.8 TB of device arenas on any current GPU.
+        hypercine::GpuEntropyFrameSlot* impossible =
+            hypercine::CreateGpuEntropyFrameSlot(1 << 20, 1 << 20);
+        if (impossible) {
+            hypercine::DestroyGpuEntropyFrameSlot(impossible);
+            return Fail("impossible slot allocation unexpectedly succeeded");
+        }
+        const std::string creation_error = hypercine::GpuEntropySlotCreationError();
+        if (creation_error.find("UNSUPPORTED_RESOURCE_BOUND") == std::string::npos ||
+            creation_error.find("requested") == std::string::npos ||
+            creation_error.find("free ") == std::string::npos ||
+            creation_error.find("CUDA ") == std::string::npos) {
+            return Fail("slot creation diagnostic is incomplete: " + creation_error);
+        }
+        hypercine::DestroyGpuEntropySession(cleanup_session);
+        if (creation_error != hypercine::GpuEntropySlotCreationError()) {
+            return Fail("slot creation diagnostic changed during cleanup");
+        }
+    }
+
+    // One-shot injection is process-wide: two concurrent sessions must observe
+    // exactly one injected failure, and that session must recover on retry.
+    {
+        constexpr int kWorkers = 2;
+        hypercine::GpuEntropySession* sessions[kWorkers] = {};
+        hypercine::GpuEntropyFrameSlot* worker_slots[kWorkers] = {};
+        bool queued[kWorkers] = {};
+        bool completed[kWorkers] = {};
+        std::string worker_errors[kWorkers];
+        for (int i = 0; i < kWorkers; ++i) {
+            sessions[i] = hypercine::CreateGpuEntropySession();
+            worker_slots[i] = hypercine::CreateGpuEntropyFrameSlot(patterns_w, patterns_h);
+            if (!sessions[i] || !worker_slots[i]) return Fail("concurrent capacity slot allocation failed");
+        }
+
+        std::atomic<int> ready{0};
+        std::atomic<bool> go{false};
+        std::thread workers[kWorkers];
+        for (int i = 0; i < kWorkers; ++i) {
+            workers[i] = std::thread([&, i]() {
+                ready.fetch_add(1, std::memory_order_release);
+                while (!go.load(std::memory_order_acquire)) std::this_thread::yield();
+                queued[i] = hypercine::QueueGpuEntropyFrame(
+                    sessions[i], worker_slots[i], &request, 1, &live, cfg, nullptr, nullptr);
+                if (!queued[i]) {
+                    const char* err = hypercine::GpuEntropyFrameError(worker_slots[i]);
+                    worker_errors[i] = err ? err : "";
+                    return;
+                }
+                hypercine::GpuStageStatus status = hypercine::GpuStageStatus::Pending;
+                if (!WaitForTerminalStatus(worker_slots[i], &status, &worker_errors[i])) {
+                    worker_errors[i] = "concurrent queue did not reach a terminal state";
+                    return;
+                }
+                completed[i] = status == hypercine::GpuStageStatus::Complete;
+            });
+        }
+        while (ready.load(std::memory_order_acquire) < kWorkers) std::this_thread::yield();
+        hypercine::SetGpuEntropyAllocationFailureInjectionForTest(1u);
+        go.store(true, std::memory_order_release);
+        for (auto& worker : workers) worker.join();
+
+        int failures = 0;
+        int successes = 0;
+        int failed_index = -1;
+        for (int i = 0; i < kWorkers; ++i) {
+            if (!queued[i]) {
+                ++failures;
+                failed_index = i;
+                if (worker_errors[i].find("UNSUPPORTED_RESOURCE_BOUND") == std::string::npos) {
+                    return Fail("concurrent injected failure lacked the capacity diagnostic: " + worker_errors[i]);
+                }
+            } else if (completed[i]) {
+                ++successes;
+            } else {
+                return Fail("concurrent capacity run did not complete: " + worker_errors[i]);
+            }
+        }
+        if (failures != 1 || successes != 1) {
+            return Fail("one-shot injection was not exclusive: failures=" + std::to_string(failures) +
+                        " successes=" + std::to_string(successes));
+        }
+
+        if (!hypercine::QueueGpuEntropyFrame(sessions[failed_index], worker_slots[failed_index],
+                                            &request, 1, &live, cfg, nullptr, nullptr)) {
+            const char* err = hypercine::GpuEntropyFrameError(worker_slots[failed_index]);
+            return Fail(std::string("concurrent retry queue failed: ") + (err ? err : ""));
+        }
+        hypercine::GpuStageStatus retry_status = hypercine::GpuStageStatus::Pending;
+        std::string retry_error;
+        if (!WaitForTerminalStatus(worker_slots[failed_index], &retry_status, &retry_error) ||
+            retry_status != hypercine::GpuStageStatus::Complete) {
+            return Fail("concurrent retry did not complete: " + retry_error);
+        }
+
+        for (int i = 0; i < kWorkers; ++i) {
+            hypercine::DestroyGpuEntropyFrameSlot(worker_slots[i]);
+            hypercine::DestroyGpuEntropySession(sessions[i]);
+        }
+    }
+
     cudaFree(device);
     hypercine::DestroyGpuEntropyFrameSlot(slot);
     hypercine::DestroyGpuEntropySession(session);
 
     std::cout << "PASS: entropy word bound holds for " << tables_checked
-              << " codebooks, worst-case CPU patterns, GPU overflow is Failed, and"
-              << " allocation capacity is diagnosed fail-closed\n";
+              << " codebooks, worst-case CPU patterns, GPU overflow is Failed,"
+              << " allocation capacity is diagnosed fail-closed, and the one-shot"
+              << " injection is exclusive across concurrent sessions\n";
     return 0;
 }

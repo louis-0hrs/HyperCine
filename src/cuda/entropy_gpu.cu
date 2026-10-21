@@ -7,6 +7,7 @@
 #include <cub/device/device_scan.cuh>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstring>
 #include <numeric>
@@ -16,7 +17,7 @@
 namespace hypercine {
 
 int (*g_entropy_occ_fn)() = nullptr;
-const char* g_launch_error = nullptr;
+thread_local const char* g_launch_error = nullptr;
 
 namespace {
 
@@ -24,8 +25,8 @@ constexpr int kBlock = 256;
 constexpr int kMaxHighpassBands = 32;
 constexpr int kMaxEntropyStreams = 8;
 
-// Test-only, single-shot fault injection for the fail-closed capacity path.
-size_t g_inject_workspace_alloc_failure_bytes = 0;
+// Test-only, one-shot fault injection for the fail-closed capacity path.
+std::atomic<size_t> g_inject_workspace_alloc_failure_bytes{0};
 
 // Thread-local: why the most recent CreateGpuEntropyFrameSlot call failed.
 thread_local std::string g_slot_creation_error;
@@ -44,6 +45,17 @@ std::string DescribeDeviceCapacityFailure(const std::string& what, size_t reques
         text += "device memory query failed; ";
     }
     text += "CUDA ";
+    text += cudaGetErrorName(error);
+    text += " (";
+    text += cudaGetErrorString(error);
+    text += ")";
+    return text;
+}
+
+std::string DescribeSlotSetupFailure(const char* what, cudaError_t error) {
+    std::string text = "GPU entropy slot setup failed: ";
+    text += what;
+    text += "; CUDA ";
     text += cudaGetErrorName(error);
     text += " (";
     text += cudaGetErrorString(error);
@@ -934,11 +946,13 @@ struct Workspace {
     bool AllocDevice(void** ptr, size_t bytes, const char* what) {
         last_alloc_bytes = bytes;
         last_alloc_what = what;
-        if (g_inject_workspace_alloc_failure_bytes != 0 &&
-            bytes >= g_inject_workspace_alloc_failure_bytes) {
-            g_inject_workspace_alloc_failure_bytes = 0;
-            last_alloc_error = cudaErrorMemoryAllocation;
-            return false;
+        size_t injection_threshold = g_inject_workspace_alloc_failure_bytes.load(std::memory_order_relaxed);
+        while (injection_threshold != 0 && bytes >= injection_threshold) {
+            if (g_inject_workspace_alloc_failure_bytes.compare_exchange_weak(
+                    injection_threshold, 0, std::memory_order_acq_rel, std::memory_order_relaxed)) {
+                last_alloc_error = cudaErrorMemoryAllocation;
+                return false;
+            }
         }
         if (cudaMalloc(ptr, bytes) != cudaSuccess) {
             last_alloc_error = cudaGetLastError();
@@ -1772,14 +1786,22 @@ GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
     slot->total_band_words_cap = max_pixels * word_mult + static_cast<size_t>(kMaxHighpassBands) * 32768u;
     slot->consolidated_words_cap = max_pixels * word_mult + 262144u;
 
-    auto fail = [&]() {
+    auto fail = [&](const char* what = "slot resource allocation") {
+        if (g_slot_creation_error.empty()) {
+            const cudaError_t error = cudaGetLastError();
+            g_slot_creation_error = (error == cudaSuccess)
+                ? std::string("GPU entropy slot setup failed: ") + what
+                : DescribeSlotSetupFailure(what, error);
+        }
         DestroyGpuEntropyFrameSlot(slot);
         return static_cast<GpuEntropyFrameSlot*>(nullptr);
     };
 
     auto fail_device = [&](const char* what, size_t bytes, cudaError_t error) {
-        g_slot_creation_error = DescribeDeviceCapacityFailure(what, bytes, error);
-        return fail();
+        if (g_slot_creation_error.empty()) {
+            g_slot_creation_error = DescribeDeviceCapacityFailure(what, bytes, error);
+        }
+        return fail(what);
     };
     const size_t band_words_bytes = sizeof(uint32_t) * slot->total_band_words_cap;
     const size_t consolidated_bytes = sizeof(uint32_t) * slot->consolidated_words_cap;
@@ -2233,7 +2255,7 @@ const char* GpuEntropySlotCreationError() {
 }
 
 void SetGpuEntropyAllocationFailureInjectionForTest(size_t min_bytes) {
-    g_inject_workspace_alloc_failure_bytes = min_bytes;
+    g_inject_workspace_alloc_failure_bytes.store(min_bytes, std::memory_order_release);
 }
 
 void SetGpuEntropyCapacityOverrideForTest(GpuEntropyFrameSlot* slot,
