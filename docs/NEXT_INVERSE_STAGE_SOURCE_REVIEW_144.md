@@ -104,14 +104,27 @@ an original-equality pass. Temporary source/binaries remain outside Git.
 - AppleClang21 `-arch x86_64 -std=c++17 -msse2 -O2`: probe compiled successfully.
   Generated original-source SHA-256:
   `241d2dd1591f63793e74428e40e4e4448b52af289a61f47d69f976dae743a8dd`.
-- Original private authentication: BLOCKED, configured corpus root unavailable.
+- Original private authentication: **30/30 artifacts and sidecars PASS** in
+  the subsequent read-only mounted-corpus check, superseding the first
+  unavailable-corpus result. Exact lengths, SHA-256, JSON stage/producer/
+  representation and packet bindings, AVAILABLE status and SHA sidecars
+  matched the selection at `08e23935b9880dc9d9d01374a55347a07f649eb3`.
+  The canonical mount was unavailable again during publication recovery;
+  this records the completed check, not a new authentication in that recovery.
   No files exported, moved, modified or resealed.
 - Original SSE2 numeric replay: NOT_RUN. Native ARM64 host has no executable
   x86 runtime; cross-compiled executable is not a native execution result.
 - Archived Windows compiler/ISA and allocation-owner acceptance: PENDING.
 - SDK/GPU runs, sanitizers and performance benchmarks: NOT_RUN.
 
-Next action: a reference owner with native x86_64 and the existing corpus runs
+Publication follow-up: GitHub browser authentication restored; the isolated
+checkout was recovered from its existing Git commit after temporary files
+were removed. The six Python guard tests passed again on unchanged tool code.
+The 43/43 full-suite and x86 cross-compile results above are the earlier native
+runs in this session; full build products were not retained through recovery.
+
+Next action: preferably the Windows reference owner (or a native Linux x86_64
+owner, with separate Windows provenance signoff) with the existing corpus runs
 this same-head original-function probe, reports six actual signed comparisons,
 and confirms archived build/buffer provenance. A separate own-arithmetic Draft
 can follow review of that evidence. #144/#47 remain open.
