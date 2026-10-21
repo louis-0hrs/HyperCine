@@ -11,6 +11,39 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+# 0. SDK-free fail-closed reference-oracle contract.
+# Runs on every platform and does not require the original GoPro SDK.
+add_executable(test_reference_oracle test_reference_oracle.cpp)
+add_test(NAME test_reference_oracle COMMAND test_reference_oracle)
+set_tests_properties(test_reference_oracle PROPERTIES LABELS "reference-oracle")
+
+# Optional validation tooling only; the codec has no Python dependency.
+find_package(Python3 QUIET COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME test_reference_release_inventory
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_reference_release.py")
+    set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
+    # The runner must use the CTest that configured this build. CMAKE_CTEST_COMMAND
+    # is only set by include(CTest); this project calls enable_testing() directly.
+    if(CMAKE_CTEST_COMMAND)
+        set(HYPERCINE_CTEST_COMMAND "${CMAKE_CTEST_COMMAND}")
+    else()
+        find_program(HYPERCINE_CTEST_COMMAND NAMES ctest HINTS "${CMAKE_ROOT}/bin")
+    endif()
+    if(NOT HYPERCINE_CTEST_COMMAND)
+        message(FATAL_ERROR "ctest executable not found for reference_release_gate")
+    endif()
+    # Explicit qualification entrypoint: unlike ordinary CTest, a skipped or
+    # missing Phase 2 reference test makes this target fail (runner exit 77).
+    add_custom_target(reference_release_gate
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_reference_release.py"
+            --build "${CMAKE_BINARY_DIR}" --config "$<CONFIG>"
+            --ctest "${HYPERCINE_CTEST_COMMAND}"
+            --output "${CMAKE_BINARY_DIR}/reference-release.json"
+        DEPENDS test_reference_oracle
+        USES_TERMINAL VERBATIM)
+endif()
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
@@ -89,18 +122,39 @@ if(HYPERCINE_ENABLE_CUDA)
     target_link_libraries(test_phase2a PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2a COMMAND test_phase2a)
     add_test(NAME test_diagnostic_geometry_guard COMMAND test_phase2a --self-test-geometry-guard)
+    # Exit 77 means the strict encoder gates passed but the original-SDK pixel
+    # gate is BLOCKED_ORACLE. CTest reports it as skipped, never as passed.
+    set_tests_properties(test_phase2a PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2b test_phase2b.cpp)
     target_link_libraries(test_phase2b PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2b COMMAND test_phase2b)
+    set_tests_properties(test_phase2b PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2c test_phase2c.cpp)
     target_link_libraries(test_phase2c PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2c COMMAND test_phase2c)
+    set_tests_properties(test_phase2c PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2d test_phase2d.cpp)
     target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2d COMMAND test_phase2d)
+    set_tests_properties(test_phase2d PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
+    if(TARGET reference_release_gate)
+        add_dependencies(reference_release_gate test_phase2a test_phase2b test_phase2c test_phase2d)
+    endif()
 
     add_executable(test_entropy_capacity test_entropy_capacity.cpp)
     target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic)

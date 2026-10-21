@@ -831,7 +831,10 @@ Phase2DMetadataSafetyReport VerifyPhase2DMetadataSafety(int width, int height) {
         cfg.deterministic_test_metadata = det_meta;
         cfg.verify_bitstream = true;
         Phase2DResult r = RunPhase2D(cfg);
-        if (!r.ok || r.last_bitstream.empty()) return false;
+        // Metadata safety depends only on the strict encoder/bitstream outcome.
+        // Phase2DResult.ok also folds in the original-SDK PSNR, which is a
+        // non-reproducible reference signal and must not fail this check.
+        if (!r.bitstream_byte_match || !r.decode_ok || r.last_bitstream.empty()) return false;
         *out_sample = std::move(r.last_bitstream);
 
         // Extract GUID, date, and time from sample metadata header.

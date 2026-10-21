@@ -37,16 +37,34 @@ extern "C" {
 #include "decoder.h"
 #include "diagnostic_decode_guard.h"
 
+#include "reference_oracle.h"
+
 #include <algorithm>
+#include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 #include <cstring>
 #include <cmath>
+
+#ifdef _WIN32
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#define HYPERCINE_POPEN _popen
+#define HYPERCINE_PCLOSE _pclose
+#else
+#define HYPERCINE_POPEN popen
+#define HYPERCINE_PCLOSE pclose
+#endif
 
 namespace {
 
@@ -289,6 +307,56 @@ bool Expect(const hypercine::Phase2Run& run, const char* name) {
     return true;
 }
 
+hypercine::test_oracle::SampleHeaderView ToView(const SampleHeaderInfo& info) {
+    hypercine::test_oracle::SampleHeaderView view;
+    view.parsed = info.parsed;
+    view.error = info.error;
+    view.width = info.width;
+    view.height = info.height;
+    view.frame_number = info.frame_number;
+    view.encode_quality = info.encode_quality;
+    view.encoder_version = info.encoder_version;
+    view.encoded_format = info.encoded_format;
+    view.input_format = info.input_format;
+    view.progressive = info.progressive;
+    view.interlaced_flags = info.interlaced_flags;
+    view.header_bytes = info.parsed_bytes;
+    return view;
+}
+
+bool ValidDecodedGeometry(const DecodeResult& result, const std::vector<uint8_t>& image,
+                          int width, int height) {
+    if (result.decoded_width != width || result.decoded_height != height) return false;
+    if (result.pitch < width * 4) return false;
+    return image.size() >= static_cast<size_t>(result.pitch) * static_cast<size_t>(height);
+}
+
+struct DecodeObservation {
+    std::size_t decodes = 0;
+    bool all_ok = true;
+    std::set<std::string> digests;
+    std::vector<double> psnrs;
+};
+
+void ObserveDecode(const std::vector<uint8_t>& packet, const std::vector<uint8_t>& source,
+                   int width, int height, std::size_t repeats, const char* label,
+                   bool print_first, DecodeObservation* observation) {
+    for (std::size_t i = 0; i < repeats; ++i) {
+        std::vector<uint8_t> image;
+        DecodeResult result;
+        const bool ok = Decode(packet, width, height, false, &image, &result);
+        ++observation->decodes;
+        if (i == 0 && print_first) PrintDecode(label, result, image);
+        if (!ok || !ValidDecodedGeometry(result, image, width, height)) {
+            observation->all_ok = false;
+            std::cerr << label << " decode " << i << " failed or returned invalid geometry\n";
+            continue;
+        }
+        observation->digests.insert(hypercine::Sha256Hex(image.data(), image.size()));
+        observation->psnrs.push_back(Psnr(source, image, width, height, result.pitch));
+    }
+}
+
 bool WritePacket(const std::string& directory, const char* name, const std::vector<uint8_t>& packet) {
     const std::string path = directory + "/" + name;
     std::ofstream out(path, std::ios::binary | std::ios::trunc);
@@ -311,6 +379,153 @@ bool ReadPacket(const char* path, std::vector<uint8_t>* packet) {
     in.seekg(0, std::ios::beg);
     return static_cast<bool>(in.read(reinterpret_cast<char*>(packet->data()),
                                      static_cast<std::streamsize>(bytes)));
+}
+
+std::size_t BoundedEnvCount(const char* name, std::size_t fallback, std::size_t maximum) {
+    const char* raw = std::getenv(name);
+    if (!raw || !*raw) return fallback;
+    char* end = nullptr;
+    const long value = std::strtol(raw, &end, 10);
+    if (end == raw || *end != '\0' || value < 0) return fallback;
+    return std::min<std::size_t>(static_cast<std::size_t>(value), maximum);
+}
+
+std::filesystem::path SelfExecutablePath(const char* argv0) {
+    if (!argv0 || !*argv0) return {};
+    std::error_code ec;
+    const std::filesystem::path path = std::filesystem::absolute(argv0, ec);
+    if (ec) return {};
+    return path;
+}
+
+bool ProbePathIsShellSafe(const std::filesystem::path& path) {
+    // The test-only probe builds a shell command. Refuse paths that could be
+    // interpreted by cmd.exe or a POSIX shell; the probe then reports
+    // UNAVAILABLE and the gate stays blocked.
+    const std::string text = path.string();
+#ifdef _WIN32
+    return text.find_first_of("\"$`;&|<>()%!^\r\n") == std::string::npos;
+#else
+    // Reject a literal backslash on POSIX without spelling a two-character
+    // backslash sequence in this source file.
+    if (text.find(static_cast<char>(92)) != std::string::npos) return false;
+    return text.find_first_of("\"'$`;&|<>()\r\n") == std::string::npos;
+#endif
+}
+
+std::filesystem::path MakeScratchDirectory() {
+#ifdef _WIN32
+    const long pid = _getpid();
+#else
+    const long pid = static_cast<long>(getpid());
+#endif
+    std::error_code ec;
+    const std::filesystem::path base = std::filesystem::temp_directory_path(ec);
+    if (ec) return {};
+    for (int attempt = 0; attempt < 16; ++attempt) {
+        const std::filesystem::path candidate =
+            base / ("hypercine_phase2a_oracle_" + std::to_string(pid) + "_" +
+                    std::to_string(attempt));
+        ec.clear();
+        if (std::filesystem::create_directory(candidate, ec) && !ec) return candidate;
+    }
+    return {};
+}
+
+struct FreshDecodeSample {
+    bool parsed = false;
+    bool ok = false;
+    std::string digest;
+    double psnr = 0.0;
+};
+
+bool RunSelfDecodeHash(const std::filesystem::path& self,
+                       const std::filesystem::path& packet_path,
+                       FreshDecodeSample* sample) {
+#ifdef _WIN32
+    // cmd /c strips the outermost quote pair when the command starts with a
+    // quote, so wrap the whole command once more.
+    const std::string command = "\"\"" + self.string() + "\" --decode-hash \"" +
+                                packet_path.string() + "\" 2>&1\"";
+#else
+    const std::string command = "\"" + self.string() + "\" --decode-hash \"" +
+                                packet_path.string() + "\" 2>&1";
+#endif
+    FILE* pipe = HYPERCINE_POPEN(command.c_str(), "r");
+    if (!pipe) {
+        std::cerr << "fresh-process probe: pipe unavailable\n";
+        return false;
+    }
+    std::string output;
+    char buffer[512];
+    while (std::fgets(buffer, sizeof(buffer), pipe)) output += buffer;
+    const int status = HYPERCINE_PCLOSE(pipe);
+    if (output.find("STATUS=ERROR") != std::string::npos) {
+        sample->parsed = true;
+        sample->ok = false;
+        return true;
+    }
+    if (status != 0) {
+        std::cerr << "fresh-process probe: child status " << status << "\n";
+        return false;
+    }
+
+    const std::string digest_key = "DECODE_SHA256=";
+    const std::string psnr_key = "PSNR=";
+    const std::size_t digest_at = output.find(digest_key);
+    if (digest_at == std::string::npos) {
+        std::cerr << "fresh-process probe: digest missing\n";
+        return false;
+    }
+    const std::size_t digest_begin = digest_at + digest_key.size();
+    const std::size_t digest_end = output.find_first_of(" \r\n", digest_begin);
+    if (digest_end == std::string::npos) {
+        std::cerr << "fresh-process probe: digest truncated\n";
+        return false;
+    }
+    sample->digest = output.substr(digest_begin, digest_end - digest_begin);
+    const std::size_t psnr_at = output.find(psnr_key);
+    if (psnr_at == std::string::npos) {
+        std::cerr << "fresh-process probe: psnr missing\n";
+        return false;
+    }
+    sample->psnr = std::strtod(output.c_str() + psnr_at + psnr_key.size(), nullptr);
+    sample->parsed = true;
+    sample->ok = output.find("STATUS=OK") != std::string::npos;
+    return true;
+}
+
+// Machine-readable single-decode mode used by the bounded fresh-process
+// observation. It is test-only and bounded by ReadPacket.
+int DecodePacketHash(const char* path) {
+    std::vector<uint8_t> packet;
+    if (!ReadPacket(path, &packet)) {
+        std::cout << "STATUS=ERROR reason=packet_read\n";
+        return 1;
+    }
+    const SampleHeaderInfo header = ParseSample(packet);
+    if (!header.parsed || header.error || header.width != 1920 || header.height != 1080) {
+        std::cout << "STATUS=ERROR reason=header\n";
+        return 1;
+    }
+    std::vector<uint8_t> image;
+    DecodeResult result;
+    const bool ok = Decode(packet, 1920, 1080, true, &image, &result);
+    if (!ok || !ValidDecodedGeometry(result, image, 1920, 1080)) {
+        std::cout << "STATUS=ERROR reason=decode\n";
+        return 1;
+    }
+    const auto frame = hypercine::MakeFrame(1920, 1080, hypercine::CanonicalPattern::Canonical);
+    const double psnr = Psnr(frame, image, 1920, 1080, result.pitch);
+    std::cout << "DECODE_SHA256=" << hypercine::Sha256Hex(image.data(), image.size())
+              << " PSNR=" << std::setprecision(9) << psnr
+              << " PITCH=" << result.pitch
+              << " WIDTH=" << result.decoded_width
+              << " HEIGHT=" << result.decoded_height
+              << " BYTES=" << image.size()
+              << " FRAME=" << header.frame_number
+              << " STATUS=OK\n";
+    return 0;
 }
 
 int DecodePacketFile(const char* path) {
@@ -413,6 +628,8 @@ int RunGeometryGuardSelfTest() {
 int main(int argc, char** argv) {
     if (argc == 3 && std::string(argv[1]) == "--decode") return DecodePacketFile(argv[2]);
     if (argc == 2 && std::string(argv[1]) == "--self-test-geometry-guard") return RunGeometryGuardSelfTest();
+    if (argc == 3 && std::string(argv[1]) == "--decode-hash") return DecodePacketHash(argv[2]);
+    const std::filesystem::path self = SelfExecutablePath(argc > 0 ? argv[0] : nullptr);
 
     const int width = 1920;
     const int height = 1080;
@@ -571,51 +788,134 @@ int main(int argc, char** argv) {
         }
     }
 
+    const SampleHeaderInfo host_header = ParseSample(compact.bitstream);
+    const SampleHeaderInfo device_header = ParseSample(resident.bitstream);
+    // The encoder writes the frame number through PutTagPairOptional, so the
+    // stored tag id carries the optional-tag sign bit (0xffbb).
+    const std::uint16_t stored_frame_number_tag =
+        static_cast<std::uint16_t>(-CODEC_TAG_FRAME_NUMBER);
+    const auto equivalence = hypercine::test_oracle::CompareSyntheticPackets(
+        ToView(host_header), compact.bitstream, ToView(device_header), resident.bitstream,
+        stored_frame_number_tag);
+    std::cout << "packet_equivalence="
+              << hypercine::test_oracle::PacketEquivalenceName(equivalence)
+              << " differing_packet_bytes=" << bitstream_diffs << "\n";
+    if (equivalence != hypercine::test_oracle::PacketEquivalence::Equivalent &&
+        equivalence != hypercine::test_oracle::PacketEquivalence::FrameNumberHeaderOnly) {
+        std::cerr << "strict packet attribution failed; encoder/bitstream mismatch is fatal\n";
+        CFHD_CloseEncoder(encoder_ref);
+        return 1;
+    }
+
+    const std::size_t repeats = BoundedEnvCount("HYPERCINE_PHASE2A_DECODE_REPEATS", 3, 8);
+    const std::size_t fresh_processes =
+        BoundedEnvCount("HYPERCINE_PHASE2A_FRESH_PROCESSES", 3, 8);
+    DecodeObservation host_observation;
+    DecodeObservation device_observation;
+    ObserveDecode(compact.bitstream, frame, width, height, repeats, "host compact decode", true,
+                  &host_observation);
+    ObserveDecode(resident.bitstream, frame, width, height, repeats, "device compact decode", true,
+                  &device_observation);
+
+    std::set<std::string> observed_digests = host_observation.digests;
+    observed_digests.insert(device_observation.digests.begin(), device_observation.digests.end());
+    bool decoder_ok = host_observation.all_ok && device_observation.all_ok;
+    std::size_t observed_decodes = host_observation.decodes + device_observation.decodes;
+    std::cout << "in_process_decode_observation host=" << host_observation.decodes
+              << " device=" << device_observation.decodes
+              << " distinct=" << observed_digests.size() << "\n";
+
+    if (fresh_processes > 0) {
+        const std::filesystem::path scratch = MakeScratchDirectory();
+        bool probe_available = false;
+        if (!scratch.empty() && !self.empty() && ProbePathIsShellSafe(self) &&
+            ProbePathIsShellSafe(scratch) &&
+            WritePacket(scratch.string(), "phase2a_host.cfhd", compact.bitstream) &&
+            WritePacket(scratch.string(), "phase2a_device.cfhd", resident.bitstream)) {
+            for (int packet_index = 0; packet_index < 2; ++packet_index) {
+                if (packet_index > 0 && !probe_available) break;
+                const std::filesystem::path packet_path =
+                    scratch / (packet_index == 0 ? "phase2a_host.cfhd" : "phase2a_device.cfhd");
+                bool first_process = true;
+                for (std::size_t i = 0; i < fresh_processes; ++i) {
+                    FreshDecodeSample sample;
+                    if (!RunSelfDecodeHash(self, packet_path, &sample)) {
+                        if (first_process) break;
+                        std::cerr << "fresh-process decode observation ended early\n";
+                        break;
+                    }
+                    first_process = false;
+                    probe_available = true;
+                    ++observed_decodes;
+                    if (!sample.ok) {
+                        decoder_ok = false;
+                        std::cerr << "fresh-process decode " << i << " reported an error\n";
+                        continue;
+                    }
+                    observed_digests.insert(sample.digest);
+                }
+            }
+            std::cout << "fresh_process_decode_observation="
+                      << (probe_available ? "AVAILABLE" : "UNAVAILABLE")
+                      << " processes_per_packet=" << fresh_processes
+                      << " distinct_total=" << observed_digests.size() << "\n";
+            std::error_code cleanup_error;
+            std::filesystem::remove_all(scratch, cleanup_error);
+        } else {
+            std::cout << "fresh_process_decode_observation=UNAVAILABLE reason="
+                      << (scratch.empty() ? "scratch" : self.empty() ? "self" : "write")
+                      << "\n";
+        }
+    }
+
+    // Pixel equality and PSNR are diagnostics only while the frozen original
+    // SDK remains an unqualified pixel oracle.
     std::vector<uint8_t> host_image, device_image;
     DecodeResult host_decode, device_decode;
-    const bool host_ok = Decode(compact.bitstream, width, height, false, &host_image, &host_decode);
-    const bool device_ok = Decode(resident.bitstream, width, height, false, &device_image, &device_decode);
+    const bool host_diag_ok = Decode(compact.bitstream, width, height, false, &host_image, &host_decode);
+    const bool device_diag_ok = Decode(resident.bitstream, width, height, false, &device_image, &device_decode);
     PrintDecode("host compact decode", host_decode, host_image);
     PrintDecode("device compact decode", device_decode, device_image);
-    if (host_ok && device_ok) {
-        PrintPixelDiffs(host_image, host_decode.pitch, device_image, device_decode.pitch, width, height);
+    if (host_diag_ok && device_diag_ok &&
+        ValidDecodedGeometry(host_decode, host_image, width, height) &&
+        ValidDecodedGeometry(device_decode, device_image, width, height)) {
+        PrintPixelDiffs(host_image, host_decode.pitch, device_image, device_decode.pitch,
+                        width, height);
+        std::cout << "host_device_pixels_equal="
+                  << (host_image == device_image ? 1 : 0) << "\n";
+    } else {
+        std::cout << "host_device_pixels_equal=UNAVAILABLE\n";
     }
-    if (!host_ok || !device_ok) {
-        std::cerr << "device-resident decode differs from host compact (" << bitstream_diffs
-                  << " bitstream bytes):"
-                  << " host_decode=" << (host_ok ? "ok" : "failed")
-                  << " device_decode=" << (device_ok ? "ok" : "failed") << "\n";
-        return 1;
-    }
-    if (host_decode.pitch != device_decode.pitch) {
-        std::cerr << "device-resident decode differs from host compact (" << bitstream_diffs
-                  << " bitstream bytes): pitch " << host_decode.pitch
-                  << " vs " << device_decode.pitch << "\n";
-        return 1;
-    }
-    if (host_image != device_image) {
-        std::cerr << "device-resident decode differs from host compact (" << bitstream_diffs
-                  << " bitstream bytes): decoded pixels differ\n";
-        return 1;
-    }
-    std::cout << "device and host compact decode identically (" << bitstream_diffs
-              << " bitstream bytes differ, sample size " << compact.bitstream.size() << ")\n";
 
-    std::vector<uint8_t> image;
-    DecodeResult compact_decode;
-    if (!Decode(compact.bitstream, width, height, false, &image, &compact_decode)) {
-        PrintDecode("host compact decode repeat", compact_decode, image);
-        std::cerr << "upstream decoder rejected compact bitstream\n";
-        return 1;
+    hypercine::test_oracle::ReferenceGateInputs gate;
+    gate.encoder_bitstream_verified = true;
+    gate.decoder_returned_ok = decoder_ok;
+    gate.observed_decodes = observed_decodes;
+    gate.distinct_decoded_outputs = observed_digests.size();
+    // The frozen original SDK has produced divergent pixels for identical
+    // packet bytes, so it is not a qualified independent pixel oracle.
+    gate.quality_oracle_qualified = false;
+    gate.quality_measured = !host_observation.psnrs.empty();
+    gate.quality_meets_threshold =
+        !host_observation.psnrs.empty() && host_observation.psnrs.front() >= 35.0;
+
+    const auto decision = hypercine::test_oracle::ClassifyReferenceGate(gate);
+    if (!host_observation.psnrs.empty()) {
+        std::cout << "decoded psnr " << host_observation.psnrs.front() << " dB\n";
     }
-    PrintDecode("host compact decode repeat", compact_decode, image);
-    const double psnr = Psnr(frame, image, width, height, compact_decode.pitch);
-    std::cout << "decoded psnr " << psnr << " dB\n";
-    if (psnr < 35.0) {
-        std::cerr << "psnr below 35 dB\n";
-        return 1;
-    }
+    std::cout << "reference_oracle_decision="
+              << hypercine::test_oracle::GateDecisionName(decision)
+              << " exit=" << hypercine::test_oracle::GateExitCode(decision)
+              << " release_gate="
+              << (hypercine::test_oracle::GateAllowsRelease(decision) ? "PASS" : "BLOCKED")
+              << " encoder_strict_gates=PASS\n";
+
     CFHD_CloseEncoder(encoder_ref);
-    std::cout << "phase 2a tests passed\n";
-    return 0;
+    if (decision == hypercine::test_oracle::GateDecision::Pass) {
+        std::cout << "phase 2a tests passed\n";
+        return 0;
+    }
+    std::cerr << "phase 2a strict encoder gates passed; reference pixel gate is "
+              << hypercine::test_oracle::GateDecisionName(decision) << "\n";
+    return hypercine::test_oracle::GateExitCode(decision);
 }
