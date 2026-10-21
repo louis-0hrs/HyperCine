@@ -11,6 +11,90 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+# RCA-195 Milestone 1: re-derive the band-0 publication contract from the frozen
+# SDK source. Source reading only -- this test never decodes and never writes to
+# upstream/. It fails closed if a macro, guard, writer lock or band-count entry
+# moves, so the published dependency map cannot silently drift from the tree.
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME rca195_band0_contract COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/verify_rca195_band0_contract.py"
+        --check --repo "${CMAKE_SOURCE_DIR}")
+    add_test(NAME rca195_band0_contract_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/verify_rca195_band0_contract.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
+    add_test(NAME rca195_tsan_reduction_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/analyze_rca195_tsan_log.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
+    # The probe is applied to a scratch copy only; this test proves the anchors
+    # still land and that a removed anchor fails closed.
+    add_test(NAME rca195_probe_applier_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/apply_rca195_probe.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
+    # The runner's own verdict logic must be able to return INCONCLUSIVE, and it
+    # must accept the exact queue-line format the probe header emits.
+    add_test(NAME rca195_probe_runner_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/run_rca195_probe.py"
+        --self-test)
+    # A published ledger has to reproduce from its own records. The superseded
+    # v2 ledger does not, and this test is what makes that visible instead of
+    # leaving it to a reader to notice.
+    add_test(NAME rca195_ledger_rescore_v3 COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/run_rca195_probe.py"
+        --rescore "${CMAKE_SOURCE_DIR}/docs/validation/rca195_probe_ledger_2026-10-20_v3.json")
+    # Milestone-2 design model. Three gates, deliberately split:
+    #   --check              pins every claim to the frozen tree and must stay fast
+    #                        (it is an anchor check, not a search);
+    #   --verdict-regression checks that the *verdict function itself* can fail,
+    #                        which is cheap (no BFS) and catches the rev-5 bug
+    #                        where --json discarded negative-control failures;
+    #   --self-test          runs the bounded state-space sweeps. Where a space is
+    #                        too large it reports INCONCLUSIVE rather than passing
+    #                        itself off as a proof, so this is the slower gate.
+    add_test(NAME rca195_m2_model_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --self-test)
+    add_test(NAME rca195_m2_model_check COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --check)
+    add_test(NAME rca195_m2_model_verdict COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/rca195_m2_model.py" --verdict-regression)
+    # Scratch-SDK contract candidate. The applier is applied to a private
+    # out-of-repo copy only; this test proves its anchors still land and that a
+    # removed anchor fails closed instead of producing an uninstrumented build.
+    add_test(NAME rca195_contract_applier_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/apply_rca195_contract.py"
+        --self-test --repo "${CMAKE_SOURCE_DIR}")
+    # The runner's verdict logic must fail the shapes its rules name: a broken
+    # control, a surviving injected OKAY, an unattributed failure, a hang, a
+    # dirty guard band, a changed control digest and a summary that disagrees
+    # with its own log lines.
+    add_test(NAME rca195_contract_runner_selftest COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_SOURCE_DIR}/tools/run_rca195_contract.py" --self-test)
+    set_tests_properties(rca195_band0_contract rca195_band0_contract_selftest
+        rca195_tsan_reduction_selftest rca195_probe_applier_selftest
+        rca195_probe_runner_selftest rca195_ledger_rescore_v3
+        rca195_m2_model_selftest rca195_m2_model_check
+        rca195_m2_model_verdict rca195_contract_applier_selftest
+        rca195_contract_runner_selftest
+        PROPERTIES TIMEOUT 300
+        PASS_REGULAR_EXPRESSION "VERIFY PASS;SELF-TEST PASS;RESCORE PASS;ANCHOR PASS;VERDICT-REGRESSION PASS;MODEL PASS;NEGATIVE-CASES PASS_EXHAUSTIVE;RUNNER SELF-TEST PASS")
+
+    # First-error precedence. A reviewer found that the first R6b guard stopped
+    # OKAY from erasing a failure but still let a later non-OKAY code replace an
+    # earlier one, so the reported code depended on arrival order. This asserts
+    # the rule directly against the frozen CODEC_ERROR enum, and it is
+    # mutation-tested: restoring the last-wins behaviour fails four of six cases.
+    add_executable(test_rca195_error_precedence test_rca195_error_precedence.cpp)
+    target_include_directories(test_rca195_error_precedence PRIVATE
+        "${CMAKE_SOURCE_DIR}/tools")
+    add_test(NAME rca195_contract_error_precedence
+        COMMAND test_rca195_error_precedence)
+    set_tests_properties(rca195_contract_error_precedence PROPERTIES TIMEOUT 60
+        PASS_REGULAR_EXPRESSION "ERROR-PRECEDENCE PASS")
+    # The partial-order sweeps take minutes on an idle host and longer under
+    # CI load; the anchor gate above stays in the shared 300 s budget.
+    set_tests_properties(rca195_m2_model_selftest PROPERTIES TIMEOUT 900)
+endif()
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)

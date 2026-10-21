@@ -1,0 +1,3634 @@
+{
+ "kind": "DESIGN_MODEL",
+ "revision": 6,
+ "entropy_order": "partial (per-band; the canonical prefix order is disproved, see canonical_witness)",
+ "note": "reachability model over explicit producer edges and per-band publication; not a measurement of the frozen decoder",
+ "source_anchor": {
+  "status": "OK",
+  "rows": [
+   {
+    "edge": "spatial lowpass",
+    "reads": "wavelet[index].band[0..3]",
+    "writes": "wavelet[index-1].band[0]",
+    "ok": true
+   },
+   {
+    "edge": "spatial highpass",
+    "reads": "wavelet[3].band[0..3]",
+    "writes": "wavelet[2].band[1]",
+    "ok": true
+   },
+   {
+    "edge": "temporal",
+    "reads": "temporal->band[0..1]",
+    "writes": "frame[0..1].band[0]",
+    "ok": true
+   },
+   {
+    "edge": "inverse guard",
+    "reads": "input->band[0..3]",
+    "writes": "none (silent return)",
+    "ok": true
+   },
+   {
+    "edge": "output boundary",
+    "reads": "wavelet != NULL only",
+    "writes": "none",
+    "ok": true
+   }
+  ],
+  "problems": []
+ },
+ "canonical_witness": {
+  "witness": {
+   "earlier": "e_started:(0, 0, 1)",
+   "later": "e_valid:(0, 2, 3)",
+   "claimable_after_earlier": [],
+   "claimable_after_later": [
+    "E2"
+   ]
+  },
+  "canonical_reaches_window": false,
+  "states": 128682,
+  "exhaustive": true
+ },
+ "reduced_order": {
+  "definition": "drop the `started` word and the per-band e_started events; a band is either unpublished or published",
+  "soundness": "started_is_unobservable proves no policy guard reads `started`; the released policy is refused because its claim predicate is valid == started",
+  "scope": "proposed and legacy only"
+ },
+ "topologies": {
+  "spatial_chain": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 78709,
+    "drained": 7132,
+    "terminal": 7132,
+    "ok": 7132,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 7132,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E2": "DISCARDED",
+      "E1": "DISCARDED"
+     }
+    }
+   },
+   "legacy": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 78440,
+    "drained": 25194,
+    "terminal": 25194,
+    "ok": 25194,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 25194,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E2": "DISCARDED",
+      "E1": "DISCARDED"
+     }
+    }
+   },
+   "proposed": {
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 76440,
+    "drained": 25050,
+    "terminal": 25050,
+    "ok": 0,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 25050
+    },
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
+   },
+   "false_okay": {
+    "released": {
+     "count": 7132,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "legacy": {
+     "count": 25194,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": false,
+     "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT"
+     ],
+     "states": 4480,
+     "drained": 1904,
+     "terminal": 1904,
+     "ok": 1904,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "error_kinds": {},
+     "edges": null,
+     "projections": null,
+     "false_okay": 1904,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 3056,
+     "drained": 1528,
+     "terminal": 1528,
+     "ok": 8,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 1520
+     },
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 1904,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E2": "DISCARDED",
+       "E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": true,
+    "states": 1529,
+    "ok_terminals": 1,
+    "can_reach_ok": 1529,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   },
+   "reduction": {
+    "comparable": true,
+    "partial_states": 128682,
+    "reduced_states": 3056,
+    "partial_exhaustive": true,
+    "reduced_exhaustive": true,
+    "only_partial": 0,
+    "only_reduced": 0,
+    "equal": true,
+    "example_only_partial": null,
+    "example_only_reduced": null
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 708804,
+     "states": 76440,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 717684,
+     "states": 78440,
+     "exhaustive": false,
+     "counterexample": null
+    }
+   },
+   "liveness": {
+    "exhaustive": true,
+    "states": 64342,
+    "ok_terminals": 1,
+    "can_reach_ok": 64342,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   }
+  },
+  "spatial_highpass": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "states": 972,
+    "drained": 405,
+    "terminal": 405,
+    "ok": 405,
+    "deadlocks": 0,
+    "exhaustive": true,
+    "bounded": true,
+    "truncated_at": null,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 404,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E3": "DISCARDED"
+     }
+    }
+   },
+   "legacy": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT"
+    ],
+    "states": 186,
+    "drained": 90,
+    "terminal": 90,
+    "ok": 90,
+    "deadlocks": 0,
+    "exhaustive": true,
+    "bounded": true,
+    "truncated_at": null,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 90,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E3": "DISCARDED"
+     }
+    }
+   },
+   "proposed": {
+    "violations": [],
+    "states": 176,
+    "drained": 88,
+    "terminal": 88,
+    "ok": 1,
+    "deadlocks": 0,
+    "exhaustive": true,
+    "bounded": true,
+    "truncated_at": null,
+    "error_kinds": {
+     "incomplete": 87
+    },
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
+   },
+   "false_okay": {
+    "released": {
+     "count": 404,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E3": "DISCARDED"
+      }
+     }
+    },
+    "legacy": {
+     "count": 90,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E3": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT"
+     ],
+     "states": 48,
+     "drained": 22,
+     "terminal": 22,
+     "ok": 22,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "error_kinds": {},
+     "edges": null,
+     "projections": null,
+     "false_okay": 22,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E3": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 46,
+     "drained": 23,
+     "terminal": 23,
+     "ok": 1,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 22
+     },
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 22,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E3": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": true,
+    "states": 24,
+    "ok_terminals": 1,
+    "can_reach_ok": 24,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   },
+   "reduction": {
+    "comparable": true,
+    "partial_states": 176,
+    "reduced_states": 46,
+    "partial_exhaustive": true,
+    "reduced_exhaustive": true,
+    "only_partial": 0,
+    "only_reduced": 0,
+    "equal": true,
+    "example_only_partial": null,
+    "example_only_reduced": null
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 1408,
+     "states": 176,
+     "exhaustive": true,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 1488,
+     "states": 186,
+     "exhaustive": true,
+     "counterexample": null
+    }
+   },
+   "liveness": {
+    "exhaustive": true,
+    "states": 89,
+    "ok_terminals": 1,
+    "can_reach_ok": 89,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   }
+  },
+  "fieldplus_half": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 102560,
+    "drained": 5248,
+    "terminal": 5248,
+    "ok": 5248,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 5248,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
+   },
+   "legacy": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 122754,
+    "drained": 15800,
+    "terminal": 15800,
+    "ok": 15800,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 15800,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
+   },
+   "proposed": {
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 83507,
+    "drained": 17469,
+    "terminal": 17469,
+    "ok": 0,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 17469
+    },
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
+   },
+   "false_okay": {
+    "released": {
+     "count": 5248,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "legacy": {
+     "count": 15800,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": false,
+     "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT"
+     ],
+     "states": 52704,
+     "drained": 17928,
+     "terminal": 17928,
+     "ok": 17928,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "error_kinds": {},
+     "edges": null,
+     "projections": null,
+     "false_okay": 17928,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 8476,
+     "drained": 4238,
+     "terminal": 4238,
+     "ok": 1,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 4237
+     },
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 17928,
+     "exhaustive": true,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": true,
+    "states": 4239,
+    "ok_terminals": 1,
+    "can_reach_ok": 4239,
+    "stranded": 0,
+    "stranded_example": [],
+    "violations": []
+   },
+   "reduction": {
+    "comparable": true,
+    "partial_states": 418414,
+    "reduced_states": 8476,
+    "partial_exhaustive": true,
+    "reduced_exhaustive": true,
+    "only_partial": 0,
+    "only_reduced": 0,
+    "equal": true,
+    "example_only_partial": null,
+    "example_only_reduced": null
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 621504,
+     "states": 49293,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 583680,
+     "states": 58382,
+     "exhaustive": false,
+     "counterexample": null
+    }
+   },
+   "liveness": {
+    "exhaustive": false,
+    "reason": "space too large",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
+   }
+  },
+  "fieldplus_full": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 116702,
+    "drained": 2722,
+    "terminal": 2722,
+    "ok": 2722,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 2722,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
+   },
+   "legacy": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 175994,
+    "drained": 7943,
+    "terminal": 7943,
+    "ok": 7943,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 7943,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 3,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 4,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 5,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "E5": "DISCARDED",
+      "E4": "DISCARDED",
+      "E3": "DISCARDED",
+      "T2": "DISCARDED"
+     }
+    }
+   },
+   "proposed": {
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 105130,
+    "drained": 5679,
+    "terminal": 5679,
+    "ok": 0,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 5679
+    },
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
+   },
+   "false_okay": {
+    "released": {
+     "count": 2722,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "legacy": {
+     "count": 7943,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": false,
+     "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT",
+      "I4_UNPROVEN"
+     ],
+     "states": 849339,
+     "drained": 169540,
+     "terminal": 169540,
+     "ok": 169540,
+     "deadlocks": 0,
+     "exhaustive": false,
+     "bounded": false,
+     "truncated_at": 600000,
+     "error_kinds": {},
+     "edges": null,
+     "projections": null,
+     "false_okay": 169540,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [],
+     "states": 542464,
+     "drained": 271232,
+     "terminal": 271232,
+     "ok": 64,
+     "deadlocks": 0,
+     "exhaustive": true,
+     "bounded": true,
+     "truncated_at": null,
+     "error_kinds": {
+      "incomplete": 271168
+     },
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 169540,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 3,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 4,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 5,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "E5": "DISCARDED",
+       "E4": "DISCARDED",
+       "E3": "DISCARDED",
+       "T2": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": true,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": false,
+    "reason": "reduced space exceeds the cap",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
+   },
+   "reduction": {
+    "comparable": false,
+    "reason": "partial space exceeds the cap; quotient equality is proved on the smaller topologies and extended here only through the unobservability proof",
+    "partial_states": 105130,
+    "reduced_states": 542464
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 163248,
+     "states": 29106,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 234024,
+     "states": 45145,
+     "exhaustive": false,
+     "counterexample": null
+    }
+   },
+   "liveness": {
+    "exhaustive": false,
+    "reason": "space too large",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
+   }
+  },
+  "spatial_three_channel": {
+   "released": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 146695,
+    "drained": 898,
+    "terminal": 898,
+    "ok": 898,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 898,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "C0E2": "DISCARDED",
+      "C0E1": "DISCARDED",
+      "C1E2": "DISCARDED",
+      "C1E1": "DISCARDED",
+      "C2E2": "DISCARDED",
+      "C2E1": "DISCARDED"
+     }
+    }
+   },
+   "legacy": {
+    "violations": [
+     "I1_FAIL_CLOSED",
+     "I3_NO_SILENT",
+     "I4_UNPROVEN"
+    ],
+    "states": 355198,
+    "drained": 5426,
+    "terminal": 5426,
+    "ok": 5426,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {},
+    "edges": null,
+    "projections": null,
+    "false_okay": 5426,
+    "false_okay_example": {
+     "missing": [
+      {
+       "channel": 0,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 0,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 1,
+       "index": 2,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 0,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 1,
+       "band": 3
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 0
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 1
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 2
+      },
+      {
+       "channel": 2,
+       "index": 2,
+       "band": 3
+      }
+     ],
+     "error": null,
+     "entries": {
+      "C0E2": "DISCARDED",
+      "C0E1": "DISCARDED",
+      "C1E2": "DISCARDED",
+      "C1E1": "DISCARDED",
+      "C2E2": "DISCARDED",
+      "C2E1": "DISCARDED"
+     }
+    }
+   },
+   "proposed": {
+    "violations": [
+     "I4_UNPROVEN"
+    ],
+    "states": 355198,
+    "drained": 5426,
+    "terminal": 5426,
+    "ok": 0,
+    "deadlocks": 0,
+    "exhaustive": false,
+    "bounded": false,
+    "truncated_at": 60000,
+    "error_kinds": {
+     "incomplete": 5426
+    },
+    "edges": null,
+    "projections": null,
+    "false_okay": 0,
+    "false_okay_example": null
+   },
+   "false_okay": {
+    "released": {
+     "count": 898,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "C0E2": "DISCARDED",
+       "C0E1": "DISCARDED",
+       "C1E2": "DISCARDED",
+       "C1E1": "DISCARDED",
+       "C2E2": "DISCARDED",
+       "C2E1": "DISCARDED"
+      }
+     }
+    },
+    "legacy": {
+     "count": 5426,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "C0E2": "DISCARDED",
+       "C0E1": "DISCARDED",
+       "C1E2": "DISCARDED",
+       "C1E1": "DISCARDED",
+       "C2E2": "DISCARDED",
+       "C2E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": false,
+     "example": null
+    }
+   },
+   "reduced": {
+    "legacy": {
+     "violations": [
+      "I1_FAIL_CLOSED",
+      "I3_NO_SILENT",
+      "I4_UNPROVEN"
+     ],
+     "states": 206728,
+     "drained": 4526,
+     "terminal": 4526,
+     "ok": 4526,
+     "deadlocks": 0,
+     "exhaustive": false,
+     "bounded": false,
+     "truncated_at": 100000,
+     "error_kinds": {},
+     "edges": null,
+     "projections": null,
+     "false_okay": 4526,
+     "false_okay_example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "C0E2": "DISCARDED",
+       "C0E1": "DISCARDED",
+       "C1E2": "DISCARDED",
+       "C1E1": "DISCARDED",
+       "C2E2": "DISCARDED",
+       "C2E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "violations": [
+      "I4_UNPROVEN"
+     ],
+     "states": 206374,
+     "drained": 4526,
+     "terminal": 4526,
+     "ok": 0,
+     "deadlocks": 0,
+     "exhaustive": false,
+     "bounded": false,
+     "truncated_at": 100000,
+     "error_kinds": {
+      "incomplete": 4526
+     },
+     "edges": null,
+     "projections": null,
+     "false_okay": 0,
+     "false_okay_example": null
+    }
+   },
+   "reduced_false_okay": {
+    "legacy": {
+     "count": 4526,
+     "exhaustive": false,
+     "example": {
+      "missing": [
+       {
+        "channel": 0,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 0,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 1,
+        "index": 2,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 0,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 1,
+        "band": 3
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 0
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 1
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 2
+       },
+       {
+        "channel": 2,
+        "index": 2,
+        "band": 3
+       }
+      ],
+      "error": null,
+      "entries": {
+       "C0E2": "DISCARDED",
+       "C0E1": "DISCARDED",
+       "C1E2": "DISCARDED",
+       "C1E1": "DISCARDED",
+       "C2E2": "DISCARDED",
+       "C2E1": "DISCARDED"
+      }
+     }
+    },
+    "proposed": {
+     "count": 0,
+     "exhaustive": false,
+     "example": null
+    }
+   },
+   "reduced_liveness": {
+    "exhaustive": false,
+    "reason": "reduced space exceeds the cap",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
+   },
+   "reduction": {
+    "comparable": false,
+    "reason": "partial space exceeds the cap; quotient equality is proved on the smaller topologies and extended here only through the unobservability proof",
+    "partial_states": 355198,
+    "reduced_states": 206374
+   },
+   "unobservable": {
+    "proposed": {
+     "unobservable": true,
+     "probes": 213192,
+     "states": 50872,
+     "exhaustive": false,
+     "counterexample": null
+    },
+    "legacy": {
+     "unobservable": true,
+     "probes": 213192,
+     "states": 50872,
+     "exhaustive": false,
+     "counterexample": null
+    }
+   },
+   "liveness": {
+    "exhaustive": false,
+    "reason": "space too large",
+    "violations": [
+     "I4_UNPROVEN"
+    ]
+   }
+  }
+ },
+ "negative_cases": [
+  {
+   "case": "spatial_index1_entropy_mask_without_producer",
+   "claims": 0,
+   "states": 38,
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "0 claims (expected 0)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
+  },
+  {
+   "case": "legacy_claims_without_producer",
+   "claims": 62,
+   "states": 126,
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "62 claims (expected >=1)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
+  },
+  {
+   "case": "temporal_without_inputs",
+   "claims": 0,
+   "states": 38,
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "0 claims (expected 0)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
+  },
+  {
+   "case": "legacy_temporal_without_inputs",
+   "claims": 1008,
+   "states": 1664,
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "1008 claims (expected >=1)",
+   "premise": {
+    "exhaustive": true,
+    "truncated_at": null
+   },
+   "blocking": true
+  },
+  {
+   "case": "stale_generation_fail_closed_single_entry",
+   "claims": 1,
+   "states": 366,
+   "error_kinds": {
+    "incomplete": 1,
+    "stale-generation": 1,
+    "input-missing-at-execute": 1,
+    "stale-before-publication": 1
+   },
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "no stale failure on any reachable path",
+   "premise": {
+    "entropy": "partial",
+    "topology": "spatial_highpass",
+    "stale_kinds": {
+     "stale-generation": 1,
+     "stale-before-publication": 1
+    },
+    "ok_terminals": 1,
+    "exhaustive": true
+   },
+   "blocking": true
+  },
+  {
+   "case": "stale_generation_fail_closed",
+   "claims": 1,
+   "states": 13529,
+   "error_kinds": {
+    "incomplete": 2,
+    "stale-generation": 2,
+    "input-missing-at-execute": 2,
+    "stale-before-publication": 2
+   },
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "no stale failure on any reachable path",
+   "premise": {
+    "entropy": "reduced",
+    "topology": "spatial_chain",
+    "stale_kinds": {
+     "stale-generation": 2,
+     "stale-before-publication": 2
+    },
+    "ok_terminals": 1,
+    "exhaustive": true
+   },
+   "blocking": true
+  },
+  {
+   "case": "stale_generation_fail_closed_partial_order",
+   "claims": 0,
+   "states": 169194,
+   "verdict": "PREFIX_ONLY_INCONCLUSIVE",
+   "reason": "partial-order space exceeds the cap; the reduced run above carries the proof",
+   "premise": {
+    "exhaustive": false,
+    "note": "informational, not used for the verdict"
+   },
+   "blocking": false
+  },
+  {
+   "case": "single_owner_no_duplicate_producer",
+   "claims": 27,
+   "states": 128682,
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "two live producers of one band",
+   "premise": {
+    "exhaustive": true
+   },
+   "blocking": true
+  },
+  {
+   "case": "four_worker_starvation",
+   "claims": 0,
+   "states": 39366,
+   "error_kinds": {
+    "incomplete": 19683
+   },
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "an unsatisfiable decode reported OKAY",
+   "premise": {
+    "workers": 4,
+    "drained": 19683,
+    "exhaustive": true
+   },
+   "blocking": true
+  },
+  {
+   "case": "partial_order_out_of_order_started",
+   "claims": 59049,
+   "states": {
+    "fired_first": [
+     0,
+     0,
+     2
+    ],
+    "still_unstarted": [
+     0,
+     0,
+     1
+    ]
+   },
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "a later band's started is unreachable before the earliest band's -- the mode is a prefix",
+   "premise": {
+    "reachable": true,
+    "exhaustive": true
+   },
+   "blocking": true
+  },
+  {
+   "case": "three_channel_missing_output",
+   "claims": null,
+   "states": null,
+   "verdict": "PASS_EXHAUSTIVE",
+   "reason": "per-channel closure missing",
+   "premise": {
+    "constructed_state": true
+   },
+   "blocking": true
+  }
+ ],
+ "negative_case_verdict": {
+  "failures": [],
+  "inconclusive": [],
+  "passed_exhaustive": [
+   "spatial_index1_entropy_mask_without_producer",
+   "legacy_claims_without_producer",
+   "temporal_without_inputs",
+   "legacy_temporal_without_inputs",
+   "stale_generation_fail_closed_single_entry",
+   "stale_generation_fail_closed",
+   "single_owner_no_duplicate_producer",
+   "four_worker_starvation",
+   "partial_order_out_of_order_started",
+   "three_channel_missing_output"
+  ]
+ },
+ "compositional": {
+  "ok": true,
+  "independence": {
+   "independent": true,
+   "channels": [
+    0,
+    1,
+    2
+   ],
+   "problems": []
+  },
+  "per_channel": {
+   "0": {
+    "states": 3056,
+    "exhaustive": true,
+    "violations": [],
+    "ok": 8
+   },
+   "1": {
+    "states": 3056,
+    "exhaustive": true,
+    "violations": [],
+    "ok": 8
+   },
+   "2": {
+    "states": 3056,
+    "exhaustive": true,
+    "violations": [],
+    "ok": 8
+   }
+  },
+  "drain_is_global": true,
+  "failures": [],
+  "note": "independence + exhausting each channel alone + global drain covers every worker interleaving: a slot is the only cross-channel resource and the conclusion holds whether or not a channel obtains one"
+ },
+ "channel_independence": {
+  "independent": true,
+  "channels": [
+   0,
+   1,
+   2
+  ],
+  "problems": []
+ },
+ "verdict": "PASS",
+ "verdict_facts": {
+  "safe": true,
+  "reduced_safe": true,
+  "quotients": true,
+  "unobservable": true,
+  "controls_fire": true,
+  "canonical_disproved": true,
+  "compositional": true,
+  "negative_controls": true
+ }
+}

@@ -1,0 +1,294 @@
+{
+ "issue": 195,
+ "milestone": 1,
+ "verdict": "DESIGN_ONLY",
+ "repo_head": "50af67d4c96237d6a48f3a0face32898ccda5b3f",
+ "sources": {
+  "upstream/Codec/decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+  "upstream/Codec/image.h": "93ed2e580030274dda46257eaf08ac90717f2a526ccc11fb5b471dcdb3bf1d52",
+  "upstream/Codec/wavelet.c": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd",
+  "upstream/Codec/wavelet.h": "d0032a2aa8bc05b1460733909027b2cd451e150b01ca19ab393cea1f47402309",
+  "upstream/Codec/entropy_threading.c": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+  "upstream/Codec/config.h": "53d038c2850b878cf579ffbb4db3b76d83bb74964bbd0d4a358d579550fc477f"
+ },
+ "macros": {
+  "file": "upstream/Codec/image.h",
+  "released_line": 230,
+  "strict_form_present_as_comment_line": 229,
+  "released_form": "((wavelet)->band_valid_flags == (wavelet)->band_started_flags)",
+  "strict_form": "((wavelet)->band_valid_flags == (uint32_t)((1 << (wavelet)->num_bands) - 1))",
+  "vacuous_state_4_band": "0x0000000E",
+  "vacuous_state_2_band": "0x00000002"
+ },
+ "band_counts": {
+  "table_file": "upstream/Codec/wavelet.c",
+  "values": [
+   1,
+   2,
+   2,
+   4,
+   2,
+   4,
+   4,
+   0,
+   4,
+   4,
+   0,
+   0
+  ],
+  "resolved_types": {
+   "IMAGE": 0,
+   "HORIZONTAL": 1,
+   "VERTICAL": 2,
+   "TEMPORAL": 4,
+   "SPATIAL": 3,
+   "HORZTEMP": 5,
+   "VERTTEMP": 6,
+   "FRAME": 5
+  },
+  "bands": {
+   "spatial": 4,
+   "temporal": 2,
+   "frame": 4
+  }
+ },
+ "writers": {
+  "valid_writer": {
+   "symbol": "UpdateWaveletBandValidFlags",
+   "line": 24073,
+   "sets": [
+    "band_valid_flags|bit",
+    "band_started_flags|bit"
+   ],
+   "lock": "entropy_worker_new.lock, guarded by _THREADED_DECODER and a live pool",
+   "lock_compiled_in_default_config": true
+  },
+  "started_writer": {
+   "symbol": "UpdateWaveletBandStartedFlags",
+   "line": 24114,
+   "sets": [
+    "band_started_flags|bit"
+   ],
+   "lock": "entropy_worker_new.lock guarded by _DELAYED_THREAD_START==0",
+   "lock_compiled_in_default_config": false
+  },
+  "ordering": {
+   "claim": "valid and started are written by different code paths under different lock discipline in the shipped configuration",
+   "why": "config.h sets _DELAYED_THREAD_START to 1, so the started writer does not take entropy_worker_new.lock, while the valid writer does",
+   "consequence": "a reader comparing the two words under no lock cannot rely on a single consistent snapshot of the pair"
+  }
+ },
+ "readers": {
+  "inverse_branch_guards": {
+   "file": "upstream/Codec/decoder.c",
+   "lines": [
+    13030,
+    13095,
+    13155
+   ],
+   "count": 3,
+   "note": "spatial lowpass (index > 0), field-plus lowpass (index > 3) and spatial highpass (index == 3)"
+  },
+  "temporal_branch": {
+   "file": "upstream/Codec/decoder.c",
+   "line": 13233,
+   "form": "assert only",
+   "survives_release_build": false,
+   "reason": "NDEBUG removes the assert, so the temporal inverse runs with no runtime readiness check at all"
+  },
+  "queue_drain": {
+   "file": "upstream/Codec/entropy_threading.c",
+   "lines": [
+    269,
+    285,
+    305
+   ],
+   "admission_line": 269,
+   "admission_under_lock": true,
+   "recheck_line": 285,
+   "recheck_under_lock": false,
+   "execute_line": 302,
+   "note": "the admission decision is taken under the entropy worker lock, but the transform itself runs after Unlock() and is re-gated by an unlocked, non-atomic re-read of both flag words; the do/while condition at the loop tail repeats that unlocked read"
+  }
+ },
+ "output_path": {
+  "debug_macro": {
+   "definition": "#define DEBUG (1 && _DEBUG)",
+   "defined_by_build_file": [],
+   "evaluates_true_on_linux": false,
+   "reason": "_DEBUG is an MSVC Debug-configuration macro; gcc and clang builds in this tree never define it, so `(1 && _DEBUG)` is 0"
+  },
+  "hollow_gate": {
+   "symbol": "AllTransformBandsValid",
+   "line": 2050,
+   "always_compiled": true,
+   "wrapper": "#if DEBUG || 1",
+   "checks_band_flags": false,
+   "real_check_present_as_comment": true,
+   "tests_only": "wavelet != NULL",
+   "live_call_sites": [
+    13303,
+    13315,
+    13329,
+    13534,
+    13555,
+    13576,
+    13599
+   ],
+   "note": "seven runtime guards on the frame-output path that cannot detect an unreconstructed band"
+  },
+  "correct_gate_compiled_out": {
+   "symbol": "AllLowpassBandsValid",
+   "line": 2078,
+   "checks_band0": true,
+   "call_site_line": 24533,
+   "call_site_form": "assert()",
+   "guard": "#if DEBUG",
+   "nesting": [
+    [
+     "DEBUG",
+     "if"
+    ]
+   ],
+   "active_in_any_build": false,
+   "note": "the only per-channel band-0 output check is behind #if DEBUG, which no configuration in this tree enables"
+  },
+  "dead_reader": {
+   "symbol": "AllBandsValid",
+   "line": 2044,
+   "call_sites": [
+    11327,
+    11725
+   ],
+   "reachable": false,
+   "reason": "both call sites are in the #else branch of #if _THREADED_DECODER, which config.h enables",
+   "still_vacuous": "it forwards to BANDS_ALL_VALID, the released macro"
+  }
+ },
+ "queue_shutdown": {
+  "function": "WaitForTransformThread",
+  "file": "upstream/Codec/decoder.c",
+  "line": 24283,
+  "waits_for_pool": true,
+  "completeness_check_before_reset": false,
+  "error_set_on_unadmitted_entry": false,
+  "resets": [
+   "decoder->transform_queue.started = 0;",
+   "decoder->transform_queue.num_entries = 0;",
+   "decoder->transform_queue.next_entry = 0;",
+   "decoder->transform_queue.free_entry = 0;"
+  ],
+  "done_is_a_claim_not_a_completion_record": true,
+  "done_write_lines": [
+   271
+  ],
+  "done_read_lines": [
+   269
+  ],
+  "consequence": "a transform that is never admitted or never executed is discarded without a diagnostic, and the frame can still be reported as decoded successfully"
+ },
+ "required_bit_matrix": {
+  "function": "DecodedBandsValid",
+  "file": "upstream/Codec/decoder.c",
+  "line": 24136,
+  "live_call_sites": [],
+  "commented_call_sites": 2,
+  "status": "upstream-supplied but unreachable in the shipped build",
+  "matrix": [
+   {
+    "transform": "SPATIAL",
+    "index": 1,
+    "num_bands": 4,
+    "required_mask": "0xE",
+    "required_bits": [
+     1,
+     2,
+     3
+    ],
+    "waits_for_lowpass": false
+   },
+   {
+    "transform": "SPATIAL",
+    "index": 2,
+    "num_bands": 4,
+    "required_mask": "0xF",
+    "required_bits": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "waits_for_lowpass": true
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 2,
+    "num_bands": 2,
+    "required_mask": null,
+    "required_bits": null,
+    "waits_for_lowpass": null
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 3,
+    "num_bands": 4,
+    "required_mask": "0xF",
+    "required_bits": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "waits_for_lowpass": true
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 5,
+    "num_bands": 4,
+    "required_mask": "0xF",
+    "required_bits": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "waits_for_lowpass": true
+   },
+   {
+    "transform": "FIELDPLUS",
+    "index": 4,
+    "num_bands": 4,
+    "required_mask": "0xE",
+    "required_bits": [
+     1,
+     2,
+     3
+    ],
+    "waits_for_lowpass": false
+   }
+  ]
+ },
+ "liveness": {
+  "same_thread_claim": {
+   "drain_site": "upstream/Codec/entropy_threading.c",
+   "transform_site": "upstream/Codec/decoder.c",
+   "statement": "the transform-queue drain loop and the inverse transform invocation are both inside EntropyWorkerThreadProc, so a consumer that blocks inside ReconstructWaveletBand removes one of the workers that could publish its input",
+   "construction_reachable": true
+  },
+  "producer_call_sites": 10,
+  "queue_length_expression": "(TRANSFORM_MAX_WAVELETS * TRANSFORM_MAX_CHANNELS)",
+  "worker_pool": {
+   "created_when": "cpus > 1, capped at 4 threads (decoder.c, AllocDecoderBuffer)",
+   "note": "a blocked worker reduces the drain capacity of a pool of at most 4"
+  },
+  "bounded_wait_required": true,
+  "unbounded_spin_acceptable": false
+ },
+ "limitations": [
+  "source reading only: no decode was executed by this pass",
+  "the per-topology matrix is re-derived from DecodedBandsValid, which the shipped build never calls",
+  "HALF 1080p BGRA on the pinned packet is the only measured condition in the referenced evidence; FULL was not exercised on either host",
+  "the temporal branch has no runtime check at all in a release build, so its race is characterised from source, not measured",
+  "no claim about other formats, resolutions or GOP structures"
+ ]
+}

@@ -1,0 +1,7468 @@
+{
+  "arms": [
+    {
+      "arm": "A",
+      "injections": {},
+      "label": "valid control"
+    },
+    {
+      "arm": "B",
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "label": "skip temporal producer ch1"
+    },
+    {
+      "arm": "C",
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "label": "skip spatial producer ch0"
+    },
+    {
+      "arm": "D",
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "label": "forced stale token ch1"
+    },
+    {
+      "arm": "E",
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "label": "skip consumer site ch1"
+    }
+  ],
+  "calls": [
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 2,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {},
+      "ms": 39.281,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 6
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 33,
+        "realloc_enter": 42,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 0,
+          "executed": 6,
+          "precedence": 0,
+          "realloc_early": 33,
+          "realloc_enter": 42,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+      "status": "OK",
+      "tag": "A_FULL_w2_00",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 2,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {},
+      "ms": 25.253,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 6
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 33,
+        "realloc_enter": 42,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 0,
+          "executed": 6,
+          "precedence": 0,
+          "realloc_early": 33,
+          "realloc_enter": 42,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+      "status": "OK",
+      "tag": "A_FULL_w2_01",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {},
+      "ms": 28.38,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 6
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 33,
+        "realloc_enter": 42,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 0,
+          "executed": 6,
+          "precedence": 0,
+          "realloc_early": 33,
+          "realloc_enter": 42,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+      "status": "OK",
+      "tag": "A_FULL_w2_02",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 4,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {},
+      "ms": 24.633,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 6
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 33,
+        "realloc_enter": 42,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 0,
+          "executed": 6,
+          "precedence": 0,
+          "realloc_early": 33,
+          "realloc_enter": 42,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+      "status": "OK",
+      "tag": "A_FULL_w4_00",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 4,
+      "elapsed_s": 0.09,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {},
+      "ms": 18.203,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 6
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 33,
+        "realloc_enter": 42,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 0,
+          "executed": 6,
+          "precedence": 0,
+          "realloc_early": 33,
+          "realloc_enter": 42,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+      "status": "OK",
+      "tag": "A_FULL_w4_01",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 4,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {},
+      "ms": 27.07,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 6
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 33,
+        "realloc_enter": 42,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 0,
+          "executed": 6,
+          "precedence": 0,
+          "realloc_early": 33,
+          "realloc_enter": 42,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+      "status": "OK",
+      "tag": "A_FULL_w4_02",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {},
+      "ms": 20.525,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 9
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 30,
+        "realloc_enter": 39,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 0,
+          "executed": 9,
+          "precedence": 0,
+          "realloc_early": 30,
+          "realloc_enter": 39,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+      "status": "OK",
+      "tag": "A_HALF_w2_00",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {},
+      "ms": 17.659,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 9
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 30,
+        "realloc_enter": 39,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 0,
+          "executed": 9,
+          "precedence": 0,
+          "realloc_early": 30,
+          "realloc_enter": 39,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+      "status": "OK",
+      "tag": "A_HALF_w2_01",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {},
+      "ms": 15.491,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 9
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 30,
+        "realloc_enter": 39,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 0,
+          "executed": 9,
+          "precedence": 0,
+          "realloc_early": 30,
+          "realloc_enter": 39,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+      "status": "OK",
+      "tag": "A_HALF_w2_02",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {},
+      "ms": 14.869,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 9
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 30,
+        "realloc_enter": 39,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 0,
+          "executed": 9,
+          "precedence": 0,
+          "realloc_early": 30,
+          "realloc_enter": 39,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+      "status": "OK",
+      "tag": "A_HALF_w4_00",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {},
+      "ms": 14.587,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 9
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 30,
+        "realloc_enter": 39,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 0,
+          "executed": 9,
+          "precedence": 0,
+          "realloc_early": 30,
+          "realloc_enter": 39,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+      "status": "OK",
+      "tag": "A_HALF_w4_01",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "A",
+      "arm_label": "valid control",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {},
+      "ms": 15.21,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 9
+        },
+        "drain_short": null,
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 30,
+        "realloc_enter": 39,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 0,
+          "executed": 9,
+          "precedence": 0,
+          "realloc_early": 30,
+          "realloc_enter": 39,
+          "result_false": 0,
+          "sdk_error": 0,
+          "skipped": 0,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 0,
+      "sdk_ok": 1,
+      "sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+      "status": "OK",
+      "tag": "A_HALF_w4_02",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 41.017,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "B_FULL_w2_00",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.09,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 18.288,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "B_FULL_w2_01",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 30.375,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "B_FULL_w2_02",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 26.391,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "B_FULL_w4_00",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 26.373,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "B_FULL_w4_01",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.1,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 22.875,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "B_FULL_w4_02",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 15.043,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 2,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "B_HALF_w2_00",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.04,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 13.796,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 2,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "B_HALF_w2_01",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 17.899,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 2,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "B_HALF_w2_02",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 16.14,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 2,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "B_HALF_w4_00",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 15.129,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 2,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "B_HALF_w4_01",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "B",
+      "arm_label": "skip temporal producer ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:2"
+      },
+      "ms": 15.297,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 2,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "B_HALF_w4_02",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 33.592,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "C_FULL_w2_00",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 2,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 29.727,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "C_FULL_w2_01",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 2,
+      "elapsed_s": 0.13,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 36.232,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "C_FULL_w2_02",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 4,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 26.596,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "C_FULL_w4_00",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 4,
+      "elapsed_s": 0.1,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 20.789,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "C_FULL_w4_01",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 4,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 26.35,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "C_FULL_w4_02",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 18.332,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "C_HALF_w2_00",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 15.617,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "C_HALF_w2_01",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 17.009,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "C_HALF_w2_02",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 15.452,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "C_HALF_w4_00",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 14.151,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "C_HALF_w4_01",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "C",
+      "arm_label": "skip spatial producer ch0",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "0:1"
+      },
+      "ms": 15.126,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 0,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "C_HALF_w4_02",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 33.651,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 1,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "D_FULL_w2_00",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 29.998,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 1,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "D_FULL_w2_01",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 33.508,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 1,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "D_FULL_w2_02",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 28.352,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 1,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "D_FULL_w4_00",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.1,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 23.056,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 1,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "D_FULL_w4_01",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 23.696,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 1,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "D_FULL_w4_02",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.07,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 19.747,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 2,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "D_HALF_w2_00",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.07,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 19.649,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 2,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "D_HALF_w2_01",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 15.902,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 2,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "D_HALF_w2_02",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.05,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 13.378,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 2,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "D_HALF_w4_00",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.07,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 17.856,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 2,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "D_HALF_w4_01",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "D",
+      "arm_label": "forced stale token ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.05,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_STALE": "1:2"
+      },
+      "ms": 13.169,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 7
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 7,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 28,
+        "realloc_enter": 37,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 7,
+          "precedence": 0,
+          "realloc_early": 28,
+          "realloc_enter": 37,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 0,
+          "stale": 2,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [],
+        "stales": [
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          }
+        ],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "D_HALF_w4_02",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 35.129,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "E_FULL_w2_00",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.12,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 34.385,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "E_FULL_w2_01",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.13,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 33.421,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "E_FULL_w2_02",
+      "w": 1920,
+      "workers": 2
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.14,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 25.052,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "E_FULL_w4_00",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 24.629,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "E_FULL_w4_01",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.11,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 1080,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 25.313,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 6,
+          "entries": 0,
+          "executed": 5
+        },
+        "drain_short": {
+          "claimed": 6,
+          "executed": 5,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 32,
+        "realloc_enter": 41,
+        "result": {
+          "aba": 0,
+          "claims": 6,
+          "drain_short": 1,
+          "executed": 5,
+          "precedence": 0,
+          "realloc_early": 32,
+          "realloc_enter": 41,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 8294400,
+      "pitch": 7680,
+      "res": "FULL",
+      "resolution": "FULL",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "788ae0147bdf979a6575938ca2d7d4403788588f7be2010f03776c968fd1ab49",
+      "status": "OK",
+      "tag": "E_FULL_w4_02",
+      "w": 1920,
+      "workers": 4
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.07,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 20.898,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "E_HALF_w2_00",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 17.845,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "E_HALF_w2_01",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 2,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 18.614,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "E_HALF_w2_02",
+      "w": 960,
+      "workers": 2
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.03,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 9.553,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "E_HALF_w4_00",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 15.073,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "E_HALF_w4_01",
+      "w": 960,
+      "workers": 4
+    },
+    {
+      "arm": "E",
+      "arm_label": "skip consumer site ch1",
+      "cpu_max": 4,
+      "elapsed_s": 0.06,
+      "guard_bytes": 65536,
+      "guard_first_dirty": 0,
+      "guard_ok": 1,
+      "h": 540,
+      "injections": {
+        "RCA195_CONTRACT_SKIP": "1:1"
+      },
+      "ms": 15.114,
+      "observed": {
+        "aba_reuse": 0,
+        "claims": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "drain": {
+          "claimed": 9,
+          "entries": 0,
+          "executed": 8
+        },
+        "drain_short": {
+          "claimed": 9,
+          "executed": 8,
+          "remaining": 0
+        },
+        "executes": [
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 1,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 2,
+            "idx": 2
+          },
+          {
+            "ch": 0,
+            "idx": 1
+          },
+          {
+            "ch": 2,
+            "idx": 1
+          }
+        ],
+        "precedence": [],
+        "realloc_early": 29,
+        "realloc_enter": 38,
+        "result": {
+          "aba": 0,
+          "claims": 9,
+          "drain_short": 1,
+          "executed": 8,
+          "precedence": 0,
+          "realloc_early": 29,
+          "realloc_enter": 38,
+          "result_false": 1,
+          "sdk_error": 58,
+          "skipped": 1,
+          "stale": 0,
+          "walloc": 9,
+          "wfree": 0
+        },
+        "skips": [
+          {
+            "ch": 1,
+            "idx": 1
+          }
+        ],
+        "stales": [],
+        "walloc": 9,
+        "wfree": 0
+      },
+      "out_bytes": 2073600,
+      "pitch": 3840,
+      "res": "HALF",
+      "resolution": "HALF",
+      "sdk_error": 2048,
+      "sdk_ok": 0,
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "status": "OK",
+      "tag": "E_HALF_w4_02",
+      "w": 960,
+      "workers": 4
+    }
+  ],
+  "calls_per_arm": 3,
+  "control_digest": null,
+  "packet_sha256": "34fcbcfac1a3792f847cfb4a67a1aef6510b8aa2cd5ca83d11f8ecc0c97416dc",
+  "reasons": [],
+  "resolutions": [
+    "FULL",
+    "HALF"
+  ],
+  "verdict": "CONTRACT_CANDIDATE_QUALIFIED",
+  "workers": [
+    2,
+    4
+  ]
+}
