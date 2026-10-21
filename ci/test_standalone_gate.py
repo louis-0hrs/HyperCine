@@ -34,6 +34,17 @@ class StandaloneGateTests(unittest.TestCase):
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
+    def test_merged_scalar_and_gop2_inventory_is_mandatory(self):
+        # A merge that drops either lane must fail even if its other tests pass.
+        merged = {'gop2_original_stage_contract', 'gop2_reference_inventory_integrity',
+                  'scalar_inverse_arithmetic', 'scalar_inverse_rejection',
+                  'scalar_inverse_vectors', 'scalar_inverse_replay_contract'}
+        merged |= {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
+        self.assertTrue(merged <= REQUIRED)
+        for missing in sorted(merged):
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
+
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.xml'
