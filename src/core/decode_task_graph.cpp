@@ -149,10 +149,11 @@ void DecodeTaskGraph::worker() noexcept {
             ++running_;
         }
         GraphError result = GraphError::None;
-        // The callback runs with no graph lock held, so the publication
-        // predicate that follows runs on the same thread with the callback's
-        // frame and any storage it produced still live. The predicate may call
-        // the const query API; it must not mutate graph state.
+        // The callback runs with no graph lock held. execute() has RETURNED by the
+        // time the publication predicate runs, so the callback frame itself is
+        // not live -- only storage the task published into independently owned
+        // memory is. The predicate may call the const query API; it must not
+        // mutate graph state, and it must not read a callback local.
         try { nodes_[index].task.execute(TaskContext(*this)); }
         catch (const std::bad_alloc&) { result = GraphError::Allocation; }
         catch (...) { result = GraphError::Callback; }

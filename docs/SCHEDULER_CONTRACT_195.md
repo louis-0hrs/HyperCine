@@ -3,7 +3,9 @@
 # Scheduler contract derived from RCA-195
 
 **Status: implemented and measured against this repository's wrapper scheduler
-(`src/core/decode_task_graph.*`). Every rule below is a required CTest gate.**
+(`src/core/decode_task_graph.*`). Every rule below is a required CTest gate. Revision 3
+adds the S6 execution witness, the S2 lifetime contract and its rule; still Draft, not
+promoted.**
 No frozen `upstream/` change. No claim about the reference decoder's internals.
 
 ## 0. Where this comes from, and what it is not
@@ -74,8 +76,22 @@ struct TaskSpec {
 ```
 
 The worker that ran `execute()` evaluates `published()` **on the same thread,
-immediately after the callback**, with the callback frame and any storage it produced
-still live, and hands the result to `complete()`. A `false` result — or a predicate
+immediately after the callback**, and hands the result to `complete()`.
+
+**Lifetime: what is guaranteed and what is not.** `execute()` has already returned when
+`published()` is evaluated, so the callback's *frame is gone*. Capturing a local of the
+callback body is a dangling read, not a supported pattern — an earlier revision of these
+comments claimed the frame "and any storage it produced" was still live, which was
+simply wrong. Measured: a probe that captured the address of a callback local read the
+dead slot and reported success in a Release build, while AddressSanitizer classified the
+same read as **`stack-use-after-return`**.
+
+The real requirement is on the produced storage, not the frame: it must be owned
+independently of the callback (heap object, shared ownership, or a member of a
+longer-lived owner) and must stay alive from publication until `run()` has drained and
+downstream consumers are finished with it. The graph never owns or frees payload memory;
+the caller does. This is now the required rule
+`S2-predicate-reads-owned-storage`. A `false` result — or a predicate
 that throws, because a check that cannot answer is not evidence of an output — becomes
 the terminal error `GraphError::OutputNotPublished`. The node becomes `Failed`, its
 transitive dependents become `Failed`, and **no successor is released**.
@@ -97,6 +113,7 @@ Measured:
 | `S2-throwing-predicate-fails-closed` | predicate throws | same, fail-closed rather than "check skipped" |
 | `S2-publish-before-consume` | real write then read over a dependency edge | both nodes `Completed`, consumer observed the value |
 | `S2-transitive-tail-fails` | false predicate in the middle of three nodes | tail never runs, tail `Failed` |
+| `S2-predicate-reads-owned-storage` | predicate reads caller-owned storage that outlives the callback frame | publishes correctly, consumer observes the written value, both nodes `Completed` |
 
 **What S2 still cannot do.** The predicate is a *declaration*: a callback that sets its
 own flag without writing the buffer is still reported as published. The graph can check
@@ -139,7 +156,7 @@ A second `run()` is refused. An impossible predecessor count fails closed with
 assignment produced a public `OKAY`; then a guard that merely refused to overwrite with
 `OKAY` still let a later *different* failure win.
 
-Both arrival orders are exercised, and the order is **constructed**: the second failure
+Both arrival orders are exercised, and the order is **constructed**: the later failure
 waits until the first error is visible, so "first" is a fact rather than a winner. A
 publication failure is also sticky against a later callback failure, because
 `OutputNotPublished` is terminal in the same way.
@@ -149,23 +166,51 @@ both failures race and interpreted whoever won as "first"; it reported a false `
 Deterministic construction reversed the finding. Building the state a rule talks about
 is the difference between measuring and guessing.
 
+**Second mis-test: a constructed order is still not a witnessed event.** Constructing
+*when* the later failure fires does not construct *that it fires at all*.
+`fail_locked()` stops dispatch, so once the first error is recorded the other root task
+can be cancelled before any worker claims it. The rule then observed
+`first != None && final == first` and reported `HOLDS` without a second failure having
+happened. Measured on the previous revision with an instrumented probe: in the
+allocation-first arm the later callback was claimed **0 times in 12/12 runs at 1, 2, 4
+and 16 workers**, while the rule passed every time.
+
+The arms now differ by worker width, because only one claim is honest at each width:
+
+- **workers >= 2** — both roots can be in flight. A two-party start handshake forbids
+  either callback from failing before both are claimed, and a flag set immediately
+  before the later throw makes "a later failure was survived" a witnessed fact. A
+  missing witness is `BROKEN`, never `HOLDS`.
+- **workers == 1** — the graph is strictly serial, so the later task can never be
+  claimed once the first fails. Asserting a survived later failure there would report a
+  fabricated event. The rule instead asserts the reachable outcome: the later task
+  never ran and is `Canceled`.
+
+Every wait is bounded, so a broken handshake fails the rule instead of hanging the suite.
+
 ## 3. Result against this implementation
 
 | Rule | Mechanism | Result |
 | --- | --- | --- |
 | S1 | reject missing producer / cycle / duplicate / no callback at construction | HOLDS |
-| S2 | completion requires a declared output that exists; false or throwing predicate is terminal and releases no successor | HOLDS (negative, throwing, positive and transitive-tail controls) |
+| S2 | completion requires a declared output that exists; false or throwing predicate is terminal and releases no successor | HOLDS (negative, throwing, positive, transitive-tail and owned-storage controls) |
 | S3 | cancel drains, discards post-cancel completion, never reports success | HOLDS |
 | S4 | failed producer releases no consumer | HOLDS |
 | S5 | run once; success requires every node | HOLDS |
-| S6 | first error sticky, both orders, publication error included | HOLDS |
+| S6 | first error sticky, both orders, publication error included, later failure witnessed | HOLDS |
 
-17 required assertions hold, 0 broken, at 1, 2, 4 and 16 workers.
+19 required assertions hold, 0 broken, at 1, 2, 4 and 16 workers.
 
-**Mutation control.** Deleting the predicate evaluation
-(`if (!exists) result = OutputNotPublished;`) turns four assertions `BROKEN` and the
-run exits 1. A gate nobody has tried to break is a gate nobody has tested; this one was
-broken on purpose and caught it.
+**Mutation controls.** A gate nobody has tried to break is a gate nobody has tested.
+Each mutation below was applied to a scratch copy, built, and measured:
+
+| Mutation | Expected and measured |
+| --- | --- |
+| Delete the predicate evaluation (`if (!exists) result = OutputNotPublished;`) | four assertions `BROKEN`, exit 1 |
+| Neuter the S6 two-party handshake (so the later task can be cancelled before it is claimed) | 28–29 of 30 S6 rule instances `BROKEN` across 10 runs at width 2, 4 and 16 — the witness exposes the vacuity the previous revision reported as `HOLDS` |
+
+The second mutation is the important one: it is the mutation that the *previous*
+revision of this test would have survived silently.
 
 ## 4. What this contract deliberately does not claim
 

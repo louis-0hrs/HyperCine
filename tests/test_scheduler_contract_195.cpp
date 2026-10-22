@@ -19,6 +19,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -188,6 +189,60 @@ void rule_s2_output_completeness(std::size_t workers) {
 }
 
 // ---------------------------------------------------------------------------
+// S2-lifetime -- the publication predicate must read storage that outlives the
+// callback frame.
+//
+// The earlier text in decode_task_graph.h said the callback "frame and any
+// storage it produced" is still live when published() runs. That is false:
+// execute() has returned, so a callback local is already dead. Measured with a
+// probe that captured the address of one such local: a plain Release build read
+// the dead slot and reported success, and AddressSanitizer classified the same
+// read as `stack-use-after-return`. Guidance that tells consumers to capture
+// callback locals is therefore a use-after-return generator, not a contract.
+//
+// The supported pattern is what this rule exercises: the payload is owned
+// independently of the frame (here a heap object the caller owns) and stays
+// alive through predicate evaluation and the downstream consumer.
+// ---------------------------------------------------------------------------
+void rule_s2_predicate_reads_owned_storage() {
+    // Caller-owned payload: outlives both the callback frame and the graph.
+    struct Payload {
+        int written = 0;
+        int consumed = 0;
+    };
+    auto payload = std::make_shared<Payload>();
+    bool callback_ran = false;
+
+    DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
+        {key(1), {},
+         // The lambda's own frame dies here; only `payload` survives it.
+         [payload, &callback_ran](const TaskContext&) {
+             payload->written = 147;
+             callback_ran = true;
+         },
+         // Reads independently owned storage, not a callback local.
+         [payload] { return payload && payload->written == 147; }},
+        {key(2), {key(1)},
+         [payload, &callback_ran](const TaskContext&) {
+             // The producer's storage is still valid for downstream consumers.
+             if (!callback_ran || payload->written != 147)
+                 throw std::runtime_error("consumer read a dead or unwritten payload");
+             ++payload->consumed;
+         },
+         [payload] { return payload->consumed == 1; }}});
+
+    require_fully_contracted(graph, "S2-owned-storage");
+    const bool success = graph.run(2);
+    required("S2-predicate-reads-owned-storage",
+             success && graph.error() == GraphError::None && payload->written == 147 &&
+                 payload->consumed == 1 &&
+                 graph.state(0) == TaskState::Completed &&
+                 graph.state(1) == TaskState::Completed,
+             "a predicate that reads caller-owned storage outliving the callback frame "
+             "publishes correctly and its consumer sees the written value");
+}
+
+// ---------------------------------------------------------------------------
 // S3 -- cancellation drains and never reports success.
 // From RCA-195: WaitForTransformThread zeroed the queue without asking what was
 // unfinished, so a dropped transform became an ordinary success.
@@ -267,65 +322,218 @@ void rule_s5_must_complete(std::size_t workers) {
 // S6 -- the first recorded error is the one reported, in either arrival order.
 // The order is constructed, not raced for: the second failure waits until the
 // first error is visible, so "first" is a fact rather than a winner.
+//
+// Constructed order alone was not enough, and that was measured rather than
+// argued: `fail_locked()` stops dispatch, so the later task can be cancelled
+// before any worker claims it. The rule then saw `first != None && final ==
+// first` and reported HOLDS although the second failure never happened. An
+// instrumented probe of the previous revision confirmed it -- in the
+// allocation-first arm the later callback was claimed 0 times in 12/12 runs at
+// every worker width while the rule still passed.
+//
+// The arms therefore differ by worker width, because only one claim is honest at
+// each width:
+//
+//   workers >= 2  both root tasks can be in flight. A two-party start handshake
+//                 (neither callback may fail before both are claimed) plus a
+//                 flag written immediately before the later throw makes
+//                 "survived a later failure" a witnessed fact. Missing witness
+//                 is BROKEN, never HOLDS.
+//   workers == 1  the graph is strictly serial: the later task can never be
+//                 claimed once the first fails. Claiming to have survived a
+//                 later failure there would be a fabricated event, so the rule
+//                 asserts what is actually reachable instead -- the later task
+//                 was never executed and is Canceled.
+//
+// Every wait is bounded, so a broken handshake fails the rule instead of hanging.
 // ---------------------------------------------------------------------------
-void rule_s6_first_error_precedence() {
-    const auto order_holds = [](bool allocation_first) {
-        std::atomic<bool> release_second{false};
+namespace s6 {
+
+// Bounded spin, never an unbounded wait: a handshake that cannot complete has to
+// fail the rule rather than wedge the gate.
+bool wait_for(const std::function<bool()>& predicate, int seconds) {
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
+    while (!predicate()) {
+        if (std::chrono::steady_clock::now() >= deadline) return false;
+        std::this_thread::yield();
+    }
+    return true;
+}
+
+// Shared two-party start gate. Both root callbacks call enter(); the gate opens
+// when the second one arrives.
+struct StartGate {
+    std::atomic<int> started{0};
+    std::atomic<bool> both_started{false};
+    std::atomic<bool> timed_out{false};
+
+    void enter() {
+        if (started.fetch_add(1) + 1 >= 2) both_started = true;
+    }
+    // False means the other party never arrived in time: a broken witness, not a
+    // passing rule.
+    bool await_both() {
+        if (!wait_for([this] { return both_started.load(); }, 5)) {
+            timed_out = true;
+            return false;
+        }
+        return true;
+    }
+};
+
+}  // namespace s6
+
+void rule_s6_first_error_precedence(std::size_t workers) {
+    const bool concurrent = workers >= 2;
+
+    const auto order_holds = [concurrent](bool allocation_first, std::string& why) {
+        s6::StartGate gate;
+        std::atomic<bool> second_threw{false};
+        std::atomic<bool> later_ran{false};
+        const GraphError first_error =
+            allocation_first ? GraphError::Allocation : GraphError::Callback;
+
         DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
+            // The first failure. In the concurrent arm it may not fail before the
+            // other task has been claimed.
             {key(1), {},
              [&](const TaskContext&) {
+                 gate.enter();
+                 if (concurrent) gate.await_both();
                  if (allocation_first) throw std::bad_alloc();
-                 while (!release_second.load()) std::this_thread::yield();
-                 throw std::runtime_error("second");
+                 throw std::runtime_error("first");
              },
              {[] { return true; }}},
+            // The later failure, only after the first error is visible.
             {key(2), {},
              [&](const TaskContext&) {
-                 if (!allocation_first) throw std::runtime_error("first");
-                 while (!release_second.load()) std::this_thread::yield();
+                 later_ran = true;
+                 gate.enter();
+                 if (concurrent &&
+                     (!gate.await_both() ||
+                      !s6::wait_for([&] { return graph.error() != GraphError::None; }, 5))) {
+                     gate.timed_out = true;
+                     return;  // produces output; the witness check below fails the rule
+                 }
+                 second_threw = true;
+                 if (allocation_first) throw std::runtime_error("second");
                  throw std::bad_alloc();
              },
              {[] { return true; }}}});
-        std::thread runner([&] { graph.run(2); });
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
-        while (graph.error() == GraphError::None && std::chrono::steady_clock::now() < deadline)
-            std::this_thread::yield();
-        const GraphError first = graph.error();
-        release_second = true;
-        runner.join();
-        return first != GraphError::None && graph.error() == first;
+
+        std::thread runner([&] { graph.run(concurrent ? 2 : 1); });
+        GraphError first = GraphError::None;
+        if (concurrent) {
+            // The later callback waits on this error becoming visible, so it is
+            // safe to read before joining: the first error is already recorded.
+            s6::wait_for([&] { return graph.error() != GraphError::None; }, 5);
+            first = graph.error();
+            runner.join();
+        } else {
+            // Serial run: the error only exists once the worker has reached it,
+            // so join first and read the settled value.
+            runner.join();
+            first = graph.error();
+        }
+
+        bool holds = first == first_error && graph.error() == first;
+        if (concurrent) {
+            const bool witnessed = !gate.timed_out && second_threw.load();
+            holds = holds && witnessed && graph.state(0) == TaskState::Failed &&
+                    graph.state(1) == TaskState::Failed;
+            why = witnessed
+                      ? std::string("two-party witness: both callbacks were claimed and the "
+                                    "later one threw while the first error stayed reported")
+                      : std::string("later failure was NOT exercised (handshake incomplete or "
+                                    "the later callback never threw)");
+        } else {
+            holds = holds && !later_ran.load() && graph.state(0) == TaskState::Failed &&
+                    graph.state(1) == TaskState::Canceled;
+            why = std::string("single worker: strictly serial, the later task was never claimed "
+                              "and is Canceled, so no later failure is claimed");
+        }
+        return holds;
     };
 
-    required("S6-first-error-allocation-first", order_holds(true),
-             "the first recorded error survives a later allocation failure");
-    required("S6-first-error-callback-first", order_holds(false),
-             "the first recorded error survives a later callback failure");
+    {
+        std::string why;
+        const bool holds = order_holds(true, why);
+        required("S6-first-error-allocation-first", holds,
+                 "the first recorded error (allocation) is the reported one -- " + why);
+    }
+    {
+        std::string why;
+        const bool holds = order_holds(false, why);
+        required("S6-first-error-callback-first", holds,
+                 "the first recorded error (callback) is the reported one -- " + why);
+    }
 }
 
 // A publication failure is terminal, so it must not be masked by, and must not
 // mask, a later unrelated failure either.
-void rule_s6_publication_error_is_sticky() {
-    std::atomic<bool> release_second{false};
+// Same vacuity risk as above, so the same witness is required: at width >= 2 the
+// later callback must be claimed and must actually throw; at width 1 the rule
+// asserts the reachable serial outcome instead.
+void rule_s6_publication_error_is_sticky(std::size_t workers) {
+    const bool concurrent = workers >= 2;
+    s6::StartGate gate;
+    std::atomic<bool> second_threw{false};
+    std::atomic<bool> later_ran{false};
     bool produced = false;
+
     DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
-        {key(1), {}, [](const TaskContext&) {}, {[&produced] { return produced; }}},
+        {key(1), {},
+         [&](const TaskContext&) {
+             gate.enter();
+             if (concurrent) gate.await_both();
+             // Returns normally and publishes nothing. The publication predicate
+             // below is what has to catch it.
+         },
+         {[&produced] { return produced; }}},
         {key(2), {},
          [&](const TaskContext&) {
-             while (!release_second.load()) std::this_thread::yield();
+             later_ran = true;
+             gate.enter();
+             if (concurrent &&
+                 (!gate.await_both() ||
+                  !s6::wait_for([&] { return graph.error() != GraphError::None; }, 5))) {
+                 gate.timed_out = true;
+                 return;
+             }
+             second_threw = true;
              throw std::runtime_error("later");
          },
          {[] { return true; }}}});
-    std::thread runner([&] { graph.run(2); });
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
-    while (graph.error() == GraphError::None && std::chrono::steady_clock::now() < deadline)
-        std::this_thread::yield();
-    const GraphError first = graph.error();
-    release_second = true;
-    runner.join();
-    required("S6-publication-error-is-sticky",
-             first == GraphError::OutputNotPublished &&
-                 graph.error() == GraphError::OutputNotPublished,
-             "an OutputNotPublished failure keeps precedence over a later callback failure");
+
+    std::thread runner([&] { graph.run(concurrent ? 2 : 1); });
+    GraphError first = GraphError::None;
+    if (concurrent) {
+        s6::wait_for([&] { return graph.error() != GraphError::None; }, 5);
+        first = graph.error();
+        runner.join();
+    } else {
+        runner.join();
+        first = graph.error();
+    }
+
+    const bool precedence = first == GraphError::OutputNotPublished &&
+                            graph.error() == GraphError::OutputNotPublished &&
+                            graph.state(0) == TaskState::Failed;
+    if (concurrent) {
+        const bool witnessed = !gate.timed_out && second_threw.load();
+        required("S6-publication-error-is-sticky",
+                 precedence && witnessed && graph.state(1) == TaskState::Failed,
+                 witnessed
+                     ? std::string("an OutputNotPublished failure keeps precedence over a later "
+                                   "callback failure that actually executed")
+                     : std::string("an OutputNotPublished failure was reported, but the later "
+                                   "callback was NOT exercised -- witness missing"));
+    } else {
+        required("S6-publication-error-is-sticky",
+                 precedence && !later_ran.load() && graph.state(1) == TaskState::Canceled,
+                 "single worker: OutputNotPublished is the reported error and the dependent "
+                 "work was never claimed");
+    }
 }
 
 }  // namespace
@@ -344,11 +552,12 @@ int main(int argc, char** argv) {
     std::printf("scheduler contract, workers=%zu, synthetic wrapper graph only\n", workers);
     rule_s1_reject_before_execution();
     rule_s2_output_completeness(workers);
+    rule_s2_predicate_reads_owned_storage();
     rule_s3_cancel_drains_and_fails();
     rule_s4_failure_does_not_publish(workers);
     rule_s5_must_complete(workers);
-    rule_s6_first_error_precedence();
-    rule_s6_publication_error_is_sticky();
+    rule_s6_first_error_precedence(workers);
+    rule_s6_publication_error_is_sticky(workers);
 
     std::printf("%d rules hold, %d broken\n", holds, failures);
     // Fail-closed gate: no rule is optional here, so an unmet rule is a failure

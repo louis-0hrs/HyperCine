@@ -48,13 +48,22 @@ struct TaskSpec {
     std::vector<TaskKey> inputs;
     std::function<void(const TaskContext&)> execute;
     // Publication predicate (rule S2). When set, the worker that ran execute()
-    // evaluates it immediately afterwards, on that same thread and with the
-    // callback's storage still live, and only then hands the result to
-    // complete(). A false or throwing predicate becomes a terminal graph error:
-    // the node is Failed, its transitive dependents are Failed, and no consumer
-    // is released. It is evaluated without the graph lock held (the callback
-    // frame is live and may legitimately call the const query API), but the
-    // Completed transition it gates is still made under the lock.
+    // evaluates it immediately afterwards on that same thread, and only then
+    // hands the result to complete(). A false or throwing predicate becomes a
+    // terminal graph error: the node is Failed, its transitive dependents are
+    // Failed, and no consumer is released. It is evaluated without the graph
+    // lock held and may call the const query API; the Completed transition it
+    // gates is still made under the lock.
+    //
+    // Lifetime requirement -- note what is NOT guaranteed: execute() has already
+    // returned when published() is evaluated, so the callback's stack frame is
+    // gone. Capturing a local of the callback body is therefore a dangling read,
+    // not a supported pattern. The real requirement is on the produced storage:
+    // it must be owned independently of the callback frame (heap object, shared
+    // ownership, or a member of a longer-lived owner) and must stay alive from
+    // the point the callback publishes it until run() has drained and downstream
+    // consumers have finished with it. This graph never owns or frees payload
+    // memory; the caller does.
     //
     // An empty predicate means "no output contract declared": completion then
     // rests on execute() returning, which is exactly the assumption RCA-195
