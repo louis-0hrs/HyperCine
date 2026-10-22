@@ -392,6 +392,10 @@ void rule_s6_first_error_precedence(std::size_t workers) {
         std::atomic<bool> later_ran{false};
         const GraphError first_error =
             allocation_first ? GraphError::Allocation : GraphError::Callback;
+        // Published after construction, so the callbacks can observe the recorded
+        // error without referring to the graph object during its own initializer
+        // (rejected by MSVC, and it would be a half-constructed object anyway).
+        DecodeTaskGraph* graph_ptr = nullptr;
 
         DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
             // The first failure. In the concurrent arm it may not fail before the
@@ -411,7 +415,7 @@ void rule_s6_first_error_precedence(std::size_t workers) {
                  gate.enter();
                  if (concurrent &&
                      (!gate.await_both() ||
-                      !s6::wait_for([&] { return graph.error() != GraphError::None; }, 5))) {
+                      !s6::wait_for([&] { return graph_ptr->error() != GraphError::None; }, 5))) {
                      gate.timed_out = true;
                      return;  // produces output; the witness check below fails the rule
                  }
@@ -420,6 +424,7 @@ void rule_s6_first_error_precedence(std::size_t workers) {
                  throw std::bad_alloc();
              },
              {[] { return true; }}}});
+        graph_ptr = &graph;
 
         std::thread runner([&] { graph.run(concurrent ? 2 : 1); });
         GraphError first = GraphError::None;
@@ -480,6 +485,7 @@ void rule_s6_publication_error_is_sticky(std::size_t workers) {
     std::atomic<bool> second_threw{false};
     std::atomic<bool> later_ran{false};
     bool produced = false;
+    DecodeTaskGraph* graph_ptr = nullptr;
 
     DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
         {key(1), {},
@@ -496,7 +502,7 @@ void rule_s6_publication_error_is_sticky(std::size_t workers) {
              gate.enter();
              if (concurrent &&
                  (!gate.await_both() ||
-                  !s6::wait_for([&] { return graph.error() != GraphError::None; }, 5))) {
+                  !s6::wait_for([&] { return graph_ptr->error() != GraphError::None; }, 5))) {
                  gate.timed_out = true;
                  return;
              }
@@ -504,6 +510,7 @@ void rule_s6_publication_error_is_sticky(std::size_t workers) {
              throw std::runtime_error("later");
          },
          {[] { return true; }}}});
+    graph_ptr = &graph;
 
     std::thread runner([&] { graph.run(concurrent ? 2 : 1); });
     GraphError first = GraphError::None;
