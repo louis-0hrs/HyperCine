@@ -1,0 +1,80 @@
+[
+  {
+    "id": "gop2_stage_extract.exe",
+    "byte_length": 924160,
+    "sha256": "0a773e9497f60e66089c29462bfa2626a65a8ceac0b38494e2d1f7aae984d154",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "gop2_stage_compare.exe",
+    "byte_length": 1186816,
+    "sha256": "0e576d9ec6986e904cd7c86c76775a2db5a8f794fb75b7be909c6fe97a0bc86a",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "gop2_stage_extract.cpp",
+    "byte_length": 12007,
+    "sha256": "dbcd14f3439e46e073ea337e49fe36a824f9f9d9ce1d47ae1b041c4e4128b6c1",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "gop2_reference_export.cpp",
+    "byte_length": 16316,
+    "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "gop2_stage_compare.cpp",
+    "byte_length": 6526,
+    "sha256": "e63f4a1c3a3907debaab6c449a22acec9cccd2b94a0b88bb7f5c6a732fa69956",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "gop2_candidate_compare.cpp",
+    "byte_length": 10327,
+    "sha256": "459ae9f4ad75320f80d288681ec33311649987d4617f5688088bdda7bae8b9e1",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "prepare_gop2_stage_sdk.py",
+    "byte_length": 5750,
+    "sha256": "ed0ebb86b9f318df1145289376d4b5e678f2343cc8a32d486c76567094579878",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "gop2_stage_contract.py",
+    "byte_length": 14610,
+    "sha256": "2e08082a6bb0d9d10339c645553c2ba37352137048d3ae24ab517881597a3967",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "observer.json",
+    "byte_length": 1283,
+    "sha256": "fcd4897f5935c653191481d1faaf6d6be97d1b7eb9a900b4484d2c065b292db8",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "Codec/decoder.c",
+    "byte_length": 763217,
+    "sha256": "c9849be236c44216a770c498a4ccfc1550e2149040b727ebfd3c94006aff306f",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "Codec/wavelet.c",
+    "byte_length": 260319,
+    "sha256": "e086dc747c2c0d6ab0d8e402c90860049fc7397dc57f6024996bf453fa5ca5e9",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "stage_CMakeLists.txt",
+    "byte_length": 1434,
+    "sha256": "c09c976573d4954552b9dfe713f7bb44997565ff41fa3f66ef5ff12caa454b65",
+    "license": "MIT OR Apache-2.0"
+  },
+  {
+    "id": "candidate_CMakeLists.txt",
+    "byte_length": 1951,
+    "sha256": "2cf76e2871e3e988bdc199b23798a8eae7c1f418f8456bb4be0fe8932c54cd75",
+    "license": "MIT OR Apache-2.0"
+  }
+]
