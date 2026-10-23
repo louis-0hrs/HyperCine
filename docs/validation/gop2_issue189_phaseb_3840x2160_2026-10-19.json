@@ -1,0 +1,5236 @@
+{
+  "candidate_sha": "7ed4a82ed97598454c2680bd264dedf259e6e7dc",
+  "compared": 90,
+  "comparison_file": {
+    "byte_length": 22787,
+    "sha256": "00f22f40fe8d504968b67012053225f0d7d2a5a24b3e9a17fc2b3e3ba78781b2"
+  },
+  "comparisons": [
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "b94ab39fab0e8e53e3ed6ba9b4dd7951dc3f85d7af9354894105c41b8e2bcc3d"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_pre_ch0_band0.i16le",
+      "band": 0,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "b94ab39fab0e8e53e3ed6ba9b4dd7951dc3f85d7af9354894105c41b8e2bcc3d"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "logical_band": 0,
+      "reference_id": "pre_ch0_band0.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "c3fd2781c131693c69d4cded9bb0741606e5072d12d69cc96c834d901378c440"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_pre_ch0_band1.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "c3fd2781c131693c69d4cded9bb0741606e5072d12d69cc96c834d901378c440"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "logical_band": 1,
+      "reference_id": "pre_ch0_band1.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_pre_ch0_band2.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "logical_band": 2,
+      "reference_id": "pre_ch0_band2.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_pre_ch0_band3.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "logical_band": 3,
+      "reference_id": "pre_ch0_band3.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "c919afac0ec2e8a0dc91510c9bd8b83f083c3fc093a42ad7f821ef239874de0e"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_pre_ch0_band4.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "c919afac0ec2e8a0dc91510c9bd8b83f083c3fc093a42ad7f821ef239874de0e"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "logical_band": 4,
+      "reference_id": "pre_ch0_band4.i16le",
+      "wavelet": 4,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_pre_ch0_band5.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "logical_band": 5,
+      "reference_id": "pre_ch0_band5.i16le",
+      "wavelet": 4,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_pre_ch0_band6.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "logical_band": 6,
+      "reference_id": "pre_ch0_band6.i16le",
+      "wavelet": 4,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "4f2d50a5e53619182a32d954eff3c4744a0b870be09f8477375f188cd2002c3a"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_pre_ch0_band7.i16le",
+      "band": 0,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "4f2d50a5e53619182a32d954eff3c4744a0b870be09f8477375f188cd2002c3a"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "logical_band": 7,
+      "reference_id": "pre_ch0_band7.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "6a7f8152b76900e269c78ab52e9442a28fa90471e7545bc95b72a8678d096305"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_pre_ch0_band8.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "6a7f8152b76900e269c78ab52e9442a28fa90471e7545bc95b72a8678d096305"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "logical_band": 8,
+      "reference_id": "pre_ch0_band8.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "18219d432ec2954a55078007e4b208244b42f7ec59950a012360d0d9e687891c"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_pre_ch0_band9.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "18219d432ec2954a55078007e4b208244b42f7ec59950a012360d0d9e687891c"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "logical_band": 9,
+      "reference_id": "pre_ch0_band9.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "83e2e720c8119c502e50af9b316c7747a657cb18de48301e38ec2909695b793e"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_pre_ch0_band10.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "83e2e720c8119c502e50af9b316c7747a657cb18de48301e38ec2909695b793e"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "logical_band": 10,
+      "reference_id": "pre_ch0_band10.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "actual_bytes": 4147200,
+      "artifact": "frame0_pre_ch0_band14.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "expected_bytes": 4147200,
+      "frame_index": 0,
+      "logical_band": 14,
+      "reference_id": "pre_ch0_band14.i16le",
+      "wavelet": 0,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "actual_bytes": 4147200,
+      "artifact": "frame0_pre_ch0_band15.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "expected_bytes": 4147200,
+      "frame_index": 0,
+      "logical_band": 15,
+      "reference_id": "pre_ch0_band15.i16le",
+      "wavelet": 0,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "actual_bytes": 4147200,
+      "artifact": "frame0_pre_ch0_band16.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "expected_bytes": 4147200,
+      "frame_index": 0,
+      "logical_band": 16,
+      "reference_id": "pre_ch0_band16.i16le",
+      "wavelet": 0,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 16588800,
+        "sha256": "ac9057c77594ffe7914e0e1d216aa7f8c720a68be6c9c1cf8d1ef2445948a66d"
+      },
+      "actual_bytes": 16588800,
+      "artifact": "frame0_signed_frame0_ch0.i16le",
+      "band": -1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 16588800,
+        "sha256": "ac9057c77594ffe7914e0e1d216aa7f8c720a68be6c9c1cf8d1ef2445948a66d"
+      },
+      "expected_bytes": 16588800,
+      "frame_index": 0,
+      "logical_band": -1,
+      "reference_id": "signed_frame0_ch0.i16le",
+      "wavelet": -1,
+      "width": 3840
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "ac30aeb09db24b3416d70e273121ea470e0d7060618d6aabf376b9d9a7df3d95"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch1_band0.i16le",
+      "band": 0,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "ac30aeb09db24b3416d70e273121ea470e0d7060618d6aabf376b9d9a7df3d95"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 0,
+      "reference_id": "pre_ch1_band0.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "7a75b81b77e86609ccfc0465960b34fd4156d21847b991c9d90e3d9ed5b71232"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch1_band1.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "7a75b81b77e86609ccfc0465960b34fd4156d21847b991c9d90e3d9ed5b71232"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 1,
+      "reference_id": "pre_ch1_band1.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch1_band2.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 2,
+      "reference_id": "pre_ch1_band2.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch1_band3.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 3,
+      "reference_id": "pre_ch1_band3.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "04aed2f59bfda03b1ce2697dda9cd1603098af6b43dc932d43e36e181a9be7e1"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch1_band4.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "04aed2f59bfda03b1ce2697dda9cd1603098af6b43dc932d43e36e181a9be7e1"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 4,
+      "reference_id": "pre_ch1_band4.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch1_band5.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 5,
+      "reference_id": "pre_ch1_band5.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch1_band6.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 6,
+      "reference_id": "pre_ch1_band6.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "9a3a9bbf5b0d9149a6e89bd5a943e7a629a30ea97ae01d034a4512942dfba6c7"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch1_band7.i16le",
+      "band": 0,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "9a3a9bbf5b0d9149a6e89bd5a943e7a629a30ea97ae01d034a4512942dfba6c7"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 7,
+      "reference_id": "pre_ch1_band7.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch1_band8.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 8,
+      "reference_id": "pre_ch1_band8.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch1_band9.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 9,
+      "reference_id": "pre_ch1_band9.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch1_band10.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 10,
+      "reference_id": "pre_ch1_band10.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame0_pre_ch1_band14.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 0,
+      "logical_band": 14,
+      "reference_id": "pre_ch1_band14.i16le",
+      "wavelet": 0,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame0_pre_ch1_band15.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 0,
+      "logical_band": 15,
+      "reference_id": "pre_ch1_band15.i16le",
+      "wavelet": 0,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame0_pre_ch1_band16.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 0,
+      "logical_band": 16,
+      "reference_id": "pre_ch1_band16.i16le",
+      "wavelet": 0,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "03c589ce3ef5f9f8174799beb8366a7a5d9cd250caefaf8618e9c6044e879f6c"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame0_signed_frame0_ch1.i16le",
+      "band": -1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "03c589ce3ef5f9f8174799beb8366a7a5d9cd250caefaf8618e9c6044e879f6c"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 0,
+      "logical_band": -1,
+      "reference_id": "signed_frame0_ch1.i16le",
+      "wavelet": -1,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "0fa7028a19e92a4d181f9ba47aa90d073287119644d160f9bfc88fd7f19b1d94"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch2_band0.i16le",
+      "band": 0,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "0fa7028a19e92a4d181f9ba47aa90d073287119644d160f9bfc88fd7f19b1d94"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 0,
+      "reference_id": "pre_ch2_band0.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch2_band1.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 1,
+      "reference_id": "pre_ch2_band1.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "e0bcc7cca8d5f7a2ef60f383dcfcba78cf46221e04d4e5dab48d848d840cd292"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch2_band2.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "e0bcc7cca8d5f7a2ef60f383dcfcba78cf46221e04d4e5dab48d848d840cd292"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 2,
+      "reference_id": "pre_ch2_band2.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_pre_ch2_band3.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "logical_band": 3,
+      "reference_id": "pre_ch2_band3.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch2_band4.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 4,
+      "reference_id": "pre_ch2_band4.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "83d98921afab00406c1486b2469fae655eec4ffe8b18c2e831b84c19c5e8c96c"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch2_band5.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "83d98921afab00406c1486b2469fae655eec4ffe8b18c2e831b84c19c5e8c96c"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 5,
+      "reference_id": "pre_ch2_band5.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch2_band6.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 6,
+      "reference_id": "pre_ch2_band6.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "7e8661dee33997efc65bf70c92f0d0aeb4061774c6c4631c38d5c4dff6db3286"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch2_band7.i16le",
+      "band": 0,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "7e8661dee33997efc65bf70c92f0d0aeb4061774c6c4631c38d5c4dff6db3286"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 7,
+      "reference_id": "pre_ch2_band7.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch2_band8.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 8,
+      "reference_id": "pre_ch2_band8.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch2_band9.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 9,
+      "reference_id": "pre_ch2_band9.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_pre_ch2_band10.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "logical_band": 10,
+      "reference_id": "pre_ch2_band10.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame0_pre_ch2_band14.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 0,
+      "logical_band": 14,
+      "reference_id": "pre_ch2_band14.i16le",
+      "wavelet": 0,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame0_pre_ch2_band15.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 0,
+      "logical_band": 15,
+      "reference_id": "pre_ch2_band15.i16le",
+      "wavelet": 0,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame0_pre_ch2_band16.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 0,
+      "logical_band": 16,
+      "reference_id": "pre_ch2_band16.i16le",
+      "wavelet": 0,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "14d7a4e38064ce1f4c49273f55385af421ea5f58912088d8740bdbe97fb82352"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame0_signed_frame0_ch2.i16le",
+      "band": -1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "14d7a4e38064ce1f4c49273f55385af421ea5f58912088d8740bdbe97fb82352"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 0,
+      "logical_band": -1,
+      "reference_id": "signed_frame0_ch2.i16le",
+      "wavelet": -1,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "b94ab39fab0e8e53e3ed6ba9b4dd7951dc3f85d7af9354894105c41b8e2bcc3d"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_pre_ch0_band0.i16le",
+      "band": 0,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "b94ab39fab0e8e53e3ed6ba9b4dd7951dc3f85d7af9354894105c41b8e2bcc3d"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "logical_band": 0,
+      "reference_id": "pre_ch0_band0.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "c3fd2781c131693c69d4cded9bb0741606e5072d12d69cc96c834d901378c440"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_pre_ch0_band1.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "c3fd2781c131693c69d4cded9bb0741606e5072d12d69cc96c834d901378c440"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "logical_band": 1,
+      "reference_id": "pre_ch0_band1.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_pre_ch0_band2.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "logical_band": 2,
+      "reference_id": "pre_ch0_band2.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_pre_ch0_band3.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "logical_band": 3,
+      "reference_id": "pre_ch0_band3.i16le",
+      "wavelet": 5,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "c919afac0ec2e8a0dc91510c9bd8b83f083c3fc093a42ad7f821ef239874de0e"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_pre_ch0_band4.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "c919afac0ec2e8a0dc91510c9bd8b83f083c3fc093a42ad7f821ef239874de0e"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "logical_band": 4,
+      "reference_id": "pre_ch0_band4.i16le",
+      "wavelet": 4,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_pre_ch0_band5.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "logical_band": 5,
+      "reference_id": "pre_ch0_band5.i16le",
+      "wavelet": 4,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_pre_ch0_band6.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "logical_band": 6,
+      "reference_id": "pre_ch0_band6.i16le",
+      "wavelet": 4,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "4f2d50a5e53619182a32d954eff3c4744a0b870be09f8477375f188cd2002c3a"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_pre_ch0_band7.i16le",
+      "band": 0,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "4f2d50a5e53619182a32d954eff3c4744a0b870be09f8477375f188cd2002c3a"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "logical_band": 7,
+      "reference_id": "pre_ch0_band7.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "6a7f8152b76900e269c78ab52e9442a28fa90471e7545bc95b72a8678d096305"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_pre_ch0_band8.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "6a7f8152b76900e269c78ab52e9442a28fa90471e7545bc95b72a8678d096305"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "logical_band": 8,
+      "reference_id": "pre_ch0_band8.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "18219d432ec2954a55078007e4b208244b42f7ec59950a012360d0d9e687891c"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_pre_ch0_band9.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "18219d432ec2954a55078007e4b208244b42f7ec59950a012360d0d9e687891c"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "logical_band": 9,
+      "reference_id": "pre_ch0_band9.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "83e2e720c8119c502e50af9b316c7747a657cb18de48301e38ec2909695b793e"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_pre_ch0_band10.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "83e2e720c8119c502e50af9b316c7747a657cb18de48301e38ec2909695b793e"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "logical_band": 10,
+      "reference_id": "pre_ch0_band10.i16le",
+      "wavelet": 3,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "actual_bytes": 4147200,
+      "artifact": "frame1_pre_ch0_band11.i16le",
+      "band": 1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "expected_bytes": 4147200,
+      "frame_index": 1,
+      "logical_band": 11,
+      "reference_id": "pre_ch0_band11.i16le",
+      "wavelet": 1,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "actual_bytes": 4147200,
+      "artifact": "frame1_pre_ch0_band12.i16le",
+      "band": 2,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "expected_bytes": 4147200,
+      "frame_index": 1,
+      "logical_band": 12,
+      "reference_id": "pre_ch0_band12.i16le",
+      "wavelet": 1,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "actual_bytes": 4147200,
+      "artifact": "frame1_pre_ch0_band13.i16le",
+      "band": 3,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 4147200,
+        "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8"
+      },
+      "expected_bytes": 4147200,
+      "frame_index": 1,
+      "logical_band": 13,
+      "reference_id": "pre_ch0_band13.i16le",
+      "wavelet": 1,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 16588800,
+        "sha256": "5c022563a7235709f98812d092dce60eeb683e8c9000f6cd530e46e16d1ef426"
+      },
+      "actual_bytes": 16588800,
+      "artifact": "frame1_signed_frame1_ch0.i16le",
+      "band": -1,
+      "channel": 0,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 16588800,
+        "sha256": "5c022563a7235709f98812d092dce60eeb683e8c9000f6cd530e46e16d1ef426"
+      },
+      "expected_bytes": 16588800,
+      "frame_index": 1,
+      "logical_band": -1,
+      "reference_id": "signed_frame1_ch0.i16le",
+      "wavelet": -1,
+      "width": 3840
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "ac30aeb09db24b3416d70e273121ea470e0d7060618d6aabf376b9d9a7df3d95"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch1_band0.i16le",
+      "band": 0,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "ac30aeb09db24b3416d70e273121ea470e0d7060618d6aabf376b9d9a7df3d95"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 0,
+      "reference_id": "pre_ch1_band0.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "7a75b81b77e86609ccfc0465960b34fd4156d21847b991c9d90e3d9ed5b71232"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch1_band1.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "7a75b81b77e86609ccfc0465960b34fd4156d21847b991c9d90e3d9ed5b71232"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 1,
+      "reference_id": "pre_ch1_band1.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch1_band2.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 2,
+      "reference_id": "pre_ch1_band2.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch1_band3.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 3,
+      "reference_id": "pre_ch1_band3.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "04aed2f59bfda03b1ce2697dda9cd1603098af6b43dc932d43e36e181a9be7e1"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch1_band4.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "04aed2f59bfda03b1ce2697dda9cd1603098af6b43dc932d43e36e181a9be7e1"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 4,
+      "reference_id": "pre_ch1_band4.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch1_band5.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 5,
+      "reference_id": "pre_ch1_band5.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch1_band6.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 6,
+      "reference_id": "pre_ch1_band6.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "9a3a9bbf5b0d9149a6e89bd5a943e7a629a30ea97ae01d034a4512942dfba6c7"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch1_band7.i16le",
+      "band": 0,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "9a3a9bbf5b0d9149a6e89bd5a943e7a629a30ea97ae01d034a4512942dfba6c7"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 7,
+      "reference_id": "pre_ch1_band7.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch1_band8.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 8,
+      "reference_id": "pre_ch1_band8.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch1_band9.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 9,
+      "reference_id": "pre_ch1_band9.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch1_band10.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 10,
+      "reference_id": "pre_ch1_band10.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame1_pre_ch1_band11.i16le",
+      "band": 1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 1,
+      "logical_band": 11,
+      "reference_id": "pre_ch1_band11.i16le",
+      "wavelet": 1,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame1_pre_ch1_band12.i16le",
+      "band": 2,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 1,
+      "logical_band": 12,
+      "reference_id": "pre_ch1_band12.i16le",
+      "wavelet": 1,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame1_pre_ch1_band13.i16le",
+      "band": 3,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 1,
+      "logical_band": 13,
+      "reference_id": "pre_ch1_band13.i16le",
+      "wavelet": 1,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "94c8d22d0ba4f9fc2f84d213b9cf52db61e6fc021bec3b967e686b1266dfe8c1"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame1_signed_frame1_ch1.i16le",
+      "band": -1,
+      "channel": 1,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "94c8d22d0ba4f9fc2f84d213b9cf52db61e6fc021bec3b967e686b1266dfe8c1"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 1,
+      "logical_band": -1,
+      "reference_id": "signed_frame1_ch1.i16le",
+      "wavelet": -1,
+      "width": 1920
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "0fa7028a19e92a4d181f9ba47aa90d073287119644d160f9bfc88fd7f19b1d94"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch2_band0.i16le",
+      "band": 0,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "0fa7028a19e92a4d181f9ba47aa90d073287119644d160f9bfc88fd7f19b1d94"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 0,
+      "reference_id": "pre_ch2_band0.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch2_band1.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 1,
+      "reference_id": "pre_ch2_band1.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "e0bcc7cca8d5f7a2ef60f383dcfcba78cf46221e04d4e5dab48d848d840cd292"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch2_band2.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "e0bcc7cca8d5f7a2ef60f383dcfcba78cf46221e04d4e5dab48d848d840cd292"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 2,
+      "reference_id": "pre_ch2_band2.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_pre_ch2_band3.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "logical_band": 3,
+      "reference_id": "pre_ch2_band3.i16le",
+      "wavelet": 5,
+      "width": 240
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch2_band4.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 4,
+      "reference_id": "pre_ch2_band4.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "83d98921afab00406c1486b2469fae655eec4ffe8b18c2e831b84c19c5e8c96c"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch2_band5.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "83d98921afab00406c1486b2469fae655eec4ffe8b18c2e831b84c19c5e8c96c"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 5,
+      "reference_id": "pre_ch2_band5.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch2_band6.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 6,
+      "reference_id": "pre_ch2_band6.i16le",
+      "wavelet": 4,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "7e8661dee33997efc65bf70c92f0d0aeb4061774c6c4631c38d5c4dff6db3286"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch2_band7.i16le",
+      "band": 0,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "7e8661dee33997efc65bf70c92f0d0aeb4061774c6c4631c38d5c4dff6db3286"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 7,
+      "reference_id": "pre_ch2_band7.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch2_band8.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 8,
+      "reference_id": "pre_ch2_band8.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch2_band9.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 9,
+      "reference_id": "pre_ch2_band9.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_pre_ch2_band10.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "logical_band": 10,
+      "reference_id": "pre_ch2_band10.i16le",
+      "wavelet": 3,
+      "width": 480
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame1_pre_ch2_band11.i16le",
+      "band": 1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 1,
+      "logical_band": 11,
+      "reference_id": "pre_ch2_band11.i16le",
+      "wavelet": 1,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame1_pre_ch2_band12.i16le",
+      "band": 2,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 1,
+      "logical_band": 12,
+      "reference_id": "pre_ch2_band12.i16le",
+      "wavelet": 1,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "actual_bytes": 2073600,
+      "artifact": "frame1_pre_ch2_band13.i16le",
+      "band": 3,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 2073600,
+        "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b"
+      },
+      "expected_bytes": 2073600,
+      "frame_index": 1,
+      "logical_band": 13,
+      "reference_id": "pre_ch2_band13.i16le",
+      "wavelet": 1,
+      "width": 960
+    },
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "03b2d859cc0bb1a71beb6f60b44c317ae5359b54a71bc2edac8fd153636ce3ef"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame1_signed_frame1_ch2.i16le",
+      "band": -1,
+      "channel": 2,
+      "differing_coefficients": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "03b2d859cc0bb1a71beb6f60b44c317ae5359b54a71bc2edac8fd153636ce3ef"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 1,
+      "logical_band": -1,
+      "reference_id": "signed_frame1_ch2.i16le",
+      "wavelet": -1,
+      "width": 1920
+    }
+  ],
+  "geometry": [
+    3840,
+    2160
+  ],
+  "input_packet": {
+    "byte_length": 2930956,
+    "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+  },
+  "issue": 189,
+  "license": "MIT OR Apache-2.0",
+  "limitations": [
+    "Two pinned generated-source SDK packets only; no default-pool/race-free claim.",
+    "Signed planes use the identified alternate frozen SDK spatial path with exact default-output controls.",
+    "Native signed16 transform saturation is retained; no p10/output packing clip is applied to these planes.",
+    "Phase-A originals are unchanged; their old MISSING fields are historical."
+  ],
+  "mismatched": 0,
+  "observations": {
+    "allowed_cpus": 1,
+    "alternate_original_path_checks": 18,
+    "candidate_comparison": "PENDING",
+    "cpu_affinity_count": 1,
+    "entropy_pool": 0,
+    "fresh_decoders_per_format": 3,
+    "height": 2160,
+    "instrumentation_neutrality": "PASS",
+    "matrix": "BT709",
+    "native_signed16_saturation_retained": true,
+    "neutrality_frame_checks": 12,
+    "neutrality_resident_checks": 198,
+    "observer_version": 2,
+    "pre_inverse_bands": [
+      {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band0.i16le",
+        "level": 4,
+        "logical_band": 0,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 5,
+        "width": 480
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band1.i16le",
+        "level": 4,
+        "logical_band": 1,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 480
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band2.i16le",
+        "level": 4,
+        "logical_band": 2,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 480
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band3.i16le",
+        "level": 4,
+        "logical_band": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 16,
+        "wavelet": 5,
+        "width": 480
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band4.i16le",
+        "level": 3,
+        "logical_band": 4,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 960
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band5.i16le",
+        "level": 3,
+        "logical_band": 5,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 960
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band6.i16le",
+        "level": 3,
+        "logical_band": 6,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "quantization": 4,
+        "wavelet": 4,
+        "width": 960
+      },
+      {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band7.i16le",
+        "level": 3,
+        "logical_band": 7,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 3,
+        "width": 960
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band8.i16le",
+        "level": 3,
+        "logical_band": 8,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 960
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band9.i16le",
+        "level": 3,
+        "logical_band": 9,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 960
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band10.i16le",
+        "level": 3,
+        "logical_band": 10,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 3,
+        "width": 960
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch0_band11.i16le",
+        "level": 1,
+        "logical_band": 11,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 1920
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch0_band12.i16le",
+        "level": 1,
+        "logical_band": 12,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 1920
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch0_band13.i16le",
+        "level": 1,
+        "logical_band": 13,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 9,
+        "wavelet": 1,
+        "width": 1920
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch0_band14.i16le",
+        "level": 1,
+        "logical_band": 14,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 1920
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch0_band15.i16le",
+        "level": 1,
+        "logical_band": 15,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 1920
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch0_band16.i16le",
+        "level": 1,
+        "logical_band": 16,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 9,
+        "wavelet": 0,
+        "width": 1920
+      },
+      {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band0.i16le",
+        "level": 4,
+        "logical_band": 0,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band1.i16le",
+        "level": 4,
+        "logical_band": 1,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band2.i16le",
+        "level": 4,
+        "logical_band": 2,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band3.i16le",
+        "level": 4,
+        "logical_band": 3,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 16,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band4.i16le",
+        "level": 3,
+        "logical_band": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band5.i16le",
+        "level": 3,
+        "logical_band": 5,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band6.i16le",
+        "level": 3,
+        "logical_band": 6,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 4,
+        "wavelet": 4,
+        "width": 480
+      },
+      {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band7.i16le",
+        "level": 3,
+        "logical_band": 7,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band8.i16le",
+        "level": 3,
+        "logical_band": 8,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band9.i16le",
+        "level": 3,
+        "logical_band": 9,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band10.i16le",
+        "level": 3,
+        "logical_band": 10,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch1_band11.i16le",
+        "level": 1,
+        "logical_band": 11,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch1_band12.i16le",
+        "level": 1,
+        "logical_band": 12,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch1_band13.i16le",
+        "level": 1,
+        "logical_band": 13,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 1,
+        "width": 960
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch1_band14.i16le",
+        "level": 1,
+        "logical_band": 14,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch1_band15.i16le",
+        "level": 1,
+        "logical_band": 15,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch1_band16.i16le",
+        "level": 1,
+        "logical_band": 16,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 0,
+        "width": 960
+      },
+      {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band0.i16le",
+        "level": 4,
+        "logical_band": 0,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band1.i16le",
+        "level": 4,
+        "logical_band": 1,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band2.i16le",
+        "level": 4,
+        "logical_band": 2,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band3.i16le",
+        "level": 4,
+        "logical_band": 3,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 16,
+        "wavelet": 5,
+        "width": 240
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band4.i16le",
+        "level": 3,
+        "logical_band": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band5.i16le",
+        "level": 3,
+        "logical_band": 5,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band6.i16le",
+        "level": 3,
+        "logical_band": 6,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 4,
+        "wavelet": 4,
+        "width": 480
+      },
+      {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band7.i16le",
+        "level": 3,
+        "logical_band": 7,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band8.i16le",
+        "level": 3,
+        "logical_band": 8,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band9.i16le",
+        "level": 3,
+        "logical_band": 9,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band10.i16le",
+        "level": 3,
+        "logical_band": 10,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 3,
+        "width": 480
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch2_band11.i16le",
+        "level": 1,
+        "logical_band": 11,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch2_band12.i16le",
+        "level": 1,
+        "logical_band": 12,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch2_band13.i16le",
+        "level": 1,
+        "logical_band": 13,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 1,
+        "width": 960
+      },
+      {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch2_band14.i16le",
+        "level": 1,
+        "logical_band": 14,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch2_band15.i16le",
+        "level": 1,
+        "logical_band": 15,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch2_band16.i16le",
+        "level": 1,
+        "logical_band": 16,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 0,
+        "width": 960
+      }
+    ],
+    "producer": "original_sdk_private_observer_overlay",
+    "range": "video",
+    "release_gate": "BLOCKED_PENDING_STAGE_COMPARISON_AND_OWNER_REVIEW",
+    "same_instance_calls": 3,
+    "sample_reencoded": false,
+    "schema": "hypercine.gop2.original_stages/1",
+    "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+    "signed_path": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+    "signed_plane_channel_order": [
+      "Y",
+      "V",
+      "U"
+    ],
+    "signed_plane_orientation": "top_down",
+    "signed_plane_storage": "signed_int16_little_endian_before_p10_clipping_and_YU64_packing",
+    "signed_planes": [
+      {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 0,
+        "frame_index": 0,
+        "height": 2160,
+        "id": "signed_frame0_ch0.i16le",
+        "pitch": 7680,
+        "width": 3840
+      },
+      {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 1,
+        "frame_index": 0,
+        "height": 2160,
+        "id": "signed_frame0_ch1.i16le",
+        "pitch": 3840,
+        "width": 1920
+      },
+      {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 2,
+        "frame_index": 0,
+        "height": 2160,
+        "id": "signed_frame0_ch2.i16le",
+        "pitch": 3840,
+        "width": 1920
+      },
+      {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 0,
+        "frame_index": 1,
+        "height": 2160,
+        "id": "signed_frame1_ch0.i16le",
+        "pitch": 7680,
+        "width": 3840
+      },
+      {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 1,
+        "frame_index": 1,
+        "height": 2160,
+        "id": "signed_frame1_ch1.i16le",
+        "pitch": 3840,
+        "width": 1920
+      },
+      {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 2,
+        "frame_index": 1,
+        "height": 2160,
+        "id": "signed_frame1_ch2.i16le",
+        "pitch": 3840,
+        "width": 1920
+      }
+    ],
+    "source_quality": "FilmScan3",
+    "stability": "PASS",
+    "stage_observations_per_band_or_row": 9,
+    "stage_output_format": "YU64",
+    "width": 3840,
+    "worker_pool": 1
+  },
+  "observations_file": {
+    "byte_length": 16853,
+    "sha256": "3e34acfa8d71bf3e199c7c74252148b5c0f432fa267c4db15317f8a476fdc388"
+  },
+  "original_stages": [
+    {
+      "byte_length": 259200,
+      "id": "pre_ch0_band0.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "b94ab39fab0e8e53e3ed6ba9b4dd7951dc3f85d7af9354894105c41b8e2bcc3d",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band0.i16le",
+        "level": 4,
+        "logical_band": 0,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 5,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 259200,
+      "id": "pre_ch0_band1.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "c3fd2781c131693c69d4cded9bb0741606e5072d12d69cc96c834d901378c440",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band1.i16le",
+        "level": 4,
+        "logical_band": 1,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 259200,
+      "id": "pre_ch0_band2.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band2.i16le",
+        "level": 4,
+        "logical_band": 2,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 259200,
+      "id": "pre_ch0_band3.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch0_band3.i16le",
+        "level": 4,
+        "logical_band": 3,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 16,
+        "wavelet": 5,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "id": "pre_ch0_band4.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "c919afac0ec2e8a0dc91510c9bd8b83f083c3fc093a42ad7f821ef239874de0e",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band4.i16le",
+        "level": 3,
+        "logical_band": 4,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "id": "pre_ch0_band5.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band5.i16le",
+        "level": 3,
+        "logical_band": 5,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "id": "pre_ch0_band6.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band6.i16le",
+        "level": 3,
+        "logical_band": 6,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 2,
+        "quantization": 4,
+        "wavelet": 4,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "id": "pre_ch0_band7.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "4f2d50a5e53619182a32d954eff3c4744a0b870be09f8477375f188cd2002c3a",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band7.i16le",
+        "level": 3,
+        "logical_band": 7,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "id": "pre_ch0_band8.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "6a7f8152b76900e269c78ab52e9442a28fa90471e7545bc95b72a8678d096305",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band8.i16le",
+        "level": 3,
+        "logical_band": 8,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "id": "pre_ch0_band9.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "18219d432ec2954a55078007e4b208244b42f7ec59950a012360d0d9e687891c",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band9.i16le",
+        "level": 3,
+        "logical_band": 9,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 1036800,
+      "id": "pre_ch0_band10.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "83e2e720c8119c502e50af9b316c7747a657cb18de48301e38ec2909695b793e",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch0_band10.i16le",
+        "level": 3,
+        "logical_band": 10,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 3,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "id": "pre_ch0_band11.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch0_band11.i16le",
+        "level": 1,
+        "logical_band": 11,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "id": "pre_ch0_band12.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch0_band12.i16le",
+        "level": 1,
+        "logical_band": 12,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "id": "pre_ch0_band13.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch0_band13.i16le",
+        "level": 1,
+        "logical_band": 13,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 9,
+        "wavelet": 1,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "id": "pre_ch0_band14.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch0_band14.i16le",
+        "level": 1,
+        "logical_band": 14,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "id": "pre_ch0_band15.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch0_band15.i16le",
+        "level": 1,
+        "logical_band": 15,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 4147200,
+      "id": "pre_ch0_band16.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "06b2c5a0c01e515d009c0bfbe0e61fafb105a54da5ec621104915cd5949849e8",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 0,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch0_band16.i16le",
+        "level": 1,
+        "logical_band": 16,
+        "original_pitch": 3840,
+        "pitch": 3840,
+        "prescale": 0,
+        "quantization": 9,
+        "wavelet": 0,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch1_band0.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "ac30aeb09db24b3416d70e273121ea470e0d7060618d6aabf376b9d9a7df3d95",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band0.i16le",
+        "level": 4,
+        "logical_band": 0,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch1_band1.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "7a75b81b77e86609ccfc0465960b34fd4156d21847b991c9d90e3d9ed5b71232",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band1.i16le",
+        "level": 4,
+        "logical_band": 1,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch1_band2.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band2.i16le",
+        "level": 4,
+        "logical_band": 2,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch1_band3.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch1_band3.i16le",
+        "level": 4,
+        "logical_band": 3,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 16,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch1_band4.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "04aed2f59bfda03b1ce2697dda9cd1603098af6b43dc932d43e36e181a9be7e1",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band4.i16le",
+        "level": 3,
+        "logical_band": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch1_band5.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band5.i16le",
+        "level": 3,
+        "logical_band": 5,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch1_band6.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band6.i16le",
+        "level": 3,
+        "logical_band": 6,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 4,
+        "wavelet": 4,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch1_band7.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "9a3a9bbf5b0d9149a6e89bd5a943e7a629a30ea97ae01d034a4512942dfba6c7",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band7.i16le",
+        "level": 3,
+        "logical_band": 7,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch1_band8.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band8.i16le",
+        "level": 3,
+        "logical_band": 8,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch1_band9.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band9.i16le",
+        "level": 3,
+        "logical_band": 9,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch1_band10.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch1_band10.i16le",
+        "level": 3,
+        "logical_band": 10,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch1_band11.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch1_band11.i16le",
+        "level": 1,
+        "logical_band": 11,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch1_band12.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch1_band12.i16le",
+        "level": 1,
+        "logical_band": 12,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch1_band13.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch1_band13.i16le",
+        "level": 1,
+        "logical_band": 13,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 1,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch1_band14.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch1_band14.i16le",
+        "level": 1,
+        "logical_band": 14,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch1_band15.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch1_band15.i16le",
+        "level": 1,
+        "logical_band": 15,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch1_band16.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 1,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch1_band16.i16le",
+        "level": 1,
+        "logical_band": 16,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 0,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch2_band0.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "0fa7028a19e92a4d181f9ba47aa90d073287119644d160f9bfc88fd7f19b1d94",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band0.i16le",
+        "level": 4,
+        "logical_band": 0,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch2_band1.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band1.i16le",
+        "level": 4,
+        "logical_band": 1,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch2_band2.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "e0bcc7cca8d5f7a2ef60f383dcfcba78cf46221e04d4e5dab48d848d840cd292",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band2.i16le",
+        "level": 4,
+        "logical_band": 2,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 32,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 129600,
+      "id": "pre_ch2_band3.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 270,
+        "id": "pre_ch2_band3.i16le",
+        "level": 4,
+        "logical_band": 3,
+        "original_pitch": 480,
+        "pitch": 480,
+        "prescale": 0,
+        "quantization": 16,
+        "wavelet": 5,
+        "width": 240
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch2_band4.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band4.i16le",
+        "level": 3,
+        "logical_band": 4,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch2_band5.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "83d98921afab00406c1486b2469fae655eec4ffe8b18c2e831b84c19c5e8c96c",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band5.i16le",
+        "level": 3,
+        "logical_band": 5,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 8,
+        "wavelet": 4,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch2_band6.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band6.i16le",
+        "level": 3,
+        "logical_band": 6,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 2,
+        "quantization": 4,
+        "wavelet": 4,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch2_band7.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "7e8661dee33997efc65bf70c92f0d0aeb4061774c6c4631c38d5c4dff6db3286",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 0,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band7.i16le",
+        "level": 3,
+        "logical_band": 7,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 1,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch2_band8.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band8.i16le",
+        "level": 3,
+        "logical_band": 8,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch2_band9.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band9.i16le",
+        "level": 3,
+        "logical_band": 9,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 518400,
+      "id": "pre_ch2_band10.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "both",
+        "height": 540,
+        "id": "pre_ch2_band10.i16le",
+        "level": 3,
+        "logical_band": 10,
+        "original_pitch": 960,
+        "pitch": 960,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 3,
+        "width": 480
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch2_band11.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch2_band11.i16le",
+        "level": 1,
+        "logical_band": 11,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch2_band12.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch2_band12.i16le",
+        "level": 1,
+        "logical_band": 12,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 1,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch2_band13.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame1",
+        "height": 1080,
+        "id": "pre_ch2_band13.i16le",
+        "level": 1,
+        "logical_band": 13,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 1,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch2_band14.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 1,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch2_band14.i16le",
+        "level": 1,
+        "logical_band": 14,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch2_band15.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 2,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch2_band15.i16le",
+        "level": 1,
+        "logical_band": 15,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 6,
+        "wavelet": 0,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 2073600,
+      "id": "pre_ch2_band16.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "11283ef755895422e6f28b93f3d78cad7539891cf2893c9fdccefb923c5bf70b",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "band": 3,
+        "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+        "channel": 2,
+        "frame_association": "frame0",
+        "height": 1080,
+        "id": "pre_ch2_band16.i16le",
+        "level": 1,
+        "logical_band": 16,
+        "original_pitch": 1920,
+        "pitch": 1920,
+        "prescale": 0,
+        "quantization": 12,
+        "wavelet": 0,
+        "width": 960
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 16588800,
+      "id": "signed_frame0_ch0.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "ac9057c77594ffe7914e0e1d216aa7f8c720a68be6c9c1cf8d1ef2445948a66d",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 0,
+        "frame_index": 0,
+        "height": 2160,
+        "id": "signed_frame0_ch0.i16le",
+        "pitch": 7680,
+        "width": 3840
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 8294400,
+      "id": "signed_frame0_ch1.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "03c589ce3ef5f9f8174799beb8366a7a5d9cd250caefaf8618e9c6044e879f6c",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 1,
+        "frame_index": 0,
+        "height": 2160,
+        "id": "signed_frame0_ch1.i16le",
+        "pitch": 3840,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 8294400,
+      "id": "signed_frame0_ch2.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "14d7a4e38064ce1f4c49273f55385af421ea5f58912088d8740bdbe97fb82352",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 2,
+        "frame_index": 0,
+        "height": 2160,
+        "id": "signed_frame0_ch2.i16le",
+        "pitch": 3840,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 16588800,
+      "id": "signed_frame1_ch0.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "5c022563a7235709f98812d092dce60eeb683e8c9000f6cd530e46e16d1ef426",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 0,
+        "frame_index": 1,
+        "height": 2160,
+        "id": "signed_frame1_ch0.i16le",
+        "pitch": 7680,
+        "width": 3840
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 8294400,
+      "id": "signed_frame1_ch1.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "94c8d22d0ba4f9fc2f84d213b9cf52db61e6fc021bec3b967e686b1266dfe8c1",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 1,
+        "frame_index": 1,
+        "height": 2160,
+        "id": "signed_frame1_ch1.i16le",
+        "pitch": 3840,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    },
+    {
+      "byte_length": 8294400,
+      "id": "signed_frame1_ch2.i16le",
+      "input_packet": {
+        "byte_length": 2930956,
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804"
+      },
+      "matrix": "BT709",
+      "orientation": "top_down",
+      "output_format_context": "YU64",
+      "producer": "original_sdk_private_observer_overlay_v2",
+      "qualification": "bounded_single_cpu_control_on_pinned_packet",
+      "range": "video",
+      "representation": "signed_int16_little_endian_compact_rows",
+      "schema": "hypercine.gop2.original_stage_artifact/1",
+      "sdk_channel_order": [
+        "Y",
+        "V",
+        "U"
+      ],
+      "sha256": "03b2d859cc0bb1a71beb6f60b44c317ae5359b54a71bc2edac8fd153636ce3ef",
+      "signed_path_if_applicable": "alternate_original_SDK_spatial_signed_path_with_default_output_parity",
+      "stage": {
+        "capture_point": "TransformInverseSpatialToV210_before_ConvertYUVStripPlanarToV210",
+        "channel": 2,
+        "frame_index": 1,
+        "height": 2160,
+        "id": "signed_frame1_ch2.i16le",
+        "pitch": 3840,
+        "width": 1920
+      },
+      "status": "AVAILABLE"
+    }
+  ],
+  "phase_a_manifest": {
+    "byte_length": 121532,
+    "sha256": "7c0326b9a961d5f5167cb43eb498097946e78cfc432f2d8943e4ccdf75800d20"
+  },
+  "pre_inverse_entropy_oracle": "AVAILABLE",
+  "reference_result": "PASS",
+  "release_gate": "OWNER_REVIEW_REQUIRED",
+  "schema": "hypercine.gop2.phaseb_index/1",
+  "toolchain": {
+    "candidate_decoder_archive": {
+      "byte_length": 105006,
+      "sha256": "24b5eb2ca8de0d1f056a893e67e9149b0d2bdbbd24648874f49861ef0170298c"
+    },
+    "candidate_wavelet_archive": {
+      "byte_length": 8176612,
+      "sha256": "1e451384a8759d8e5baf4146f205f153bb40e47e89ae9168c8fa0663b00b8c66"
+    },
+    "comparison_binary": {
+      "byte_length": 1186816,
+      "sha256": "0e576d9ec6986e904cd7c86c76775a2db5a8f794fb75b7be909c6fe97a0bc86a"
+    },
+    "comparison_source": {
+      "byte_length": 6526,
+      "sha256": "e63f4a1c3a3907debaab6c449a22acec9cccd2b94a0b88bb7f5c6a732fa69956"
+    },
+    "extractor_binary": {
+      "byte_length": 924160,
+      "sha256": "0a773e9497f60e66089c29462bfa2626a65a8ceac0b38494e2d1f7aae984d154"
+    },
+    "extractor_source": {
+      "byte_length": 12007,
+      "sha256": "dbcd14f3439e46e073ea337e49fe36a824f9f9d9ce1d47ae1b041c4e4128b6c1"
+    },
+    "observer": {
+      "license": "MIT OR Apache-2.0",
+      "line_endings": "LF-normalized source copies",
+      "observer_only": true,
+      "pre_inverse_capture": "DecodeSampleSubband after entropy, before inverse submission",
+      "schema": "hypercine.gop2.sdk_observer/1",
+      "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+      "signed_capture": "Alternate original TransformInverseSpatialToV210 before ConvertYUVStripPlanarToV210, all three row-strip sites; require packed output equals original default path",
+      "sources": [
+        {
+          "id": "Codec/decoder.c",
+          "instrumented_byte_length": 763217,
+          "instrumented_sha256": "c9849be236c44216a770c498a4ccfc1550e2149040b727ebfd3c94006aff306f",
+          "original_byte_length": 762579,
+          "original_sha256": "774ac189fd42046899888c79e0a79e2f3e2d45cbff797d0698a5e5291a4c55c7"
+        },
+        {
+          "id": "Codec/wavelet.c",
+          "instrumented_byte_length": 260319,
+          "instrumented_sha256": "e086dc747c2c0d6ab0d8e402c90860049fc7397dc57f6024996bf453fa5ca5e9",
+          "original_byte_length": 259942,
+          "original_sha256": "f91a1cc68f35bd69552bc2a0db15c38062676e9a287616d1d640c11131bb0edb"
+        }
+      ],
+      "tracked_upstream_modified": false,
+      "upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+      "version": 2
+    },
+    "observer_index": {
+      "byte_length": 1283,
+      "sha256": "fcd4897f5935c653191481d1faaf6d6be97d1b7eb9a900b4484d2c065b292db8"
+    },
+    "phase_a_helper_source": {
+      "byte_length": 16316,
+      "sha256": "75167622aa0c81ee4fab151836eb03679d81616f4edc552d7ec316443ba8559f"
+    },
+    "pristine_sdk_archive": {
+      "byte_length": 2780282,
+      "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496"
+    }
+  },
+  "unclipped_signed_planes": "AVAILABLE"
+}

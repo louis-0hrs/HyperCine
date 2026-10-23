@@ -1,5 +1,8 @@
 # HyperCine Phase 2D — Upstream Bitstream Equivalence, Production Readiness & Controlled GPU Entropy Optimization
 
+> [!WARNING]
+> **Historical Phase 2D report, not a current production-safety approval.** The “complete”, “production readiness” and “12/12 CTest” statements below describe that *specific earlier snapshot*. Later multi-frame methodology changed the canonical benchmark; the frozen reference decoder is now known to produce nondeterministic pixels in some scenarios. Use the [Phase 3A.2c canonical JSON](../benchmarks/phase3a2c_release_candidate.json), [compatibility scope](COMPATIBILITY.md), and [decoder issue #120](https://github.com/louis-0hrs/HyperCine/issues/120) for the current boundaries.
+
 **Status**: Complete (12/12 CTest suites passing; `upstream/` 100% untouched)  
 **Target GPU**: NVIDIA GeForce RTX 4090 Laptop GPU (`sm_89`, 76 SMs, 16,375 MB VRAM, PCIe Gen4 x8, CUDA 12.8 / Driver 572.61)  
 **Host CPU**: 16 Logical Processors (Windows x64, MSVC 19.44 Release)
