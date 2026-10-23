@@ -1,8 +1,11 @@
-# Phase 3A.1, Phase 3A.2 & Phase 3A.2a — Benchmark Hardening & Canonical Release Candidate
+# Historical Phase 3A.1–3A.2a benchmark hardening and provenance
 
-This document records the authoritative `ProductionEndToEnd_v2` benchmark methodology, the Phase 3A.2a sequence-alignment and provenance corrections, the canonical clean-tree headline tables, the `DefaultAuto` vs. manual slot-scaling study, and the preserved historical Phase 3A.2 / Phase 3A.1 records.
+This is a **historical engineering record** of the `ProductionEndToEnd_v2` methodology, Phase 3A.2a sequence/provenance corrections, and earlier slot-scaling studies. The original measurements, hashes and audit explanations below remain unchanged.
 
-- **Authoritative Clean-Tree Release Candidate Record (Phase 3A.2a — Current Canonical):** [`benchmarks/phase3a2a_release_candidate.json`](../benchmarks/phase3a2a_release_candidate.json) — generated on clean source commit `fba948edf98b72045af150b1a918fd0d8a643c61` (`"publication": "CLEAN"`, `"canonical": true`, `"git_status_clean": true`, `"upstream_status_clean": true`, `"benchmark_contract": "ProductionEndToEnd_v2"`, `"benchmark_equivalence_verified": true`, `"native_architecture_match": true`). All public headline tables in [`README.md`](../README.md) are copied exclusively from this file.
+> [!NOTE]
+> **Current Phase 3A.2c headline:** use [`benchmarks/phase3a2c_release_candidate.json`](../benchmarks/phase3a2c_release_candidate.json) and the [current benchmark guide](../benchmarks/results/README.md). The `3A.2a` tables below were canonical **for that historical phase**, but are no longer the README headline source.
+
+- **Historical Clean-Tree Release Candidate Record (Phase 3A.2a — superseded):** [`benchmarks/phase3a2a_release_candidate.json`](../benchmarks/phase3a2a_release_candidate.json) — generated on clean source commit `fba948edf98b72045af150b1a918fd0d8a643c61` (`"publication": "CLEAN"`, `"canonical": true`, `"git_status_clean": true`, `"upstream_status_clean": true`, `"benchmark_contract": "ProductionEndToEnd_v2"`, `"benchmark_equivalence_verified": true`, `"native_architecture_match": true`). Those numbers remain part of the Phase 3A.2a audit record; the README's current Phase 3A.2c headline uses the later dataset linked above.
 - **Preserved Historical Release Candidate Record (Phase 3A.2):** [`benchmarks/phase3a2_release_candidate.json`](../benchmarks/phase3a2_release_candidate.json) — generated on commit `4e8037841dcba3c31a6f8d31371869e26f6fbd1b` (tagged `phase3a2-release-candidate`). Preserved untouched as historical audit evidence.
 - **Phase 3A.1 Audit & Diagnostic Companions:** [`benchmarks/phase3a1_canonical.json`](../benchmarks/phase3a1_canonical.json) and the fresh-process order-study companions (`benchmarks/phase3a1_fresh_*.json`) were captured during the Phase 3A.1 diagnostic pass before working-tree cleanup and are marked `"publication": "DIRTY"`. `upstream/` was never modified in any pass.
 

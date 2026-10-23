@@ -1,0 +1,82 @@
+{
+  "schema": "hypercine.gop2.windows_length_binding_review/1",
+  "license": "MIT OR Apache-2.0",
+  "date": "2026-10-20",
+  "historical_windows_review": "8988b49109bced51f9e314894881112c7e435e35",
+  "historical_verifier": "4a9f3f116f1d9202c63b997a971dc5b7199d0e7c",
+  "length_binding_fix": "9c37423eb459fb61ddde198e955577e8cfb53d32",
+  "snapshot_reused": true,
+  "new_corpus_copy": false,
+  "corpus_modified": false,
+  "native_sdk_or_cuda_replayed": false,
+  "promotion_gate": "OWNER_2_16_DECISION_REQUIRED",
+  "validator_sources": {
+    "gop2_reference_inventory.py": {
+      "byte_length": 23497,
+      "sha256": "0523852ea18189f1868dd36cb1d938b0a57eef7ff68334fa7b64056518f089c6",
+      "identity_basis": "Git blob; checkout CRLF normalized for identity check"
+    },
+    "gop2_stage_contract.py": {
+      "byte_length": 20199,
+      "sha256": "d69ed9cde4a02b37272a6ce8bd93577085e66fbedcb4a1ede051bceb2ee99e58",
+      "identity_basis": "Git blob; checkout CRLF normalized for identity check"
+    },
+    "prepare_gop2_stage_sdk.py": {
+      "byte_length": 5750,
+      "sha256": "ed0ebb86b9f318df1145289376d4b5e678f2343cc8a32d486c76567094579878",
+      "identity_basis": "Git blob; checkout CRLF normalized for identity check"
+    }
+  },
+  "geometries": [
+    {
+      "geometry": "1920x1080",
+      "phase_a_originals_rehashed": 82,
+      "phase_a_comparisons_reverified": 112,
+      "phase_b_originals_rehashed": 57,
+      "phase_b_comparisons_reverified": 90,
+      "phase_b_direct_byte_comparisons": 90,
+      "public_private_index_identity": "PASS",
+      "mismatched": 0,
+      "new_length_binding": "PASS"
+    },
+    {
+      "geometry": "3840x2160",
+      "phase_a_originals_rehashed": 82,
+      "phase_a_comparisons_reverified": 112,
+      "phase_b_originals_rehashed": 57,
+      "phase_b_comparisons_reverified": 90,
+      "phase_b_direct_byte_comparisons": 90,
+      "public_private_index_identity": "PASS",
+      "mismatched": 0,
+      "new_length_binding": "PASS"
+    }
+  ],
+  "exact_parent_length_rejections": {
+    "methods_run": 17,
+    "expected_failures": 4,
+    "errors": 0
+  },
+  "scoped_reference_review": "PINNED_REFERENCE_LENGTH_BINDING_PASS_AT_9c37423",
+  "snapshot_rehash": {
+    "files": 2144,
+    "byte_length": 1377743781,
+    "sorted_file_inventory_sha256": "9be8c2f1e0a64c5c3e28a111bffbe4df1dfd5c03c83cad10f934b5e4c5f0b2c0",
+    "historical_inventory_identity": "PASS"
+  },
+  "native_windows_cpu_ctest": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 28.23,
+    "python_optimize": true
+  },
+  "optimized_python_methods": {
+    "stage_contract": 17,
+    "reference_integrity": 20,
+    "ci_inventory": 8
+  },
+  "full_sdk_free_external_decode_rerun": false,
+  "external_decode_limitation": "FFmpeg and ffprobe unavailable",
+  "archived_tool_and_observer_scope": "Historical #200 semantic review; full snapshot bytes rehashed unchanged",
+  "persistent_corpus_reread": false
+}

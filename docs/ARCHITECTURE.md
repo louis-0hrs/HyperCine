@@ -1,16 +1,29 @@
 # HyperCine Architecture
 
-HyperCine is a modern, high-performance, GPU-accelerated implementation of the GoPro CineForm codec. The goal of HyperCine is to provide ultra-fast CineForm encoding and decoding (targeting multi-stream real-time 4K and 8K playback and ingest) while maintaining 100% bitstream compatibility with the SMPTE VC-5 standard and the official GoPro CineForm SDK.
+HyperCine contains an upstream-compatible **CUDA encoder**, an independent **SDK-free CPU encoder** with an optional experimental Apple **Metal frontend**, and separate decoder research. These paths are not yet one unified cross-platform codec runtime. The frozen GoPro SDK remains an unchanged reference, not an implementation to modify.
 
-This document outlines the architectural pipeline of the CineForm codec, the structure of the upstream reference implementation, the threading model, memory access patterns, and the integration strategy for HyperCine.
+This document distinguishes the general CineForm algorithm from features actually implemented and validated in HyperCine. For tested formats and host limitations, read [Compatibility](COMPATIBILITY.md).
+
+## Implementation status and ownership
+
+| Component | Current boundary | Evidence |
+| :--- | :--- | :--- |
+| Phase 3A.2c CUDA encoder | Windows / NVIDIA; BGRA8 → CFHD YUV422 FilmScan 3, GOP 1 | [Canonical reference record](../benchmarks/phase3a2c_release_candidate.json) |
+| Frozen GoPro SDK | CPU encode/decode reference with known decoder reproducibility concerns | [Upstream policy and investigation](UPSTREAM.md) |
+| SDK-free CPU encoder | Standalone fixed FS3-Q2 and stateful FilmScan 3 paths; separately scoped tests | [Standalone](MACOS_STANDALONE_ENCODER.md) · [FilmScan 3](MACOS_FILMSCAN3_CPU.md) |
+| Experimental Metal frontend | Color and forward-wavelet work for SDK-free FilmScan 3; host quantization and packaging remain | [Metal implementation report](MACOS_METAL_BACKEND.md) |
+| Portable decode scheduling | Synthetic dependency graph; **not yet a CFHD decoder** | [Task graph](DECODE_TASK_GRAPH_147.md) |
+| Vulkan / complete GPU decode | Not a qualified mainline release feature | [Compatibility](COMPATIBILITY.md) |
+
+**Key distinction:** The encoder's bitstream-equivalence benchmark and a decoder's pixel/release-safety gate answer different questions. An identical compressed sample can still trigger a reference-decoder failure; see [#120](https://github.com/louis-0hrs/HyperCine/issues/120).
+
+## 1. CineForm algorithm (conceptual)
+
+CineForm is an intra-frame wavelet codec used for intermediates and high-fidelity media workflows. The following diagrams explain the **format's general algorithm**, not a claim that each listed stage or input format is accelerated on every backend.
 
 ---
 
-## 1. CineForm Codec Pipeline Overview
-
-CineForm is an intra-frame wavelet video codec designed specifically for digital intermediate (DI) editing, acquisition, and high-fidelity video mastering. Unlike DCT-based codecs (such as ProRes, DNxHD, or JPEG), CineForm employs subband biorthogonal wavelet transforms across the entire image (or large slices), avoiding macroblocking artifacts at high compression ratios.
-
-### High-Level Encoding Pipeline
+### General encoding pipeline
 
 ```
   [Input Video Frame] (RGBA, BGRA, YUY2, RGB48, Bayer RAW)
@@ -50,7 +63,7 @@ CineForm is an intra-frame wavelet video codec designed specifically for digital
   [Output CineForm Bitstream]
 ```
 
-### High-Level Decoding Pipeline
+### General decoding pipeline (not an implemented GPU decoder)
 
 ```
   [Input CineForm Bitstream]
@@ -92,9 +105,9 @@ CineForm is an intra-frame wavelet video codec designed specifically for digital
 
 ---
 
-## 2. Mathematical Foundations: The 2-6 Biorthogonal Wavelet
+## 2. Mathematical background: the 2-6 biorthogonal wavelet
 
-The core mathematical engine of CineForm is the **2-6 Biorthogonal Wavelet Filter Pair**. This filter pair operates with symmetric FIR filters that possess exact linear phase and compact support.
+CineForm uses a **2-6 biorthogonal wavelet** with integer filtering and specific edge handling. The simplified expressions below are an orientation aid, not a replacement for the SDK's exact rounding, saturation, prescale and boundary contracts. Production bit-exactness must be checked against the relevant reference vectors.
 
 ### Forward Decomposition Filter Coefficients
 For an input sequence $x[n]$:
@@ -124,31 +137,34 @@ The upstream reference code (`upstream/`) is organized as follows:
 
 | Directory | Responsibilities | Key Source Files |
 |-----------|------------------|------------------|
-| `upstream/Codec/` | Core encoder and decoder pipelines, frame state, entropy coding, bitstream packaging | `encoder.c`, `decoder.c`, `frame.c`, `bitstream.c`, `entropy.c`, `quantize.c`, `spatial.c`, `wavelet.c` |
-| `upstream/Common/` | Cross-platform utilities, thread abstractions, locks, dynamic array allocators, metadata parsing | `thread.c`, `lock.c`, `config.h`, `mem.h`, `metadata.c` |
-| `upstream/Convert/` | Color space conversion kernels (RGB to YUV, YUV to RGB, Bayer demosaic, pedestal adjustments) | `RGB2YUV.c`, `YUV2RGB.c`, `convert.c`, `bayer.c` |
-| `upstream/Wavelet/` | Historical wavelet routines, demo harnesses, standalone transform tests | `wavelet.c`, `subband.c` |
-| `upstream/Example/` | Command-line test harness (`TestCFHD`), demo apps, sample AVI test bitstream | `TestCFHD/TestCFHD.cpp`, `videos/CFHDsample422.AVI` |
+| [`upstream/Codec/`](../upstream/Codec/) | Core encode/decode, wavelets, quantization, color conversion and C thread primitives | `encoder.c`, `decoder.c`, `spatial.c`, `wavelet.c`, `quantize.c`, `RGB2YUV.c`, `convert.c`, `bayer.c`, `thread.c` |
+| [`upstream/Common/`](../upstream/Common/) | Public SDK types, allocator contracts and C++ synchronization helpers | `CFHDTypes.h`, `IAllocator.h`, `ThreadPool.cpp`, `MessageQueue.cpp`, `Lock.h` |
+| [`upstream/ConvertLib/`](../upstream/ConvertLib/) | C++ pixel conversion, scaling and DPX helpers | `ImageConverter.cpp`, `ConvertYUV8.cpp`, `ColorMatrix.cpp`, `ImageScaler.cpp`, `DPXConverter.cpp` |
+| [`upstream/EncoderSDK/`](../upstream/EncoderSDK/) | Public encoder API, sample encoding and asynchronous queues | `CFHDEncoder.cpp`, `SampleEncoder.cpp`, `EncoderPool.cpp` |
+| [`upstream/DecoderSDK/`](../upstream/DecoderSDK/) | Public decoder API, sample decoding, metadata and output conversion | `CFHDDecoder.cpp`, `SampleDecoder.cpp`, `CFHDMetadata.cpp`, `Conversion.cpp` |
+| [`upstream/Example/`](../upstream/Example/) | Sample CLI and reference AVI | `TestCFHD.cpp`, `videos/CFHDsample422.AVI` |
 
 ---
 
 ## 4. Concurrency and Threading Model
 
 ### Upstream CPU Model
-- **Thread Pools:** Uses native platform worker threads (Win32 worker threads on Windows via `Common/thread.c`).
+- **Thread Pools:** Uses platform worker abstractions in `Codec/thread.c` and C++ helpers in `Common/ThreadPool.cpp`; codec worker orchestration also lives in `Codec/entropy_threading.c`.
 - **Slice / Band Parallelism:** Video frames are vertically partitioned into horizontal bands or slices. Each worker thread processes a set of slices independently through the wavelet decomposition and quantization stages.
 - **Entropy Coding Serialization:** Entropy coding of subband bitstreams is performed per-slice or per-subband, then concatenated into the master bitstream sequentially.
 
-### HyperCine Target Execution Model
-HyperCine separates the codec pipeline into:
-1. **Host-bound stages (CPU):**
-   - Bitstream demuxing / syntax parsing.
-   - Run-length & Huffman / VLC entropy decoding (or fused GPU entropy decode for architectures supporting high-throughput prefix-sum scans).
-2. **Device-bound stages (GPU / CUDA / Vulkan):**
-   - Color space conversion and matrix transforms.
-   - Multi-level forward and inverse 2-6 wavelet transforms.
-   - Quantization and de-quantization.
-   - Pinned memory asynchronous transfers via double/triple buffered streams.
+### HyperCine's implemented encoder execution models
+
+**CUDA Phase 3A.2c (`src/core/phase3a_encoder.cpp`, `src/core/phase2d_encoder.cpp`):** The host handles the reference encoder state, pageable/pinned staging where applicable, scheduling, and final CFHD sample assembly. CUDA kernels perform color conversion, forward 2-6 wavelet decomposition with per-frame quantization, and highpass entropy encoding. Frontend work for frame `k+1` can overlap later stages for frame `k` across frame slots. The entropy stage uses a cached CUDA Graph; rate-control updates occur outside the captured entropy graph.
+
+**Separate SDK-free standalone (`src/cpu/`, `src/core/standalone_encoder.cpp`, `src/core/filmscan3_encoder.cpp`):** This encoder is independent of GoPro SDK linkage. Its scalar CPU routines perform format-specific conversion and wavelet processing. Optional `HYPERCINE_ENABLE_METAL=ON` adds the experimental macOS FilmScan 3 GPU frontend; quantization, stateful rate control, VLC/packet writing and metadata remain host-side. Its validation domain is narrower than the CUDA throughput matrix.
+
+**Decoder research:** The reference decoder uses the original GoPro SDK. A separate portable decode DAG models producer/consumer dependencies but does **not** yet parse, entropy-decode, reconstruct and output arbitrary CFHD frames. Draft decoder work should not be presented as a shipping backend. See [decoder scheduler design](WAVELET_DEPENDENCY_SCHEDULING_144.md) and [task graph](DECODE_TASK_GRAPH_147.md).
+
+### Concurrency and safety distinction
+
+The GoPro SDK decoder has reproducible success-status / pixel-output divergence on certain hosts and worker topologies. The ongoing [Windows](https://github.com/louis-0hrs/HyperCine/issues/120) and [Linux](https://github.com/louis-0hrs/HyperCine/issues/159) campaigns investigate this independently of GPU encoder parity. Limiting workers may change whether the bug manifests but is not a causal fix. Code-level explanations remain hypotheses unless reproduced by controlled diagnostics.
+
 
 ---
 

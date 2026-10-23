@@ -158,6 +158,11 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_subdirectory(tests/scalar_inverse_research)
+        add_test(NAME gop2_original_stage_contract
+            COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_stage_contract.py")
+        add_test(NAME gop2_reference_inventory_integrity
+            COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_reference_inventory.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
@@ -412,6 +417,17 @@ endif()
 
 # Core HyperCine library source
 add_subdirectory(src)
+
+# Bounded diagnostic probe for constrained CUDA devices (issue #116).
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(hypercine_m4_resolution_probe tools/m4_sm52_resolution_probe.cpp)
+    target_include_directories(hypercine_m4_resolution_probe PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+    target_link_libraries(hypercine_m4_resolution_probe PRIVATE hypercine_wavelet)
+    if(TARGET CFHDCodecStatic)
+        target_link_libraries(hypercine_m4_resolution_probe PRIVATE CFHDCodecStatic)
+    endif()
+endif()
 
 # Tests
 if(HYPERCINE_BUILD_TESTS)
