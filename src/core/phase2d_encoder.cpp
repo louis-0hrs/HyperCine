@@ -831,7 +831,10 @@ Phase2DMetadataSafetyReport VerifyPhase2DMetadataSafety(int width, int height) {
         cfg.deterministic_test_metadata = det_meta;
         cfg.verify_bitstream = true;
         Phase2DResult r = RunPhase2D(cfg);
-        if (!r.ok || r.last_bitstream.empty()) return false;
+        // Metadata safety depends only on the strict encoder/bitstream outcome.
+        // Phase2DResult.ok also folds in the original-SDK PSNR, which is a
+        // non-reproducible reference signal and must not fail this check.
+        if (!r.bitstream_byte_match || !r.decode_ok || r.last_bitstream.empty()) return false;
         *out_sample = std::move(r.last_bitstream);
 
         // Extract GUID, date, and time from sample metadata header.
@@ -1102,8 +1105,12 @@ Phase2DResult RunPhase2D(const Phase2DConfig& cfg) {
         slots[static_cast<size_t>(i)].w_slot = HyperCine_GpuSlotCreateForPhase2C(width, height, 1);
         slots[static_cast<size_t>(i)].e_slot = CreateGpuEntropyFrameSlot(width, height);
         if (!slots[static_cast<size_t>(i)].w_slot || !slots[static_cast<size_t>(i)].e_slot) {
+            // Copy before cleanup so the diagnostic cannot be invalidated by
+            // teardown CUDA calls.
+            const std::string alloc_error = GpuEntropySlotCreationError();
             cleanup_all();
             res.error = "failed to allocate multi-frame GPU slot";
+            if (!alloc_error.empty()) res.error += ": " + alloc_error;
             return res;
         }
         if (i == 0 && cfg.input_mode == Phase2CInputMode::DeviceInput) {
@@ -1390,7 +1397,8 @@ Phase2DResult RunPhase2D(const Phase2DConfig& cfg) {
                                           hp_tables.data(), e_cfg,
                                           (cfg.use_cuda_graph || d2h_mode == CompressedD2HMode::FrameConsolidated) ? wv_done_ev : nullptr,
                                           band_evs)) {
-                    res.error = "QueueGpuEntropyFrame failed";
+                    const char* slot_error = GpuEntropyFrameError(slot.e_slot);
+                    res.error = (slot_error && slot_error[0]) ? slot_error : "QueueGpuEntropyFrame failed";
                     asm_failed.store(true);
                     break;
                 }

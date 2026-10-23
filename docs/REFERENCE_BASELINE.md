@@ -1,5 +1,8 @@
 # HyperCine Phase 0 Reference Baseline Report
 
+> [!NOTE]
+> **Historical Phase 0 snapshot.** The compiler environment, CTest inventory, performance numbers and reproduction commands below describe that original frozen-SDK study, **not** the latest HyperCine CUDA encoder or the current test suite. For the later canonical throughput record see the [benchmark guide](../benchmarks/results/README.md).
+
 This document records the exact build configuration, test suite results, and hardware benchmark figures established during Phase 0 for the pristine GoPro CineForm SDK reference baseline.
 
 ---

@@ -20,11 +20,34 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': n} for n in REQUIRED if n != 'standalone_external_decode']})
 
+    def test_missing_gop2_integrity_fails(self):
+        self.assertIn('gop2_reference_inventory_integrity', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'gop2_reference_inventory_integrity']})
+
+    def test_missing_gop2_stage_contract_fails(self):
+        self.assertIn('gop2_original_stage_contract', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'gop2_original_stage_contract']})
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
     def test_rg48_registrations_required(self):
+        # RGB444 (this branch): each RG48 registration is mandatory.
         for missing in ('rgb444_rg48_import', 'rgb444_rg48_rejection', 'rgb444_rg48_replay_contract'):
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
+
+    def test_merged_scalar_and_gop2_inventory_is_mandatory(self):
+        # main: a merge that drops either lane must fail even if its other tests pass.
+        merged = {'gop2_original_stage_contract', 'gop2_reference_inventory_integrity',
+                  'scalar_inverse_arithmetic', 'scalar_inverse_rejection',
+                  'scalar_inverse_vectors', 'scalar_inverse_replay_contract'}
+        merged |= {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
+        self.assertTrue(merged <= REQUIRED)
+        for missing in sorted(merged):
             with self.subTest(missing=missing), self.assertRaises(ValueError):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
 

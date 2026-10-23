@@ -1,0 +1,68 @@
+{
+  "schema": "hypercine.gop2.verifier_revision/1",
+  "license": "MIT OR Apache-2.0",
+  "independent_child_sha": "52cb24669491b6aae3a1eb133c2a35ea49525019",
+  "artifacts_regenerated": false,
+  "actual_phase_a_file_comparisons_verified": 224,
+  "actual_phase_b_file_comparisons_verified": 180,
+  "native_cpu_ctest": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sdk_free_gop2_contract_ctest": {
+    "passed": 2,
+    "failed": 0
+  },
+  "method_counts": {
+    "ci_inventory": 8,
+    "reference_integrity": 20,
+    "original_stage_contract": 11
+  },
+  "full_windows_standalone_external_suite_rerun": false,
+  "reason": "FFmpeg and ffprobe unavailable; only the two GOP2 contract CTests run in SDK-free configuration",
+  "sources": [
+    {
+      "id": "tools_gop2_reference_inventory.py",
+      "repository_source": "tools/gop2_reference_inventory.py",
+      "sha256": "a05c8c451f1a0d9552469ba0af26c37507ddffadb6acfdb31c3f7a18ac823fec",
+      "byte_length": 23926
+    },
+    {
+      "id": "tools_gop2_stage_contract.py",
+      "repository_source": "tools/gop2_stage_contract.py",
+      "sha256": "8c5d05d1af6bc7c05478e261ba10219d94974b10cffea6c63935a5b5fe17056f",
+      "byte_length": 18243
+    },
+    {
+      "id": "tests_test_gop2_reference_inventory.py",
+      "repository_source": "tests/test_gop2_reference_inventory.py",
+      "sha256": "7e0814a393edf824ff015dd0a2f6ce46fed9707c9d154061db010a856e0b3103",
+      "byte_length": 13350
+    },
+    {
+      "id": "tests_test_gop2_stage_contract.py",
+      "repository_source": "tests/test_gop2_stage_contract.py",
+      "sha256": "600eef3a628ae6f6c653f0bd8f36403d8159246deb022557e96c343080245794",
+      "byte_length": 5820
+    },
+    {
+      "id": "ci_run_standalone.py",
+      "repository_source": "ci/run_standalone.py",
+      "sha256": "ee2ca657074c520565b315ccf7dd5f0107c43ef9ed8e19c95f9b64d895c3ded6",
+      "byte_length": 5721
+    },
+    {
+      "id": "ci_test_standalone_gate.py",
+      "repository_source": "ci/test_standalone_gate.py",
+      "sha256": "3ccc7e13cdf007efacd9b6cfa4280ad464fab4fd5dcb8ebdc258ba1a41eeec60",
+      "byte_length": 4093
+    },
+    {
+      "id": "CMakeLists.txt",
+      "repository_source": "CMakeLists.txt",
+      "sha256": "eceb2395297791119487a3fd1ca96785ac05a6bec02f0ac3e443aa5b182d18e2",
+      "byte_length": 25117
+    }
+  ]
+}
