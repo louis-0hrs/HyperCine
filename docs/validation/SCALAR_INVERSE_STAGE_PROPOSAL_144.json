@@ -1,0 +1,971 @@
+{
+  "schema": "hypercine.scalar_stage_proposal/1",
+  "license": "MIT OR Apache-2.0",
+  "issue": 144,
+  "status": "ARCHITECTURE_REVIEW_REQUIRED",
+  "implementation_authorized": false,
+  "date": "2026-10-20",
+  "base_sha": "bc37b5c388ebe561851becf6ebc417564f1c909b",
+  "reference_sha": "77acadbd497a490c034440709390807087147d64",
+  "sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+  "upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+  "stage": "FIELDPLUS_wavelet5_four_entropy_completed_bands_to_wavelet4_band0",
+  "proposed_scope": "isolated_private_scalar_arithmetic_qualification_only",
+  "gop1_oracle": false,
+  "packet_decoder": false,
+  "native_private_bytes_rehashed_this_run": false,
+  "private_binding_state": "CONFIGURED_BUT_UNREACHABLE",
+  "reference_indices": [
+    {
+      "id": "docs/validation/gop2_issue189_1920x1080_2026-10-19.json",
+      "byte_length": 121369,
+      "sha256": "b9eac9db4bae0a795240718b36f34e63973f9128f854eae212e68a7282cc4780"
+    },
+    {
+      "id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+      "byte_length": 162751,
+      "sha256": "0cee37d4a288f6ad6d7a27237e09c9d1c1d395390b8b5daf6fad31e3fabac98a"
+    },
+    {
+      "id": "docs/validation/gop2_issue189_3840x2160_2026-10-19.json",
+      "byte_length": 121532,
+      "sha256": "7c0326b9a961d5f5167cb43eb498097946e78cfc432f2d8943e4ccdf75800d20"
+    },
+    {
+      "id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+      "byte_length": 163192,
+      "sha256": "b88fd92e14b3d03532dadbecc9c5b0c23fc2dae2f244d1375ec4ff8bbc66081e"
+    }
+  ],
+  "source_fingerprints": [
+    {
+      "id": "upstream/Codec/decoder.c",
+      "byte_length": 790410,
+      "sha256": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+      "sha256_lf": "774ac189fd42046899888c79e0a79e2f3e2d45cbff797d0698a5e5291a4c55c7"
+    },
+    {
+      "id": "upstream/Codec/wavelet.c",
+      "byte_length": 268078,
+      "sha256": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd",
+      "sha256_lf": "f91a1cc68f35bd69552bc2a0db15c38062676e9a287616d1d640c11131bb0edb"
+    },
+    {
+      "id": "upstream/Codec/spatial.c",
+      "byte_length": 1088790,
+      "sha256": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+      "sha256_lf": "a8d2d441b52edebce1bd827bdfde1e0a1b03349cfdaf08052444bbf2a4e87004"
+    },
+    {
+      "id": "upstream/Codec/InvertHorizontalStrip16s.c",
+      "byte_length": 617909,
+      "sha256": "723eb8a1b7cf027c4b8efecd79c915c7885544aeb2eda4329168ba1edaf0a9ac",
+      "sha256_lf": "c96fa600df3ccc876206ee09c0db1aa3e3833152a4baeee20fa150ab058bbe68"
+    },
+    {
+      "id": "upstream/Codec/codec.h",
+      "byte_length": 70477,
+      "sha256": "aad8911c49ada10fb962fd061aaf841a434e0e023d265e8aa777e2f8cb1dd19f",
+      "sha256_lf": "488edb2c875bedc0e0a0e5d21cda0077076ed2c68bb106b9d498cbbd83a6eb3d"
+    },
+    {
+      "id": "upstream/Codec/filter.h",
+      "byte_length": 11038,
+      "sha256": "ca496f459839ea11c1ec1be2996870b2cd3f8dd529933baa37a9d764410e9960",
+      "sha256_lf": "cf350d6cffdbfecae6b91209b1c2248b21daf7794e80da94c6a0e9095d40f6b3"
+    },
+    {
+      "id": "upstream/Codec/image.h",
+      "byte_length": 22930,
+      "sha256": "93ed2e580030274dda46257eaf08ac90717f2a526ccc11fb5b471dcdb3bf1d52",
+      "sha256_lf": "ed5b8d18864aea0705e3d8d4351568e742eb5e7c8136e48ddecd22cdda1c6c2a"
+    },
+    {
+      "id": "upstream/Codec/config.h",
+      "byte_length": 6859,
+      "sha256": "53d038c2850b878cf579ffbb4db3b76d83bb74964bbd0d4a358d579550fc477f",
+      "sha256_lf": "b73c93a759e5fb68e64a387ba8c4ec0de48fa43f302fa319812279aa1bf084b5"
+    },
+    {
+      "id": "src/core/decode_task_graph.h",
+      "byte_length": 3126,
+      "sha256": "e0f77bcb4e607a17c62d3a2aeef40972869cdc4714c9974c15d26a5b40a9950f",
+      "sha256_lf": "e0f77bcb4e607a17c62d3a2aeef40972869cdc4714c9974c15d26a5b40a9950f"
+    }
+  ],
+  "cases": [
+    {
+      "packet_geometry": [
+        1920,
+        1080
+      ],
+      "sdk_channel": 0,
+      "sdk_component": "Y",
+      "packet": {
+        "sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+        "byte_length": 897552
+      },
+      "source_gop": 2,
+      "frame_association": "shared_spatial_stage_before_temporal_inverse",
+      "inputs": [
+        {
+          "id": "pre_ch0_band0.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "43430978674556abe1c24a9df3b89c9e7ff7f0b14d59c55747f74f9b27d81f68",
+          "byte_length": 64800,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 0,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch0_band0.i16le",
+            "level": 4,
+            "logical_band": 0,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 1,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch0_band1.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "20dcf1b5cc750d637e027441857a9125abc4408a2bc0877b93580d4492824302",
+          "byte_length": 64800,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 1,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch0_band1.i16le",
+            "level": 4,
+            "logical_band": 1,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch0_band2.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "547a2de724209623cdf439f0cc51a8cfc7d8ffb89fcfab9c0c93c1b802ceb40a",
+          "byte_length": 64800,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 2,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch0_band2.i16le",
+            "level": 4,
+            "logical_band": 2,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch0_band3.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "d043a2d604f110e5746b2875778ccc2f90f76c0e8056aa8d5dd0cca27501ed2c",
+          "byte_length": 64800,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 3,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch0_band3.i16le",
+            "level": 4,
+            "logical_band": 3,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 16,
+            "wavelet": 5,
+            "width": 240
+          }
+        }
+      ],
+      "expected": {
+        "id": "stages/ch0_wavelet4_ll.i16le",
+        "index_id": "docs/validation/gop2_issue189_1920x1080_2026-10-19.json",
+        "sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+        "byte_length": 259200,
+        "representation": "signed_int16_little_endian_compact_rows",
+        "producer": "original_sdk_decoder",
+        "stage": {
+          "band": 0,
+          "channel": 0,
+          "height": 270,
+          "id": "ch0_wavelet4_ll",
+          "level": 3,
+          "original_pitch": 960,
+          "pitch": 960,
+          "prescale": 2,
+          "producer": "original_sdk_post_inverse_resident_buffer",
+          "quantization": 1,
+          "wavelet": 4,
+          "wavelet_type": 3,
+          "width": 480
+        }
+      }
+    },
+    {
+      "packet_geometry": [
+        1920,
+        1080
+      ],
+      "sdk_channel": 1,
+      "sdk_component": "V",
+      "packet": {
+        "sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+        "byte_length": 897552
+      },
+      "source_gop": 2,
+      "frame_association": "shared_spatial_stage_before_temporal_inverse",
+      "inputs": [
+        {
+          "id": "pre_ch1_band0.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "576283702ea1a36d3dc9ab8902296fcd4d774c23fa57a327beb95d579124d564",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 0,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch1_band0.i16le",
+            "level": 4,
+            "logical_band": 0,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 1,
+            "wavelet": 5,
+            "width": 120
+          }
+        },
+        {
+          "id": "pre_ch1_band1.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "58f14ff0ed0ee2aaae9ffdb0a1dec56dd6d8bf98044933aa84271c15aeed88c0",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 1,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch1_band1.i16le",
+            "level": 4,
+            "logical_band": 1,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 120
+          }
+        },
+        {
+          "id": "pre_ch1_band2.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 2,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch1_band2.i16le",
+            "level": 4,
+            "logical_band": 2,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 120
+          }
+        },
+        {
+          "id": "pre_ch1_band3.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 3,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch1_band3.i16le",
+            "level": 4,
+            "logical_band": 3,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 16,
+            "wavelet": 5,
+            "width": 120
+          }
+        }
+      ],
+      "expected": {
+        "id": "stages/ch1_wavelet4_ll.i16le",
+        "index_id": "docs/validation/gop2_issue189_1920x1080_2026-10-19.json",
+        "sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+        "byte_length": 129600,
+        "representation": "signed_int16_little_endian_compact_rows",
+        "producer": "original_sdk_decoder",
+        "stage": {
+          "band": 0,
+          "channel": 1,
+          "height": 270,
+          "id": "ch1_wavelet4_ll",
+          "level": 3,
+          "original_pitch": 480,
+          "pitch": 480,
+          "prescale": 2,
+          "producer": "original_sdk_post_inverse_resident_buffer",
+          "quantization": 1,
+          "wavelet": 4,
+          "wavelet_type": 3,
+          "width": 240
+        }
+      }
+    },
+    {
+      "packet_geometry": [
+        1920,
+        1080
+      ],
+      "sdk_channel": 2,
+      "sdk_component": "U",
+      "packet": {
+        "sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+        "byte_length": 897552
+      },
+      "source_gop": 2,
+      "frame_association": "shared_spatial_stage_before_temporal_inverse",
+      "inputs": [
+        {
+          "id": "pre_ch2_band0.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "b92cb20fc06f9cc7033821668a74c9db2bf5f4853fccf3c821b67bc82a592d5c",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 0,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch2_band0.i16le",
+            "level": 4,
+            "logical_band": 0,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 1,
+            "wavelet": 5,
+            "width": 120
+          }
+        },
+        {
+          "id": "pre_ch2_band1.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 1,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch2_band1.i16le",
+            "level": 4,
+            "logical_band": 1,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 120
+          }
+        },
+        {
+          "id": "pre_ch2_band2.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "cb1506f8db4d6521c2fc925ab12c4ec38a93d7454bf43ab1ce17f6ea1dc19384",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 2,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch2_band2.i16le",
+            "level": 4,
+            "logical_band": 2,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 120
+          }
+        },
+        {
+          "id": "pre_ch2_band3.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_1920x1080_2026-10-19.json",
+          "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36",
+          "byte_length": 32400,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 3,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 135,
+            "id": "pre_ch2_band3.i16le",
+            "level": 4,
+            "logical_band": 3,
+            "original_pitch": 240,
+            "pitch": 240,
+            "prescale": 0,
+            "quantization": 16,
+            "wavelet": 5,
+            "width": 120
+          }
+        }
+      ],
+      "expected": {
+        "id": "stages/ch2_wavelet4_ll.i16le",
+        "index_id": "docs/validation/gop2_issue189_1920x1080_2026-10-19.json",
+        "sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+        "byte_length": 129600,
+        "representation": "signed_int16_little_endian_compact_rows",
+        "producer": "original_sdk_decoder",
+        "stage": {
+          "band": 0,
+          "channel": 2,
+          "height": 270,
+          "id": "ch2_wavelet4_ll",
+          "level": 3,
+          "original_pitch": 480,
+          "pitch": 480,
+          "prescale": 2,
+          "producer": "original_sdk_post_inverse_resident_buffer",
+          "quantization": 1,
+          "wavelet": 4,
+          "wavelet_type": 3,
+          "width": 240
+        }
+      }
+    },
+    {
+      "packet_geometry": [
+        3840,
+        2160
+      ],
+      "sdk_channel": 0,
+      "sdk_component": "Y",
+      "packet": {
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804",
+        "byte_length": 2930956
+      },
+      "source_gop": 2,
+      "frame_association": "shared_spatial_stage_before_temporal_inverse",
+      "inputs": [
+        {
+          "id": "pre_ch0_band0.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "b94ab39fab0e8e53e3ed6ba9b4dd7951dc3f85d7af9354894105c41b8e2bcc3d",
+          "byte_length": 259200,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 0,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch0_band0.i16le",
+            "level": 4,
+            "logical_band": 0,
+            "original_pitch": 960,
+            "pitch": 960,
+            "prescale": 0,
+            "quantization": 1,
+            "wavelet": 5,
+            "width": 480
+          }
+        },
+        {
+          "id": "pre_ch0_band1.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "c3fd2781c131693c69d4cded9bb0741606e5072d12d69cc96c834d901378c440",
+          "byte_length": 259200,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 1,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch0_band1.i16le",
+            "level": 4,
+            "logical_band": 1,
+            "original_pitch": 960,
+            "pitch": 960,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 480
+          }
+        },
+        {
+          "id": "pre_ch0_band2.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766",
+          "byte_length": 259200,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 2,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch0_band2.i16le",
+            "level": 4,
+            "logical_band": 2,
+            "original_pitch": 960,
+            "pitch": 960,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 480
+          }
+        },
+        {
+          "id": "pre_ch0_band3.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766",
+          "byte_length": 259200,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 3,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 0,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch0_band3.i16le",
+            "level": 4,
+            "logical_band": 3,
+            "original_pitch": 960,
+            "pitch": 960,
+            "prescale": 0,
+            "quantization": 16,
+            "wavelet": 5,
+            "width": 480
+          }
+        }
+      ],
+      "expected": {
+        "id": "stages/ch0_wavelet4_ll.i16le",
+        "index_id": "docs/validation/gop2_issue189_3840x2160_2026-10-19.json",
+        "sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+        "byte_length": 1036800,
+        "representation": "signed_int16_little_endian_compact_rows",
+        "producer": "original_sdk_decoder",
+        "stage": {
+          "band": 0,
+          "channel": 0,
+          "height": 540,
+          "id": "ch0_wavelet4_ll",
+          "level": 3,
+          "original_pitch": 1920,
+          "pitch": 1920,
+          "prescale": 2,
+          "producer": "original_sdk_post_inverse_resident_buffer",
+          "quantization": 1,
+          "wavelet": 4,
+          "wavelet_type": 3,
+          "width": 960
+        }
+      }
+    },
+    {
+      "packet_geometry": [
+        3840,
+        2160
+      ],
+      "sdk_channel": 1,
+      "sdk_component": "V",
+      "packet": {
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804",
+        "byte_length": 2930956
+      },
+      "source_gop": 2,
+      "frame_association": "shared_spatial_stage_before_temporal_inverse",
+      "inputs": [
+        {
+          "id": "pre_ch1_band0.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "ac30aeb09db24b3416d70e273121ea470e0d7060618d6aabf376b9d9a7df3d95",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 0,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch1_band0.i16le",
+            "level": 4,
+            "logical_band": 0,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 1,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch1_band1.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "7a75b81b77e86609ccfc0465960b34fd4156d21847b991c9d90e3d9ed5b71232",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 1,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch1_band1.i16le",
+            "level": 4,
+            "logical_band": 1,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch1_band2.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 2,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch1_band2.i16le",
+            "level": 4,
+            "logical_band": 2,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch1_band3.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 3,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 1,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch1_band3.i16le",
+            "level": 4,
+            "logical_band": 3,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 16,
+            "wavelet": 5,
+            "width": 240
+          }
+        }
+      ],
+      "expected": {
+        "id": "stages/ch1_wavelet4_ll.i16le",
+        "index_id": "docs/validation/gop2_issue189_3840x2160_2026-10-19.json",
+        "sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+        "byte_length": 518400,
+        "representation": "signed_int16_little_endian_compact_rows",
+        "producer": "original_sdk_decoder",
+        "stage": {
+          "band": 0,
+          "channel": 1,
+          "height": 540,
+          "id": "ch1_wavelet4_ll",
+          "level": 3,
+          "original_pitch": 960,
+          "pitch": 960,
+          "prescale": 2,
+          "producer": "original_sdk_post_inverse_resident_buffer",
+          "quantization": 1,
+          "wavelet": 4,
+          "wavelet_type": 3,
+          "width": 480
+        }
+      }
+    },
+    {
+      "packet_geometry": [
+        3840,
+        2160
+      ],
+      "sdk_channel": 2,
+      "sdk_component": "U",
+      "packet": {
+        "sha256": "1ab74a2f6f72009d0216763bd4d2d820a8491d84b198064a1bf58ee1522f3804",
+        "byte_length": 2930956
+      },
+      "source_gop": 2,
+      "frame_association": "shared_spatial_stage_before_temporal_inverse",
+      "inputs": [
+        {
+          "id": "pre_ch2_band0.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "0fa7028a19e92a4d181f9ba47aa90d073287119644d160f9bfc88fd7f19b1d94",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 0,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch2_band0.i16le",
+            "level": 4,
+            "logical_band": 0,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 1,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch2_band1.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 1,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch2_band1.i16le",
+            "level": 4,
+            "logical_band": 1,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch2_band2.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "e0bcc7cca8d5f7a2ef60f383dcfcba78cf46221e04d4e5dab48d848d840cd292",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 2,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch2_band2.i16le",
+            "level": 4,
+            "logical_band": 2,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 32,
+            "wavelet": 5,
+            "width": 240
+          }
+        },
+        {
+          "id": "pre_ch2_band3.i16le",
+          "index_id": "docs/validation/gop2_issue189_phaseb_3840x2160_2026-10-19.json",
+          "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f",
+          "byte_length": 129600,
+          "representation": "signed_int16_little_endian_compact_rows",
+          "producer": "original_sdk_private_observer_overlay_v2",
+          "stage": {
+            "band": 3,
+            "capture_point": "DecodeSampleSubband_after_entropy_before_inverse_submission",
+            "channel": 2,
+            "frame_association": "both",
+            "height": 270,
+            "id": "pre_ch2_band3.i16le",
+            "level": 4,
+            "logical_band": 3,
+            "original_pitch": 480,
+            "pitch": 480,
+            "prescale": 0,
+            "quantization": 16,
+            "wavelet": 5,
+            "width": 240
+          }
+        }
+      ],
+      "expected": {
+        "id": "stages/ch2_wavelet4_ll.i16le",
+        "index_id": "docs/validation/gop2_issue189_3840x2160_2026-10-19.json",
+        "sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+        "byte_length": 518400,
+        "representation": "signed_int16_little_endian_compact_rows",
+        "producer": "original_sdk_decoder",
+        "stage": {
+          "band": 0,
+          "channel": 2,
+          "height": 540,
+          "id": "ch2_wavelet4_ll",
+          "level": 3,
+          "original_pitch": 960,
+          "pitch": 960,
+          "prescale": 2,
+          "producer": "original_sdk_post_inverse_resident_buffer",
+          "quantization": 1,
+          "wavelet": 4,
+          "wavelet_type": 3,
+          "width": 480
+        }
+      }
+    }
+  ],
+  "arithmetic": {
+    "vertical": "int32_then_signed16_saturation",
+    "signed_division": "floor_by_power_of_two",
+    "rounding_adjustment": 4,
+    "horizontal_x0": "wide_border_then_wrap16_at_SSE_insert",
+    "horizontal_vector_interior": "signed16_saturation_after_each_add_or_subtract",
+    "horizontal_scalar_tail": "wrap16_after_each_short_compound_assignment",
+    "horizontal_last": "wide_border_then_signed16_saturation",
+    "dequantize_again": false,
+    "apply_output_prescale_2": false
+  },
+  "counterexamples": [
+    {
+      "L_previous": -32768,
+      "L_current": 0,
+      "L_next": 32767,
+      "H_current": 0,
+      "wide_interior": [
+        -4096,
+        4096
+      ],
+      "SSE_interior": [
+        -2048,
+        2047
+      ],
+      "short_tail": [
+        0,
+        0
+      ]
+    },
+    {
+      "L_previous": 0,
+      "L_current": 32767,
+      "L_next": 0,
+      "H_current": 32767,
+      "wide_interior": [
+        32767,
+        0
+      ],
+      "SSE_interior": [
+        16383,
+        0
+      ],
+      "short_tail": [
+        -1,
+        0
+      ]
+    },
+    {
+      "border_L0": 32767,
+      "border_L1": -32768,
+      "border_L2": 32767,
+      "H0": 32767,
+      "wide_border_before_storage": [
+        49151,
+        -16384
+      ],
+      "first_SSE_insert": [
+        -16385,
+        -16384
+      ]
+    }
+  ]
+}
