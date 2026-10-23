@@ -51,6 +51,12 @@ class StandaloneGateTests(unittest.TestCase):
             with self.subTest(missing=missing), self.assertRaises(ValueError):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
 
+    def test_rg48_allocation_failure_is_required(self):
+        name = 'rgb444_rg48_allocation_failure'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.xml'

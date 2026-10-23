@@ -125,7 +125,8 @@ The separate `hypercine_rgb444_frame` target is built in SDK-free standalone
 mode. It does not link the YUV writer or `hypercine_quality_state`.
 `rgb444_frame_storage` and `rgb444_frame_rejection` are registered with CTest
 along with `rgb444_rg48_import`, `rgb444_rg48_rejection` and
-`rgb444_rg48_replay_contract`; all five are mandatory in `ci/run_standalone.py`,
+`rgb444_rg48_replay_contract` and `rgb444_rg48_allocation_failure`;
+all six are mandatory in `ci/run_standalone.py`,
 including the existing Windows/Linux/
 macOS standalone matrix. Missing or skipped registrations cannot certify this
 slice. Existing fixture files and p10 math are unchanged.
@@ -152,3 +153,6 @@ Portable reproduction and measured native evidence are in
 `docs/validation/rgb444-frame-p0/`. Parent #37 remains open and partially
 implemented; this API/storage slice does not satisfy its packet-export DoD.
 RG48 continuation evidence is in `docs/validation/rgb444-rg48-source/`.
+The later RG48 allocation-failure qualification is recorded in
+`docs/validation/RGB444_RG48_ALLOCATION.md`; the earlier evidence directories
+retain their original dated scope and counts.

@@ -15,6 +15,7 @@ REQUIRED = {
     # RGB444 (this branch): frame boundary and RG48 importer registrations.
     'rgb444_frame_storage', 'rgb444_frame_rejection',
     'rgb444_rg48_import', 'rgb444_rg48_rejection', 'rgb444_rg48_replay_contract',
+    'rgb444_rg48_allocation_failure',
     # main: ISA selection plus GOP2 inventory and stage contract.
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',

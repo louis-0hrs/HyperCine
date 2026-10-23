@@ -138,6 +138,13 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_link_libraries(test_rgb444_rg48 PRIVATE hypercine_rgb444_frame)
         add_test(NAME rgb444_rg48_import COMMAND test_rgb444_rg48 import)
         add_test(NAME rgb444_rg48_rejection COMMAND test_rgb444_rg48 rejection)
+        # Isolate the allocation interceptor while compiling the actual importer.
+        add_executable(test_rgb444_rg48_allocation tests/test_rgb444_rg48_allocation.cpp
+            src/cpu/rgb444_frontend.cpp)
+        target_include_directories(test_rgb444_rg48_allocation PRIVATE include)
+        target_compile_features(test_rgb444_rg48_allocation PRIVATE cxx_std_17)
+        add_test(NAME rgb444_rg48_allocation_failure COMMAND test_rgb444_rg48_allocation)
+        set_tests_properties(rgb444_rg48_allocation_failure PROPERTIES TIMEOUT 20)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
