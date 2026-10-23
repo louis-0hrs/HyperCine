@@ -204,7 +204,7 @@ void rule_s2_output_completeness(std::size_t workers) {
 // independently of the frame (here a heap object the caller owns) and stays
 // alive through predicate evaluation and the downstream consumer.
 // ---------------------------------------------------------------------------
-void rule_s2_predicate_reads_owned_storage() {
+void rule_s2_predicate_reads_owned_storage(std::size_t workers) {
     // Caller-owned payload: outlives both the callback frame and the graph.
     struct Payload {
         int written = 0;
@@ -232,7 +232,10 @@ void rule_s2_predicate_reads_owned_storage() {
          [payload] { return payload->consumed == 1; }}});
 
     require_fully_contracted(graph, "S2-owned-storage");
-    const bool success = graph.run(2);
+    // Requested width, including workers left idle by a two-node chain.
+    // Width 1 is the serial producer-then-consumer order; it is still this
+    // rule, not a skipped copy of a hardcoded run(2).
+    const bool success = graph.run(workers);
     required("S2-predicate-reads-owned-storage",
              success && graph.error() == GraphError::None && payload->written == 147 &&
                  payload->consumed == 1 &&
@@ -247,7 +250,7 @@ void rule_s2_predicate_reads_owned_storage() {
 // From RCA-195: WaitForTransformThread zeroed the queue without asking what was
 // unfinished, so a dropped transform became an ordinary success.
 // ---------------------------------------------------------------------------
-void rule_s3_cancel_drains_and_fails() {
+void rule_s3_cancel_drains_and_fails(std::size_t workers) {
     std::atomic<bool> entered{false};
     std::atomic<bool> release{false};
     bool wrote = false;
@@ -261,7 +264,11 @@ void rule_s3_cancel_drains_and_fails() {
          {[&wrote] { return wrote; }}},
         {key(2), {key(1)}, [](const TaskContext&) {}, {[] { return true; }}}});
 
-    std::thread runner([&] { graph.run(2); });
+    // Requested width. Cancel is issued from this thread while one callback
+    // is inside the graph, so the rule does not borrow a second worker to
+    // look concurrent -- and it still has to hold when the pool is wider than
+    // the ready set. A CTest argument of 4 or 16 must not replay run(2).
+    std::thread runner([&] { graph.run(workers); });
     while (!entered.load()) std::this_thread::yield();
     const bool cancelled = graph.cancel(kGeneration);
     const bool not_quiescent_while_running = !graph.quiescent();
@@ -559,8 +566,8 @@ int main(int argc, char** argv) {
     std::printf("scheduler contract, workers=%zu, synthetic wrapper graph only\n", workers);
     rule_s1_reject_before_execution();
     rule_s2_output_completeness(workers);
-    rule_s2_predicate_reads_owned_storage();
-    rule_s3_cancel_drains_and_fails();
+    rule_s2_predicate_reads_owned_storage(workers);
+    rule_s3_cancel_drains_and_fails(workers);
     rule_s4_failure_does_not_publish(workers);
     rule_s5_must_complete(workers);
     rule_s6_first_error_precedence(workers);
