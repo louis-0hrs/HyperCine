@@ -7,21 +7,61 @@
 #include <cub/device/device_scan.cuh>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstring>
 #include <numeric>
+#include <string>
 #include <vector>
 
 namespace hypercine {
 
 int (*g_entropy_occ_fn)() = nullptr;
-const char* g_launch_error = nullptr;
+thread_local const char* g_launch_error = nullptr;
 
 namespace {
 
 constexpr int kBlock = 256;
 constexpr int kMaxHighpassBands = 32;
 constexpr int kMaxEntropyStreams = 8;
+
+// Test-only, one-shot fault injection for the fail-closed capacity path.
+std::atomic<size_t> g_inject_workspace_alloc_failure_bytes{0};
+
+// Thread-local: why the most recent CreateGpuEntropyFrameSlot call failed.
+thread_local std::string g_slot_creation_error;
+
+std::string DescribeDeviceCapacityFailure(const std::string& what, size_t requested_bytes, cudaError_t error) {
+    size_t free_bytes = 0;
+    size_t total_bytes = 0;
+    cudaGetLastError();  // clear the non-sticky allocation error before querying
+    const cudaError_t query = cudaMemGetInfo(&free_bytes, &total_bytes);
+    std::string text = "UNSUPPORTED_RESOURCE_BOUND: ";
+    text += what;
+    text += " allocation failed: requested " + std::to_string(requested_bytes) + " B; ";
+    if (query == cudaSuccess) {
+        text += "free " + std::to_string(free_bytes) + " B of " + std::to_string(total_bytes) + " B; ";
+    } else {
+        text += "device memory query failed; ";
+    }
+    text += "CUDA ";
+    text += cudaGetErrorName(error);
+    text += " (";
+    text += cudaGetErrorString(error);
+    text += ")";
+    return text;
+}
+
+std::string DescribeSlotSetupFailure(const char* what, cudaError_t error) {
+    std::string text = "GPU entropy slot setup failed: ";
+    text += what;
+    text += "; CUDA ";
+    text += cudaGetErrorName(error);
+    text += " (";
+    text += cudaGetErrorString(error);
+    text += ")";
+    return text;
+}
 
 __host__ __device__ uint32_t Bswap32(uint32_t value) {
     return (value >> 24) | ((value >> 8) & 0x0000FF00u) | ((value << 8) & 0x00FF0000u) | (value << 24);
@@ -886,6 +926,9 @@ struct Workspace {
     int cb_val_len[8] = {};
     void* scan_temp = nullptr;
     size_t scan_bytes = 0;
+    size_t last_alloc_bytes = 0;
+    cudaError_t last_alloc_error = cudaSuccess;
+    const char* last_alloc_what = nullptr;
     int active_cb = 0;
     int active_segments = 0;
     GpuEntropyStop active_stop = GpuEntropyStop::Full;
@@ -900,19 +943,45 @@ struct Workspace {
     PinnedScalars* pinned = nullptr;
     uint32_t* pinned_words = nullptr;
 
+    bool AllocDevice(void** ptr, size_t bytes, const char* what) {
+        last_alloc_bytes = bytes;
+        last_alloc_what = what;
+        size_t injection_threshold = g_inject_workspace_alloc_failure_bytes.load(std::memory_order_relaxed);
+        while (injection_threshold != 0 && bytes >= injection_threshold) {
+            if (g_inject_workspace_alloc_failure_bytes.compare_exchange_weak(
+                    injection_threshold, 0, std::memory_order_acq_rel, std::memory_order_relaxed)) {
+                last_alloc_error = cudaErrorMemoryAllocation;
+                return false;
+            }
+        }
+        if (cudaMalloc(ptr, bytes) != cudaSuccess) {
+            last_alloc_error = cudaGetLastError();
+            return false;
+        }
+        last_alloc_error = cudaSuccess;
+        return true;
+    }
+
     bool Ensure(int coeffs, int blocks, int tokens_needed, bool need_host_words = true) {
         if (coeffs <= coeff_cap && blocks <= block_cap && tokens_needed <= token_cap && stream &&
             tile_sums && (!need_host_words || (words && pinned_words))) {
             return true;
         }
         Release();
+        last_alloc_bytes = 0;
+        last_alloc_error = cudaSuccess;
+        last_alloc_what = nullptr;
         coeff_cap = std::max(coeffs, 1);
         block_cap = std::max(blocks, 1);
         token_cap = std::max(tokens_needed, 1);
         const int max_tiles = (token_cap + 1023) / 1024 + 4;
-        auto alloc = [](void** ptr, size_t bytes) {
-            if (cudaMalloc(ptr, bytes) != cudaSuccess) return false;
-            return cudaMemset(*ptr, 0, bytes) == cudaSuccess;
+        auto alloc = [this](void** ptr, size_t bytes) {
+            if (!AllocDevice(ptr, bytes, "entropy workspace")) return false;
+            if (cudaMemset(*ptr, 0, bytes) != cudaSuccess) {
+                last_alloc_error = cudaGetLastError();
+                return false;
+            }
+            return true;
         };
         if (!alloc(reinterpret_cast<void**>(&prefix), sizeof(int) * block_cap)) return false;
         if (!alloc(reinterpret_cast<void**>(&suffix), sizeof(int) * block_cap)) return false;
@@ -976,10 +1045,14 @@ struct Workspace {
         value_entry[cb] = nullptr;
         cb_run_len[cb] = tables.run_length;
         cb_val_len[cb] = tables.value_length;
-        if (cudaMalloc(&run_bits[cb], sizeof(uint32_t) * tables.run_length) != cudaSuccess) return false;
-        if (cudaMalloc(&run_size[cb], sizeof(int16_t) * tables.run_length) != cudaSuccess) return false;
-        if (cudaMalloc(&run_count[cb], sizeof(int16_t) * tables.run_length) != cudaSuccess) return false;
-        if (cudaMalloc(&value_entry[cb], sizeof(uint32_t) * tables.value_length) != cudaSuccess) return false;
+        if (!AllocDevice(reinterpret_cast<void**>(&run_bits[cb]),
+                         sizeof(uint32_t) * tables.run_length, "entropy codebook")) return false;
+        if (!AllocDevice(reinterpret_cast<void**>(&run_size[cb]),
+                         sizeof(int16_t) * tables.run_length, "entropy codebook")) return false;
+        if (!AllocDevice(reinterpret_cast<void**>(&run_count[cb]),
+                         sizeof(int16_t) * tables.run_length, "entropy codebook")) return false;
+        if (!AllocDevice(reinterpret_cast<void**>(&value_entry[cb]),
+                         sizeof(uint32_t) * tables.value_length, "entropy codebook")) return false;
         if (cudaMemcpyAsync(run_bits[cb], tables.run_bits.data(), sizeof(uint32_t) * tables.run_length, cudaMemcpyHostToDevice, use) != cudaSuccess) return false;
         if (cudaMemcpyAsync(run_size[cb], tables.run_size.data(), sizeof(int16_t) * tables.run_length, cudaMemcpyHostToDevice, use) != cudaSuccess) return false;
         if (cudaMemcpyAsync(run_count[cb], tables.run_count.data(), sizeof(int16_t) * tables.run_length, cudaMemcpyHostToDevice, use) != cudaSuccess) return false;
@@ -1024,12 +1097,21 @@ struct Workspace {
     }
 };
 
+std::string DescribeWorkspaceSetupFailure(const Workspace& ws, int stream, const char* what) {
+    if (ws.last_alloc_error == cudaSuccess) {
+        // Non-allocation setup failure (for example an async codebook copy).
+        return "GPU entropy stream " + std::to_string(stream) + " " + what + " setup failed";
+    }
+    return DescribeDeviceCapacityFailure("GPU entropy stream " + std::to_string(stream) + " " + what,
+                                         ws.last_alloc_bytes, ws.last_alloc_error);
+}
+
 bool ScanInts(Workspace* ws, int* input, int* output, int count, cudaStream_t stream) {
     size_t bytes = 0;
     if (cub::DeviceScan::ExclusiveSum(nullptr, bytes, input, output, count, stream) != cudaSuccess) return false;
     if (bytes > ws->scan_bytes) {
         if (ws->scan_temp) cudaFree(ws->scan_temp);
-        if (cudaMalloc(&ws->scan_temp, bytes) != cudaSuccess) return false;
+        if (!ws->AllocDevice(&ws->scan_temp, bytes, "entropy scan workspace")) return false;
         ws->scan_bytes = bytes;
     }
     return cub::DeviceScan::ExclusiveSum(ws->scan_temp, bytes, input, output, count, stream) == cudaSuccess;
@@ -1040,7 +1122,7 @@ bool ScanBits(Workspace* ws, uint32_t* input, uint32_t* output, int count, cudaS
     if (cub::DeviceScan::ExclusiveSum(nullptr, bytes, input, output, count, stream) != cudaSuccess) return false;
     if (bytes > ws->scan_bytes) {
         if (ws->scan_temp) cudaFree(ws->scan_temp);
-        if (cudaMalloc(&ws->scan_temp, bytes) != cudaSuccess) return false;
+        if (!ws->AllocDevice(&ws->scan_temp, bytes, "entropy scan workspace")) return false;
         ws->scan_bytes = bytes;
     }
     return cub::DeviceScan::ExclusiveSum(ws->scan_temp, bytes, input, output, count, stream) == cudaSuccess;
@@ -1687,6 +1769,7 @@ bool EncodeHighpassBatch(GpuEntropySession* session, const GpuBandRequest* reque
 }
 
 GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
+    g_slot_creation_error.clear();
     if (max_width <= 0 || max_height <= 0) return nullptr;
     auto* slot = new GpuEntropyFrameSlot();
     slot->max_width = max_width;
@@ -1703,15 +1786,38 @@ GpuEntropyFrameSlot* CreateGpuEntropyFrameSlot(int max_width, int max_height) {
     slot->total_band_words_cap = max_pixels * word_mult + static_cast<size_t>(kMaxHighpassBands) * 32768u;
     slot->consolidated_words_cap = max_pixels * word_mult + 262144u;
 
-    auto fail = [&]() {
+    auto fail = [&](const char* what = "slot resource allocation") {
+        if (g_slot_creation_error.empty()) {
+            const cudaError_t error = cudaGetLastError();
+            g_slot_creation_error = (error == cudaSuccess)
+                ? std::string("GPU entropy slot setup failed: ") + what
+                : DescribeSlotSetupFailure(what, error);
+        }
         DestroyGpuEntropyFrameSlot(slot);
         return static_cast<GpuEntropyFrameSlot*>(nullptr);
     };
 
-    if (cudaMalloc(&slot->d_band_words, sizeof(uint32_t) * slot->total_band_words_cap) != cudaSuccess) return fail();
-    if (cudaMalloc(&slot->d_consolidated_words, sizeof(uint32_t) * slot->consolidated_words_cap) != cudaSuccess) return fail();
-    if (cudaMalloc(&slot->d_total_bits, sizeof(uint32_t) * kMaxHighpassBands) != cudaSuccess) return fail();
-    if (cudaMalloc(&slot->d_frame_meta, sizeof(FrameCompactMeta)) != cudaSuccess) return fail();
+    auto fail_device = [&](const char* what, size_t bytes, cudaError_t error) {
+        if (g_slot_creation_error.empty()) {
+            g_slot_creation_error = DescribeDeviceCapacityFailure(what, bytes, error);
+        }
+        return fail(what);
+    };
+    const size_t band_words_bytes = sizeof(uint32_t) * slot->total_band_words_cap;
+    const size_t consolidated_bytes = sizeof(uint32_t) * slot->consolidated_words_cap;
+    const size_t total_bits_bytes = sizeof(uint32_t) * kMaxHighpassBands;
+    if (cudaMalloc(&slot->d_band_words, band_words_bytes) != cudaSuccess) {
+        return fail_device("GPU entropy band arena", band_words_bytes, cudaGetLastError());
+    }
+    if (cudaMalloc(&slot->d_consolidated_words, consolidated_bytes) != cudaSuccess) {
+        return fail_device("GPU entropy consolidated arena", consolidated_bytes, cudaGetLastError());
+    }
+    if (cudaMalloc(&slot->d_total_bits, total_bits_bytes) != cudaSuccess) {
+        return fail_device("GPU entropy band metadata", total_bits_bytes, cudaGetLastError());
+    }
+    if (cudaMalloc(&slot->d_frame_meta, sizeof(FrameCompactMeta)) != cudaSuccess) {
+        return fail_device("GPU entropy frame metadata", sizeof(FrameCompactMeta), cudaGetLastError());
+    }
     cudaMemset(slot->d_band_words, 0, sizeof(uint32_t) * slot->total_band_words_cap);
     cudaMemset(slot->d_consolidated_words, 0, sizeof(uint32_t) * slot->consolidated_words_cap);
     cudaMemset(slot->d_total_bits, 0, sizeof(uint32_t) * kMaxHighpassBands);
@@ -1887,13 +1993,23 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
         if (stream_bands[s].empty()) continue;
         const int mv = stream_max_vlen[s];
         const int blocks = (mv + kBlock - 1) / kBlock;
-        if (!session->slots[s].Ensure(mv + 8, blocks + 1, mv + 8, false)) return false;
+        if (!session->slots[s].Ensure(mv + 8, blocks + 1, mv + 8, false)) {
+            slot->failed = true;
+            const char* what = session->slots[s].last_alloc_what ? session->slots[s].last_alloc_what : "entropy workspace";
+            slot->error = DescribeWorkspaceSetupFailure(session->slots[s], s, what);
+            return false;
+        }
         for (int b : stream_bands[s]) {
             const int cb = (tables[b].codebook >= 0 && tables[b].codebook < 8) ? tables[b].codebook : 0;
             const bool already_uploaded = session->slots[s].run_bits[cb] &&
                                           session->slots[s].cb_run_len[cb] == tables[b].run_length &&
                                           session->slots[s].cb_val_len[cb] == tables[b].value_length;
-            if (!session->slots[s].UploadTables(tables[b], session->slots[s].stream)) return false;
+            if (!session->slots[s].UploadTables(tables[b], session->slots[s].stream)) {
+                slot->failed = true;
+                const char* what = session->slots[s].last_alloc_what ? session->slots[s].last_alloc_what : "entropy codebook";
+                slot->error = DescribeWorkspaceSetupFailure(session->slots[s], s, what);
+                return false;
+            }
             if (!already_uploaded && cfg.use_cuda_graph) {
                 cudaStreamSynchronize(session->slots[s].stream);
             }
@@ -1951,6 +2067,10 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
                         cudaGraph_t abandoned = nullptr;
                         cudaStreamEndCapture(slot->consolidate_stream, &abandoned);
                         if (abandoned) cudaGraphDestroy(abandoned);
+                        slot->failed = true;
+                        const char* what = session->slots[s].last_alloc_what
+                            ? session->slots[s].last_alloc_what : "entropy workspace";
+                        slot->error = DescribeWorkspaceSetupFailure(session->slots[s], s, what);
                         return false;
                     }
                 }
@@ -2069,6 +2189,10 @@ bool QueueGpuEntropyFrame(GpuEntropySession* session, GpuEntropyFrameSlot* slot,
             }
             if (!LaunchHighpassIntoFrameSlot(session->slots[s], slot, b, requests[b], tables[b],
                                              cfg.kernel_mode, cfg.record_substage_events, false, st, &launches)) {
+                slot->failed = true;
+                const char* what = session->slots[s].last_alloc_what
+                    ? session->slots[s].last_alloc_what : "entropy workspace";
+                slot->error = DescribeWorkspaceSetupFailure(session->slots[s], s, what);
                 return false;
             }
         }
@@ -2124,6 +2248,14 @@ const char* GpuEntropyFrameError(const GpuEntropyFrameSlot* slot) {
 
 bool GpuEntropyFrameHasFailed(const GpuEntropyFrameSlot* slot) {
     return slot && slot->failed;
+}
+
+const char* GpuEntropySlotCreationError() {
+    return g_slot_creation_error.c_str();
+}
+
+void SetGpuEntropyAllocationFailureInjectionForTest(size_t min_bytes) {
+    g_inject_workspace_alloc_failure_bytes.store(min_bytes, std::memory_order_release);
 }
 
 void SetGpuEntropyCapacityOverrideForTest(GpuEntropyFrameSlot* slot,

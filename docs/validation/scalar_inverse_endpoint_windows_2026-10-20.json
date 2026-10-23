@@ -1,0 +1,87 @@
+{
+  "schema": "hypercine.scalar_inverse.endpoint_windows/1",
+  "license": "MIT OR Apache-2.0",
+  "date": "2026-10-20",
+  "scope": "isolated GOP2-derived wavelet5-to-wavelet4 scalar inverse stage",
+  "candidate": {
+    "tested_worktree_base_commit": "a085c43fd1ba63d555997abbef16e1de9f52040b",
+    "correction_committed_in_pr_head": "4a7ba47f0ff8b38911667e27449be88b96d18019",
+    "state": "native evidence was produced from a corrected working tree; the corrected implementation was already committed at PR head 4a7ba47 before this evidence was added",
+    "files": {
+      "src/cpu/decode_spatial_scalar.cpp": "ba093f6ee894a2e60eb0903845aaa8023643f867a4e32346177e164577aac92a",
+      "src/cpu/decode_spatial_scalar.h": "efaaffe146954455ce1d6cc8dfb020ae1e7366347f6f5c4ce34613c03b2f3a18",
+      "tests/test_decode_spatial_scalar.cpp": "5e4146bba2acaec85315fc7d335a40d62694b28cbf462a846c75137b3cb639fe",
+      "tests/reference_scalar_inverse/generate_vectors.py": "35f1b9c6c6dad30a21038872f92b6602ec29a3cf68712101d8c1c4abed299708",
+      "tests/reference_scalar_inverse/synthetic_vectors.h": "69a01ea2c84aa710634a6407268ff8ed927b27deaa09b5e9f02a52b08ab6ca6f"
+    }
+  },
+  "original_replay": {
+    "status": "ORIGINAL_SIX_PAIR_EQUALITY_PASS",
+    "cases": 6,
+    "artifacts_authenticated_before_candidate": 30,
+    "sidecars_authenticated_before_candidate": 60,
+    "original_artifacts_rehashed_after_candidate": 30,
+    "candidate_outputs_written_to_temporary_directory": true,
+    "originals_modified": false,
+    "mismatches": 0
+  },
+  "release_ctest": {
+    "registered": 31,
+    "passed": 31,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 36.42,
+    "includes_original_six_pair_replay": true
+  },
+  "host": {
+    "os": "Windows x64",
+    "compiler": "MSVC 19.44.35229",
+    "language_standard": "C++17",
+    "configuration": "Release",
+    "generator": "Visual Studio 17 2022",
+    "generator_platform": "x64"
+  },
+  "original_sdk_provenance": {
+    "source_commit": "11574d0295771edccadd17af14af74a539f924c7",
+    "upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+    "archive": {
+      "id": "original_sdk_collector.lib",
+      "byte_length": 2780282,
+      "sha256": "1609cc9ca056d63e5e562957994ddca49bbbdee34198c05602e2c91b1a858496",
+      "matches_authenticated_corpus_sidecar": true
+    },
+    "spatial_c_compile": {
+      "flags": ["/std:c11", "/O2", "/TC"],
+      "arch_override": false,
+      "processor_macro_overrides": false
+    },
+    "config_h_defaults": {
+      "_PROCESSOR_DISPATCH": 0,
+      "_PROCESSOR_GENERIC": 0,
+      "_PROCESSOR_PENTIUM_4": 1,
+      "_XMMOPT": 1
+    },
+    "selected_path": "x64 Pentium-4 SSE2 implementation; no runtime CPU dispatch",
+    "horizontal_disassembly": {
+      "binary_sha256": "9ddc6ca2c4a6ea396c293b00757b0f90cd6d96f360a494331b4b079b67626be6",
+      "paddsw": 10,
+      "psubsw": 6,
+      "psraw": 8
+    },
+    "call_chain": [
+      "upstream/Codec/decoder.c:13045",
+      "upstream/Codec/wavelet.c:5770 (scale=0 and level>=4)",
+      "upstream/Codec/spatial.c:21114 (InvertSpatialQuantOverflowProtected16s)",
+      "upstream/Codec/InvertHorizontalStrip16s.c (selected P4 SSE2 implementation)"
+    ]
+  },
+  "limitations": {
+    "external_decode_tests": "not registered; FFmpeg/ffprobe unavailable",
+    "sanitizers": "not run on this Windows working tree",
+    "gpu_tests": "not run",
+    "benchmarks": "not run",
+    "production_decoder_qualification": false,
+    "full_GOP1_GOP2_qualification": false,
+    "upstream_modified": false
+  }
+}
