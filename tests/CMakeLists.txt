@@ -14,6 +14,9 @@ include_directories(
 # Conflict resolution (#168 vs main): keep this branch's CPU-only GPU
 # diagnostic report test (#115), then main's reference-oracle registrations
 # (#206). Neither side replaces the other.
+# Non-standalone only. Standalone returns before add_subdirectory(tests) and
+# registers this same target in the root CMakeLists.txt. Do not include this
+# file from that path; the target name would collide.
 add_executable(test_gpu_diagnostic_report
     test_gpu_diagnostic_report.cpp
     ${CMAKE_SOURCE_DIR}/benchmarks/gpu_diagnostic_report.cpp

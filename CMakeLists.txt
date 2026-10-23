@@ -147,6 +147,15 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_entropy_bitexact tests/test_entropy_bitexact.cpp)
         target_link_libraries(test_entropy_bitexact PRIVATE hypercine_standalone)
         add_test(NAME entropy_bitexact COMMAND test_entropy_bitexact)
+        # CPU-only JSON report. No hypercine_core, CFHDCodecStatic, or CUDA.
+        # tests/CMakeLists.txt registers the same target for non-standalone
+        # builds. This branch returns before add_subdirectory(tests), so the
+        # two add_executable calls never run in one configure.
+        add_executable(test_gpu_diagnostic_report
+            tests/test_gpu_diagnostic_report.cpp
+            ${CMAKE_SOURCE_DIR}/benchmarks/gpu_diagnostic_report.cpp)
+        target_include_directories(test_gpu_diagnostic_report PRIVATE ${CMAKE_SOURCE_DIR}/benchmarks)
+        add_test(NAME test_gpu_diagnostic_report COMMAND test_gpu_diagnostic_report)
         add_executable(test_standalone tests/test_standalone.cpp)
         target_link_libraries(test_standalone PRIVATE hypercine_standalone)
         foreach(stage color wavelet quantization entropy sample geometry)

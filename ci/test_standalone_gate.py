@@ -31,6 +31,15 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': n} for n in REQUIRED
                                        if n != 'gop2_original_stage_contract']})
+
+    def test_missing_gpu_diagnostic_report_fails(self):
+        # Not redundant with test_complete_inventory: that check is derived from
+        # REQUIRED, so dropping the name from REQUIRED would still pass it.
+        self.assertIn('test_gpu_diagnostic_report', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'test_gpu_diagnostic_report']})
+
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
