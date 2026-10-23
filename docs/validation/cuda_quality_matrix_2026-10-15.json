@@ -37,9 +37,9 @@
   },
   "archive": {
     "status": "AUTHORIZED_BUT_UNREACHABLE",
-    "requested_root": "\\\\TRUENAS\\DeDub\\HyperCine\\golden\\windows\\qualities",
+    "requested_root": "$HYPERCINE_GOLDEN_DIR\\HyperCine\\golden\\windows\\qualities",
     "local_corpora_retained": true,
-    "reason": "User authorized upload, but the TrueNAS host was unreachable during this session (net view \\\\TRUENAS returned system error 53; all UNC path probes failed). No NAS files were written.",
+    "reason": "User authorized upload, but the external NAS host was unreachable during this session (net view $HYPERCINE_GOLDEN_DIR returned system error 53; all UNC path probes failed). No NAS files were written.",
     "user_authorized": true
   },
   "profiles": [
@@ -55,7 +55,7 @@
           "status": "complete",
           "artifact_files": 80,
           "manifest_sha256": "602a15e00b1a2fc1d0aebf90d6f63f21c01d0cc32649bb0497a8d6a131711f41",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "4k": {
           "width": 3840,
@@ -65,7 +65,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "a4f2e2dab636a4abcea2c6989c6def5e294c1153106b4dfb51c11f1826773080",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\3840x2160\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "8k": {
           "width": 7680,
@@ -75,7 +75,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "afbd888f3aadb59fcdc378138bb685ce4eb0eda206abe21ab7991e6395dd0d4f",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\low\\7680x4320\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         }
       }
     },
@@ -91,7 +91,7 @@
           "status": "complete",
           "artifact_files": 80,
           "manifest_sha256": "19a2bd96b23da910925c9addced8a5354aaddcc9b8104c3f624cadff821a0705",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "4k": {
           "width": 3840,
@@ -101,7 +101,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "dbb64b0cb4f7203df0b853250a478a56531b534e275114af8fb452a350a441b4",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\3840x2160\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "8k": {
           "width": 7680,
@@ -111,7 +111,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "c5ffe8154e1390700088c93ba0f524cd0503ea18828ec9eed26b67b85d2efea5",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\medium\\7680x4320\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         }
       }
     },
@@ -127,7 +127,7 @@
           "status": "complete",
           "artifact_files": 80,
           "manifest_sha256": "161c132b94795eded8a307f0113ca950f545a8595cb1b4e81888ad8119d650b7",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "4k": {
           "width": 3840,
@@ -137,7 +137,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "9b496fb2954f994f4c83f3da1215880aea9e2f9fcb5db8db906dbadd75059ff9",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\3840x2160\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "8k": {
           "width": 7680,
@@ -147,7 +147,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "17c619bd0c7bb80467acbbf43e4427a3ef178b34b8798e2750882baaed5bedac",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\high\\7680x4320\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         }
       }
     },
@@ -163,7 +163,7 @@
           "status": "complete",
           "artifact_files": 80,
           "manifest_sha256": "c7f18ce04161358c6a89838afdc8e110e53bccd3c07e7e1d8c18fb3c2b987edb",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "4k": {
           "width": 3840,
@@ -173,7 +173,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "538f47fede86acbcc9212db5789095ab47c27912a628d4e4d04e48772510edb9",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\3840x2160\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "8k": {
           "width": 7680,
@@ -183,7 +183,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "50869d43ecfc47955261109273dfc89399750c1af2e0c63a7749cac2e7308abd",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan1\\7680x4320\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         }
       }
     },
@@ -199,7 +199,7 @@
           "status": "complete",
           "artifact_files": 80,
           "manifest_sha256": "d7044bb986e91e2dc4dcc109e5908e5de6197b606790d8b6fedbd0df948c20cf",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "4k": {
           "width": 3840,
@@ -209,7 +209,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "ef9014c053c1945dc97469f74205117cd0a48816b0830e2d1cc72b34e23a8700",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\3840x2160\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "8k": {
           "width": 7680,
@@ -219,7 +219,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "597ebf23c4103e05c8878ceb8590f5239de0ab2b97f4c3a05319ac11141197dd",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\7680x4320\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         }
       },
       "sequence_120": {
@@ -247,7 +247,7 @@
         "quant_or_scale_transitions": 71,
         "artifact_files": 600,
         "manifest_sha256": "6ed7907589ab7e52fec6d588ba667b6d062cc9928316c1ba05ad64feac9d2792",
-        "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan2\\sequence-120\\manifest.json"
+        "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
       }
     },
     {
@@ -262,7 +262,7 @@
           "status": "complete",
           "artifact_files": 80,
           "manifest_sha256": "9197a632860efec625260f012166b4f46eca1a7fc23310e7054ac71dab3cfadf",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "4k": {
           "width": 3840,
@@ -272,7 +272,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "2834ed349b49d3da5b2ff59845b67946ea331cd1a157f48155ee747990bee94d",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\3840x2160\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         },
         "8k": {
           "width": 7680,
@@ -282,7 +282,7 @@
           "status": "complete",
           "artifact_files": 5,
           "manifest_sha256": "3d31557f46dba46320befb833e3df9c58d98686a1945e2ef9ebf60b0cb94deb6",
-          "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\7680x4320\\manifest.json"
+          "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
         }
       },
       "sequence_120": {
@@ -309,7 +309,7 @@
         "quant_or_scale_transitions": 73,
         "artifact_files": 600,
         "manifest_sha256": "bc56bd4556ef7177a8959674e359909c1c57e847f08262275c191065c723bba3",
-        "local_manifest_path": "C:\\Users\\User\\.codex\\worktrees\\windows-quality-profiles\\HyperCine-public\\build-issue24\\quality-corpus\\filmscan3\\sequence-120\\manifest.json"
+        "local_manifest_path": "<LOCAL_MANIFEST_PATH>"
       }
     }
   ]

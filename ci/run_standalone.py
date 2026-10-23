@@ -12,6 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
@@ -22,6 +23,9 @@ REQUIRED = {
      ('color', 'wavelet', 'quantization', 'entropy', 'sample', 'geometry')}
 REQUIRED |= {'standalone_external_' + size for size in
              ('256x256', '1920x1080', '128x24', '384x40', '4096x24', '128x4096', '2048x1024')}
+
+REQUIRED |= {'scalar_inverse_arithmetic', 'scalar_inverse_rejection', 'scalar_inverse_vectors',
+             'scalar_inverse_replay_contract'} | {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
 
 
 def registered_tests(document):
@@ -83,6 +87,8 @@ def main():
     ctest = ['ctest', '--test-dir', str(build), '-C', 'Release']
     document = json.loads(subprocess.check_output(ctest + ['--show-only=json-v1'], text=True))
     registered = registered_tests(document)
+    if cache.get('HYPERCINE_SCALAR_ORACLE_ROOT') and 'scalar_inverse_original_six_pairs' not in registered:
+        raise ValueError('requested original scalar replay not registered')
     (build / 'registered-tests.json').write_text(json.dumps(document, indent=2) + '\n')
     print('Registered full standalone tests:', len(registered), flush=True)
     junit = build / 'standalone-results.xml'
@@ -92,6 +98,7 @@ def main():
     count = completed_tests(junit, registered)
     result = {'status': 'PASS', 'registered_tests': len(registered), 'passed_tests': count,
               'system': platform.system(), 'architecture': machine,
+              'scalar_original_stage_replay': ('SIX_PAIRS_EQUAL' if 'scalar_inverse_original_six_pairs' in registered else 'NOT_RUN'),
               'windows_binaries': 'NOT REQUIRED: versioned manifests/fixtures; optional NAS corpus is separate'}
     (build / 'standalone-gate.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result), flush=True)

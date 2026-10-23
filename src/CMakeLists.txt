@@ -24,9 +24,11 @@ if(HYPERCINE_ENABLE_CUDA)
         CUDA_STANDARD_REQUIRED ON
         CUDA_SEPARABLE_COMPILATION OFF
     )
+    # C++ TUs in this target include <cuda_runtime.h>; CMake only injects toolkit includes for CUDA compiles.
     target_include_directories(hypercine_wavelet PUBLIC
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/cuda
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
     )
     target_compile_definitions(hypercine_wavelet PUBLIC HYPERCINE_CUDA_AVAILABLE=1)
 else()
@@ -39,6 +41,8 @@ else()
         ${CMAKE_SOURCE_DIR}/include
     )
 endif()
+
+target_link_libraries(hypercine_wavelet PUBLIC hypercine_quality_state)
 
 if(TARGET hypercine_core)
     target_link_libraries(hypercine_core INTERFACE hypercine_wavelet)

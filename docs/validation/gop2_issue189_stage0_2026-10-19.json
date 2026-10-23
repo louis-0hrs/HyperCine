@@ -1,0 +1,785 @@
+{
+  "binding": "HYPERCINE_GOLDEN_DIR",
+  "extension_counts": {
+    "(none)": 5,
+    ".bgra": 948,
+    ".bin": 532,
+    ".cfhd": 4325,
+    ".json": 62,
+    ".raw": 1,
+    ".sha256": 1,
+    ".tsv": 5,
+    ".zip": 2
+  },
+  "file_count": 5881,
+  "gop2_manifest_candidates": [],
+  "issue": 189,
+  "limitations": [
+    "Manifest discovery is not producer authentication.",
+    "Unindexed bytes and hash-only reports cannot qualify an original SDK oracle.",
+    "Existing GOP1 and RGB/RGBA/Bayer corpora are not GOP2 goldens."
+  ],
+  "manifests": [
+    {
+      "byte_length": 14591,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/medium/7680x4320-1f/manifest.json",
+      "sha256": "c5ffe8154e1390700088c93ba0f524cd0503ea18828ec9eed26b67b85d2efea5"
+    },
+    {
+      "byte_length": 14565,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/medium/3840x2160-1f/manifest.json",
+      "sha256": "dbb64b0cb4f7203df0b853250a478a56531b534e275114af8fb452a350a441b4"
+    },
+    {
+      "byte_length": 199874,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/medium/1080p-16f/manifest.json",
+      "sha256": "19a2bd96b23da910925c9addced8a5354aaddcc9b8104c3f624cadff821a0705"
+    },
+    {
+      "byte_length": 14591,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/medium/1080p-16f/7680x4320/manifest.json",
+      "sha256": "c5ffe8154e1390700088c93ba0f524cd0503ea18828ec9eed26b67b85d2efea5"
+    },
+    {
+      "byte_length": 14565,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/medium/1080p-16f/3840x2160/manifest.json",
+      "sha256": "dbb64b0cb4f7203df0b853250a478a56531b534e275114af8fb452a350a441b4"
+    },
+    {
+      "byte_length": 14593,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/low/7680x4320-1f/manifest.json",
+      "sha256": "afbd888f3aadb59fcdc378138bb685ce4eb0eda206abe21ab7991e6395dd0d4f"
+    },
+    {
+      "byte_length": 14567,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/low/3840x2160-1f/manifest.json",
+      "sha256": "a4f2e2dab636a4abcea2c6989c6def5e294c1153106b4dfb51c11f1826773080"
+    },
+    {
+      "byte_length": 199879,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/low/1080p-16f/manifest.json",
+      "sha256": "602a15e00b1a2fc1d0aebf90d6f63f21c01d0cc32649bb0497a8d6a131711f41"
+    },
+    {
+      "byte_length": 14593,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/low/1080p-16f/7680x4320/manifest.json",
+      "sha256": "afbd888f3aadb59fcdc378138bb685ce4eb0eda206abe21ab7991e6395dd0d4f"
+    },
+    {
+      "byte_length": 14567,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/low/1080p-16f/3840x2160/manifest.json",
+      "sha256": "a4f2e2dab636a4abcea2c6989c6def5e294c1153106b4dfb51c11f1826773080"
+    },
+    {
+      "byte_length": 14571,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/high/7680x4320-1f/manifest.json",
+      "sha256": "17c619bd0c7bb80467acbbf43e4427a3ef178b34b8798e2750882baaed5bedac"
+    },
+    {
+      "byte_length": 14545,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/high/3840x2160-1f/manifest.json",
+      "sha256": "9b496fb2954f994f4c83f3da1215880aea9e2f9fcb5db8db906dbadd75059ff9"
+    },
+    {
+      "byte_length": 199548,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/high/1080p-16f/manifest.json",
+      "sha256": "161c132b94795eded8a307f0113ca950f545a8595cb1b4e81888ad8119d650b7"
+    },
+    {
+      "byte_length": 14571,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/high/1080p-16f/7680x4320/manifest.json",
+      "sha256": "17c619bd0c7bb80467acbbf43e4427a3ef178b34b8798e2750882baaed5bedac"
+    },
+    {
+      "byte_length": 14545,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/high/1080p-16f/3840x2160/manifest.json",
+      "sha256": "9b496fb2954f994f4c83f3da1215880aea9e2f9fcb5db8db906dbadd75059ff9"
+    },
+    {
+      "byte_length": 1481941,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan3/sequence-120f/manifest.json",
+      "sha256": "bc56bd4556ef7177a8959674e359909c1c57e847f08262275c191065c723bba3"
+    },
+    {
+      "byte_length": 14573,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan3/7680x4320-1f/manifest.json",
+      "sha256": "3d31557f46dba46320befb833e3df9c58d98686a1945e2ef9ebf60b0cb94deb6"
+    },
+    {
+      "byte_length": 14547,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan3/3840x2160-1f/manifest.json",
+      "sha256": "2834ed349b49d3da5b2ff59845b67946ea331cd1a157f48155ee747990bee94d"
+    },
+    {
+      "byte_length": 199560,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan3/1080p-16f/manifest.json",
+      "sha256": "9197a632860efec625260f012166b4f46eca1a7fc23310e7054ac71dab3cfadf"
+    },
+    {
+      "byte_length": 1481941,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan3/1080p-16f/sequence-120/manifest.json",
+      "sha256": "bc56bd4556ef7177a8959674e359909c1c57e847f08262275c191065c723bba3"
+    },
+    {
+      "byte_length": 14573,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan3/1080p-16f/7680x4320/manifest.json",
+      "sha256": "3d31557f46dba46320befb833e3df9c58d98686a1945e2ef9ebf60b0cb94deb6"
+    },
+    {
+      "byte_length": 14547,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan3/1080p-16f/3840x2160/manifest.json",
+      "sha256": "2834ed349b49d3da5b2ff59845b67946ea331cd1a157f48155ee747990bee94d"
+    },
+    {
+      "byte_length": 1482109,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan2/sequence-120f/manifest.json",
+      "sha256": "6ed7907589ab7e52fec6d588ba667b6d062cc9928316c1ba05ad64feac9d2792"
+    },
+    {
+      "byte_length": 14575,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan2/7680x4320-1f/manifest.json",
+      "sha256": "597ebf23c4103e05c8878ceb8590f5239de0ab2b97f4c3a05319ac11141197dd"
+    },
+    {
+      "byte_length": 14549,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan2/3840x2160-1f/manifest.json",
+      "sha256": "ef9014c053c1945dc97469f74205117cd0a48816b0830e2d1cc72b34e23a8700"
+    },
+    {
+      "byte_length": 199580,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan2/1080p-16f/manifest.json",
+      "sha256": "d7044bb986e91e2dc4dcc109e5908e5de6197b606790d8b6fedbd0df948c20cf"
+    },
+    {
+      "byte_length": 1482109,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan2/1080p-16f/sequence-120/manifest.json",
+      "sha256": "6ed7907589ab7e52fec6d588ba667b6d062cc9928316c1ba05ad64feac9d2792"
+    },
+    {
+      "byte_length": 14575,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan2/1080p-16f/7680x4320/manifest.json",
+      "sha256": "597ebf23c4103e05c8878ceb8590f5239de0ab2b97f4c3a05319ac11141197dd"
+    },
+    {
+      "byte_length": 14549,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan2/1080p-16f/3840x2160/manifest.json",
+      "sha256": "ef9014c053c1945dc97469f74205117cd0a48816b0830e2d1cc72b34e23a8700"
+    },
+    {
+      "byte_length": 14593,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan1/7680x4320-1f/manifest.json",
+      "sha256": "50869d43ecfc47955261109273dfc89399750c1af2e0c63a7749cac2e7308abd"
+    },
+    {
+      "byte_length": 14567,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan1/3840x2160-1f/manifest.json",
+      "sha256": "538f47fede86acbcc9212db5789095ab47c27912a628d4e4d04e48772510edb9"
+    },
+    {
+      "byte_length": 199796,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan1/1080p-16f/manifest.json",
+      "sha256": "c7f18ce04161358c6a89838afdc8e110e53bccd3c07e7e1d8c18fb3c2b987edb"
+    },
+    {
+      "byte_length": 14593,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan1/1080p-16f/7680x4320/manifest.json",
+      "sha256": "50869d43ecfc47955261109273dfc89399750c1af2e0c63a7749cac2e7308abd"
+    },
+    {
+      "byte_length": 14567,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/_staging_issue24_2026-10-15-r1/filmscan1/1080p-16f/3840x2160/manifest.json",
+      "sha256": "538f47fede86acbcc9212db5789095ab47c27912a628d4e4d04e48772510edb9"
+    },
+    {
+      "byte_length": 14591,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/medium/7680x4320-1f/manifest.json",
+      "sha256": "c5ffe8154e1390700088c93ba0f524cd0503ea18828ec9eed26b67b85d2efea5"
+    },
+    {
+      "byte_length": 14565,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/medium/3840x2160-1f/manifest.json",
+      "sha256": "dbb64b0cb4f7203df0b853250a478a56531b534e275114af8fb452a350a441b4"
+    },
+    {
+      "byte_length": 199874,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/medium/1080p-16f/manifest.json",
+      "sha256": "19a2bd96b23da910925c9addced8a5354aaddcc9b8104c3f624cadff821a0705"
+    },
+    {
+      "byte_length": 14593,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/low/7680x4320-1f/manifest.json",
+      "sha256": "afbd888f3aadb59fcdc378138bb685ce4eb0eda206abe21ab7991e6395dd0d4f"
+    },
+    {
+      "byte_length": 14567,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/low/3840x2160-1f/manifest.json",
+      "sha256": "a4f2e2dab636a4abcea2c6989c6def5e294c1153106b4dfb51c11f1826773080"
+    },
+    {
+      "byte_length": 199879,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/low/1080p-16f/manifest.json",
+      "sha256": "602a15e00b1a2fc1d0aebf90d6f63f21c01d0cc32649bb0497a8d6a131711f41"
+    },
+    {
+      "byte_length": 14571,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/high/7680x4320-1f/manifest.json",
+      "sha256": "17c619bd0c7bb80467acbbf43e4427a3ef178b34b8798e2750882baaed5bedac"
+    },
+    {
+      "byte_length": 14545,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/high/3840x2160-1f/manifest.json",
+      "sha256": "9b496fb2954f994f4c83f3da1215880aea9e2f9fcb5db8db906dbadd75059ff9"
+    },
+    {
+      "byte_length": 199548,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/high/1080p-16f/manifest.json",
+      "sha256": "161c132b94795eded8a307f0113ca950f545a8595cb1b4e81888ad8119d650b7"
+    },
+    {
+      "byte_length": 1481941,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan3/sequence-120f/manifest.json",
+      "sha256": "bc56bd4556ef7177a8959674e359909c1c57e847f08262275c191065c723bba3"
+    },
+    {
+      "byte_length": 14573,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan3/7680x4320-1f/manifest.json",
+      "sha256": "3d31557f46dba46320befb833e3df9c58d98686a1945e2ef9ebf60b0cb94deb6"
+    },
+    {
+      "byte_length": 14547,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan3/3840x2160-1f/manifest.json",
+      "sha256": "2834ed349b49d3da5b2ff59845b67946ea331cd1a157f48155ee747990bee94d"
+    },
+    {
+      "byte_length": 199560,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan3/1080p-16f/manifest.json",
+      "sha256": "9197a632860efec625260f012166b4f46eca1a7fc23310e7054ac71dab3cfadf"
+    },
+    {
+      "byte_length": 1482109,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan2/sequence-120f/manifest.json",
+      "sha256": "6ed7907589ab7e52fec6d588ba667b6d062cc9928316c1ba05ad64feac9d2792"
+    },
+    {
+      "byte_length": 14575,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan2/7680x4320-1f/manifest.json",
+      "sha256": "597ebf23c4103e05c8878ceb8590f5239de0ab2b97f4c3a05319ac11141197dd"
+    },
+    {
+      "byte_length": 14549,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan2/3840x2160-1f/manifest.json",
+      "sha256": "ef9014c053c1945dc97469f74205117cd0a48816b0830e2d1cc72b34e23a8700"
+    },
+    {
+      "byte_length": 199580,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan2/1080p-16f/manifest.json",
+      "sha256": "d7044bb986e91e2dc4dcc109e5908e5de6197b606790d8b6fedbd0df948c20cf"
+    },
+    {
+      "byte_length": 14593,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan1/7680x4320-1f/manifest.json",
+      "sha256": "50869d43ecfc47955261109273dfc89399750c1af2e0c63a7749cac2e7308abd"
+    },
+    {
+      "byte_length": 14567,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan1/3840x2160-1f/manifest.json",
+      "sha256": "538f47fede86acbcc9212db5789095ab47c27912a628d4e4d04e48772510edb9"
+    },
+    {
+      "byte_length": 199796,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/qualities/2026-10-15/filmscan1/1080p-16f/manifest.json",
+      "sha256": "c7f18ce04161358c6a89838afdc8e110e53bccd3c07e7e1d8c18fb3c2b987edb"
+    },
+    {
+      "byte_length": 684567,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/fs3/2026-10-14/tier-a/manifest.json",
+      "sha256": "c10fbdd2a41709573ddc1f1826b49301d7bbb94233da213c7bb13440c325e9cd"
+    },
+    {
+      "byte_length": 2584,
+      "contains_artifact_index": false,
+      "gop2_candidate": false,
+      "id": "golden/windows/fs3/2026-10-14/tier-a/manifest.schema.json",
+      "sha256": "c5ab9a975ec45acb9c975bfedd676a12a7ddaf529fa903a032ab02baff88db6a"
+    },
+    {
+      "byte_length": 1457070,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/fs3/2026-10-14/sequence-1080/manifest.json",
+      "sha256": "a784807bd47a99a729e91be49ff504561ec40e453124a9b485bfbd56a8768566"
+    },
+    {
+      "byte_length": 2584,
+      "contains_artifact_index": false,
+      "gop2_candidate": false,
+      "id": "golden/windows/fs3/2026-10-14/sequence-1080/manifest.schema.json",
+      "sha256": "c5ab9a975ec45acb9c975bfedd676a12a7ddaf529fa903a032ab02baff88db6a"
+    },
+    {
+      "byte_length": 607265,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/format-f1/128/manifest.json",
+      "sha256": "4785df1429748f339accebbda3f7781728adc0d86f3a4f57c5352bbb616e271b"
+    },
+    {
+      "byte_length": 46357,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/format-f1/1080p-RGB_444/manifest.json",
+      "sha256": "4db9351ca4ed98f95f2b3623a00fe1671e5da2bc85626160ed935ff1f0f66a88"
+    },
+    {
+      "byte_length": 42295,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/format-f1/1080p-RGBA_4444/manifest.json",
+      "sha256": "67989b7923cbda89527a57d8fcad0e6d33a064f172627874f7a1859898ceb193"
+    },
+    {
+      "byte_length": 40198,
+      "contains_artifact_index": true,
+      "gop2_candidate": false,
+      "id": "golden/windows/format-f1/1080p-BAYER/manifest.json",
+      "sha256": "0ed6e87f3b9a3605ed5531447aada5bb66d8abf27053025bcdb11bba702bac37"
+    }
+  ],
+  "release_gate": "BLOCKED",
+  "required": [
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "source",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "original_sdk_packet",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_BGRA",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_YU64",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "temporal_inverse",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "wavelet_LL",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "pre_inverse_coefficients",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "signed_planar",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "source",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "original_sdk_packet",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_BGRA",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_YU64",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "temporal_inverse",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "wavelet_LL",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "pre_inverse_coefficients",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        1920,
+        1080
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "signed_planar",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "source",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "original_sdk_packet",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_BGRA",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_YU64",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "temporal_inverse",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "wavelet_LL",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "pre_inverse_coefficients",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 0,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "signed_planar",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "source",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "original_sdk_packet",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_BGRA",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "decoded_YU64",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "temporal_inverse",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "wavelet_LL",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "pre_inverse_coefficients",
+      "status": "MISSING"
+    },
+    {
+      "frame_index": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "reason": "NO_QUALIFIED_ORIGINAL_GOP2_REFERENCE",
+      "stage": "signed_planar",
+      "status": "MISSING"
+    }
+  ],
+  "schema": "hypercine.gop2.inventory/1",
+  "scope": "Existing loose-file metadata inventory; archives not opened; no SDK execution",
+  "total_byte_length": 18112836496,
+  "unparsed_manifests": []
+}

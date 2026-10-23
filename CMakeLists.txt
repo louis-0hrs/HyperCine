@@ -22,12 +22,66 @@ option(HYPERCINE_BUILD_TESTS "Build HyperCine reference tests" ON)
 option(HYPERCINE_BUILD_BENCHMARKS "Build HyperCine benchmark tool" ON)
 option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
+option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
+
+# Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
+option(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY "Build only the synthetic decode task graph" OFF)
+if(HYPERCINE_BUILD_TESTS OR HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
+    find_package(Threads REQUIRED)
+    add_subdirectory(tests/decode_task_graph)
+endif()
+if(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
+    # Keep the regular SDK/CPU tests on the project's advertised CMake range.
+    cmake_minimum_required(VERSION 3.25)
+    if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA OR HYPERCINE_ENABLE_METAL OR
+       HYPERCINE_BUILD_STANDALONE OR HYPERCINE_BUILD_QUALITY_STATE_ONLY OR HYPERCINE_REQUIRE_EXTERNAL_DECODE)
+        message(FATAL_ERROR "Task graph only mode requires SDK/GPU/other standalone modes OFF")
+    endif()
+    if(HYPERCINE_BUILD_TESTS)
+        enable_testing()
+    endif()
+    return()
+endif()
+
+# Internal P0 probe/selection boundary, built without ISA flags or SDK headers.
+# Codec targets deliberately do not dispatch through it until lane validation.
+add_library(hypercine_cpu_isa STATIC src/cpu/cpu_isa.cpp)
+target_include_directories(hypercine_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+if(HYPERCINE_BUILD_TESTS)
+    enable_testing()
+    add_executable(test_cpu_isa tests/test_cpu_isa.cpp)
+    target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+    target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
+    add_test(NAME cpu_isa_selection COMMAND test_cpu_isa)
+endif()
 
 option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)
 
 # This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
+set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quality-profile corpus root")
+add_library(hypercine_quality_state STATIC src/core/quality_state.cpp)
+target_include_directories(hypercine_quality_state PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_compile_features(hypercine_quality_state PUBLIC cxx_std_17)
+if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
+    enable_testing()
+    add_executable(test_quality_state tests/test_quality_state.cpp)
+    target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
+    add_test(NAME quality_state_unit COMMAND test_quality_state)
+    add_executable(quality_state_probe tests/quality_state_probe.cpp)
+    target_link_libraries(quality_state_probe PRIVATE hypercine_quality_state)
+    if(HYPERCINE_QUALITY_ORACLE_ROOT)
+        find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME quality_state_windows_oracle COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_quality_state_corpus.py"
+            --probe $<TARGET_FILE:quality_state_probe> --corpus "${HYPERCINE_QUALITY_ORACLE_ROOT}")
+        set_tests_properties(quality_state_windows_oracle PROPERTIES
+            ENVIRONMENT "HYPERCINE_TEST_COMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
+            TIMEOUT 3600)
+    endif()
+    return()
+endif()
 if(HYPERCINE_REQUIRE_EXTERNAL_DECODE AND (NOT HYPERCINE_BUILD_STANDALONE OR NOT HYPERCINE_BUILD_TESTS))
     message(FATAL_ERROR "External decode gate requires standalone mode and tests")
 endif()
@@ -155,6 +209,11 @@ if(HYPERCINE_BUILD_STANDALONE)
             "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/oracle-fixture-check"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_oracle_fixtures.cmake")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_subdirectory(tests/scalar_inverse_research)
+        add_test(NAME gop2_original_stage_contract
+            COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_stage_contract.py")
+        add_test(NAME gop2_reference_inventory_integrity
+            COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_reference_inventory.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
@@ -367,6 +426,19 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/upstream/WarpLib
 )
 
+# The root SDK include_directories() also mutates targets declared earlier in
+# this CMakeLists.txt. hypercine_cpu_isa is SDK-free and needs only src/, but
+# upstream/Codec/cpuid.h otherwise shadows GCC/Clang's <cpuid.h> and breaks
+# __get_cpuid_max/__cpuid_count in the Linux regular SDK-enabled build.
+# Restore the isolated header search path for these two pre-existing targets;
+# keep the upstream includes intact for actual CineForm SDK consumers.
+set_property(TARGET hypercine_cpu_isa PROPERTY INCLUDE_DIRECTORIES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src")
+if(TARGET test_cpu_isa)
+    set_property(TARGET test_cpu_isa PROPERTY INCLUDE_DIRECTORIES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src")
+endif()
+
 # Placeholder target for HyperCine library integration
 add_library(hypercine_core INTERFACE)
 target_include_directories(hypercine_core INTERFACE
@@ -375,10 +447,38 @@ target_include_directories(hypercine_core INTERFACE
 )
 if(TARGET CFHDCodecStatic)
     target_link_libraries(hypercine_core INTERFACE CFHDCodecStatic)
+
+    # upstream/EncoderSDK calls uuid_generate() (MetadataWriter.cpp,
+    # SampleEncoder.cpp), but the frozen upstream build only appends -luuid to
+    # its own tools. Every target that links the CFHDCodecStatic archive
+    # directly therefore leaves the symbol unresolved on Linux. Resolve it on
+    # the archive's INTERFACE so all downstream consumers link it without manual
+    # -luuid flags. A missing library is a clear configure error. upstream/ is
+    # not modified; MSVC and Apple (libSystem) need no extra library here.
+    if(UNIX AND NOT APPLE)
+        find_library(HYPERCINE_UUID_LIBRARY uuid)
+        if(NOT HYPERCINE_UUID_LIBRARY)
+            message(FATAL_ERROR
+                "libuuid not found; upstream/EncoderSDK needs uuid_generate on Linux. "
+                "Install the libuuid development package (Debian/Ubuntu: uuid-dev).")
+        endif()
+        target_link_libraries(CFHDCodecStatic INTERFACE ${HYPERCINE_UUID_LIBRARY})
+    endif()
 endif()
 
 # Core HyperCine library source
 add_subdirectory(src)
+
+# Bounded diagnostic probe for constrained CUDA devices (issue #116).
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(hypercine_m4_resolution_probe tools/m4_sm52_resolution_probe.cpp)
+    target_include_directories(hypercine_m4_resolution_probe PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+    target_link_libraries(hypercine_m4_resolution_probe PRIVATE hypercine_wavelet)
+    if(TARGET CFHDCodecStatic)
+        target_link_libraries(hypercine_m4_resolution_probe PRIVATE CFHDCodecStatic)
+    endif()
+endif()
 
 # Tests
 if(HYPERCINE_BUILD_TESTS)

@@ -1,0 +1,139 @@
+{
+  "schema": "hypercine.gop2.handoff/1",
+  "license": "MIT OR Apache-2.0",
+  "issue": 189,
+  "date": "2026-10-19",
+  "release_gate": "BLOCKED",
+  "corpus_binding": "HYPERCINE_GOLDEN_DIR",
+  "corpus_relative_id": "golden/windows/gop2/issue189-20261019-r1",
+  "original_sdk_revision": "11574d0295771edccadd17af14af74a539f924c7",
+  "sdk_upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+  "raw_original_artifacts": 164,
+  "raw_original_files_including_sidecars": 496,
+  "raw_original_byte_length": 670478145,
+  "tool_index": {
+    "id": "tools/tool_index.json",
+    "byte_length": 1779,
+    "sha256": "a827dc76a10169a59da98ab7141227a329ec6898cdcffcef0c9a4101dc6287e6"
+  },
+  "validation": {
+    "performance_claim": false,
+    "cpu_release_ctest": {
+      "passed": 15,
+      "skipped": 0,
+      "failed": 0
+    },
+    "candidate_exact_comparisons": 224,
+    "upstream_modified": false,
+    "candidate_mismatches": 0,
+    "full_candidate_cuda_suite_rerun": false
+  },
+  "references": [
+    {
+      "geometry": "1920x1080",
+      "source": [
+        {
+          "frame_index": 0,
+          "producer": "versioned_test_source_generator",
+          "status": "AVAILABLE"
+        },
+        {
+          "frame_index": 1,
+          "producer": "versioned_test_source_generator",
+          "status": "AVAILABLE"
+        }
+      ],
+      "packet_status": "AVAILABLE",
+      "decoded_frames": [
+        {
+          "YU64": "AVAILABLE",
+          "frame_index": 0,
+          "BGRA": "AVAILABLE"
+        },
+        {
+          "YU64": "AVAILABLE",
+          "frame_index": 1,
+          "BGRA": "AVAILABLE"
+        }
+      ],
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "post_inverse_resident_stages": {
+        "count": 66,
+        "status": "AVAILABLE"
+      },
+      "pre_inverse_entropy_coefficients": {
+        "reason": "no independently extracted original SDK pre-inverse dump",
+        "status": "MISSING"
+      },
+      "final_unclipped_signed_planes": {
+        "reason": "packed clipped YU64 cannot substitute for original signed planes",
+        "status": "MISSING"
+      },
+      "candidate_sha": "7ed4a82ed97598454c2680bd264dedf259e6e7dc",
+      "candidate_comparisons": 112,
+      "candidate_mismatches": 0,
+      "topology": {
+        "chunks": 54,
+        "coefficient_bands": 51,
+        "control_records": 3,
+        "parser": "candidate_strict_FIELDPLUS_parser"
+      },
+      "raw_reference_manifest_sha256": "b9eac9db4bae0a795240718b36f34e63973f9128f854eae212e68a7282cc4780",
+      "reference_index_sha256": "b9eac9db4bae0a795240718b36f34e63973f9128f854eae212e68a7282cc4780",
+      "comparison_index_sha256": "591f52589a97b3498179fbde793602067d8d8773f95b7e261940343d1624868b"
+    },
+    {
+      "geometry": "3840x2160",
+      "source": [
+        {
+          "frame_index": 0,
+          "producer": "versioned_test_source_generator",
+          "status": "AVAILABLE"
+        },
+        {
+          "frame_index": 1,
+          "producer": "versioned_test_source_generator",
+          "status": "AVAILABLE"
+        }
+      ],
+      "packet_status": "AVAILABLE",
+      "decoded_frames": [
+        {
+          "YU64": "AVAILABLE",
+          "frame_index": 0,
+          "BGRA": "AVAILABLE"
+        },
+        {
+          "YU64": "AVAILABLE",
+          "frame_index": 1,
+          "BGRA": "AVAILABLE"
+        }
+      ],
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "post_inverse_resident_stages": {
+        "count": 66,
+        "status": "AVAILABLE"
+      },
+      "pre_inverse_entropy_coefficients": {
+        "reason": "no independently extracted original SDK pre-inverse dump",
+        "status": "MISSING"
+      },
+      "final_unclipped_signed_planes": {
+        "reason": "packed clipped YU64 cannot substitute for original signed planes",
+        "status": "MISSING"
+      },
+      "candidate_sha": "7ed4a82ed97598454c2680bd264dedf259e6e7dc",
+      "candidate_comparisons": 112,
+      "candidate_mismatches": 0,
+      "topology": {
+        "chunks": 54,
+        "coefficient_bands": 51,
+        "control_records": 3,
+        "parser": "candidate_strict_FIELDPLUS_parser"
+      },
+      "raw_reference_manifest_sha256": "7c0326b9a961d5f5167cb43eb498097946e78cfc432f2d8943e4ccdf75800d20",
+      "reference_index_sha256": "7c0326b9a961d5f5167cb43eb498097946e78cfc432f2d8943e4ccdf75800d20",
+      "comparison_index_sha256": "ed513e71b2d42343470d11679f03a753aa491bf2169ba1fd4eed8100d9a82284"
+    }
+  ]
+}

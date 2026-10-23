@@ -1,0 +1,758 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "schema": 1,
+  "outcome": "B",
+  "width16_oracle": "UPSTREAM_ORACLE_UNDEFINED",
+  "case_count_per_process": 720,
+  "fresh_process_count": 5,
+  "canonical_complete_rows_sha256": "787b74e50112a56a8f1426ac303644f54a9bf6655ffa8c9229aab5d6a6a8e4f0",
+  "all_fixed_guard_processes_equal": true,
+  "sources": [
+    {
+      "path": "upstream/Codec/spatial.c",
+      "sha256": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9"
+    },
+    {
+      "path": "upstream/Codec/filter.h",
+      "sha256": "ca496f459839ea11c1ec1be2996870b2cd3f8dd529933baa37a9d764410e9960"
+    },
+    {
+      "path": "upstream/Codec/config.h",
+      "sha256": "53d038c2850b878cf579ffbb4db3b76d83bb74964bbd0d4a358d579550fc477f"
+    },
+    {
+      "path": "tests/test_small_chroma_oracle.cpp",
+      "sha256": "11a1a524b740133149a022bb1d202a3109da93627bf51ac0d5b06c530f6e3457"
+    },
+    {
+      "path": "tests/collect_small_chroma_evidence.py",
+      "sha256": "cb8537a1f0ba88fe144d86ac106d127eed5c1a43ce31ccc42f0a1465574efcf6"
+    }
+  ],
+  "flat512_boundary": [
+    {
+      "row_width": 12,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 128
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": -128
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 128
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 128
+        }
+      ]
+    },
+    {
+      "row_width": 14,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 128
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": -128
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 128
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 128
+        }
+      ]
+    },
+    {
+      "row_width": 16,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 128
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": -128
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 128
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 128
+        }
+      ]
+    },
+    {
+      "row_width": 18,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 20,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 24,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 32,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 64,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 120,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 128,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 192,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    },
+    {
+      "row_width": 240,
+      "guards_and_highpass0": [
+        {
+          "guard": [
+            512,
+            512
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            0,
+            0
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            -1024,
+            1024
+          ],
+          "highpass0": 0
+        },
+        {
+          "guard": [
+            4095,
+            -4095
+          ],
+          "highpass0": 0
+        }
+      ]
+    }
+  ],
+  "width16_flat_complete_rows": [
+    {
+      "width": 16,
+      "pattern": 0,
+      "guard": [
+        512,
+        512
+      ],
+      "input": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "low": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "high": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "width": 16,
+      "pattern": 0,
+      "guard": [
+        0,
+        0
+      ],
+      "input": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "low": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "high": [
+        128,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "width": 16,
+      "pattern": 0,
+      "guard": [
+        1024,
+        1024
+      ],
+      "input": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "low": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "high": [
+        -128,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "width": 16,
+      "pattern": 0,
+      "guard": [
+        -1024,
+        1024
+      ],
+      "input": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "low": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "high": [
+        128,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "width": 16,
+      "pattern": 0,
+      "guard": [
+        4095,
+        -4095
+      ],
+      "input": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "low": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "high": [
+        128,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "sanitizer": {
+    "status": "EXPECTED_UPSTREAM_PREFIX_READ_DETECTED",
+    "allocated_guard_cases": "720 PASS; complete rows identical to uninstrumented probe",
+    "kind": "use-after-poison",
+    "function": "FilterHorizontalRow16s",
+    "source": "upstream/Codec/spatial.c",
+    "exit_code": 1,
+    "instrumentation": "MSVC AddressSanitizer on pristine spatial.c; 16-byte prefix explicitly poisoned",
+    "limitations": "Logical-row boundary experiment; not a full SDK heap sanitizer qualification"
+  },
+  "scope": "Direct pristine SDK horizontal-row function; no full-frame encoder heap experiment or CUDA execution"
+}

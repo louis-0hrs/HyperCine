@@ -17,11 +17,20 @@ not remove it from Git history. This applies equally to Windows, Linux and macOS
    descriptions such as "external corpus (read-only)".
 4. Check the full staged diff manually. Run:
    `python ci/privacy_guard.py --staged`
-5. Configure local hooks per clone or worktree (Git does not auto-activate hooks):
-   `git config --local core.hooksPath .githooks`
-   The hook files require executable permissions on Unix-like systems.
-   Where hooks cannot execute, agents must invoke the scanner explicitly.
-6. The pre-push hook scans every outgoing commit. Always push through a
+5. Configure local hooks per clone or worktree (Git does not auto-activate hooks).
+   For **separate per-worktree settings** enable `extensions.worktreeConfig=true`
+   in the shared Git configuration first (only after confirming every worktree
+   supports this Git feature), then in the intended worktree run:
+   `git config --worktree core.hooksPath .githooks`
+   Without this setup, `git config --local` writes to the *shared* config and
+   changes hook behavior for every linked worktree. Every affected worktree
+   must contain the hooks and `ci/privacy_guard.py` at the expected paths.
+   Git for Windows may expose an unusable `python3` Store alias; hooks now
+   verify that the interpreter actually runs Python 3.8+, trying `python3`,
+   then `python`, then Windows `py -3`, and fail closed if none works.
+   Hook files require executable permissions on Unix-like systems.
+6. The pre-push hook scans outgoing ref names, annotated tags and every
+   outgoing commit. Always push through a
    configured remote name (e.g. `git push origin my-branch`), not a raw URL;
    new branches exclude only commits already known on that destination
    remote. Never bypass the hook by using `--no-verify`, removing it or
@@ -35,8 +44,26 @@ The repository scanner is Python 3 standard-library-only. It checks additions
 in the staging area or each selected commit for RFC1918 IPv4 addresses, private
 DNS suffixes, UNC/SMB/NFS-style shares, user-specific Windows/Unix home paths,
 tilde-relative home paths and likely secrets. It also scans new path names and
-commit messages. It reports file/line/rule only, with sensitive filenames
-redacted. It does not output the matched value.
+commit messages. Staged scans also inspect the effective author and committer
+identities using `git var`, including `GIT_AUTHOR_*` / `GIT_COMMITTER_*`
+overrides. Commit and range scans inspect the actual author and committer
+name/email stored in every selected Git object, without mailmap rewriting.
+The same text rules apply to those fields; single-label email domains and
+Git's inferred `(none)` domain are also rejected as likely host-derived
+identities. Missing/unreadable identity data blocks the scan.
+
+Use a deliberately configured identity with a public domain, a chosen GitHub
+noreply address, or a neutral agent address such as
+`hypercine-agent@example.invalid`. Configure it only in your own worktree
+with `git config --worktree user.name`, `git config --worktree user.email`,
+and `git config --worktree user.useConfigOnly true` after the per-worktree
+setup above. These settings do not override explicit `GIT_*` environment
+values; review overrides locally without publishing raw identity output.
+The guard cannot infer whether an arbitrary name or public email domain
+identifies private infrastructure, so manual metadata review remains required.
+
+Diagnostics report only a file or identity-field marker, line and rule,
+with sensitive filenames redacted. They do not output the matched value.
 
 It is a **defense in depth**, not proof of privacy. It cannot identify every
 internal hostname, embedded binary metadata, every credential format or leaks
@@ -69,3 +96,110 @@ GitHub CI begins **after pushing**, so it cannot undo initial public exposure.
 
 Tracking: issue #54. No active feature branch history is rewritten by this
 hardening change.
+
+## Combined hardening and Git identity policy (issue #54)
+
+Six overlapping PRs are integrated together: #74 (`+++` hunk content),
+#78 (disable textconv), #79 (quoted paths), #81 (binary/empty/rename-only
+destination path scanning), #85 (fixed Git diff prefixes), and #87 (raw
+author/committer identity scanning). The scanner inspects added text and a
+NUL-delimited destination-path inventory in staged, commit, and range modes.
+
+**Pre-commit:** configure `user.name` and `user.email` explicitly. Absent
+configuration fails closed rather than trusting an auto-inferred hostname.
+Agent-named identities also require `user.useConfigOnly=true`. For agents
+use a deliberate `agent@example.invalid` style alias or a verified GitHub
+`users.noreply.github.com` address. Human contributors may retain explicitly
+configured public identities; the scanner cannot prove their provenance.
+
+**Commit/pre-push:** raw author and committer envelope fields are checked,
+including public-looking multi-label dynamic/reverse-DNS host patterns that
+the earlier suffix-only implementation missed. This heuristic cannot detect
+*every* machine-owned public domain: Git objects have no explicit record
+of whether their metadata came from host inference. Manual author/committer
+review remains mandatory for imported public branches.
+
+The scanner must never print matched sensitive values. Historic Git objects,
+previous issue revisions, clones and caches remain public independently of
+forward-only redaction; no history rewrite/force-push is authorized here.
+
+
+## Ref and release-tag publication (issue #96)
+
+The installed pre-push hook passes the entire Git pre-push record stream to
+`ci/privacy_guard.py --push-remote <name>`. It checks both local and destination
+ref names, including names on deletion records, with the existing privacy rules.
+It also checks every slash-separated name component after `refs/<namespace>/`
+as a possible home-path start, including custom namespaces, deeper prefixes
+and remote-tracking names. Both absolute-home and tilde-home rules apply at
+these boundaries. Short component windows keep this inspection linear in the
+ref length. Clean nested names and safe deletions remain supported; deletion
+records still undergo name checks but need no object inspection.
+
+For each outgoing object the guard inspects its actual type before peeling.
+Annotated tags are followed recursively: every tag's full text (including its
+internal name, annotation and any signature) is scanned, and its raw tagger
+name/email is checked with the commit identity policy. This also applies when
+its target commit is already public and there are zero new commits. Local Git
+replacement objects are disabled during the scan. Supported tag headers must
+have the standard object/type/tag/tagger layout and valid UTF-8; missing taggers,
+malformed headers, unreadable objects and excessive nesting fail closed.
+Non-commit terminal targets, including tree/blob tags and unusual refs pointing
+to those types, are rejected. Clean lightweight and annotated tags pointing to
+commits, nested tags and updates/repointed tags remain supported.
+
+Git supplies automatically followed tags (`--follow-tags`) and every ref of a
+multi-ref push to the same hook. Any violation aborts the whole push before
+transfer. Ref, tag and tagger findings use fixed redacted markers and rule names;
+Git's own transport/status output is outside the scanner's diagnostic control.
+Outgoing commits still exclude only history known on the named destination;
+history on another remote cannot hide first publication to this one.
+
+This is not inspection of every reachable Git object: binary blobs and embedded
+metadata remain outside the content rules, as do unrecognized sensitive strings.
+The existing Actions workflow covers branch pushes/PRs after publication; it has
+no tag-push trigger. It neither prevents a first disclosure nor replaces local
+release-tag checks. A release service, web UI, GitHub connector or clone without
+these installed hooks needs its own pre-publication controls. This change does
+not publish a release/tag or authorize main integration/history rewriting.
+
+Run the real-hook regression matrix with:
+
+```sh
+python3 -m unittest discover -s ci -p 'test_privacy*.py' -v
+```
+
+The installed-hook matrix runs with native Python on Windows as well as POSIX.
+On Windows, Git for Windows launches the installed shell hooks; a working Python
+3.8+ interpreter must be available to those hooks. Both SHA-1 and SHA-256 cases
+run without a platform skip; missing prerequisites fail the tests. The separate
+Ubuntu CI-shell and POSIX interpreter-stub tests retain their platform limits.
+All test data is synthetic and all remotes are disposable local bare
+repositories, never public endpoints.
+
+## Overlapping remote names
+
+Keep configured remote names separate at slash boundaries. For example,
+`public` and `public/private` share a remote-tracking namespace: Git's
+`--remotes=public` includes refs fetched from both. The pre-push guard blocks
+pushes through either name while both are configured, because private history
+must not count as already published. Rename one remote to a separate namespace
+before retrying. Names such as `public` and `public-review` remain independent.
+
+Before pushing, the guard also checks **every configured remote's** fetch
+mappings. Only the standard `refs/heads/*:refs/remotes/<remote>/*` mapping,
+with or without the leading `+`, is supported. A remote without a fetch mapping
+is allowed for push-only use. Other mappings fail closed with
+`UNSUPPORTED_FETCH_REFSPEC`; the diagnostic never includes remote names or
+configuration values. This includes custom mappings on unrelated remotes:
+they could otherwise import private commits into the destination's tracking
+namespace and hide those commits from a first-publication scan.
+
+Restore standard mappings before retrying. Narrow, negative, mirror and other
+custom fetch refspecs are intentionally unsupported, even when a particular
+mapping would be safe. Changing configuration does not remove previously
+fetched refs: review stale tracking refs separately before relying on them as
+publication evidence. Manually populated tracking refs and separate fetch/push
+URLs remain outside this check; a named remote must represent one publication
+destination. This guard is not proof that arbitrary local tracking refs are
+trustworthy.
