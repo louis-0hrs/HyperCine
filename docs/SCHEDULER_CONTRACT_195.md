@@ -186,7 +186,14 @@ The arms now differ by worker width, because only one claim is honest at each wi
   fabricated event. The rule instead asserts the reachable outcome: the later task
   never ran and is `Canceled`.
 
-Every wait is bounded, so a broken handshake fails the rule instead of hanging the suite.
+Both waits in S3 are bounded, on different mechanisms. The caller's ready handshake uses
+the shared `wait_for(predicate, 5)`: if the callback is never claimed — a thread-launch
+failure or a `run()` that returns first — the rule reports `BROKEN` ("the cancelled
+callback never entered") instead of spinning until an external watchdog kills the suite.
+The callback's own `while (!release)` spin is not itself timed; it terminates because the
+caller stores `release` unconditionally after the handshake and before `join()`, on the
+timeout path as well. A negative control (`run()` returning before any worker exists)
+reaches `BROKEN` in about five seconds with exit code 1, not at the CTest timeout.
 
 ## 3. Result against this implementation
 
