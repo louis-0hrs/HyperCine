@@ -1,0 +1,2753 @@
+{
+  "binary": {
+    "byte_length": 1197056,
+    "sha256": "61830e9a954ebeeefcebb7d2acdb79fb0a2ea153c862dda2f66e385b5a085f73"
+  },
+  "candidate_sha": "7ed4a82ed97598454c2680bd264dedf259e6e7dc",
+  "compared": 112,
+  "comparison_report": {
+    "byte_length": 22937,
+    "sha256": "42a1acb2d285c938fd4e077fd3d1d1b676b0704a42d40463b4991b12eb9219d3"
+  },
+  "comparisons": [
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "71b73b531a08eeff466340c2462293fdd644c900f75d6bc4957f7ffbd9ba68e2"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame0_BGRA.bin",
+      "band": -1,
+      "channel": -1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "71b73b531a08eeff466340c2462293fdd644c900f75d6bc4957f7ffbd9ba68e2"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 0,
+      "id": "BGRA",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "BGRA_call0_frame0.raw",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "2f2146f7e9b8575763d78e69b8ce546c199f7fc679c0bfbdf0c1842dd6de62ef"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame0_YU64_clipped.bin",
+      "band": -1,
+      "channel": -1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "2f2146f7e9b8575763d78e69b8ce546c199f7fc679c0bfbdf0c1842dd6de62ef"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 0,
+      "id": "YU64_clipped",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "YU64_call0_frame0.raw",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "43430978674556abe1c24a9df3b89c9e7ff7f0b14d59c55747f74f9b27d81f68"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame0_ch0_resident_band0.bin",
+      "band": 0,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "43430978674556abe1c24a9df3b89c9e7ff7f0b14d59c55747f74f9b27d81f68"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 0,
+      "id": "ch0_resident_band0",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band0.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "20dcf1b5cc750d637e027441857a9125abc4408a2bc0877b93580d4492824302"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame0_ch0_resident_band1.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "20dcf1b5cc750d637e027441857a9125abc4408a2bc0877b93580d4492824302"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 0,
+      "id": "ch0_resident_band1",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band1.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "547a2de724209623cdf439f0cc51a8cfc7d8ffb89fcfab9c0c93c1b802ceb40a"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame0_ch0_resident_band2.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "547a2de724209623cdf439f0cc51a8cfc7d8ffb89fcfab9c0c93c1b802ceb40a"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 0,
+      "id": "ch0_resident_band2",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band2.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "d043a2d604f110e5746b2875778ccc2f90f76c0e8056aa8d5dd0cca27501ed2c"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame0_ch0_resident_band3.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "d043a2d604f110e5746b2875778ccc2f90f76c0e8056aa8d5dd0cca27501ed2c"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 0,
+      "id": "ch0_resident_band3",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band3.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "90a2678148cc58df55cf551c2aab703ab62cbe70a000ddf8192cc221335dfceb"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_resident_band4.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "90a2678148cc58df55cf551c2aab703ab62cbe70a000ddf8192cc221335dfceb"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_resident_band4",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band4.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_resident_band5.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_resident_band5",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band5.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_resident_band6.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_resident_band6",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band6.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "7502758c5e6194da688cccd31d050c8dcb3969fecbf337bfdc306c038143fbe0"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_resident_band7.bin",
+      "band": 0,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "7502758c5e6194da688cccd31d050c8dcb3969fecbf337bfdc306c038143fbe0"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_resident_band7",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band7.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "f290f3b89643c498124c16f77cd54e419281d7a08bf0135cf5687532810087ef"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_resident_band8.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "f290f3b89643c498124c16f77cd54e419281d7a08bf0135cf5687532810087ef"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_resident_band8",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band8.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "188af96bfb8078090e5cee3462f8a424c21bdc34848d80c6dedbf15b2218ae2e"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_resident_band9.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "188af96bfb8078090e5cee3462f8a424c21bdc34848d80c6dedbf15b2218ae2e"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_resident_band9",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band9.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "ab8b67c35e9d9825f6b7c293d6cab172fe75af2e9964688b6394fe9923fb5b3f"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_resident_band10.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "ab8b67c35e9d9825f6b7c293d6cab172fe75af2e9964688b6394fe9923fb5b3f"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_resident_band10",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band10.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "c9de7c9fa725ccc07b85b815c31418476c6725cdb25fc2696e62de76591f9017"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_ch0_resident_band14.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "c9de7c9fa725ccc07b85b815c31418476c6725cdb25fc2696e62de76591f9017"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "id": "ch0_resident_band14",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band14.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "326509696b5ed9dac145df2de5fc70e55e2e1cd4c123158e2f8abf81cc56d85c"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_ch0_resident_band15.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "326509696b5ed9dac145df2de5fc70e55e2e1cd4c123158e2f8abf81cc56d85c"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "id": "ch0_resident_band15",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band15.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_ch0_resident_band16.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "id": "ch0_resident_band16",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band16.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame0_ch0_wavelet4_ll.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 0,
+      "id": "ch0_wavelet4_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_wavelet4_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "7c69960849b67eb21ddadaa2aafb0062a02c2d42bc4f6690a7a88246fd4237cb"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_ch0_temporal_low.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "7c69960849b67eb21ddadaa2aafb0062a02c2d42bc4f6690a7a88246fd4237cb"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "id": "ch0_temporal_low",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_temporal_low.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "0d7ff810b87c7de540a72a86f9de648af56294d5a75fdd2c6e959a46f512cf6e"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_ch0_temporal_high.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "0d7ff810b87c7de540a72a86f9de648af56294d5a75fdd2c6e959a46f512cf6e"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "id": "ch0_temporal_high",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_temporal_high.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "dbb76bd13ed2f2ea3675ae045e4dfa745c7fd6ce4f9196104db6fd61a85df34a"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame0_ch0_frame0_base_ll.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "dbb76bd13ed2f2ea3675ae045e4dfa745c7fd6ce4f9196104db6fd61a85df34a"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 0,
+      "id": "ch0_frame0_base_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_frame0_base_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "576283702ea1a36d3dc9ab8902296fcd4d774c23fa57a327beb95d579124d564"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch1_resident_band0.bin",
+      "band": 0,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "576283702ea1a36d3dc9ab8902296fcd4d774c23fa57a327beb95d579124d564"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch1_resident_band0",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band0.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "58f14ff0ed0ee2aaae9ffdb0a1dec56dd6d8bf98044933aa84271c15aeed88c0"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch1_resident_band1.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "58f14ff0ed0ee2aaae9ffdb0a1dec56dd6d8bf98044933aa84271c15aeed88c0"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch1_resident_band1",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band1.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch1_resident_band2.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch1_resident_band2",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band2.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch1_resident_band3.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch1_resident_band3",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band3.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "4fab71a7bc30fe069ea239347660404347fb6b7f174e30b44228dc8b503664ae"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_resident_band4.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "4fab71a7bc30fe069ea239347660404347fb6b7f174e30b44228dc8b503664ae"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_resident_band4",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band4.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_resident_band5.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_resident_band5",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band5.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_resident_band6.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_resident_band6",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band6.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "8a55996c64e944a6096c052e91c230f67378c91228956cc9b80390ce5f36d00d"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_resident_band7.bin",
+      "band": 0,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "8a55996c64e944a6096c052e91c230f67378c91228956cc9b80390ce5f36d00d"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_resident_band7",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band7.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_resident_band8.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_resident_band8",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band8.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_resident_band9.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_resident_band9",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band9.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_resident_band10.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_resident_band10",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band10.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "3687a8942d2a9e7fd98242ef6b9cbe2fbcc1ed0efb0fa05bef33dab87cad87d3"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch1_resident_band14.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "3687a8942d2a9e7fd98242ef6b9cbe2fbcc1ed0efb0fa05bef33dab87cad87d3"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch1_resident_band14",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band14.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch1_resident_band15.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch1_resident_band15",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band15.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch1_resident_band16.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch1_resident_band16",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band16.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch1_wavelet4_ll.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch1_wavelet4_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_wavelet4_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "0312e9fdd04dca2c0bdc14673a9b1e0eaa4a13dacb64b7f1592f2639313b279b"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch1_temporal_low.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "0312e9fdd04dca2c0bdc14673a9b1e0eaa4a13dacb64b7f1592f2639313b279b"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch1_temporal_low",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_temporal_low.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "841ec913ac248194c2e3a1914e1527226e6bfbb4c12f3a745d63d93a2f3028f7"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch1_temporal_high.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "841ec913ac248194c2e3a1914e1527226e6bfbb4c12f3a745d63d93a2f3028f7"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch1_temporal_high",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_temporal_high.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "a6d3b60f4b98166431e383489e17646cd512d7b52b5257a2e859c0134a90084f"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch1_frame0_base_ll.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "a6d3b60f4b98166431e383489e17646cd512d7b52b5257a2e859c0134a90084f"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch1_frame0_base_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_frame0_base_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "b92cb20fc06f9cc7033821668a74c9db2bf5f4853fccf3c821b67bc82a592d5c"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch2_resident_band0.bin",
+      "band": 0,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "b92cb20fc06f9cc7033821668a74c9db2bf5f4853fccf3c821b67bc82a592d5c"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch2_resident_band0",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band0.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch2_resident_band1.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch2_resident_band1",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band1.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "cb1506f8db4d6521c2fc925ab12c4ec38a93d7454bf43ab1ce17f6ea1dc19384"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch2_resident_band2.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "cb1506f8db4d6521c2fc925ab12c4ec38a93d7454bf43ab1ce17f6ea1dc19384"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch2_resident_band2",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band2.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame0_ch2_resident_band3.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 0,
+      "id": "ch2_resident_band3",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band3.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_resident_band4.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_resident_band4",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band4.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "e13a395b3128d108c2eee3e7ba05f7856e4bafe431c4542ff7b9b7c50ced3473"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_resident_band5.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "e13a395b3128d108c2eee3e7ba05f7856e4bafe431c4542ff7b9b7c50ced3473"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_resident_band5",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band5.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_resident_band6.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_resident_band6",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band6.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "a11f7a8f86c93e1bf2773227bbc83fb439a8a2dc81656df88597a473d147988f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_resident_band7.bin",
+      "band": 0,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "a11f7a8f86c93e1bf2773227bbc83fb439a8a2dc81656df88597a473d147988f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_resident_band7",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band7.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_resident_band8.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_resident_band8",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band8.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_resident_band9.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_resident_band9",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band9.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_resident_band10.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_resident_band10",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band10.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch2_resident_band14.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch2_resident_band14",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band14.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "0d8046f1fe43ca150e1096612870069adb503266239052a69ed29dfda5f494ae"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch2_resident_band15.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "0d8046f1fe43ca150e1096612870069adb503266239052a69ed29dfda5f494ae"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch2_resident_band15",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band15.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch2_resident_band16.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch2_resident_band16",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band16.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 0
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame0_ch2_wavelet4_ll.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 0,
+      "id": "ch2_wavelet4_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_wavelet4_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "94e35fd30db993a70d0554c3abe6fc3824e8dc40a2c9c5df704009d2cb9854c8"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch2_temporal_low.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "94e35fd30db993a70d0554c3abe6fc3824e8dc40a2c9c5df704009d2cb9854c8"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch2_temporal_low",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_temporal_low.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "8f69069831cc4bd29583ee7fbcf093fa0b9315d3683297969052d031f94f52da"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch2_temporal_high.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "8f69069831cc4bd29583ee7fbcf093fa0b9315d3683297969052d031f94f52da"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch2_temporal_high",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_temporal_high.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "9caae8384222940044bea197e042054bee89817420b0ba1df07b4f019db8bbc4"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame0_ch2_frame0_base_ll.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "9caae8384222940044bea197e042054bee89817420b0ba1df07b4f019db8bbc4"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 0,
+      "id": "ch2_frame0_base_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_frame0_base_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "711d23957acc98cebc1459672f6af7cc5eb0d05547ae1ee6b049584b71f265ba"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame1_BGRA.bin",
+      "band": -1,
+      "channel": -1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "711d23957acc98cebc1459672f6af7cc5eb0d05547ae1ee6b049584b71f265ba"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 1,
+      "id": "BGRA",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "BGRA_call0_frame1.raw",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 8294400,
+        "sha256": "a01f3c196cbad72e24ea37438a25c40c97823607e35ea2dd83aab61593b34f36"
+      },
+      "actual_bytes": 8294400,
+      "artifact": "frame1_YU64_clipped.bin",
+      "band": -1,
+      "channel": -1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 8294400,
+        "sha256": "a01f3c196cbad72e24ea37438a25c40c97823607e35ea2dd83aab61593b34f36"
+      },
+      "expected_bytes": 8294400,
+      "frame_index": 1,
+      "id": "YU64_clipped",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "YU64_call0_frame1.raw",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "43430978674556abe1c24a9df3b89c9e7ff7f0b14d59c55747f74f9b27d81f68"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame1_ch0_resident_band0.bin",
+      "band": 0,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "43430978674556abe1c24a9df3b89c9e7ff7f0b14d59c55747f74f9b27d81f68"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 1,
+      "id": "ch0_resident_band0",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band0.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "20dcf1b5cc750d637e027441857a9125abc4408a2bc0877b93580d4492824302"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame1_ch0_resident_band1.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "20dcf1b5cc750d637e027441857a9125abc4408a2bc0877b93580d4492824302"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 1,
+      "id": "ch0_resident_band1",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band1.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "547a2de724209623cdf439f0cc51a8cfc7d8ffb89fcfab9c0c93c1b802ceb40a"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame1_ch0_resident_band2.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "547a2de724209623cdf439f0cc51a8cfc7d8ffb89fcfab9c0c93c1b802ceb40a"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 1,
+      "id": "ch0_resident_band2",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band2.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 64800,
+        "sha256": "d043a2d604f110e5746b2875778ccc2f90f76c0e8056aa8d5dd0cca27501ed2c"
+      },
+      "actual_bytes": 64800,
+      "artifact": "frame1_ch0_resident_band3.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 64800,
+        "sha256": "d043a2d604f110e5746b2875778ccc2f90f76c0e8056aa8d5dd0cca27501ed2c"
+      },
+      "expected_bytes": 64800,
+      "frame_index": 1,
+      "id": "ch0_resident_band3",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band3.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "90a2678148cc58df55cf551c2aab703ab62cbe70a000ddf8192cc221335dfceb"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_resident_band4.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "90a2678148cc58df55cf551c2aab703ab62cbe70a000ddf8192cc221335dfceb"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_resident_band4",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band4.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_resident_band5.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_resident_band5",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band5.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_resident_band6.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "dd2860e5e42300a259bef1aa9f5b80f1d10ccb45ba555dc0a7686cd124027766"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_resident_band6",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band6.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "7502758c5e6194da688cccd31d050c8dcb3969fecbf337bfdc306c038143fbe0"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_resident_band7.bin",
+      "band": 0,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "7502758c5e6194da688cccd31d050c8dcb3969fecbf337bfdc306c038143fbe0"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_resident_band7",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band7.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "f290f3b89643c498124c16f77cd54e419281d7a08bf0135cf5687532810087ef"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_resident_band8.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "f290f3b89643c498124c16f77cd54e419281d7a08bf0135cf5687532810087ef"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_resident_band8",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band8.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "188af96bfb8078090e5cee3462f8a424c21bdc34848d80c6dedbf15b2218ae2e"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_resident_band9.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "188af96bfb8078090e5cee3462f8a424c21bdc34848d80c6dedbf15b2218ae2e"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_resident_band9",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band9.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "ab8b67c35e9d9825f6b7c293d6cab172fe75af2e9964688b6394fe9923fb5b3f"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_resident_band10.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "ab8b67c35e9d9825f6b7c293d6cab172fe75af2e9964688b6394fe9923fb5b3f"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_resident_band10",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band10.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "e3ab3e045d66872f2e6a3521fbb74ebe0b28c0ef7ba6798614e7b80ea6697e75"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_ch0_resident_band11.bin",
+      "band": 1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "e3ab3e045d66872f2e6a3521fbb74ebe0b28c0ef7ba6798614e7b80ea6697e75"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "id": "ch0_resident_band11",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band11.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "c225169c7a57832d2d6ddf943f4033f832baff723873fa9620fdb8837cfd8e6c"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_ch0_resident_band12.bin",
+      "band": 2,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "c225169c7a57832d2d6ddf943f4033f832baff723873fa9620fdb8837cfd8e6c"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "id": "ch0_resident_band12",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band12.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_ch0_resident_band13.bin",
+      "band": 3,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "2a2cdc6867289e6e4ebc5405b17ce0f71c4c16026cbc6ac47fe5632157bd3980"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "id": "ch0_resident_band13",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_resident_band13.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 259200,
+        "sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629"
+      },
+      "actual_bytes": 259200,
+      "artifact": "frame1_ch0_wavelet4_ll.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 259200,
+        "sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629"
+      },
+      "expected_bytes": 259200,
+      "frame_index": 1,
+      "id": "ch0_wavelet4_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_wavelet4_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "7c69960849b67eb21ddadaa2aafb0062a02c2d42bc4f6690a7a88246fd4237cb"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_ch0_temporal_low.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "7c69960849b67eb21ddadaa2aafb0062a02c2d42bc4f6690a7a88246fd4237cb"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "id": "ch0_temporal_low",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_temporal_low.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "0d7ff810b87c7de540a72a86f9de648af56294d5a75fdd2c6e959a46f512cf6e"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_ch0_temporal_high.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "0d7ff810b87c7de540a72a86f9de648af56294d5a75fdd2c6e959a46f512cf6e"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "id": "ch0_temporal_high",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_temporal_high.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 1036800,
+        "sha256": "b069f27d183427b6fbcaadff269e99c272ad846581d813bed6192acb3190a00a"
+      },
+      "actual_bytes": 1036800,
+      "artifact": "frame1_ch0_frame1_base_ll.bin",
+      "band": -1,
+      "channel": 0,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 1036800,
+        "sha256": "b069f27d183427b6fbcaadff269e99c272ad846581d813bed6192acb3190a00a"
+      },
+      "expected_bytes": 1036800,
+      "frame_index": 1,
+      "id": "ch0_frame1_base_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch0_frame1_base_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "576283702ea1a36d3dc9ab8902296fcd4d774c23fa57a327beb95d579124d564"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch1_resident_band0.bin",
+      "band": 0,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "576283702ea1a36d3dc9ab8902296fcd4d774c23fa57a327beb95d579124d564"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch1_resident_band0",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band0.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "58f14ff0ed0ee2aaae9ffdb0a1dec56dd6d8bf98044933aa84271c15aeed88c0"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch1_resident_band1.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "58f14ff0ed0ee2aaae9ffdb0a1dec56dd6d8bf98044933aa84271c15aeed88c0"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch1_resident_band1",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band1.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch1_resident_band2.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch1_resident_band2",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band2.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch1_resident_band3.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch1_resident_band3",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band3.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "4fab71a7bc30fe069ea239347660404347fb6b7f174e30b44228dc8b503664ae"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_resident_band4.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "4fab71a7bc30fe069ea239347660404347fb6b7f174e30b44228dc8b503664ae"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_resident_band4",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band4.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_resident_band5.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_resident_band5",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band5.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_resident_band6.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_resident_band6",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band6.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "8a55996c64e944a6096c052e91c230f67378c91228956cc9b80390ce5f36d00d"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_resident_band7.bin",
+      "band": 0,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "8a55996c64e944a6096c052e91c230f67378c91228956cc9b80390ce5f36d00d"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_resident_band7",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band7.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_resident_band8.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_resident_band8",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band8.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_resident_band9.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_resident_band9",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band9.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_resident_band10.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_resident_band10",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band10.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "3687a8942d2a9e7fd98242ef6b9cbe2fbcc1ed0efb0fa05bef33dab87cad87d3"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch1_resident_band11.bin",
+      "band": 1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "3687a8942d2a9e7fd98242ef6b9cbe2fbcc1ed0efb0fa05bef33dab87cad87d3"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch1_resident_band11",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band11.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch1_resident_band12.bin",
+      "band": 2,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch1_resident_band12",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band12.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch1_resident_band13.bin",
+      "band": 3,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch1_resident_band13",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_resident_band13.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch1_wavelet4_ll.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch1_wavelet4_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_wavelet4_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "0312e9fdd04dca2c0bdc14673a9b1e0eaa4a13dacb64b7f1592f2639313b279b"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch1_temporal_low.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "0312e9fdd04dca2c0bdc14673a9b1e0eaa4a13dacb64b7f1592f2639313b279b"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch1_temporal_low",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_temporal_low.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "841ec913ac248194c2e3a1914e1527226e6bfbb4c12f3a745d63d93a2f3028f7"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch1_temporal_high.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "841ec913ac248194c2e3a1914e1527226e6bfbb4c12f3a745d63d93a2f3028f7"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch1_temporal_high",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_temporal_high.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "e74f9758f576e6a3a0fdeb42f33b997de21b21118610fe1bc1e7c4a13acb758c"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch1_frame1_base_ll.bin",
+      "band": -1,
+      "channel": 1,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "e74f9758f576e6a3a0fdeb42f33b997de21b21118610fe1bc1e7c4a13acb758c"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch1_frame1_base_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch1_frame1_base_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "b92cb20fc06f9cc7033821668a74c9db2bf5f4853fccf3c821b67bc82a592d5c"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch2_resident_band0.bin",
+      "band": 0,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "b92cb20fc06f9cc7033821668a74c9db2bf5f4853fccf3c821b67bc82a592d5c"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch2_resident_band0",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band0.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch2_resident_band1.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch2_resident_band1",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band1.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "cb1506f8db4d6521c2fc925ab12c4ec38a93d7454bf43ab1ce17f6ea1dc19384"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch2_resident_band2.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "cb1506f8db4d6521c2fc925ab12c4ec38a93d7454bf43ab1ce17f6ea1dc19384"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch2_resident_band2",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band2.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "actual_bytes": 32400,
+      "artifact": "frame1_ch2_resident_band3.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 32400,
+        "sha256": "4ed3cb967aea5234d12683b7a7c1605fb618de88acb36a411bb41bb94963aa36"
+      },
+      "expected_bytes": 32400,
+      "frame_index": 1,
+      "id": "ch2_resident_band3",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band3.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 5
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_resident_band4.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_resident_band4",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band4.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "e13a395b3128d108c2eee3e7ba05f7856e4bafe431c4542ff7b9b7c50ced3473"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_resident_band5.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "e13a395b3128d108c2eee3e7ba05f7856e4bafe431c4542ff7b9b7c50ced3473"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_resident_band5",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band5.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_resident_band6.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_resident_band6",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band6.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 4
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "a11f7a8f86c93e1bf2773227bbc83fb439a8a2dc81656df88597a473d147988f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_resident_band7.bin",
+      "band": 0,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "a11f7a8f86c93e1bf2773227bbc83fb439a8a2dc81656df88597a473d147988f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_resident_band7",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band7.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_resident_band8.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_resident_band8",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band8.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_resident_band9.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_resident_band9",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band9.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_resident_band10.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "3bd8d3cf878b4daa903082fe0a919c37faf030689116ca2a50e72c3d16748c9f"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_resident_band10",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band10.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 3
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch2_resident_band11.bin",
+      "band": 1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch2_resident_band11",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band11.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "0d8046f1fe43ca150e1096612870069adb503266239052a69ed29dfda5f494ae"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch2_resident_band12.bin",
+      "band": 2,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "0d8046f1fe43ca150e1096612870069adb503266239052a69ed29dfda5f494ae"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch2_resident_band12",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band12.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch2_resident_band13.bin",
+      "band": 3,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35cee74fe697d2c7732cc06aede881251e466d1c0f4cd3f4ac46e96bdc1536ff"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch2_resident_band13",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_resident_band13.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": 1
+    },
+    {
+      "actual": {
+        "byte_length": 129600,
+        "sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835"
+      },
+      "actual_bytes": 129600,
+      "artifact": "frame1_ch2_wavelet4_ll.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 129600,
+        "sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835"
+      },
+      "expected_bytes": 129600,
+      "frame_index": 1,
+      "id": "ch2_wavelet4_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_wavelet4_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "94e35fd30db993a70d0554c3abe6fc3824e8dc40a2c9c5df704009d2cb9854c8"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch2_temporal_low.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "94e35fd30db993a70d0554c3abe6fc3824e8dc40a2c9c5df704009d2cb9854c8"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch2_temporal_low",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_temporal_low.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "8f69069831cc4bd29583ee7fbcf093fa0b9315d3683297969052d031f94f52da"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch2_temporal_high.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "8f69069831cc4bd29583ee7fbcf093fa0b9315d3683297969052d031f94f52da"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch2_temporal_high",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_temporal_high.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    },
+    {
+      "actual": {
+        "byte_length": 518400,
+        "sha256": "35314d6f8c1f0abd05ec7806833726480a66ce3cf5902fe5be55b8c700c982c4"
+      },
+      "actual_bytes": 518400,
+      "artifact": "frame1_ch2_frame1_base_ll.bin",
+      "band": -1,
+      "channel": 2,
+      "differing_bytes": 0,
+      "equal": true,
+      "expected": {
+        "byte_length": 518400,
+        "sha256": "35314d6f8c1f0abd05ec7806833726480a66ce3cf5902fe5be55b8c700c982c4"
+      },
+      "expected_bytes": 518400,
+      "frame_index": 1,
+      "id": "ch2_frame1_base_ll",
+      "input_sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2",
+      "producer": "hypercine_candidate_decoder",
+      "reference_id": "stages/ch2_frame1_base_ll.i16le",
+      "reference_qualification": "bounded_original_sdk_single_cpu_control",
+      "wavelet": -1
+    }
+  ],
+  "decoder_library": {
+    "byte_length": 105006,
+    "sha256": "24b5eb2ca8de0d1f056a893e67e9149b0d2bdbbd24648874f49861ef0170298c"
+  },
+  "geometry": [
+    1920,
+    1080
+  ],
+  "input_packet": {
+    "byte_length": 897552,
+    "sha256": "fab22de68bc73eaf99d204a5a569e21540dc346d2e72d1c76de9afe401b858f2"
+  },
+  "issue": 189,
+  "mismatched": 0,
+  "not_materialized_per_channel": {
+    "frame0_logical_bands": [
+      11,
+      12,
+      13
+    ],
+    "frame1_logical_bands": [
+      14,
+      15,
+      16
+    ]
+  },
+  "reference_manifest": {
+    "byte_length": 121369,
+    "sha256": "b9eac9db4bae0a795240718b36f34e63973f9128f854eae212e68a7282cc4780"
+  },
+  "reference_status": "AVAILABLE",
+  "release_gate": "BLOCKED",
+  "required_missing": [
+    "pre_inverse_entropy_oracle",
+    "final_signed_planar_oracle"
+  ],
+  "schema": "hypercine.gop2.comparison_index/1",
+  "source": {
+    "byte_length": 10327,
+    "sha256": "459ae9f4ad75320f80d288681ec33311649987d4617f5688088bdda7bae8b9e1"
+  },
+  "topology": {
+    "chunks": 54,
+    "coefficient_bands": 51,
+    "control_records": 3,
+    "parser": "candidate_strict_FIELDPLUS_parser"
+  },
+  "wavelet_library": {
+    "byte_length": 8176612,
+    "sha256": "1e451384a8759d8e5baf4146f205f153bb40e47e89ae9168c8fa0663b00b8c66"
+  }
+}
