@@ -352,6 +352,22 @@ void rule_s5_must_complete(std::size_t workers) {
 //                 asserts what is actually reachable instead -- the later task
 //                 was never executed and is Canceled.
 //
+// run() receives the requested worker count on every arm. An earlier revision
+// substituted run(2) whenever workers >= 2 (and run(1) otherwise), so the
+// CTest entries for 4 and 16 repeated the 2-worker measurement and were not
+// evidence about those widths. The assertion split above is unchanged: width
+// 1 still must not invent the two-party witness.
+//
+// Widths 4 and 16 still execute both root callbacks, and that is a property
+// of this graph rather than a longer timeout. Both S6 roots are
+// dependency-free, so both are Ready before any worker is created. A worker
+// claims the next ready index under the graph mutex, and the concurrent
+// handshake does not fail until both callbacks have entered, so the first
+// error cannot cancel the other root before that claim. Workers beyond the
+// two roots block on the ready queue; they do not skip or replace the second
+// claim. A missing witness stays BROKEN. The wait is not widened to launder
+// a schedule the queue does not actually provide.
+//
 // Every wait is bounded, so a broken handshake fails the rule instead of hanging.
 // ---------------------------------------------------------------------------
 namespace s6 {
@@ -393,7 +409,7 @@ struct StartGate {
 void rule_s6_first_error_precedence(std::size_t workers) {
     const bool concurrent = workers >= 2;
 
-    const auto order_holds = [concurrent](bool allocation_first, std::string& why) {
+    const auto order_holds = [concurrent, workers](bool allocation_first, std::string& why) {
         s6::StartGate gate;
         std::atomic<bool> second_threw{false};
         std::atomic<bool> later_ran{false};
@@ -433,7 +449,7 @@ void rule_s6_first_error_precedence(std::size_t workers) {
              {[] { return true; }}}});
         graph_ptr = &graph;
 
-        std::thread runner([&] { graph.run(concurrent ? 2 : 1); });
+        std::thread runner([&] { graph.run(workers); });
         GraphError first = GraphError::None;
         if (concurrent) {
             // The later callback waits on this error becoming visible, so it is
@@ -519,7 +535,7 @@ void rule_s6_publication_error_is_sticky(std::size_t workers) {
          {[] { return true; }}}});
     graph_ptr = &graph;
 
-    std::thread runner([&] { graph.run(concurrent ? 2 : 1); });
+    std::thread runner([&] { graph.run(workers); });
     GraphError first = GraphError::None;
     if (concurrent) {
         s6::wait_for([&] { return graph.error() != GraphError::None; }, 5);
