@@ -245,6 +245,18 @@ void rule_s2_predicate_reads_owned_storage(std::size_t workers) {
              "publishes correctly and its consumer sees the written value");
 }
 
+// Bounded spin shared by the S3 cancel handshake and the S6 witness waits.
+// A handshake that cannot complete fails its rule instead of wedging the gate.
+template <typename Predicate>
+bool wait_for(Predicate predicate, int seconds) {
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
+    while (!predicate()) {
+        if (std::chrono::steady_clock::now() >= deadline) return false;
+        std::this_thread::yield();
+    }
+    return true;
+}
+
 // ---------------------------------------------------------------------------
 // S3 -- cancellation drains and never reports success.
 // From RCA-195: WaitForTransformThread zeroed the queue without asking what was
@@ -269,11 +281,25 @@ void rule_s3_cancel_drains_and_fails(std::size_t workers) {
     // look concurrent -- and it still has to hold when the pool is wider than
     // the ready set. A CTest argument of 4 or 16 must not replay run(2).
     std::thread runner([&] { graph.run(workers); });
-    while (!entered.load()) std::this_thread::yield();
-    const bool cancelled = graph.cancel(kGeneration);
-    const bool not_quiescent_while_running = !graph.quiescent();
+    // Ready handshake is bounded. If run() returns before this callback is
+    // claimed, the rule is BROKEN instead of spinning until a CTest watchdog
+    // kills the process. release is stored on that path too, so a callback
+    // that arrives after the timeout cannot spin in its own wait.
+    const bool callback_entered = wait_for([&] { return entered.load(); }, 5);
+    bool cancelled = false;
+    bool not_quiescent_while_running = false;
+    if (callback_entered) {
+        cancelled = graph.cancel(kGeneration);
+        not_quiescent_while_running = !graph.quiescent();
+    }
     release = true;
     runner.join();
+
+    if (!callback_entered) {
+        required("S3-cancel-drains-and-fails", false,
+                 "the cancelled callback never entered; cannot claim the cancel/drain property");
+        return;
+    }
 
     required("S3-cancel-drains-and-fails",
              cancelled && not_quiescent_while_running && graph.quiescent() &&
@@ -372,19 +398,10 @@ void rule_s5_must_complete(std::size_t workers) {
 // ---------------------------------------------------------------------------
 namespace s6 {
 
-// Bounded spin, never an unbounded wait: a handshake that cannot complete has to
-// fail the rule rather than wedge the gate.
-bool wait_for(const std::function<bool()>& predicate, int seconds) {
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
-    while (!predicate()) {
-        if (std::chrono::steady_clock::now() >= deadline) return false;
-        std::this_thread::yield();
-    }
-    return true;
-}
-
 // Shared two-party start gate. Both root callbacks call enter(); the gate opens
-// when the second one arrives.
+// when the second one arrives. The waits are the bounded wait_for above, so a
+// missing party still fails the rule instead of hanging. The witness itself is
+// unchanged: both callbacks must be claimed before either fails.
 struct StartGate {
     std::atomic<int> started{0};
     std::atomic<bool> both_started{false};
@@ -438,7 +455,7 @@ void rule_s6_first_error_precedence(std::size_t workers) {
                  gate.enter();
                  if (concurrent &&
                      (!gate.await_both() ||
-                      !s6::wait_for([&] { return graph_ptr->error() != GraphError::None; }, 5))) {
+                      !wait_for([&] { return graph_ptr->error() != GraphError::None; }, 5))) {
                      gate.timed_out = true;
                      return;  // produces output; the witness check below fails the rule
                  }
@@ -454,7 +471,7 @@ void rule_s6_first_error_precedence(std::size_t workers) {
         if (concurrent) {
             // The later callback waits on this error becoming visible, so it is
             // safe to read before joining: the first error is already recorded.
-            s6::wait_for([&] { return graph.error() != GraphError::None; }, 5);
+            wait_for([&] { return graph.error() != GraphError::None; }, 5);
             first = graph.error();
             runner.join();
         } else {
@@ -525,7 +542,7 @@ void rule_s6_publication_error_is_sticky(std::size_t workers) {
              gate.enter();
              if (concurrent &&
                  (!gate.await_both() ||
-                  !s6::wait_for([&] { return graph_ptr->error() != GraphError::None; }, 5))) {
+                  !wait_for([&] { return graph_ptr->error() != GraphError::None; }, 5))) {
                  gate.timed_out = true;
                  return;
              }
@@ -538,7 +555,7 @@ void rule_s6_publication_error_is_sticky(std::size_t workers) {
     std::thread runner([&] { graph.run(workers); });
     GraphError first = GraphError::None;
     if (concurrent) {
-        s6::wait_for([&] { return graph.error() != GraphError::None; }, 5);
+        wait_for([&] { return graph.error() != GraphError::None; }, 5);
         first = graph.error();
         runner.join();
     } else {
