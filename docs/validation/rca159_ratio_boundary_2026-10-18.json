@@ -37,6 +37,9 @@
     "total_calls": 6060,
     "distinct_modal_frame_digests_across_all_cells": 1,
     "modal_frame_sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd",
+    "modal_frame_sha256_domain": "Every modal_frame_sha256 value in this file, including per-cell copies, is sha256 of the image region (pitch*height = 8294400 bytes, 1920x1080, pitch 7680) PLUS 64 sentinel bytes 0xCD (8294464 bytes total). The probe hashes out.data()/out.size() after prefilling that tail; retained BGRA dumps contain only the 8294400 image bytes. Recomputed 2026-10-23 with sha256sum on retained Linux outputs from 2026-10-18. Exemplars of the modal class: rca159-mech/p39/dec_c00.bgra and harness dumps/p1/dec_c00.bgra. 214 of 243 exact-size retained BGRA files share this pair; the rest are non-modal frames.",
+    "modal_frame_sha256_image_only_bytes_8294400": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+    "modal_frame_sha256_image_plus_64_cd_bytes_8294464": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd",
     "status_codes_observed": [
       0
     ],

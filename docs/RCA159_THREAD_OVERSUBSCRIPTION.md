@@ -78,6 +78,8 @@ Aggregation: `ci/build_rca159_evidence.py`.
 
 Every cell decodes to the same modal frame
 `12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd`.
+That digest is the image plus 64 sentinel bytes, not the image alone — see
+[Hash domain](#hash-domain).
 All 240 calls return `CFHD_ERROR_OKAY` (code 0) at 1920×1080, pitch 7680 — including
 the divergent ones.
 
@@ -108,7 +110,8 @@ contradicts the split, and all 36 cells share one modal digest.
 95 cells, **6 060 decode calls**, one fresh process per call, same pinned packet and
 the same pristine SDK revision as above. All 6 060 calls return `CFHD_ERROR_OKAY`
 (code 0) at 1920×1080 / pitch 7680 and share **one** modal digest,
-`12ed7b2b…480fd`; only the divergent minority differs.
+`12ed7b2b…480fd` (image + 64 sentinel bytes `0xCD`; the image-only digest is
+different — see [Hash domain](#hash-domain)); only the divergent minority differs.
 
 ### The previously unmeasured band is clean
 
@@ -178,6 +181,30 @@ effect from slow host drift, so every arm in the follow-up was run **interleaved
 round** — all cells back to back, several times — before any comparison was drawn.
 The `interleaved` and `cliff` sweeps are that design. Single-cell numbers from a
 sequential pass should not be quoted on their own.
+
+## Hash domain
+
+`modal_frame_sha256` in both evidence files is the probe digest
+`sha(out.data(), out.size())`. The buffer is allocated as `pitch * height + 64`
+and prefilled with `0xCD`. Retained BGRA dumps write only `pitch * height`.
+For this geometry that is 8,294,400 bytes (1920×1080, pitch 7680), and the
+hashed domain is those bytes plus 64 sentinel bytes (8,294,464).
+
+Recomputed 2026-10-23 with `sha256sum` from retained Linux outputs dated
+2026-10-18. Two exemplars of the modal class, `rca159-mech/p39/dec_c00.bgra`
+and harness `dumps/p1/dec_c00.bgra`, are byte-identical and both exact-size:
+
+| domain | bytes | sha256 |
+| --- | ---: | --- |
+| image only | 8,294,400 | `c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0` |
+| image + 64 bytes `0xCD` | 8,294,464 | `12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd` |
+
+The second value is the historical `modal_frame_sha256`. The first is the
+image-only digest of the same bytes. Across the retained exact-size BGRA set,
+214 of 243 files share this pair; the other 29 are non-modal frames and were
+not used as the modal exemplars. This names the byte domain only. It is not a
+Windows parity or release claim. The gate stays
+`REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED`.
 
 ## What this means for the campaign
 
