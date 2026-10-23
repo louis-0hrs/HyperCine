@@ -57,7 +57,7 @@ The upstream C codebase was authored for older compilers (C99 / MSVC 2015). Unde
 - **`C4101` (Unreferenced Local Variables):** Several legacy scratch variables. Suppressed (`/wd4101`).
 
 ### 2. Multi-Core Processor Detection (`GetProcessorCount`)
-In `upstream/Common/thread.c`, processor core counts are queried using `GetSystemInfo` or `GetActiveProcessorCount`. On modern systems with >64 logical processors or asymmetric P/E cores, legacy logic limits thread counts to 32 or 64. HyperCine's host wrappers handle thread pool allocation externally rather than modifying this upstream routine.
+Processor detection is implemented in [`upstream/Codec/cpuid.c`](../upstream/Codec/cpuid.c), with platform-specific Windows, Linux and macOS branches. An older `CThreadLimiter::GetProcessorCount` helper is retained under `#if 0` in [`upstream/Common/ThreadPool.cpp`](../upstream/Common/ThreadPool.cpp). Worker counts and affinity are separate contracts; restricting process affinity does not itself prove a smaller decoder worker pool. See the decoder investigation below for measured limitations.
 
 ### 3. `ConvertRGBAtoRGB48` Inversion Hazard
 In `upstream/Codec/encoder.c` (lines 2398–2402), handling of inverted RGB buffers (`COLOR_FORMAT_RGB32_INVERTED` / `CFHD_PIXEL_FORMAT_BGRa`) offsets the input pointer to the bottom row (`data += (display_height - 1) * pitch; pitch = -pitch;`). In `upstream/Codec/frame.c` (`ConvertRGBAtoRGB48`, line 6364), a secondary inversion calculation (`rgb_ptr += (display_height - 1 - row) * rgb_row_pitch;`) results in reading before the beginning of the buffer.
@@ -102,16 +102,18 @@ The optional `CFHDCodecThreaded` target is `EXCLUDE_FROM_ALL`. It reproduces thi
 
 Decoding the same sample twice does not reconstruct the same pixels. The stock library is built with `_THREADED_DECODER=1`, and `InvertHorizontalStrip16sToYUYV` adds `rand()` into the inverse rounding. Those calls share the process CRT state across decoder worker threads, so the dither assignment depends on scheduling. `srand` does not make two opens match. Pixel PSNR is therefore not a pass/fail gate for this test. Both tests still require `CFHD_DecodeSample` to return success and the output geometry to be 128×128 YUY2 with pitch 256. Upstream sources were not modified.
 
-### 9. Multi-Threaded Decoder Bugs on >8-Core CPUs (`AllocDecoderBuffer` Scratch Overflow & `BANDS_ALL_STARTED` Race)
+### 9. Multithreaded decoder: reproduced nondeterminism, root cause under investigation
 
-In `upstream/Codec/decoder.c` (`_THREADED_DECODER=1`), two latent concurrency bugs occur on modern CPUs with more than 8 logical processors (e.g., 16-core / 32-thread CPUs) when decoding high-entropy or multi-frame sequences:
+> [!WARNING]
+> An earlier version of this section treated a presumed eight-thread scratch-buffer overflow and a simple `BANDS_ALL_STARTED` → `BANDS_ALL_VALID` substitution as established explanations. **Neither is accepted here as a proven general root cause or a production fix.** The decoder investigation has since produced controlled, sometimes contradictory evidence. The upstream source remains frozen.
 
-1. **Worker Thread Scratch Buffer Heap Overflow (`AllocDecoderBuffer`, lines 5192–5215 vs `InitDecoder`, line 2131):**
-   `AllocDecoderBuffer` allocates `decoder->buffer.scratch.size = 8 * Align16(subband_size)` (hardcoded for at most 8 concurrent worker threads), while `InitDecoder` sets `threads = GetProcessorCount()` (clamped to `ENTROPY_THREADS_MAX = 32` in `upstream/Codec/entropy_threading.c`). In `EntropyDecodeBand` (line 11523), worker threads with `thread_index >= 8` index `decoder->buffer.scratch.base_ptr + thread_index * scratch_size`, reading and writing up to `24 * scratch_size` past the end of the heap allocation when decoding high-complexity frames whose subbands queue more than 8 entropy jobs concurrently.
-2. **Wavelet Reconstruction Race Condition (`DecodeSampleTransform`, line 11703):**
-   In `DecodeSampleTransform`, when level-1 highpass bands (`HL_BAND`, `LH_BAND`, `HH_BAND`) are queued to the entropy worker pool, the main thread checks `decoder->thread_cntrl.state[transform_index][wavelet_index] == BANDS_ALL_STARTED` (`0x0F`, set as soon as worker threads *start* entropy decoding) instead of `BANDS_ALL_VALID` (`0xF0`, set when worker threads *finish* entropy decoding). Only if that check fails does it wait on `WaitForTransformLevel(decoder, transform_index, wavelet_index)` for `BANDS_ALL_VALID`. If worker threads have started all 3 bands (`state == 0x0F`) but have not yet finished writing decoded coefficients (`state != 0xF0`), the main decoder thread immediately proceeds to `ReconstructWaveletBand` and reconstructs from partially decoded highpass band memory.
+**Observed failure.** The original GoPro `CFHD_DecodeSample` can return `CFHD_ERROR_OKAY` with correct dimensions yet yield different decoded pixels from an *identical* CFHD packet. Reproductions exist without CUDA/GPU involvement, including fresh-process tests. Consequently, decoder pixel or PSNR regressions must be distinguished from encoder packet mismatches. See [Windows test-gating issue #120](https://github.com/louis-0hrs/HyperCine/issues/120) and the [cross-host decision board #161](https://github.com/louis-0hrs/HyperCine/issues/161).
 
-- *Mitigation:* In accordance with Rule 1 (`upstream/` immutability), `upstream/Codec/decoder.c` is untouched. In HyperCine's decode verification harnesses (`DecodeCfhdSample3A` in `src/core/phase3a_encoder.cpp`), the upstream decoder worker count is clamped to 1 thread (`TAG_CPU_MAX = 1` via `CFHD_SetActiveMetadata` and `m_decoder->thread_cntrl.capabilities = (capabilities & 0xffff) | (1 << 16)` after `CFHD_PrepareToDecode`), forcing `EntropyDecodeBand` onto the synchronous `thread_count == 1` path (`scratch_memory = decoder->buffer.scratch.base_ptr`, no worker race).
+**Worker topology matters in one measured Linux protocol.** The [#159 thread/affinity correction (PR #169)](https://github.com/louis-0hrs/HyperCine/pull/169) found that restricting a process's CPU affinity does not necessarily reduce the decoder's worker pool: `GetProcessorCount()` can still size the pool using online processors. Under that test's recorded Linux matrix, divergent calls occurred in oversubscribed cells (`decoder_threads > affinity_cpus`) and not in the non-oversubscribed cells. This is **evidence about a trigger in those test conditions**, not a verified cross-platform memory-race mechanism.
+
+**Source hypotheses are still being tested.** Possible explanations include worker completion/publication order, lowpass producer-consumer lifetime, buffer indexing and dither/rounding state. In a bounded low-logical-processor [#160 A/B (PR #163)](https://github.com/louis-0hrs/HyperCine/pull/163), specific queue-discard and strict-validity-predicate interventions did **not** explain the observed divergence. Do not generalize an earlier 128/256 synthetic result into a proven 1080p root cause. Compare the actual checked-out SDK line/function names; old hardcoded line-number explanations may be wrong.
+
+**Diagnostic containment is not a repair.** Some HyperCine verification code configures the reference decoder with `TAG_CPU_MAX = 1` and a matching one-worker limit after `CFHD_PrepareToDecode`. This changes the execution path and can avoid a reproduced concurrency-sensitive trigger in particular tests, but it is **not** evidence that all decoder race, memory-safety, format, or release gates have passed. Do not modify `upstream/` as part of a workaround.
 
 ### 10. Small-width horizontal highpass prefix reads (#21)
 
@@ -129,3 +131,36 @@ remain unchanged. The test-only negative regression preserves this oracle
 limitation and checks prefix independence at larger tested widths, without
 granting new full-frame parity claims. See [diagnosis and reproduction](SMALL_CHROMA_ORACLE.md).
 
+### 11. Position-dependent signed narrowing in inverse horizontal synthesis
+
+Source review for [issue #144](https://github.com/louis-0hrs/HyperCine/issues/144)
+found that `InvertHorizontalStrip16s.c`, with the default Pentium-4/SSE2 path,
+uses different signed16 storage rules along a row. Interior SIMD operations
+saturate after each add/subtract; the scalar tail uses wrapping `short`
+assignments on the pinned x86/MSVC model. The first border's SSE insertion
+retains low bits, while the last border stores a saturated result. These paths
+can differ from a uniform wide-accumulator formula on signed extrema.
+
+The [scalar-stage proposal](SCALAR_INVERSE_STAGE_144.md) pins the source,
+operation order, border/tail positions and integer counterexamples. This is a
+source-derived portability constraint, not an observed defect on the selected
+real references or a claim about decoder nondeterminism. A future owned CPU
+adapter must explicitly model the reviewed narrowing rules, or obtain separate
+approval and oracle qualification for a changed arithmetic contract. No SDK or
+production implementation is patched here; the proposed stage remains gated.
+
+
+### 12. Asymmetric lower vertical endpoint in overflow-protected inverse
+
+`InvertSpatialQuantOverflowProtected16s` in `Codec/spatial.c` leaves the LL
+pointer at row n-2 after its scalar middle loop, while the three-row LH ring
+contains rows n-3,n-2,n-1. Its final vertical lowpass filter therefore reads
+LL rows n-2,n-3,n-4 and highpass row n-1; the horizontal-highpass pair reads
+LH rows n-1,n-2,n-3 and HH row n-1. This is pointer progression, not a change
+to the +4 rounding rule or a horizontal arithmetic difference.
+
+The owned research stage preserves that asymmetry explicitly and requires at
+least four input rows. Three rows would make the original LL endpoint read
+before row zero. An independent synthetic ramp and pinned original replay
+cover this behavior; frozen upstream remains unchanged. See
+[the numerical diagnosis](validation/SCALAR_INVERSE_RESEARCH_144.md).

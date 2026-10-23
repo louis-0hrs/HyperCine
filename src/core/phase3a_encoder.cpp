@@ -195,7 +195,7 @@ public:
             fn_throttle_ = reinterpret_cast<FnGetThrottle>(GetProcAddress(dll_, "nvmlDeviceGetCurrentClocksEventReasons"));
         }
 
-        if (fn_init_ && fn_get_dev_ && fn_init_() == 0) {
+        if (fn_init_ && fn_shutdown_ && fn_get_dev_ && fn_init_() == 0) {
             inited_ = true;
             if (fn_get_dev_(0, &dev_) == 0 && dev_ != nullptr) {
                 available_ = true;
