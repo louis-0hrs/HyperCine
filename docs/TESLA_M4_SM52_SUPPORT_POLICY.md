@@ -64,7 +64,7 @@ ordered, and a later gate never repairs an earlier one.
 | **G1 launches kernels** | The built binary is accepted by the driver and executes on the device. | **PASS** — CUDA Phase 2 tests and the entropy-capacity concurrency test execute natively. |
 | **G2 strict encode equivalence** | Encoder input -> quantized coefficients -> entropy payload -> complete sample, plus geometry, metadata and resource checks, are byte-identical for the exercised synthetic inputs. | **PASS for the exercised configurations.** This gate is always fatal and is never derived from decoded pixels. |
 | **G2P original-SDK pixel equality** | Decoded pixels and PSNR from the frozen original decoder match a trustworthy reference. | **NOT QUALIFIED.** The frozen decoder is nondeterministic for identical packets on this class (#120/#205/#206). The Phase 2 tests report exit `77` for the pixel gate unless an earlier strict gate already failed. |
-| **G3 repeated stateful 1080p** | Repeated stateful runs produce stable strict results and a qualified pixel result. | **NOT QUALIFIED.** Strict bitstream results were repeatable in the exercised runs; the pixel signal is exactly the unstable one quarantined by #120. |
+| **G3 repeated stateful 1080p** | Repeated stateful runs produce stable strict results and a qualified pixel result. | **NOT QUALIFIED.** The pixel signal is exactly the unstable one quarantined by #120; full-pipeline repeatability under a qualified oracle has not been established on this class. |
 | **G4 4K** | Same as G2/G3 at 3840×2160. | **Strict gates PASS at the measured configuration** (3 slots, 4 streams, host input, band-streamed D2H). Pixel gate **NOT QUALIFIED**. |
 | **G5 8K** | Same at 7680×4320 within the device's measured capacity. | **Split.** 3 slots × 2 streams passes the strict bitstream/decode gates; **3 slots × 4 streams fails hard** (see §3). Capacity failure is a FAIL, never a SKIP. |
 | **G6 useful FPS** | Sustained throughput meets a declared target for a declared configuration. | **NOT MEASURED / NOT QUALIFIED** on this device class. No FPS figure is claimed here. |
@@ -72,8 +72,8 @@ ordered, and a later gate never repairs an earlier one.
 Consequences:
 
 - "18/20 CUDA tests green" or "23/26 native CTest" describes execution, not
-  qualification. The missing items are the pixel gate and the measured
-  resource ceiling, and they stay visible.
+  qualification. The missing pieces are a qualified pixel gate and a
+  release-capable capacity envelope, and they stay visible.
 - No configuration on this device is currently a **release** target, because
   G2P cannot pass until an independent pixel oracle is qualified and reviewed.
 
