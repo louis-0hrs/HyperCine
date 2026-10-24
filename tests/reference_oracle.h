@@ -87,6 +87,16 @@ inline GateDecision ClassifyReferenceGate(const ReferenceGateInputs& inputs) {
     return GateDecision::Pass;
 }
 
+// Decode-only callsites have no encoder in the loop and no quality oracle, so
+// they cannot claim pixel accuracy. Their only qualified signal is whether
+// independent decodes of the same immutable packet agree. Pass here means
+// "stable across repeats", never "pixels are correct"; divergence is the
+// quarantined reference state, not a failure of the code under test.
+inline GateDecision ClassifyRepeatedDecodeStability(bool outputs_identical) {
+    return outputs_identical ? GateDecision::Pass
+                             : GateDecision::ReferenceUnstable;
+}
+
 inline const char* GateDecisionName(GateDecision decision) {
     switch (decision) {
     case GateDecision::Pass: return "PASS";
@@ -115,6 +125,31 @@ inline bool GateIsStrictFailure(GateDecision decision) {
     return decision == GateDecision::EncoderBitstreamMismatch ||
            decision == GateDecision::ReferenceDecodeError ||
            decision == GateDecision::QualityFailureStable;
+}
+
+// Aggregate the ordered per-fixture outcomes of a decode-only batch. Each
+// fixture's strict storage/decode/geometry/pitch/output checks must already
+// have run before its outcome is appended; an unstable fixture must never
+// short-circuit the batch, because that would hide a strict failure of a later
+// fixture behind the quarantine. Strict decisions therefore dominate, and a
+// batch is only blocked when every fixture was strict-clean and at least one
+// repeated decode diverged.
+inline GateDecision ClassifyFixtureBatch(
+    const std::vector<GateDecision>& fixtures) {
+    if (fixtures.empty()) return GateDecision::ReferenceDecodeError;
+    bool saw_unstable = false;
+    bool saw_blocked = false;
+    for (GateDecision decision : fixtures) {
+        if (GateIsStrictFailure(decision)) return decision;
+        if (decision == GateDecision::ReferenceUnstable) {
+            saw_unstable = true;
+        } else if (decision != GateDecision::Pass) {
+            saw_blocked = true;
+        }
+    }
+    if (saw_unstable) return GateDecision::ReferenceUnstable;
+    if (saw_blocked) return GateDecision::OracleUnavailable;
+    return GateDecision::Pass;
 }
 
 inline bool GateAllowsRelease(GateDecision decision) {
