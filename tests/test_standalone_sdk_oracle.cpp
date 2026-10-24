@@ -14,12 +14,14 @@
 #include <string>
 #include <vector>
 #include "test_vectors.h"
+#include "reference_oracle.h"
 #include "hypercine/canonical.h"
 #include "CFHDDecoder.h"
 #include "CFHDEncoder.h"
 #include "CFHDMetadata.h"
 
 namespace {
+namespace oracle = hypercine::test_oracle;
 using Bytes = HyperCineTest::AlignedVector<uint8_t>;
 using Path = std::filesystem::path;
 constexpr int width = 128, height = 128;
@@ -172,7 +174,10 @@ int main(int argc,char** argv) {
     try {
         Require(argc==3 || report,"usage: test_standalone_sdk_oracle fixtures output [--report]");
         const Path fixtures=argv[1],output=argv[2];std::filesystem::create_directories(output);
-        bool pass=true;
+        // Strict decoding/storage/API/geometry/pitch/non-zero signals stay fatal.
+        bool strict_failure=false;
+        std::size_t observed_decodes=0,distinct_per_pattern=0;
+        bool quality_measured=false,quality_meets_threshold=true;
         std::cout<<std::setprecision(10)<<"Standalone SDK oracle: Windows x86, frozen GoPro SDK, YU64+BGRA, 5 fresh instances per format\n";
         for(const std::string pattern:{"flat","gradient","canonical"}) {
             try {
@@ -182,26 +187,40 @@ int main(int argc,char** argv) {
                 for(int repeat=0;repeat<5;++repeat) {
                     auto yu64=Decode(packet,CFHD_PIXEL_FORMAT_YU64,pattern+" YU64 repeat="+std::to_string(repeat));
                     auto p10=Planar(yu64);auto metric=CompareP10(p10,expected,pattern+" SDK-vs-FFmpeg");
-                    yhash.insert(HyperCineTest::ComputeFNV1a64(yu64.data(),yu64.size()));
+                    yhash.insert(HyperCineTest::ComputeFNV1a64(yu64.data(),yu64.size()));++observed_decodes;
                     auto bgra=Decode(packet,CFHD_PIXEL_FORMAT_BGRA,pattern+" BGRA repeat="+std::to_string(repeat));
-                    CompareRgb(bgra,rgb,pattern+" SDK-vs-FFmpeg");rhash.insert(HyperCineTest::ComputeFNV1a64(bgra.data(),bgra.size()));
+                    CompareRgb(bgra,rgb,pattern+" SDK-vs-FFmpeg");rhash.insert(HyperCineTest::ComputeFNV1a64(bgra.data(),bgra.size()));++observed_decodes;
                     if(repeat==0) {Write(output/(pattern+".sdk-p10"),p10);Write(output/(pattern+".sdk-bgra"),bgra);
                         if(report) {Emit(pattern+".sdk-p10",p10);Emit(pattern+".sdk-bgra",bgra);}}
-                    // P10 coding quality is a gate; RGB comparison records differing chroma reconstruction.
-                    if(metric.psnr<=35 || (pattern=="flat" && metric.maximum!=0)) pass=false;
+                    // The pinned .p10 decode is not an independently qualified oracle
+                    // (#224), so the comparison is recorded, never gated. RGB is diagnostic.
+                    quality_measured=true;
+                    if(metric.psnr<=35 || (pattern=="flat" && metric.maximum!=0)) quality_meets_threshold=false;
                 }
+                distinct_per_pattern=std::max(distinct_per_pattern,std::max(yhash.size(),rhash.size()));
                 std::cout<<pattern<<" distinctYU64="<<yhash.size()<<" distinctBGRA="<<rhash.size()<<'\n';
-            }catch(const std::exception& e) {pass=false;std::cerr<<pattern<<" SDK decode FAIL: "<<e.what()<<'\n';}
+            }catch(const std::exception& e) {strict_failure=true;std::cerr<<pattern<<" STRICT_FAILURE "<<e.what()<<'\n';}
         }
         try {
             auto control=Control(Read(fixtures/"canonical.input-p10"));Write(output/"control.cfhd",control);
             auto sdk=Planar(Decode(control,CFHD_PIXEL_FORMAT_YU64,"GoPro control"));Write(output/"control.sdk-p10",sdk);
             auto metric=CompareP10(sdk,Read(fixtures/"canonical.input-p10"),"GoPro control vs source");
-            if(metric.psnr<=35) pass=false;
+            quality_measured=true;
+            if(metric.psnr<=35) quality_meets_threshold=false;
             if(report) {Emit("control.cfhd",control);Emit("control.sdk-p10",sdk);}
             InvalidHeader();
-        }catch(const std::exception& e){pass=false;std::cerr<<"control FAIL: "<<e.what()<<'\n';}
-        std::cout<<(pass?"SDK decode PASS: all three standalone packets":"SDK decode FAIL: see unmasked diagnostics")<<'\n';
-        return pass || report ? 0:1;
+        }catch(const std::exception& e){strict_failure=true;std::cerr<<"control STRICT_FAILURE "<<e.what()<<'\n';}
+        // Only the decoded-pixel half is quarantined: an unqualified pinned reference
+        // can be BLOCKED_ORACLE at best, and disagreeing repeats are the unstable
+        // reference state. Neither is a pixel-accuracy pass or a stable failure.
+        const oracle::GateDecision decision=strict_failure
+            ?oracle::GateDecision::ReferenceDecodeError
+            :oracle::ClassifyDecodeOnlyReference(observed_decodes,distinct_per_pattern);
+        std::cout<<"standalone_sdk_decode_3_packets quality_measured="<<(quality_measured?1:0)
+                 <<" quality_meets_threshold="<<(quality_meets_threshold?1:0)
+                 <<" distinctOutputsMax="<<distinct_per_pattern
+                 <<' '<<oracle::GateDecisionName(decision)
+                 <<" exit="<<oracle::GateExitCode(decision)<<'\n';
+        return report ? 0 : oracle::GateExitCode(decision);
     }catch(const std::exception& e) {std::cerr<<"Oracle harness error: "<<e.what()<<'\n';return 1;}
 }

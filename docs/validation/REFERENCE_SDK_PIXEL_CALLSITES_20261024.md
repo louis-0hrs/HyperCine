@@ -27,7 +27,7 @@ No gate is changed here and no oracle is newly qualified.
 | --- | --- | --- | --- | --- |
 | 1 | `tests/test_phase2a.cpp:125` | synthetic host/device packet | encoded-byte/coefficient/entropy identity and geometry strictly; pixels through `tests/reference_oracle.h` | **Aligned** — `SKIP_RETURN_CODE 77`, `reference-oracle` label (`tests/CMakeLists.txt:127`) |
 | 2 | `tests/test_phase2b.cpp:215`, `test_phase2c`, `test_phase2d` via `src/core/phase2c_encoder.cpp:300`, `phase2d_encoder.cpp:251` | same class | same class | **Aligned** — `tests/CMakeLists.txt:135`–`153` |
-| 3 | `tests/test_standalone_sdk_oracle.cpp:75`, gate at `:190`–`192` | three pinned 128×128 packets, five fresh instances per format | `PSNR > 35 dB` vs pinned FFmpeg decode, flat must be exact | **Not aligned** — a reference-decoder pixel signal is a hard CTest PASS/FAIL (`tests/CMakeLists.txt:204`–`209`); distinct-hash counts are printed but never classified |
+| 3 | `tests/test_standalone_sdk_oracle.cpp:56`, gate at `:213`–`:224` | three pinned 128×128 packets, five fresh instances per format | storage/decode/geometry/pitch/non-zero strictly; decoded pixels through `tests/reference_oracle.h` | **Aligned** — `SKIP_RETURN_CODE 77`, `reference-oracle` label (`tests/CMakeLists.txt:212`–`215`); the pinned `.p10` comparison is recorded, never gated (follow-up below) |
 | 4 | `tests/test_filmscan3_windows_decoder.cpp:35`, gate at `:46` | two Mac-produced 1080p packets, two decodes each | output identical across two decodes, else thrown as failure; output non-zero | **Not aligned** — instability is detected but mapped to FAIL, not to a blocked gate |
 | 5 | `tests/test_phase3a.cpp:147`–`154` (CUDA-only) via `src/core/phase3a_encoder.cpp:3455`–`3463` and `:3438` | every frame of a 300-frame encoded sequence | per-frame `PSNR >= 35 dB` and a frame stamp read out of decoded pixels | **Not aligned** — reference-dependent strict gate; the CUDA lane (#16/#187) owns its registration (`tests/CMakeLists.txt:171`) |
 | 6 | `tests/test_yuy2_stability.cpp:118` | one encoded sample, eight decodes | **encoder** masked-bitstream identity (`:142`–`154`); pixel hashes recorded only (`:178`–`193`) | **Aligned** — encoder-strict, pixels diagnostic |
@@ -40,15 +40,16 @@ No gate is changed here and no oracle is newly qualified.
 Strict gates at every site — decode return code, geometry, pitch, bitstream and
 coefficient identity — remain fatal. Nothing in this table is relaxed.
 
-## The three unaligned gates
+## The gates that were unaligned at audit time
 
 **#3 `standalone_sdk_decode_3_packets`.** `docs/WINDOWS_STANDALONE_ORACLE.md:163`–`176`
 records the first hosted run failing with unrestricted SDK workers while all API
 calls returned success and correct geometry. The test now requests the documented
-`TAG_CPU_MAX=1` mitigation (`tests/test_standalone_sdk_oracle.cpp:71`–`73`). The
-remaining defect is classification: if the mitigation ever fails, the same
-reference instability is reported as an encoder-quality failure. Under the #120
-contract that state is `BLOCKED_ORACLE`, not FAIL and not PASS.
+`TAG_CPU_MAX=1` mitigation (`tests/test_standalone_sdk_oracle.cpp:75`). The
+defect at audit time was classification: if the mitigation ever failed, the same
+reference instability was reported as an encoder-quality failure. Under the #120
+contract that state is `BLOCKED_ORACLE`, not FAIL and not PASS. Migrated in the
+follow-up below.
 
 **#4 `test_filmscan3_windows_decoder`.** The two-repeat identity check is already
 an instability detector. It is mapped to a thrown failure, so the same packet on
@@ -107,10 +108,11 @@ specific upstream mechanism.
 
 ## Recommended next actions
 
-1. **#3** — split the two signals: keep decode status, geometry, pitch, non-zero
-   output and the fixture-hash gate strict; route only the PSNR/stability signal
-   through `ClassifyReferenceGate` so an unstable reference exits 77 instead of 1.
-   This needs a maintainer decision because the CTest would then be able to skip.
+1. **#3** — **done** in the follow-up below: decode status, geometry, pitch,
+   non-zero output and the fixture-hash gate stay strict; only the PSNR/stability
+   signal is routed through `ClassifyDecodeOnlyReference`, so an unqualified or
+   unstable reference exits 77 instead of 1. The CTest can now skip; the Draft PR
+   remains the maintainer's merge decision.
 2. **#4** — map "two decodes differ" to the blocked exit code instead of a thrown
    failure; keep everything else unchanged.
 3. **#5** — hand to the phase lane; do not change from the #120 test-only branch.
@@ -119,6 +121,44 @@ specific upstream mechanism.
    control, not a wider sweep. The matrix above is its starting evidence.
 5. **#11 (`src/core/phase3a_encoder.cpp:757`)** — the ABI-private prefix mutation
    is a separate boundary question under #144 and is untouched here.
+
+## Follow-up (2026-10-24): callsite #3 migrated to the blocked state
+
+- `tests/test_standalone_sdk_oracle.cpp:213`–`224` classifies the decoded-pixel
+  half through `ClassifyDecodeOnlyReference` in `tests/reference_oracle.h:98`.
+  A stable set of repeats against the pinned `.p10`/`.bgra` reference is
+  `BLOCKED_ORACLE_NOT_QUALIFIED`; disagreeing repeats of the same immutable
+  packet are `ORIGINAL_SDK_REFERENCE_NONDETERMINISTIC_QUARANTINED`. Both exit
+  `77`. Neither is a pixel-accuracy PASS and neither is a stable quality failure.
+- The PSNR and flat-exactness comparison is still computed and printed with the
+  same thresholds, and the final line records `quality_measured`,
+  `quality_meets_threshold` and `distinctOutputsMax` (YU64 or BGRA). It is
+  evidence, not a gate, because the pinned FFmpeg decode is not an independently
+  qualified oracle (see the matrix above and "What this matrix does not
+  establish").
+- Every strict signal is unchanged and still exits `1`: fixture storage/read and
+  size, `CFHD_OpenDecoder`/`CFHD_PrepareToDecode`/`CFHD_DecodeSample` status,
+  128x128 YU64/BGRA geometry and format, 512-byte padded pitch, non-zero
+  output, the `Control()` encoder API path (`CFHD_OpenEncoder`,
+  `CFHD_PrepareToEncode`, `CFHD_EncodeSample`, `CFHD_GetSampleData`) and the
+  invalid-header rejection. A strict failure is reported as
+  `ReferenceDecodeError` regardless of any earlier pixel observation.
+- `tests/CMakeLists.txt:204`–`215` registers the test with `SKIP_RETURN_CODE 77`,
+  the `reference-oracle` label, and a fail pattern restricted to
+  `STRICT_FAILURE`/`Oracle harness error`. The old `SDK decode PASS:` output line
+  no longer exists, so the former `PASS_REGULAR_EXPRESSION` was removed rather
+  than left permanently unmatched.
+- Deterministic SDK-free coverage lives in `tests/test_reference_oracle.cpp`
+  (`TestDecodeOnlyReference`): stable repeats `77`, divergent repeats `77`,
+  missing evidence `1`, and neither blocked state is a strict failure or
+  release-allowing.
+- Local Windows x64 CPU-only evidence at this revision: full Release CTest and
+  the direct `77`/`1` controls are recorded in the PR handoff for the exact
+  head; hosted CI is SDK-free and does not execute this callsite.
+- `PASS` is unreachable at this callsite until an independent pixel oracle is
+  qualified; that is the contract, not an oversight.
+- Not changed: callsite #5 (`test_phase3a`, CUDA lane #16/#187) and callsite #4
+  (`test_filmscan3_windows_decoder`, separate #120 child).
 
 ## Non-claims
 

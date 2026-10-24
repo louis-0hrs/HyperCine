@@ -87,6 +87,24 @@ inline GateDecision ClassifyReferenceGate(const ReferenceGateInputs& inputs) {
     return GateDecision::Pass;
 }
 
+// A decode-only callsite has no encoder in the loop. Its strict signals (fixture
+// storage/read, decoder API status, geometry, pitch, non-zero output) stay fatal
+// and are enforced by the caller. A decoded-pixel comparison against a pinned
+// reference may be measured and recorded, but until that reference is an
+// independently qualified oracle it can only be BLOCKED_ORACLE. Independent
+// decodes of the same immutable packet that disagree are the quarantined
+// reference state. Neither outcome may become a pixel-accuracy pass or a stable
+// quality failure.
+inline GateDecision ClassifyDecodeOnlyReference(
+    std::size_t observed_decodes,
+    std::size_t distinct_decoded_outputs) {
+    if (observed_decodes == 0 || distinct_decoded_outputs == 0) {
+        return GateDecision::ReferenceDecodeError;
+    }
+    if (distinct_decoded_outputs > 1) return GateDecision::ReferenceUnstable;
+    return GateDecision::OracleUnavailable;
+}
+
 inline const char* GateDecisionName(GateDecision decision) {
     switch (decision) {
     case GateDecision::Pass: return "PASS";

@@ -267,11 +267,46 @@ void TestGateDecisions() {
           "pass label is explicit");
 }
 
+// Decode-only callsites have no encoder in the loop and compare pixels against a
+// pinned reference that is not an independently qualified oracle. Stable repeats
+// are therefore BLOCKED_ORACLE, divergence is quarantined, and missing evidence
+// fails closed. None of these states is a pixel-accuracy pass.
+void TestDecodeOnlyReference() {
+    const GateDecision stable = oracle::ClassifyDecodeOnlyReference(5, 1);
+    Check(stable == GateDecision::OracleUnavailable,
+          "stable repeats against an unqualified reference are blocked");
+    Check(oracle::GateExitCode(stable) == oracle::kExitBlocked,
+          "blocked decode-only reference uses the distinct blocked exit code");
+    Check(!oracle::GateIsStrictFailure(stable),
+          "blocked pixel quality is not a strict failure");
+    Check(!oracle::GateAllowsRelease(stable),
+          "blocked pixel quality blocks release");
+
+    const GateDecision divergent = oracle::ClassifyDecodeOnlyReference(5, 2);
+    Check(divergent == GateDecision::ReferenceUnstable,
+          "divergent repeated decodes are quarantined");
+    Check(oracle::GateExitCode(divergent) == oracle::kExitBlocked,
+          "quarantined decode-only reference exits 77");
+    Check(!oracle::GateIsStrictFailure(divergent),
+          "quarantine is not a strict failure");
+
+    Check(oracle::ClassifyDecodeOnlyReference(0, 0) ==
+              GateDecision::ReferenceDecodeError,
+          "missing decode evidence fails closed");
+    Check(oracle::ClassifyDecodeOnlyReference(5, 0) ==
+              GateDecision::ReferenceDecodeError,
+          "missing decoded output fails closed");
+    Check(oracle::GateExitCode(oracle::ClassifyDecodeOnlyReference(0, 0)) ==
+              oracle::kExitFail,
+          "missing decode evidence exits 1");
+}
+
 }  // namespace
 
 int main() {
     TestPacketEquivalence();
     TestGateDecisions();
+    TestDecodeOnlyReference();
     if (failures != 0) {
         std::cerr << failures << " reference-oracle contract check(s) failed\n";
         return 1;
