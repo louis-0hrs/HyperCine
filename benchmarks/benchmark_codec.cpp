@@ -17,8 +17,10 @@
 #include <numeric>
 #include <algorithm>
 #include <cstring>
+#include <cerrno>
 #include <thread>
 #include <filesystem>
+#include <sys/stat.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -372,6 +374,61 @@ BenchmarkMetrics RunResolutionBenchmark(const BenchmarkConfig& cfg) {
     return metrics;
 }
 
+// A closed stream is not evidence that a measurement record exists. Character
+// devices accept writes and keep nothing: POSIX /dev/null and Windows NUL,
+// CON, COM1 all open successfully. The artifact path therefore has to resolve
+// to a regular file, both before writing and again after closing.
+enum class OutputTargetKind {
+    Missing,       // nothing there yet; creating a regular file is allowed
+    RegularFile,   // an existing regular file; overwriting is allowed
+    NotRegular,    // device, pipe, socket or directory
+    Uninspectable  // cannot be examined, so no durable artifact can be promised
+};
+
+OutputTargetKind InspectOutputTarget(const std::string& path) {
+#if defined(_WIN32)
+    HANDLE handle = CreateFileA(path.c_str(), FILE_READ_ATTRIBUTES,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
+                                nullptr);
+    if (handle == INVALID_HANDLE_VALUE) {
+        const DWORD error = GetLastError();
+        if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND) {
+            return OutputTargetKind::Missing;
+        }
+        return OutputTargetKind::Uninspectable;
+    }
+    const DWORD type = GetFileType(handle);
+    BY_HANDLE_FILE_INFORMATION info{};
+    const BOOL haveInfo = GetFileInformationByHandle(handle, &info);
+    CloseHandle(handle);
+    if (type != FILE_TYPE_DISK) {
+        return OutputTargetKind::NotRegular;
+    }
+    if (!haveInfo) {
+        return OutputTargetKind::Uninspectable;
+    }
+    if ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+        return OutputTargetKind::NotRegular;
+    }
+    return OutputTargetKind::RegularFile;
+#else
+    struct stat info {};
+    if (::stat(path.c_str(), &info) != 0) {
+        return (errno == ENOENT || errno == ENOTDIR) ? OutputTargetKind::Missing
+                                                     : OutputTargetKind::Uninspectable;
+    }
+    return S_ISREG(info.st_mode) ? OutputTargetKind::RegularFile
+                                 : OutputTargetKind::NotRegular;
+#endif
+}
+
+const char* DescribeRejectedTarget(OutputTargetKind kind) {
+    return kind == OutputTargetKind::NotRegular
+               ? "target is not a regular file (device, pipe, socket or directory)"
+               : "target path cannot be inspected as a regular file";
+}
+
 // Returns true only when the artefact was actually written and closed. A caller
 // that reports success without this returning true would be claiming a
 // measurement record that does not exist.
@@ -391,6 +448,15 @@ bool WriteResultsJson(const std::string& filepath,
     // literal file name instead of a directory path.
     std::string nativePath = filepath;
 #endif
+
+    const OutputTargetKind beforeWrite = InspectOutputTarget(nativePath);
+    if (beforeWrite == OutputTargetKind::NotRegular ||
+        beforeWrite == OutputTargetKind::Uninspectable) {
+        std::cerr << "Refusing to write JSON output: " << nativePath << ": "
+                  << DescribeRejectedTarget(beforeWrite) << std::endl;
+        return false;
+    }
+
     std::ofstream out(nativePath);
     if (!out.is_open()) {
         std::cerr << "Failed to write JSON output: " << nativePath << std::endl;
@@ -449,6 +515,14 @@ bool WriteResultsJson(const std::string& filepath,
     out.close();
     if (!out) {
         std::cerr << "Failed to finish writing JSON output: " << nativePath << std::endl;
+        return false;
+    }
+
+    // The stream closed cleanly, but that only proves the bytes were accepted
+    // somewhere. Success is claimed only when the path now names a regular file.
+    if (InspectOutputTarget(nativePath) != OutputTargetKind::RegularFile) {
+        std::cerr << "Failed to write JSON output: " << nativePath
+                  << " did not produce a regular file" << std::endl;
         return false;
     }
 
