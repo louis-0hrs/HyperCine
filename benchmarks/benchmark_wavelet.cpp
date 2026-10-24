@@ -13,6 +13,7 @@
 #include <cstring>
 #include <thread>
 #include <cuda_runtime.h>
+#include "bench_host.h"
 
 #if defined(_MSC_VER)
 #include <intrin.h>
@@ -108,12 +109,26 @@ int main(int argc, char** argv) {
         int iters;
     };
 
-    std::vector<BenchConfig> configs = {
-        { "1080p", 1920, 1080, 1, 50 },
-        { "4K_UHD", 3840, 2160, 1, 25 },
-        { "8K_UHD", 7680, 4320, 1, 10 },
-        { "1080p_Batch16", 1920, 1080, 16, 20 }
-    };
+    // Default keeps every recorded configuration. --1080p-only is a smoke
+    // filter for the artifact contract; it does not change that configuration.
+    bool only_1080p = false;
+    std::string json_path = "benchmarks/results/cuda_wavelet_phase1.json";
+    for (int i = 1; i < argc; ++i) {
+        const std::string arg = argv[i];
+        if (arg == "--1080p-only") {
+            only_1080p = true;
+        } else if (!arg.empty() && arg[0] != '-') {
+            json_path = arg;
+        }
+    }
+
+    std::vector<BenchConfig> configs;
+    configs.push_back({ "1080p", 1920, 1080, 1, 50 });
+    if (!only_1080p) {
+        configs.push_back({ "4K_UHD", 3840, 2160, 1, 25 });
+        configs.push_back({ "8K_UHD", 7680, 4320, 1, 10 });
+        configs.push_back({ "1080p_Batch16", 1920, 1080, 16, 20 });
+    }
 
     std::vector<ResolutionResult> all_results;
 
@@ -346,15 +361,13 @@ int main(int argc, char** argv) {
     // -------------------------------------------------------------------------
     // Generate JSON Output
     // -------------------------------------------------------------------------
-    std::string json_path = "benchmarks/results/cuda_wavelet_phase1.json";
-    if (argc > 1) {
-        json_path = argv[1];
+    if (!hypercine::bench::OutputTargetAllowsWrite(json_path)) {
+        return 1;
+    }
+    if (!hypercine::bench::CreateParentDirectory(json_path)) {
+        return 1;
     }
     std::ofstream out(json_path);
-    if (!out.is_open()) {
-        json_path = "../../benchmarks/results/cuda_wavelet_phase1.json";
-        out.open(json_path);
-    }
     if (!out.is_open()) {
         std::cerr << "[-] Error opening " << json_path << " for writing!\n";
         return 1;
@@ -369,8 +382,8 @@ int main(int argc, char** argv) {
     out << "    \"compute_capability\": \"" << dev_info.major << "." << dev_info.minor << "\",\n";
     out << "    \"cuda_toolkit_version\": \"" << (dev_info.cuda_runtime_version / 1000) << "." << ((dev_info.cuda_runtime_version % 100) / 10) << "\",\n";
     out << "    \"cuda_driver_version\": \"" << (dev_info.cuda_driver_version / 1000) << "." << ((dev_info.cuda_driver_version % 100) / 10) << "\",\n";
-    out << "    \"compiler\": \"MSVC " << _MSC_VER << "\",\n";
-    out << "    \"build_type\": \"" << build_type << "\"\n";
+    hypercine::bench::WriteCompilerField(out);
+    out << "    \"build_type\": \"" << hypercine::bench::BuildTypeName(build_type.c_str()) << "\"\n";
     out << "  },\n";
     out << "  \"benchmarks\": [\n";
 
@@ -431,6 +444,13 @@ int main(int argc, char** argv) {
     out << "  ]\n";
     out << "}\n";
     out.close();
+    if (!out) {
+        std::cerr << "[-] Error finishing " << json_path << "\n";
+        return 1;
+    }
+    if (!hypercine::bench::OutputTargetIsRegularFile(json_path)) {
+        return 1;
+    }
 
     std::cout << "[+] Saved benchmark results to: " << json_path << "\n";
     std::cout << "=========================================================================\n";

@@ -12,6 +12,7 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
 #include "CFHDMetadata.h"
@@ -52,6 +53,7 @@ void EncodeQuantizedGroup(ENCODER* encoder, TRANSFORM* transform[], int num_tran
 #include <string>
 #include <thread>
 #include <vector>
+#include "bench_host.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -284,8 +286,8 @@ int main(int argc, char** argv) {
     json << "    \"timer\": \"CFHD_EncodeSample wall clock, GetSampleData excluded\",\n";
     json << "    \"upstream_threaded_encoder\": " << _THREADED_ENCODER << ",\n";
     json << "    \"cpu_affinity_mask\": " << AffinityMask() << ",\n";
-    json << "    \"compiler\": \"MSVC " << _MSC_VER << "\",\n";
-    json << "    \"build_type\": \"Release\"\n  },\n";
+    hypercine::bench::WriteCompilerField(json);
+    json << "    \"build_type\": \"" << hypercine::bench::BuildTypeName("Release") << "\"\n  },\n";
     json << "  \"system\": {\n";
     json << "    \"cpu_model\": \"" << JsonEscape(cpu) << "\",\n";
     json << "    \"thread_count\": " << hw << ",\n";
@@ -623,17 +625,10 @@ int main(int argc, char** argv) {
     json << "    \"note\": \"Phase 1C does not implement GPU zero-run, symbol generation, prefix sums, or VLC packing. The recommendation is in the completion report and uses the measured CPU entropy times above.\"\n";
     json << "  }\n}\n";
 
-    std::ofstream out(json_path, std::ios::binary);
-    if (!out) {
+    if (!hypercine::bench::WriteCompleteFile(json_path, json.str())) {
         std::cerr << "cannot write " << json_path << "\n";
-        const std::string fallback = "hybrid_phase1c.json";
-        std::ofstream alt(fallback, std::ios::binary);
-        if (!alt) return 1;
-        alt << json.str();
-        std::cout << "\nWrote " << fallback << "\n";
-        return 0;
+        return 1;
     }
-    out << json.str();
     std::cout << "\nWrote " << json_path << "\n";
     return 0;
 }

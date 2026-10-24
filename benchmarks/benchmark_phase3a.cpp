@@ -11,6 +11,7 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 
 extern "C" {
@@ -43,6 +44,7 @@ extern "C" {
 #include <sstream>
 #include <string>
 #include <vector>
+#include "bench_host.h"
 
 namespace {
 
@@ -238,7 +240,7 @@ void WritePhase3AResultJson(std::ostringstream& json, const hypercine::Phase3ARe
 
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
     std::cout << "================================================================================\n";
     std::cout << "HyperCine Phase 3A: Sequence Correctness, Reproducibility & Benchmark Hardening\n";
     std::cout << "================================================================================\n";
@@ -642,26 +644,16 @@ int main() {
     json << "\n  }\n"
          << "}\n";
 
-    std::error_code ec;
     std::filesystem::path out_path = std::filesystem::path("benchmarks") / "results" / "phase3a_sequence.json";
-    std::filesystem::create_directories(out_path.parent_path(), ec);
+    if (argc > 1 && argv[1] != nullptr && argv[1][0] != '-') {
+        out_path = argv[1];
+    }
     const std::string payload = json.str();
-    bool wrote_ok = false;
-    {
-        FILE* fp = std::fopen(out_path.string().c_str(), "wb");
-        if (fp) {
-            const size_t nw = std::fwrite(payload.data(), 1, payload.size(), fp);
-            std::fclose(fp);
-            wrote_ok = (nw == payload.size());
-        }
+    if (!hypercine::bench::WriteCompleteFile(out_path, payload)) {
+        std::cerr << "Failed to write " << out_path.string() << "\n";
+        return 1;
     }
-    if (!wrote_ok) {
-        std::cerr << "WARNING: direct fopen(" << out_path.string() << ") failed (errno=" << errno
-                  << "); emitting JSON_BEGIN..JSON_END on stdout\n";
-        std::cout << "JSON_BEGIN\n" << payload << "JSON_END\n";
-    } else {
-        std::cout << "\nWrote Phase 3A sequence benchmark & verification report to "
-                  << std::filesystem::absolute(out_path).string() << " (" << payload.size() << " bytes)\n";
-    }
+    std::cout << "\nWrote Phase 3A sequence benchmark & verification report to "
+              << std::filesystem::absolute(out_path).string() << " (" << payload.size() << " bytes)\n";
     return 0;
 }
