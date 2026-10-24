@@ -39,8 +39,10 @@ bool LaunchYuv422ToBgra8(
     RowOrientation,
     cudaStream_t,
     uint32_t*,
-    bool)
+    bool,
+    cudaError_t* launch_error)
 {
+    if (launch_error) *launch_error = static_cast<cudaError_t>(1);
     return false;
 }
 

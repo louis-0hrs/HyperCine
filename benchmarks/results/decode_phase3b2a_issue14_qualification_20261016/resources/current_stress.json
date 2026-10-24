@@ -1,0 +1,7 @@
+{"license":"MIT OR Apache-2.0","seed":"0x1337BEEF","cases":[
+{"instances":2,"frames_per_instance":60,"status":"PASS"},
+{"instances":4,"frames_per_instance":60,"status":"PASS"},
+{"determinism_width":128,"decodes":200,"coefficients_planes_bgra":"exact","status":"PASS"},
+{"determinism_width":128,"decodes":100,"coefficients_planes_bgra":"exact","status":"PASS"},
+{"mixed_frames":5000,"fieldplus_frame0_outputs":147,"fieldplus_frame1_outputs":147,"steady_state_cpp_allocations":0,"cuda_allocation_delta":0,"release_order":"alternating_FIFO_reverse","slot_modes":[1,2,0,4],"lifetime":"PASS","status":"PASS"}
+]}

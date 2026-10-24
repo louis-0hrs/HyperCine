@@ -22,6 +22,7 @@ if(HYPERCINE_ENABLE_CUDA)
         cuda/decode_color_cuda.cu
         cuda/decode_phase2a_pipeline.cu
         core/decode_parser.cpp
+        core/decode_fieldplus_parser.cpp
         core/decode_fsm_tables.cpp
         core/decode_thread_pool.cpp
         cuda/decode_entropy_cuda.cu
@@ -50,6 +51,7 @@ else()
         cuda/wavelet_cuda_stub.cpp
         cuda/decode_inverse_stub.cpp
         core/decode_parser.cpp
+        core/decode_fieldplus_parser.cpp
         core/decode_thread_pool.cpp
         cuda/decode_phase2b_stub.cpp
         cuda/decode_phase2c_stub.cpp
@@ -71,6 +73,13 @@ if(HYPERCINE_ENABLE_CUDA)
     target_include_directories(hypercine_decoder PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 endif()
 add_library(HyperCine::Decoder ALIAS hypercine_decoder)
+
+# hypercine_wavelet calls the upstream CFHD entry points. Declaring the dependency
+# keeps the link line ordered (hypercine_wavelet before CFHDCodecStatic) on
+# toolchains whose static archive resolution is a single left-to-right pass (GNU ld).
+if(TARGET CFHDCodecStatic)
+    target_link_libraries(hypercine_wavelet PUBLIC CFHDCodecStatic)
+endif()
 
 if(TARGET hypercine_core)
     target_link_libraries(hypercine_core INTERFACE hypercine_wavelet)

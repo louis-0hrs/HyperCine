@@ -37,6 +37,9 @@ struct DecodeRequest {
     DecodeRange range = DecodeRange::ComputerGraphics;
     DecodeOrientation orientation = DecodeOrientation::BottomUp;
     DiagnosticDecodeStrategy diagnostic_strategy = DiagnosticDecodeStrategy::Automatic;
+    // Selects an output image within a multi-frame coded sample. One-frame
+    // GOP-1 samples accept only index 0. This does not assign timestamps.
+    int frame_index = 0;
 };
 struct DecodeTicket {
     uint64_t owner = 0;
@@ -79,6 +82,8 @@ struct DecoderCapabilities {
     // GOP-1 interlaced YUV 4:2:2 at coded precision 10. This is not FIELDPLUS,
     // GOP-2, RGB, or any other temporal profile.
     bool interlaced_output = false;
+    // Progressive FIELDPLUS / GOP-2 YUV 4:2:2 at coded precision 10.
+    bool progressive_fieldplus_gop2 = false;
     int maximum_slots = 4;
 };
 struct DecodeFrameInfo {
@@ -113,6 +118,8 @@ public:
     bool IsInitialized() const;
     DecoderCapabilities Capabilities() const;
     int SlotCount() const;
+    // Progressive FIELDPLUS/GOP-2 buffers are allocated lazily on first use per slot.
+    // For latency-sensitive use, submit and release a FIELDPLUS request on each slot before timing.
     // Accepted malformed samples receive a Failed ticket requiring release.
     // Saturation returns an empty ticket and Busy, without consuming a slot.
     // Input bytes may be reused as soon as this call returns. Host indexing is

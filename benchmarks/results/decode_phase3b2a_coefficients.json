@@ -1,0 +1,8 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "validation": "all 51 decoded coefficient bands compared sample-by-sample to frozen upstream captures",
+  "samples": ["canonical_64x64", "temporal_asymmetric_64x64", "motion_64x64", "chroma_temporal_64x64", "motion_1920x1080_filmscan3"],
+  "coefficient_hashes": "runtime arrays compared exactly; stable per-band hash manifest not emitted",
+  "notes": "1080p capture was obtained through the upstream YU64 decode path."
+}

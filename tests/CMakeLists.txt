@@ -17,7 +17,34 @@ if(NOT HYPERCINE_ENABLE_CUDA)
     add_test(NAME test_decoder_cpu COMMAND test_decoder_cpu)
 endif()
 
+add_executable(test_decode_phase3b2a_parser test_decode_phase3b2a_parser.cpp)
+target_include_directories(test_decode_phase3b2a_parser PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+target_link_libraries(test_decode_phase3b2a_parser PRIVATE HyperCine::Decoder)
+add_test(NAME test_decode_phase3b2a_parser COMMAND test_decode_phase3b2a_parser "${CMAKE_SOURCE_DIR}")
+
 if(HYPERCINE_ENABLE_CUDA)
+    add_executable(test_decode_phase3b2a_api test_decode_phase3b2a_api.cpp)
+    target_link_libraries(test_decode_phase3b2a_api PRIVATE HyperCine::Decoder CFHDCodecStatic)
+    add_test(NAME test_decode_phase3b2a_api COMMAND test_decode_phase3b2a_api "${CMAKE_SOURCE_DIR}")
+
+    add_executable(test_decode_phase3b2a_reconstruction test_decode_phase3b2a_reconstruction.cpp)
+    target_link_libraries(test_decode_phase3b2a_reconstruction PRIVATE HyperCine::Decoder CFHDCodecStatic)
+    add_test(NAME test_decode_phase3b2a_reconstruction COMMAND test_decode_phase3b2a_reconstruction "${CMAKE_SOURCE_DIR}")
+
+    add_executable(test_decode_phase3b2a_failclosed test_decode_phase3b2a_failclosed.cpp)
+    target_link_libraries(test_decode_phase3b2a_failclosed PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_decode_phase3b2a_failclosed COMMAND test_decode_phase3b2a_failclosed "${CMAKE_SOURCE_DIR}")
+    set_tests_properties(test_decode_phase3b2a_failclosed PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
+
+    add_executable(test_decode_phase3b2a_temporal test_decode_phase3b2a_temporal.cu)
+    target_include_directories(test_decode_phase3b2a_temporal PRIVATE ${CMAKE_SOURCE_DIR}/src/cuda)
+    target_link_libraries(test_decode_phase3b2a_temporal PRIVATE hypercine_wavelet)
+    add_test(NAME test_decode_phase3b2a_temporal COMMAND test_decode_phase3b2a_temporal)
+
+    add_executable(test_decode_phase3b2a_upstream_temporal test_decode_phase3b2a_upstream_temporal.cpp)
+    target_link_libraries(test_decode_phase3b2a_upstream_temporal PRIVATE CFHDCodecStatic)
+    add_test(NAME test_decode_phase3b2a_upstream_temporal COMMAND test_decode_phase3b2a_upstream_temporal)
+
     add_executable(test_decode_phase3ae test_decode_phase3ae.cpp)
     target_compile_definitions(test_decode_phase3ae PRIVATE _ALLOCATOR=1)
     target_link_libraries(test_decode_phase3ae PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
@@ -127,9 +154,9 @@ if(HYPERCINE_ENABLE_CUDA)
     endif()
     add_test(NAME test_decode_phase3b1_acceptance COMMAND test_decode_phase3b1_acceptance
         "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/phase3b1-acceptance" --matrix)
-    add_test(NAME test_decode_phase3b1_stress COMMAND test_decode_phase3b1_acceptance
-        "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/phase3b1-stress" --stress)
-    set_tests_properties(test_decode_phase3b1_acceptance test_decode_phase3b1_stress PROPERTIES TIMEOUT 1800)
+    add_test(NAME test_decode_phase3b2a_mixed_stress COMMAND test_decode_phase3b1_acceptance
+        "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/phase3b2a-mixed-stress" --stress)
+    set_tests_properties(test_decode_phase3b1_acceptance test_decode_phase3b2a_mixed_stress PROPERTIES TIMEOUT 1800)
 
     add_executable(test_decode_phase3b2r test_decode_phase3b2r.cpp)
     target_compile_definitions(test_decode_phase3b2r PRIVATE _ALLOCATOR=1)
@@ -288,4 +315,12 @@ if(HYPERCINE_ENABLE_CUDA AND HYPERCINE_BUILD_BENCHMARKS)
     target_link_libraries(test_decode_phase2fb PRIVATE decode_phase2fb_research)
     add_test(NAME test_decode_phase2fb COMMAND test_decode_phase2fb)
     set_tests_properties(test_decode_phase2fb PROPERTIES TIMEOUT 300)
+endif()
+
+# Diagnostics-only helper for Compute Sanitizer evidence (issue #13). It is a
+# kernel-instrumentation control, not a codec test, so it registers no CTest:
+# run it manually under compute-sanitizer. See docs/DECODE_PHASE3B2A.md.
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(sanitizer_launch_control sanitizer_launch_control.cu)
+    set_target_properties(sanitizer_launch_control PROPERTIES CUDA_ARCHITECTURES ${CMAKE_CUDA_ARCHITECTURES})
 endif()

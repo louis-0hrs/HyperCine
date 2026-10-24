@@ -64,8 +64,13 @@ __global__ inline void VerticalInverseKernel(
         oh = sat16_gpu(odd_h);
     } else if (r == height - 1) {
         // Bottom border
-        int32_t even_l = (((5  * lowlow[r * ll_stride + c] + 4 * lowlow[(r - 1) * ll_stride + c] - lowlow[(r - 2) * ll_stride + c] + 4) >> 3) + highlow[r * hl_stride + c]) >> 1;
-        int32_t odd_l  = (((11 * lowlow[r * ll_stride + c] - 4 * lowlow[(r - 1) * ll_stride + c] + lowlow[(r - 2) * ll_stride + c] + 4) >> 3) - highlow[r * hl_stride + c]) >> 1;
+        // The frozen upstream overflow-protected routine advances its LL
+        // pointer through the interior rows but enters this border with it at
+        // height-2. Match that observable FIELDPLUS behavior while keeping the
+        // highpass pointer on the final row.
+        const int ll_row = descale == 3 ? r - 1 : r;
+        int32_t even_l = (((5  * lowlow[ll_row * ll_stride + c] + 4 * lowlow[(ll_row - 1) * ll_stride + c] - lowlow[(ll_row - 2) * ll_stride + c] + 4) >> 3) + highlow[r * hl_stride + c]) >> 1;
+        int32_t odd_l  = (((11 * lowlow[ll_row * ll_stride + c] - 4 * lowlow[(ll_row - 1) * ll_stride + c] + lowlow[(ll_row - 2) * ll_stride + c] + 4) >> 3) - highlow[r * hl_stride + c]) >> 1;
         el = sat16_gpu(even_l);
         ol = sat16_gpu(odd_l);
 
@@ -99,7 +104,8 @@ __global__ inline void VerticalInverseKernel(
             int16_t diff_h_odd = sat16_add_gpu(sat16_add_gpu(sat16_sub_gpu(0, lh0), lh2), 4) >> 3;
             oh = (sat16_sub_gpu(sat16_add_gpu(lh1, diff_h_odd), hh_val)) >> 1;
         } else {
-            // 32-bit unpacked math (Level 1)
+            // 32-bit unpacked math (prescaled Level 1 and overflow-protected
+            // deepest FIELDPLUS inverse).
             int32_t l0 = lowlow[(r - 1) * ll_stride + c];
             int32_t l1 = lowlow[r * ll_stride + c];
             int32_t l2 = lowlow[(r + 1) * ll_stride + c];
@@ -157,7 +163,7 @@ __global__ inline void HorizontalInverseKernel(
         // Left border
         int32_t left_even = ((11 * L[0] - 4 * L[1] + L[2] + 4) >> 3) + H[0];
         int32_t left_odd  = ((5  * L[0] + 4 * L[1] - L[2] + 4) >> 3) - H[0];
-        if (descale == 0) {
+        if (descale == 0 || descale == 4) {
             out_even = sat16_gpu(left_even >> 1);
             out_odd  = sat16_gpu(left_odd >> 1);
         } else {
@@ -168,7 +174,7 @@ __global__ inline void HorizontalInverseKernel(
         // Right border
         int32_t right_even = ((5  * L[c] + 4 * L[c - 1] - L[c - 2] + 4) >> 3) + H[c];
         int32_t right_odd  = ((11 * L[c] - 4 * L[c - 1] + L[c - 2] + 4) >> 3) - H[c];
-        if (descale == 0) {
+        if (descale == 0 || descale == 4) {
             out_even = sat16_gpu(right_even >> 1);
             out_odd  = sat16_gpu(right_odd >> 1);
         } else {
@@ -177,7 +183,12 @@ __global__ inline void HorizontalInverseKernel(
         }
     } else {
         // Interior columns
-        if (descale == 0) {
+        if (descale == 4) {
+            const int32_t diff_e = (int32_t(L[c - 1]) - int32_t(L[c + 1]) + 4) >> 3;
+            const int32_t diff_o = (-int32_t(L[c - 1]) + int32_t(L[c + 1]) + 4) >> 3;
+            out_even = sat16_gpu((int32_t(L[c]) + diff_e + int32_t(H[c])) >> 1);
+            out_odd = sat16_gpu((int32_t(L[c]) + diff_o - int32_t(H[c])) >> 1);
+        } else if (descale == 0) {
             int16_t diff_e = sat16_add_gpu(sat16_sub_gpu(L[c - 1], L[c + 1]), 4) >> 3;
             int16_t ev = sat16_add_gpu(sat16_add_gpu(L[c], diff_e), H[c]) >> 1;
 
@@ -186,7 +197,7 @@ __global__ inline void HorizontalInverseKernel(
 
             out_even = sat16_gpu(ev);
             out_odd  = sat16_gpu(od);
-        } else {
+        } else if (descale == 2) {
             int16_t diff_e = sat16_add_gpu(sat16_sub_gpu(L[c - 1], L[c + 1]), 4) >> 3;
             int16_t ev = sat16_add_gpu(sat16_add_gpu(L[c], diff_e), H[c]);
 
@@ -195,6 +206,16 @@ __global__ inline void HorizontalInverseKernel(
 
             out_even = sat16_gpu(int32_t(ev) * 2);
             out_odd  = sat16_gpu(int32_t(od) * 2);
+        } else {
+            // The frozen upstream FIELDPLUS scalar inverse keeps the filter
+            // accumulator in 32 bits and saturates only after restoring the
+            // prescale. Preserve that arithmetic for its narrow chroma bands.
+            const int32_t diff_e = (int32_t(L[c - 1]) - int32_t(L[c + 1]) + 4) >> 3;
+            const int32_t diff_o = (-int32_t(L[c - 1]) + int32_t(L[c + 1]) + 4) >> 3;
+            const int32_t even = (int32_t(L[c]) + diff_e + int32_t(H[c])) * 2;
+            const int32_t odd = (int32_t(L[c]) + diff_o - int32_t(H[c])) * 2;
+            out_even = sat16_gpu(even);
+            out_odd = sat16_gpu(odd);
         }
     }
 
@@ -238,6 +259,35 @@ __global__ inline void FieldCombineKernel(
     const int16_t hi = high[r * high_stride + c];
     output[(2 * r) * out_stride + c] = FieldCodeSse2(sat16_sub_gpu(lo, hi));
     output[(2 * r + 1) * out_stride + c] = FieldCodeSse2(sat16_add_gpu(lo, hi));
+}
+
+// Reconstruct one selected frame from the progressive FIELDPLUS temporal low
+// and high planes. vector_width models the upstream CPU dispatch chunk size
+// (8 for generic, 40 for Pentium 4). The upstream SIMD prefix saturates before
+// shifting; its scalar tail shifts the unsaturated int32 sum arithmetically.
+static __global__ void FieldPlusTemporalInverseKernel(
+    const int16_t* __restrict__ low, int low_pitch,
+    const int16_t* __restrict__ high, int high_pitch,
+    int16_t* __restrict__ output, int output_pitch,
+    int width, int height, int frame_index, int vector_width,
+    uint32_t* frame_error = nullptr)
+{
+    if (DecoderFrameFailed(frame_error)) return;
+    const int c = blockIdx.x * blockDim.x + threadIdx.x;
+    const int r = blockIdx.y * blockDim.y + threadIdx.y;
+    if (c >= width || r >= height || vector_width <= 0 || frame_index < 0 || frame_index > 1) return;
+
+    const int low_stride = low_pitch / int(sizeof(int16_t));
+    const int high_stride = high_pitch / int(sizeof(int16_t));
+    const int output_stride = output_pitch / int(sizeof(int16_t));
+    const int16_t lo = low[r * low_stride + c];
+    const int16_t hi = high[r * high_stride + c];
+    int32_t combined = frame_index == 0 ? int32_t(lo) - hi : int32_t(lo) + hi;
+    if (c < width - width % vector_width) combined = sat16_gpu(combined);
+    // Spell out the arithmetic shift so host and device compilers agree.
+    const int16_t reconstructed = static_cast<int16_t>(
+        combined >= 0 ? combined / 2 : -((-combined + 1) / 2));
+    output[r * output_stride + c] = reconstructed;
 }
 
 } // namespace HyperCine

@@ -1,0 +1,12 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS_FOR_TESTED_FIXTURES",
+  "coefficient_bands": "exact",
+  "w3_w5_w4_stages": "exact",
+  "temporal_low_high_and_frame_base_ll": "exact",
+  "signed_planar_yuv422": {"frame0": "exact upstream-derived signed reference", "frame1": "exact upstream-derived signed reference", "output_order": ["Y", "U", "V"]},
+  "bgra": {"frame0": "exact", "frame1": "exact"},
+  "orientation": "top-down and bottom-up pixel order checked for both frame indices",
+  "matrix_range_cross_product": "NOT_RUN_AS_SEPARATE_GATE",
+  "lowpass_offset_isolated_report": "NOT_RUN; end-to-end fixture outputs exact"
+}

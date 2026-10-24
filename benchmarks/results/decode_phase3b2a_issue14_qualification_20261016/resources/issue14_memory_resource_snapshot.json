@@ -1,0 +1,138 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS_MEMORY_LAZY_FIRST_USE_AND_SOURCE_LEVEL_STREAM_EVENT_ACCOUNTING",
+  "1080p_per_slot_device_bytes": 85191172,
+  "4k_per_slot_device_bytes": 228373252,
+  "pinned_bytes": 72518552,
+  "pageable_bytes": 85510728,
+  "stream_count": 26,
+  "event_count": 394,
+  "stream_event_source_audit": {
+    "status": "EXACT_CREATE_DESTROY_CALL_ACCOUNTING",
+    "owner": "CudaDecoderPipelinePhase2E DecodeSlot2E",
+    "before_3b2a_per_slot": {
+      "streams": 13,
+      "events": 197
+    },
+    "after_3b2a_per_slot": {
+      "streams": 13,
+      "events": 197
+    },
+    "delta_per_slot": {
+      "streams": 0,
+      "events": 0
+    },
+    "global_owned": {
+      "streams": 0,
+      "events": 0
+    },
+    "default_two_slot_instance": {
+      "streams": 26,
+      "events": 394
+    },
+    "one_slot_instance": {
+      "streams": 13,
+      "events": 197
+    },
+    "three_slot_instance": {
+      "streams": 39,
+      "events": 591
+    },
+    "four_slot_instance": {
+      "streams": 52,
+      "events": 788
+    },
+    "streams_per_slot_breakdown": {
+      "copy": 1,
+      "replay": 8,
+      "channel": 3,
+      "main": 1
+    },
+    "events_per_slot_breakdown": {
+      "channel_done": 3,
+      "inverse_and_field": 24,
+      "frame_transfer_and_lowpass": 5,
+      "per_vlc_band": 162,
+      "color_and_ready": 3
+    },
+    "destruction": "All per-slot stream/event handles are checked on successful initialization and destroyed by DecodeSlot2E::Release; decoder release drains and releases each slot.",
+    "method": "Counted creation/destruction call sites and fixed loop bounds in current source and base f433a74. No stream/event creation calls were added by 3B-2A."
+  },
+  "reference_coefficient_lower_bound_mib": {
+    "1080p": 24.22,
+    "4k": 96.9
+  },
+  "note": "Both production-size memory footprints are measured. Stream/event totals are exact source-level owned-handle counts; the current diagnostics API does not expose a runtime handle counter.",
+  "measurement": {
+    "resolution": "1920x1080",
+    "slots": 2,
+    "device_total_bytes": 170532360,
+    "immutable_device_bytes": 150016,
+    "per_slot_device_bytes": 85191172,
+    "pinned_total_bytes": 72518552,
+    "per_slot_pinned_bytes": 36259276,
+    "pageable_capacity_total_bytes": 85510728,
+    "cuda_allocation_calls_during_slot_setup": 152,
+    "steady_state_allocation_deltas": 0,
+    "first_fieldplus_decode": {
+      "latency_ms": 12.0898,
+      "device_growth_bytes": 6364344,
+      "pinned_growth_bytes": 69816,
+      "pageable_capacity_growth_bytes": 0,
+      "cuda_allocation_calls": 25,
+      "fixture": "tests/fixtures/phase3b2a/motion_1080p_progressive.cfhd",
+      "output_frame": 0,
+      "output_hash": "7f633a5358642abd"
+    }
+  },
+  "measurement_4k": {
+    "resolution": "3840x2160",
+    "slots": 2,
+    "device_total_bytes": 456896520,
+    "immutable_device_bytes": 150016,
+    "per_slot_device_bytes": 228373252,
+    "pinned_total_bytes": 72518552,
+    "per_slot_pinned_bytes": 36259276,
+    "pageable_capacity_total_bytes": 85510728,
+    "cuda_allocation_calls_after_slot_setup_and_first_decode": 152,
+    "allocation_growth_on_first_4k_decode": {
+      "device_bytes": 25026744,
+      "pinned_bytes": 69816,
+      "pageable_capacity_bytes": 0,
+      "cuda_allocation_calls": 25
+    },
+    "frame0_to_frame1_steady_state_allocation_delta": 0,
+    "stream_count": 26,
+    "event_count": 394,
+    "first_fieldplus_decode": {
+      "latency_ms": 78.8483,
+      "device_growth_bytes": 25026744,
+      "pinned_growth_bytes": 69816,
+      "pageable_capacity_growth_bytes": 0,
+      "cuda_allocation_calls": 25,
+      "source_fnv1a64": "d75570406b9b8381",
+      "sample_fnv1a64": "cc0bd067610e1d02",
+      "output_frame": 0,
+      "output_hash": "8c054bd19cd88cd6"
+    }
+  },
+  "three_slot_mixed_stress": {
+    "slots": 3,
+    "device_total_bytes": 265270048,
+    "immutable_device_bytes": 150016,
+    "per_slot_device_bytes": 88373344,
+    "pinned_total_bytes": 108882552,
+    "per_slot_pinned_bytes": 36294184,
+    "pageable_capacity_total_bytes": 128187496,
+    "cuda_allocation_calls": 265,
+    "steady_state_cpp_allocations": 0,
+    "cuda_allocation_delta": 0
+  },
+  "fieldplus_allocation_policy": {
+    "policy": "LAZY_PER_SLOT_ON_FIRST_PROGRESSIVE_FIELDPLUS_DECODE",
+    "prewarm_api": "none",
+    "caller_recommendation": "submit and release a FIELDPLUS decode on each slot before latency-sensitive use",
+    "allocation_calls_per_first_used_slot": 25,
+    "warmed_steady_state_allocation_delta": 0
+  }
+}

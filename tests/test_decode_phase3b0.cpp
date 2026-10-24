@@ -641,8 +641,88 @@ bool DecodeOne(const uint8_t* data, size_t size, CFHD_PixelFormat requested, Att
     return true;
 }
 
+// A narrowly scoped protective gate for the *research test harness* only.
+//
+// On native Linux A2 (issue #38, PR #72), the pristine upstream SDK's
+// PrepareToEncode can report success for unsupported input->encoded pairs,
+// while EncodeSample later segfaults in Release/NDEBUG. The older table that
+// classified YUY2->RGB444, RG48->YUV422, B64A paths and Bayer input->Bayer
+// as unsupported was contradicted by the native Release pair sweep: those
+// cases complete there. Preserve them as live probes.
+//
+// Do not use the GoPro SDK's assert(0) as a format-capability API. These
+// exclusions are *test-side* safeguards, not a claim that any other pair is
+// supported. Keep upstream and production codec code untouched.
+bool UnsafeUpstreamEncodePair(CFHD_PixelFormat input, CFHD_EncodedFormat encoded) {
+    // The SDK enters Bayer encoding without validating that input is raw Bayer.
+    // Native Linux testing found all non-Bayer input->Bayer requests crash.
+    if (encoded == CFHD_ENCODED_FORMAT_BAYER)
+        return input != CFHD_PIXEL_FORMAT_BYR4 && input != CFHD_PIXEL_FORMAT_BYR5;
+
+    if (encoded == CFHD_ENCODED_FORMAT_RGBA_4444) {
+        // These specific inputs were observed to crash in native Release
+        // (some also hit SampleEncoder.cpp's assert(0) in assert-active builds).
+        switch (input) {
+        case CFHD_PIXEL_FORMAT_YUY2:
+        case CFHD_PIXEL_FORMAT_2VUY:
+        case CFHD_PIXEL_FORMAT_YU64:
+        case CFHD_PIXEL_FORMAT_V210:
+        case CFHD_PIXEL_FORMAT_CT_UCHAR:
+        case CFHD_PIXEL_FORMAT_RG24:
+        case CFHD_PIXEL_FORMAT_RG48:
+            return true;
+        default:
+            return false; // BGRA and B64A remain eligible for real probing.
+        }
+    }
+
+    // The prior assert-active SDK probe classified RG48->RGB444 as unsupported.
+    // Unlike RG48->YUV422, it was not confirmed working by the later native
+    // Linux sweep. Keep the existing conservative guard until measured.
+    return input == CFHD_PIXEL_FORMAT_RG48 &&
+           encoded == CFHD_ENCODED_FORMAT_RGB_444;
+}
+
+// Keep explicit positive and negative examples so future guard expansions
+// cannot silently discard supported test axes. All comparisons remain active
+// with NDEBUG in Release (do not rely on assert).
+bool CheckUpstreamSkipMatrix() {
+    struct Pair { CFHD_PixelFormat input; CFHD_EncodedFormat encoded; };
+    const Pair unsafe[] = {
+        {CFHD_PIXEL_FORMAT_BGRA, CFHD_ENCODED_FORMAT_BAYER},
+        {CFHD_PIXEL_FORMAT_RG24, CFHD_ENCODED_FORMAT_RGBA_4444},
+        {CFHD_PIXEL_FORMAT_2VUY, CFHD_ENCODED_FORMAT_RGBA_4444},
+        {CFHD_PIXEL_FORMAT_RG48, CFHD_ENCODED_FORMAT_RGB_444},
+    };
+    const Pair preserve[] = {
+        {CFHD_PIXEL_FORMAT_YUY2, CFHD_ENCODED_FORMAT_YUV_422},
+        {CFHD_PIXEL_FORMAT_YUY2, CFHD_ENCODED_FORMAT_RGB_444},
+        {CFHD_PIXEL_FORMAT_RG24, CFHD_ENCODED_FORMAT_RGB_444},
+        {CFHD_PIXEL_FORMAT_RG24, CFHD_ENCODED_FORMAT_YUV_422},
+        {CFHD_PIXEL_FORMAT_BGRA, CFHD_ENCODED_FORMAT_RGB_444},
+        {CFHD_PIXEL_FORMAT_BGRA, CFHD_ENCODED_FORMAT_RGBA_4444},
+        {CFHD_PIXEL_FORMAT_BGRA, CFHD_ENCODED_FORMAT_YUV_422},
+        {CFHD_PIXEL_FORMAT_RG48, CFHD_ENCODED_FORMAT_YUV_422},
+        {CFHD_PIXEL_FORMAT_B64A, CFHD_ENCODED_FORMAT_RGBA_4444},
+        {CFHD_PIXEL_FORMAT_B64A, CFHD_ENCODED_FORMAT_RGB_444},
+        {CFHD_PIXEL_FORMAT_B64A, CFHD_ENCODED_FORMAT_YUV_422},
+        {CFHD_PIXEL_FORMAT_BYR4, CFHD_ENCODED_FORMAT_BAYER},
+        {CFHD_PIXEL_FORMAT_BYR5, CFHD_ENCODED_FORMAT_BAYER},
+    };
+    for (const Pair& p : unsafe)
+        if (!UnsafeUpstreamEncodePair(p.input, p.encoded)) return false;
+    for (const Pair& p : preserve)
+        if (UnsafeUpstreamEncodePair(p.input, p.encoded)) return false;
+    return true;
+}
+
 Attempt Run(const Attempt& request) {
     Attempt a = request;
+    if (UnsafeUpstreamEncodePair(a.input, a.encoded)) {
+        a.note += " SKIPPED_UPSTREAM_UNSAFE_CONVERSION: SDK input-to-encoded path is unsafe or unqualified on native Linux; not an encode/decode PASS";
+        a.prepare = -2;
+        return a;
+    }
     if (a.input == CFHD_PIXEL_FORMAT_RG30 || a.input == CFHD_PIXEL_FORMAT_R210 ||
         a.input == CFHD_PIXEL_FORMAT_DPX0 || a.input == CFHD_PIXEL_FORMAT_AR10 ||
         a.input == CFHD_PIXEL_FORMAT_AB10 || a.input == CFHD_PIXEL_FORMAT_RG64 ||
@@ -1005,6 +1085,10 @@ void RunThunk(void* opaque) {
 extern "C" int HyperCineSehCall(void (*fn)(void*), void* arg, unsigned long* code);
 
 int main(int argc, char** argv) {
+    if (!CheckUpstreamSkipMatrix()) {
+        std::cerr << "Phase3B0 SDK skip-classifier regression" << std::endl;
+        return 2;
+    }
     const std::filesystem::path results = argc > 1 ? argv[1] : "benchmarks/results";
     const std::filesystem::path fixtures = argc > 2 ? argv[2] : "tests/fixtures/phase3b0";
     const std::filesystem::path root = argc > 3 ? argv[3] : ".";

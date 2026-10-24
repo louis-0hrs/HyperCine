@@ -26,6 +26,8 @@ typedef int cudaError_t;
 #include "hypercine/decoder.h"
 
 namespace HyperCine {
+
+struct FieldPlusSampleDescriptor;
 struct DecoderReconstruction;
 
 // Phase 2E Pipeline Overlap Execution Mode (Section 2, 24, 25, 26)
@@ -198,6 +200,30 @@ struct Phase2eSlotStageTimings {
     std::vector<Phase2FCBandRecord> fc_band_records;
 };
 
+// Deterministic CUDA submission failpoint for failure-path tests. The hook is
+// consulted before each checked submission on the fail-closed paths; returning
+// cudaSuccess submits normally, any other value fails that submission with the
+// returned error without calling the real CUDA API.
+enum class TestCudaSubmitSite : uint32_t {
+    DagStreamWait = 1,
+    DagEventRecord,
+    DagLaunchResult,
+    DagColorLaunch,
+    DagFrameErrorCopy,
+    DagReadyEvent,
+    BlockingColorStartEvent,
+    BlockingColorLaunch,
+    BlockingColorStopEvent,
+    BlockingFrameErrorCopy,
+    BlockingReadyEvent,
+    FieldPlusColorStartEvent,
+    FieldPlusColorLaunch,
+    FieldPlusColorStopEvent,
+    FieldPlusFrameErrorCopy,
+    FieldPlusReadyEvent
+};
+using TestCudaFailureFn = std::function<cudaError_t(TestCudaSubmitSite)>;
+
 // Phase 2E Accelerated CUDA Decoder Pipeline with Asynchronous Band Streaming & Overlap
 class CudaDecoderPipelinePhase2E {
 public:
@@ -250,6 +276,19 @@ public:
     using DelayHookFn = std::function<void(int band_idx, int channel, int level, int band)>;
     void SetTestDelayHook(DelayHookFn hook);
 
+    // Deterministic submission failpoint for failure-path tests. The hook is
+    // copied into each acquired slot; nullptr disables it.
+    void SetTestCudaFailureHook(TestCudaFailureFn hook);
+
+    // Test/research only: store a submission failure against an already
+    // published ticket so PollDecode/WaitForDecode fail-closed behavior can be
+    // exercised even when no host-safe CUDA call can be made to fail.
+    bool InjectTestCudaFailure(uint64_t ticket, cudaError_t error);
+
+    // Test/research only: first submission error persisted by the most recent
+    // queue attempt, or cudaSuccess.
+    cudaError_t GetTestLastCudaSubmitError() const;
+
     // Asynchronously queue compressed sample decode onto an available slot
     uint64_t QueueDecode(
         const uint8_t* compressed_sample,
@@ -266,6 +305,10 @@ public:
         const std::vector<GpuEntropyBandDescriptor>&,
         DeviceSurfaceType, ColorMatrix, ColorRange, RowOrientation,
         bool production_guard, float host_parse_ms = 0, bool interlaced_gop1 = false);
+    uint64_t QueueDecodeFieldPlusParsed(const uint8_t*, size_t,
+        const FieldPlusSampleDescriptor&, int frame_index,
+        DeviceSurfaceType, ColorMatrix, ColorRange, RowOrientation,
+        bool production_guard = true);
     DecoderMemoryStats GetMemoryStats() const;
     void PrepareProductionScratch();
 
@@ -313,6 +356,15 @@ public:
     bool GetGpuCheckpoints(uint64_t ticket, std::vector<GpuEntropySegmentDescriptor>& out);
     bool GetGpuIndexResults(uint64_t ticket, std::vector<GpuCheckpointIndexResult>& out);
     bool DownloadIntermediateLl(uint64_t ticket, int channel, int level, std::vector<int16_t>& out);
+    // FIELDPLUS stage oracle hook: tight signed-16 temporal low/high planes and
+    // the selected output frame's base LL, after the GOP temporal inverse.
+    bool DownloadFieldPlusTemporalStages(uint64_t ticket, int channel,
+        std::vector<int16_t>& temporal_low, std::vector<int16_t>& temporal_high,
+        std::vector<int16_t>& wavelet4_ll, std::vector<int16_t>& frame_base_ll,
+        int* width = nullptr, int* height = nullptr);
+    bool DownloadFieldPlusSpatialStages(uint64_t ticket, int channel,
+        std::vector<int16_t>& vertical_low, std::vector<int16_t>& vertical_high,
+        int* width = nullptr, int* height = nullptr);
     // Test/research only. Tight host rows of the temporal low/high pair (the
     // horizontal inverse immediately before the field kernel) and the
     // reconstructed plane. Wavelet channel 0=Y, 1=V, 2=U. Device pitches are

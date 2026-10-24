@@ -5,6 +5,7 @@
 #include "hypercine/research/decoder_diagnostics.h"
 #include "hypercine/research/decode_phase2e.h"
 #include "decoder_backend.h"
+#include "decode_fieldplus.h"
 #include <atomic>
 #include <chrono>
 #include <mutex>
@@ -19,6 +20,7 @@ bool ValidRequest(const DecodeRequest& r) {
         (r.matrix == DecodeMatrix::BT709 || r.matrix == DecodeMatrix::BT601) &&
         (r.range == DecodeRange::ComputerGraphics || r.range == DecodeRange::VideoSystems) &&
         (r.orientation == DecodeOrientation::BottomUp || r.orientation == DecodeOrientation::TopDown) &&
+        r.frame_index >= 0 &&
         unsigned(r.diagnostic_strategy) <= unsigned(DiagnosticDecodeStrategy::HostStreaming);
 }
 }
@@ -127,9 +129,9 @@ DecoderCapabilities Decoder::Capabilities() const {
     int count = 0;
     out.device_backend_available = cudaGetDeviceCount(&count) == cudaSuccess && count > impl_->config.cuda_device;
     out.device_bgra8 = out.planar_yuv422_signed16 = out.device_backend_available;
-    // GOP-1 interlaced YUV 4:2:2 at coded precision 10 only. FIELDPLUS, GOP-2,
-    // RGB, RGBA, and Bayer stay unsupported. CPU-only builds leave this false.
+    // Both production profiles are limited to YUV 4:2:2 at coded precision 10.
     out.interlaced_output = out.device_backend_available;
+    out.progressive_fieldplus_gop2 = out.device_backend_available;
 #endif
     return out;
 }
@@ -158,9 +160,39 @@ DecodeTicket Decoder::QueueDecode(const uint8_t* sample, size_t size, const Deco
     std::string parse_error;
     DecodeError parse_status = DecodeError::InvalidSample;
     try {
+        FieldPlusSampleDescriptor fieldplus;
+        DecodeError fieldplus_status = DecodeError::InvalidSample;
+        if (ParseProgressiveFieldPlusSampleValidated(sample, size,
+                r.format == DecodePixelFormat::DeviceBGRA8 ? 24 : 4,
+                fieldplus, nullptr, &fieldplus_status)) {
+            if (r.frame_index >= fieldplus.frame_count) return fail(DecodeError::InvalidRequest);
+            if (fieldplus.width > impl_->config.maximum_width || fieldplus.height > impl_->config.maximum_height)
+                return fail(DecodeError::InvalidSample);
+            // FIELDPLUS uses a fixed, validated checkpoint/replay route; GOP-1's
+            // Auto classifier and its three diagnostic strategy overrides are
+            // deliberately not applied to the 51-band profile.
+            if (r.diagnostic_strategy != DiagnosticDecodeStrategy::Automatic)
+                return fail(DecodeError::UnsupportedEncodingMode);
+            slot->info = {};
+            slot->info.strategy = DecodeStrategy::Hybrid;
+            slot->backend_ticket = impl_->backend.QueueDecodeFieldPlusParsed(sample, size, fieldplus,
+                r.frame_index,
+                r.format == DecodePixelFormat::DeviceBGRA8 ? DeviceSurfaceType::BGRA8 : DeviceSurfaceType::PlanarYUV422_16S,
+                r.matrix == DecodeMatrix::BT709 ? ColorMatrix::BT709 : ColorMatrix::BT601,
+                r.range == DecodeRange::ComputerGraphics ? ColorRange::CG : ColorRange::VS,
+                r.orientation == DecodeOrientation::BottomUp ? RowOrientation::BottomUp : RowOrientation::TopDown,
+                true);
+            if (!slot->backend_ticket) return fail(DecodeError::InvalidSample);
+            slot->status = {DecodeState::Running, DecodeError::None};
+            if (error) *error = DecodeError::None;
+            return slot->ticket;
+        }
         FrameReconstruction mode = FrameReconstruction::Progressive;
         if (!ParseCineFormSampleValidated(sample, size, r.format == DecodePixelFormat::DeviceBGRA8 ? 24 : 4,
                                          impl_->parsed, &parse_error, &parse_status, &mode)) return fail(parse_status);
+        // GOP-1 samples contain exactly one output image. Keep existing callers
+        // unchanged while rejecting accidental requests for a nonexistent frame.
+        if (r.frame_index != 0) return fail(DecodeError::InvalidRequest);
         if (impl_->parsed[7].width * 2 > impl_->config.maximum_width ||
             impl_->parsed[7].height * 2 > impl_->config.maximum_height) return fail(DecodeError::InvalidSample);
         const float parse_ms = std::chrono::duration<float, std::milli>(Clock::now() - parse_start).count();
@@ -283,6 +315,36 @@ bool DecoderInspector::DownloadBand(Decoder& decoder, DecodeTicket t, int band, 
     auto* s = d.Find(t);
     return d.Update(s, true).state == DecodeState::Ready &&
         d.backend.DownloadBandCoefficientsToHost(s->backend_ticket, band, out, width, height, pitch);
+}
+bool DecoderInspector::DownloadFieldPlusBand(Decoder& decoder, DecodeTicket t, int channel, int logical_subband,
+        std::vector<int16_t>& out, int* width, int* height, int* pitch) {
+    if (channel < 0 || channel >= kFieldPlusChannelCount || logical_subband < 0 ||
+        logical_subband >= kFieldPlusLogicalBandsPerChannel) return false;
+    auto& d = *decoder.impl_; std::lock_guard<std::mutex> lock(d.mutex); d.SelectDevice();
+    auto* s = d.Find(t);
+    return s && d.Update(s, true).state == DecodeState::Ready &&
+        d.backend.DownloadBandCoefficientsToHost(s->backend_ticket,
+            channel * kFieldPlusLogicalBandsPerChannel + logical_subband, out, width, height, pitch);
+}
+bool DecoderInspector::DownloadFieldPlusTemporalStages(Decoder& decoder, DecodeTicket t, int channel,
+        std::vector<int16_t>& temporal_low, std::vector<int16_t>& temporal_high,
+        std::vector<int16_t>& wavelet4_ll, std::vector<int16_t>& frame_base_ll, int* width, int* height) {
+    if (channel < 0 || channel >= kFieldPlusChannelCount) return false;
+    auto& d = *decoder.impl_; std::lock_guard<std::mutex> lock(d.mutex); d.SelectDevice();
+    auto* s = d.Find(t);
+    return s && d.Update(s, true).state == DecodeState::Ready &&
+        d.backend.DownloadFieldPlusTemporalStages(s->backend_ticket, channel, temporal_low,
+            temporal_high, wavelet4_ll, frame_base_ll, width, height);
+}
+bool DecoderInspector::DownloadFieldPlusSpatialStages(Decoder& decoder, DecodeTicket t, int channel,
+        std::vector<int16_t>& vertical_low, std::vector<int16_t>& vertical_high,
+        int* width, int* height) {
+    if (channel < 0 || channel >= kFieldPlusChannelCount) return false;
+    auto& d = *decoder.impl_; std::lock_guard<std::mutex> lock(d.mutex); d.SelectDevice();
+    auto* s = d.Find(t);
+    return s && d.Update(s, true).state == DecodeState::Ready &&
+        d.backend.DownloadFieldPlusSpatialStages(s->backend_ticket, channel,
+            vertical_low, vertical_high, width, height);
 }
 bool DecoderInspector::DownloadIntermediate(Decoder& decoder, DecodeTicket t, int channel, int level, std::vector<int16_t>& out) {
     auto& d = *decoder.impl_; std::lock_guard<std::mutex> lock(d.mutex); d.SelectDevice();

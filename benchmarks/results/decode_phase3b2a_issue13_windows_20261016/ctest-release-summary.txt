@@ -1,0 +1,53 @@
+# Issue #13 full CUDA CTest on branch decode-phase3b2a-issue13-windows-asan
+
+Command: ctest --test-dir build-release-sm89 -C Release --output-on-failure
+Build: CUDA 12.8.61 Release, sm_89, MSVC 19.44.35229.0, RTX 4090 Laptop GPU, driver 610.62
+
+1/44 Test  #1: test_decode_phase3b2a_parser ..............   Passed    0.05 sec
+2/44 Test  #2: test_decode_phase3b2a_api .................   Passed    0.21 sec
+3/44 Test  #3: test_decode_phase3b2a_reconstruction ......   Passed    3.01 sec
+4/44 Test  #4: test_decode_phase3b2a_temporal ............   Passed    0.12 sec
+5/44 Test  #5: test_decode_phase3b2a_upstream_temporal ...   Passed    0.03 sec
+6/44 Test  #6: test_decode_phase3ae ......................   Passed    0.20 sec
+7/44 Test  #7: test_decode_phase3a_rc ....................   Passed   29.64 sec
+8/44 Test  #8: test_transform_wavelet ....................   Passed    0.04 sec
+9/44 Test  #9: test_codec_roundtrip ......................   Passed    0.06 sec
+10/44 Test #10: test_yuy2_stability .......................   Passed    1.18 sec
+11/44 Test #11: test_decode_phase0 ........................   Passed    3.09 sec
+12/44 Test #12: test_avi_sample ...........................   Passed    0.17 sec
+13/44 Test #13: test_decoder ..............................   Passed   18.02 sec
+14/44 Test #14: test_decode_phase3b0 ......................   Passed    1.39 sec
+15/44 Test #15: test_decode_phase3b1 ......................   Passed    0.72 sec
+16/44 Test #16: test_decode_phase3b1_acceptance ...........   Passed   18.06 sec
+17/44 Test #17: test_decode_phase3b2a_mixed_stress ........   Passed   19.07 sec
+18/44 Test #18: test_decode_phase3b2r_math ................   Passed    0.06 sec
+19/44 Test #19: test_decode_phase3b2r_reference ...........   Passed    0.03 sec
+20/44 Test #20: test_decode_phase2fa ......................   Passed  461.89 sec
+21/44 Test #21: test_decode_gpu_index .....................   Passed    0.30 sec
+22/44 Test #22: test_cuda_wavelet .........................   Passed    2.24 sec
+23/44 Test #23: test_cuda_pyramid .........................   Passed    0.18 sec
+24/44 Test #24: test_entropy_parallel .....................   Passed    0.14 sec
+25/44 Test #25: test_hybrid_roundtrip .....................   Passed    0.24 sec
+26/44 Test #26: test_phase2a ..............................   Passed    1.08 sec
+27/44 Test #27: test_phase2b ..............................   Passed    0.60 sec
+28/44 Test #28: test_phase2c ..............................   Passed   10.15 sec
+29/44 Test #29: test_phase2d ..............................   Passed   16.83 sec
+30/44 Test #30: test_entropy_capacity .....................   Passed    0.18 sec
+31/44 Test #31: test_phase3a ..............................   Passed   42.91 sec
+32/44 Test #32: test_decode_inverse_wavelet_cuda ..........   Passed    1.53 sec
+33/44 Test #33: test_decode_phase1 ........................   Passed    2.05 sec
+34/44 Test #34: test_color_conversion_cuda ................   Passed    0.36 sec
+35/44 Test #35: test_decode_phase2a .......................   Passed    2.67 sec
+36/44 Test #36: test_decode_entropy_cuda ..................   Passed    0.16 sec
+37/44 Test #37: test_decode_phase2b .......................   Passed    8.06 sec
+38/44 Test #38: test_decode_entropy_phase2c ...............   Passed    0.17 sec
+39/44 Test #39: test_decode_phase2c .......................   Passed   26.71 sec
+40/44 Test #40: test_decode_phase2d .......................   Passed   32.43 sec
+41/44 Test #41: test_decode_phase2e .......................   Passed   27.83 sec
+42/44 Test #42: test_decode_phase2fc ......................   Passed    2.99 sec
+43/44 Test #43: test_decode_phase2fc_audit ................   Passed   36.36 sec
+44/44 Test #44: test_decode_phase2fb ......................   Passed    0.20 sec
+
+100% tests passed, 0 tests failed out of 44
+
+Total Test time (real) = 773.46 sec

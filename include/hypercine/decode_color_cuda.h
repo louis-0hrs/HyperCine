@@ -88,7 +88,10 @@ bool LaunchYuv422ToBgra8(
     RowOrientation orientation = RowOrientation::BottomUp,
     cudaStream_t stream = nullptr,
     uint32_t* frame_error = nullptr,
-    bool interlaced_row16 = false
+    bool interlaced_row16 = false,
+    // Optional: receives the launch result instead of collapsing it to bool,
+    // so fail-closed callers can preserve the original CUDA error.
+    cudaError_t* launch_error = nullptr
 );
 
 } // namespace HyperCine

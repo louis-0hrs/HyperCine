@@ -1,0 +1,60 @@
+# Issue #13 mixed acceptance profile under Compute Sanitizer (2026-10-18)
+#
+# Target: test_decode_phase3b1_acceptance.exe . <evidence-dir> --sanitizer
+# Tools:  compute-sanitizer 2025.1.0.0, RTX 4090 Laptop GPU, CUDA 12.8.61
+# Flags:  --error-exitcode 99 --launch-timeout 0; memcheck also --leak-check full
+# Output below is sanitized (relative executable names only). Raw tool logs and
+# the per-run JSON evidence stay outside the Git tree.
+#
+# Profile: committed 64x64 GOP-1 interlaced fixture, frozen 1920x1080 interlaced
+# FilmScan-3 fixture with difference-coded Peak-carrying subband, field-asymmetric
+# luma and chroma cases, 44 mixed FIELDPLUS frame 0/1 + GOP-1 progressive +
+# GOP-1 interlaced + noise frames, slot modes 1/2/Auto/4, two and four decoder
+# instances, alternating/FIFO/reverse release, delayed release/drain, malformed
+# rejection.
+
+[memcheck] rc=0 elapsed=70s
+frozen64 PASS peaks=0 difference=3
+frozen1080 PASS peaks=1 difference=3
+field_luma_sanitizer PASS peaks=1 difference=3
+field_chroma_sanitizer PASS peaks=2 difference=3
+noise_sanitizer PASS peaks=1 difference=3
+mixed steady-state deltas cpp=0 cuda_calls=0 device=0 pinned=0 pageable=0
+Phase 3B-1 acceptance --sanitizer PASS
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors
+
+[initcheck] rc=0 elapsed=85s
+frozen64 PASS peaks=0 difference=3
+frozen1080 PASS peaks=1 difference=3
+field_luma_sanitizer PASS peaks=1 difference=3
+field_chroma_sanitizer PASS peaks=2 difference=3
+noise_sanitizer PASS peaks=1 difference=3
+mixed steady-state deltas cpp=0 cuda_calls=0 device=0 pinned=0 pageable=0
+Phase 3B-1 acceptance --sanitizer PASS
+========= ERROR SUMMARY: 0 errors
+
+[racecheck] rc=0 elapsed=188s
+frozen64 PASS peaks=0 difference=3
+frozen1080 PASS peaks=1 difference=3
+field_luma_sanitizer PASS peaks=1 difference=3
+field_chroma_sanitizer PASS peaks=2 difference=3
+noise_sanitizer PASS peaks=1 difference=3
+mixed steady-state deltas cpp=0 cuda_calls=0 device=0 pinned=0 pageable=0
+Phase 3B-1 acceptance --sanitizer PASS
+========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)
+
+[synccheck] rc=0 elapsed=14s
+frozen64 PASS peaks=0 difference=3
+frozen1080 PASS peaks=1 difference=3
+field_luma_sanitizer PASS peaks=1 difference=3
+field_chroma_sanitizer PASS peaks=2 difference=3
+noise_sanitizer PASS peaks=1 difference=3
+mixed steady-state deltas cpp=0 cuda_calls=0 device=0 pinned=0 pageable=0
+Phase 3B-1 acceptance --sanitizer PASS
+========= ERROR SUMMARY: 0 errors
+
+# The same memcheck configuration was re-run on the temporal and production
+# reconstruction targets with --leak-check full so each has an explicit summary:
+#   temporal:       0 bytes leaked in 0 allocations, 0 errors
+#   reconstruction: 0 bytes leaked in 0 allocations, 0 errors

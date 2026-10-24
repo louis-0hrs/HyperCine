@@ -1,0 +1,108 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "WINDOWS_ATTACH_AND_HOST_INSTRUMENTATION_PASS",
+  "date": "2026-10-16",
+  "scope": "Compute Sanitizer and host AddressSanitizer qualification of the Phase 3B-2A decoder on the Windows RTX 4090 machine (issue #13, Windows part)",
+  "environment": {
+    "os": "Windows 11 Home 25H2, build 26200 (WDDM)",
+    "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU",
+    "driver": "610.62",
+    "cuda_toolkit": "12.8.61",
+    "compute_sanitizer": "2025.1.0.0 (build 35351055)",
+    "compiler": "MSVC 19.44.35229.0 (toolset 14.44.35207)",
+    "host_instrumentation": "MSVC AddressSanitizer (clang_rt.asan_dynamic-x86_64.dll, toolset 14.44.35207)"
+  },
+  "attach": {
+    "status": "RESOLVED",
+    "previous_failure": "The earlier attempt reported 'No attachable process found' for both the production reconstruction target and the minimal CUDA temporal target.",
+    "current_result": "Instrumented runs execute on the RTX 4090; a sanitized run reports the target execution and its findings."
+  },
+  "instrumentation_controls": {
+    "binary": "tests/sanitizer_launch_control.cu (diagnostics-only build target, no CTest registration)",
+    "clean_kernel_under_memcheck": "0 errors",
+    "faulty_kernel_under_memcheck": "Invalid __global__ write of size 4 bytes reported",
+    "kernel_name_filter_matching_faulty_kernel": "the same invalid write is reported",
+    "kernel_name_filter_matching_clean_kernel_only": "0 errors, so the filter provably gates which kernels are checked",
+    "purpose": "This installation has no --dump-kernel-launches, so the controls establish that the tool really instruments device code and that a zero-error report is not a vacuous result."
+  },
+  "memcheck": {
+    "status": "PASS",
+    "leak_check": "PASS",
+    "commands": [
+      "compute-sanitizer --tool memcheck --leak-check full --error-exitcode 99 --launch-timeout 0 <target>",
+      "compute-sanitizer --tool memcheck --leak-check full --error-exitcode 99 --launch-timeout 0 build-release-sm89/tests/Release/sanitizer_launch_control.exe --violate"
+    ],
+    "results": {
+      "test_decode_phase3b2a_temporal.exe": "0 errors, 0 leaked bytes in 0 allocations",
+      "test_decode_phase3b2a_reconstruction.exe .": "0 errors, 0 leaked bytes in 0 allocations; the target verified its BGRA hashes, 200/100-repeat determinism and 400-request zero-allocation alternation inside the instrumented process",
+      "test_decode_phase3b0.exe": "0 errors, 0 leaked bytes in 0 allocations over the 297-case probe",
+      "test_decode_phase3b2a_upstream_temporal.exe": "not applicable; the target terminates before the first instrumented CUDA API call"
+    }
+  },
+  "initcheck": {
+    "status": "PASS",
+    "results": {
+      "test_decode_phase3b2a_temporal.exe": "0 errors",
+      "test_decode_phase3b2a_reconstruction.exe .": "0 errors"
+    }
+  },
+  "racecheck": {
+    "status": "PASS_WITH_BOUNDED_COVERAGE",
+    "results": {
+      "test_decode_phase3b2a_temporal.exe": "0 hazards displayed (0 errors, 0 warnings)",
+      "test_decode_phase3b2a_reconstruction.exe .": "0 hazards displayed over the first 400 kernel launches (--launch-count 400)",
+      "test_decode_phase3b2a_reconstruction.exe --matrix-range .": "0 hazards displayed"
+    },
+    "limitation": "The unbounded racecheck on the full production reconstruction target did not finish within the session budget and is reported as bounded coverage, not as an unbounded pass."
+  },
+  "synccheck": {
+    "status": "PASS_WITH_BOUNDED_COVERAGE",
+    "results": {
+      "test_decode_phase3b2a_temporal.exe": "0 errors",
+      "test_decode_phase3b2a_reconstruction.exe .": "0 errors over the first 400 kernel launches (--launch-count 400)",
+      "test_decode_phase3b2a_reconstruction.exe --matrix-range .": "0 errors"
+    }
+  },
+  "leak_check": "PASS on the temporal, production reconstruction and phase3b0 targets: 0 bytes leaked in 0 allocations.",
+  "host_asan": {
+    "status": "PASS_FOR_REPRODUCTION_ATTEMPT_WITH_ONE_UPSTREAM_FINDING",
+    "configuration": "cmake -B build-asan -S . -G \"Visual Studio 17 2022\" -A x64 -DHYPERCINE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=89 -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_BUILD_BENCHMARKS=OFF -DCMAKE_CXX_FLAGS=\"/fsanitize=address /Zi /Dfseeko=_fseeki64\" -DCMAKE_CUDA_FLAGS=\"-Xcompiler=/fsanitize=address -Xcompiler=/Zi\" -DCMAKE_EXE_LINKER_FLAGS=\"/DEBUG\"",
+    "tool_limits": [
+      "detect_leaks is not supported by MSVC AddressSanitizer on Windows",
+      "halt_on_error=0 is not honored; a run stops at the first report"
+    ],
+    "heap_corruption_reproduction": {
+      "target": "test_decode_phase3b0",
+      "repetitions": 20,
+      "cases_per_repetition": 297,
+      "result": "NOT_REPRODUCED: exit code 0 and zero ASan reports in 20/20 runs",
+      "determinism": "identical case/status sequence in all 20 runs after removing upstream encoded byte counts; the probe's encoded byte counts vary by up to 4 bytes on a subset of cases, matching the documented cross-process upstream metadata behaviour"
+    },
+    "finding": {
+      "classification": "UPSTREAM_ORACLE_OUT_OF_ALLOCATION_READ",
+      "target": "test_decode_phase3b2a_reconstruction.exe (default mode, 5/5 runs) and --4k-smoke (1/1 run)",
+      "report": "heap-buffer-overflow, READ of size 16, 0 bytes past the end of a 2,073,680-byte allocation",
+      "first_frame": "InvertTemporalQuant16s upstream/Codec/temporal.c:9606",
+      "allocation_site": "AllocWaveletStack wavelet.c:478 -> AllocImage image.c:169 -> AllocAligned allocator.h:162",
+      "trigger": "1920x1080 and 4K FIELDPLUS samples decoded through CFHD_DecodeSample into a CFHD_PIXEL_FORMAT_YU64 target; the 64x64 --matrix-range path reports nothing",
+      "interpretation": "SSE2 read-ahead preload of the next iteration's coefficients passes the plane end on the last group of the last row; a read, not a write, inside frozen upstream",
+      "clean_paths": {
+        "test_decode_phase3b2a_reconstruction.exe --matrix-range .": "exit 0, no report",
+        "test_decode_phase3b2a_temporal.exe": "exit 0 in 5/5 runs",
+        "test_decode_phase3b2r.exe --reference-smoke": "exit 0",
+        "test_decode_phase3b2r.exe --math": "exit 0"
+      },
+      "action": "documented as an upstream quirk in docs/UPSTREAM.md; upstream sources unchanged; no production decoder change"
+    }
+  },
+  "fieldplus_frames_0_1_alternation_slot_reuse_mixed_gop": "VALIDATED_BY_WINDOWS_SANITIZER_AND_HOST_ASAN_WITHIN_THE_DOCUMENTED_COVERAGE",
+  "kernel_launch_evidence": "LIMITED_BY_TOOL: Compute Sanitizer 2025.1.0.0 in this installation has no --dump-kernel-launches, so no launch list can be recorded. Coverage is evidenced by the instrumentation controls plus the hash-verified GPU output produced inside the instrumented process.",
+  "qualification_outcome": "WINDOWS_PART_PASS_STACKED_INTEGRATION_PENDING",
+  "production_promotion": "NOT_RECOMMENDED_FROM_THIS_EVIDENCE_ALONE",
+  "remaining_blockers": [
+    "PR #52 has not integrated the native A2 test patch #80",
+    "Full native CTest on the resulting parent integration head does not exist yet",
+    "racecheck/synccheck on the full production target are bounded to 400 kernel launches on Windows"
+  ],
+  "evidence": "benchmarks/results/decode_phase3b2a_issue13_windows_20261016/"
+}

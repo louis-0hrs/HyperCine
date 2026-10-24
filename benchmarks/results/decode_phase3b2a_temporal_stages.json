@@ -1,0 +1,10 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "w3_temporal_high": "exact to upstream-derived signed-16 stages",
+  "w5_w4_temporal_low": "exact to upstream-derived signed-16 stages",
+  "temporal_kernel": {"frame0": "arshift1(sat16(low-high))", "frame1": "arshift1(sat16(low+high))", "gpu_scalar_tail": "arshift1(unsaturated int32 sum)", "exact_comparison": true},
+  "upstream_windows_msvc": {"selected_vector_width": 40, "scalar_tail_rule": "arithmetic right shift of unsaturated sum", "tentative_divide_by_two_hypothesis": "DISPROVED"},
+  "geometry_audit_widths": [64, 80, 96, 112, 128, 1920],
+  "production_1920_temporal_widths": {"luma": 960, "chroma": 480, "scalar_tail": false}
+}
