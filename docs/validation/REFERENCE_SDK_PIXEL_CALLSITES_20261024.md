@@ -124,12 +124,13 @@ specific upstream mechanism.
 
 ## Follow-up (2026-10-24): callsite #3 migrated to the blocked state
 
-- `tests/test_standalone_sdk_oracle.cpp:213`–`224` classifies the decoded-pixel
-  half through `ClassifyDecodeOnlyReference` in `tests/reference_oracle.h:98`.
-  A stable set of repeats against the pinned `.p10`/`.bgra` reference is
-  `BLOCKED_ORACLE_NOT_QUALIFIED`; disagreeing repeats of the same immutable
-  packet are `ORIGINAL_SDK_REFERENCE_NONDETERMINISTIC_QUARANTINED`. Both exit
-  `77`. Neither is a pixel-accuracy PASS and neither is a stable quality failure.
+- `tests/test_standalone_sdk_oracle.cpp` classifies the decoded-pixel half
+  through the strict-failure overload of `ClassifyDecodeOnlyReference` in
+  `tests/reference_oracle.h`. A stable set of repeats against the pinned
+  `.p10`/`.bgra` reference is `BLOCKED_ORACLE_NOT_QUALIFIED`; disagreeing
+  repeats of the same immutable packet are
+  `ORIGINAL_SDK_REFERENCE_NONDETERMINISTIC_QUARANTINED`. Both exit `77`.
+  Neither is a pixel-accuracy PASS and neither is a stable quality failure.
 - The PSNR and flat-exactness comparison is still computed and printed with the
   same thresholds, and the final line records `quality_measured`,
   `quality_meets_threshold` and `distinctOutputsMax` (YU64 or BGRA). It is
@@ -150,8 +151,16 @@ specific upstream mechanism.
   than left permanently unmatched.
 - Deterministic SDK-free coverage lives in `tests/test_reference_oracle.cpp`
   (`TestDecodeOnlyReference`): stable repeats `77`, divergent repeats `77`,
-  missing evidence `1`, and neither blocked state is a strict failure or
-  release-allowing.
+  missing evidence `1`, strict-plus-divergent `1`, strict-plus-stable `1`, and
+  neither blocked state is a strict failure or release-allowing. The strict
+  cases pin the precedence rule so a strict failure cannot be masked by a
+  quarantined pixel observation.
+- `tests/compare_sdk_oracle.py` no longer looks for the retired
+  `SDK decode PASS:`/`SDK decode FAIL:` lines. `--log` replay selects the
+  summary line through its `quality_measured=` marker and records strict
+  `STRICT_FAILURE`/`Oracle harness error` lines. `tests/test_compare_sdk_oracle.py`
+  pins that filter so a later output change cannot silently shrink the
+  recovered observations.
 - Local Windows x64 CPU-only evidence at this revision: full Release CTest and
   the direct `77`/`1` controls are recorded in the PR handoff for the exact
   head; hosted CI is SDK-free and does not execute this callsite.

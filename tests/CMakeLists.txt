@@ -23,6 +23,9 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME test_reference_release_inventory
         COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_reference_release.py")
     set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
+    add_test(NAME test_compare_sdk_oracle
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_compare_sdk_oracle.py")
+    set_tests_properties(test_compare_sdk_oracle PROPERTIES LABELS "reference-oracle")
     # The runner must use the CTest that configured this build. CMAKE_CTEST_COMMAND
     # is only set by include(CTest); this project calls enable_testing() directly.
     if(CMAKE_CTEST_COMMAND)

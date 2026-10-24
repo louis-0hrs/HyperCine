@@ -212,10 +212,10 @@ int main(int argc,char** argv) {
         }catch(const std::exception& e){strict_failure=true;std::cerr<<"control STRICT_FAILURE "<<e.what()<<'\n';}
         // Only the decoded-pixel half is quarantined: an unqualified pinned reference
         // can be BLOCKED_ORACLE at best, and disagreeing repeats are the unstable
-        // reference state. Neither is a pixel-accuracy pass or a stable failure.
-        const oracle::GateDecision decision=strict_failure
-            ?oracle::GateDecision::ReferenceDecodeError
-            :oracle::ClassifyDecodeOnlyReference(observed_decodes,distinct_per_pattern);
+        // reference state. Neither is a pixel-accuracy pass or a stable failure, and
+        // neither can mask a strict failure in any fixture or in the control block.
+        const oracle::GateDecision decision=oracle::ClassifyDecodeOnlyReference(
+            strict_failure,observed_decodes,distinct_per_pattern);
         std::cout<<"standalone_sdk_decode_3_packets quality_measured="<<(quality_measured?1:0)
                  <<" quality_meets_threshold="<<(quality_meets_threshold?1:0)
                  <<" distinctOutputsMax="<<distinct_per_pattern

@@ -105,6 +105,18 @@ inline GateDecision ClassifyDecodeOnlyReference(
     return GateDecision::OracleUnavailable;
 }
 
+// The caller owns the strict signals. This overload makes their precedence
+// explicit and testable: a strict failure is REFERENCE_DECODE_ERROR even when
+// repeats also disagreed, so a quarantined pixel observation can never hide a
+// fixture, decoder, geometry, pitch or output failure.
+inline GateDecision ClassifyDecodeOnlyReference(
+    bool strict_failure,
+    std::size_t observed_decodes,
+    std::size_t distinct_decoded_outputs) {
+    if (strict_failure) return GateDecision::ReferenceDecodeError;
+    return ClassifyDecodeOnlyReference(observed_decodes, distinct_decoded_outputs);
+}
+
 inline const char* GateDecisionName(GateDecision decision) {
     switch (decision) {
     case GateDecision::Pass: return "PASS";
