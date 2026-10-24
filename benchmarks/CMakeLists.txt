@@ -86,6 +86,35 @@ if(HYPERCINE_ENABLE_CUDA)
     )
     target_link_libraries(benchmark_phase3a PRIVATE hypercine_core CFHDCodecStatic)
 
+    add_executable(gpu_diagnostic_probe
+        gpu_diagnostic_probe.cpp
+        gpu_diagnostic_report.cpp
+    )
+    find_package(CUDAToolkit REQUIRED)
+    target_link_libraries(gpu_diagnostic_probe PRIVATE hypercine_core CFHDCodecStatic)
+    target_include_directories(gpu_diagnostic_probe PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+    target_compile_definitions(gpu_diagnostic_probe PRIVATE
+        HYPERCINE_SOURCE_COMMIT="${HYPERCINE_SOURCE_COMMIT}"
+        HYPERCINE_SOURCE_DIRTY=${HYPERCINE_SOURCE_DIRTY}
+        HYPERCINE_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+        HYPERCINE_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+        HYPERCINE_BUILD_TYPE="$<CONFIG>"
+        HYPERCINE_CUDA_COMPILER_VERSION="${CMAKE_CUDA_COMPILER_VERSION}")
+    if(WIN32)
+        target_link_libraries(gpu_diagnostic_probe PRIVATE psapi)
+    endif()
+
+    if(HYPERCINE_BUILD_TESTS)
+        # Registered here, not in tests/: tests/ is configured before
+        # benchmarks/, so a TARGET guard there never fires.
+        add_test(NAME gpu_diagnostic_probe_cli
+            COMMAND "${CMAKE_COMMAND}"
+                "-DPROBE=$<TARGET_FILE:gpu_diagnostic_probe>"
+                "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/gpu_diagnostic_probe_cli"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_gpu_diagnostic_probe_cli.cmake")
+        set_tests_properties(gpu_diagnostic_probe_cli PROPERTIES LABELS "diagnostics")
+    endif()
+
     add_executable(benchmark_phase3a1
         benchmark_phase3a1.cpp
     )

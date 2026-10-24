@@ -11,6 +11,19 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+# Conflict resolution (#168 vs main): keep this branch's CPU-only GPU
+# diagnostic report test (#115), then main's reference-oracle registrations
+# (#206). Neither side replaces the other.
+# Non-standalone only. Standalone returns before add_subdirectory(tests) and
+# registers this same target in the root CMakeLists.txt. Do not include this
+# file from that path; the target name would collide.
+add_executable(test_gpu_diagnostic_report
+    test_gpu_diagnostic_report.cpp
+    ${CMAKE_SOURCE_DIR}/benchmarks/gpu_diagnostic_report.cpp
+)
+target_include_directories(test_gpu_diagnostic_report PRIVATE ${CMAKE_SOURCE_DIR}/benchmarks)
+add_test(NAME test_gpu_diagnostic_report COMMAND test_gpu_diagnostic_report)
+
 # 0. SDK-free fail-closed reference-oracle contract.
 # Runs on every platform and does not require the original GoPro SDK.
 add_executable(test_reference_oracle test_reference_oracle.cpp)
