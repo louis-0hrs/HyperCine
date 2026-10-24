@@ -15,10 +15,11 @@
 #include <cuda_runtime_api.h>
 
 #include <algorithm>
+#include <cerrno>
 #include <cstdlib>
 #include <cstdio>
-#include <fstream>
 #include <iostream>
+#include <limits>
 #include <string>
 
 namespace {
@@ -27,6 +28,13 @@ using hypercine::diag::CudaMemInfoSnapshot;
 using hypercine::diag::GpuDiagnosticReport;
 using hypercine::diag::UnavailableMetric;
 using hypercine::diag::VramUsedSnapshot;
+
+// This tool is deliberately bounded: it is a single short diagnostic run, not
+// a general encode harness. Dimension includes 8K UHD (7680x4320).
+constexpr int kMaxDimension = 8192;
+constexpr int kMaxFrames = 16;
+constexpr int kMaxWarmupFrames = 16;
+constexpr int kMaxRequestedSlots = 4;
 
 struct Options {
     int width = 1920;
@@ -37,13 +45,22 @@ struct Options {
     hypercine::Phase3AInputMode input_mode = hypercine::Phase3AInputMode::HostPageableEndToEnd;
     hypercine::EncodingQuality quality = hypercine::EncodingQuality::FilmScan3;
     std::string out_path;
+    bool overwrite = false;
 };
 
 bool ParseInt(const std::string& text, int* value) {
     if (text.empty()) return false;
+    errno = 0;
     char* end = nullptr;
     const long parsed = std::strtol(text.c_str(), &end, 10);
-    if (end == nullptr || *end != '\0') return false;
+    if (end == text.c_str() || *end != '\0') return false;
+    // On LP64 hosts a token such as 4294967297 would otherwise narrow to 1,
+    // silently running a different workload than the caller asked for.
+    if (errno == ERANGE) return false;
+    if (parsed < std::numeric_limits<int>::min() ||
+        parsed > std::numeric_limits<int>::max()) {
+        return false;
+    }
     *value = static_cast<int>(parsed);
     return true;
 }
@@ -119,32 +136,19 @@ void FillProvenance(GpuDiagnosticReport* report) {
     }
 }
 
-bool WriteReport(const GpuDiagnosticReport& report, const std::string& out_path,
-                 std::string* error) {
-    if (out_path.empty()) {
-        *error = "--out is required";
-        return false;
-    }
-    std::ofstream file(out_path, std::ios::binary);
-    if (!file) {
-        *error = "failed to open output path";
-        return false;
-    }
-    file << hypercine::diag::BuildGpuDiagnosticJson(report);
-    if (!file) {
-        *error = "failed to write output file";
-        return false;
-    }
-    return true;
-}
-
 }  // namespace
 
 int main(int argc, char** argv) {
     Options opt;
     std::string parse_error;
 
-    for (int i = 1; i < argc && parse_error.empty(); ++i) {
+    // Parse every argument even after the first error: otherwise a later
+    // --out would be ignored and an invalid-arguments run would report the
+    // wrong failure (and write no report at all).
+    auto fail = [&](const char* message) {
+        if (parse_error.empty()) parse_error = message;
+    };
+    for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         auto value_of = [&](const char* name) -> std::string {
             const std::string prefix = std::string(name) + "=";
@@ -155,38 +159,40 @@ int main(int argc, char** argv) {
         const std::string out = value_of("--out");
         if (!out.empty()) {
             opt.out_path = out;
+        } else if (arg == "--overwrite") {
+            opt.overwrite = true;
         } else if (arg.rfind("--width", 0) == 0) {
             int v = 0;
-            if (!ParseInt(value_of("--width"), &v)) parse_error = "invalid --width";
+            if (!ParseInt(value_of("--width"), &v)) fail("invalid --width");
             else opt.width = v;
         } else if (arg.rfind("--height", 0) == 0) {
             int v = 0;
-            if (!ParseInt(value_of("--height"), &v)) parse_error = "invalid --height";
+            if (!ParseInt(value_of("--height"), &v)) fail("invalid --height");
             else opt.height = v;
         } else if (arg.rfind("--frames", 0) == 0) {
             int v = 0;
-            if (!ParseInt(value_of("--frames"), &v)) parse_error = "invalid --frames";
+            if (!ParseInt(value_of("--frames"), &v)) fail("invalid --frames");
             else opt.frames = v;
         } else if (arg.rfind("--warmup", 0) == 0) {
             int v = 0;
-            if (!ParseInt(value_of("--warmup"), &v)) parse_error = "invalid --warmup";
+            if (!ParseInt(value_of("--warmup"), &v)) fail("invalid --warmup");
             else opt.warmup_frames = v;
         } else if (arg.rfind("--slots", 0) == 0) {
             int v = 0;
-            if (!ParseInt(value_of("--slots"), &v)) parse_error = "invalid --slots";
+            if (!ParseInt(value_of("--slots"), &v)) fail("invalid --slots");
             else opt.requested_slots = v;
         } else if (arg.rfind("--input-mode", 0) == 0) {
             if (!ParseInputMode(value_of("--input-mode"), &opt.input_mode)) {
-                parse_error = "invalid --input-mode";
+                fail("invalid --input-mode");
             }
         } else if (arg.rfind("--quality", 0) == 0) {
             if (!ParseQuality(value_of("--quality"), &opt.quality)) {
-                parse_error = "invalid --quality";
+                fail("invalid --quality");
             }
         } else if (arg.rfind("--out", 0) == 0) {
-            parse_error = "missing value for --out";
+            fail("missing value for --out");
         } else {
-            parse_error = "unknown argument";
+            fail("unknown argument");
         }
     }
 
@@ -202,7 +208,11 @@ int main(int argc, char** argv) {
 
     auto finish = [&](int exit_code) {
         std::string write_error;
-        if (!WriteReport(report, opt.out_path, &write_error)) {
+        const hypercine::diag::ReportWritePolicy policy =
+            opt.overwrite ? hypercine::diag::ReportWritePolicy::kOverwrite
+                          : hypercine::diag::ReportWritePolicy::kCreateNew;
+        if (!hypercine::diag::WriteGpuDiagnosticReportFile(report, opt.out_path, policy,
+                                                          &write_error)) {
             std::cerr << "gpu_diagnostic_probe: " << write_error << "\n";
             return 3;
         }
@@ -211,10 +221,14 @@ int main(int argc, char** argv) {
         return exit_code;
     };
 
-    if (parse_error.empty() && (opt.width <= 0 || opt.height <= 0 || opt.frames <= 0 ||
-                                opt.warmup_frames < 0 || opt.requested_slots < 0 ||
-                                opt.requested_slots > 4)) {
-        parse_error = "invalid geometry, frame count, or slot request";
+    if (parse_error.empty() &&
+        (opt.width <= 0 || opt.width > kMaxDimension || opt.height <= 0 ||
+         opt.height > kMaxDimension || opt.frames <= 0 || opt.frames > kMaxFrames ||
+         opt.warmup_frames < 0 || opt.warmup_frames > kMaxWarmupFrames ||
+         opt.requested_slots < 0 || opt.requested_slots > kMaxRequestedSlots)) {
+        parse_error =
+            "invalid geometry, frame count, or slot request: bounds are 1-8192 px, "
+            "1-16 frames, 0-16 warmup frames and 0-4 slots";
     }
     if (!parse_error.empty()) {
         report.status = "INVALID_ARGUMENTS";

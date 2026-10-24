@@ -91,3 +91,6 @@ Makefile
 
 # Source fixture verifier (not a generated CMake artifact)
 !tests/verify_filmscan3_fixtures.cmake
+
+# GPU diagnostic CLI contract verifier (not a generated CMake artifact)
+!benchmarks/verify_gpu_diagnostic_probe_cli.cmake

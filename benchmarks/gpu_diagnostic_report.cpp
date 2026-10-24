@@ -4,6 +4,8 @@
 
 #include "gpu_diagnostic_report.h"
 
+#include <cerrno>
+#include <cstdio>
 #include <iomanip>
 #include <sstream>
 
@@ -200,6 +202,43 @@ std::string BuildGpuDiagnosticJson(const GpuDiagnosticReport& report) {
     json << "  ]\n";
     json << "}\n";
     return json.str();
+}
+
+bool WriteGpuDiagnosticReportFile(const GpuDiagnosticReport& report,
+                                  const std::string& out_path,
+                                  ReportWritePolicy policy, std::string* error) {
+    if (out_path.empty()) {
+        *error = "output path is empty";
+        return false;
+    }
+
+    // "x" is the C11 exclusive-create mode: the call fails instead of
+    // truncating an existing file. Both the UCRT and POSIX fopen support it.
+    const char* const mode =
+        (policy == ReportWritePolicy::kCreateNew) ? "wbx" : "wb";
+    errno = 0;
+    std::FILE* file = std::fopen(out_path.c_str(), mode);
+    if (file == nullptr) {
+        if (policy == ReportWritePolicy::kCreateNew && errno == EEXIST) {
+            *error = "output path already exists; pass --overwrite to replace it";
+        } else {
+            *error = "failed to open output path";
+        }
+        return false;
+    }
+
+    const std::string json = BuildGpuDiagnosticJson(report);
+    bool ok = std::fwrite(json.data(), 1, json.size(), file) == json.size();
+    if (ok && std::fflush(file) != 0) ok = false;
+    if (std::fclose(file) != 0) ok = false;
+    if (!ok) {
+        *error = "failed to write output file";
+        // Never leave a truncated sidecar behind: a partial report is not
+        // evidence, and a caller could mistake it for one.
+        std::remove(out_path.c_str());
+        return false;
+    }
+    return true;
 }
 
 }  // namespace diag

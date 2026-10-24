@@ -66,8 +66,17 @@ cmake --build <build-dir> --target gpu_diagnostic_probe
   --width=1920 --height=1080 --frames=4 --warmup=2 --out=<out>.json
 ```
 
-`--out` is required. Exit codes: `0` passed, `2` invalid arguments (a partial
-JSON is still written), `3` device or run failure.
+`--out` is required. The report is created **exclusively**: if the path already
+exists the probe exits non-zero and leaves the existing file byte-identical.
+`--overwrite` is the explicit opt-in that may replace an existing artifact, and
+even then a directory is never replaced. Exit codes: `0` passed, `2` invalid
+arguments (a partial JSON is still written when the output path is new), `3`
+device or run failure, or an output refusal.
+
+Numeric arguments are bounded because this is a single short diagnostic run:
+1–8192 px per dimension, 1–16 frames, 0–16 warmup frames and 0–4 slots.
+Tokens outside `int` range are rejected instead of narrowed — `4294967297`
+is an error, not `1`.
 
 ## Measured evidence
 
@@ -122,7 +131,27 @@ deltas, message escaping and deterministic output.
 
 `test_gpu_diagnostic_report` (CPU-only, registered with CTest) validates the
 schema names, null-vs-zero semantics, measured/estimated separation, partial
-failure reports, escaping and determinism.
+failure reports, escaping and determinism. It also covers the writer contract
+directly: create-new refuses a pre-existing file byte-identically, explicit
+overwrite replaces it, an empty path and a missing parent fail without creating
+an artifact, and a directory is never replaced.
+
+`gpu_diagnostic_probe_cli` (registered from `benchmarks/CMakeLists.txt`, so it
+only exists in CUDA builds) is a real binary-level regression: it runs the
+probe against a sentinel artifact on the invalid-arguments and valid-arguments
+paths and asserts byte-identical preservation, proves that narrowing tokens
+such as `--width=4294967297` are rejected with `INVALID_ARGUMENTS`, checks the
+declared bounds for every numeric option, and confirms that only `--overwrite`
+replaces an artifact.
+
+2026-10-24 native Windows x64 Tesla M4 re-check (MSVC 19.44 Release, CUDA
+12.8.93 `sm_52`): the full configured target set builds, `test_gpu_diagnostic_report`
+passes, and `gpu_diagnostic_probe_cli` passes in 9.6 s including real device
+runs. Separately, a 1920x1080, 1-frame, 1-slot run returned `PASSED` (exit 0),
+a valid run against an existing sentinel returned exit 3 and left the sentinel
+byte-identical, and `--width=4294967297` returned exit 2 with
+`INVALID_ARGUMENTS`. The full decoder suite was not rerun for this test-only
+change.
 
 Full native Windows x64 CUDA Release build passed. The full CTest run was
 **23/25**: `test_phase2c` and `test_phase2d` failed with the reference-decoder

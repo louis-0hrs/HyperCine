@@ -92,6 +92,23 @@ struct GpuDiagnosticReport {
 
 std::string BuildGpuDiagnosticJson(const GpuDiagnosticReport& report);
 
+enum class ReportWritePolicy {
+    // Fail closed: refuse to touch a path that already exists.
+    kCreateNew,
+    // Explicit opt-in replacement of an existing path.
+    kOverwrite,
+};
+
+// Writes the versioned JSON payload to out_path.
+//
+// With kCreateNew the file is created exclusively, so a pre-existing artifact
+// is never truncated. If writing fails after the file was created, the file is
+// removed again: a partially written report must not survive as evidence.
+bool WriteGpuDiagnosticReportFile(const GpuDiagnosticReport& report,
+                                  const std::string& out_path,
+                                  ReportWritePolicy policy,
+                                  std::string* error);
+
 }  // namespace diag
 }  // namespace hypercine
 

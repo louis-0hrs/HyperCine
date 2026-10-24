@@ -3,7 +3,11 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "gpu_diagnostic_report.h"
 
+#include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <stdexcept>
 #include <string>
 
@@ -12,8 +16,10 @@ namespace {
 using hypercine::diag::BuildGpuDiagnosticJson;
 using hypercine::diag::CudaMemInfoSnapshot;
 using hypercine::diag::GpuDiagnosticReport;
+using hypercine::diag::ReportWritePolicy;
 using hypercine::diag::UnavailableMetric;
 using hypercine::diag::VramUsedSnapshot;
+using hypercine::diag::WriteGpuDiagnosticReportFile;
 
 void Check(bool value, const char* message) {
     if (!value) throw std::runtime_error(message);
@@ -139,6 +145,107 @@ void InvalidArgumentsContract() {
     Check(Contains(json, "\"code\": null"), "invalid run has no CUDA code");
 }
 
+class TempDirectory {
+public:
+    TempDirectory() {
+        const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+        path_ = std::filesystem::temp_directory_path() /
+                ("hypercine_gpu_diagnostic_" + std::to_string(stamp));
+        std::filesystem::create_directories(path_);
+    }
+
+    ~TempDirectory() {
+        std::error_code ignored;
+        std::filesystem::remove_all(path_, ignored);
+    }
+
+    TempDirectory(const TempDirectory&) = delete;
+    TempDirectory& operator=(const TempDirectory&) = delete;
+
+    std::string File(const std::string& name) const { return (path_ / name).string(); }
+
+private:
+    std::filesystem::path path_;
+};
+
+std::string ReadFile(const std::string& path) {
+    std::ifstream in(path, std::ios::binary);
+    return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+}
+
+void WriteSentinel(const std::string& path, const std::string& text) {
+    std::ofstream out(path, std::ios::binary);
+    out << text;
+}
+
+constexpr const char* kSentinel = "sentinel bytes that must survive\n";
+
+void CreateNewRefusesToOverwrite() {
+    TempDirectory dir;
+    const std::string path = dir.File("report.json");
+    WriteSentinel(path, kSentinel);
+    std::string error;
+    Check(!WriteGpuDiagnosticReportFile(PassingReport(), path, ReportWritePolicy::kCreateNew,
+                                        &error),
+          "create-new must refuse an existing path");
+    Check(Contains(error, "already exists"), "refusal must name the existing path");
+    Check(ReadFile(path) == kSentinel, "existing artifact must stay byte-identical");
+}
+
+void CreateNewWritesFreshFile() {
+    TempDirectory dir;
+    const std::string path = dir.File("report.json");
+    std::string error;
+    Check(WriteGpuDiagnosticReportFile(PassingReport(), path, ReportWritePolicy::kCreateNew,
+                                       &error),
+          "create-new must write a fresh path");
+    Check(ReadFile(path) == BuildGpuDiagnosticJson(PassingReport()),
+          "written payload must equal the built JSON");
+}
+
+void OverwriteReplacesExisting() {
+    TempDirectory dir;
+    const std::string path = dir.File("report.json");
+    WriteSentinel(path, kSentinel);
+    std::string error;
+    Check(WriteGpuDiagnosticReportFile(PassingReport(), path, ReportWritePolicy::kOverwrite,
+                                       &error),
+          "explicit overwrite must succeed");
+    const std::string written = ReadFile(path);
+    Check(written != kSentinel, "explicit overwrite must replace the sentinel");
+    Check(Contains(written, "\"schema\": \"hypercine.gpu_diagnostic\""),
+          "overwritten payload must be a diagnostic report");
+}
+
+void EmptyPathIsRejected() {
+    std::string error;
+    Check(!WriteGpuDiagnosticReportFile(PassingReport(), "", ReportWritePolicy::kCreateNew,
+                                        &error),
+          "empty output path must be rejected");
+    Check(Contains(error, "empty"), "empty-path error");
+}
+
+void MissingParentLeavesNoFile() {
+    TempDirectory dir;
+    const std::string path = dir.File("missing/report.json");
+    std::string error;
+    Check(!WriteGpuDiagnosticReportFile(PassingReport(), path, ReportWritePolicy::kCreateNew,
+                                        &error),
+          "missing parent directory must fail");
+    Check(!std::filesystem::exists(path), "no partial artifact may be created");
+}
+
+void DirectoryIsNeverReplaced() {
+    TempDirectory dir;
+    const std::string path = dir.File("existing-directory");
+    std::filesystem::create_directories(path);
+    std::string error;
+    Check(!WriteGpuDiagnosticReportFile(PassingReport(), path, ReportWritePolicy::kOverwrite,
+                                        &error),
+          "a directory must never be replaced by a report");
+    Check(std::filesystem::is_directory(path), "existing directory must survive");
+}
+
 }  // namespace
 
 int main() {
@@ -147,6 +254,12 @@ int main() {
         FailureReportContract();
         UnavailableMeasuredDeltaContract();
         InvalidArgumentsContract();
+        CreateNewRefusesToOverwrite();
+        CreateNewWritesFreshFile();
+        OverwriteReplacesExisting();
+        EmptyPathIsRejected();
+        MissingParentLeavesNoFile();
+        DirectoryIsNeverReplaced();
     } catch (const std::exception& error) {
         std::cerr << "gpu diagnostic report FAIL: " << error.what() << "\n";
         return 1;
