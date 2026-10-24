@@ -45,6 +45,12 @@ if(Python3_Interpreter_FOUND)
 endif()
 
 # 1. Transform-level test
+if(WIN32 AND TARGET CFHDCodecStatic)
+    add_executable(decoder_sdk_dump decoder_differential/sdk_dump.cpp)
+    target_link_libraries(decoder_sdk_dump PRIVATE CFHDCodecStatic)
+    add_test(NAME decoder_differential_yu64_unpack COMMAND decoder_sdk_dump --self-test)
+endif()
+
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
     target_link_libraries(test_small_chroma_oracle PRIVATE CFHDCodecStatic)
