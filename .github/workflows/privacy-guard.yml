@@ -10,6 +10,18 @@ permissions:
   contents: read
 
 jobs:
+  windows-installed-hooks:
+    name: Installed privacy hooks (Windows)
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test native Python with Git for Windows hooks
+        run: python -m unittest discover -s ci -p 'test_privacy_hooks.py' -v
+
   publication-privacy:
     name: Publication privacy (all new commits)
     runs-on: ubuntu-24.04
@@ -21,13 +33,15 @@ jobs:
         with:
           python-version: '3.12'
       - name: Test detector with synthetic examples
-        run: python -m unittest discover -s ci -p 'test_privacy_guard.py' -v
+        run: python -m unittest discover -s ci -p 'test_privacy*.py' -v
       - name: Inspect each introduced commit (not just final diff)
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PUSH_BEFORE_SHA: ${{ github.event.before }}
         shell: bash
         run: |
+          # Range selection must use original ancestry as well as the scanner.
+          export GIT_NO_REPLACE_OBJECTS=1
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             base="$PR_BASE_SHA"
           else

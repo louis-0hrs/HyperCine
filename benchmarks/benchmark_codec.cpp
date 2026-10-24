@@ -17,12 +17,20 @@
 #include <numeric>
 #include <algorithm>
 #include <cstring>
+#include <cerrno>
+#include <thread>
+#include <filesystem>
+#include <sys/stat.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <psapi.h>
 #include <intrin.h>
+#elif defined(__i386__) || defined(__x86_64__)
+// Toolchain CPUID intrinsics; see benchmarks/CMakeLists.txt for the include
+// boundary that keeps upstream/Codec/cpuid.h off this target's search path.
+#include <cpuid.h>
 #endif
 
 #include "CFHDEncoder.h"
@@ -60,32 +68,144 @@ struct BenchmarkMetrics {
     size_t avgCompressedBytes;
     double compressionRatio;
     size_t peakMemoryBytes;
+    std::string peakMemoryMetric;
 };
+
+// CPU brand string from CPUID leaves 0x80000002..0x80000004. Returns an empty
+// string when the platform cannot answer, so the caller can distinguish "no
+// identifier available" from a real model name instead of inventing one.
+// The CPUID brand leaves are a fixed 48-byte field, space-padded on the right.
+// Emitting that padding into a JSON string is a defect in the artifact, not a
+// property of the CPU: it survives into every downstream comparison and makes
+// two names for one processor. Trim it at the source so every emitted artifact
+// is canonical. The historical Windows baseline keeps its recorded bytes; this
+// only governs what this tool writes from now on.
+std::string TrimTrailingBlanks(const char* text) {
+    std::string value(text);
+    const auto last = value.find_last_not_of(" \t\r\n");
+    if (last == std::string::npos) return std::string();
+    value.erase(last + 1);
+    return value;
+}
 
 std::string GetCpuBrandString() {
 #ifdef _WIN32
     int cpuInfo[4] = { -1 };
-    char brand[0x40] = { 0 };
+    char brand[0x40] = { '\0' };
     __cpuid(cpuInfo, 0x80000000);
-    unsigned int nExIds = cpuInfo[0];
+    unsigned int nExIds = static_cast<unsigned int>(cpuInfo[0]);
     if (nExIds >= 0x80000004) {
-        __cpuid((int*)(brand), 0x80000002);
-        __cpuid((int*)(brand + 16), 0x80000003);
-        __cpuid((int*)(brand + 32), 0x80000004);
-        return std::string(brand);
+        __cpuid(reinterpret_cast<int*>(brand), 0x80000002);
+        __cpuid(reinterpret_cast<int*>(brand + 16), 0x80000003);
+        __cpuid(reinterpret_cast<int*>(brand + 32), 0x80000004);
+        return TrimTrailingBlanks(brand);
+    }
+#elif defined(__i386__) || defined(__x86_64__)
+    unsigned int eax = 0, ebx = 0, ecx = 0, edx = 0;
+    if (__get_cpuid_max(0x80000000u, nullptr) >= 0x80000004u) {
+        char brand[0x40] = { '\0' };
+        __cpuid_count(0x80000002u, 0, eax, ebx, ecx, edx);
+        std::memcpy(brand, &eax, 4); std::memcpy(brand + 4, &ebx, 4);
+        std::memcpy(brand + 8, &ecx, 4); std::memcpy(brand + 12, &edx, 4);
+        __cpuid_count(0x80000003u, 0, eax, ebx, ecx, edx);
+        std::memcpy(brand + 16, &eax, 4); std::memcpy(brand + 20, &ebx, 4);
+        std::memcpy(brand + 24, &ecx, 4); std::memcpy(brand + 28, &edx, 4);
+        __cpuid_count(0x80000004u, 0, eax, ebx, ecx, edx);
+        std::memcpy(brand + 32, &eax, 4); std::memcpy(brand + 36, &ebx, 4);
+        std::memcpy(brand + 40, &ecx, 4); std::memcpy(brand + 44, &edx, 4);
+        return TrimTrailingBlanks(brand);
     }
 #endif
-    return "Unknown CPU";
+    return std::string();
 }
 
-size_t GetPeakWorkingSetBytes() {
+// Reported logical hardware threads. Windows keeps the system-info query it has
+// always used so recorded Windows baselines stay comparable; other platforms use
+// the portable standard query and never report a zero thread count.
+int GetLogicalThreadCount() {
+#ifdef _WIN32
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+    return static_cast<int>(sysInfo.dwNumberOfProcessors);
+#else
+    unsigned int count = std::thread::hardware_concurrency();
+    return count > 0 ? static_cast<int>(count) : 1;
+#endif
+}
+
+// Host OS this binary was built for. Build-time constant, not a claim about a
+// specific machine or its physical core/NUMA topology.
+const char* GetBuildOsName() {
+#if defined(_WIN32)
+    return "Windows x64";
+#elif defined(__APPLE__)
+    return "macOS";
+#elif defined(__linux__)
+    return "Linux";
+#else
+    return "Unknown";
+#endif
+}
+
+// Build type this binary was compiled with, provided by CMake. A hardcoded
+// "Release" is a claim about a build the tool did not inspect.
+const char* GetBuildTypeName() {
+#if defined(HYPERCINE_BENCH_BUILD_TYPE)
+    return HYPERCINE_BENCH_BUILD_TYPE;
+#else
+    return "unknown";
+#endif
+}
+
+// Compiler that built this binary. Uses the CMake-provided identifier/version
+// (see benchmarks/CMakeLists.txt) and falls back to a plain toolchain name.
+const char* GetCompilerDescription() {
+#if defined(HYPERCINE_BENCH_COMPILER)
+    return HYPERCINE_BENCH_COMPILER;
+#elif defined(_MSC_VER)
+    return "MSVC";
+#elif defined(__clang__)
+    return "Clang";
+#elif defined(__GNUC__)
+    return "GCC";
+#else
+    return "Unknown";
+#endif
+}
+
+// Peak memory is a platform-specific measurement (Windows working set vs POSIX
+// resident set); the metric name travels with the value so unrelated counters
+// are never silently compared across operating systems.
+struct PeakMemoryReport {
+    size_t bytes;
+    const char* metric;
+};
+
+PeakMemoryReport GetPeakMemoryReport() {
 #ifdef _WIN32
     PROCESS_MEMORY_COUNTERS pmc;
     if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        return pmc.PeakWorkingSetSize;
+        return { static_cast<size_t>(pmc.PeakWorkingSetSize), "windows_peak_working_set" };
     }
+    return { 0, "unavailable" };
+#elif defined(__linux__)
+    std::ifstream status("/proc/self/status");
+    std::string key;
+    while (status >> key) {
+        if (key == "VmHWM:") {
+            size_t kb = 0;
+            if (status >> kb) {
+                return { kb * 1024, "linux_vmhwm" };
+            }
+            break;
+        }
+    }
+    return { 0, "unavailable" };
+#else
+    // No equivalent peak counter is read here; report it explicitly as
+    // unavailable rather than reusing another platform's metric.
+    return { 0, "unavailable" };
 #endif
-    return 0;
 }
 
 // Generate realistic synthetic frame data (checkerboard + diagonal gradient)
@@ -233,7 +353,9 @@ BenchmarkMetrics RunResolutionBenchmark(const BenchmarkConfig& cfg) {
 
     CFHD_CloseDecoder(decoder);
 
-    metrics.peakMemoryBytes = GetPeakWorkingSetBytes();
+    const PeakMemoryReport peakMemory = GetPeakMemoryReport();
+    metrics.peakMemoryBytes = peakMemory.bytes;
+    metrics.peakMemoryMetric = peakMemory.metric;
 
     // Print summary table row
     std::cout << std::fixed << std::setprecision(2);
@@ -247,34 +369,108 @@ BenchmarkMetrics RunResolutionBenchmark(const BenchmarkConfig& cfg) {
               << metrics.decodeMinLatencyMs << " - " << metrics.decodeMaxLatencyMs << " ms]\n";
     std::cout << "  Comp:   " << (metrics.avgCompressedBytes / 1024) << " KB/frame ("
               << metrics.compressionRatio << ":1) | Peak RAM: "
-              << (metrics.peakMemoryBytes / (1024 * 1024)) << " MB\n";
+              << (metrics.peakMemoryBytes / (1024 * 1024)) << " MB (" << metrics.peakMemoryMetric << ")\n";
 
     return metrics;
 }
 
-void WriteResultsJson(const std::string& filepath,
+// A closed stream is not evidence that a measurement record exists. Character
+// devices accept writes and keep nothing: POSIX /dev/null and Windows NUL,
+// CON, COM1 all open successfully. The artifact path therefore has to resolve
+// to a regular file, both before writing and again after closing.
+enum class OutputTargetKind {
+    Missing,       // nothing there yet; creating a regular file is allowed
+    RegularFile,   // an existing regular file; overwriting is allowed
+    NotRegular,    // device, pipe, socket or directory
+    Uninspectable  // cannot be examined, so no durable artifact can be promised
+};
+
+OutputTargetKind InspectOutputTarget(const std::string& path) {
+#if defined(_WIN32)
+    HANDLE handle = CreateFileA(path.c_str(), FILE_READ_ATTRIBUTES,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
+                                nullptr);
+    if (handle == INVALID_HANDLE_VALUE) {
+        const DWORD error = GetLastError();
+        if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND) {
+            return OutputTargetKind::Missing;
+        }
+        return OutputTargetKind::Uninspectable;
+    }
+    const DWORD type = GetFileType(handle);
+    BY_HANDLE_FILE_INFORMATION info{};
+    const BOOL haveInfo = GetFileInformationByHandle(handle, &info);
+    CloseHandle(handle);
+    if (type != FILE_TYPE_DISK) {
+        return OutputTargetKind::NotRegular;
+    }
+    if (!haveInfo) {
+        return OutputTargetKind::Uninspectable;
+    }
+    if ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+        return OutputTargetKind::NotRegular;
+    }
+    return OutputTargetKind::RegularFile;
+#else
+    struct stat info {};
+    if (::stat(path.c_str(), &info) != 0) {
+        return (errno == ENOENT || errno == ENOTDIR) ? OutputTargetKind::Missing
+                                                     : OutputTargetKind::Uninspectable;
+    }
+    return S_ISREG(info.st_mode) ? OutputTargetKind::RegularFile
+                                 : OutputTargetKind::NotRegular;
+#endif
+}
+
+const char* DescribeRejectedTarget(OutputTargetKind kind) {
+    return kind == OutputTargetKind::NotRegular
+               ? "target is not a regular file (device, pipe, socket or directory)"
+               : "target path cannot be inspected as a regular file";
+}
+
+// Returns true only when the artefact was actually written and closed. A caller
+// that reports success without this returning true would be claiming a
+// measurement record that does not exist.
+bool WriteResultsJson(const std::string& filepath,
                       const std::vector<BenchmarkMetrics>& results,
                       const std::string& cpuModel,
                       int threadCount)
 {
-    std::string normPath = filepath;
-    for (char& c : normPath) {
+#if defined(_WIN32)
+    // Windows tooling expects backslash separators in the recorded path.
+    std::string nativePath = filepath;
+    for (char& c : nativePath) {
         if (c == '/') c = '\\';
     }
-    std::ofstream out(normPath);
+#else
+    // POSIX paths are used as given; turning '/' into '\\' would create a
+    // literal file name instead of a directory path.
+    std::string nativePath = filepath;
+#endif
+
+    const OutputTargetKind beforeWrite = InspectOutputTarget(nativePath);
+    if (beforeWrite == OutputTargetKind::NotRegular ||
+        beforeWrite == OutputTargetKind::Uninspectable) {
+        std::cerr << "Refusing to write JSON output: " << nativePath << ": "
+                  << DescribeRejectedTarget(beforeWrite) << std::endl;
+        return false;
+    }
+
+    std::ofstream out(nativePath);
     if (!out.is_open()) {
-        std::cerr << "Failed to write JSON output: " << normPath << std::endl;
+        std::cerr << "Failed to write JSON output: " << nativePath << std::endl;
         perror("Reason");
-        return;
+        return false;
     }
 
     out << "{\n";
     out << "  \"system\": {\n";
-    out << "    \"os\": \"Windows x64\",\n";
+    out << "    \"os\": \"" << GetBuildOsName() << "\",\n";
     out << "    \"cpu_model\": \"" << cpuModel << "\",\n";
     out << "    \"thread_count\": " << threadCount << ",\n";
-    out << "    \"compiler\": \"MSVC 19.44 / Visual Studio 2022\",\n";
-    out << "    \"build_type\": \"Release\",\n";
+    out << "    \"compiler\": \"" << GetCompilerDescription() << "\",\n";
+    out << "    \"build_type\": \"" << GetBuildTypeName() << "\",\n";
     out << "    \"upstream_commit\": \"11574d0295771edccadd17af14af74a539f924c7\"\n";
     out << "  },\n";
     out << "  \"configuration\": {\n";
@@ -309,15 +505,29 @@ void WriteResultsJson(const std::string& filepath,
         out << "        \"avg_bytes\": " << m.avgCompressedBytes << ",\n";
         out << "        \"ratio\": " << m.compressionRatio << "\n";
         out << "      },\n";
-        out << "      \"peak_memory_bytes\": " << m.peakMemoryBytes << "\n";
+        out << "      \"peak_memory_bytes\": " << m.peakMemoryBytes << ",\n";
+        out << "      \"peak_memory_metric\": \"" << m.peakMemoryMetric << "\"\n";
         out << "    }" << (i + 1 < results.size() ? "," : "") << "\n";
     }
 
     out << "  ]\n";
     out << "}\n";
     out.close();
+    if (!out) {
+        std::cerr << "Failed to finish writing JSON output: " << nativePath << std::endl;
+        return false;
+    }
+
+    // The stream closed cleanly, but that only proves the bytes were accepted
+    // somewhere. Success is claimed only when the path now names a regular file.
+    if (InspectOutputTarget(nativePath) != OutputTargetKind::RegularFile) {
+        std::cerr << "Failed to write JSON output: " << nativePath
+                  << " did not produce a regular file" << std::endl;
+        return false;
+    }
 
     std::cout << "\n[+] Benchmark results successfully saved to: " << filepath << std::endl;
+    return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -326,16 +536,21 @@ int main(int argc, char* argv[]) {
     std::cout << "=========================================================\n";
 
     std::string cpuModel = GetCpuBrandString();
-    SYSTEM_INFO sysInfo;
-    GetSystemInfo(&sysInfo);
-    int threadCount = sysInfo.dwNumberOfProcessors;
+    int threadCount = GetLogicalThreadCount();
 
-    std::cout << "CPU:          " << cpuModel << "\n";
+    std::cout << "CPU:          " << (cpuModel.empty() ? "unavailable" : cpuModel) << "\n";
     std::cout << "Cores/Threads:" << threadCount << "\n";
-    std::cout << "Compiler:     MSVC 19.44 (Visual Studio 2022)\n";
+    std::cout << "Compiler:     " << GetCompilerDescription() << "\n";
     std::cout << "Configuration:BGRA -> 4:2:2 Film3 (Reference CPU)\n";
 
+#if defined(_WIN32)
+    // Preserve the recorded Windows baseline output path on Windows.
     std::string jsonPath = "benchmarks/results/reference_windows_msvc.json";
+#else
+    // Distinct default on non-Windows so a POSIX run never overwrites the
+    // recorded Windows baseline JSON.
+    std::string jsonPath = "benchmarks/results/reference_local.json";
+#endif
     bool run1080p = true;
     bool run4k = true;
     bool run8k = true;
@@ -370,12 +585,34 @@ int main(int argc, char* argv[]) {
                            CFHD_ENCODING_QUALITY_FILMSCAN3});
     }
 
+    // Create the artifact directory instead of relying on the process working
+    // directory being the repository root. The default path is repo-relative.
+    {
+        const std::string::size_type slash = jsonPath.find_last_of("/\\");
+        if (slash != std::string::npos) {
+            std::error_code ec;
+            std::filesystem::create_directories(jsonPath.substr(0, slash), ec);
+            if (ec) {
+                std::cerr << "Failed to create output directory for " << jsonPath
+                          << ": " << ec.message() << std::endl;
+            }
+        }
+    }
+
     std::vector<BenchmarkMetrics> results;
     for (const auto& cfg : configs) {
         results.push_back(RunResolutionBenchmark(cfg));
     }
 
-    WriteResultsJson(jsonPath, results, cpuModel, threadCount);
+    // The exit status must express whether the measurement record exists. A
+    // missing artifact with exit 0 is the same false-OKAY class this repository
+    // has already been burned by: a run nobody can audit looks like a pass.
+    if (!WriteResultsJson(jsonPath, results, cpuModel, threadCount)) {
+        std::cerr << "\n=========================================================\n";
+        std::cerr << " Benchmark Run FAILED: no result artifact was written  \n";
+        std::cerr << "=========================================================\n";
+        return 1;
+    }
 
     std::cout << "\n=========================================================\n";
     std::cout << " Benchmark Run Completed Successfully                    \n";

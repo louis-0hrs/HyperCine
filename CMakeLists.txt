@@ -24,6 +24,25 @@ option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
 option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
 
+# Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
+option(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY "Build only the synthetic decode task graph" OFF)
+if(HYPERCINE_BUILD_TESTS OR HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
+    find_package(Threads REQUIRED)
+    add_subdirectory(tests/decode_task_graph)
+endif()
+if(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
+    # Keep the regular SDK/CPU tests on the project's advertised CMake range.
+    cmake_minimum_required(VERSION 3.25)
+    if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA OR HYPERCINE_ENABLE_METAL OR
+       HYPERCINE_BUILD_STANDALONE OR HYPERCINE_BUILD_QUALITY_STATE_ONLY OR HYPERCINE_REQUIRE_EXTERNAL_DECODE)
+        message(FATAL_ERROR "Task graph only mode requires SDK/GPU/other standalone modes OFF")
+    endif()
+    if(HYPERCINE_BUILD_TESTS)
+        enable_testing()
+    endif()
+    return()
+endif()
+
 # Internal P0 probe/selection boundary, built without ISA flags or SDK headers.
 # Codec targets deliberately do not dispatch through it until lane validation.
 add_library(hypercine_cpu_isa STATIC src/cpu/cpu_isa.cpp)
@@ -35,6 +54,8 @@ if(HYPERCINE_BUILD_TESTS)
     target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
     add_test(NAME cpu_isa_selection COMMAND test_cpu_isa)
 endif()
+
+option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)
 
 # This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
@@ -67,6 +88,9 @@ endif()
 if(HYPERCINE_ENABLE_METAL AND (NOT APPLE OR NOT HYPERCINE_BUILD_STANDALONE))
     message(FATAL_ERROR "Metal requires Apple and the SDK-free standalone build")
 endif()
+if(HYPERCINE_ENABLE_VULKAN AND NOT HYPERCINE_BUILD_STANDALONE)
+    message(FATAL_ERROR "The Vulkan FilmScan3 frontend requires the SDK-free standalone build")
+endif()
 if(HYPERCINE_BUILD_STANDALONE)
     cmake_minimum_required(VERSION 3.25)
     if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA)
@@ -80,6 +104,42 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/core/filmscan3_encoder.cpp
         src/core/filmscan3_backend.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    if(HYPERCINE_ENABLE_VULKAN)
+        # Vulkan is loaded through dlopen at runtime, so only the headers are a
+        # build dependency; VK_NO_PROTOTYPES removes every link-time symbol.
+        find_package(Vulkan REQUIRED)
+        find_package(Threads REQUIRED)
+        set(VULKAN_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/vulkan/shaders")
+        set(VULKAN_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+        set(VULKAN_SHADER_SOURCES
+            "${VULKAN_SHADER_DIR}/color_cg709.comp"
+            "${VULKAN_SHADER_DIR}/wavelet_h26.comp"
+            "${VULKAN_SHADER_DIR}/wavelet_v26.comp")
+        # Deterministic GLSL -> SPIR-V embedder; dlopen("libshaderc") keeps the
+        # shader compiler optional on the build host (see the tool's header).
+        add_executable(vulkan_spirv_embed tools/vulkan_spirv_embed.cpp)
+        target_link_libraries(vulkan_spirv_embed PRIVATE ${CMAKE_DL_LIBS})
+        add_custom_command(
+            OUTPUT "${VULKAN_GEN_DIR}/vulkan_shaders_generated.h"
+                   "${VULKAN_GEN_DIR}/vulkan_spirv_manifest.txt"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${VULKAN_GEN_DIR}"
+            COMMAND $<TARGET_FILE:vulkan_spirv_embed>
+                    --out "${VULKAN_GEN_DIR}/vulkan_shaders_generated.h"
+                    --manifest "${VULKAN_GEN_DIR}/vulkan_spirv_manifest.txt"
+                    ${VULKAN_SHADER_SOURCES}
+            DEPENDS vulkan_spirv_embed ${VULKAN_SHADER_SOURCES}
+            COMMENT "Embedding HyperCine Vulkan compute shaders (SPIR-V)"
+            VERBATIM)
+        add_custom_target(hypercine_vulkan_shaders DEPENDS
+            "${VULKAN_GEN_DIR}/vulkan_shaders_generated.h")
+        add_dependencies(hypercine_standalone hypercine_vulkan_shaders)
+        target_sources(hypercine_standalone PRIVATE src/vulkan/vulkan_frontend.cpp)
+        target_include_directories(hypercine_standalone PRIVATE
+            "${VULKAN_GEN_DIR}" ${Vulkan_INCLUDE_DIRS})
+        target_compile_definitions(hypercine_standalone PRIVATE
+            HYPERCINE_VULKAN_AVAILABLE=1 VK_NO_PROTOTYPES)
+        set_property(GLOBAL PROPERTY HYPERCINE_HAS_VULKAN TRUE)
+    endif()
     if(HYPERCINE_ENABLE_METAL)
         enable_language(OBJCXX)
         set(CMAKE_OBJCXX_STANDARD 17)
@@ -120,6 +180,16 @@ if(HYPERCINE_BUILD_STANDALONE)
             target_compile_definitions(hypercine_encode_filmscan3_metal PRIVATE HYPERCINE_METAL_AUDIT=1)
             target_link_libraries(hypercine_encode_filmscan3_metal PRIVATE hypercine_standalone)
         endif()
+        if(HYPERCINE_ENABLE_VULKAN)
+            # CPU<->Vulkan parity. GPU-required run fails closed when no Vulkan
+            # compute device is usable; the same binary is a skip when not required.
+            add_executable(test_vulkan_filmscan3 tests/test_vulkan_filmscan3.cpp)
+            target_link_libraries(test_vulkan_filmscan3 PRIVATE hypercine_standalone)
+            add_test(NAME vulkan_filmscan3_cpu_parity COMMAND test_vulkan_filmscan3)
+            set_tests_properties(vulkan_filmscan3_cpu_parity PROPERTIES
+                LABELS "vulkan;gpu-required"
+                SKIP_RETURN_CODE 77)
+        endif()
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_api COMMAND test_filmscan3)
@@ -145,6 +215,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
         add_test(NAME filmscan3_geometry_validation COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_geometry_validation.py")
+        add_subdirectory(tests/scalar_inverse_research)
+        add_test(NAME gop2_original_stage_contract
+            COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_stage_contract.py")
+        add_test(NAME gop2_reference_inventory_integrity
+            COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_reference_inventory.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
@@ -363,6 +438,19 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/upstream/WarpLib
 )
 
+# The root SDK include_directories() also mutates targets declared earlier in
+# this CMakeLists.txt. hypercine_cpu_isa is SDK-free and needs only src/, but
+# upstream/Codec/cpuid.h otherwise shadows GCC/Clang's <cpuid.h> and breaks
+# __get_cpuid_max/__cpuid_count in the Linux regular SDK-enabled build.
+# Restore the isolated header search path for these two pre-existing targets;
+# keep the upstream includes intact for actual CineForm SDK consumers.
+set_property(TARGET hypercine_cpu_isa PROPERTY INCLUDE_DIRECTORIES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src")
+if(TARGET test_cpu_isa)
+    set_property(TARGET test_cpu_isa PROPERTY INCLUDE_DIRECTORIES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src")
+endif()
+
 # Placeholder target for HyperCine library integration
 add_library(hypercine_core INTERFACE)
 target_include_directories(hypercine_core INTERFACE
@@ -371,10 +459,38 @@ target_include_directories(hypercine_core INTERFACE
 )
 if(TARGET CFHDCodecStatic)
     target_link_libraries(hypercine_core INTERFACE CFHDCodecStatic)
+
+    # upstream/EncoderSDK calls uuid_generate() (MetadataWriter.cpp,
+    # SampleEncoder.cpp), but the frozen upstream build only appends -luuid to
+    # its own tools. Every target that links the CFHDCodecStatic archive
+    # directly therefore leaves the symbol unresolved on Linux. Resolve it on
+    # the archive's INTERFACE so all downstream consumers link it without manual
+    # -luuid flags. A missing library is a clear configure error. upstream/ is
+    # not modified; MSVC and Apple (libSystem) need no extra library here.
+    if(UNIX AND NOT APPLE)
+        find_library(HYPERCINE_UUID_LIBRARY uuid)
+        if(NOT HYPERCINE_UUID_LIBRARY)
+            message(FATAL_ERROR
+                "libuuid not found; upstream/EncoderSDK needs uuid_generate on Linux. "
+                "Install the libuuid development package (Debian/Ubuntu: uuid-dev).")
+        endif()
+        target_link_libraries(CFHDCodecStatic INTERFACE ${HYPERCINE_UUID_LIBRARY})
+    endif()
 endif()
 
 # Core HyperCine library source
 add_subdirectory(src)
+
+# Bounded diagnostic probe for constrained CUDA devices (issue #116).
+if(HYPERCINE_ENABLE_CUDA)
+    add_executable(hypercine_m4_resolution_probe tools/m4_sm52_resolution_probe.cpp)
+    target_include_directories(hypercine_m4_resolution_probe PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+    target_link_libraries(hypercine_m4_resolution_probe PRIVATE hypercine_wavelet)
+    if(TARGET CFHDCodecStatic)
+        target_link_libraries(hypercine_m4_resolution_probe PRIVATE CFHDCodecStatic)
+    endif()
+endif()
 
 # Tests
 if(HYPERCINE_BUILD_TESTS)
