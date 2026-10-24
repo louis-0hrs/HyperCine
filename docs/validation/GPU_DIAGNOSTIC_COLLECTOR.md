@@ -144,12 +144,15 @@ such as `--width=4294967297` are rejected with `INVALID_ARGUMENTS`, checks the
 declared bounds for every numeric option, and confirms that only `--overwrite`
 replaces an artifact.
 
-2026-10-24 native Windows x64 Tesla M4 re-check (MSVC 19.44 Release, CUDA
-12.8.93 `sm_52`): the full configured target set builds, `test_gpu_diagnostic_report`
-passes, and `gpu_diagnostic_probe_cli` passes in 9.6 s including real device
-runs. Separately, a 1920x1080, 1-frame, 1-slot run returned `PASSED` (exit 0),
-a valid run against an existing sentinel returned exit 3 and left the sentinel
-byte-identical, and `--width=4294967297` returned exit 2 with
+2026-10-24 native Windows x64 Tesla M4 re-check at `ccf102dc0adadc86a43faf7895e0a8be41e7d9ac`
+(`source_dirty=false`; MSVC 19.44.35229.0 Release; CUDA compiler 12.8.93,
+runtime 12,080, driver 13,000): the full configured target set builds,
+`test_gpu_diagnostic_report` passes, and `gpu_diagnostic_probe_cli` passes in
+7.8 s including real device runs. Separately, a 1920x1080, 1-frame, 1-slot run
+returned `PASSED` (exit 0) with report SHA-256
+`7035769aa5764a4c895a78b3fd21941b2a3e0462a64eb9fda4871f7e78743d84`; a valid
+run against an existing sentinel returned exit 3 and left the sentinel
+byte-identical; and `--width=4294967297` returned exit 2 with
 `INVALID_ARGUMENTS`. The full decoder suite was not rerun for this test-only
 change.
 
