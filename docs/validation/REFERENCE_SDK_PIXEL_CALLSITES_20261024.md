@@ -28,7 +28,7 @@ No gate is changed here and no oracle is newly qualified.
 | 1 | `tests/test_phase2a.cpp:125` | synthetic host/device packet | encoded-byte/coefficient/entropy identity and geometry strictly; pixels through `tests/reference_oracle.h` | **Aligned** — `SKIP_RETURN_CODE 77`, `reference-oracle` label (`tests/CMakeLists.txt:127`) |
 | 2 | `tests/test_phase2b.cpp:215`, `test_phase2c`, `test_phase2d` via `src/core/phase2c_encoder.cpp:300`, `phase2d_encoder.cpp:251` | same class | same class | **Aligned** — `tests/CMakeLists.txt:135`–`153` |
 | 3 | `tests/test_standalone_sdk_oracle.cpp:75`, gate at `:190`–`192` | three pinned 128×128 packets, five fresh instances per format | `PSNR > 35 dB` vs pinned FFmpeg decode, flat must be exact | **Not aligned** — a reference-decoder pixel signal is a hard CTest PASS/FAIL (`tests/CMakeLists.txt:204`–`209`); distinct-hash counts are printed but never classified |
-| 4 | `tests/test_filmscan3_windows_decoder.cpp:35`, gate at `:48`–`56` | two Mac-produced 1080p packets, two decodes each | output identical across two decodes, else the blocked state; output non-zero | **Aligned** — divergence maps to exit 77; strict checks stay fatal (follow-up below) |
+| 4 | `tests/test_filmscan3_windows_decoder.cpp:35`, gate at `:46`–`66` | two Mac-produced 1080p packets, two decodes each | output identical across two decodes, else the blocked state; output non-zero | **Aligned** — divergence maps to exit 77 and never short-circuits the second fixture; strict checks stay fatal (follow-up below) |
 | 5 | `tests/test_phase3a.cpp:147`–`154` (CUDA-only) via `src/core/phase3a_encoder.cpp:3455`–`3463` and `:3438` | every frame of a 300-frame encoded sequence | per-frame `PSNR >= 35 dB` and a frame stamp read out of decoded pixels | **Not aligned** — reference-dependent strict gate; the CUDA lane (#16/#187) owns its registration (`tests/CMakeLists.txt:171`) |
 | 6 | `tests/test_yuy2_stability.cpp:118` | one encoded sample, eight decodes | **encoder** masked-bitstream identity (`:142`–`154`); pixel hashes recorded only (`:178`–`193`) | **Aligned** — encoder-strict, pixels diagnostic |
 | 7 | `tests/test_codec_roundtrip.cpp:116` | seven patterns | roundtrip success, bitstream hash; PSNR printed only (`:191`–`194`) | **Aligned** — pixels diagnostic |
@@ -123,11 +123,18 @@ specific upstream mechanism.
 
 ## Follow-up (2026-10-24): callsite #4 migrated to the blocked state
 
-- `tests/test_filmscan3_windows_decoder.cpp:48`–`56` classifies the two-repeat
+- `tests/test_filmscan3_windows_decoder.cpp:46`–`66` classifies the two-repeat
   comparison through `ClassifyRepeatedDecodeStability` in
   `tests/reference_oracle.h`. Divergence prints
   `ORIGINAL_SDK_REFERENCE_NONDETERMINISTIC_QUARANTINED` with both decoded-buffer
-  FNV-1a hashes and exits `77`.
+  FNV-1a hashes.
+- A divergent fixture does not return early. Both fixtures always run their
+  full storage/read/decode/geometry/pitch/non-zero checks, and the exit code is
+  decided once by `ClassifyFixtureBatch` (`tests/reference_oracle.h:137`).
+  Strict failures dominate: a broken second fixture exits `1` even when the
+  first fixture was unstable, so quarantine can never mask a strict error.
+  The batch exits `77` only when every fixture was strict-clean and at least
+  one repeated decode diverged.
 - Every strict signal is unchanged and still exits `1`: fixture storage/read,
   `CFHD_OpenDecoder` / `CFHD_PrepareToDecode` / `CFHD_DecodeSample` return codes,
   1920x1080 YU64 geometry, 7680-byte pitch with 16-byte alignment, and non-zero
@@ -135,9 +142,15 @@ specific upstream mechanism.
 - `tests/CMakeLists.txt` registers the test with `SKIP_RETURN_CODE 77` and the
   `reference-oracle` label, so the lane inventory reports
   `REFERENCE_ORACLE_BLOCKED` rather than a red gate for an unknown reference.
-- Deterministic SDK-free coverage of the mapping lives in
-  `tests/test_reference_oracle.cpp` (`TestRepeatedDecodeStability`); it does not
-  depend on provoking an unstable SDK decode.
+- Deterministic SDK-free coverage lives in `tests/test_reference_oracle.cpp`
+  (`TestRepeatedDecodeStability`, `TestFixtureBatchPrecedence`): stable batch
+  `0`, unstable batch `77`, and unstable-first-plus-strict-second `1`. It does
+  not depend on provoking an unstable SDK decode.
+- Local Windows x64 CPU-only evidence at this revision: full Release CTest
+  **23/23 passed** (128.0 s); the two committed fixtures decode stably with
+  `FNV=d464ad2b5da58f8e` and `FNV=3c483e1bf890463`; a missing second fixture
+  exits `1` after the first fixture's PASS line, and a missing first fixture
+  still lets the second fixture run and PASS before the batch exits `1`.
 - `PASS` at this callsite means "repeats agreed", not "pixels are correct". The
   site makes no pixel-quality claim.
 - Not changed: callsites #3 and #5. #3 still needs the maintainer decision about

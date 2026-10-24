@@ -41,19 +41,27 @@ Bytes Decode(Bytes& packet) {
 }
 int main(int argc,char** argv){try{
     if(argc!=3)throw std::invalid_argument("expected two original Mac-produced 1080p CFHD samples");
+    std::vector<oracle::GateDecision> batch;
+    batch.reserve(static_cast<std::size_t>(argc-1));
     for(int i=1;i<argc;++i){
-        std::ifstream f(argv[i],std::ios::binary|std::ios::ate);const auto size=f.tellg();
-        if(!f || size<=0 || size>16793600)throw std::runtime_error("invalid fixture storage");
-        Bytes packet(static_cast<std::size_t>(size));f.seekg(0);f.read(reinterpret_cast<char*>(packet.data()),size);if(!f)throw std::runtime_error("fixture read failed");
-        const auto first=Decode(packet),second=Decode(packet);
-        const auto stability=oracle::ClassifyRepeatedDecodeStability(first==second);
-        if(stability!=oracle::GateDecision::Pass){
-            std::cout<<argv[i]<<" "<<oracle::GateDecisionName(stability)<<" repeats=2 FNV_FIRST="<<std::hex
-                     <<HyperCineTest::ComputeFNV1a64(first.data(),first.size())<<" FNV_SECOND="
-                     <<HyperCineTest::ComputeFNV1a64(second.data(),second.size())<<std::dec<<'\n';
-            return oracle::GateExitCode(stability);
+        try{
+            std::ifstream f(argv[i],std::ios::binary|std::ios::ate);const auto size=f.tellg();
+            if(!f || size<=0 || size>16793600)throw std::runtime_error("invalid fixture storage");
+            Bytes packet(static_cast<std::size_t>(size));f.seekg(0);f.read(reinterpret_cast<char*>(packet.data()),size);if(!f)throw std::runtime_error("fixture read failed");
+            const auto first=Decode(packet),second=Decode(packet);
+            const auto stability=oracle::ClassifyRepeatedDecodeStability(first==second);
+            if(stability==oracle::GateDecision::Pass){
+                std::cout<<argv[i]<<" GoPro Windows YU64 1920x1080 CPU_MAX=1 repeats=2 FNV="<<std::hex<<HyperCineTest::ComputeFNV1a64(first.data(),first.size())<<std::dec<<" PASS\n";
+            }else{
+                std::cout<<argv[i]<<" "<<oracle::GateDecisionName(stability)<<" repeats=2 FNV_FIRST="<<std::hex
+                         <<HyperCineTest::ComputeFNV1a64(first.data(),first.size())<<" FNV_SECOND="
+                         <<HyperCineTest::ComputeFNV1a64(second.data(),second.size())<<std::dec<<'\n';
+            }
+            batch.push_back(stability);
+        }catch(const std::exception& e){
+            std::cerr<<argv[i]<<" STRICT_FAILURE "<<e.what()<<'\n';
+            batch.push_back(oracle::GateDecision::ReferenceDecodeError);
         }
-        std::cout<<argv[i]<<" GoPro Windows YU64 1920x1080 CPU_MAX=1 repeats=2 FNV="<<std::hex<<HyperCineTest::ComputeFNV1a64(first.data(),first.size())<<std::dec<<" PASS\n";
     }
-    return 0;
+    return oracle::GateExitCode(oracle::ClassifyFixtureBatch(batch));
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

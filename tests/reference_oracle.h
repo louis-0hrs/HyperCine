@@ -127,6 +127,31 @@ inline bool GateIsStrictFailure(GateDecision decision) {
            decision == GateDecision::QualityFailureStable;
 }
 
+// Aggregate the ordered per-fixture outcomes of a decode-only batch. Each
+// fixture's strict storage/decode/geometry/pitch/output checks must already
+// have run before its outcome is appended; an unstable fixture must never
+// short-circuit the batch, because that would hide a strict failure of a later
+// fixture behind the quarantine. Strict decisions therefore dominate, and a
+// batch is only blocked when every fixture was strict-clean and at least one
+// repeated decode diverged.
+inline GateDecision ClassifyFixtureBatch(
+    const std::vector<GateDecision>& fixtures) {
+    if (fixtures.empty()) return GateDecision::ReferenceDecodeError;
+    bool saw_unstable = false;
+    bool saw_blocked = false;
+    for (GateDecision decision : fixtures) {
+        if (GateIsStrictFailure(decision)) return decision;
+        if (decision == GateDecision::ReferenceUnstable) {
+            saw_unstable = true;
+        } else if (decision != GateDecision::Pass) {
+            saw_blocked = true;
+        }
+    }
+    if (saw_unstable) return GateDecision::ReferenceUnstable;
+    if (saw_blocked) return GateDecision::OracleUnavailable;
+    return GateDecision::Pass;
+}
+
 inline bool GateAllowsRelease(GateDecision decision) {
     return decision == GateDecision::Pass;
 }

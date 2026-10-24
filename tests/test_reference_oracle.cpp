@@ -284,12 +284,61 @@ void TestRepeatedDecodeStability() {
     Check(!oracle::GateAllowsRelease(divergent), "quarantined repeats block release");
 }
 
+// Regression for the multi-fixture decode-only callsite: a divergent first
+// fixture must not short-circuit the batch and hide a strict failure of a
+// later fixture. Deterministic and SDK-free; the executable under test performs
+// the same accumulation and defers its exit code to ClassifyFixtureBatch.
+void TestFixtureBatchPrecedence() {
+    const std::vector<GateDecision> stable{GateDecision::Pass, GateDecision::Pass};
+    Check(oracle::ClassifyFixtureBatch(stable) == GateDecision::Pass,
+          "stable fixtures pass the batch");
+    Check(oracle::GateExitCode(oracle::ClassifyFixtureBatch(stable)) ==
+              oracle::kExitPass,
+          "stable fixture batch exits 0");
+
+    const std::vector<GateDecision> unstable_second{
+        GateDecision::Pass, GateDecision::ReferenceUnstable};
+    Check(oracle::ClassifyFixtureBatch(unstable_second) ==
+              GateDecision::ReferenceUnstable,
+          "unstable second fixture quarantines the batch");
+    Check(oracle::GateExitCode(oracle::ClassifyFixtureBatch(unstable_second)) ==
+              oracle::kExitBlocked,
+          "unstable second fixture exits 77");
+
+    const std::vector<GateDecision> unstable_first{
+        GateDecision::ReferenceUnstable, GateDecision::Pass};
+    Check(oracle::ClassifyFixtureBatch(unstable_first) ==
+              GateDecision::ReferenceUnstable,
+          "unstable first fixture quarantines the batch after later checks run");
+
+    const std::vector<GateDecision> masked_strict_failure{
+        GateDecision::ReferenceUnstable, GateDecision::ReferenceDecodeError};
+    Check(oracle::ClassifyFixtureBatch(masked_strict_failure) ==
+              GateDecision::ReferenceDecodeError,
+          "strict failure dominates an earlier unstable fixture");
+    Check(oracle::GateExitCode(
+              oracle::ClassifyFixtureBatch(masked_strict_failure)) ==
+              oracle::kExitFail,
+          "strict failure after an unstable fixture exits 1");
+
+    const std::vector<GateDecision> masked_quality_failure{
+        GateDecision::ReferenceUnstable, GateDecision::QualityFailureStable};
+    Check(oracle::GateExitCode(
+              oracle::ClassifyFixtureBatch(masked_quality_failure)) ==
+              oracle::kExitFail,
+          "stable quality failure after an unstable fixture exits 1");
+
+    Check(oracle::ClassifyFixtureBatch({}) == GateDecision::ReferenceDecodeError,
+          "empty fixture batch fails closed");
+}
+
 }  // namespace
 
 int main() {
     TestPacketEquivalence();
     TestGateDecisions();
     TestRepeatedDecodeStability();
+    TestFixtureBatchPrecedence();
     if (failures != 0) {
         std::cerr << failures << " reference-oracle contract check(s) failed\n";
         return 1;
