@@ -31,6 +31,15 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': n} for n in REQUIRED
                                        if n != 'gop2_original_stage_contract']})
+
+    def test_missing_reference_decode_contract_fails(self):
+        # Not redundant with test_complete_inventory: that check is derived from
+        # REQUIRED, so dropping the name from REQUIRED would still pass it.
+        self.assertIn('reference_decode_contract', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'reference_decode_contract']})
+
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
