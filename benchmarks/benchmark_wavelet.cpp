@@ -361,6 +361,9 @@ int main(int argc, char** argv) {
     // -------------------------------------------------------------------------
     // Generate JSON Output
     // -------------------------------------------------------------------------
+    if (!hypercine::bench::OutputTargetAllowsWrite(json_path)) {
+        return 1;
+    }
     if (!hypercine::bench::CreateParentDirectory(json_path)) {
         return 1;
     }
@@ -443,6 +446,9 @@ int main(int argc, char** argv) {
     out.close();
     if (!out) {
         std::cerr << "[-] Error finishing " << json_path << "\n";
+        return 1;
+    }
+    if (!hypercine::bench::OutputTargetIsRegularFile(json_path)) {
         return 1;
     }
 

@@ -4,14 +4,17 @@
 
 # Fail-closed artifact contract for a benchmark executable (issues #33, #226).
 #
-# Two directions, same as tests/verify_benchmark_artifact_contract.cmake:
-#   1. A writable target produces a real, parseable artifact, exit 0, and the
-#      tool's success banner.
-#   2. An unwritable target produces exit != 0 and does NOT print that banner.
+# Three directions:
+#   1. A writable nested path produces a real JSON artifact, exit 0, and the
+#      tool's success banner. The parent directory is created by the tool.
+#   2. An unwritable target (the artifact path itself occupied by a directory)
+#      produces exit != 0 and does NOT print that banner.
+#   3. A character device (POSIX /dev/null, Windows NUL) produces exit != 0 and
+#      does NOT print a success, "Wrote" or "saved" banner. Those devices accept
+#      every write and keep nothing, so a closed stream is not an artifact.
 #
-# The unwritable target is the artifact path itself occupied by a directory.
-# Opening it for writing fails even when the parent directory exists, which is
-# the silent-success case (create_directories ok, ofstream fails, exit 0).
+# The artifact is parsed with string(JSON) (CMake >= 3.19), not a substring
+# search. A truncated or malformed record fails the test.
 #
 # Invoked as:
 #   cmake -DBENCH=<exe> -DWORK=<dir> -DSUCCESS_BANNER=<text> -DJSON_KEY=<member>
@@ -66,8 +69,11 @@ if(good_size LESS 64)
     message(FATAL_ERROR "artifact is only ${good_size} bytes; not a real measurement record")
 endif()
 file(READ "${good_json}" good_body)
-if(NOT good_body MATCHES "\"${JSON_KEY}\"[ \t\r\n]*:")
-    message(FATAL_ERROR "artifact has no \"${JSON_KEY}\" member:\n${good_body}")
+# Parse the document. string(JSON) aborts this script when the artifact is not
+# valid JSON, and LENGTH of the named array is its element count.
+string(JSON json_count LENGTH "${good_body}" "${JSON_KEY}")
+if(json_count LESS 1)
+    message(FATAL_ERROR "artifact \"${JSON_KEY}\" member is not a non-empty array")
 endif()
 if(NOT EXISTS "${WORK}/nested")
     message(FATAL_ERROR "the run did not create the artifact parent directory")
@@ -95,4 +101,34 @@ if(bad_out MATCHES "${SUCCESS_BANNER}" OR bad_err MATCHES "${SUCCESS_BANNER}")
         "unwritable artifact path printed the success banner:\n${bad_out}\n${bad_err}")
 endif()
 
-message(STATUS "benchmark fail-closed contract PASS: writable run wrote ${good_size} bytes, unwritable run exited ${bad_rc}")
+# --- 3. character device: accepts writes, retains nothing -------------------
+if(WIN32)
+    set(device_target "NUL")
+else()
+    set(device_target "/dev/null")
+endif()
+set(device_cmd ${cmd} "${device_target}")
+execute_process(
+    COMMAND ${device_cmd}
+    WORKING_DIRECTORY "${WORK}"
+    RESULT_VARIABLE device_rc
+    OUTPUT_VARIABLE device_out
+    ERROR_VARIABLE device_err
+    TIMEOUT 300)
+
+if(device_rc EQUAL 0)
+    message(FATAL_ERROR
+        "non-regular sink ${device_target} still exited 0. A character device "
+        "must not be accepted as a written measurement artifact.\n"
+        "stdout:\n${device_out}\nstderr:\n${device_err}")
+endif()
+if(device_out MATCHES "${SUCCESS_BANNER}" OR device_err MATCHES "${SUCCESS_BANNER}")
+    message(FATAL_ERROR
+        "non-regular sink ${device_target} printed the success banner:\n${device_out}\n${device_err}")
+endif()
+if(device_out MATCHES "[Ww]rote" OR device_out MATCHES "[Ss]aved")
+    message(FATAL_ERROR
+        "non-regular sink ${device_target} printed a wrote/saved banner:\n${device_out}")
+endif()
+
+message(STATUS "benchmark fail-closed contract PASS: writable run wrote ${good_size} bytes, directory run exited ${bad_rc}, device run exited ${device_rc}")

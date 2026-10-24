@@ -502,6 +502,9 @@ bool WriteMatrixJson(const std::string& filepath,
                      const std::string& cpu_model,
                      int thread_count,
                      const HyperCineCUDADeviceInfo& dev_info) {
+    if (!hypercine::bench::OutputTargetAllowsWrite(filepath)) {
+        return false;
+    }
     if (!hypercine::bench::CreateParentDirectory(filepath)) {
         return false;
     }
@@ -583,6 +586,9 @@ bool WriteMatrixJson(const std::string& filepath,
     out.close();
     if (!out) {
         std::cerr << "[-] Error finishing JSON output: " << filepath << "\n";
+        return false;
+    }
+    if (!hypercine::bench::OutputTargetIsRegularFile(filepath)) {
         return false;
     }
 

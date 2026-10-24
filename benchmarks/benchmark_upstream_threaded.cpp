@@ -62,6 +62,9 @@ int main(int argc, char** argv) {
         : "benchmarks/results/upstream_threaded.json";
     const int idle_threads = CountThreads();
     std::cout << "UPSTREAM_THREADED linked library idle threads " << idle_threads << "\n";
+    if (!hypercine::bench::OutputTargetAllowsWrite(path)) {
+        return 1;
+    }
     if (!hypercine::bench::CreateParentDirectory(path)) {
         return 1;
     }
@@ -141,6 +144,9 @@ int main(int argc, char** argv) {
     out.close();
     if (!out) {
         std::cerr << "cannot finish write " << path << "\n";
+        return 1;
+    }
+    if (!hypercine::bench::OutputTargetIsRegularFile(path)) {
         return 1;
     }
     std::cout << "Wrote " << path << "\n";

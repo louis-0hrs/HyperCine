@@ -150,6 +150,8 @@ if(HYPERCINE_BUILD_TESTS)
     # Same contract for the CUDA benchmark tools that can run a single 1080p
     # configuration. Registered only when those targets exist (CUDA ON); the
     # tests/ directory is configured before benchmarks/, so this stays here.
+    # Each run checks a writable nested path, a directory sink, and a character
+    # device (/dev/null or NUL), and parses the artifact with string(JSON).
     # Heavier suites (phase 2C/2D/3A/3A1) still fail closed, but their full
     # measurement is not a ctest default.
     if(TARGET benchmark_wavelet)
