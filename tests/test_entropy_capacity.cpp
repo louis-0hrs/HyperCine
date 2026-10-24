@@ -11,6 +11,8 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
+
 #include "CFHDEncoder.h"
 
 extern "C" {
