@@ -25,7 +25,7 @@ REQUIRED |= {'standalone_external_' + size for size in
              ('256x256', '1920x1080', '128x24', '384x40', '4096x24', '128x4096', '2048x1024')}
 
 REQUIRED |= {'scalar_inverse_arithmetic', 'scalar_inverse_rejection', 'scalar_inverse_vectors',
-             'scalar_inverse_replay_contract'} | {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
+             'scalar_inverse_replay_contract', 'original_descale_review_contract'} | {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
 
 
 def registered_tests(document):
