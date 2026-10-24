@@ -267,11 +267,29 @@ void TestGateDecisions() {
           "pass label is explicit");
 }
 
+void TestRepeatedDecodeStability() {
+    const GateDecision stable = oracle::ClassifyRepeatedDecodeStability(true);
+    Check(stable == GateDecision::Pass, "identical repeated decodes are stable");
+    Check(oracle::GateExitCode(stable) == oracle::kExitPass, "stable repeats exit 0");
+
+    // (ii) at the decode-only callsite: divergence is quarantined, never a
+    // failure of the code under test and never a pixel-accuracy pass.
+    const GateDecision divergent = oracle::ClassifyRepeatedDecodeStability(false);
+    Check(divergent == GateDecision::ReferenceUnstable,
+          "divergent repeated decodes are quarantined");
+    Check(oracle::GateExitCode(divergent) == oracle::kExitBlocked,
+          "quarantined repeats use the distinct blocked exit code");
+    Check(!oracle::GateIsStrictFailure(divergent),
+          "quarantined repeats are not a strict failure");
+    Check(!oracle::GateAllowsRelease(divergent), "quarantined repeats block release");
+}
+
 }  // namespace
 
 int main() {
     TestPacketEquivalence();
     TestGateDecisions();
+    TestRepeatedDecodeStability();
     if (failures != 0) {
         std::cerr << failures << " reference-oracle contract check(s) failed\n";
         return 1;

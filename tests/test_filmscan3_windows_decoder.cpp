@@ -9,9 +9,11 @@
 #include <string>
 #include <vector>
 #include "test_vectors.h"
+#include "reference_oracle.h"
 #include "CFHDDecoder.h"
 #include "CFHDMetadata.h"
 namespace {
+namespace oracle=hypercine::test_oracle;
 using Bytes=HyperCineTest::AlignedVector<uint8_t>;
 struct DecoderDelete {void operator()(void* p)const{if(p)CFHD_CloseDecoder(p);}};
 struct MetadataDelete {void operator()(void* p)const{if(p)CFHD_CloseMetadata(p);}};
@@ -43,7 +45,14 @@ int main(int argc,char** argv){try{
         std::ifstream f(argv[i],std::ios::binary|std::ios::ate);const auto size=f.tellg();
         if(!f || size<=0 || size>16793600)throw std::runtime_error("invalid fixture storage");
         Bytes packet(static_cast<std::size_t>(size));f.seekg(0);f.read(reinterpret_cast<char*>(packet.data()),size);if(!f)throw std::runtime_error("fixture read failed");
-        const auto first=Decode(packet),second=Decode(packet);if(first!=second)throw std::runtime_error("non-deterministic GoPro decoder output");
+        const auto first=Decode(packet),second=Decode(packet);
+        const auto stability=oracle::ClassifyRepeatedDecodeStability(first==second);
+        if(stability!=oracle::GateDecision::Pass){
+            std::cout<<argv[i]<<" "<<oracle::GateDecisionName(stability)<<" repeats=2 FNV_FIRST="<<std::hex
+                     <<HyperCineTest::ComputeFNV1a64(first.data(),first.size())<<" FNV_SECOND="
+                     <<HyperCineTest::ComputeFNV1a64(second.data(),second.size())<<std::dec<<'\n';
+            return oracle::GateExitCode(stability);
+        }
         std::cout<<argv[i]<<" GoPro Windows YU64 1920x1080 CPU_MAX=1 repeats=2 FNV="<<std::hex<<HyperCineTest::ComputeFNV1a64(first.data(),first.size())<<std::dec<<" PASS\n";
     }
     return 0;

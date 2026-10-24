@@ -87,6 +87,16 @@ inline GateDecision ClassifyReferenceGate(const ReferenceGateInputs& inputs) {
     return GateDecision::Pass;
 }
 
+// Decode-only callsites have no encoder in the loop and no quality oracle, so
+// they cannot claim pixel accuracy. Their only qualified signal is whether
+// independent decodes of the same immutable packet agree. Pass here means
+// "stable across repeats", never "pixels are correct"; divergence is the
+// quarantined reference state, not a failure of the code under test.
+inline GateDecision ClassifyRepeatedDecodeStability(bool outputs_identical) {
+    return outputs_identical ? GateDecision::Pass
+                             : GateDecision::ReferenceUnstable;
+}
+
 inline const char* GateDecisionName(GateDecision decision) {
     switch (decision) {
     case GateDecision::Pass: return "PASS";
