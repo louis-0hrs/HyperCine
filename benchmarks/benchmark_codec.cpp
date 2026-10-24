@@ -72,6 +72,20 @@ struct BenchmarkMetrics {
 // CPU brand string from CPUID leaves 0x80000002..0x80000004. Returns an empty
 // string when the platform cannot answer, so the caller can distinguish "no
 // identifier available" from a real model name instead of inventing one.
+// The CPUID brand leaves are a fixed 48-byte field, space-padded on the right.
+// Emitting that padding into a JSON string is a defect in the artifact, not a
+// property of the CPU: it survives into every downstream comparison and makes
+// two names for one processor. Trim it at the source so every emitted artifact
+// is canonical. The historical Windows baseline keeps its recorded bytes; this
+// only governs what this tool writes from now on.
+std::string TrimTrailingBlanks(const char* text) {
+    std::string value(text);
+    const auto last = value.find_last_not_of(" \t\r\n");
+    if (last == std::string::npos) return std::string();
+    value.erase(last + 1);
+    return value;
+}
+
 std::string GetCpuBrandString() {
 #ifdef _WIN32
     int cpuInfo[4] = { -1 };
@@ -82,7 +96,7 @@ std::string GetCpuBrandString() {
         __cpuid(reinterpret_cast<int*>(brand), 0x80000002);
         __cpuid(reinterpret_cast<int*>(brand + 16), 0x80000003);
         __cpuid(reinterpret_cast<int*>(brand + 32), 0x80000004);
-        return std::string(brand);
+        return TrimTrailingBlanks(brand);
     }
 #elif defined(__i386__) || defined(__x86_64__)
     unsigned int eax = 0, ebx = 0, ecx = 0, edx = 0;
@@ -96,9 +110,8 @@ std::string GetCpuBrandString() {
         std::memcpy(brand + 24, &ecx, 4); std::memcpy(brand + 28, &edx, 4);
         __cpuid_count(0x80000004u, 0, eax, ebx, ecx, edx);
         std::memcpy(brand + 32, &eax, 4); std::memcpy(brand + 36, &ebx, 4);
-        std::memcpy(brand + 32, &eax, 4); std::memcpy(brand + 36, &ebx, 4);
         std::memcpy(brand + 40, &ecx, 4); std::memcpy(brand + 44, &edx, 4);
-        return std::string(brand);
+        return TrimTrailingBlanks(brand);
     }
 #endif
     return std::string();
