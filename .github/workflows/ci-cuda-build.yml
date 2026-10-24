@@ -122,6 +122,15 @@ jobs:
           # every broken target of this configuration, not just the first one.
           cmake --build build-cuda --parallel "$(nproc)" -- -k 0 2>&1 | tee build.log
 
+      - name: Require the expected target inventory
+        # A zero exit proves only that the targets the configure step created
+        # were built. It cannot see a target that was never configured, which
+        # is how a narrower condition can turn this gate green while deleting
+        # the #226/#228 coverage it exists for. Assert the inventory too.
+        run: |
+          python3 ci/check_cuda_build_inventory.py \
+            --build-dir build-cuda --log build.log
+
       - name: Report build inventory
         if: always()
         run: |
