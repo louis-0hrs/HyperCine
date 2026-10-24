@@ -15,7 +15,9 @@
 #   * an argument error keeps exit 2 even when its report cannot be written,
 #     and is named on stderr instead of being masked by the write refusal;
 #   * a separated option never consumes a following "--" token as its value, so
-#     "--out --overwrite" is a missing value, not a file named "--overwrite".
+#     "--out --overwrite" is a missing value, not a file named "--overwrite";
+#   * a required --out is validated with the other arguments: otherwise valid
+#     arguments without it exit 2 before any diagnostic run, not 3 afterwards.
 
 if(NOT DEFINED PROBE)
     message(FATAL_ERROR "verify_gpu_diagnostic_probe_cli: PROBE is required")
@@ -208,5 +210,16 @@ if(NOT EXISTS "${WORK_DIR}/--report.json")
     message(FATAL_ERROR "literal flag-shaped path: --out=<path> did not honor the path")
 endif()
 file(REMOVE "${WORK_DIR}/--report.json")
+
+# 12. Valid arguments without --out are an argument error, not a completed run:
+#     exit 2 during validation rather than 3 after a pointless diagnostic.
+run_probe("valid arguments without --out" "--width=64" "--height=64"
+          "--frames=1" "--warmup=0" "--slots=1")
+if(NOT RC STREQUAL "2")
+    message(FATAL_ERROR "no --out: expected exit 2, got ${RC}\n${OUT}${ERR}")
+endif()
+if(NOT ERR MATCHES "invalid arguments: missing required --out")
+    message(FATAL_ERROR "no --out: missing required --out was not named\n${ERR}")
+endif()
 
 message(STATUS "gpu_diagnostic_probe CLI contract PASS")

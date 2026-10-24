@@ -66,16 +66,19 @@ cmake --build <build-dir> --target gpu_diagnostic_probe
   --width=1920 --height=1080 --frames=4 --warmup=2 --out=<out>.json
 ```
 
-`--out` is required. The report is created **exclusively**: if the path already
-exists the probe exits non-zero and leaves the existing file byte-identical.
-`--overwrite` is the explicit opt-in that may replace an existing artifact, and
-even then a directory is never replaced. The opened stream must be a regular
-file: device paths such as `NUL` (Windows) or `/dev/null` (POSIX) accept writes
-while storing nothing, so they are refused instead of producing exit `0`
+`--out` is required and is validated with the other arguments: otherwise valid
+arguments without it exit `2` before any diagnostic run. The report is created
+**exclusively**: if the path already exists the probe exits non-zero and leaves
+the existing file byte-identical. `--overwrite` is the explicit opt-in that may
+replace an existing artifact, and even then a directory is never replaced; an
+overwrite that fails mid-write does not restore the previous artifact, which
+matches "no partial evidence" but is not a backup. The opened stream must be a
+regular file: device paths such as `NUL` (Windows) or `/dev/null` (POSIX) accept
+writes while storing nothing, so they are refused instead of producing exit `0`
 without an artifact. Exit codes: `0` passed, `2` invalid arguments (a partial
 JSON is still written when the output path is new), `3` device or run failure,
 or an output refusal after valid arguments. An argument error keeps exit `2`
-even when its report cannot be written (no `--out`, or an occupied path); the
+even when its report cannot be written (for example an occupied path); the
 argument error and the write refusal are both named on stderr, so `3` always
 means the arguments themselves were accepted.
 
@@ -168,15 +171,31 @@ byte-identical; and `--width=4294967297` returned exit 2 with
 `INVALID_ARGUMENTS`. The full decoder suite was not rerun for this test-only
 change.
 
-Full native Windows x64 CUDA Release build passed. The full CTest run was
-**23/25**: `test_phase2c` and `test_phase2d` failed with the reference-decoder
+The earlier 2026-10-18 pre-quarantine run, recorded in `e338873`, was **23/25**:
+`test_phase2c` and `test_phase2d` failed with the reference-decoder
 nondeterminism already documented in #120/#116, not with this change. Bounded
 reruns produced distinct signatures: `test_phase2c` failed twice at 8K
 DeviceInput (`QueueGpuEntropyFrame failed`) and once at 1080p with PSNR
 20.378136; `test_phase2d` failed once at metadata encode and once at the 1080p
-upstream comparison. This diff adds only a benchmark target and a test target;
-it does not modify `src/`, the existing test sources or `upstream/`. No green
-suite or release claim is made, and the release gate stays unresolved.
+upstream comparison. That inventory predates the fail-closed reference-oracle
+quarantine: it is historical and must not be read as the current tree's result.
+
+At the source head this change is based on (`87247cc`, 2026-10-24, same native
+Windows x64 hardware and toolchain) the suite registers **31** tests, with
+**27 passed / 3 skipped / 1 failed**:
+
+- the three skips are `test_phase2a`, `test_phase2b` and `test_phase2d`, which
+  exit `BLOCKED_ORACLE_NOT_QUALIFIED` under CTest's `SKIP_RETURN_CODE 77` until
+  an independent pixel oracle exists (#120);
+- the single failure is `test_phase2c` at the 8K DeviceInput 3-slot x 4-stream
+  capacity gate: `UNSUPPORTED_RESOURCE_BOUND`, 33,178,624 B requested against
+  23,789,568 B free of 3,953,131,520 B (`cudaErrorMemoryAllocation`), kept fatal
+  and not reclassified as a skip.
+
+This diff adds only a benchmark target, its CLI contract test and this
+documentation; it does not modify `src/`, the existing test sources or
+`upstream/`. A skip is not a pixel pass, no green suite or release claim is
+made, and the release gate stays unresolved.
 
 ## Limitations
 

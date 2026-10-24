@@ -243,6 +243,11 @@ int main(int argc, char** argv) {
             "invalid geometry, frame count, or slot request: bounds are 1-8192 px, "
             "1-16 frames, 0-16 warmup frames and 0-4 slots";
     }
+    if (parse_error.empty() && opt.out_path.empty()) {
+        // --out is required: reject it with the other arguments instead of
+        // running the whole diagnostic and only then failing to write it.
+        parse_error = "missing required --out";
+    }
     if (!parse_error.empty()) {
         report.status = "INVALID_ARGUMENTS";
         report.error_message = parse_error;
