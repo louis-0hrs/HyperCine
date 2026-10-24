@@ -180,9 +180,14 @@ DeviceInput (`QueueGpuEntropyFrame failed`) and once at 1080p with PSNR
 upstream comparison. That inventory predates the fail-closed reference-oracle
 quarantine: it is historical and must not be read as the current tree's result.
 
-At the source head this change is based on (`87247cc`, 2026-10-24, same native
-Windows x64 hardware and toolchain) the suite registers **31** tests, with
-**27 passed / 3 skipped / 1 failed**:
+At the source head this change was originally based on (`87247cc`, 2026-10-24,
+same native Windows x64 hardware and toolchain) the suite registered **31**
+tests, with **27 passed / 3 skipped / 1 failed**. After the forward-only merge
+of protected `main` `08cf131` into this branch (merge commit `8af1215`, same
+host, CUDA-ON Release configuration, 2026-10-24) the suite registers **36**
+tests, with **32 passed / 3 skipped / 1 failed**; the five additional entries
+are four `scheduler_contract_195_workers_*` cases from #219 and
+`benchmark_artifact_contract` from #227.
 
 - the three skips are `test_phase2a`, `test_phase2b` and `test_phase2d`, which
   exit `BLOCKED_ORACLE_NOT_QUALIFIED` under CTest's `SKIP_RETURN_CODE 77` until
@@ -190,11 +195,13 @@ Windows x64 hardware and toolchain) the suite registers **31** tests, with
 - the single failure is `test_phase2c` at the 8K DeviceInput 3-slot x 4-stream
   capacity gate: `UNSUPPORTED_RESOURCE_BOUND`, 33,178,624 B requested against
   23,789,568 B free of 3,953,131,520 B (`cudaErrorMemoryAllocation`), kept fatal
-  and not reclassified as a skip.
+  and not reclassified as a skip. Its 1080p slot-4 reference-PSNR line is
+  classified by the fail-closed reference gate and is not a pixel acceptance.
 
-This diff adds only a benchmark target, its CLI contract test and this
-documentation; it does not modify `src/`, the existing test sources or
-`upstream/`. A skip is not a pixel pass, no green suite or release claim is
+This branch's own diff still adds only a benchmark target, its CLI contract
+test and this documentation; it does not modify `src/`, the existing test
+sources or `upstream/`. The merge brought in unrelated upstream-branch content
+unchanged. A skip is not a pixel pass, no green suite or release claim is
 made, and the release gate stays unresolved.
 
 ## Limitations
