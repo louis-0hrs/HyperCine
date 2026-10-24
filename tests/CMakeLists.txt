@@ -242,3 +242,18 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME gop2_original_stage_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_stage_contract.py")
 endif()
+
+# Candidate independent pixel oracle: external FFmpeg, explicitly version-bound.
+# A missing tool or an unmeasured build exits 77 and never reports qualified.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME ffmpeg_oracle_qualification
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/qualify_ffmpeg_oracle.py")
+    set_tests_properties(ffmpeg_oracle_qualification PROPERTIES
+        LABELS "reference-oracle" SKIP_RETURN_CODE 77 TIMEOUT 180)
+    add_test(NAME ffmpeg_oracle_qualification_contract
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_ffmpeg_oracle_qualification.py")
+    set_tests_properties(ffmpeg_oracle_qualification_contract PROPERTIES
+        LABELS "reference-oracle")
+endif()
