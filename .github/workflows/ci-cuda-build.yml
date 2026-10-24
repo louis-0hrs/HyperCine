@@ -1,0 +1,136 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+#
+# Issue #233: the other workflows build with HYPERCINE_ENABLE_CUDA=OFF, so a
+# GCC-only defect inside a CUDA-gated source file compiles nowhere. This job
+# configures the real CUDA build (tests + benchmarks) and requires a zero-exit
+# full build. It does not run CTest: the host has no GPU, and executing the
+# CUDA suites is a separate native qualification.
+name: CUDA build (Linux, compile-only)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      checkout_ref:
+        description: 'Commit or ref to build (empty = the triggering ref)'
+        required: false
+        default: ''
+  push:
+    branches: [ 'main' ]
+    paths:
+      - 'CMakeLists.txt'
+      - 'include/**'
+      - 'src/**'
+      - 'tools/**'
+      - 'benchmarks/**'
+      - 'tests/**'
+      - 'upstream/**'
+      - '.github/workflows/ci-cuda-build.yml'
+  pull_request:
+    paths:
+      - 'CMakeLists.txt'
+      - 'include/**'
+      - 'src/**'
+      - 'tools/**'
+      - 'benchmarks/**'
+      - 'tests/**'
+      - 'upstream/**'
+      - '.github/workflows/ci-cuda-build.yml'
+
+permissions:
+  contents: read
+
+env:
+  # Pinned toolkit: the apt package name selects the 12.8 line and the exact
+  # package version is pinned below, so a silent toolkit upgrade cannot land.
+  CUDA_TOOLKIT_PACKAGE: cuda-toolkit-12-8=12.8.1-1
+  CUDA_HOME: /usr/local/cuda-12.8
+
+jobs:
+  cuda-build:
+    name: Linux GCC (CUDA-ON full build, no GPU)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref || github.sha }}
+
+      - name: Verify upstream immutability
+        run: |
+          status="$(git status --porcelain upstream/)"
+          if [ -n "$status" ]; then
+            echo "upstream/ directory has been modified: $status" >&2
+            exit 1
+          fi
+
+      - name: Free runner disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo apt-get clean
+          df -h /
+
+      - name: Install pinned CUDA toolkit and build dependencies
+        run: |
+          wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+          sudo dpkg -i cuda-keyring_1.1-1_all.deb
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            "${CUDA_TOOLKIT_PACKAGE}" build-essential cmake ninja-build uuid-dev
+          echo "${CUDA_HOME}/bin" >> "$GITHUB_PATH"
+          df -h /
+
+      - name: Publish toolchain versions
+        run: |
+          echo "source_sha=$(git rev-parse HEAD)"
+          "${CUDA_HOME}/bin/nvcc" --version
+          gcc --version | head -1
+          g++ --version | head -1
+          cmake --version | head -1
+          ninja --version
+          nproc
+
+      - name: Configure CUDA-ON build (tests and benchmarks)
+        run: |
+          cmake -S . -B build-cuda -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_CUDA_COMPILER="${CUDA_HOME}/bin/nvcc" \
+            -DCMAKE_CUDA_ARCHITECTURES=86 \
+            -DHYPERCINE_BUILD_UPSTREAM=ON \
+            -DHYPERCINE_ENABLE_CUDA=ON \
+            -DHYPERCINE_BUILD_TESTS=ON \
+            -DHYPERCINE_BUILD_BENCHMARKS=ON \
+            -DHYPERCINE_BUILD_STANDALONE=OFF \
+            -DHYPERCINE_ENABLE_METAL=OFF \
+            -DHYPERCINE_ENABLE_VULKAN=OFF
+
+      - name: Build every configured target
+        run: |
+          set -o pipefail
+          # -k 0 keeps going after a failing translation unit so one run shows
+          # every broken target of this configuration, not just the first one.
+          cmake --build build-cuda --parallel "$(nproc)" -- -k 0 2>&1 | tee build.log
+
+      - name: Report build inventory
+        if: always()
+        run: |
+          echo "source_sha=$(git rev-parse HEAD)"
+          echo "compiled_translation_units=$(grep -c '^\[[0-9]*/[0-9]*\]' build.log || true)"
+          echo "ninja_build_edges=$(ninja -C build-cuda -t targets all | wc -l || true)"
+          echo "registered_ctest_tests=$(ctest --test-dir build-cuda -N | grep -c 'Test #[0-9]' || true)"
+          echo "compile_errors=$(grep -c 'error:' build.log || true)"
+
+      - name: Preserve build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cuda-build-log
+          path: build.log
+          if-no-files-found: warn
