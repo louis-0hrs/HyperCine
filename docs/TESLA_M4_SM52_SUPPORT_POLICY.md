@@ -66,7 +66,7 @@ ordered, and a later gate never repairs an earlier one.
 | **G2P original-SDK pixel equality** | Decoded pixels and PSNR from the frozen original decoder match a trustworthy reference. | **NOT QUALIFIED.** The frozen decoder is nondeterministic for identical packets on this class (#120/#205/#206). The Phase 2 tests report exit `77` for the pixel gate unless an earlier strict gate already failed. |
 | **G3 repeated stateful 1080p** | Repeated stateful runs produce stable strict results and a qualified pixel result. | **NOT QUALIFIED.** The pixel signal is exactly the unstable one quarantined by #120; full-pipeline repeatability under a qualified oracle has not been established on this class. |
 | **G4 4K** | Same as G2/G3 at 3840×2160. | **Strict gates PASS at the measured configuration** (3 slots, 4 streams, host input, band-streamed D2H). Pixel gate **NOT QUALIFIED**. |
-| **G5 8K** | Same at 7680×4320 within the device's measured capacity. | **Split.** 3 slots × 2 streams passes the strict bitstream/decode gates; **3 slots × 4 streams fails hard** (see §3). Capacity failure is a FAIL, never a SKIP. |
+| **G5 8K** | Same as G2 at 7680×4320, stated per exact slot/stream configuration rather than as an envelope. | **Measured at three configurations only**, each with device input and two frames in one bounded run: 1 slot × 4 streams, 2 slots × 4 streams and 3 slots × 2 streams passed the strict encoder/bitstream gates, and in those runs the reference decode completed and its PSNR gate happened to pass. Those are not qualified pixel results (G2P), and these are not G3-style repeated runs. **3 slots × 4 streams fails hard** (see §3). Capacity failure is a FAIL, never a SKIP. No other combination is measured and none is inferred. |
 | **G6 useful FPS** | Sustained throughput meets a declared target for a declared configuration. | **NOT MEASURED / NOT QUALIFIED** on this device class. No FPS figure is claimed here. |
 
 Consequences:
@@ -81,16 +81,26 @@ Consequences:
 
 The 8K 3-slot × 4-stream configuration on the 4 GiB-class device requested
 `33,178,624` bytes for the entropy workspace while only `24,838,144` bytes
-were free. The allocation returned `cudaErrorMemoryAllocation`; the encoder
-reported `encoded=0` and a nonzero exit with an `UNSUPPORTED_RESOURCE_BOUND`
-classification. This is a genuine capacity boundary for that exact
-configuration and device class, not a kernel-arithmetic mismatch and not an
-OOM explanation for unrelated 1080p failures.
+were free, as recorded in the #194 capacity-diagnostics lane. The allocation
+returned `cudaErrorMemoryAllocation`; the encoder reported `encoded=0` and a
+nonzero exit with an `UNSUPPORTED_RESOURCE_BOUND` classification. This is a
+genuine capacity boundary for that exact configuration and device class, not a
+kernel-arithmetic mismatch and not an OOM explanation for unrelated 1080p
+failures. The free-byte figure is one observation of that run; it is not a
+fixed property of the device class.
 
-The alternate 8K 3-slot × 2-stream configuration was observed to complete the
-strict bitstream/decode gates. That observation supports an envelope
-recommendation; it does not upgrade 8K to release quality, because G2P is
-still blocked.
+Three other 8K pipeline configurations were observed to complete their strict
+encoder/bitstream gates: 1 slot × 4 streams (`2,333,736,960` bytes measured),
+2 slots × 4 streams (`3,381,002,240` bytes) and 3 slots × 2 streams
+(`3,874,750,464` bytes, 98.0% of device memory). Each was a single bounded run
+with device input and two frames, and in each the included original-SDK
+reference PSNR gate happened to pass. That gate is nondeterministic on this
+class (#120) and is not a qualified pixel oracle.
+
+These are **three measured points, not a capacity envelope.** No other
+slot/stream combination was run, no free-memory preflight is implemented, and
+the 3-slot × 2-stream point leaves no demonstrated headroom. The observations
+do not upgrade 8K to release quality, because G2P is still blocked.
 
 The one-shot allocation-failure injection added in #194 is process-safe,
 validated concurrently, and remains test-only. It does not change production
@@ -104,7 +114,8 @@ These labels describe what evidence exists, not what customers may ship.
 | :--- | :--- | :--- |
 | 1080p (1920×1080) Phase 2 encoder configs exercised by the native suite | **Diagnostic (strict gates)** | G0–G2 evidence; pixel gate blocked. |
 | 4K UHD (3840×2160), 3 slots / 4 streams, host input, band-streamed D2H | **Diagnostic (strict gates)** | G0–G2 evidence at that configuration. |
-| 8K UHD (7680×4320), up to 3 slots × 2 streams | **Diagnostic, capacity-preflighted** | Measured pass at 3×2; not a release claim. |
+| 8K UHD (7680×4320), exactly 1 slot × 4 streams / 2 slots × 4 streams / 3 slots × 2 streams (device input, two frames) | **Diagnostic (strict gates), measured points only** | Three bounded runs; strict encoder/bitstream gates passed and the included PSNR gate happened to pass. Not an envelope, not repeated-stateful, no free-memory preflight. |
+| 8K UHD, any other slot/stream combination | **Unmeasured** | No evidence; not inferred from the three measured points. |
 | 8K UHD, 3 slots × 4 streams on a 4 GiB-class device | **Unsupported (hard failure)** | Measured request exceeds free memory; must fail, not skip. |
 | Any decoded-pixel / PSNR acceptance | **Blocked** | #120 oracle not qualified. |
 | Production decoder or NLE interoperability | **Out of scope** | No decoder promotion in #116. |
@@ -175,7 +186,9 @@ configuration to production or release status until:
 2. targeted 1080p and 4K runs compare source, coefficients, entropy payload
    and decoded pixels separately at the same immutable packet SHA;
 3. repeated stateful 1080p runs are stable under that oracle;
-4. the 8K envelope is either measured within capacity or declared unsupported;
+4. each 8K slot/stream configuration proposed for support is measured
+   individually or declared unsupported; no envelope is extrapolated from the
+   three measured points;
 5. a declared FPS target is measured on the declared configuration.
 
 Until then the accurate status is
@@ -188,4 +201,6 @@ Until then the accurate status is
 - Not a statement that every 1080p failure on this class is caused by the
   measured 8K capacity boundary; those remain separate findings.
 - Not evidence for any GPU other than the measured SM 5.2 device class.
+- Not an 8K envelope: only three exact 8K slot/stream configurations were
+  measured, each once, and no adjacent configuration is implied.
 - Not a performance comparison or regression verdict.
