@@ -113,7 +113,11 @@ def build_token(ffmpeg):
 
 
 def require_qualified_build(token):
-    if not any(token.startswith(prefix) for prefix in QUALIFIED_BUILD_PREFIXES):
+    # Exact version token or a build suffix, never a bare string prefix:
+    # "9.0.20" and "n8.0.1" are different builds from "9.0.2" and "n8.0".
+    matched = any(token == prefix or token.startswith(prefix + '-')
+                  for prefix in QUALIFIED_BUILD_PREFIXES)
+    if not matched:
         raise Blocked('decoder build {} is not on the measured list ({})'.format(
             token, ', '.join(QUALIFIED_BUILD_PREFIXES)))
     return token

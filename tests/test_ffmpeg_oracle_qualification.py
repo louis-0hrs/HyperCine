@@ -25,7 +25,7 @@ class QualificationContractTest(unittest.TestCase):
             self.assertEqual(harness.require_qualified_build(token), token)
 
     def test_unmeasured_builds_are_blocked(self):
-        for token in ('9.1.0', 'n7.1', '7.0.2'):
+        for token in ('9.1.0', 'n7.1', '7.0.2', '9.0.20', 'n8.0.1'):
             with self.assertRaises(harness.Blocked):
                 harness.require_qualified_build(token)
 
