@@ -11,6 +11,7 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
 #include "CFHDMetadata.h"
@@ -50,6 +51,7 @@ extern "C" {
 #include <sstream>
 #include <string>
 #include <vector>
+#include "bench_host.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -465,21 +467,9 @@ int main(int argc, char** argv) {
     json << "\n  ]\n}\n";
     const std::string body = json.str();
     std::cerr << "json bytes " << body.size() << "\n";
-    FILE* file = std::fopen(path.c_str(), "wb");
-    if (!file) {
-        std::perror("fopen results");
-        file = std::fopen("phase2a.json", "wb");
-    }
-    if (!file) {
-        std::perror("fopen temp");
+    if (!hypercine::bench::WriteCompleteFile(path, body)) {
         return 1;
     }
-    const size_t wrote = std::fwrite(body.data(), 1, body.size(), file);
-    std::fclose(file);
-    if (wrote != body.size()) {
-        std::cerr << "short write " << wrote << "\n";
-        return 1;
-    }
-    std::cout << "Wrote " << path << " (" << wrote << " bytes)\n";
+    std::cout << "Wrote " << path << " (" << body.size() << " bytes)\n";
     return 0;
 }

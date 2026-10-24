@@ -15,6 +15,7 @@
 #include <sstream>
 #include <algorithm>
 #include <numeric>
+#include "bench_host.h"
 
 #if defined(_MSC_VER)
 #include <intrin.h>
@@ -496,15 +497,21 @@ ResolutionBenchmarkMatrix RunBenchmarkForResolution(
     return matrix;
 }
 
-void WriteMatrixJson(const std::string& filepath,
+bool WriteMatrixJson(const std::string& filepath,
                      const std::vector<ResolutionBenchmarkMatrix>& matrices,
                      const std::string& cpu_model,
                      int thread_count,
                      const HyperCineCUDADeviceInfo& dev_info) {
+    if (!hypercine::bench::OutputTargetAllowsWrite(filepath)) {
+        return false;
+    }
+    if (!hypercine::bench::CreateParentDirectory(filepath)) {
+        return false;
+    }
     std::ofstream out(filepath);
     if (!out.is_open()) {
         std::cerr << "[-] Error opening " << filepath << " for writing!\n";
-        return;
+        return false;
     }
 
     out << "{\n";
@@ -516,8 +523,8 @@ void WriteMatrixJson(const std::string& filepath,
     out << "    \"compute_capability\": \"" << dev_info.major << "." << dev_info.minor << "\",\n";
     out << "    \"cuda_toolkit_version\": \"" << (dev_info.cuda_runtime_version / 1000) << "." << ((dev_info.cuda_runtime_version % 100) / 10) << "\",\n";
     out << "    \"cuda_driver_version\": \"" << (dev_info.cuda_driver_version / 1000) << "." << ((dev_info.cuda_driver_version % 100) / 10) << "\",\n";
-    out << "    \"compiler\": \"MSVC " << _MSC_VER << "\",\n";
-    out << "    \"build_type\": \"Release\"\n";
+    hypercine::bench::WriteCompilerField(out);
+    out << "    \"build_type\": \"" << hypercine::bench::BuildTypeName("Release") << "\"\n";
     out << "  },\n";
     out << "  \"benchmarks\": [\n";
 
@@ -577,8 +584,16 @@ void WriteMatrixJson(const std::string& filepath,
     out << "  ]\n";
     out << "}\n";
     out.close();
+    if (!out) {
+        std::cerr << "[-] Error finishing JSON output: " << filepath << "\n";
+        return false;
+    }
+    if (!hypercine::bench::OutputTargetIsRegularFile(filepath)) {
+        return false;
+    }
 
     std::cout << "\n[+] Successfully saved unambiguous benchmark matrix JSON to: " << filepath << "\n";
+    return true;
 }
 
 } // namespace
@@ -603,26 +618,40 @@ int main(int argc, char** argv) {
     std::cout << "    CPU: " << cpu_model << " (" << thread_count << " threads)\n";
     std::cout << "    GPU: " << dev_info.device_name << "\n";
 
+    bool only_1080p = false;
+    std::string json_path = "benchmarks/results/cuda_wavelet_phase1b.json";
+    for (int i = 1; i < argc; ++i) {
+        const std::string arg = argv[i];
+        if (arg == "--1080p-only") {
+            only_1080p = true;
+        } else if (arg == "--json" && i + 1 < argc) {
+            json_path = argv[++i];
+        } else if (!arg.empty() && arg[0] != '-') {
+            json_path = arg;
+        }
+    }
+
     cudaStream_t stream = nullptr;
     cudaStreamCreate(&stream);
 
     std::vector<ResolutionBenchmarkMatrix> matrices;
 
-    // 1080p: 10 frames/batch, 15 iters
+    // 1080p: 10 frames/batch, 15 iters. --1080p-only keeps this configuration
+    // and skips the larger ones; the 1080p measurement itself is unchanged.
     matrices.push_back(RunBenchmarkForResolution("1080p", 1920, 1080, 10, 15, stream));
 
-    // 4K UHD: 10 frames/batch, 10 iters
-    matrices.push_back(RunBenchmarkForResolution("4K_UHD", 3840, 2160, 10, 10, stream));
+    if (!only_1080p) {
+        // 4K UHD: 10 frames/batch, 10 iters
+        matrices.push_back(RunBenchmarkForResolution("4K_UHD", 3840, 2160, 10, 10, stream));
 
-    // 8K UHD: 5 frames/batch, 5 iters
-    matrices.push_back(RunBenchmarkForResolution("8K_UHD", 7680, 4320, 5, 5, stream));
-
-    std::string json_path = "benchmarks/results/cuda_wavelet_phase1b.json";
-    if (argc > 1) {
-        json_path = argv[1];
+        // 8K UHD: 5 frames/batch, 5 iters
+        matrices.push_back(RunBenchmarkForResolution("8K_UHD", 7680, 4320, 5, 5, stream));
     }
-    WriteMatrixJson(json_path, matrices, cpu_model, thread_count, dev_info);
 
+    const bool wrote = WriteMatrixJson(json_path, matrices, cpu_model, thread_count, dev_info);
     cudaStreamDestroy(stream);
+    if (!wrote) {
+        return 1;
+    }
     return 0;
 }
