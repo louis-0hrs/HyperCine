@@ -34,8 +34,14 @@ class StandaloneGateTests(unittest.TestCase):
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
+    def test_rg48_registrations_required(self):
+        # RGB444 (this branch): each RG48 registration is mandatory.
+        for missing in ('rgb444_rg48_import', 'rgb444_rg48_rejection', 'rgb444_rg48_replay_contract'):
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
+
     def test_merged_scalar_and_gop2_inventory_is_mandatory(self):
-        # A merge that drops either lane must fail even if its other tests pass.
+        # main: a merge that drops either lane must fail even if its other tests pass.
         merged = {'gop2_original_stage_contract', 'gop2_reference_inventory_integrity',
                   'scalar_inverse_arithmetic', 'scalar_inverse_rejection',
                   'scalar_inverse_vectors', 'scalar_inverse_replay_contract'}
@@ -44,6 +50,12 @@ class StandaloneGateTests(unittest.TestCase):
         for missing in sorted(merged):
             with self.subTest(missing=missing), self.assertRaises(ValueError):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
+
+    def test_rg48_allocation_failure_is_required(self):
+        name = 'rgb444_rg48_allocation_failure'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:

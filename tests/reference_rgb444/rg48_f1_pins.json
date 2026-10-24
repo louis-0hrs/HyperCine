@@ -1,0 +1,1462 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "schema": "hypercine-rg48-source-pins-v1",
+  "exporter_commit": "f17355f2f391410fc2cf27065e54dcffe1ae45e7",
+  "upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+  "proof_scope": "RG48 source import only; original SDK artifacts verified by size and SHA, no SDK decode or internal stage replay",
+  "manifests": [
+    {
+      "path": "128/manifest.json",
+      "byte_length": 607265,
+      "sha256": "4785df1429748f339accebbda3f7781728adc0d86f3a4f57c5352bbb616e271b"
+    },
+    {
+      "path": "1080p-RGB_444/manifest.json",
+      "byte_length": 46357,
+      "sha256": "4db9351ca4ed98f95f2b3623a00fe1671e5da2bc85626160ed935ff1f0f66a88"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "RGB_444/RG48/filmscan1/asymmetric/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/asymmetric/source.bin",
+          "sha256": "d30c2c0f67299c3f614bb667aec639787e13c4191f82ccf4d7e7dc8ebcd29d5a",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/asymmetric/sdk.cfhd",
+          "sha256": "81262d58968b79d16e7dbc5b75e3a3fba3ee664a6b1a3b3abecb20d83bd0ab10",
+          "byte_length": 4660
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/asymmetric/sdk.normalized.cfhd",
+          "sha256": "e8ab987204d948fc6039074bd786ee57f3b52aad8e93c7654f6b0a5f1fef814e",
+          "byte_length": 4660
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/asymmetric/decoded.bin",
+          "sha256": "9b782a2333186dea74e73ade036a86806999059a54b7b2573714ae32f9c6d41b",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "9505e336534dc7317abd3d1f424736c918758bff149585a029a3a089bef0762b",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "67ac20bbe74f68060c3cb63d7299f8841dcd1e82001069de4a20bdd9162eac8f",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "e97908fe5b6ee35ecdce1ab8b749ad3fd88652c8a8bfcc80be222f3efb993c91",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/asymmetric/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/asymmetric/source.bin",
+          "sha256": "d30c2c0f67299c3f614bb667aec639787e13c4191f82ccf4d7e7dc8ebcd29d5a",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/asymmetric/sdk.cfhd",
+          "sha256": "ef08b263dc6107e8ce5e1d591065f4dc41e05b84846f5ad8217273189eb15472",
+          "byte_length": 4660
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/asymmetric/sdk.normalized.cfhd",
+          "sha256": "160867a0d12c8159fc4c5d13f801c591ccfd5ddd7fe0bdf59a0edbe90953381d",
+          "byte_length": 4660
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/asymmetric/decoded.bin",
+          "sha256": "9b782a2333186dea74e73ade036a86806999059a54b7b2573714ae32f9c6d41b",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "9505e336534dc7317abd3d1f424736c918758bff149585a029a3a089bef0762b",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "67ac20bbe74f68060c3cb63d7299f8841dcd1e82001069de4a20bdd9162eac8f",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "e97908fe5b6ee35ecdce1ab8b749ad3fd88652c8a8bfcc80be222f3efb993c91",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/flat/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/flat/source.bin",
+          "sha256": "645dd4a6fdedebef93461beea2a91f2695ce5765dd9b535de9927085e7285fea",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/flat/sdk.cfhd",
+          "sha256": "61646e0170cc968b437ac3fd75209e524393f8b932916bf49cc7425148efaec3",
+          "byte_length": 4660
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/flat/sdk.normalized.cfhd",
+          "sha256": "95b36b09c2e1511031d7e09d95cb25a877f89ca59488ef8c3a518cd9d25c16dd",
+          "byte_length": 4660
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/flat/decoded.bin",
+          "sha256": "645dd4a6fdedebef93461beea2a91f2695ce5765dd9b535de9927085e7285fea",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "6a6d052214418ecfe856e844acba68acd813405acc9299e0a6d63f5d787ebe74",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "6a6d052214418ecfe856e844acba68acd813405acc9299e0a6d63f5d787ebe74",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "6a6d052214418ecfe856e844acba68acd813405acc9299e0a6d63f5d787ebe74",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/flat/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/flat/source.bin",
+          "sha256": "645dd4a6fdedebef93461beea2a91f2695ce5765dd9b535de9927085e7285fea",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/flat/sdk.cfhd",
+          "sha256": "b703d2662ff512ef27f85b7265b9174d31d80ac0ebb20ed58c6c54bdb4fc3b8b",
+          "byte_length": 4660
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/flat/sdk.normalized.cfhd",
+          "sha256": "768f076a37bcd494c06d1ddadbaa13f8a13a25c0e35ef79a3cb09a316a8d5ca5",
+          "byte_length": 4660
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/flat/decoded.bin",
+          "sha256": "645dd4a6fdedebef93461beea2a91f2695ce5765dd9b535de9927085e7285fea",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "6a6d052214418ecfe856e844acba68acd813405acc9299e0a6d63f5d787ebe74",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "6a6d052214418ecfe856e844acba68acd813405acc9299e0a6d63f5d787ebe74",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "6a6d052214418ecfe856e844acba68acd813405acc9299e0a6d63f5d787ebe74",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/gradient/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/gradient/source.bin",
+          "sha256": "372afd7ca614514dfbed685bbdc80c1fcc9c0ec1fe55defde2303d09f5bd9b8a",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/gradient/sdk.cfhd",
+          "sha256": "60f20282adb7e2cb6354f50f4497868ef6cd710c75a772eb918dbd450e855c6c",
+          "byte_length": 4660
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/gradient/sdk.normalized.cfhd",
+          "sha256": "f7f7183996a276544c20788b0b2545672f0e6b547fa42ab9a3821f7fcdbf40cb",
+          "byte_length": 4660
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/gradient/decoded.bin",
+          "sha256": "f5c84ce8dffbf8272bf86f2d432d7b916ced46977e37fc1137ecb039764c356b",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "9505e336534dc7317abd3d1f424736c918758bff149585a029a3a089bef0762b",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "67ac20bbe74f68060c3cb63d7299f8841dcd1e82001069de4a20bdd9162eac8f",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "d69f1392fdaa3f66f28c5575b90873834394d636f1360f93be1baa05476d8769",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/gradient/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/gradient/source.bin",
+          "sha256": "372afd7ca614514dfbed685bbdc80c1fcc9c0ec1fe55defde2303d09f5bd9b8a",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/gradient/sdk.cfhd",
+          "sha256": "f07e151cd8636ed6036a3f84a793253d81370c094b3385ded734b6ef3fadeb19",
+          "byte_length": 4660
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/gradient/sdk.normalized.cfhd",
+          "sha256": "e4a6bdc4e78e5d3e47750b58cc13d5b0efc9ea5f8e47e32a3b55b699d5485303",
+          "byte_length": 4660
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/gradient/decoded.bin",
+          "sha256": "f5c84ce8dffbf8272bf86f2d432d7b916ced46977e37fc1137ecb039764c356b",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "9505e336534dc7317abd3d1f424736c918758bff149585a029a3a089bef0762b",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "67ac20bbe74f68060c3cb63d7299f8841dcd1e82001069de4a20bdd9162eac8f",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "d69f1392fdaa3f66f28c5575b90873834394d636f1360f93be1baa05476d8769",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/primaries/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/primaries/source.bin",
+          "sha256": "f567257d7a6e1c14c927ac7c58776ac249e5ea35f352f62f5f0ed91654fcaded",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/primaries/sdk.cfhd",
+          "sha256": "a8abf7f80b3765e88ba4eef01a8e34c63620a10eebed6da1b454ffa9b29a3143",
+          "byte_length": 6632
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/primaries/sdk.normalized.cfhd",
+          "sha256": "9176d46b0075276622d09940d86c5f50abe6985927cd7f3170799abfae7cba1b",
+          "byte_length": 6632
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/primaries/decoded.bin",
+          "sha256": "77d039cbfcf83fd3994b8dc89182ccfe292a4a43aece56127c4ab241d52a7f06",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "5c69d1e7c770960b99bdc6777d3012e95f0b0e0001c699c82b65bb262f6fc2da",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "f530a8a99840cdcc1d763e13e2d0186e938974d0caf57e99a5bceb965161e501",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "690e4e293fec01532186836228a721b55cb7879158406358b976c148a454534b",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/primaries/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/primaries/source.bin",
+          "sha256": "f567257d7a6e1c14c927ac7c58776ac249e5ea35f352f62f5f0ed91654fcaded",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/primaries/sdk.cfhd",
+          "sha256": "88ae8fe2c4cb3d911e8a6626d1178e0fea1b4322d5478bb7c85761f8b2e8c67a",
+          "byte_length": 7104
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/primaries/sdk.normalized.cfhd",
+          "sha256": "c000ee6e2c8be2fcccd3ff3991691f800087ea46a19572894b7f64df77729fae",
+          "byte_length": 7104
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/primaries/decoded.bin",
+          "sha256": "b17f6560bd352e658d23814d90f39ee8bb42401567a4d40e1740a1546e28484c",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "5c69d1e7c770960b99bdc6777d3012e95f0b0e0001c699c82b65bb262f6fc2da",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "f530a8a99840cdcc1d763e13e2d0186e938974d0caf57e99a5bceb965161e501",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "690e4e293fec01532186836228a721b55cb7879158406358b976c148a454534b",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/checker/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/checker/source.bin",
+          "sha256": "9de3b2bd05bb2ac1cbb80e13c42ead7d6b525671194d0acea77f9d2a08964d39",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/checker/sdk.cfhd",
+          "sha256": "134a3f5aed518cc714e05719eafcb3326cd42288bc158deb1daa216738c85aa7",
+          "byte_length": 38876
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/checker/sdk.normalized.cfhd",
+          "sha256": "c2255b52f548c8c639f992c366b2deb295adad2a17ac9249871af36ed50e558e",
+          "byte_length": 38876
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/checker/decoded.bin",
+          "sha256": "3d8b519b6ec4aa6185e64a0ba28a65ccdce4e945bcc88d8f22ea84c04f57e9fe",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "8f090a87d44a24865341cdcb10b56a6f7ad5854b7f997a56ff6967b30a99a4df",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "967cb77f75dde873026b8761f846749646e62237ee16583c0fb9434d21628648",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "2bdf1275e747d728dfba237576165dcb1178fe21fad27f960fdd9a47a28400ec",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/checker/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/checker/source.bin",
+          "sha256": "9de3b2bd05bb2ac1cbb80e13c42ead7d6b525671194d0acea77f9d2a08964d39",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/checker/sdk.cfhd",
+          "sha256": "41c71a14070d35170ae583e964851388def6bedccaf1070179c0cf98ed3a9215",
+          "byte_length": 52196
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/checker/sdk.normalized.cfhd",
+          "sha256": "3606ad7a716a0f95850a16a3ed33c1681f8ed1efbb1630fcf193f091875831c8",
+          "byte_length": 52196
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/checker/decoded.bin",
+          "sha256": "86e110418f39bdc60bf3e9830cd30dcabcc224ae6b7c49fda393e353278a5ddd",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "8f090a87d44a24865341cdcb10b56a6f7ad5854b7f997a56ff6967b30a99a4df",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "967cb77f75dde873026b8761f846749646e62237ee16583c0fb9434d21628648",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "2bdf1275e747d728dfba237576165dcb1178fe21fad27f960fdd9a47a28400ec",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/noise/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/noise/source.bin",
+          "sha256": "b5642ac684a4ef6270f193b901666f20cd7b60ad7fa4f316da3dffd53c9ee832",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/noise/sdk.cfhd",
+          "sha256": "27dc05eaf254845a4c8b8d0992bc3ffbad2c628c5782c834ad88e2de6c402316",
+          "byte_length": 65964
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/noise/sdk.normalized.cfhd",
+          "sha256": "ed03717d4b22c3bb8e366af015c8e4985c401cab6327d37389fe276303335aae",
+          "byte_length": 65964
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/noise/decoded.bin",
+          "sha256": "9c75eeada1acfc694d743e36b516266223bb3b67215b079d50a6e3dafabe7a56",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "1c279e34d9be16d4f3f7e5ac784d1543797a49feacc491dbcffa993df462624b",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "5f7c923b1665365037a869aa76030aee2bac6c80a15a81cf08b524c635c8c01a",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "d7890fb5d7b41a9fa5d442b889c9fd827a51f8f2dd1e1a344a22cc86ee560649",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/noise/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/noise/source.bin",
+          "sha256": "b5642ac684a4ef6270f193b901666f20cd7b60ad7fa4f316da3dffd53c9ee832",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/noise/sdk.cfhd",
+          "sha256": "3847796076c0d58cc6ef4acb15a5acf82fa7b7a189d1ce0280a88364ed5f8b1d",
+          "byte_length": 95328
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/noise/sdk.normalized.cfhd",
+          "sha256": "072621d4b120806abfeefb80c1e3bbf2b03290a61d1a737902272fdbdd62b0c9",
+          "byte_length": 95328
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/noise/decoded.bin",
+          "sha256": "15664180e9f2885b8dd197fe78d6c81b7b1804b2b52dff462905bc8edf623df4",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "1c279e34d9be16d4f3f7e5ac784d1543797a49feacc491dbcffa993df462624b",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "5f7c923b1665365037a869aa76030aee2bac6c80a15a81cf08b524c635c8c01a",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "d7890fb5d7b41a9fa5d442b889c9fd827a51f8f2dd1e1a344a22cc86ee560649",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/edge/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/edge/source.bin",
+          "sha256": "5f7db717dcef033b9f3d32af76cd99224b8128a8274fc47de33ad478a4e26179",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/edge/sdk.cfhd",
+          "sha256": "3a19fbc9103d39c9083ffc4804613e8c440394699299372729a7d5fc450955b2",
+          "byte_length": 6252
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/edge/sdk.normalized.cfhd",
+          "sha256": "98d51571544a30e4e180e5fe83e166250ac917512de8c219b00dbb0d8abf008e",
+          "byte_length": 6252
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/edge/decoded.bin",
+          "sha256": "57744349ed73bbcfe22676735ffc586f08e34288d874576d66a2b2537a05801e",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "f530a8a99840cdcc1d763e13e2d0186e938974d0caf57e99a5bceb965161e501",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "2e2a3cd70c2319512fcda4ae04bef4d9d228956783adb30a7ede897bad876f65",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "e0666e2ae53b1d6c0212fcb2bf9abecdcfe08e2598cc4e6d36ce3f188ae4c042",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/edge/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/edge/source.bin",
+          "sha256": "5f7db717dcef033b9f3d32af76cd99224b8128a8274fc47de33ad478a4e26179",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/edge/sdk.cfhd",
+          "sha256": "3742a658a617e9f9e339999f46a62e43d235451c9d88677ae9f35ae7876cd220",
+          "byte_length": 6624
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/edge/sdk.normalized.cfhd",
+          "sha256": "29b9dd0ff49ebd234913d3ef344215ac1630fd08e95873c9c82ad579f363b1ef",
+          "byte_length": 6624
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/edge/decoded.bin",
+          "sha256": "539ca85cc50e56ed4aa2e354afa8f1ca85231818c480501119c428ce04698a9d",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "f530a8a99840cdcc1d763e13e2d0186e938974d0caf57e99a5bceb965161e501",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "2e2a3cd70c2319512fcda4ae04bef4d9d228956783adb30a7ede897bad876f65",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "e0666e2ae53b1d6c0212fcb2bf9abecdcfe08e2598cc4e6d36ce3f188ae4c042",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/minmax/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/minmax/source.bin",
+          "sha256": "9cc00cb2073a3e62b558e3c8693959a588c66bc25edd09d048411340aeb7d218",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/minmax/sdk.cfhd",
+          "sha256": "7d81b009295d993229b6f11c66b94d0733a89512800c14470bbd296d5bf6d8f2",
+          "byte_length": 23656
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/minmax/sdk.normalized.cfhd",
+          "sha256": "da6479ef2882d01c69054ee1165ab8391d22cb7e776f62e8e94a2aca786636f1",
+          "byte_length": 23656
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan1/minmax/decoded.bin",
+          "sha256": "b9ac5e08671be55853bb8d3dbd5babff60569db0288a1996e2d2685396828a59",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "5fb8bb1199e0d3d38306ca5eebe9101fb9bfd55a67bdc4bf7a1ec2a5032a58a1",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "53651ebb9ff0b6a4f3a532bda2d3304b6cb3f70317c69d06611b2acb1b27e06a",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "54bd52fd837e110944ce48a30daf5dce9467b2bfeab2ad27a2a6e83c1ea7bc96",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/minmax/128x128",
+      "width": 128,
+      "height": 128,
+      "source_pitch": 768,
+      "artifacts": {
+        "source.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/minmax/source.bin",
+          "sha256": "9cc00cb2073a3e62b558e3c8693959a588c66bc25edd09d048411340aeb7d218",
+          "byte_length": 98304
+        },
+        "sdk.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/minmax/sdk.cfhd",
+          "sha256": "62b61b7d9e546f044091275bd927528a9fb2aa68522000c2b24ada5723040ae1",
+          "byte_length": 29228
+        },
+        "sdk.normalized.cfhd": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/minmax/sdk.normalized.cfhd",
+          "sha256": "f176d414e2c8678331cad055efabfbf9381b3060566ac92860c9c0db5fe660be",
+          "byte_length": 29228
+        },
+        "decoded.bin": {
+          "path": "128/RGB_444/f1/128x128/RG48/filmscan3/minmax/decoded.bin",
+          "sha256": "ae190a2e54b116319ee88d94240bbd016ab78782823e2c64dc4581038bcc243e",
+          "byte_length": 98304
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "5fb8bb1199e0d3d38306ca5eebe9101fb9bfd55a67bdc4bf7a1ec2a5032a58a1",
+          "byte_length": 32768
+        },
+        {
+          "channel": "green",
+          "sha256": "53651ebb9ff0b6a4f3a532bda2d3304b6cb3f70317c69d06611b2acb1b27e06a",
+          "byte_length": 32768
+        },
+        {
+          "channel": "blue",
+          "sha256": "54bd52fd837e110944ce48a30daf5dce9467b2bfeab2ad27a2a6e83c1ea7bc96",
+          "byte_length": 32768
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/asymmetric/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/asymmetric/source.bin",
+          "sha256": "4bec693984a0d1a4f8f53417410f97c54bdf3c94638048be46f1451a6d0abefe",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/asymmetric/sdk.cfhd",
+          "sha256": "f11ee3a324aea7e4afb8de48be38f135c9c838790e5148513f7df5329011b2bb",
+          "byte_length": 228340
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/asymmetric/sdk.normalized.cfhd",
+          "sha256": "261828f834304535ffe425c331d8dee2b131cbee15eaae1ed5baa92e295ade86",
+          "byte_length": 228340
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/asymmetric/decoded.bin",
+          "sha256": "81341ed267271226a1edae21146db87ddad371a7bebd68c651e292d93fd4bfb2",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "44db37aeba06bb8b6d0b8748f231279e50659a51326908350c4e8cd96ebbcaba",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "6bfc6a9946857710bc5f89db7f54c3f6e5c0d3583feae3bbe8e41444fba24b1f",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "a909f3ee1b7ed95c4b4ff56a6563860781c302730a5cb4dec8aefeffcb3722df",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/asymmetric/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/asymmetric/source.bin",
+          "sha256": "4bec693984a0d1a4f8f53417410f97c54bdf3c94638048be46f1451a6d0abefe",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/asymmetric/sdk.cfhd",
+          "sha256": "cd65bb52978a5e7c6e1a49468e79e96ebd49b2c4847c092980e9985251aa437d",
+          "byte_length": 228340
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/asymmetric/sdk.normalized.cfhd",
+          "sha256": "5b5293e58ab1e55c13ce137b99265d436e23e23ae9ed44a30df036e701705a1e",
+          "byte_length": 228340
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/asymmetric/decoded.bin",
+          "sha256": "81341ed267271226a1edae21146db87ddad371a7bebd68c651e292d93fd4bfb2",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "44db37aeba06bb8b6d0b8748f231279e50659a51326908350c4e8cd96ebbcaba",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "6bfc6a9946857710bc5f89db7f54c3f6e5c0d3583feae3bbe8e41444fba24b1f",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "a909f3ee1b7ed95c4b4ff56a6563860781c302730a5cb4dec8aefeffcb3722df",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/flat/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/flat/source.bin",
+          "sha256": "db9ebc5f6851543d24b9ea218670af0d9536b549c7e88b26e55b73036a358992",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/flat/sdk.cfhd",
+          "sha256": "e461a69c3821b8d76a1c5dd6c29069c5e4428d129a62b6038f8eea750a2c67cc",
+          "byte_length": 228340
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/flat/sdk.normalized.cfhd",
+          "sha256": "ec2aa1101d65bbfb59aa861effbf42aeb1b938e721e9493ba5f4ba63dedf3fc3",
+          "byte_length": 228340
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/flat/decoded.bin",
+          "sha256": "db9ebc5f6851543d24b9ea218670af0d9536b549c7e88b26e55b73036a358992",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "5dda26321998c1671e3137a4feb36c12e8683fb6e4cec09e850734a500e959d6",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "5dda26321998c1671e3137a4feb36c12e8683fb6e4cec09e850734a500e959d6",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "5dda26321998c1671e3137a4feb36c12e8683fb6e4cec09e850734a500e959d6",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/flat/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/flat/source.bin",
+          "sha256": "db9ebc5f6851543d24b9ea218670af0d9536b549c7e88b26e55b73036a358992",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/flat/sdk.cfhd",
+          "sha256": "26bc71deb19601bd0c8334cff73360ab053d7c82dbba4c80c8029949dcc3ca08",
+          "byte_length": 228340
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/flat/sdk.normalized.cfhd",
+          "sha256": "27dbb3e401d4a0fdd032432b00f08ef1f226c612b5ce5ee0714836e7b0b25360",
+          "byte_length": 228340
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/flat/decoded.bin",
+          "sha256": "db9ebc5f6851543d24b9ea218670af0d9536b549c7e88b26e55b73036a358992",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "5dda26321998c1671e3137a4feb36c12e8683fb6e4cec09e850734a500e959d6",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "5dda26321998c1671e3137a4feb36c12e8683fb6e4cec09e850734a500e959d6",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "5dda26321998c1671e3137a4feb36c12e8683fb6e4cec09e850734a500e959d6",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/gradient/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/gradient/source.bin",
+          "sha256": "64c28ef5bed878db62b420f884905fa6c876a7da5a0480c2d53c28040f087edc",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/gradient/sdk.cfhd",
+          "sha256": "3046472bbf34427460c26594798fc88aef13cf014e81ba30706c8568a5c58ade",
+          "byte_length": 228340
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/gradient/sdk.normalized.cfhd",
+          "sha256": "e6e2798e7618d54b6362c5bba7ac903032a4749c7679721c42c559288956b6f6",
+          "byte_length": 228340
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/gradient/decoded.bin",
+          "sha256": "36804082f599c00c115fecb97fd87517b9805d70b8d3cb5d73a239795b47206f",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "44db37aeba06bb8b6d0b8748f231279e50659a51326908350c4e8cd96ebbcaba",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "6bfc6a9946857710bc5f89db7f54c3f6e5c0d3583feae3bbe8e41444fba24b1f",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "b91a15ab4559b880b51bdd2c5c345cebfd1621c99b024dc99e0d3ce8d9694785",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/gradient/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/gradient/source.bin",
+          "sha256": "64c28ef5bed878db62b420f884905fa6c876a7da5a0480c2d53c28040f087edc",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/gradient/sdk.cfhd",
+          "sha256": "4a067eb342d67925fbdca0898c5e7b778e77db8e01f26176945de7db2cd11861",
+          "byte_length": 228340
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/gradient/sdk.normalized.cfhd",
+          "sha256": "d28e222c8ea02e49ea7449fb788a1340eaa4ee2cf5402dbb639898efe1faef56",
+          "byte_length": 228340
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/gradient/decoded.bin",
+          "sha256": "36804082f599c00c115fecb97fd87517b9805d70b8d3cb5d73a239795b47206f",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "44db37aeba06bb8b6d0b8748f231279e50659a51326908350c4e8cd96ebbcaba",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "6bfc6a9946857710bc5f89db7f54c3f6e5c0d3583feae3bbe8e41444fba24b1f",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "b91a15ab4559b880b51bdd2c5c345cebfd1621c99b024dc99e0d3ce8d9694785",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/primaries/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/primaries/source.bin",
+          "sha256": "86878f438e1caa11bb9aba4e53d90b5c8e1f31363cf6241c3c3742a990cc8556",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/primaries/sdk.cfhd",
+          "sha256": "64696cd1f33b094a68d00cc33f1d2aa530b0ed33a54daeea7f7e32d5bec9ef12",
+          "byte_length": 254600
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/primaries/sdk.normalized.cfhd",
+          "sha256": "9b3ba60a0b821993a051d5f032c5d5ce6128597e56c92899a051112fcbfd6d8a",
+          "byte_length": 254600
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/primaries/decoded.bin",
+          "sha256": "de6289d78fdda9527b1c4aa10ab1146d20f191fca27fa99cf4b64e2c5839ec2e",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "012b0e26f0d8dbef93eb3c4949142c56587ef7c0142864e3a5b7afbc9ef66aea",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "fa6c8e3ee710c8d135d7d9fd05d5babc52db7af65b16531a1e84ec84cd726614",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "42024aa404901995e87a852b928e6c660046b047bb03750a0114bd341e91c934",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/primaries/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/primaries/source.bin",
+          "sha256": "86878f438e1caa11bb9aba4e53d90b5c8e1f31363cf6241c3c3742a990cc8556",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/primaries/sdk.cfhd",
+          "sha256": "13b96928b0c9c56c7d629d9ba2d42482cb317601cf6a4bcd2d2ee461c2610741",
+          "byte_length": 260004
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/primaries/sdk.normalized.cfhd",
+          "sha256": "b531f0cb34a0df2b6b6d5025611e7052f12519ef41916d846c092316f6a9f17b",
+          "byte_length": 260004
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/primaries/decoded.bin",
+          "sha256": "d4db42c038f201429b10405f6e153be39829c6116036414008cfa9b4c6eb1a83",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "012b0e26f0d8dbef93eb3c4949142c56587ef7c0142864e3a5b7afbc9ef66aea",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "fa6c8e3ee710c8d135d7d9fd05d5babc52db7af65b16531a1e84ec84cd726614",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "42024aa404901995e87a852b928e6c660046b047bb03750a0114bd341e91c934",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/checker/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/checker/source.bin",
+          "sha256": "bc99d3c7b06ec3c379b42b9800c8024d862361ccf41b783e0a76caa5c81d9747",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/checker/sdk.cfhd",
+          "sha256": "b0a31a73a40f79ad3266d500342ad7ac4921de16ca4d8dbdee2214ce4aed5054",
+          "byte_length": 4616848
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/checker/sdk.normalized.cfhd",
+          "sha256": "595addcbcd11a17b97d7406708724a909dcd7da72f79b4be0a6333e27350a9fd",
+          "byte_length": 4616848
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/checker/decoded.bin",
+          "sha256": "c3e8e57731d62f201b4a7480b8817a7d4f306de62a750ff44768b8ae9e988bb8",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "03ae88aa25e6362700a753abc8da9011f3088c64747fea6c286ddf6934b5d1dc",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "b70019ad0087a5ea2975b820e6991ba4993206d11bc62fa086b0fe417b0f161c",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "3d1034287e743718fe9cdcc4ae641b38583ba2dd9dfa38993365ed12fe1ec2b5",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/checker/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/checker/source.bin",
+          "sha256": "bc99d3c7b06ec3c379b42b9800c8024d862361ccf41b783e0a76caa5c81d9747",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/checker/sdk.cfhd",
+          "sha256": "eefc21d29884959219a10ab63047a7ca6979c4d6519b84e5567eecab352338d8",
+          "byte_length": 6369364
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/checker/sdk.normalized.cfhd",
+          "sha256": "87fb4c791532ea351fdb6c2dabbcd7fcaa843eb38a6ec96633c00bc0a65f447b",
+          "byte_length": 6369364
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/checker/decoded.bin",
+          "sha256": "7911717ef9661e00800bbb0283753a534078ba52b14baa3e1342031df1e109d4",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "03ae88aa25e6362700a753abc8da9011f3088c64747fea6c286ddf6934b5d1dc",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "b70019ad0087a5ea2975b820e6991ba4993206d11bc62fa086b0fe417b0f161c",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "3d1034287e743718fe9cdcc4ae641b38583ba2dd9dfa38993365ed12fe1ec2b5",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/noise/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/noise/source.bin",
+          "sha256": "1a5d021451759983ba8a40e01149a6a6f129246a255b3b244ee8d1c3d0f37f47",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/noise/sdk.cfhd",
+          "sha256": "12d54fe68d8474f7528d831956d35300cc5a41ce55c3ee37f9ff5021663e3849",
+          "byte_length": 7973240
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/noise/sdk.normalized.cfhd",
+          "sha256": "2cbc7e90d30ad4dd99092675dab8a64b5be38ca5f4087728baf8fcd6bb32e0fb",
+          "byte_length": 7973240
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/noise/decoded.bin",
+          "sha256": "b7bbfc5ddb72dc200216ddb339dc74155765c96b46db783c9e47c8ac6e150a7f",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "a0bf431a53d0451a30341564e711a02e2d4f40b5ccbfa95fb16d08e03a730e21",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "9e0ccbfd89be19721d400230c1ba0820fe32e75db3fc1a60550794f10faf876d",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "11b1c009cf98bdf02bbcf11a2c8dcee695ed24747e0294477026e9dbd94cfe6d",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/noise/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/noise/source.bin",
+          "sha256": "1a5d021451759983ba8a40e01149a6a6f129246a255b3b244ee8d1c3d0f37f47",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/noise/sdk.cfhd",
+          "sha256": "7a629e2a157cade6700640d234606bb6bff5e4cc6dfc26ba8a1192809ce071de",
+          "byte_length": 11682216
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/noise/sdk.normalized.cfhd",
+          "sha256": "d10147ff2bf031e765bd5d606aad268ebe126f3c6bab96278379c1754e9fd66f",
+          "byte_length": 11682216
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/noise/decoded.bin",
+          "sha256": "57552e64d48c7bc79f6f81ccef2aa08c366abd8ca2d230cd113d6c1152c82399",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "a0bf431a53d0451a30341564e711a02e2d4f40b5ccbfa95fb16d08e03a730e21",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "9e0ccbfd89be19721d400230c1ba0820fe32e75db3fc1a60550794f10faf876d",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "11b1c009cf98bdf02bbcf11a2c8dcee695ed24747e0294477026e9dbd94cfe6d",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/edge/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/edge/source.bin",
+          "sha256": "2d09de1b868fb7c4f0645a0e8c730d638aac0b66bdcb36ff24f3130d1941a437",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/edge/sdk.cfhd",
+          "sha256": "a4e2836516e09c0e8862b383f66ddf309de09d1f2a960b5a029f88d98779baaa",
+          "byte_length": 247220
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/edge/sdk.normalized.cfhd",
+          "sha256": "cde23a909ac2e11de21738b6e5ba02d5b9bce23a8a90282058f09bfcb6e64e77",
+          "byte_length": 247220
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/edge/decoded.bin",
+          "sha256": "0245aea9b7dc74f0640164acc15a5c4b874846359f5cd1bc0e621ab8a12a2aee",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "fa6c8e3ee710c8d135d7d9fd05d5babc52db7af65b16531a1e84ec84cd726614",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "8b5709cd04e087bee235fdccabeadea26baed1774865374b6ad6dd07759a708d",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "46e1f42d656483bea7a570eb7f04f2f14599e733e66f63d1d67cc457087441ee",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/edge/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/edge/source.bin",
+          "sha256": "2d09de1b868fb7c4f0645a0e8c730d638aac0b66bdcb36ff24f3130d1941a437",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/edge/sdk.cfhd",
+          "sha256": "31210b4957022b8b890b1789caae0faf0ab8f740bd2cf28d53b4f02ad84ca639",
+          "byte_length": 250356
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/edge/sdk.normalized.cfhd",
+          "sha256": "8820c51b733a026df4d6bd06a8d97c9038686c6b6ffe4440202052b3d39fd23b",
+          "byte_length": 250356
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/edge/decoded.bin",
+          "sha256": "613758b7f90432a1062eac8a4fac7cdfe0e2d04d15b36d409be427d93d18ba41",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "fa6c8e3ee710c8d135d7d9fd05d5babc52db7af65b16531a1e84ec84cd726614",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "8b5709cd04e087bee235fdccabeadea26baed1774865374b6ad6dd07759a708d",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "46e1f42d656483bea7a570eb7f04f2f14599e733e66f63d1d67cc457087441ee",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan1/minmax/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/minmax/source.bin",
+          "sha256": "cfdeacef8a8cada25ac6f316c7b9b758a8e90030ef40c35e86be1c5379f12ec0",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/minmax/sdk.cfhd",
+          "sha256": "e1d379f06d5490a012cd51e4a1f4b4973a8433f4b74ae86ef2266948300f4ac6",
+          "byte_length": 2858460
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/minmax/sdk.normalized.cfhd",
+          "sha256": "42e931cb9bfa72d6075f4327c293a843b41a11090a7cf12a20cbcb5b815b459e",
+          "byte_length": 2858460
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan1/minmax/decoded.bin",
+          "sha256": "7ecafb1fc4822b1476ea63d1f42f12885408da93591d4df6fbf6483d8f5d552b",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "7d02fc29f73e56f31eacf4e7a9feb93d2c657afea85a708ed3d026b6ec302891",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "e228b4cc10d016266adbef4189d161af646878bdf5cec7e4f9f07b234c4870c7",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "190fba51b5680cd09b05201cf46090ab1bf9eded33067c39dd961ac004a82167",
+          "byte_length": 4147200
+        }
+      ]
+    },
+    {
+      "case_id": "RGB_444/RG48/filmscan3/minmax/1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "source_pitch": 11520,
+      "artifacts": {
+        "source.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/minmax/source.bin",
+          "sha256": "cfdeacef8a8cada25ac6f316c7b9b758a8e90030ef40c35e86be1c5379f12ec0",
+          "byte_length": 12441600
+        },
+        "sdk.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/minmax/sdk.cfhd",
+          "sha256": "6e7015b4d3f3784edae55c8dc3a0c2d7f81af83d76985b2bdb9fe236177d79b5",
+          "byte_length": 3632156
+        },
+        "sdk.normalized.cfhd": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/minmax/sdk.normalized.cfhd",
+          "sha256": "9502e61d74c6c93dcb756cbbe38a22b2fbb8394013f9ee0381bd5b68a4eea5be",
+          "byte_length": 3632156
+        },
+        "decoded.bin": {
+          "path": "1080p-RGB_444/RGB_444/f1/1920x1080/RG48/filmscan3/minmax/decoded.bin",
+          "sha256": "fb8c8e72613e85d496bae542379854bed3cb2a8f0a60228dc914d9474150d72d",
+          "byte_length": 12441600
+        }
+      },
+      "canonical_p12_le_planes": [
+        {
+          "channel": "red",
+          "sha256": "7d02fc29f73e56f31eacf4e7a9feb93d2c657afea85a708ed3d026b6ec302891",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "green",
+          "sha256": "e228b4cc10d016266adbef4189d161af646878bdf5cec7e4f9f07b234c4870c7",
+          "byte_length": 4147200
+        },
+        {
+          "channel": "blue",
+          "sha256": "190fba51b5680cd09b05201cf46090ab1bf9eded33067c39dd961ac004a82167",
+          "byte_length": 4147200
+        }
+      ]
+    }
+  ]
+}
