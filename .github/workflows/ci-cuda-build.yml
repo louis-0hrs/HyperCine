@@ -9,7 +9,9 @@
 name: CUDA build (Linux, compile-only)
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  # A dispatched negative-control build targets a different tree than the
+  # branch head, so it must not cancel the head run of the same ref.
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.checkout_ref }}
   cancel-in-progress: true
 
 on:
