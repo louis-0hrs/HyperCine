@@ -69,8 +69,11 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
     add_test(NAME quality_state_unit COMMAND test_quality_state)
     add_executable(quality_state_probe tests/quality_state_probe.cpp)
     target_link_libraries(quality_state_probe PRIVATE hypercine_quality_state)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME quality_state_probe_arguments COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_quality_state_probe.py"
+        $<TARGET_FILE:quality_state_probe>)
     if(HYPERCINE_QUALITY_ORACLE_ROOT)
-        find_package(Python3 COMPONENTS Interpreter REQUIRED)
         add_test(NAME quality_state_windows_oracle COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_quality_state_corpus.py"
             --probe $<TARGET_FILE:quality_state_probe> --corpus "${HYPERCINE_QUALITY_ORACLE_ROOT}")
