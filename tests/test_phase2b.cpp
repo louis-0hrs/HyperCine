@@ -11,6 +11,9 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
+#include <cstring>
+
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
 #include "CFHDMetadata.h"
