@@ -10,7 +10,10 @@
 # checked here, in both directions:
 #
 #   1. A writable target produces a real, parseable artifact and exit 0.
-#   2. An unwritable target produces exit != 0 and NO success banner, so the
+#   2. A non-regular sink (POSIX /dev/null, Windows NUL) produces exit != 0 and
+#      NO success banner. Character devices accept writes and keep nothing, so
+#      a closed stream is not evidence of a measurement record.
+#   3. An unwritable target produces exit != 0 and NO success banner, so the
 #      failure cannot be mistaken for a completed run.
 #
 # Invoked as: cmake -DBENCH=<exe> -DWORK=<dir> -P verify_benchmark_artifact_contract.cmake
@@ -48,6 +51,13 @@ file(READ "${good_json}" good_body)
 if(NOT good_body MATCHES "\"benchmarks\"[ \t\r\n]*:")
     message(FATAL_ERROR "artifact has no \"benchmarks\" member:\n${good_body}")
 endif()
+# Parse the whole document rather than trusting a substring: a truncated or
+# malformed record must not pass as a measurement. string(JSON) fails the test
+# with a parse error when the artifact is not valid JSON.
+string(JSON bench_count LENGTH "${good_body}" benchmarks)
+if(bench_count LESS 1)
+    message(FATAL_ERROR "artifact \"benchmarks\" member is not a non-empty array")
+endif()
 # A directory component that did not exist beforehand must have been created.
 if(NOT EXISTS "${WORK}/nested")
     message(FATAL_ERROR "the run did not create the artifact parent directory")
@@ -60,7 +70,38 @@ if(good_body MATCHES "\"build_type\"[ \t\r\n]*:[ \t\r\n]*\"\"")
     message(FATAL_ERROR "build_type is empty")
 endif()
 
-# --- 2. unwritable path: must fail loudly, never silently ---------------------
+# --- 2. non-regular sink: a device is not an artifact -------------------------
+# Both canonical sinks open and accept writes while preserving nothing. Before
+# this contract existed the tool reported "saved" and exit 0 for both.
+if(WIN32)
+    set(device_target "NUL")
+else()
+    set(device_target "/dev/null")
+endif()
+
+execute_process(
+    COMMAND "${BENCH}" --1080p-only --json "${device_target}"
+    RESULT_VARIABLE device_rc
+    OUTPUT_VARIABLE device_out
+    ERROR_VARIABLE device_err
+    TIMEOUT 300)
+
+if(device_rc EQUAL 0)
+    message(FATAL_ERROR
+        "non-regular sink ${device_target} still exited 0. A character device "
+        "must not be accepted as a written measurement artifact.\n"
+        "stdout:\n${device_out}\nstderr:\n${device_err}")
+endif()
+if(device_out MATCHES "Completed Successfully")
+    message(FATAL_ERROR
+        "non-regular sink ${device_target} printed the success banner:\n${device_out}")
+endif()
+if(device_out MATCHES "results successfully saved")
+    message(FATAL_ERROR
+        "non-regular sink ${device_target} claimed the results were saved:\n${device_out}")
+endif()
+
+# --- 3. unwritable path: must fail loudly, never silently ---------------------
 set(bad_json "${WORK}/blocked/artifact.json")
 # Occupy the parent path with a regular file so the directory cannot be created
 # and the stream cannot be opened. Portable, unlike relying on permissions,
