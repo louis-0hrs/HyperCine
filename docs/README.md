@@ -25,6 +25,7 @@ This directory contains **current capability references**, **platform-specific v
 - [Sequence correctness](PHASE3A_SEQUENCE_CORRECTNESS.md) — stateful quantizer, entropy and frame-order verification.
 - [Entropy coding and bounds](ENTROPY.md) — fused VLC coding, capacity and CUDA error-state contracts.
 - [CUDA quality profiles](CUDA_QUALITY_PROFILES.md) — separate profile qualification and its source-pinned evidence; check tested parameters before broadening a claim.
+- [Tesla M4 / SM 5.2 legacy support policy](TESLA_M4_SM52_SUPPORT_POLICY.md) — research-only gate separation, the measured 4 GiB capacity failure, three exact 8K points and the PASS/FAIL/SKIP matrix; not a release qualification.
 - [Phase 3A benchmark hardening](PHASE3A1_BENCHMARK_HARDENING.md) — **historical** sequence-alignment/provenance repairs and comparisons before Phase 3A.2c.
 - [Phase 3B optimization opportunities](PHASE3B_PERFORMANCE_OPPORTUNITIES.md) — ideas from a historical profiling pass; not new implementation or current headline measurements.
 

@@ -15,10 +15,26 @@ add_executable(benchmark_codec
 
 target_link_libraries(benchmark_codec PRIVATE CFHDCodecStatic)
 
+# The directory-level include_directories() above injects upstream/Codec, whose
+# cpuid.h claims the same _CPUID_H guard as the toolchain header. benchmark_codec
+# only needs CFHDEncoder.h/CFHDDecoder.h from upstream/Common, so the CPUID
+# brand-string probe would silently resolve the frozen GoPro header and lose
+# __get_cpuid/__get_cpuid_max. Restore an explicit, minimal search path for this
+# target only; real CineForm SDK consumers keep the upstream directories.
+target_include_directories(benchmark_codec PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/upstream/Common)
+set_property(TARGET benchmark_codec PROPERTY INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/upstream/Common)
+
 # Record the real compiler that built this binary instead of a hardcoded
 # toolchain string, so Linux/macOS runs report truthful metadata.
 target_compile_definitions(benchmark_codec PRIVATE
-    HYPERCINE_BENCH_COMPILER="${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+    HYPERCINE_BENCH_COMPILER="${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
+    HYPERCINE_BENCH_BUILD_TYPE="$<CONFIG>")
 
 if(WIN32)
     target_link_libraries(benchmark_codec PRIVATE psapi)
@@ -138,3 +154,16 @@ if(TARGET CFHDCodecThreaded)
     endif()
 endif()
 
+
+# Issue #33: the benchmark tool must not report success when its measurement
+# artifact was not written. Registered here, after the target exists; the
+# tests/ directory is configured before benchmarks/, so the guard cannot live
+# there. Skipped when tests are disabled.
+if(HYPERCINE_BUILD_TESTS)
+    add_test(NAME benchmark_artifact_contract
+        COMMAND "${CMAKE_COMMAND}"
+            "-DBENCH=$<TARGET_FILE:benchmark_codec>"
+            "-DWORK=${CMAKE_CURRENT_BINARY_DIR}/benchmark-artifact-contract"
+            -P "${CMAKE_SOURCE_DIR}/tests/verify_benchmark_artifact_contract.cmake")
+    set_tests_properties(benchmark_artifact_contract PROPERTIES TIMEOUT 600)
+endif()

@@ -1,0 +1,90 @@
+// Copyright (c) 2026 HyperCine Contributors.
+// Dual-licensed under the MIT License or Apache License, Version 2.0.
+// See LICENSE-MIT and LICENSE-APACHE for details.
+//
+// Bit-exact Vulkan compute port of the frozen SDK-free CG709 conversion in
+// src/cpu/filmscan3_frontend.cpp (ConvertFilmScan3Bgra / ReferenceChannel).
+//
+// Semantics reproduced exactly:
+//   * input is top-down BGRA8, logically vertical-inverted on read
+//     (output row y reads source row height-1-y)
+//   * Y / Cr / Cb channel order; Cr and Cb are taken from the even-x sample
+//     only (no pair average)
+//   * explicit signed floor division, saturating int16, uint16 wrapping
+//   * unsigned >> 6 on the final non-negative reconstruction
+//
+// No shaderInt16 / 16-bit storage is required: values are carried in int32 and
+// narrowed explicitly, which is provably equivalent for this arithmetic.
+
+#version 450
+
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(std430, binding = 0) readonly buffer InBgra {
+    uint bgra[];           // one uint per pixel: b | g<<8 | r<<16 | a<<24
+} inb;
+
+layout(std430, binding = 1) writeonly buffer OutY {
+    int y[];               // luma plane, width * height, stride Ystride
+} outy;
+
+layout(std430, binding = 2) writeonly buffer OutCr {
+    int cr[];              // Cr plane, (width/2) * height, stride Crstride
+} outcr;
+
+layout(std430, binding = 3) writeonly buffer OutCb {
+    int cb[];              // Cb plane, (width/2) * height, stride Cbstride
+} outcb;
+
+layout(push_constant) uniform Push {
+    uint width;
+    uint height;
+    uint in_stride;        // in uints per input row (top-down, >= width)
+    uint y_stride;
+    uint c_stride;         // stride shared by Cr and Cb planes
+} pc;
+
+int floor_div(int v, int d) {
+    return v >= 0 ? v / d : -((-v + d - 1) / d);
+}
+
+int sat16(int v) {
+    return clamp(v, -32768, 32767);
+}
+
+int reference_channel(int r, int g, int b, int crc, int cgc, int cbc, int offset) {
+    int v = floor_div((r << 7) * crc, 65536);
+    v = sat16(v + floor_div((g << 7) * cgc, 65536));
+    v = sat16(v + floor_div((b << 7) * cbc, 65536));
+    // The CPU reference narrows through uint16_t before the *4 multiply, so the
+    // product wraps modulo 65536 - not modulo 2^32. Mask explicitly to match.
+    uint wrapped = (uint(v) * 4u) & 0xFFFFu;
+    int vi = wrapped <= 32767u ? int(wrapped) : int(wrapped) - 65536;
+    vi = sat16(vi + offset);
+    vi = sat16(vi + 16383);
+    uint u = uint(vi);
+    uint nonneg = u < 16383u ? 0u : u - 16383u;
+    return int((nonneg * 4u) >> 6);
+}
+
+void main() {
+    uint x = gl_GlobalInvocationID.x;
+    uint y = gl_GlobalInvocationID.y;
+    if (x >= pc.width || y >= pc.height) {
+        return;
+    }
+    // Logical vertical inversion: output row y reads source row height-1-y.
+    uint src_row = pc.height - 1u - y;
+    uint packed = inb.bgra[src_row * pc.in_stride + x];
+    int b = int(packed & 0xFFu);
+    int g = int((packed >> 8) & 0xFFu);
+    int r = int((packed >> 16) & 0xFFu);
+
+    outy.y[y * pc.y_stride + x] = reference_channel(r, g, b, 1499, 5029, 507, 1024);
+
+    if ((x & 1u) == 0u) {
+        uint cx = x >> 1;
+        outcr.cr[y * pc.c_stride + cx] = reference_channel(r, g, b, 3596, -3268, -327, 8192);
+        outcb.cb[y * pc.c_stride + cx] = reference_channel(r, g, b, -827, -2768, 3596, 8192);
+    }
+}

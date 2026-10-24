@@ -17,13 +17,20 @@
 #include <numeric>
 #include <algorithm>
 #include <cstring>
+#include <cerrno>
 #include <thread>
+#include <filesystem>
+#include <sys/stat.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <psapi.h>
 #include <intrin.h>
+#elif defined(__i386__) || defined(__x86_64__)
+// Toolchain CPUID intrinsics; see benchmarks/CMakeLists.txt for the include
+// boundary that keeps upstream/Codec/cpuid.h off this target's search path.
+#include <cpuid.h>
 #endif
 
 #include "CFHDEncoder.h"
@@ -64,20 +71,52 @@ struct BenchmarkMetrics {
     std::string peakMemoryMetric;
 };
 
+// CPU brand string from CPUID leaves 0x80000002..0x80000004. Returns an empty
+// string when the platform cannot answer, so the caller can distinguish "no
+// identifier available" from a real model name instead of inventing one.
+// The CPUID brand leaves are a fixed 48-byte field, space-padded on the right.
+// Emitting that padding into a JSON string is a defect in the artifact, not a
+// property of the CPU: it survives into every downstream comparison and makes
+// two names for one processor. Trim it at the source so every emitted artifact
+// is canonical. The historical Windows baseline keeps its recorded bytes; this
+// only governs what this tool writes from now on.
+std::string TrimTrailingBlanks(const char* text) {
+    std::string value(text);
+    const auto last = value.find_last_not_of(" \t\r\n");
+    if (last == std::string::npos) return std::string();
+    value.erase(last + 1);
+    return value;
+}
+
 std::string GetCpuBrandString() {
 #ifdef _WIN32
     int cpuInfo[4] = { -1 };
-    char brand[0x40] = { 0 };
+    char brand[0x40] = { '\0' };
     __cpuid(cpuInfo, 0x80000000);
-    unsigned int nExIds = cpuInfo[0];
+    unsigned int nExIds = static_cast<unsigned int>(cpuInfo[0]);
     if (nExIds >= 0x80000004) {
-        __cpuid((int*)(brand), 0x80000002);
-        __cpuid((int*)(brand + 16), 0x80000003);
-        __cpuid((int*)(brand + 32), 0x80000004);
-        return std::string(brand);
+        __cpuid(reinterpret_cast<int*>(brand), 0x80000002);
+        __cpuid(reinterpret_cast<int*>(brand + 16), 0x80000003);
+        __cpuid(reinterpret_cast<int*>(brand + 32), 0x80000004);
+        return TrimTrailingBlanks(brand);
+    }
+#elif defined(__i386__) || defined(__x86_64__)
+    unsigned int eax = 0, ebx = 0, ecx = 0, edx = 0;
+    if (__get_cpuid_max(0x80000000u, nullptr) >= 0x80000004u) {
+        char brand[0x40] = { '\0' };
+        __cpuid_count(0x80000002u, 0, eax, ebx, ecx, edx);
+        std::memcpy(brand, &eax, 4); std::memcpy(brand + 4, &ebx, 4);
+        std::memcpy(brand + 8, &ecx, 4); std::memcpy(brand + 12, &edx, 4);
+        __cpuid_count(0x80000003u, 0, eax, ebx, ecx, edx);
+        std::memcpy(brand + 16, &eax, 4); std::memcpy(brand + 20, &ebx, 4);
+        std::memcpy(brand + 24, &ecx, 4); std::memcpy(brand + 28, &edx, 4);
+        __cpuid_count(0x80000004u, 0, eax, ebx, ecx, edx);
+        std::memcpy(brand + 32, &eax, 4); std::memcpy(brand + 36, &ebx, 4);
+        std::memcpy(brand + 40, &ecx, 4); std::memcpy(brand + 44, &edx, 4);
+        return TrimTrailingBlanks(brand);
     }
 #endif
-    return "Unknown CPU";
+    return std::string();
 }
 
 // Reported logical hardware threads. Windows keeps the system-info query it has
@@ -105,6 +144,16 @@ const char* GetBuildOsName() {
     return "Linux";
 #else
     return "Unknown";
+#endif
+}
+
+// Build type this binary was compiled with, provided by CMake. A hardcoded
+// "Release" is a claim about a build the tool did not inspect.
+const char* GetBuildTypeName() {
+#if defined(HYPERCINE_BENCH_BUILD_TYPE)
+    return HYPERCINE_BENCH_BUILD_TYPE;
+#else
+    return "unknown";
 #endif
 }
 
@@ -325,7 +374,65 @@ BenchmarkMetrics RunResolutionBenchmark(const BenchmarkConfig& cfg) {
     return metrics;
 }
 
-void WriteResultsJson(const std::string& filepath,
+// A closed stream is not evidence that a measurement record exists. Character
+// devices accept writes and keep nothing: POSIX /dev/null and Windows NUL,
+// CON, COM1 all open successfully. The artifact path therefore has to resolve
+// to a regular file, both before writing and again after closing.
+enum class OutputTargetKind {
+    Missing,       // nothing there yet; creating a regular file is allowed
+    RegularFile,   // an existing regular file; overwriting is allowed
+    NotRegular,    // device, pipe, socket or directory
+    Uninspectable  // cannot be examined, so no durable artifact can be promised
+};
+
+OutputTargetKind InspectOutputTarget(const std::string& path) {
+#if defined(_WIN32)
+    HANDLE handle = CreateFileA(path.c_str(), FILE_READ_ATTRIBUTES,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
+                                nullptr);
+    if (handle == INVALID_HANDLE_VALUE) {
+        const DWORD error = GetLastError();
+        if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND) {
+            return OutputTargetKind::Missing;
+        }
+        return OutputTargetKind::Uninspectable;
+    }
+    const DWORD type = GetFileType(handle);
+    BY_HANDLE_FILE_INFORMATION info{};
+    const BOOL haveInfo = GetFileInformationByHandle(handle, &info);
+    CloseHandle(handle);
+    if (type != FILE_TYPE_DISK) {
+        return OutputTargetKind::NotRegular;
+    }
+    if (!haveInfo) {
+        return OutputTargetKind::Uninspectable;
+    }
+    if ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+        return OutputTargetKind::NotRegular;
+    }
+    return OutputTargetKind::RegularFile;
+#else
+    struct stat info {};
+    if (::stat(path.c_str(), &info) != 0) {
+        return (errno == ENOENT || errno == ENOTDIR) ? OutputTargetKind::Missing
+                                                     : OutputTargetKind::Uninspectable;
+    }
+    return S_ISREG(info.st_mode) ? OutputTargetKind::RegularFile
+                                 : OutputTargetKind::NotRegular;
+#endif
+}
+
+const char* DescribeRejectedTarget(OutputTargetKind kind) {
+    return kind == OutputTargetKind::NotRegular
+               ? "target is not a regular file (device, pipe, socket or directory)"
+               : "target path cannot be inspected as a regular file";
+}
+
+// Returns true only when the artefact was actually written and closed. A caller
+// that reports success without this returning true would be claiming a
+// measurement record that does not exist.
+bool WriteResultsJson(const std::string& filepath,
                       const std::vector<BenchmarkMetrics>& results,
                       const std::string& cpuModel,
                       int threadCount)
@@ -341,11 +448,20 @@ void WriteResultsJson(const std::string& filepath,
     // literal file name instead of a directory path.
     std::string nativePath = filepath;
 #endif
+
+    const OutputTargetKind beforeWrite = InspectOutputTarget(nativePath);
+    if (beforeWrite == OutputTargetKind::NotRegular ||
+        beforeWrite == OutputTargetKind::Uninspectable) {
+        std::cerr << "Refusing to write JSON output: " << nativePath << ": "
+                  << DescribeRejectedTarget(beforeWrite) << std::endl;
+        return false;
+    }
+
     std::ofstream out(nativePath);
     if (!out.is_open()) {
         std::cerr << "Failed to write JSON output: " << nativePath << std::endl;
         perror("Reason");
-        return;
+        return false;
     }
 
     out << "{\n";
@@ -354,7 +470,7 @@ void WriteResultsJson(const std::string& filepath,
     out << "    \"cpu_model\": \"" << cpuModel << "\",\n";
     out << "    \"thread_count\": " << threadCount << ",\n";
     out << "    \"compiler\": \"" << GetCompilerDescription() << "\",\n";
-    out << "    \"build_type\": \"Release\",\n";
+    out << "    \"build_type\": \"" << GetBuildTypeName() << "\",\n";
     out << "    \"upstream_commit\": \"11574d0295771edccadd17af14af74a539f924c7\"\n";
     out << "  },\n";
     out << "  \"configuration\": {\n";
@@ -397,8 +513,21 @@ void WriteResultsJson(const std::string& filepath,
     out << "  ]\n";
     out << "}\n";
     out.close();
+    if (!out) {
+        std::cerr << "Failed to finish writing JSON output: " << nativePath << std::endl;
+        return false;
+    }
+
+    // The stream closed cleanly, but that only proves the bytes were accepted
+    // somewhere. Success is claimed only when the path now names a regular file.
+    if (InspectOutputTarget(nativePath) != OutputTargetKind::RegularFile) {
+        std::cerr << "Failed to write JSON output: " << nativePath
+                  << " did not produce a regular file" << std::endl;
+        return false;
+    }
 
     std::cout << "\n[+] Benchmark results successfully saved to: " << filepath << std::endl;
+    return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -409,7 +538,7 @@ int main(int argc, char* argv[]) {
     std::string cpuModel = GetCpuBrandString();
     int threadCount = GetLogicalThreadCount();
 
-    std::cout << "CPU:          " << cpuModel << "\n";
+    std::cout << "CPU:          " << (cpuModel.empty() ? "unavailable" : cpuModel) << "\n";
     std::cout << "Cores/Threads:" << threadCount << "\n";
     std::cout << "Compiler:     " << GetCompilerDescription() << "\n";
     std::cout << "Configuration:BGRA -> 4:2:2 Film3 (Reference CPU)\n";
@@ -456,12 +585,34 @@ int main(int argc, char* argv[]) {
                            CFHD_ENCODING_QUALITY_FILMSCAN3});
     }
 
+    // Create the artifact directory instead of relying on the process working
+    // directory being the repository root. The default path is repo-relative.
+    {
+        const std::string::size_type slash = jsonPath.find_last_of("/\\");
+        if (slash != std::string::npos) {
+            std::error_code ec;
+            std::filesystem::create_directories(jsonPath.substr(0, slash), ec);
+            if (ec) {
+                std::cerr << "Failed to create output directory for " << jsonPath
+                          << ": " << ec.message() << std::endl;
+            }
+        }
+    }
+
     std::vector<BenchmarkMetrics> results;
     for (const auto& cfg : configs) {
         results.push_back(RunResolutionBenchmark(cfg));
     }
 
-    WriteResultsJson(jsonPath, results, cpuModel, threadCount);
+    // The exit status must express whether the measurement record exists. A
+    // missing artifact with exit 0 is the same false-OKAY class this repository
+    // has already been burned by: a run nobody can audit looks like a pass.
+    if (!WriteResultsJson(jsonPath, results, cpuModel, threadCount)) {
+        std::cerr << "\n=========================================================\n";
+        std::cerr << " Benchmark Run FAILED: no result artifact was written  \n";
+        std::cerr << "=========================================================\n";
+        return 1;
+    }
 
     std::cout << "\n=========================================================\n";
     std::cout << " Benchmark Run Completed Successfully                    \n";
