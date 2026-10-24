@@ -368,3 +368,52 @@ c11 (the whole frame, V rather than U) is the same race when the reader finishes
 ### Next action
 
 One forced-preemption decode, private instrumented copy only, logging for each channel the wavelet index at the moment `BANDS_ALL_VALID` accepts the queue entry, whether band 0's valid bit is clear, and the first lowpass row still equal to the allocation fill. Compare that channel to the chroma plane that moved. Do not change the tracked `upstream/` tree to do it.
+
+## The unread rows are zero-filled, measured
+
+The section above stated that "the unread coefficient bytes were not sampled, so
+'demand-zero' is the usual fresh-process behaviour, not a measurement." That gap
+is now closed on this host.
+
+Sixty fresh processes, one decode each, 8 workers on one allowed CPU
+(`cpu_max=8`, `taskset -c 0`), same pinned 900396-byte packet. Each decode wrote
+its BGRA to its own directory. Eight of sixty frames (13.3%) differed from the
+modal digest; for each divergent frame the whole output was compared byte-wise
+against the modal frame.
+
+| prefix rows | prefix mod 4 | plane moved | B changed | G changed | R changed | affected plane byte 0x00 |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: |
+| 1080 | 0 | V | 0.0% | 100.0% | 100.0% | 100.0% |
+| 678 | 2 | V | 0.0% | 99.6% | 99.7% | 99.0% |
+| 234 | 2 | V | 0.0% | 99.2% | 99.2% | 97.4% |
+| 1080 | 0 | V | 0.0% | 100.0% | 100.0% | 100.0% |
+| 806 | 2 | U | 99.2% | 99.7% | 0.0% | 99.3% |
+| 134 | 2 | V | 0.0% | 96.9% | 96.9% | 93.7% |
+| 882 | 2 | V | 0.0% | 99.8% | 99.9% | 99.3% |
+| 1080 | 0 | U | 99.3% | 100.0% | 0.0% | 100.0% |
+
+Three results follow, each of which the earlier text only predicted:
+
+1. **The affected plane is exactly `0x00` in the corrupted prefix** — 93.7% to
+   100% of its bytes over all eight frames. Not a previous frame, not the probe
+   `0xCD` sentinel, not a stale reconstruction: the reader consumed rows the
+   producer had not written, and the allocation was demand-zero. The prediction
+   is now a measurement on the same geometry the defect occurs on.
+2. **The unaffected plane is byte-identical to the modal frame across the whole
+   image** (0.0% changed), while the third channel moves. That is the U/V split:
+   when U (Cb) is the plane that lost the race, B and G move and R stays exact;
+   when V (Cr) is, R moves and B stays exact. Six of eight frames lost V, two
+   lost U — the loser is whichever channel's queue entry the reader accepted
+   early, not a fixed channel.
+3. **Every prefix length is even, and five of eight are `2 (mod 4)`**, matching
+   the "K rows on the 270-row band above the final wavelet, plus one support
+   row" geometry derived above. The lengths are 134, 234, 678, 806, 882 and
+   1080; the three full-frame cases are `0 (mod 4)` because the extra support
+   row falls off the bottom, exactly as the geometry predicts.
+
+What this still does not do: no wavelet row was logged during a live decode, so
+the ordering of producer and reader is inferred from the output geometry rather
+than captured. The demand-zero result explains *what* the reader consumed, not
+*which* scheduling step let it run. That remains the instrumented-copy
+experiment, and it needs an owner decision because it cannot be done in the
+tracked `upstream/` tree.
