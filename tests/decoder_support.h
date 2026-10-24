@@ -74,7 +74,7 @@ struct Stream {
 };
 template<class T> struct DeviceBuffer {
     T* p = nullptr;
-    explicit DeviceBuffer(size_t n) { GpuCheck(cudaMalloc(&p, sizeof(T) * n)); }
+    explicit DeviceBuffer(size_t n) { GpuCheck(cudaMalloc(reinterpret_cast<void**>(&p), sizeof(T) * n)); }
     ~DeviceBuffer() { if (p) cudaFree(p); }
     DeviceBuffer(const DeviceBuffer&) = delete;
 };

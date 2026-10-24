@@ -1,0 +1,72 @@
+begin yuy2_yuv_prog_64_low_gradient
+$REPO_ROOT/upstream/Codec/codebooks.c:1141:34: runtime error: left shift of 16 by 27 places cannot be represented in type 'int'
+$REPO_ROOT/upstream/Codec/encoder.c:728:4: runtime error: null pointer passed as argument 2, which is declared to never be null
+=================================================================
+==326798==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51d00000007c at pc 0x55824bdf3ea2 bp 0x7fff3a1cbbf0 sp 0x7fff3a1cbbe8
+READ of size 2 at 0x51d00000007c thread T0
+    #0 0x55824bdf3ea1 in FilterHorizontalRow16s $REPO_ROOT/upstream/Codec/spatial.c:537
+    #1 0x55824be269f7 in FilterSpatialQuant16s $REPO_ROOT/upstream/Codec/spatial.c:10149
+    #2 0x55824c44f512 in TransformForwardSpatial $REPO_ROOT/upstream/Codec/wavelet.c:2525
+    #3 0x55824c3327f0 in FinishFrameTransformQuant $REPO_ROOT/upstream/Codec/encoder.c:8749
+    #4 0x55824c32faa9 in ComputeGroupTransformQuant $REPO_ROOT/upstream/Codec/encoder.c:8396
+    #5 0x55824c3181e2 in EncodeSample $REPO_ROOT/upstream/Codec/encoder.c:3254
+    #6 0x55824bec22db in CSampleEncoder::EncodeSample(void*, int, CFHD_EncodingQuality) $REPO_ROOT/upstream/EncoderSDK/SampleEncoder.cpp:571
+    #7 0x55824beb8aab in CFHD_EncodeSample $REPO_ROOT/upstream/EncoderSDK/CFHDEncoder.cpp:349
+    #8 0x55824bc39411 in Run $REPO_ROOT/tests/test_decode_phase3b0.cpp:677
+    #9 0x55824bc4c9ab in RunThunk $REPO_ROOT/tests/test_decode_phase3b0.cpp:1000
+    #10 0x55824bca0706 in HyperCineSehCall $REPO_ROOT/tests/seh_guard.c:25
+    #11 0x55824bc5b604 in main $REPO_ROOT/tests/test_decode_phase3b0.cpp:1186
+    #12 0x7f19d8a35ca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: c495b62edadd6c356265942ec1282d98058a7b41)
+    #13 0x7f19d8a35d64 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x29d64) (BuildId: c495b62edadd6c356265942ec1282d98058a7b41)
+    #14 0x55824bc0f710 in _start ($REPO_ROOT/build-linux-asan-cuda/tests/test_decode_phase3b0+0xd43710) (BuildId: eaf14377326f19a8492d6c14bb6846b9f6908157)
+
+0x51d00000007c is located 4 bytes before 2048-byte region [0x51d000000080,0x51d000000880)
+allocated by thread T0 here:
+    #0 0x7f19d98f424d in posix_memalign ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:145
+    #1 0x55824c3b940f in _mm_malloc /usr/lib/gcc/x86_64-linux-gnu/14/include/mm_malloc.h:45
+    #2 0x55824c3b9787 in AllocAligned $REPO_ROOT/upstream/Codec/allocator.h:162
+    #3 0x55824c3bb0f7 in AllocImage $REPO_ROOT/upstream/Codec/image.c:169
+    #4 0x55824c442905 in AllocWaveletStack $REPO_ROOT/upstream/Codec/wavelet.c:478
+    #5 0x55824c445e38 in AllocTransform $REPO_ROOT/upstream/Codec/wavelet.c:1265
+    #6 0x55824c30c142 in InitializeEncoderWithParameters $REPO_ROOT/upstream/Codec/encoder.c:1615
+    #7 0x55824bebe735 in CSampleEncoder::PrepareToEncode(int, int, CFHD_PixelFormat, CFHD_EncodedFormat, unsigned int, CFHD_EncodingQuality*) $REPO_ROOT/upstream/EncoderSDK/SampleEncoder.cpp:303
+    #8 0x55824beb8967 in CFHD_PrepareToEncode $REPO_ROOT/upstream/EncoderSDK/CFHDEncoder.cpp:289
+    #9 0x55824bc38b40 in Run $REPO_ROOT/tests/test_decode_phase3b0.cpp:659
+    #10 0x55824bc4c9ab in RunThunk $REPO_ROOT/tests/test_decode_phase3b0.cpp:1000
+    #11 0x55824bca0706 in HyperCineSehCall $REPO_ROOT/tests/seh_guard.c:25
+    #12 0x55824bc5b604 in main $REPO_ROOT/tests/test_decode_phase3b0.cpp:1186
+    #13 0x7f19d8a35ca7  (/lib/x86_64-linux-gnu/libc.so.6+0x29ca7) (BuildId: c495b62edadd6c356265942ec1282d98058a7b41)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow $REPO_ROOT/upstream/Codec/spatial.c:537 in FilterHorizontalRow16s
+Shadow bytes around the buggy address:
+  0x51cffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51cffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51cffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51cfffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51cfffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x51d000000000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x51d000000080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==326798==ABORTING

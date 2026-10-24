@@ -31,6 +31,11 @@ if(HYPERCINE_ENABLE_CUDA)
     target_link_libraries(test_decode_phase3b2a_reconstruction PRIVATE HyperCine::Decoder CFHDCodecStatic)
     add_test(NAME test_decode_phase3b2a_reconstruction COMMAND test_decode_phase3b2a_reconstruction "${CMAKE_SOURCE_DIR}")
 
+    add_executable(test_decode_phase3b2a_failclosed test_decode_phase3b2a_failclosed.cpp)
+    target_link_libraries(test_decode_phase3b2a_failclosed PRIVATE HyperCine::Decoder hypercine_wavelet CFHDCodecStatic)
+    add_test(NAME test_decode_phase3b2a_failclosed COMMAND test_decode_phase3b2a_failclosed "${CMAKE_SOURCE_DIR}")
+    set_tests_properties(test_decode_phase3b2a_failclosed PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
+
     add_executable(test_decode_phase3b2a_temporal test_decode_phase3b2a_temporal.cu)
     target_include_directories(test_decode_phase3b2a_temporal PRIVATE ${CMAKE_SOURCE_DIR}/src/cuda)
     target_link_libraries(test_decode_phase3b2a_temporal PRIVATE hypercine_wavelet)
