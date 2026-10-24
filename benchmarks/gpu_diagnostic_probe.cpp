@@ -153,7 +153,16 @@ int main(int argc, char** argv) {
         auto value_of = [&](const char* name) -> std::string {
             const std::string prefix = std::string(name) + "=";
             if (arg.rfind(prefix, 0) == 0) return arg.substr(prefix.size());
-            if (arg == name && i + 1 < argc) return std::string(argv[++i]);
+            if (arg == name && i + 1 < argc) {
+                const std::string next = argv[i + 1];
+                // --out --overwrite must be a missing value, not a report
+                // written to a file literally named "--overwrite". A path that
+                // really starts with "--" uses the --out=<path> form.
+                if (next.rfind("--", 0) != 0) {
+                    ++i;
+                    return next;
+                }
+            }
             return std::string();
         };
         const std::string out = value_of("--out");
@@ -214,7 +223,11 @@ int main(int argc, char** argv) {
         if (!hypercine::diag::WriteGpuDiagnosticReportFile(report, opt.out_path, policy,
                                                           &write_error)) {
             std::cerr << "gpu_diagnostic_probe: " << write_error << "\n";
-            return 3;
+            // An argument error stays observable as exit 2 even when its report
+            // cannot be written; the refusal is reported on stderr. Exit 3 is
+            // reserved for a failed run or a report refusal after valid
+            // arguments.
+            return exit_code == 2 ? 2 : 3;
         }
         std::cout << "gpu_diagnostic_probe: status=" << report.status
                   << " out=" << opt.out_path << "\n";
@@ -233,6 +246,9 @@ int main(int argc, char** argv) {
     if (!parse_error.empty()) {
         report.status = "INVALID_ARGUMENTS";
         report.error_message = parse_error;
+        // The report may not be writable (no --out, occupied path); the
+        // argument error must still be visible without reading a JSON file.
+        std::cerr << "gpu_diagnostic_probe: invalid arguments: " << parse_error << "\n";
         return finish(2);
     }
 

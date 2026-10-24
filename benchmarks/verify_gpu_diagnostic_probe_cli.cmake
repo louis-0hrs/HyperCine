@@ -11,7 +11,11 @@
 #   * numeric tokens outside int range are rejected instead of narrowing to a
 #     different workload (4294967297 used to become 1);
 #   * --overwrite is the only path that may replace an existing file, and it
-#     still refuses to replace a directory.
+#     still refuses to replace a directory;
+#   * an argument error keeps exit 2 even when its report cannot be written,
+#     and is named on stderr instead of being masked by the write refusal;
+#   * a separated option never consumes a following "--" token as its value, so
+#     "--out --overwrite" is a missing value, not a file named "--overwrite".
 
 if(NOT DEFINED PROBE)
     message(FATAL_ERROR "verify_gpu_diagnostic_probe_cli: PROBE is required")
@@ -37,6 +41,7 @@ endfunction()
 function(run_probe label)
     execute_process(
         COMMAND "${PROBE}" ${ARGN}
+        WORKING_DIRECTORY "${WORK_DIR}"
         RESULT_VARIABLE rc
         OUTPUT_VARIABLE out
         ERROR_VARIABLE err)
@@ -45,10 +50,15 @@ function(run_probe label)
     set(ERR "${err}" PARENT_SCOPE)
 endfunction()
 
-# 1. Invalid token plus an existing artifact: refusal, artifact untouched.
+# 1. Invalid token plus an existing artifact: the argument error keeps exit 2
+#    even though the report cannot be written, the refusal is named, and the
+#    artifact stays byte-identical.
 run_probe("invalid --width" "--width=abc" "--out=${SENTINEL}")
-if(RC STREQUAL "0")
-    message(FATAL_ERROR "invalid --width: expected a non-zero exit\n${OUT}${ERR}")
+if(NOT RC STREQUAL "2")
+    message(FATAL_ERROR "invalid --width: expected exit 2, got ${RC}\n${OUT}${ERR}")
+endif()
+if(NOT ERR MATCHES "invalid arguments: invalid --width")
+    message(FATAL_ERROR "invalid --width: argument error was not reported on stderr\n${ERR}")
 endif()
 if(NOT ERR MATCHES "already exists")
     message(FATAL_ERROR "invalid --width: refusal did not name the existing artifact\n${ERR}")
@@ -162,5 +172,41 @@ endif()
 if(NOT ERR MATCHES "not a regular file")
     message(FATAL_ERROR "device output: refusal did not name the non-regular path\n${ERR}")
 endif()
+
+# 9. The separated --out form must not swallow a following flag token. It is a
+#    missing value, and no artifact may appear under the flag name.
+run_probe("separated --out flag value" "--width=64" "--height=64" "--frames=1"
+          "--warmup=0" "--slots=1" "--out" "--overwrite")
+if(NOT RC STREQUAL "2")
+    message(FATAL_ERROR "separated --out: expected exit 2, got ${RC}\n${OUT}${ERR}")
+endif()
+if(NOT ERR MATCHES "missing value for --out")
+    message(FATAL_ERROR "separated --out: missing-value error was not reported\n${ERR}")
+endif()
+if(EXISTS "${WORK_DIR}/--overwrite")
+    message(FATAL_ERROR "separated --out: a report was written under the flag name")
+endif()
+
+# 10. Invalid arguments with no --out at all still report the argument error on
+#     stderr and keep exit 2 rather than surfacing only the missing artifact.
+run_probe("invalid arguments without --out" "--width=abc")
+if(NOT RC STREQUAL "2")
+    message(FATAL_ERROR "no --out: expected exit 2, got ${RC}\n${OUT}${ERR}")
+endif()
+if(NOT ERR MATCHES "invalid arguments: invalid --width")
+    message(FATAL_ERROR "no --out: argument error was masked\n${ERR}")
+endif()
+
+# 11. The --out=<path> form still accepts a literal value beginning with "--";
+#     that form is the escape hatch for such a path.
+run_probe("literal flag-shaped path" "--width=64" "--height=64" "--frames=1"
+          "--warmup=0" "--slots=1" "--out=--report.json")
+if(NOT RC STREQUAL "0" AND NOT RC STREQUAL "3")
+    message(FATAL_ERROR "literal flag-shaped path: unexpected exit ${RC}\n${OUT}${ERR}")
+endif()
+if(NOT EXISTS "${WORK_DIR}/--report.json")
+    message(FATAL_ERROR "literal flag-shaped path: --out=<path> did not honor the path")
+endif()
+file(REMOVE "${WORK_DIR}/--report.json")
 
 message(STATUS "gpu_diagnostic_probe CLI contract PASS")

@@ -74,7 +74,15 @@ file: device paths such as `NUL` (Windows) or `/dev/null` (POSIX) accept writes
 while storing nothing, so they are refused instead of producing exit `0`
 without an artifact. Exit codes: `0` passed, `2` invalid arguments (a partial
 JSON is still written when the output path is new), `3` device or run failure,
-or an output refusal.
+or an output refusal after valid arguments. An argument error keeps exit `2`
+even when its report cannot be written (no `--out`, or an occupied path); the
+argument error and the write refusal are both named on stderr, so `3` always
+means the arguments themselves were accepted.
+
+Options accept both `--name=value` and `--name value`. The separated form never
+consumes a following token that begins with `--`, so `--out --overwrite` is a
+missing `--out` value rather than a report named `--overwrite`; a path that
+really begins with `--` uses the `--out=<path>` form.
 
 Numeric arguments are bounded because this is a single short diagnostic run:
 1–8192 px per dimension, 1–16 frames, 0–16 warmup frames and 0–4 slots.
