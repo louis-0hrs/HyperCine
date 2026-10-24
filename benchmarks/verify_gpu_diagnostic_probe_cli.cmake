@@ -147,4 +147,20 @@ if(NOT IS_DIRECTORY "${DIRECTORY_TARGET}")
     message(FATAL_ERROR "overwrite directory: existing directory was destroyed")
 endif()
 
+# 8. A device path accepts writes but stores no artifact. Exit 0 here would be
+#    a false OKAY, so it must be refused even with --overwrite.
+if(WIN32)
+    set(DEVICE_TARGET "NUL")
+else()
+    set(DEVICE_TARGET "/dev/null")
+endif()
+run_probe("device output" "--width=64" "--height=64" "--frames=1" "--warmup=0"
+          "--slots=1" "--overwrite" "--out=${DEVICE_TARGET}")
+if(RC STREQUAL "0")
+    message(FATAL_ERROR "device output: exit 0 without an artifact\n${OUT}${ERR}")
+endif()
+if(NOT ERR MATCHES "not a regular file")
+    message(FATAL_ERROR "device output: refusal did not name the non-regular path\n${ERR}")
+endif()
+
 message(STATUS "gpu_diagnostic_probe CLI contract PASS")

@@ -9,6 +9,14 @@
 #include <iomanip>
 #include <sstream>
 
+#if defined(_WIN32)
+#include <io.h>
+#include <sys/stat.h>
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 namespace hypercine {
 namespace diag {
 namespace {
@@ -44,6 +52,21 @@ void WriteNullableU64(std::ostringstream& json, bool available, uint64_t value) 
     } else {
         json << "null";
     }
+}
+
+// A device path ("NUL" on Windows, "/dev/null" on POSIX) accepts writes and
+// discards them, so a successful fopen/fwrite does not prove an artifact
+// exists. Only a regular file counts as evidence.
+bool StreamIsRegularFile(std::FILE* file) {
+#if defined(_WIN32)
+    struct _stat64 info {};
+    if (_fstat64(_fileno(file), &info) != 0) return false;
+    return (info.st_mode & _S_IFMT) == _S_IFREG;
+#else
+    struct stat info {};
+    if (fstat(fileno(file), &info) != 0) return false;
+    return S_ISREG(info.st_mode);
+#endif
 }
 
 }  // namespace
@@ -224,6 +247,14 @@ bool WriteGpuDiagnosticReportFile(const GpuDiagnosticReport& report,
         } else {
             *error = "failed to open output path";
         }
+        return false;
+    }
+
+    if (!StreamIsRegularFile(file)) {
+        std::fclose(file);
+        // Never remove here: with kOverwrite the path may be an existing
+        // device node, and the caller did not ask for it to be deleted.
+        *error = "output path is not a regular file";
         return false;
     }
 

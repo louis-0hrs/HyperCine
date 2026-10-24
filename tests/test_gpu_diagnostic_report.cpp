@@ -246,6 +246,22 @@ void DirectoryIsNeverReplaced() {
     Check(std::filesystem::is_directory(path), "existing directory must survive");
 }
 
+void DevicePathIsNotEvidence() {
+    // Writes to a device succeed but store nothing. Reporting success would be
+    // a false OKAY: the caller has no artifact.
+#if defined(_WIN32)
+    const std::string path = "NUL";
+#else
+    const std::string path = "/dev/null";
+#endif
+    std::string error;
+    Check(!WriteGpuDiagnosticReportFile(PassingReport(), path, ReportWritePolicy::kOverwrite,
+                                        &error),
+          "a device path must not be accepted as an artifact");
+    Check(Contains(error, "not a regular file"),
+          "device-path refusal must say the path is not a regular file");
+}
+
 }  // namespace
 
 int main() {
@@ -260,6 +276,7 @@ int main() {
         EmptyPathIsRejected();
         MissingParentLeavesNoFile();
         DirectoryIsNeverReplaced();
+        DevicePathIsNotEvidence();
     } catch (const std::exception& error) {
         std::cerr << "gpu diagnostic report FAIL: " << error.what() << "\n";
         return 1;

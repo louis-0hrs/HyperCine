@@ -104,6 +104,8 @@ enum class ReportWritePolicy {
 // With kCreateNew the file is created exclusively, so a pre-existing artifact
 // is never truncated. If writing fails after the file was created, the file is
 // removed again: a partially written report must not survive as evidence.
+// The opened stream must be a regular file; device paths such as "NUL" or
+// "/dev/null" accept writes without storing anything and are refused.
 bool WriteGpuDiagnosticReportFile(const GpuDiagnosticReport& report,
                                   const std::string& out_path,
                                   ReportWritePolicy policy,

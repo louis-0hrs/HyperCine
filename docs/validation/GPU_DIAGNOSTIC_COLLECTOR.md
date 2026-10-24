@@ -69,9 +69,12 @@ cmake --build <build-dir> --target gpu_diagnostic_probe
 `--out` is required. The report is created **exclusively**: if the path already
 exists the probe exits non-zero and leaves the existing file byte-identical.
 `--overwrite` is the explicit opt-in that may replace an existing artifact, and
-even then a directory is never replaced. Exit codes: `0` passed, `2` invalid
-arguments (a partial JSON is still written when the output path is new), `3`
-device or run failure, or an output refusal.
+even then a directory is never replaced. The opened stream must be a regular
+file: device paths such as `NUL` (Windows) or `/dev/null` (POSIX) accept writes
+while storing nothing, so they are refused instead of producing exit `0`
+without an artifact. Exit codes: `0` passed, `2` invalid arguments (a partial
+JSON is still written when the output path is new), `3` device or run failure,
+or an output refusal.
 
 Numeric arguments are bounded because this is a single short diagnostic run:
 1–8192 px per dimension, 1–16 frames, 0–16 warmup frames and 0–4 slots.
@@ -134,7 +137,8 @@ schema names, null-vs-zero semantics, measured/estimated separation, partial
 failure reports, escaping and determinism. It also covers the writer contract
 directly: create-new refuses a pre-existing file byte-identically, explicit
 overwrite replaces it, an empty path and a missing parent fail without creating
-an artifact, and a directory is never replaced.
+an artifact, a directory is never replaced, and a device path is refused rather
+than reported as a written report.
 
 `gpu_diagnostic_probe_cli` (registered from `benchmarks/CMakeLists.txt`, so it
 only exists in CUDA builds) is a real binary-level regression: it runs the
