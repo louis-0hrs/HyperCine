@@ -298,3 +298,73 @@ supports them:
    than a bounded evidence budget allows here.
 3. **Nothing in this document changes product behaviour.** The gate stays
    `REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED` until a mechanism is understood.
+
+## Mechanism — why a preempted worker returns a prefix
+
+**Evidence:** [`docs/validation/rca159_prefix_mechanism_2026-10-24.json`](validation/rca159_prefix_mechanism_2026-10-24.json).
+No new rate sweep. The four retained divergent dumps and the one retained modal dump from the earlier oversubscribed run were re-measured. `upstream/` was not modified. No decoder fix was applied. The gate stays `REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED`.
+
+### Packet and the path that is actually taken
+
+The pinned packet is an intra frame (`SAMPLE` = 9), spatial transform (`TRANSFORM_TYPE` = 0), 3 channels, 3 wavelets, 10 subbands, 2 spatial levels, 1920×1080, precision 10, encoded format YUV 4:2:2 (tag 84 = 1), colorspace BT.709 (tag 91 = 2), quality low word 6. The progressive sample flag is present (tag 68 = 1). The probe asks for full resolution and BGRA. The SDK maps BGRA + YUV 4:2:2 to internal `DECODED_FORMAT_RGB32` (`upstream/DecoderSDK/SampleDecoder.cpp`).
+
+That is **not** the half-resolution / lowpass copy. `CopyLowpass16sToBuffer` → `ConvertLowpass16sToRGBNoIPPFast` is the half-resolution and lowpass-only branch inside `ReconstructSampleFrameToBuffer`. For this full-resolution progressive RGB32 decode the live call is:
+
+`DecodeSampleIntraFrame` → `ReconstructSampleFrameToBuffer` → `TransformInverseSpatialUniversalThreadedToOutput` → `InvertHorizontalStrip16sYUVtoRGB` → `ConvertRow16uToDitheredRGB`
+
+(`upstream/Codec/decoder.c` around the progressive full-resolution RGB8 arm, the `InvertHorizontalStrip16sYUVtoRGB` call). The non-threaded `BANDS_ALL_VALID` test in the same file (the `#else` of `_THREADED_DECODER`) is not on this path. The live queue gate is `BANDS_ALL_STARTED` (`decoder.c`, threaded arm of the subband decode).
+
+### What the four dumps actually are
+
+Re-measured against the retained modal dump (image-only digest `c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0`). File row 0 of the modal dump matches the top of the source picture, not the bottom, so the prefix is the top of the image.
+
+| dump | divergent rows | tail bit-identical | channels bit-identical on the whole frame | bytes equal to `0xCD` in the divergent region |
+| --- | --- | --- | --- | --- |
+| c2 | 0..341 (342) | yes (738 rows) | R, A | 0 |
+| c19 | 0..437 (438) | yes (642 rows) | R, A | 0 |
+| c18 | 0..745 (746) | yes (334 rows) | R, A | 0 |
+| c11 | 0..1079 (1080) | n/a (whole frame) | B, A | 0.0023 |
+
+The `0xCD` figure is the fraction of bytes, not a filled sentinel block. The probe sentinel is not what occupies the prefix.
+
+Row-shift test, this pass, whole row equal to the modal row at offset k ∈ {±1, ±2, ±4, ±8, ±16}: **0 / every compared row**, on all four dumps. A per-row constant delta is also false: in the divergent region c2 has 288 distinct B deltas and 63 distinct G deltas, and sampled rows are not constant. The same shape holds for c19 and c18. c11 has 136 distinct R deltas and 57 distinct G deltas. So this is not a row displacement and not the per-row DC offset described for #160.
+
+### Channel selectivity is one chroma plane
+
+`ConvertRow16uToDitheredRGB` (`upstream/Codec/convert.c`) documents the swap: U is plane 2, V is plane 1. In the RGB32 store, R is computed from Y and V only, B from Y and U only, G from all three, and A is the constant `RGBA_DEFAULT_ALPHA` (255).
+
+A whole frame whose R and A bytes match the modal frame while B and G move (c2, c18, c19) is a changed U plane with Y and V unchanged. A frame whose B and A match while R and G move (c11) is a changed V plane with Y and U unchanged. It cannot be "whichever RGB channel lost the race": R does not read U, and B does not read V. Which chroma moves changes per run because each channel is its own transform and its own worker. A matching alpha byte only means both frames wrote the constant; there is no fourth wavelet. These four dumps do not show a torn Y plane. That does not prove Y cannot race.
+
+### The predicate can release the consumer early
+
+The old test required every band bit. The live macro does not:
+
+```c
+#define BANDS_ALL_VALID(wavelet)  ((wavelet)->band_valid_flags == (wavelet)->band_started_flags)
+#define BANDS_ALL_STARTED(wavelet) (((wavelet)->band_started_flags & ((1u << num_bands) - 2)) == ((1u << num_bands) - 2))
+```
+
+`BANDS_ALL_STARTED` ignores band 0. For a 4-band spatial wavelet the inverse is queued once bands 1..3 have been *started*. The entropy worker then accepts that queue entry when `band_valid_flags == band_started_flags` (`upstream/Codec/entropy_threading.c`). If bands 1..3 are both started and valid, and band 0 has not been started, both words are `0xE` and the macro is true **while the lowpass band is still absent**. `DecodedBandsValid` in `decoder.c` is the check that would wait for every band not produced by this inverse; the worker does not call it. `ReconstructWaveletBand` repeats the same macro and, for a spatial wavelet with `index > 0`, calls `TransformInverseSpatialQuantLowpass`, which reads `input->band[0]` from the top of the band and writes the next level's lowpass from the top.
+
+`AllTransformBandsValid`, which `ReconstructSampleFrameToBuffer` uses before the output inverse, only checks that the wavelet pointer is non-NULL. It does not look at the band flags. A lowpass that was reconstructed too early is still rendered.
+
+`AllocImage` does not clear the coefficient buffer. The `memset` of the image memory is under `#if (0 && DEBUG)` (`upstream/Codec/image.c`). A consumer that runs ahead therefore reads uninitialized rows, not a previous frame (this failure already happens on the first decode of a fresh process) and not the probe's `0xCD` output sentinel. Uninitialized anonymous pages are typically demand-zero; that was not measured inside the wavelet.
+
+### Why the visible damage is a top prefix of even length
+
+The inverse walks rows from the top. Rows the producer has already written reconstruct to the modal value. Rows it has not written yet reconstruct from the unread contents. If the producer is behind at the start and overtakes the reader, the stored child band is wrong for a top prefix and bit-identical afterwards. The output stage then just converts that band.
+
+Each spatial level doubles the row count. The final output writes two image rows per final-wavelet row, and the final vertical filter reads lowpass rows `row-1`, `row` and `row+1` (`InvertSpatialMiddleRow16sToOutput` in `upstream/Codec/spatial.c`). A tear of K rows on the 270-row band above the final wavelet therefore shows up as `4K` image rows, plus one extra final-wavelet row of support, which is `4K+2` image rows. The three partial dumps are all `2 (mod 4)`: 342 = 4×85+2, 438 = 4×109+2, 746 = 4×186+2. The full-frame dump is 1080 = 4×270, the entire 270-row band, so the extra support row falls off the bottom. 85, 109 and 186 are not band heights (the pyramid steps are 540, 270 and 135). The stop row is where the two workers happened to cross, not a subband boundary.
+
+c11 (the whole frame, V rather than U) is the same race when the reader finishes before the producer writes any row. A prefix is the same race when the producer catches up mid-band. Which of those two schedulings happened on each dump was not traced.
+
+### What this does not prove
+
+- No wavelet row was logged during a live decode. The level (the 270-row band versus a torn final high band) is the geometry that fits the `mod 4` result, not a captured schedule.
+- The unread coefficient bytes were not sampled, so "demand-zero" is the usual fresh-process behaviour, not a measurement.
+- Nothing here says the luma channel cannot lose the same race.
+- No fix was built. The change that matches the predicate bug would be to accept a queued inverse only from `DecodedBandsValid` (or the old full-bit mask), and not to mark the queue entry done while band 0 is still missing. That stays a proposal. The gate is unchanged.
+
+### Next action
+
+One forced-preemption decode, private instrumented copy only, logging for each channel the wavelet index at the moment `BANDS_ALL_VALID` accepts the queue entry, whether band 0's valid bit is clear, and the first lowpass row still equal to the allocation fill. Compare that channel to the chroma plane that moved. Do not change the tracked `upstream/` tree to do it.
