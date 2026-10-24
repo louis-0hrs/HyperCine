@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -25,6 +26,15 @@ REQUIRED = ("test_reference_oracle", "test_phase2a", "test_phase2b",
 PHASE2 = ("test_phase2a", "test_phase2b", "test_phase2c", "test_phase2d")
 LANE_LABEL = "reference-oracle"
 ORACLE_SKIP = "SKIP_RETURN_CODE=77"
+
+# The allocator's documented capacity diagnostic (include/hypercine/entropy_gpu.h).
+# Only this exact contract may relabel a strict failure as device-capacity-bound;
+# the row stays FAIL so a limited device is never reported as a passing gate.
+CAPACITY_BOUND = re.compile(
+    r"UNSUPPORTED_RESOURCE_BOUND: [^\n]*? allocation failed: "
+    r"requested (\d+) B; "
+    r"(?:free (\d+) B of (\d+) B|device memory query failed); "
+    r"CUDA (cudaError[A-Za-z]+) \(")
 
 
 def _as_labels(value):
@@ -66,6 +76,31 @@ def _skip_text(node):
     return " ".join(part for part in ((node.get("message") or ""),
                                       (node.text or "").strip(),
                                       (node.get("value") or "")) if part)
+
+
+def _evidence_text(node):
+    """Collect a testcase's failure and captured output text."""
+    parts = []
+    for child in node:
+        if child.tag in ("failure", "error", "system-out", "system-err"):
+            parts.append(_skip_text(child))
+    return "\n".join(part for part in parts if part)
+
+
+def capacity_bound(text):
+    """Read the exact allocator capacity contract; None if it is absent.
+
+    A malformed or partial message stays an ordinary strict failure, so an
+    unverified device-capacity claim cannot be manufactured from test output.
+    """
+    match = CAPACITY_BOUND.search(text)
+    if match is None:
+        return None
+    requested, free_bytes, total_bytes, status = match.groups()
+    return dict(requested_bytes=int(requested),
+                free_bytes=None if free_bytes is None else int(free_bytes),
+                total_bytes=None if total_bytes is None else int(total_bytes),
+                cuda_status=status)
 
 
 def _registration_problem(name, entry):
@@ -139,9 +174,18 @@ def inventory(xml_text, ctest_exit, registration):
                              reason="registered with the lane label but no result was produced"))
             continue
         if node.find("failure") is not None or node.find("error") is not None:
-            rows.append(dict(test=name, required=required, state="FAIL", gate_exit=1,
-                             classification="STRICT_FAILURE",
-                             reason="CTest failure"))
+            capacity = capacity_bound(_evidence_text(node))
+            if capacity is None:
+                rows.append(dict(test=name, required=required, state="FAIL",
+                                 gate_exit=1, classification="STRICT_FAILURE",
+                                 reason="CTest failure"))
+            else:
+                rows.append(dict(test=name, required=required, state="FAIL",
+                                 gate_exit=1,
+                                 classification="STRICT_FAILURE_CAPACITY_BOUND",
+                                 capacity=capacity,
+                                 reason="device capacity exhausted before the strict "
+                                        "gate could run; still a hard failure"))
         elif node.find("skipped") is not None:
             skipped = node.find("skipped")
             if ORACLE_SKIP in _skip_text(skipped):

@@ -56,6 +56,24 @@ def classify(data, name):
     return next(row for row in data["tests"] if row["test"] == name)
 
 
+FAILED = "<failure>Failed</failure>"
+
+
+def failure(output):
+    return FAILED + "<system-out>" + output + "</system-out>"
+
+
+CAPACITY_FAILED = (
+    "FAIL: 8K DeviceInput Consolidated strict encoder/bitstream gate failed: "
+    "UNSUPPORTED_RESOURCE_BOUND: GPU entropy stream 2 entropy workspace allocation "
+    "failed: requested 33178624 B; free 23789568 B of 3953131520 B; "
+    "CUDA cudaErrorMemoryAllocation (out of memory)")
+CAPACITY_NO_QUERY = (
+    "UNSUPPORTED_RESOURCE_BOUND: GPU entropy stream 1 entropy workspace allocation "
+    "failed: requested 1048576 B; device memory query failed; "
+    "CUDA cudaErrorMemoryAllocation (out of memory)")
+
+
 class ReleaseGateTests(unittest.TestCase):
     def test_all_pass_execution_without_independent_oracle_is_blocked(self):
         data = gate.inventory(report(), 0, registration())
@@ -140,6 +158,53 @@ class ReleaseGateTests(unittest.TestCase):
                                       "test_phase2c": ("run", "<failure>capacity</failure>")}),
                               8, registration())
         self.assertEqual(data["gate_exit"], 1)
+
+    def test_capacity_bound_failure_is_classified_but_still_fails(self):
+        data = gate.inventory(report({"test_phase2c": ("run", failure(CAPACITY_FAILED))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE_CAPACITY_BOUND")
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(row["gate_exit"], 1)
+        self.assertEqual(row["capacity"]["requested_bytes"], 33178624)
+        self.assertEqual(row["capacity"]["free_bytes"], 23789568)
+        self.assertEqual(row["capacity"]["total_bytes"], 3953131520)
+        self.assertEqual(row["capacity"]["cuda_status"], "cudaErrorMemoryAllocation")
+        self.assertEqual(data["counts"]["FAIL"], 1)
+        self.assertEqual(data["release_gate"], "FAIL")
+        self.assertEqual(data["gate_exit"], 1)
+
+    def test_capacity_message_without_device_query_is_classified(self):
+        data = gate.inventory(report({"test_phase2c": ("run", failure(CAPACITY_NO_QUERY))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE_CAPACITY_BOUND")
+        self.assertIsNone(row["capacity"]["free_bytes"])
+        self.assertIsNone(row["capacity"]["total_bytes"])
+        self.assertEqual(data["gate_exit"], 1)
+
+    def test_capacity_marker_in_passing_output_grants_nothing(self):
+        xml = report()
+        xml = xml.replace('<testcase name="test_phase2c" status="run"></testcase>',
+                          '<testcase name="test_phase2c" status="run">'
+                          '<system-out>' + CAPACITY_FAILED + '</system-out></testcase>')
+        data = gate.inventory(xml, 0, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "PASS_EXECUTION_ONLY")
+        self.assertEqual(data["gate_exit"], 77)
+        self.assertEqual(data["release_gate"], "BLOCKED")
+
+    def test_partial_capacity_message_stays_strict_failure(self):
+        for text in ("UNSUPPORTED_RESOURCE_BOUND: workspace allocation failed",
+                     "UNSUPPORTED_RESOURCE_BOUND: workspace allocation failed: "
+                     "requested 33178624 B; CUDA cudaErrorMemoryAllocation (out of memory)",
+                     "capacity: requested 33178624 B; free 23789568 B of 3953131520 B"):
+            data = gate.inventory(report({"test_phase2c": ("run", failure(text))}), 8,
+                                  registration())
+            row = classify(data, "test_phase2c")
+            self.assertEqual(row["classification"], "STRICT_FAILURE", text)
+            self.assertNotIn("capacity", row)
+            self.assertEqual(data["gate_exit"], 1)
 
     def test_runner_error_cannot_pass(self):
         self.assertEqual(gate.inventory(report(), 8, registration())["gate_exit"], 1)
