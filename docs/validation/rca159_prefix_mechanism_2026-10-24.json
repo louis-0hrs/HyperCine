@@ -1,0 +1,134 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "issue": "https://github.com/louis-0hrs/HyperCine/issues/159",
+  "pull_request": "https://github.com/louis-0hrs/HyperCine/pull/169",
+  "measured_utc": "2026-10-24",
+  "scope": "Mechanism trace of the #159 prefix corruption. No rate sweep, no decoder change, no merge, no release.",
+  "gate": "REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED",
+  "upstream_modified": false,
+  "instrumentation": "none — a sentinel fill would require editing the frozen upstream tree; not done",
+  "packet": {
+    "bytes": 900396,
+    "sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52",
+    "sample_type": 9,
+    "transform_type": 0,
+    "num_channels": 3,
+    "num_wavelets": 3,
+    "num_subbands": 10,
+    "num_spatial": 2,
+    "width": 1920,
+    "height": 1080,
+    "precision": 10,
+    "encoded_format_tag84": 1,
+    "encoded_format": "YUV_422",
+    "colorspace_tag91": 2,
+    "colorspace": "BT.709",
+    "quality_low": 6,
+    "sample_flags_tag68": 1,
+    "progressive": true
+  },
+  "decode_request": {
+    "resolution": "FULL",
+    "output_fourcc": "BGRA",
+    "internal_format": "DECODED_FORMAT_RGB32",
+    "path": [
+      "DecodeSampleIntraFrame",
+      "ReconstructSampleFrameToBuffer",
+      "TransformInverseSpatialUniversalThreadedToOutput",
+      "InvertHorizontalStrip16sYUVtoRGB",
+      "ConvertRow16uToDitheredRGB"
+    ],
+    "not_on_path": [
+      "CopyLowpass16sToBuffer",
+      "ConvertLowpass16sToRGBNoIPPFast"
+    ],
+    "note": "CopyLowpass16sToBuffer is the half-resolution and lowpass-only branch. This probe requests full resolution."
+  },
+  "dumps": {
+    "note": "Retained modal and divergent BGRA dumps from the earlier oversubscribed run. Re-measured this pass. No new decode.",
+    "modal_image_sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0",
+    "file_row_0_is_image_top": true,
+    "frames": [
+      {
+        "name": "c2",
+        "sha256": "e1a56cc6781618c613198a60c1c51a9a2643ea5d5ffac20e72a9648c1fbef1f4",
+        "divergent_rows_inclusive": [0, 341],
+        "divergent_row_count": 342,
+        "tail_identical": true,
+        "tail_rows": 738,
+        "channels_identical_whole_frame": ["R", "A"],
+        "channels_changed_in_prefix": ["B", "G"],
+        "prefix_bytes_equal_0xCD": 0.0,
+        "B_unique_deltas": 288,
+        "G_unique_deltas": 63,
+        "row_mod_4": 2
+      },
+      {
+        "name": "c19",
+        "sha256": "22c7cd727f526b5ca1fd331bf11ef3e248efa7e1ea9a0223c8c47e5fe31ba955",
+        "divergent_rows_inclusive": [0, 437],
+        "divergent_row_count": 438,
+        "tail_identical": true,
+        "tail_rows": 642,
+        "channels_identical_whole_frame": ["R", "A"],
+        "channels_changed_in_prefix": ["B", "G"],
+        "prefix_bytes_equal_0xCD": 0.0,
+        "B_unique_deltas": 282,
+        "G_unique_deltas": 50,
+        "row_mod_4": 2
+      },
+      {
+        "name": "c18",
+        "sha256": "1f74222acb0f00ab7549a57b107b970fc85c0399a476ec464b3fc24abb2cff3b",
+        "divergent_rows_inclusive": [0, 745],
+        "divergent_row_count": 746,
+        "tail_identical": true,
+        "tail_rows": 334,
+        "channels_identical_whole_frame": ["R", "A"],
+        "channels_changed_in_prefix": ["B", "G"],
+        "prefix_bytes_equal_0xCD": 0.0,
+        "B_unique_deltas": 285,
+        "G_unique_deltas": 56,
+        "row_mod_4": 2
+      },
+      {
+        "name": "c11",
+        "sha256": "4843d33632c604a569df7f35d5727adae3e784f35aecd073fd222c8edbf394df",
+        "divergent_rows_inclusive": [0, 1079],
+        "divergent_row_count": 1080,
+        "tail_identical": false,
+        "tail_rows": 0,
+        "channels_identical_whole_frame": ["B", "A"],
+        "channels_changed_in_prefix": ["G", "R"],
+        "prefix_bytes_equal_0xCD": 0.0023,
+        "R_unique_deltas": 136,
+        "G_unique_deltas": 57,
+        "row_mod_4": 0
+      }
+    ]
+  },
+  "refuted": {
+    "row_shift_k": [1, 2, 4, 8, 16, -1, -2, -4, -8, -16],
+    "whole_row_matches_at_any_k": 0,
+    "per_row_constant_dc": false,
+    "prefix_is_probe_sentinel_0xCD": false,
+    "copy_lowpass_is_the_full_resolution_path": false
+  },
+  "supported": {
+    "contiguous_top_prefix_then_bit_identical_tail": true,
+    "changed_plane_when_R_and_A_match": "U (planar index 2)",
+    "changed_plane_when_B_and_A_match": "V (planar index 1)",
+    "predicate": "BANDS_ALL_VALID is band_valid_flags == band_started_flags, so it is true when every started band is finished, including when band 0 was never started",
+    "queue_gate": "BANDS_ALL_STARTED ignores band 0",
+    "worker_accepts_queue_on_that_macro": "upstream/Codec/entropy_threading.c",
+    "partial_lengths_mod_4": 2,
+    "full_frame_length_equals_4_times_270": true,
+    "vertical_filter_reads": ["row-1", "row", "row+1"]
+  },
+  "not_proven": [
+    "which worker pair crossed on each dump",
+    "that unread coefficient rows were zero",
+    "that the luma channel cannot race",
+    "a fix"
+  ]
+}
