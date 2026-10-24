@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "license": "MIT OR Apache-2.0; Copyright (c) 2026 HyperCine Contributors",
+  "source_sha256": "c1e2448e13ca082919ff646f8b16ae6d9db7bcb5fd39df7f43fc80ef0c90535e",
+  "rows": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "stride_bytes": 7680,
+      "buffer_count": 42,
+      "resident_bytes": 31622400,
+      "largest_buffer_bytes": 8294400,
+      "input_index_product": 8294400,
+      "input_index_fits_uint32": true,
+      "status": "ESTIMATE_ONLY"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "stride_bytes": 15360,
+      "buffer_count": 42,
+      "resident_bytes": 126489600,
+      "largest_buffer_bytes": 33177600,
+      "input_index_product": 33177600,
+      "input_index_fits_uint32": true,
+      "status": "ESTIMATE_ONLY"
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "stride_bytes": 30720,
+      "buffer_count": 42,
+      "resident_bytes": 505958400,
+      "largest_buffer_bytes": 132710400,
+      "input_index_product": 132710400,
+      "input_index_fits_uint32": true,
+      "status": "ESTIMATE_ONLY"
+    },
+    {
+      "width": 12288,
+      "height": 8040,
+      "stride_bytes": 49152,
+      "buffer_count": 42,
+      "resident_bytes": 1506631680,
+      "largest_buffer_bytes": 395182080,
+      "input_index_product": 395182080,
+      "input_index_fits_uint32": true,
+      "status": "ESTIMATE_ONLY"
+    },
+    {
+      "width": 17520,
+      "height": 8040,
+      "stride_bytes": 70080,
+      "buffer_count": 42,
+      "resident_bytes": 2148545280,
+      "largest_buffer_bytes": 563443200,
+      "input_index_product": 563443200,
+      "input_index_fits_uint32": true,
+      "status": "ESTIMATE_ONLY"
+    }
+  ],
+  "transitions": [
+    {
+      "old": 1920,
+      "new": 3840,
+      "minimum_overlap_bytes": 158112000
+    },
+    {
+      "old": 3840,
+      "new": 7680,
+      "minimum_overlap_bytes": 632448000
+    },
+    {
+      "old": 7680,
+      "new": 12288,
+      "minimum_overlap_bytes": 2012590080
+    },
+    {
+      "old": 12288,
+      "new": 17520,
+      "minimum_overlap_bytes": 3655176960
+    }
+  ],
+  "caveats": [
+    "No Metal execution or measured device limits",
+    "CPU planes, downloads, samples and driver allocations excluded",
+    "maxBufferLength and available shared RAM must be queried at runtime",
+    "Current main rejects 4K+ before workspace preparation"
+  ]
+}
