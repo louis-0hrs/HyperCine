@@ -122,6 +122,32 @@ int main(int argc, char** argv) try {
         Require(hashes[i] != hashes[i - 1], "consecutive 4K frames produced identical coefficient hashes");
     std::cout << "PASS 16 consecutive 4K frames: ordered hashes distinct and CPU==Metal on every frame\n";
 
+    // Dump the whole ordered sequence so it can be decoded independently. These
+    // are 16 PACKET comparisons above; an FFmpeg decode of all 16 is a separate,
+    // stronger statement and must not be conflated with them.
+    if (!dump.empty()) {
+        cpu.Reset();
+        metal.Reset();
+        for (int i = 0; i < 16; ++i) {
+            GeneratePhase3AFrame(W, H, i, Phase3APattern::DeterministicNoise, input.data(),
+                                 static_cast<int>(STRIDE), 0x1337beef);
+            const auto c = cpu.Encode(input.data(), input.size(), STRIDE, metadata);
+            const auto m = metal.Encode(input.data(), input.size(), STRIDE, metadata);
+            char name[64];
+            std::snprintf(name, sizeof(name), "/seq_cpu_%04d.cfhd", i);
+            std::ofstream fc(dump + name, std::ios::binary);
+            fc.write(reinterpret_cast<const char*>(c.sample.data()),
+                     static_cast<std::streamsize>(c.sample.size()));
+            if (!fc) throw std::runtime_error("sequence dump write failed");
+            std::snprintf(name, sizeof(name), "/seq_metal_%04d.cfhd", i);
+            std::ofstream fm(dump + name, std::ios::binary);
+            fm.write(reinterpret_cast<const char*>(m.sample.data()),
+                     static_cast<std::streamsize>(m.sample.size()));
+            if (!fm) throw std::runtime_error("sequence dump write failed");
+        }
+        std::cout << "DUMPED 16 ordered CPU and 16 ordered Metal packets for independent decode\n";
+    }
+
     // ---- Schritt 3: stability and limits -------------------------------------
     // Padded input stride: the encoder must honour the padding, not assume width*4.
     {
