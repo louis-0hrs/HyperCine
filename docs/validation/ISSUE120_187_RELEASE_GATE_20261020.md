@@ -235,3 +235,50 @@ with the same `test_phase2c` strict 8K capacity failure. A fresh configure
 generated the target command with the CMake installation's `ctest`
 executable. This is tooling evidence only: the release gate remains BLOCKED,
 the original-SDK pixel oracle stays unqualified and #187 remains on HOLD.
+
+## Capacity-bound strict failures (2026-10-24)
+
+The native M4 lane has one persistent red row, `test_phase2c` on the 8K
+DeviceInput Consolidated 3-slot/4-stream configuration. Until now the
+inventory reported it as an undifferentiated `STRICT_FAILURE`, so a machine
+consumer could not separate a device-capacity limit from a codec regression
+without reading the log. The runner now classifies it explicitly. This changes
+no gate: the row remains `state=FAIL`, `gate_exit=1` and `release_gate=FAIL`.
+
+The classifier accepts only the allocator contract documented in
+`include/hypercine/entropy_gpu.h`:
+
+```
+UNSUPPORTED_RESOURCE_BOUND: <what> allocation failed: requested <N> B;
+free <N> B of <N> B; CUDA <cudaErrorName> (<message>)
+```
+
+`free ... of ...` may be replaced by `device memory query failed`. A failure
+that carries this exact contract is classified `STRICT_FAILURE_CAPACITY_BOUND`
+and gains a `capacity` object with `requested_bytes`, `free_bytes`,
+`total_bytes` (both `null` when the device query failed) and `cuda_status`.
+Anything else — a truncated message, a marker in a *passing* test's output, a
+failure from a different subsystem — stays `STRICT_FAILURE`, so a capacity
+claim cannot be manufactured from log text. `counts`, `reference_lane` and
+`release_gate` are computed exactly as before; a capacity-bound failure has the
+same weight as any other strict failure.
+
+Native evidence (Windows 11 x64 QEMU guest, AMD EPYC 7601 8 LP; Tesla M4
+CC 5.2, 3,840 MiB; CUDA 12.8.93 `sm_52`; MSVC 19.44 Release), CUDA-ON build
+from `471da206e02c9373b9a30cd2cc2d77af87c7b93c`:
+
+- Full registered CTest: **34 tests, 30 passed / 3 SKIP77 / 1 failed**,
+  413.61 s. The only failure is `test_phase2c`; the count is identical to the
+  pre-change run at the same commit (376.60 s), so the classifier changed no
+  outcome.
+- Reference-lane inventory: **2 PASS / 1 FAIL / 3 BLOCKED**,
+  `coverage.complete=true`, runner exit **1**, `release_gate=FAIL`.
+  `test_phase2c` is `STRICT_FAILURE_CAPACITY_BOUND` with
+  `requested_bytes=33178624`, `free_bytes=23789568`,
+  `total_bytes=3953131520`, `cuda_status=cudaErrorMemoryAllocation`.
+- The 8K row was not retried or swept again; the same bounded run produced
+  both the CTest summary and the inventory.
+
+This is representation and tooling evidence only. It does not qualify the
+M4 for 8K 3x4, does not convert any failure to a skip or pass, and does not
+change the original-SDK pixel-oracle status, which remains BLOCKED.

@@ -56,6 +56,24 @@ def classify(data, name):
     return next(row for row in data["tests"] if row["test"] == name)
 
 
+FAILED = "<failure>Failed</failure>"
+
+
+def failure(output):
+    return FAILED + "<system-out>" + output + "</system-out>"
+
+
+CAPACITY_FAILED = (
+    "FAIL: 8K DeviceInput Consolidated strict encoder/bitstream gate failed: "
+    "UNSUPPORTED_RESOURCE_BOUND: GPU entropy stream 2 entropy workspace allocation "
+    "failed: requested 33178624 B; free 23789568 B of 3953131520 B; "
+    "CUDA cudaErrorMemoryAllocation (out of memory)")
+CAPACITY_NO_QUERY = (
+    "UNSUPPORTED_RESOURCE_BOUND: GPU entropy stream 1 entropy workspace allocation "
+    "failed: requested 1048576 B; device memory query failed; "
+    "CUDA cudaErrorMemoryAllocation (out of memory)")
+
+
 class ReleaseGateTests(unittest.TestCase):
     def test_all_pass_execution_without_independent_oracle_is_blocked(self):
         data = gate.inventory(report(), 0, registration())
@@ -140,6 +158,138 @@ class ReleaseGateTests(unittest.TestCase):
                                       "test_phase2c": ("run", "<failure>capacity</failure>")}),
                               8, registration())
         self.assertEqual(data["gate_exit"], 1)
+
+    def test_capacity_bound_failure_is_classified_but_still_fails(self):
+        data = gate.inventory(report({"test_phase2c": ("run", failure(CAPACITY_FAILED))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE_CAPACITY_BOUND")
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(row["gate_exit"], 1)
+        self.assertEqual(row["capacity"]["requested_bytes"], 33178624)
+        self.assertEqual(row["capacity"]["free_bytes"], 23789568)
+        self.assertEqual(row["capacity"]["total_bytes"], 3953131520)
+        self.assertEqual(row["capacity"]["cuda_status"], "cudaErrorMemoryAllocation")
+        self.assertEqual(data["counts"]["FAIL"], 1)
+        self.assertEqual(data["release_gate"], "FAIL")
+        self.assertEqual(data["gate_exit"], 1)
+
+    def test_capacity_message_without_device_query_is_classified(self):
+        """The device-query-failed variant is still an attributable cause.
+
+        The fixture carries the `FAIL: ` prefix because that is what
+        `test_entropy_capacity.cpp` actually emits -- its `Fail()` writes
+        `FAIL: <message>`. Without the prefix this would exercise the
+        no-terminal-diagnostic path instead of the variant under test.
+        """
+        data = gate.inventory(
+            report({"test_phase2c": ("run", failure("FAIL: " + CAPACITY_NO_QUERY))}),
+            8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE_CAPACITY_BOUND")
+        self.assertIsNone(row["capacity"]["free_bytes"])
+        self.assertIsNone(row["capacity"]["total_bytes"])
+        self.assertEqual(data["gate_exit"], 1)
+
+    def test_capacity_marker_in_passing_output_grants_nothing(self):
+        xml = report()
+        xml = xml.replace('<testcase name="test_phase2c" status="run"></testcase>',
+                          '<testcase name="test_phase2c" status="run">'
+                          '<system-out>' + CAPACITY_FAILED + '</system-out></testcase>')
+        data = gate.inventory(xml, 0, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "PASS_EXECUTION_ONLY")
+        self.assertEqual(data["gate_exit"], 77)
+        self.assertEqual(data["release_gate"], "BLOCKED")
+
+    def test_handled_capacity_message_does_not_relabel_a_later_failure(self):
+        """Mixed output: capacity marker handled, then an unrelated fatal error.
+
+        The allocator diagnostic is printed while a smaller configuration still
+        fits, so the test continues and later fails on something else. Binding
+        the classification to the whole captured output relabelled that second
+        failure as device-capacity-bound and hid its real cause. The contract
+        in docs/validation/ISSUE120_187_RELEASE_GATE_20261020.md says a
+        failure from another subsystem stays STRICT_FAILURE.
+        """
+        mixed = (CAPACITY_FAILED + "\n" +
+                 "FAIL: 8K DeviceInput Consolidated identity verification failed: "
+                 "coefficient mismatch at band 7")
+        data = gate.inventory(report({"test_phase2c": ("run", failure(mixed))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE")
+        self.assertNotIn("capacity", row)
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(row["gate_exit"], 1)
+        self.assertEqual(data["release_gate"], "FAIL")
+
+    def test_capacity_failure_as_the_fatal_line_is_still_classified(self):
+        """Positive control for the binding: the marker as the fatal line counts.
+
+        A test that fails *because* of the allocation prints the diagnostic
+        through Fail(), so the line that ended the run carries the contract.
+        """
+        fatal = "FAIL: 8K DeviceInput Consolidated strict encoder/bitstream " \
+                "gate failed: " + CAPACITY_FAILED.split("FAIL: ", 1)[-1] \
+                if CAPACITY_FAILED.startswith("FAIL: ") else "FAIL: " + CAPACITY_FAILED
+        data = gate.inventory(report({"test_phase2c": ("run", failure(fatal))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE_CAPACITY_BOUND")
+        self.assertEqual(row["capacity"]["requested_bytes"], 33178624)
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(data["release_gate"], "FAIL")
+
+    def test_capacity_marker_without_a_fail_line_stays_strict_failure(self):
+        """No terminal `FAIL:` line means no attributable cause, so no relabel.
+
+        The fixture deliberately carries the marker but no `FAIL: ` prefix. The
+        earlier version passed `CAPACITY_FAILED`, which starts with `FAIL: ` and
+        therefore never reached the no-diagnostic path at all -- the test named
+        a fallback it did not exercise.
+        """
+        marker_only = (CAPACITY_FAILED.split("FAIL: ", 1)[1]
+                       if CAPACITY_FAILED.startswith("FAIL: ") else CAPACITY_FAILED)
+        self.assertNotIn("FAIL: ", marker_only)
+        data = gate.inventory(report({"test_phase2c": ("run", failure(marker_only))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE")
+        self.assertNotIn("capacity", row)
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(data["release_gate"], "FAIL")
+        self.assertEqual(data["gate_exit"], 1)
+
+    def test_handled_capacity_marker_then_error_stays_strict_failure(self):
+        """A marker printed before an unrelated abort must not become the cause.
+
+        This is the closure case: the test printed a capacity line it survived,
+        then died through <error>. `FAIL:` never appears, so nothing binds the
+        marker to the failure and the strict classification must survive.
+        """
+        text = CAPACITY_FAILED.split("FAIL: ", 1)[1]
+        data = gate.inventory(
+            report({"test_phase2c": ("error",
+                                     "<error>coefficient mismatch</error>"
+                                     "<system-out>" + text + "</system-out>")}),
+            8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE")
+        self.assertNotIn("capacity", row)
+        self.assertEqual(data["gate_exit"], 1)
+
+    def test_partial_capacity_message_stays_strict_failure(self):
+        for text in ("UNSUPPORTED_RESOURCE_BOUND: workspace allocation failed",
+                     "UNSUPPORTED_RESOURCE_BOUND: workspace allocation failed: "
+                     "requested 33178624 B; CUDA cudaErrorMemoryAllocation (out of memory)",
+                     "capacity: requested 33178624 B; free 23789568 B of 3953131520 B"):
+            data = gate.inventory(report({"test_phase2c": ("run", failure(text))}), 8,
+                                  registration())
+            row = classify(data, "test_phase2c")
+            self.assertEqual(row["classification"], "STRICT_FAILURE", text)
+            self.assertNotIn("capacity", row)
+            self.assertEqual(data["gate_exit"], 1)
 
     def test_runner_error_cannot_pass(self):
         self.assertEqual(gate.inventory(report(), 8, registration())["gate_exit"], 1)
