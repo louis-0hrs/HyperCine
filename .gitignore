@@ -93,3 +93,4 @@ Makefile
 !tests/verify_filmscan3_fixtures.cmake
 !tests/verify_oracle_fixtures.cmake
 !tests/verify_benchmark_artifact_contract.cmake
+!tests/verify_benchmark_fail_closed.cmake
