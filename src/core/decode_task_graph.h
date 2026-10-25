@@ -184,9 +184,25 @@ struct TaskSpec {
     // An empty predicate means "no extra boolean contract". It is not permission
     // to complete without a buffer. Tasks with an empty predicate are counted by
     // uncontracted_tasks() so that omission stays visible.
+    //
+    // The only exception is graph-wide and explicit: GraphLimits::
+    // require_published_output == false, for pools that never publish. It cannot
+    // be expressed per task, so a single lax task cannot hide inside a strict graph.
     std::function<bool()> published;
 };
-struct GraphLimits { std::size_t nodes = 4096, edges = 65536; };
+struct GraphLimits {
+    std::size_t nodes = 4096, edges = 65536;
+    // S2 completion rule. Default ON: a task becomes Completed only with a valid
+    // published BufferVersion for this generation. This is the decoder-facing
+    // contract and it stays the default so that omitting it is never silently lax.
+    //
+    // Setting it false is an explicit, per-graph opt-out for callers that use the
+    // graph purely as a worker pool: their callbacks write into storage the caller
+    // already owns and never call publish(). Such a graph then reports
+    // uncontracted_tasks() == nodes, so the omission stays observable. It is NOT a
+    // way to make a decoder graph lax -- a graph that publishes keeps the rule.
+    bool require_published_output = true;
+};
 
 // One immutable graph per unique session/slot/generation. The owner must never
 // reuse a generation and must keep this object and callback storage alive until
@@ -229,6 +245,7 @@ public:
     // Tasks that declared no publication predicate. Immutable after
     // construction, so it is readable at any time without the graph lock.
     std::size_t uncontracted_tasks() const noexcept;
+    bool requires_published_output() const noexcept { return require_published_output_; }
     // Number of Pending -> Ready transitions since construction, including the
     // initial roots. A generation that failed its first error must not gain a
     // single one afterwards; this counter makes that observable instead of
@@ -280,6 +297,8 @@ private:
     std::vector<std::size_t> ready_; // reserved before any callback runs
     std::size_t next_ = 0, running_ = 0, completed_ = 0, ready_transitions_ = 0;
     std::size_t uncontracted_ = 0;
+    // Graph-wide S2 completion rule, captured at construction. Default true.
+    bool require_published_output_ = true;
     GraphError error_ = GraphError::None;
     bool started_ = false, drained_ = true, stop_ = false;
 };

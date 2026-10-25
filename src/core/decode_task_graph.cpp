@@ -65,7 +65,7 @@ GraphError DecodeTaskGraph::validate(const std::vector<TaskSpec>& tasks, GraphPr
 
 DecodeTaskGraph::DecodeTaskGraph(Generation generation, GraphProfile profile,
                                std::vector<TaskSpec> tasks, GraphLimits limits)
-    : generation_(generation) {
+    : generation_(generation), require_published_output_(limits.require_published_output) {
     // Throws before nodes_ is populated: a rejected topology owns no state and
     // starts no thread, so no callback can have run.
     if (validate(tasks, profile, generation, limits) != GraphError::None)
@@ -291,9 +291,10 @@ bool DecodeTaskGraph::complete(Generation generation, std::size_t index, GraphEr
         // Cancellation outranks a missing buffer: the node is Canceled, not a
         // later OutputNotPublished, and its dependents were already stopped.
         nodes_[index].state = TaskState::Canceled;
-    } else if (!published_output(index)) {
+    } else if (require_published_output_ && !published_output(index)) {
         // No valid buffer for this generation. Do not Complete, and do not
         // ready any dependent: fail_locked marks them Failed, never Ready.
+        // The rule is graph-wide and on by default; see GraphLimits.
         fail_locked(GraphError::OutputNotPublished, index);
     } else {
         nodes_[index].state = TaskState::Completed;
