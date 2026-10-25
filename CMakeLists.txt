@@ -296,6 +296,16 @@ if(HYPERCINE_BUILD_STANDALONE)
         endif()
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            # #45: a real 4K FFmpeg gate with its own negative controls. Kept apart
+            # from the 1080p evidence so a 4K claim always has a 4K decode behind it.
+            if(HYPERCINE_ENABLE_METAL)
+                add_test(NAME filmscan3_metal_4k_ffmpeg_gate COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_4k_ffmpeg.py"
+                    --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                    --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                    --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}")
+                set_tests_properties(filmscan3_metal_4k_ffmpeg_gate PROPERTIES TIMEOUT 1800)
+            endif()
             add_test(NAME filmscan3_geometry_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry.py"
                 --encoder $<TARGET_FILE:test_filmscan3_geometry>

@@ -12,8 +12,35 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <limits>
 namespace fs=std::filesystem;
 using namespace hypercine::standalone;
+namespace {
+// Strict WIDTHxHEIGHT. std::stoi stops at the first unparsable character, which
+// would silently accept "3840x2160junk" or " 3840x 2160"; every character must be
+// consumed. Range is checked here so an overflow cannot wrap into a valid value,
+// and the geometry contract is validated before it is ever used.
+int ParseDimension(const std::string& text,const char* what) {
+    if(text.empty())throw std::invalid_argument(std::string("--geometry ")+what+" is missing");
+    for(char c:text)if(c<'0'||c>'9')throw std::invalid_argument(std::string("--geometry ")+what+" must be decimal digits");
+    if(text.size()>9)throw std::invalid_argument(std::string("--geometry ")+what+" is out of range");
+    long long value=0;
+    for(char c:text)value=value*10+(c-'0');
+    if(value<=0||value>std::numeric_limits<int>::max())
+        throw std::invalid_argument(std::string("--geometry ")+what+" is out of range");
+    return static_cast<int>(value);
+}
+FilmScan3Geometry ParseGeometry(const std::string& value) {
+    const auto at=value.find('x');
+    if(at==std::string::npos||value.find('x',at+1)!=std::string::npos)
+        throw std::invalid_argument("--geometry expects exactly WIDTHxHEIGHT");
+    FilmScan3Geometry geometry;
+    geometry.width=ParseDimension(value.substr(0,at),"width");
+    geometry.height=ParseDimension(value.substr(at+1),"height");
+    ValidateFilmScan3Geometry(geometry);
+    return geometry;
+}
+}
 int main(int argc,char** argv) {
     try {
         int begin=1;std::ifstream metadata;bool reference_yuv=false;
@@ -23,14 +50,7 @@ int main(int argc,char** argv) {
             const std::string flag=argv[begin++];
             if(flag=="--reference-yuv")reference_yuv=true;
             else if(flag=="--geometry" && begin<argc) {
-                const std::string value=argv[begin++];
-                const auto at=value.find('x');
-                if(at==std::string::npos)throw std::invalid_argument("--geometry expects WIDTHxHEIGHT");
-                try {
-                    geometry.width=std::stoi(value.substr(0,at));
-                    geometry.height=std::stoi(value.substr(at+1));
-                } catch(const std::exception&) { throw std::invalid_argument("--geometry expects WIDTHxHEIGHT"); }
-                ValidateFilmScan3Geometry(geometry);
+                geometry=ParseGeometry(argv[begin++]);
             }
             else if(flag=="--metadata-binary" && begin<argc) {
                 metadata.open(argv[begin++],std::ios::binary);if(!metadata)throw std::runtime_error("cannot read explicit metadata");
