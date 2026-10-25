@@ -21,12 +21,12 @@ import validate_windows_reference as gate
 from validate_standalone import avi
 
 
-def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None):
+def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None, geometry=(1920, 1080)):
     directory.mkdir(parents=True, exist_ok=True)
     inputs, metadata, expected = [], bytearray(), []
     run_name = 'tier-a-1080' if any('tier-a-1080/' in a['path'] for a in manifest['artifacts']) else 'sequence-1920x1080'
     for frame in manifest['frames']:
-        if (frame['width'], frame['height']) != (1920, 1080):
+        if (frame['width'], frame['height']) != geometry:
             continue
         path = directory/('input_%04d.bgra' % frame['frame_index'])
         gate.checked_input(probe, frame, path)
@@ -40,6 +40,8 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
             for key, size in [('TAG_CLIP_GUID', 16), ('TAG_ENCODE_DATE', 10), ('TAG_ENCODE_TIME', 8), ('TAG_TIMECODE', 11)]:
                 metadata.extend(records[key][:size])
     arguments = [str(encoder)]
+    if geometry != (1920, 1080):
+        arguments += ['--geometry', '%dx%d' % geometry]
     if ffmpeg:
         arguments += ['--reference-yuv']
     if inject:
