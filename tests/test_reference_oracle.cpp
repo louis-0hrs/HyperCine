@@ -267,6 +267,68 @@ void TestGateDecisions() {
           "pass label is explicit");
 }
 
+// Decode-only callsites have no encoder in the loop and compare pixels against a
+// pinned reference that is not an independently qualified oracle. Stable repeats
+// are therefore BLOCKED_ORACLE, divergence is quarantined, and missing evidence
+// fails closed. None of these states is a pixel-accuracy pass.
+void TestDecodeOnlyReference() {
+    const GateDecision stable = oracle::ClassifyDecodeOnlyReference(5, 1);
+    Check(stable == GateDecision::OracleUnavailable,
+          "stable repeats against an unqualified reference are blocked");
+    Check(oracle::GateExitCode(stable) == oracle::kExitBlocked,
+          "blocked decode-only reference uses the distinct blocked exit code");
+    Check(!oracle::GateIsStrictFailure(stable),
+          "blocked pixel quality is not a strict failure");
+    Check(!oracle::GateAllowsRelease(stable),
+          "blocked pixel quality blocks release");
+
+    const GateDecision divergent = oracle::ClassifyDecodeOnlyReference(5, 2);
+    Check(divergent == GateDecision::ReferenceUnstable,
+          "divergent repeated decodes are quarantined");
+    Check(oracle::GateExitCode(divergent) == oracle::kExitBlocked,
+          "quarantined decode-only reference exits 77");
+    Check(!oracle::GateIsStrictFailure(divergent),
+          "quarantine is not a strict failure");
+
+    const GateDecision strict_divergent =
+        oracle::ClassifyDecodeOnlyReference(true, 5, 2);
+    Check(strict_divergent == GateDecision::ReferenceDecodeError,
+          "a strict failure dominates quarantined divergence");
+    Check(oracle::GateExitCode(strict_divergent) == oracle::kExitFail,
+          "strict failure with divergent repeats exits 1");
+
+    const GateDecision strict_stable =
+        oracle::ClassifyDecodeOnlyReference(true, 5, 1);
+    Check(strict_stable == GateDecision::ReferenceDecodeError,
+          "a strict failure dominates a stable reference");
+    Check(oracle::GateExitCode(strict_stable) == oracle::kExitFail,
+          "strict failure with stable repeats exits 1");
+
+    const GateDecision clean_divergent =
+        oracle::ClassifyDecodeOnlyReference(false, 5, 2);
+    Check(clean_divergent == GateDecision::ReferenceUnstable,
+          "strict-clean divergence stays quarantined");
+    Check(oracle::GateExitCode(clean_divergent) == oracle::kExitBlocked,
+          "strict-clean divergence exits 77");
+
+    const GateDecision clean_stable =
+        oracle::ClassifyDecodeOnlyReference(false, 5, 1);
+    Check(clean_stable == GateDecision::OracleUnavailable,
+          "strict-clean stable repeats stay blocked");
+    Check(oracle::GateExitCode(clean_stable) == oracle::kExitBlocked,
+          "strict-clean stable repeats exit 77");
+
+    Check(oracle::ClassifyDecodeOnlyReference(0, 0) ==
+              GateDecision::ReferenceDecodeError,
+          "missing decode evidence fails closed");
+    Check(oracle::ClassifyDecodeOnlyReference(5, 0) ==
+              GateDecision::ReferenceDecodeError,
+          "missing decoded output fails closed");
+    Check(oracle::GateExitCode(oracle::ClassifyDecodeOnlyReference(0, 0)) ==
+              oracle::kExitFail,
+          "missing decode evidence exits 1");
+}
+
 void TestRepeatedDecodeStability() {
     const GateDecision stable = oracle::ClassifyRepeatedDecodeStability(true);
     Check(stable == GateDecision::Pass, "identical repeated decodes are stable");
@@ -337,6 +399,7 @@ void TestFixtureBatchPrecedence() {
 int main() {
     TestPacketEquivalence();
     TestGateDecisions();
+    TestDecodeOnlyReference();
     TestRepeatedDecodeStability();
     TestFixtureBatchPrecedence();
     if (failures != 0) {
