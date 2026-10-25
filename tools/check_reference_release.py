@@ -87,13 +87,42 @@ def _evidence_text(node):
     return "\n".join(part for part in parts if part)
 
 
+# HyperCine's tests fail through `Fail()`: `FAIL: <reason>` on stderr, then
+# exit 1. The diagnostic that ended the run is therefore the last such line;
+# everything printed before it was handled and did not terminate the test.
+FATAL_LINE = re.compile(r'^FAIL: ', re.MULTILINE)
+
+
+def fatal_diagnostic(text):
+    """Return the text of the diagnostic that actually terminated the test.
+
+    Returns None when the output carries no `FAIL:` line. Callers then fall
+    back to the whole text, because a run whose failure is reported through a
+    different channel must not silently lose its classification.
+    """
+    starts = [match.start() for match in FATAL_LINE.finditer(text)]
+    if not starts:
+        return None
+    start = starts[-1]
+    end = text.find('\n', start)
+    return text[start:] if end < 0 else text[start:end]
+
+
 def capacity_bound(text):
-    """Read the exact allocator capacity contract; None if it is absent.
+    """Read the exact allocator capacity contract from the fatal diagnostic.
+
+    The marker is bound to the line that ended the run, not to the whole
+    captured output. A test may print a capacity message and then survive it:
+    on a device where a smaller configuration fits, that message is context,
+    and a later unrelated failure (a coefficient mismatch, say) must not be
+    relabelled as device-capacity-bound. Searching the whole output made those
+    two cases indistinguishable.
 
     A malformed or partial message stays an ordinary strict failure, so an
     unverified device-capacity claim cannot be manufactured from test output.
     """
-    match = CAPACITY_BOUND.search(text)
+    fatal = fatal_diagnostic(text)
+    match = CAPACITY_BOUND.search(text if fatal is None else fatal)
     if match is None:
         return None
     requested, free_bytes, total_bytes, status = match.groups()

@@ -194,6 +194,52 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertEqual(data["gate_exit"], 77)
         self.assertEqual(data["release_gate"], "BLOCKED")
 
+    def test_handled_capacity_message_does_not_relabel_a_later_failure(self):
+        """Mixed output: capacity marker handled, then an unrelated fatal error.
+
+        The allocator diagnostic is printed while a smaller configuration still
+        fits, so the test continues and later fails on something else. Binding
+        the classification to the whole captured output relabelled that second
+        failure as device-capacity-bound and hid its real cause. The contract
+        in docs/validation/ISSUE120_187_RELEASE_GATE_20261020.md says a
+        failure from another subsystem stays STRICT_FAILURE.
+        """
+        mixed = (CAPACITY_FAILED + "\n" +
+                 "FAIL: 8K DeviceInput Consolidated identity verification failed: "
+                 "coefficient mismatch at band 7")
+        data = gate.inventory(report({"test_phase2c": ("run", failure(mixed))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE")
+        self.assertNotIn("capacity", row)
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(row["gate_exit"], 1)
+        self.assertEqual(data["release_gate"], "FAIL")
+
+    def test_capacity_failure_as_the_fatal_line_is_still_classified(self):
+        """Positive control for the binding: the marker as the fatal line counts.
+
+        A test that fails *because* of the allocation prints the diagnostic
+        through Fail(), so the line that ended the run carries the contract.
+        """
+        fatal = "FAIL: 8K DeviceInput Consolidated strict encoder/bitstream " \
+                "gate failed: " + CAPACITY_FAILED.split("FAIL: ", 1)[-1] \
+                if CAPACITY_FAILED.startswith("FAIL: ") else "FAIL: " + CAPACITY_FAILED
+        data = gate.inventory(report({"test_phase2c": ("run", failure(fatal))}),
+                              8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE_CAPACITY_BOUND")
+        self.assertEqual(row["capacity"]["requested_bytes"], 33178624)
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(data["release_gate"], "FAIL")
+
+    def test_output_without_a_fail_line_falls_back_to_whole_text(self):
+        """A run reporting failure through another channel keeps its meaning."""
+        data = gate.inventory(report({"test_phase2c": ("run", failure(CAPACITY_FAILED))}),
+                              8, registration())
+        self.assertEqual(classify(data, "test_phase2c")["classification"],
+                         "STRICT_FAILURE_CAPACITY_BOUND")
+
     def test_partial_capacity_message_stays_strict_failure(self):
         for text in ("UNSUPPORTED_RESOURCE_BOUND: workspace allocation failed",
                      "UNSUPPORTED_RESOURCE_BOUND: workspace allocation failed: "
