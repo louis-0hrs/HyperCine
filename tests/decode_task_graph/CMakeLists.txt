@@ -5,6 +5,12 @@ target_compile_features(hypercine_decode_task_graph PUBLIC cxx_std_17)
 set_target_properties(hypercine_decode_task_graph PROPERTIES CXX_EXTENSIONS OFF)
 target_include_directories(hypercine_decode_task_graph PUBLIC ../../src/core)
 target_link_libraries(hypercine_decode_task_graph PUBLIC Threads::Threads)
+# Fault-injection seam used only by the T1/T2 gate below (see decode_task_graph.h).
+# It is a compile-time switch: a build without this definition has no seam.
+if(HYPERCINE_BUILD_TESTS)
+    target_compile_definitions(hypercine_decode_task_graph PRIVATE
+        HYPERCINE_DECODE_TASK_GRAPH_TEST_HOOK=1)
+endif()
 if(HYPERCINE_BUILD_TESTS)
     enable_testing()
     add_executable(test_decode_task_graph ../test_decode_task_graph.cpp)
@@ -32,5 +38,21 @@ if(HYPERCINE_BUILD_TESTS)
         set_tests_properties(scheduler_contract_195_workers_${workers} PROPERTIES
             TIMEOUT 120
             PASS_REGULAR_EXPRESSION "SCHEDULER-CONTRACT PASS")
+    endforeach()
+
+    # T1/T2 gate for issues #144 and #195: topology rejected before the first
+    # worker, versioned publication with release/acquire, bounded consumer wait
+    # and a write-once error slot. A rule that does not hold exits non-zero.
+    add_executable(test_scheduler_t1_t2_144 test_scheduler_t1_t2_144.cpp)
+    target_link_libraries(test_scheduler_t1_t2_144 PRIVATE hypercine_decode_task_graph)
+    # Same macro as the library, so the test sees set_publish_seam().
+    target_compile_definitions(test_scheduler_t1_t2_144 PRIVATE
+        HYPERCINE_DECODE_TASK_GRAPH_TEST_HOOK=1)
+    foreach(workers 1 2 4 16)
+        add_test(NAME scheduler_t1_t2_144_workers_${workers}
+                 COMMAND test_scheduler_t1_t2_144 ${workers})
+        set_tests_properties(scheduler_t1_t2_144_workers_${workers} PROPERTIES
+            TIMEOUT 120
+            PASS_REGULAR_EXPRESSION "SCHEDULER-T1T2 PASS")
     endforeach()
 endif()
