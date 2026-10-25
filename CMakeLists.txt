@@ -24,6 +24,32 @@ option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
 option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
 
+# Configure CUDA before the standalone early-return path. The standalone
+# FilmScan3 target below deliberately uses only HyperCine's SDK-free scalar
+# frontend/writer and CUDA wavelet sources; it never links the GoPro wrapper.
+if(HYPERCINE_ENABLE_CUDA)
+    include(CheckLanguage)
+    check_language(CUDA)
+    if(NOT CMAKE_CUDA_COMPILER AND DEFINED ENV{CUDA_PATH})
+        if(EXISTS "$ENV{CUDA_PATH}/bin/nvcc.exe")
+            set(CMAKE_CUDA_COMPILER "$ENV{CUDA_PATH}/bin/nvcc.exe" CACHE FILEPATH "CUDA compiler" FORCE)
+        elseif(EXISTS "$ENV{CUDA_PATH}/bin/nvcc")
+            set(CMAKE_CUDA_COMPILER "$ENV{CUDA_PATH}/bin/nvcc" CACHE FILEPATH "CUDA compiler" FORCE)
+        endif()
+    endif()
+    if(CMAKE_CUDA_COMPILER)
+        if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
+            set(CMAKE_CUDA_ARCHITECTURES native CACHE STRING "Target CUDA architectures" FORCE)
+        endif()
+        enable_language(CUDA)
+        set(CMAKE_CUDA_STANDARD 17)
+        set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+        message(STATUS "CUDA enabled. Compiler: ${CMAKE_CUDA_COMPILER} (Version: ${CMAKE_CUDA_COMPILER_VERSION}, Architectures: ${CMAKE_CUDA_ARCHITECTURES})")
+    else()
+        message(FATAL_ERROR "HYPERCINE_ENABLE_CUDA is ON, but no CUDA compiler was detected on this system.")
+    endif()
+endif()
+
 # SDK-free Python contracts, registered by both the regular test tree and the
 # standalone build, which returns before add_subdirectory(tests). Kept in one
 # function so the two build modes cannot drift apart.
@@ -115,8 +141,8 @@ if(HYPERCINE_ENABLE_VULKAN AND NOT HYPERCINE_BUILD_STANDALONE)
 endif()
 if(HYPERCINE_BUILD_STANDALONE)
     cmake_minimum_required(VERSION 3.25)
-    if(HYPERCINE_BUILD_UPSTREAM OR HYPERCINE_ENABLE_CUDA)
-        message(FATAL_ERROR "Standalone requires HYPERCINE_BUILD_UPSTREAM=OFF and HYPERCINE_ENABLE_CUDA=OFF")
+    if(HYPERCINE_BUILD_UPSTREAM)
+        message(FATAL_ERROR "Standalone requires HYPERCINE_BUILD_UPSTREAM=OFF")
     endif()
     add_library(hypercine_standalone STATIC
         src/cpu/wavelet_cpu.cpp
@@ -126,6 +152,23 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/core/filmscan3_encoder.cpp
         src/core/filmscan3_backend.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    if(HYPERCINE_ENABLE_CUDA)
+        find_package(CUDAToolkit REQUIRED)
+        target_sources(hypercine_standalone PRIVATE
+            src/cuda/wavelet_cuda_reference.cu
+            src/cuda/wavelet_cuda_optimized.cu
+            src/cuda/wavelet_cuda_api.cu
+            src/cuda/filmscan3_cuda_frontend.cpp)
+        target_include_directories(hypercine_standalone PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+            ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+        target_compile_definitions(hypercine_standalone PRIVATE HYPERCINE_CUDA_AVAILABLE=1)
+        target_link_libraries(hypercine_standalone PUBLIC CUDA::cudart)
+        set_target_properties(hypercine_standalone PROPERTIES
+            CUDA_STANDARD 17
+            CUDA_STANDARD_REQUIRED ON
+            CUDA_SEPARABLE_COMPILATION OFF)
+    endif()
     if(HYPERCINE_ENABLE_VULKAN)
         # Vulkan is loaded through dlopen at runtime, so only the headers are a
         # build dependency; VK_NO_PROTOTYPES removes every link-time symbol.
@@ -215,6 +258,27 @@ if(HYPERCINE_BUILD_STANDALONE)
                 LABELS "vulkan;gpu-required"
                 SKIP_RETURN_CODE 77)
         endif()
+        if(HYPERCINE_ENABLE_CUDA)
+            add_executable(hypercine_cuda_frontend_compare tools/hypercine_cuda_frontend_compare.cpp)
+            target_include_directories(hypercine_cuda_frontend_compare PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/core")
+            string(REPLACE ";" "," HYPERCINE_CUDA_ARCHITECTURES_REPORT "${CMAKE_CUDA_ARCHITECTURES}")
+            target_compile_definitions(hypercine_cuda_frontend_compare PRIVATE
+                HYPERCINE_CUDA_ARCHITECTURES_STRING="${HYPERCINE_CUDA_ARCHITECTURES_REPORT}")
+            target_link_libraries(hypercine_cuda_frontend_compare PRIVATE hypercine_standalone CUDA::cudart)
+            add_test(NAME cuda_filmscan3_complete_packet COMMAND hypercine_cuda_frontend_compare
+                --output-dir "${CMAKE_CURRENT_BINARY_DIR}/cuda-filmscan3")
+            set_tests_properties(cuda_filmscan3_complete_packet PROPERTIES
+                LABELS "cuda;gpu-required" SKIP_RETURN_CODE 77 TIMEOUT 300)
+            add_test(NAME cuda_filmscan3_negative_skip_kernel COMMAND hypercine_cuda_frontend_compare
+                --negative-control skip-kernel)
+            set_tests_properties(cuda_filmscan3_negative_skip_kernel PROPERTIES
+                LABELS "cuda;negative-control" WILL_FAIL TRUE SKIP_RETURN_CODE 77 TIMEOUT 300)
+            add_test(NAME cuda_filmscan3_negative_altered_output COMMAND hypercine_cuda_frontend_compare
+                --negative-control alter-output)
+            set_tests_properties(cuda_filmscan3_negative_altered_output PROPERTIES
+                LABELS "cuda;negative-control" WILL_FAIL TRUE SKIP_RETURN_CODE 77 TIMEOUT 300)
+        endif()
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_api COMMAND test_filmscan3)
@@ -290,6 +354,15 @@ if(HYPERCINE_BUILD_STANDALONE)
         endif()
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            if(HYPERCINE_ENABLE_CUDA)
+                add_test(NAME cuda_filmscan3_ffmpeg_decode COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3.py"
+                    --compare $<TARGET_FILE:hypercine_cuda_frontend_compare>
+                    --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                    --output-dir "${CMAKE_CURRENT_BINARY_DIR}/cuda-filmscan3-ffmpeg")
+                set_tests_properties(cuda_filmscan3_ffmpeg_decode PROPERTIES
+                    LABELS "cuda;gpu-required;external-decode" SKIP_RETURN_CODE 77 TIMEOUT 300)
+            endif()
             add_test(NAME filmscan3_geometry_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry.py"
                 --encoder $<TARGET_FILE:test_filmscan3_geometry>
@@ -372,29 +445,6 @@ if(HYPERCINE_BUILD_STANDALONE)
         endforeach()
     endif()
     return()
-endif()
-
-if(HYPERCINE_ENABLE_CUDA)
-    include(CheckLanguage)
-    check_language(CUDA)
-    if(NOT CMAKE_CUDA_COMPILER AND DEFINED ENV{CUDA_PATH})
-        if(EXISTS "$ENV{CUDA_PATH}/bin/nvcc.exe")
-            set(CMAKE_CUDA_COMPILER "$ENV{CUDA_PATH}/bin/nvcc.exe" CACHE FILEPATH "CUDA compiler" FORCE)
-        elseif(EXISTS "$ENV{CUDA_PATH}/bin/nvcc")
-            set(CMAKE_CUDA_COMPILER "$ENV{CUDA_PATH}/bin/nvcc" CACHE FILEPATH "CUDA compiler" FORCE)
-        endif()
-    endif()
-    if(CMAKE_CUDA_COMPILER)
-        if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
-            set(CMAKE_CUDA_ARCHITECTURES native CACHE STRING "Target CUDA architectures" FORCE)
-        endif()
-        enable_language(CUDA)
-        set(CMAKE_CUDA_STANDARD 17)
-        set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-        message(STATUS "CUDA enabled. Compiler: ${CMAKE_CUDA_COMPILER} (Version: ${CMAKE_CUDA_COMPILER_VERSION}, Architectures: ${CMAKE_CUDA_ARCHITECTURES})")
-    else()
-        message(FATAL_ERROR "HYPERCINE_ENABLE_CUDA is ON, but no CUDA compiler was detected on this system.")
-    endif()
 endif()
 
 # Configure build settings for MSVC
