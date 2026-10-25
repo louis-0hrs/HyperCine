@@ -96,9 +96,11 @@ FATAL_LINE = re.compile(r'^FAIL: ', re.MULTILINE)
 def fatal_diagnostic(text):
     """Return the text of the diagnostic that actually terminated the test.
 
-    Returns None when the output carries no `FAIL:` line. Callers then fall
-    back to the whole text, because a run whose failure is reported through a
-    different channel must not silently lose its classification.
+    Returns None when the output carries no `FAIL:` line. Callers must treat
+    None as "no attributable terminal diagnostic" and fall back to the plain
+    strict classification -- never to the whole captured output. A testcase
+    that printed a handled capacity marker and then died through <error> or a
+    separate channel would otherwise be relabelled from unrelated text.
     """
     starts = [match.start() for match in FATAL_LINE.finditer(text)]
     if not starts:
@@ -120,9 +122,18 @@ def capacity_bound(text):
 
     A malformed or partial message stays an ordinary strict failure, so an
     unverified device-capacity claim cannot be manufactured from test output.
+
+    With no terminal `FAIL:` line there is no attributable diagnostic at all,
+    so the strict classification is kept and the capacity marker is not read.
+    Searching the whole output in that case was the remaining hole: a testcase
+    that printed a handled capacity line and then aborted through <error> was
+    still labelled device-capacity-bound even though nothing bound the marker
+    to the failure.
     """
     fatal = fatal_diagnostic(text)
-    match = CAPACITY_BOUND.search(text if fatal is None else fatal)
+    if fatal is None:
+        return None
+    match = CAPACITY_BOUND.search(fatal)
     if match is None:
         return None
     requested, free_bytes, total_bytes, status = match.groups()

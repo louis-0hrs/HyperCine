@@ -175,8 +175,16 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertEqual(data["gate_exit"], 1)
 
     def test_capacity_message_without_device_query_is_classified(self):
-        data = gate.inventory(report({"test_phase2c": ("run", failure(CAPACITY_NO_QUERY))}),
-                              8, registration())
+        """The device-query-failed variant is still an attributable cause.
+
+        The fixture carries the `FAIL: ` prefix because that is what
+        `test_entropy_capacity.cpp` actually emits -- its `Fail()` writes
+        `FAIL: <message>`. Without the prefix this would exercise the
+        no-terminal-diagnostic path instead of the variant under test.
+        """
+        data = gate.inventory(
+            report({"test_phase2c": ("run", failure("FAIL: " + CAPACITY_NO_QUERY))}),
+            8, registration())
         row = classify(data, "test_phase2c")
         self.assertEqual(row["classification"], "STRICT_FAILURE_CAPACITY_BOUND")
         self.assertIsNone(row["capacity"]["free_bytes"])
@@ -233,12 +241,43 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertEqual(row["state"], "FAIL")
         self.assertEqual(data["release_gate"], "FAIL")
 
-    def test_output_without_a_fail_line_falls_back_to_whole_text(self):
-        """A run reporting failure through another channel keeps its meaning."""
-        data = gate.inventory(report({"test_phase2c": ("run", failure(CAPACITY_FAILED))}),
+    def test_capacity_marker_without_a_fail_line_stays_strict_failure(self):
+        """No terminal `FAIL:` line means no attributable cause, so no relabel.
+
+        The fixture deliberately carries the marker but no `FAIL: ` prefix. The
+        earlier version passed `CAPACITY_FAILED`, which starts with `FAIL: ` and
+        therefore never reached the no-diagnostic path at all -- the test named
+        a fallback it did not exercise.
+        """
+        marker_only = (CAPACITY_FAILED.split("FAIL: ", 1)[1]
+                       if CAPACITY_FAILED.startswith("FAIL: ") else CAPACITY_FAILED)
+        self.assertNotIn("FAIL: ", marker_only)
+        data = gate.inventory(report({"test_phase2c": ("run", failure(marker_only))}),
                               8, registration())
-        self.assertEqual(classify(data, "test_phase2c")["classification"],
-                         "STRICT_FAILURE_CAPACITY_BOUND")
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE")
+        self.assertNotIn("capacity", row)
+        self.assertEqual(row["state"], "FAIL")
+        self.assertEqual(data["release_gate"], "FAIL")
+        self.assertEqual(data["gate_exit"], 1)
+
+    def test_handled_capacity_marker_then_error_stays_strict_failure(self):
+        """A marker printed before an unrelated abort must not become the cause.
+
+        This is the closure case: the test printed a capacity line it survived,
+        then died through <error>. `FAIL:` never appears, so nothing binds the
+        marker to the failure and the strict classification must survive.
+        """
+        text = CAPACITY_FAILED.split("FAIL: ", 1)[1]
+        data = gate.inventory(
+            report({"test_phase2c": ("error",
+                                     "<error>coefficient mismatch</error>"
+                                     "<system-out>" + text + "</system-out>")}),
+            8, registration())
+        row = classify(data, "test_phase2c")
+        self.assertEqual(row["classification"], "STRICT_FAILURE")
+        self.assertNotIn("capacity", row)
+        self.assertEqual(data["gate_exit"], 1)
 
     def test_partial_capacity_message_stays_strict_failure(self):
         for text in ("UNSUPPORTED_RESOURCE_BOUND: workspace allocation failed",
