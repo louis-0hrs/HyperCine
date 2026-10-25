@@ -200,6 +200,12 @@ if(HYPERCINE_BUILD_STANDALONE)
             target_link_libraries(test_metal_filmscan3 PRIVATE hypercine_standalone)
             add_test(NAME filmscan3_metal_required COMMAND test_metal_filmscan3)
             set_tests_properties(filmscan3_metal_required PROPERTIES LABELS "metal;gpu-required")
+            # #45: a complete 4K CFHD encoder on Metal. A GPU-wavelet PASS alone is
+            # not sufficient, so this compares whole samples and every hash.
+            add_executable(test_metal_filmscan3_4k tests/test_metal_filmscan3_4k.cpp)
+            target_link_libraries(test_metal_filmscan3_4k PRIVATE hypercine_standalone)
+            add_test(NAME filmscan3_metal_4k_encoder COMMAND test_metal_filmscan3_4k)
+            set_tests_properties(filmscan3_metal_4k_encoder PROPERTIES LABELS "metal;gpu-required" TIMEOUT 1800)
             # Same host tool/writer, with mandatory Metal and per-stage scalar audit.
             add_executable(hypercine_encode_filmscan3_metal tools/hypercine_encode_filmscan3.cpp)
             target_compile_definitions(hypercine_encode_filmscan3_metal PRIVATE HYPERCINE_METAL_AUDIT=1)
@@ -290,6 +296,16 @@ if(HYPERCINE_BUILD_STANDALONE)
         endif()
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            # #45: a real 4K FFmpeg gate with its own negative controls. Kept apart
+            # from the 1080p evidence so a 4K claim always has a 4K decode behind it.
+            if(HYPERCINE_ENABLE_METAL)
+                add_test(NAME filmscan3_metal_4k_ffmpeg_gate COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_4k_ffmpeg.py"
+                    --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                    --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                    --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}")
+                set_tests_properties(filmscan3_metal_4k_ffmpeg_gate PROPERTIES TIMEOUT 1800)
+            endif()
             add_test(NAME filmscan3_geometry_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry.py"
                 --encoder $<TARGET_FILE:test_filmscan3_geometry>
