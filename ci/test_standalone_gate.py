@@ -45,6 +45,17 @@ class StandaloneGateTests(unittest.TestCase):
             with self.subTest(missing=missing), self.assertRaises(ValueError):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
 
+    def test_each_shared_contract_registration_is_mandatory(self):
+        # These four are registered through hypercine_register_sdk_free_contracts()
+        # or the merged P4 geometry block; dropping any single registration must
+        # fail the gate, not shrink it back to the old green inventory.
+        for missing in ('test_reference_release_inventory', 'test_compare_sdk_oracle',
+                        'test_rca159_witness_contract',
+                        'filmscan3_geometry_reference_p10'):
+            self.assertIn(missing, REQUIRED)
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
+
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.xml'
