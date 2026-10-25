@@ -200,6 +200,12 @@ if(HYPERCINE_BUILD_STANDALONE)
             target_link_libraries(test_metal_filmscan3 PRIVATE hypercine_standalone)
             add_test(NAME filmscan3_metal_required COMMAND test_metal_filmscan3)
             set_tests_properties(filmscan3_metal_required PROPERTIES LABELS "metal;gpu-required")
+            # #45: a complete 4K CFHD encoder on Metal. A GPU-wavelet PASS alone is
+            # not sufficient, so this compares whole samples and every hash.
+            add_executable(test_metal_filmscan3_4k tests/test_metal_filmscan3_4k.cpp)
+            target_link_libraries(test_metal_filmscan3_4k PRIVATE hypercine_standalone)
+            add_test(NAME filmscan3_metal_4k_encoder COMMAND test_metal_filmscan3_4k)
+            set_tests_properties(filmscan3_metal_4k_encoder PROPERTIES LABELS "metal;gpu-required" TIMEOUT 1800)
             # Same host tool/writer, with mandatory Metal and per-stage scalar audit.
             add_executable(hypercine_encode_filmscan3_metal tools/hypercine_encode_filmscan3.cpp)
             target_compile_definitions(hypercine_encode_filmscan3_metal PRIVATE HYPERCINE_METAL_AUDIT=1)
