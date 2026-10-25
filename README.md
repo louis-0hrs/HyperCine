@@ -79,6 +79,32 @@ cmake --build build-cpu --config Release
 ctest --test-dir build-cpu -C Release --output-on-failure
 ```
 
+### Reduced configuration without the original SDK
+
+`-DHYPERCINE_BUILD_UPSTREAM=OFF` is a legitimate configuration, but it is **not** a
+way to get the full reference suite: the targets that link the frozen
+`CFHDCodecStatic` archive cannot exist. Configure now reports the omission by
+name instead of leaving it to a link error, and the remaining SDK-free tests
+still run ([#253](https://github.com/louis-0hrs/HyperCine/issues/253)):
+
+```sh
+cmake -S . -B build-noupstream -DCMAKE_BUILD_TYPE=Release \
+  -DHYPERCINE_BUILD_UPSTREAM=OFF -DHYPERCINE_BUILD_STANDALONE=OFF \
+  -DHYPERCINE_BUILD_TESTS=ON
+cmake --build build-noupstream --parallel
+ctest --test-dir build-noupstream --output-on-failure
+```
+
+A test count from this configuration is a **subset**, never a full-suite figure.
+For the complete reference suite use the CPU-only build above.
+
+`-DHYPERCINE_ENABLE_CUDA=ON` together with `-DHYPERCINE_BUILD_UPSTREAM=OFF` is
+still not a working pairing, and for a different reason: the CUDA
+`hypercine_wavelet` sources call the frozen `CFHD_*` encoder entry points, so an
+executable that links that archive fails with unresolved `CFHD_*` symbols even
+though no target names it. Only `hypercine_m4_resolution_probe` reaches that
+state today. That is a separate follow-up, not a guard gap.
+
 ### NVIDIA CUDA release build
 
 Choose `CMAKE_CUDA_ARCHITECTURES` for the installed GPU (`89` for Ada Lovelace, `86` for Ampere).

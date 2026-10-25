@@ -9,11 +9,24 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/DecoderSDK
 )
 
-add_executable(benchmark_codec
-    benchmark_codec.cpp
-)
+# Record the real compiler that built this binary instead of a hardcoded
+# toolchain string, so Linux/macOS runs report truthful metadata.
+function(hypercine_bench_compiler_metadata target)
+    target_compile_definitions(${target} PRIVATE
+        HYPERCINE_BENCH_COMPILER="${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
+        HYPERCINE_BENCH_BUILD_TYPE="$<CONFIG>")
+endfunction()
 
-target_link_libraries(benchmark_codec PRIVATE CFHDCodecStatic)
+# Issue #253: benchmark_codec links the frozen CFHDCodecStatic archive, which
+# only the upstream build defines. Guarded so -DHYPERCINE_BUILD_UPSTREAM=OFF
+# reports the omission at configure time instead of emitting
+# `cannot find -lCFHDCodecStatic` from the linker.
+if(TARGET CFHDCodecStatic)
+    add_executable(benchmark_codec
+        benchmark_codec.cpp
+    )
+
+    target_link_libraries(benchmark_codec PRIVATE CFHDCodecStatic)
 
 # The directory-level include_directories() above injects upstream/Codec, whose
 # cpuid.h claims the same _CPUID_H guard as the toolchain header. benchmark_codec
@@ -30,20 +43,18 @@ set_property(TARGET benchmark_codec PROPERTY INCLUDE_DIRECTORIES
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/upstream/Common)
 
-# Record the real compiler that built this binary instead of a hardcoded
-# toolchain string, so Linux/macOS runs report truthful metadata.
-function(hypercine_bench_compiler_metadata target)
-    target_compile_definitions(${target} PRIVATE
-        HYPERCINE_BENCH_COMPILER="${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
-        HYPERCINE_BENCH_BUILD_TYPE="$<CONFIG>")
-endfunction()
 hypercine_bench_compiler_metadata(benchmark_codec)
 
 if(WIN32)
     target_link_libraries(benchmark_codec PRIVATE psapi)
 endif()
+else()
+    message(STATUS
+        "HYPERCINE_BUILD_UPSTREAM=OFF: benchmark_codec is unavailable and was not "
+        "registered (it links the frozen CFHDCodecStatic archive).")
+endif()
 
-if(HYPERCINE_ENABLE_CUDA)
+if(HYPERCINE_ENABLE_CUDA AND TARGET CFHDCodecStatic)
     add_executable(benchmark_wavelet
         benchmark_wavelet.cpp
     )
@@ -121,6 +132,10 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(benchmark_phase3a PRIVATE psapi)
         target_link_libraries(benchmark_phase3a1 PRIVATE psapi)
     endif()
+elseif(HYPERCINE_ENABLE_CUDA)
+    message(STATUS
+        "HYPERCINE_BUILD_UPSTREAM=OFF: the CUDA benchmarks are unavailable and were "
+        "not registered (they link the frozen CFHDCodecStatic archive).")
 endif()
 
 if(TARGET CFHDCodecThreaded)
@@ -139,7 +154,7 @@ endif()
 # artifact was not written. Registered here, after the target exists; the
 # tests/ directory is configured before benchmarks/, so the guard cannot live
 # there. Skipped when tests are disabled.
-if(HYPERCINE_BUILD_TESTS)
+if(HYPERCINE_BUILD_TESTS AND TARGET benchmark_codec)
     add_test(NAME benchmark_artifact_contract
         COMMAND "${CMAKE_COMMAND}"
             "-DBENCH=$<TARGET_FILE:benchmark_codec>"
