@@ -11,6 +11,7 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 
 extern "C" {
@@ -46,6 +47,7 @@ extern "C" {
 #include <sstream>
 #include <string>
 #include <vector>
+#include "bench_host.h"
 
 namespace {
 
@@ -235,7 +237,11 @@ void WriteRunJson(std::ostringstream& json, const char* label, const hypercine::
 
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+    const std::filesystem::path out_path =
+        (argc > 1 && argv[1] != nullptr && argv[1][0] != '-')
+            ? std::filesystem::path(argv[1])
+            : (std::filesystem::path("benchmarks") / "results" / "phase2d.json");
     std::cout << std::fixed << std::setprecision(2);
     HyperCineDeviceLink link{};
     if (HyperCine_QueryDeviceLink(&link) != 0) {
@@ -691,13 +697,9 @@ int main() {
     json << "  ]\n";
     json << "}\n";
 
-    std::filesystem::path out_path = std::filesystem::path("benchmarks") / "results" / "phase2d.json";
-    std::error_code ec;
-    std::filesystem::create_directories(out_path.parent_path(), ec);
-    std::ofstream out(out_path, std::ios::binary);
-    if (out) {
-        out << json.str();
-        std::cout << "Wrote JSON results to " << out_path.string() << "\n";
+    if (!hypercine::bench::WriteCompleteFile(out_path, json.str())) {
+        return 1;
     }
+    std::cout << "Wrote JSON results to " << out_path.string() << "\n";
     return 0;
 }

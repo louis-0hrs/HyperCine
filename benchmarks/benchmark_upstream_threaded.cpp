@@ -8,6 +8,7 @@
 #endif
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 #include "hypercine/canonical.h"
 
@@ -18,6 +19,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include "bench_host.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -60,6 +62,12 @@ int main(int argc, char** argv) {
         : "benchmarks/results/upstream_threaded.json";
     const int idle_threads = CountThreads();
     std::cout << "UPSTREAM_THREADED linked library idle threads " << idle_threads << "\n";
+    if (!hypercine::bench::OutputTargetAllowsWrite(path)) {
+        return 1;
+    }
+    if (!hypercine::bench::CreateParentDirectory(path)) {
+        return 1;
+    }
     std::ofstream out(path, std::ios::binary);
     if (!out) {
         std::cerr << "cannot write " << path << "\n";
@@ -133,6 +141,14 @@ int main(int argc, char** argv) {
         if (!encode_ok) rc = 1;
     }
     out << "\n  ]\n}\n";
+    out.close();
+    if (!out) {
+        std::cerr << "cannot finish write " << path << "\n";
+        return 1;
+    }
+    if (!hypercine::bench::OutputTargetIsRegularFile(path)) {
+        return 1;
+    }
     std::cout << "Wrote " << path << "\n";
     return rc;
 }

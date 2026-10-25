@@ -87,6 +87,47 @@ inline GateDecision ClassifyReferenceGate(const ReferenceGateInputs& inputs) {
     return GateDecision::Pass;
 }
 
+// A decode-only callsite has no encoder in the loop. Its strict signals (fixture
+// storage/read, decoder API status, geometry, pitch, non-zero output) stay fatal
+// and are enforced by the caller. A decoded-pixel comparison against a pinned
+// reference may be measured and recorded, but until that reference is an
+// independently qualified oracle it can only be BLOCKED_ORACLE. Independent
+// decodes of the same immutable packet that disagree are the quarantined
+// reference state. Neither outcome may become a pixel-accuracy pass or a stable
+// quality failure.
+inline GateDecision ClassifyDecodeOnlyReference(
+    std::size_t observed_decodes,
+    std::size_t distinct_decoded_outputs) {
+    if (observed_decodes == 0 || distinct_decoded_outputs == 0) {
+        return GateDecision::ReferenceDecodeError;
+    }
+    if (distinct_decoded_outputs > 1) return GateDecision::ReferenceUnstable;
+    return GateDecision::OracleUnavailable;
+}
+
+// The caller owns the strict signals. This overload makes their precedence
+// explicit and testable: a strict failure is REFERENCE_DECODE_ERROR even when
+// repeats also disagreed, so a quarantined pixel observation can never hide a
+// fixture, decoder, geometry, pitch or output failure.
+inline GateDecision ClassifyDecodeOnlyReference(
+    bool strict_failure,
+    std::size_t observed_decodes,
+    std::size_t distinct_decoded_outputs) {
+    if (strict_failure) return GateDecision::ReferenceDecodeError;
+    return ClassifyDecodeOnlyReference(observed_decodes, distinct_decoded_outputs);
+}
+
+// Decode-only callsites have no encoder in the loop and no quality oracle, so
+// they cannot claim pixel accuracy. Their only qualified signal is whether
+// independent decodes of the same immutable packet agree. Pass here means
+// "stable across repeats", never "pixels are correct"; divergence is the
+// quarantined reference state, not a failure of the code under test.
+inline GateDecision ClassifyRepeatedDecodeStability(bool outputs_identical) {
+    return outputs_identical ? GateDecision::Pass
+                             : GateDecision::ReferenceUnstable;
+}
+
+
 inline const char* GateDecisionName(GateDecision decision) {
     switch (decision) {
     case GateDecision::Pass: return "PASS";
@@ -115,6 +156,31 @@ inline bool GateIsStrictFailure(GateDecision decision) {
     return decision == GateDecision::EncoderBitstreamMismatch ||
            decision == GateDecision::ReferenceDecodeError ||
            decision == GateDecision::QualityFailureStable;
+}
+
+// Aggregate the ordered per-fixture outcomes of a decode-only batch. Each
+// fixture's strict storage/decode/geometry/pitch/output checks must already
+// have run before its outcome is appended; an unstable fixture must never
+// short-circuit the batch, because that would hide a strict failure of a later
+// fixture behind the quarantine. Strict decisions therefore dominate, and a
+// batch is only blocked when every fixture was strict-clean and at least one
+// repeated decode diverged.
+inline GateDecision ClassifyFixtureBatch(
+    const std::vector<GateDecision>& fixtures) {
+    if (fixtures.empty()) return GateDecision::ReferenceDecodeError;
+    bool saw_unstable = false;
+    bool saw_blocked = false;
+    for (GateDecision decision : fixtures) {
+        if (GateIsStrictFailure(decision)) return decision;
+        if (decision == GateDecision::ReferenceUnstable) {
+            saw_unstable = true;
+        } else if (decision != GateDecision::Pass) {
+            saw_blocked = true;
+        }
+    }
+    if (saw_unstable) return GateDecision::ReferenceUnstable;
+    if (saw_blocked) return GateDecision::OracleUnavailable;
+    return GateDecision::Pass;
 }
 
 inline bool GateAllowsRelease(GateDecision decision) {
