@@ -49,6 +49,9 @@ std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry);
 enum class CudaTestMode { Normal, SkipKernel, AlterOutput };
 std::shared_ptr<Frontend> CudaFrontend(FilmScan3Geometry, CudaTestMode = CudaTestMode::Normal);
 std::shared_ptr<Frontend> MetalFrontend(); // throws if disabled/device/pipeline unavailable
+// Geometry-carrying Metal frontend. Same failure contract: it throws rather than
+// degrading, so an explicitly requested Metal backend cannot silently become CPU.
+std::shared_ptr<Frontend> MetalFrontend(FilmScan3Geometry);
 MetalTiming ReadMetalTiming(const Frontend&);
 // One-shot deterministic failure *after real GPU completion*, before readback.
 // This tests state rollback/reuse without submitting unsafe commands to the GPU.
@@ -56,6 +59,9 @@ void FailNextMetalCompletion(Frontend&);
 // Failure injection for deterministic fallback tests; no process-global switch.
 using MetalFactory = std::shared_ptr<Frontend>(*)();
 std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend, MetalFactory = MetalFrontend);
+// Geometry-aware selection. MetalOrCpu keeps the requested geometry in its CPU
+// fallback instead of reverting to the 1080p default.
+std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend, FilmScan3Geometry);
 struct FrontendAccess {
     static void Use(FilmScan3Encoder& encoder, std::shared_ptr<Frontend> frontend) {
         if (!frontend) throw std::invalid_argument("null FilmScan3 frontend");

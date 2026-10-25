@@ -38,6 +38,18 @@ std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry geometry) {
     ValidateFilmScan3Geometry(geometry);
     return std::make_shared<Cpu>(geometry);
 }
+std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend backend, FilmScan3Geometry geometry) {
+    ValidateFilmScan3Geometry(geometry);
+    switch(backend) {
+        case FilmScan3Backend::Cpu: return CpuFrontend(geometry);
+        // Explicit Metal must not silently degrade: MetalFrontend throws.
+        case FilmScan3Backend::Metal: return MetalFrontend(geometry);
+        case FilmScan3Backend::MetalOrCpu:
+            try { return MetalFrontend(geometry); }
+            catch(const std::runtime_error&) { return CpuFrontend(geometry); }
+    }
+    throw std::invalid_argument("invalid FilmScan3 backend");
+}
 std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend backend, MetalFactory factory) {
     switch(backend) {
         case FilmScan3Backend::Cpu: return CpuFrontend();
@@ -49,6 +61,7 @@ std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend backend, MetalFactory 
 }
 #ifndef HYPERCINE_METAL_AVAILABLE
 std::shared_ptr<Frontend> MetalFrontend() { throw std::runtime_error("Metal backend not built"); }
+std::shared_ptr<Frontend> MetalFrontend(FilmScan3Geometry) { throw std::runtime_error("Metal backend not built"); }
 MetalTiming ReadMetalTiming(const Frontend&) { throw std::runtime_error("Metal backend not built"); }
 void FailNextMetalCompletion(Frontend&) { throw std::runtime_error("Metal backend not built"); }
 #endif

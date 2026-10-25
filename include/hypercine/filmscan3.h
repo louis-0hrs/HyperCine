@@ -52,6 +52,10 @@ public:
     FilmScan3Encoder() = default; // scalar CPU remains the default
     explicit FilmScan3Encoder(FilmScan3Backend backend);
     explicit FilmScan3Encoder(FilmScan3Geometry geometry); // CPU only
+    // Explicit backend *and* geometry. An explicitly requested Metal backend is
+    // not allowed to fall back to CPU; only MetalOrCpu may, and only during
+    // initialization, in which case the CPU fallback keeps this geometry.
+    FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry);
     FilmScan3Geometry geometry() const noexcept;
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
