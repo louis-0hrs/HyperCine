@@ -45,12 +45,21 @@ struct TaskKey {
 
 // One immutable, published version of one task output.
 //   version == 0  : nothing has been published for that task in this generation.
+//                   A rejected publish is included: a null address or a
+//                   zero-length span never advances the version.
 //   version >= 1  : data/bytes describe the payload of that version and are
 //                   valid for reading. The version is only ever produced by
 //                   DecodeTaskGraph::publish(), whose release-store orders the
 //                   producer's payload stores before the consumer's acquire.
 // A BufferVersion carries the generation it was published for; a consumer must
 // compare `generation` against its own graph generation before reading.
+//
+// Precedence (fail-closed). A non-zero version is not admission. Once the graph
+// has been stopped or a GraphError has been recorded, that decision outranks an
+// already published version. TaskContext::wait_for_input() is the gate: it
+// checks stop/error first, then the version, then the deadline, and it throws
+// PublicationTimeout without handing the caller the payload when the decision
+// has already been made.
 struct BufferVersion {
     Generation generation{};
     std::uint64_t version = 0;
@@ -78,6 +87,20 @@ public:
     // Returns false when the graph already failed, was canceled, or this task
     // is no longer Running -- the payload is then NOT published. `data` must
     // outlive the graph; this graph never copies or frees it.
+    //
+    // Null and zero-length are not publications (fail-closed). A rejected call
+    // returns false before any store:
+    //   data == nullptr && bytes > 0  -> version stays 0. A positive length with
+    //       no address would otherwise look published and be unreadable.
+    //   data != nullptr && bytes == 0 -> version stays 0. A zero-length span is
+    //       not a decoder output and is not a meaningful empty buffer.
+    //   data == nullptr && bytes == 0 -> version stays 0. Absence of a payload
+    //       is not an empty successful publish.
+    // The rejection leaves TaskState unchanged, does not store payload or
+    // payload_bytes, does not release-store version, does not notify waiters,
+    // and does not bump ready_transitions(). There is no separate published
+    // counter: the version word is that counter, and it stays 0. A later valid
+    // publish of the same task is still admitted.
     // const: the callback receives a const TaskContext&; publication moves the
     // graph's own record, not this handle.
     bool publish(const void* data, std::size_t bytes) const noexcept;
@@ -87,6 +110,16 @@ public:
     // PublicationTimeout if the deadline expires, the graph is canceled, or an
     // error was recorded. It never returns for an unpublished edge, so a
     // caller cannot read before publication by ignoring a return value.
+    //
+    // Precedence, checked in this order on every wake while the graph mutex is
+    // held:
+    //   1. stop, or a recorded error -> PublicationTimeout, even when the
+    //      source version is already non-zero. A buffer published earlier must
+    //      not let the consumer bypass a later cancellation or failure.
+    //   2. source version != 0       -> return. Only then may the caller read.
+    //   3. deadline expired          -> PublicationTimeout.
+    //   4. otherwise park on the condition variable.
+    // A throw means the caller has read no payload byte.
     void wait_for_input(std::size_t index, std::chrono::milliseconds timeout) const;
 
     // Read-only probe of the same gate, without waiting. Returns true only when
@@ -125,6 +158,13 @@ struct TaskSpec {
     // the point the callback publishes it until run() has drained and downstream
     // consumers have finished with it. This graph never owns or frees payload
     // memory; the caller does.
+    //
+    // NOT IMPLEMENTED (S2 ownership). A task marked complete must provably own
+    // valid output data, and the buffer lifetime must be pinned before the first
+    // productive decoder consumer. This graph does not implement that proof:
+    // `published` is only a caller-supplied boolean, completion does not retain
+    // or refcount the payload, and nothing here pins those bytes for a decoder
+    // consumer. A Completed state is not that guarantee.
     //
     // An empty predicate means "no output contract declared": completion then
     // rests on execute() returning, which is exactly the assumption RCA-195

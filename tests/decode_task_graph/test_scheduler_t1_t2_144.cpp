@@ -322,6 +322,230 @@ void rule_t2_deadline_is_terminal() {
 }
 
 // ---------------------------------------------------------------------------
+// publish() null / zero-length. A positive length with no address, a zero-length
+// span, and a null zero-length call are not publications. Each must return
+// false and leave version, payload, payload_bytes, TaskState and the ready
+// counter untouched. The version word is the publication counter; there is no
+// second one. A later real publish of the same task is still admitted.
+// ---------------------------------------------------------------------------
+// One graph, one publish. Isolating each shape is required: a single task can
+// publish only once, so a later call that returns false can be the second-publish
+// refusal rather than the null/zero-length rule.
+bool reject_publish_isolated(const void* data, std::size_t bytes, Generation generation,
+                             std::string* detail) {
+    bool rejected = false;
+    bool running_before = false, running_after = false;
+    long long ready_before = -1, ready_after = -1;
+    BufferVersion seen{};
+    DecodeTaskGraph* graph_ptr = nullptr;
+    DecodeTaskGraph graph(generation, GraphProfile::Synthetic, {
+        {key(1), {},
+         [&](const TaskContext& context) {
+             running_before = graph_ptr->state(0) == TaskState::Running;
+             ready_before = static_cast<long long>(graph_ptr->ready_transitions());
+             rejected = !context.publish(data, bytes);
+             seen = DecodeTaskGraphTestAccess::observe(*graph_ptr, 0);
+             running_after = graph_ptr->state(0) == TaskState::Running;
+             ready_after = static_cast<long long>(graph_ptr->ready_transitions());
+         },
+         {/* no output contract: rejection itself must not fail the task */}}});
+    graph_ptr = &graph;
+    const bool ran = graph.run(1);
+    const bool holds = ran && rejected && running_before && running_after && seen.version == 0 &&
+                       seen.data == nullptr && seen.bytes == 0 && ready_before >= 0 &&
+                       ready_before == ready_after && graph.state(0) == TaskState::Completed &&
+                       graph.error() == GraphError::None;
+    char line[256];
+    std::snprintf(line, sizeof(line),
+                  "[bytes=%zu data=%s rejected=%d version=%llu payload=%s span=%zu "
+                  "running %d->%d ready %lld->%lld run=%d state=%d]",
+                  bytes, data == nullptr ? "null" : "set", static_cast<int>(rejected),
+                  static_cast<unsigned long long>(seen.version),
+                  seen.data == nullptr ? "null" : "set", seen.bytes,
+                  static_cast<int>(running_before), static_cast<int>(running_after),
+                  ready_before, ready_after, static_cast<int>(ran),
+                  static_cast<int>(graph.state(0)));
+    if (!detail->empty()) *detail += ' ';
+    *detail += line;
+    return holds;
+}
+
+void rule_publish_rejects_null_and_zero_length() {
+    unsigned char byte = 0x11;
+    std::string detail;
+    // Each shape on its own task, so a refusal cannot be the single-version rule.
+    const bool null_positive = reject_publish_isolated(nullptr, 16, {7, 3, 4}, &detail);
+    const bool zero_length = reject_publish_isolated(&byte, 0, {7, 3, 6}, &detail);
+    const bool null_zero = reject_publish_isolated(nullptr, 0, {7, 3, 7}, &detail);
+
+    // Rejections must not consume the one publication. Three refusals, then one
+    // real publish, on a single task.
+    bool rej_null = false, rej_zero = false, rej_both = false, accepted = false;
+    bool still_running = false;
+    DecodeTaskGraph* graph_ptr = nullptr;
+    DecodeTaskGraph graph({7, 3, 8}, GraphProfile::Synthetic, {
+        {key(1), {},
+         [&](const TaskContext& context) {
+             rej_null = !context.publish(nullptr, 16);
+             rej_zero = !context.publish(&byte, 0);
+             rej_both = !context.publish(nullptr, 0);
+             still_running = graph_ptr->state(0) == TaskState::Running;
+             accepted = context.publish(&byte, 1);
+         },
+         {[&] { return accepted; }}}});
+    graph_ptr = &graph;
+    const bool ran = graph.run(1);
+    const BufferVersion final_view = DecodeTaskGraphTestAccess::observe(graph, 0);
+    char follow[256];
+    std::snprintf(follow, sizeof(follow),
+                  " follow reject %d/%d/%d running=%d later=%d run=%d final_version=%llu "
+                  "final_bytes=%zu",
+                  static_cast<int>(rej_null), static_cast<int>(rej_zero),
+                  static_cast<int>(rej_both), static_cast<int>(still_running),
+                  static_cast<int>(accepted), static_cast<int>(ran),
+                  static_cast<unsigned long long>(final_view.version), final_view.bytes);
+    detail += follow;
+    required("T2-publish-rejects-null-and-zero",
+             null_positive && zero_length && null_zero && ran && rej_null && rej_zero &&
+                 rej_both && still_running && accepted &&
+                 graph.state(0) == TaskState::Completed && final_view.valid() &&
+                 final_view.data == &byte && final_view.bytes == 1,
+             detail);
+}
+
+// ---------------------------------------------------------------------------
+// wait_for_input precedence. A buffer that was published earlier must not let a
+// consumer return once a stop or a recorded error exists. The consumer is
+// already inside its callback, the version is already non-zero, and only then
+// is the decision recorded. Checking the version first would admit the payload.
+// ---------------------------------------------------------------------------
+void rule_stop_precedes_published_version(std::size_t workers) {
+    std::vector<unsigned char> payload(kPayload, 0x3C);
+    std::atomic<bool> consumer_entered{false};
+    std::atomic<int> wait_admitted{0};
+    std::atomic<int> wait_threw{0};
+    std::atomic<int> payload_reads{0};
+    DecodeTaskGraph* graph_ptr = nullptr;
+    DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
+        {key(1), {},
+         [&](const TaskContext& context) {
+             if (!context.publish(payload.data(), payload.size()))
+                 throw std::runtime_error("producer publish failed");
+         },
+         {[] { return true; }}},
+        {key(2), {key(1)},
+         [&](const TaskContext& context) {
+             consumer_entered.store(true);
+             const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+             while (graph_ptr->error() == GraphError::None &&
+                    std::chrono::steady_clock::now() < until)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+             try {
+                 context.wait_for_input(0, std::chrono::milliseconds(1000));
+                 ++wait_admitted;
+                 const BufferVersion view = context.input(0);
+                 if (view.valid() && view.data != nullptr && view.bytes == kPayload)
+                     ++payload_reads;
+             } catch (const PublicationTimeout&) {
+                 ++wait_threw;
+                 throw;
+             }
+         },
+         {[] { return true; }}}});
+    graph_ptr = &graph;
+    std::thread runner([&] { graph.run(workers); });
+    const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    while (!consumer_entered.load() && std::chrono::steady_clock::now() < until)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    const bool canceled = consumer_entered.load() && graph.cancel(kGeneration);
+    runner.join();
+    const BufferVersion published = DecodeTaskGraphTestAccess::observe(graph, 0);
+    char detail[512];
+    std::snprintf(detail, sizeof(detail),
+                  "canceled=%d entered=%d admitted=%d threw=%d payload_reads=%d "
+                  "error=%d (expected %d Canceled) producer_state=%d consumer_state=%d "
+                  "published_version=%llu",
+                  static_cast<int>(canceled), static_cast<int>(consumer_entered.load()),
+                  wait_admitted.load(), wait_threw.load(), payload_reads.load(),
+                  static_cast<int>(graph.error()), static_cast<int>(GraphError::Canceled),
+                  static_cast<int>(graph.state(0)), static_cast<int>(graph.state(1)),
+                  static_cast<unsigned long long>(published.version));
+    required("T2-stop-precedes-published-version",
+             canceled && wait_admitted.load() == 0 && wait_threw.load() == 1 &&
+                 payload_reads.load() == 0 && graph.error() == GraphError::Canceled &&
+                 graph.quiescent() && graph.state(0) == TaskState::Completed &&
+                 graph.state(1) == TaskState::Failed && published.valid(),
+             detail);
+}
+
+// Same precedence for a recorded callback error rather than cancel(). The error
+// node waits until the consumer is inside its callback, so the version is
+// already published when the slot is written. Needs two workers: with one, the
+// error node cannot run while the consumer spins. The scenario therefore runs
+// at max(workers, 2).
+void rule_recorded_error_precedes_published_version(std::size_t workers) {
+    const std::size_t width = workers < 2 ? 2 : workers;
+    std::vector<unsigned char> payload(kPayload, 0xC3);
+    std::atomic<bool> consumer_entered{false};
+    std::atomic<int> wait_admitted{0};
+    std::atomic<int> wait_threw{0};
+    std::atomic<int> payload_reads{0};
+    DecodeTaskGraph* graph_ptr = nullptr;
+    DecodeTaskGraph graph({7, 3, 5}, GraphProfile::Synthetic, {
+        {key(1), {},
+         [&](const TaskContext& context) {
+             if (!context.publish(payload.data(), payload.size()))
+                 throw std::runtime_error("producer publish failed");
+         },
+         {[] { return true; }}},
+        {key(2), {},
+         [&](const TaskContext&) {
+             const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+             while (!consumer_entered.load() && std::chrono::steady_clock::now() < until)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+             throw std::runtime_error("recorded error after an earlier publish");
+         },
+         {[] { return true; }}},
+        {key(3), {key(1)},
+         [&](const TaskContext& context) {
+             consumer_entered.store(true);
+             const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+             while (graph_ptr->error() == GraphError::None &&
+                    std::chrono::steady_clock::now() < until)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+             try {
+                 context.wait_for_input(0, std::chrono::milliseconds(1000));
+                 ++wait_admitted;
+                 const BufferVersion view = context.input(0);
+                 if (view.valid() && view.data != nullptr && view.bytes == kPayload)
+                     ++payload_reads;
+             } catch (const PublicationTimeout&) {
+                 ++wait_threw;
+                 throw;
+             }
+         },
+         {[] { return true; }}}});
+    graph_ptr = &graph;
+    const bool ran = graph.run(width);
+    const BufferVersion published = DecodeTaskGraphTestAccess::observe(graph, 0);
+    char detail[512];
+    std::snprintf(detail, sizeof(detail),
+                  "width=%zu entered=%d admitted=%d threw=%d payload_reads=%d "
+                  "error=%d (expected %d Callback) consumer_state=%d "
+                  "published_version=%llu run=%d",
+                  width, static_cast<int>(consumer_entered.load()), wait_admitted.load(),
+                  wait_threw.load(), payload_reads.load(), static_cast<int>(graph.error()),
+                  static_cast<int>(GraphError::Callback), static_cast<int>(graph.state(2)),
+                  static_cast<unsigned long long>(published.version), static_cast<int>(ran));
+    required("T2-error-precedes-published-version",
+             !ran && consumer_entered.load() && wait_admitted.load() == 0 &&
+                 wait_threw.load() == 1 && payload_reads.load() == 0 &&
+                 graph.error() == GraphError::Callback && graph.quiescent() &&
+                 graph.state(2) == TaskState::Failed && published.valid(),
+             detail);
+}
+
+// ---------------------------------------------------------------------------
 // First-Error, write-once. Two producers are made Running at the same time by a
 // rendezvous; the first records Callback, the second (already Running, so its
 // completion is accepted) raises Allocation. The slot must keep Callback, and no
@@ -403,6 +627,9 @@ int main(int argc, char** argv) {
     rule_t2_no_read_before_release();
     rule_t2_version_is_generation_bound();
     rule_t2_deadline_is_terminal();
+    rule_publish_rejects_null_and_zero_length();
+    rule_stop_precedes_published_version(workers);
+    rule_recorded_error_precedes_published_version(workers);
     rule_first_error_write_once(workers);
     std::printf("SUMMARY %d rule(s) hold, %d broken\n", holds, failures);
     if (failures) {

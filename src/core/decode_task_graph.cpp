@@ -148,6 +148,14 @@ bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t by
     Node& target = nodes_[node];
     if (target.state != TaskState::Running || stop_ || error_ != GraphError::None) return false;
     if (target.version.load(std::memory_order_relaxed) != 0) return false;
+    // Null / zero-length rejection, before any store. A refusal must not publish
+    // a valid-looking version, change TaskState, notify a waiter, or move
+    // ready_transitions(). The version word is the publication counter and stays
+    // 0, so a later valid publish of this task is still admitted.
+    //   nullptr && bytes > 0 : unreadable length, not a payload.
+    //   bytes == 0            : not a decoder output, with or without an address
+    //                           (non-null zero-length, and nullptr with bytes 0).
+    if (data == nullptr || bytes == 0) return false;
     target.payload.store(data, std::memory_order_relaxed);
     target.payload_bytes.store(bytes, std::memory_order_relaxed);
 #ifdef HYPERCINE_DECODE_TASK_GRAPH_TEST_HOOK
@@ -184,7 +192,9 @@ BufferVersion DecodeTaskGraph::input(std::size_t node, std::size_t input) const 
 // Bounded consumer wait (T2/T4). One mutex, one condition variable, no spin and
 // no polling loop over the version word: every unproductive iteration is parked
 // in wait_until. A deadline, a cancel or an earlier error is fail-closed -- the
-// caller gets PublicationTimeout and has read no payload byte.
+// caller gets PublicationTimeout and has read no payload byte. Stop or a
+// recorded error is checked before the version, so an already published buffer
+// cannot outrank that decision.
 void DecodeTaskGraph::wait_for_input(std::size_t node, std::size_t input,
                                      std::chrono::milliseconds timeout) const {
     std::unique_lock<std::mutex> lock(mutex_);
@@ -193,8 +203,12 @@ void DecodeTaskGraph::wait_for_input(std::size_t node, std::size_t input,
     const Node& source = nodes_[nodes_[node].sources[input]];
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     for (;;) {
-        if (source.version.load(std::memory_order_acquire) != 0) return;
+        // Precedence: stop or a recorded error is terminal even when this source
+        // already published a version. Checking the version first would admit
+        // that earlier buffer and bypass the later decision. The caller has
+        // read no payload byte when this throws.
         if (stop_ || error_ != GraphError::None) throw PublicationTimeout();
+        if (source.version.load(std::memory_order_acquire) != 0) return;
         if (std::chrono::steady_clock::now() >= deadline) throw PublicationTimeout();
         // Releases the mutex; publish()/fail_locked() can then take it.
         changed_.wait_until(lock, deadline);
