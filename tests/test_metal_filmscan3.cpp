@@ -15,7 +15,9 @@ int main(int argc,char** argv){try{
     auto audit=std::make_shared<metal_test::Audit>(); // mandatory GPU; never skip/fallback
     std::cout<<"Required Metal device: "<<audit->DeviceName()<<'\n';
     using namespace reference_fixture;
-    for(auto geometry : {std::array<int,2>{128,24},{384,40},{1920,1080}}) {
+    // 4K is the P5 target (#45): the CPU session budget and Metal maxBufferLength
+    // both admit 3840x2160, so the geometry must be exercised, not assumed.
+    for(auto geometry : {std::array<int,2>{128,24},{384,40},{1920,1080},{3840,2160}}) {
         const int w=geometry[0],h=geometry[1],stride=w*4+16;
         AlignedVector<uint8_t> pixels(static_cast<std::size_t>(stride)*h,0xcd);
         for(int pattern=0;pattern<13;++pattern) {

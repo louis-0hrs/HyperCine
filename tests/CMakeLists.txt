@@ -20,12 +20,8 @@ set_tests_properties(test_reference_oracle PROPERTIES LABELS "reference-oracle")
 # Optional validation tooling only; the codec has no Python dependency.
 find_package(Python3 QUIET COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)
-    add_test(NAME test_reference_release_inventory
-        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_reference_release.py")
-    set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
-    add_test(NAME test_compare_sdk_oracle
-        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_compare_sdk_oracle.py")
-    set_tests_properties(test_compare_sdk_oracle PROPERTIES LABELS "reference-oracle")
+    # Shared with the standalone build, which never reaches this file.
+    hypercine_register_sdk_free_contracts()
     # The runner must use the CTest that configured this build. CMAKE_CTEST_COMMAND
     # is only set by include(CTest); this project calls enable_testing() directly.
     if(CMAKE_CTEST_COMMAND)
@@ -45,12 +41,6 @@ if(Python3_Interpreter_FOUND)
             --output "${CMAKE_BINARY_DIR}/reference-release.json"
         DEPENDS test_reference_oracle
         USES_TERMINAL VERBATIM)
-
-    # Recorded RCA-159 band-0 witness (#234). Recomputed statistics and the
-    # sanitized records only; no private corpus and no GPU are involved.
-    add_test(NAME test_rca159_witness_contract
-        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_rca159_witness.py")
-    set_tests_properties(test_rca159_witness_contract PROPERTIES LABELS "validation")
 endif()
 
 # 1. Transform-level test
