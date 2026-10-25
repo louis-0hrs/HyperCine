@@ -1,0 +1,118 @@
+{
+  "schema": "hypercine.rca159_band0_guard_preregistration/1",
+  "license": "MIT OR Apache-2.0",
+  "issue": 234,
+  "date": "2026-10-25",
+  "status": "PREREGISTERED_NOT_EXECUTED",
+  "executed": false,
+  "prerequisite_evidence": {
+    "path": "docs/validation/rca159_band0_witness_2026-10-25.json",
+    "schema": "hypercine.rca159_band0_witness/1"
+  },
+  "hypothesis": {
+    "statement": "Requiring actual band-0 validity and its publication before inverse admission removes the documented corrupt output without new errors or hangs.",
+    "falsified_if": "The guarded arm still produces the early-reader state, still corrupts, or only passes by changing scheduling so much that the positive modal result is lost."
+  },
+  "patch_requirement": {
+    "admission_predicate": "consumer proceeds only when band 0 is actually valid and published, not when valid == started",
+    "checked_at": ["enqueue", "worker_dequeue"],
+    "unbounded_busy_wait_forbidden": true,
+    "producer_write_publish_ordering_reviewed": true,
+    "consumer_matching_acquire_or_lock_reviewed": true,
+    "flag_bit_alone_is_not_publication": true,
+    "tracked_upstream_change_permitted": false,
+    "patch_location": "disposable private copy outside tracked git"
+  },
+  "arms": [
+    {
+      "id": "A",
+      "description": "unmodified original decoder on the same private copy",
+      "guard_enabled": false,
+      "purpose": "baseline reproduction under the registered conditions"
+    },
+    {
+      "id": "B",
+      "description": "band-0 validity and publication guard",
+      "guard_enabled": true,
+      "purpose": "hypothesis test"
+    }
+  ],
+  "controls": [
+    {
+      "id": "C1",
+      "description": "single worker, where the race is not expected to occur",
+      "expected": "no early-reader state in either arm",
+      "purpose": "no-race control"
+    },
+    {
+      "id": "C2",
+      "description": "forced-preemption barrier or deliberately injected publication state",
+      "expected": "guarded arm refuses admission, unguarded arm reproduces the symptom",
+      "purpose": "negative control that must not be skipped or reported as PASS"
+    },
+    {
+      "id": "C3",
+      "description": "same-process repeat decode",
+      "expected": "first failure preserved, no stale READY",
+      "purpose": "repeat and first-error precedence"
+    },
+    {
+      "id": "C4",
+      "description": "bounded fresh-process stress arm, 60 processes as in the recorded witness",
+      "expected": "bounded completion, every child terminated within the deadline",
+      "purpose": "population comparison"
+    }
+  ],
+  "registration_invariants": {
+    "same_packet_sha256_in_both_arms": true,
+    "same_worker_count_in_both_arms": true,
+    "same_affinity_in_both_arms": true,
+    "same_cpu_count_in_both_arms": true,
+    "uninstrumented_counts_reported_separately_from_trace_counts": true,
+    "child_deadline_seconds": 20,
+    "trace_used_for_correspondence_only": true
+  },
+  "positive_checks_retained": [
+    "modal output digest unchanged in the unguarded arm",
+    "full image geometry",
+    "row pitch",
+    "documented API error codes",
+    "no overwritten first failure"
+  ],
+  "permitted_verdicts": [
+    "CURE_CONFIRMED",
+    "NO_EFFECT",
+    "INCONCLUSIVE_TIMING",
+    "BLOCKED_UPSTREAM_PATCH"
+  ],
+  "verdict_rules": {
+    "CURE_CONFIRMED": "guarded arm removes the documented corruption, preserves the modal result, and produces zero unexplained errors or hangs in every registered control",
+    "NO_EFFECT": "guarded arm still reproduces the early-reader state or the corrupt output under matched conditions",
+    "INCONCLUSIVE_TIMING": "the guard changes scheduling far enough that positive evidence cannot be attributed, or coverage is incomplete; must not be reported as a cure",
+    "BLOCKED_UPSTREAM_PATCH": "no correct publication synchronization is feasible without invasive edits to frozen original source"
+  },
+  "runner_required_fields": [
+    "run.host.cpu_model",
+    "run.host.logical_cpus",
+    "run.host.smt_enabled",
+    "run.host.affinity",
+    "run.host.worker_count",
+    "run.host.worker_to_cpu_ratio",
+    "run.packet.packet_sha256",
+    "run.packet.source_sha256",
+    "run.patch.revision",
+    "run.patch.source_sha256",
+    "run.measurement.uninstrumented_counts",
+    "run.measurement.trace_counts",
+    "run.controls.executed",
+    "run.deadline_violations",
+    "run.verdict"
+  ],
+  "non_claims": {
+    "patch_exists_here": false,
+    "upstream_may_be_patched_publicly": false,
+    "pixel_oracle_qualified": false,
+    "release_gate_changed": false,
+    "decoder_promotion_authorized": false
+  }
+}

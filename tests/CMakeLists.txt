@@ -42,6 +42,12 @@ if(Python3_Interpreter_FOUND)
             --output "${CMAKE_BINARY_DIR}/reference-release.json"
         DEPENDS test_reference_oracle
         USES_TERMINAL VERBATIM)
+
+    # Recorded RCA-159 band-0 witness (#234). Recomputed statistics and the
+    # sanitized records only; no private corpus and no GPU are involved.
+    add_test(NAME test_rca159_witness_contract
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_rca159_witness.py")
+    set_tests_properties(test_rca159_witness_contract PROPERTIES LABELS "validation")
 endif()
 
 # 1. Transform-level test
