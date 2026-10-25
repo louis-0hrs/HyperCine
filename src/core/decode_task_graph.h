@@ -68,10 +68,13 @@ struct TaskKey {
 //
 // Precedence (fail-closed). A non-zero version is not admission. Once the graph
 // has been stopped or a GraphError has been recorded, that decision outranks an
-// already published version. TaskContext::wait_for_input() is the gate: it
-// checks stop/error first, then the version, then the deadline, and it throws
-// PublicationTimeout without handing the caller the payload when the decision
-// has already been made.
+// already published version. wait_for_input(), input_published() and input()
+// all apply it. The waiting gate checks stop/error first, then the version,
+// then the deadline, and throws PublicationTimeout without handing the caller
+// the payload. The non-blocking probes do not throw: after stop or the first
+// error they report "not published" and an empty view, so a buffer published
+// earlier cannot reopen an aborted generation. A non-empty view additionally
+// requires generation, version, payload address and length to be jointly valid.
 struct BufferVersion {
     Generation generation{};
     std::uint64_t version = 0;
@@ -136,12 +139,20 @@ public:
     void wait_for_input(std::size_t index, std::chrono::milliseconds timeout) const;
 
     // Read-only probe of the same gate, without waiting. Returns true only when
-    // the acquire-load of that input's version observed a publish.
+    // the generation is still open (not stopped, no recorded error) and the
+    // acquire-load observed a publish whose generation, version, address and
+    // length are jointly a readable graph-owned buffer. Stop or the first error
+    // makes this return false even if that version is already non-zero.
     bool input_published(std::size_t index) const;
 
-    // const view of a published input; empty (valid() == false) when nothing
-    // was published. Only meaningful after wait_for_input() returned, or when
-    // input_published() is true.
+    // const view of a published input. Empty (valid() == false, null data,
+    // zero length) when nothing readable was published, and also after stop or
+    // a recorded error. Same precedence as wait_for_input(): an earlier publish
+    // does not reopen an aborted generation. A non-empty view means generation,
+    // version, address and length were admitted together, and the address is
+    // the graph-owned copy. Only meaningful when input_published() is true;
+    // after wait_for_input() returns it is still re-checked, so a stop that
+    // lands between the wait and this call cannot hand out the payload.
     BufferVersion input(std::size_t index) const;
 
 private:
@@ -283,6 +294,9 @@ private:
                         std::chrono::milliseconds timeout) const;
     BufferVersion input(std::size_t node, std::size_t input) const;
     bool input_published(std::size_t node, std::size_t input) const;
+    // mutex_ must be held. Empty unless the generation is open and `source`
+    // holds one jointly valid owned buffer of this generation.
+    BufferVersion admitted_input(const Node& source) const;
     void worker() noexcept;
     bool complete(Generation generation, std::size_t node, GraphError error);
     void fail_locked(GraphError error, std::size_t cause);

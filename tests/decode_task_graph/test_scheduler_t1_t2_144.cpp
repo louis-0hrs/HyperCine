@@ -561,6 +561,95 @@ void rule_recorded_error_precedes_published_version(std::size_t workers) {
 }
 
 // ---------------------------------------------------------------------------
+// Non-blocking abort. Two producers, one consumer. A publishes a real buffer
+// and completes, which is what releases the consumer. B then records a callback
+// error while the consumer is already inside its callback. The consumer must
+// not call wait_for_input(); it probes input_published() and input() directly.
+// A version that was published earlier must not become a readable view after
+// that error: zero payload bytes may be read.
+//
+// Needs two workers so B can run while the consumer is inside the callback.
+// At workers == 1 the scenario therefore runs at width 2, same as the waiting
+// error-precedence rule above. Removing the stop/error admission in
+// admitted_input() makes input_published() succeed and input() hand out the
+// buffer, so this rule goes BROKEN. That is the negative control.
+// ---------------------------------------------------------------------------
+void rule_nonblocking_abort_admits_no_payload(std::size_t workers) {
+    const std::size_t width = workers < 2 ? 2 : workers;
+    const Generation generation{7, 3, 21};
+    std::vector<unsigned char> payload(kPayload);
+    for (std::size_t i = 0; i < payload.size(); ++i)
+        payload[i] = static_cast<unsigned char>(0x40 + (i & 0x0F));
+    std::atomic<bool> consumer_entered{false};
+    std::atomic<int> published_probes{0};
+    std::atomic<int> payload_reads{0};
+    std::atomic<int> partial_views{0};
+    std::atomic<unsigned> payload_sink{0};
+    DecodeTaskGraph* graph_ptr = nullptr;
+    DecodeTaskGraph graph(generation, GraphProfile::Synthetic, {
+        {key(1), {},
+         [&](const TaskContext& context) {
+             if (!context.publish(payload.data(), payload.size()))
+                 throw std::runtime_error("producer A publish failed");
+         },
+         {[] { return true; }}},
+        {key(2), {},
+         [&](const TaskContext&) {
+             const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+             while (!consumer_entered.load() && std::chrono::steady_clock::now() < until)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+             throw std::runtime_error("producer B callback error after A published");
+         },
+         {[] { return true; }}},
+        {key(3), {key(1)},
+         [&](const TaskContext& context) {
+             consumer_entered.store(true);
+             const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+             while (graph_ptr->error() == GraphError::None &&
+                    std::chrono::steady_clock::now() < until)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+             // No wait_for_input(). These two probes are the whole gate.
+             if (context.input_published(0)) ++published_probes;
+             const BufferVersion view = context.input(0);
+             const bool empty = !view.valid() && view.version == 0 && view.data == nullptr &&
+                                view.bytes == 0 && view.generation.session == 0 &&
+                                view.generation.slot == 0 && view.generation.value == 0;
+             if (!empty) ++partial_views;
+             const bool readable = view.valid() && view.data != nullptr && view.bytes == kPayload &&
+                                   (view.generation == generation);
+             if (readable) {
+                 const auto* bytes = static_cast<const unsigned char*>(view.data);
+                 unsigned sum = 0;
+                 for (std::size_t i = 0; i < view.bytes; ++i) sum += bytes[i];
+                 payload_sink.fetch_add(sum + 1, std::memory_order_relaxed);
+                 ++payload_reads;
+             }
+         },
+         {[] { return true; }}}});
+    graph_ptr = &graph;
+    const bool ran = graph.run(width);
+    const BufferVersion published = DecodeTaskGraphTestAccess::observe(graph, 0);
+    char detail[640];
+    std::snprintf(detail, sizeof(detail),
+                  "width=%zu entered=%d published_probes=%d partial_views=%d "
+                  "payload_reads=%d (expected 0) error=%d (expected %d Callback) "
+                  "A=%d B=%d consumer=%d published_version=%llu run=%d",
+                  width, static_cast<int>(consumer_entered.load()), published_probes.load(),
+                  partial_views.load(), payload_reads.load(), static_cast<int>(graph.error()),
+                  static_cast<int>(GraphError::Callback), static_cast<int>(graph.state(0)),
+                  static_cast<int>(graph.state(1)), static_cast<int>(graph.state(2)),
+                  static_cast<unsigned long long>(published.version), static_cast<int>(ran));
+    required("T2-nonblocking-abort-admits-no-payload",
+             !ran && consumer_entered.load() && published_probes.load() == 0 &&
+                 partial_views.load() == 0 && payload_reads.load() == 0 &&
+                 graph.error() == GraphError::Callback && graph.quiescent() &&
+                 graph.state(0) == TaskState::Completed && graph.state(1) == TaskState::Failed &&
+                 graph.state(2) == TaskState::Canceled && published.valid() &&
+                 published.bytes == kPayload,
+             detail);
+}
+
+// ---------------------------------------------------------------------------
 // First-Error, write-once. Two producers are made Running at the same time by a
 // rendezvous; the first records Callback, the second (already Running, so its
 // completion is accepted) raises Allocation. The slot must keep Callback, and no
@@ -645,6 +734,7 @@ int main(int argc, char** argv) {
     rule_publish_rejects_null_and_zero_length();
     rule_stop_precedes_published_version(workers);
     rule_recorded_error_precedes_published_version(workers);
+    rule_nonblocking_abort_admits_no_payload(workers);
     rule_first_error_write_once(workers);
     std::printf("SUMMARY %d rule(s) hold, %d broken\n", holds, failures);
     if (failures) {

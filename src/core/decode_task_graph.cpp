@@ -204,27 +204,44 @@ bool DecodeTaskGraph::published_output(std::size_t index) const {
         return false;
     return true;
 }
+BufferVersion DecodeTaskGraph::admitted_input(const Node& source) const {
+    BufferVersion view;
+    // Same precedence as wait_for_input(), which throws instead of returning a
+    // view. Stop or the first recorded error is terminal even when this source
+    // already published a version. Returning that version here would let a
+    // non-blocking caller bypass the decision the waiting gate already closes.
+    if (stop_ || error_ != GraphError::None) return view;
+    // Acquire pairs with the release-store in publish(). Payload fields are
+    // read only after that store was observed.
+    const auto version = source.version.load(std::memory_order_acquire);
+    if (version == 0) return view;
+    // Guard (foreign generation): a version word from another generation is not
+    // an input of this graph, even when the address still looks readable.
+    if (!(source.published_generation == generation_)) return view;
+    const void* data = source.payload.load(std::memory_order_relaxed);
+    const auto bytes = source.payload_bytes.load(std::memory_order_relaxed);
+    // Guard (joint admission): generation, version, address and length are one
+    // decision. A non-zero version with a null address, a zero length, or a
+    // pointer that is not the graph-owned copy is not a readable buffer. Any
+    // one of those missing leaves the view empty, so valid() stays false.
+    if (data == nullptr || bytes == 0 || source.owned_bytes.empty() ||
+        data != source.owned_bytes.data() || bytes != source.owned_bytes.size())
+        return view;
+    view.generation = source.published_generation;
+    view.version = version;
+    view.data = data;
+    view.bytes = bytes;
+    return view;
+}
 bool DecodeTaskGraph::input_published(std::size_t node, std::size_t input) const {
     std::lock_guard<std::mutex> lock(mutex_);
     if (node >= nodes_.size() || input >= nodes_[node].sources.size()) return false;
-    return nodes_[nodes_[node].sources[input]].version.load(std::memory_order_acquire) != 0;
+    return admitted_input(nodes_[nodes_[node].sources[input]]).valid();
 }
 BufferVersion DecodeTaskGraph::input(std::size_t node, std::size_t input) const {
     std::lock_guard<std::mutex> lock(mutex_);
-    BufferVersion view;
-    if (node >= nodes_.size() || input >= nodes_[node].sources.size()) return view;
-    const Node& source = nodes_[nodes_[node].sources[input]];
-    // Acquire pairs with the release-store in publish(). The payload fields are
-    // read only when that store was observed AND the stored generation is this
-    // graph's generation. A foreign generation is not a readable input.
-    const auto version = source.version.load(std::memory_order_acquire);
-    if (version != 0 && source.published_generation == generation_) {
-        view.generation = source.published_generation;
-        view.version = version;
-        view.data = source.payload.load(std::memory_order_relaxed);
-        view.bytes = source.payload_bytes.load(std::memory_order_relaxed);
-    }
-    return view;
+    if (node >= nodes_.size() || input >= nodes_[node].sources.size()) return {};
+    return admitted_input(nodes_[nodes_[node].sources[input]]);
 }
 // Bounded consumer wait (T2/T4). One mutex, one condition variable, no spin and
 // no polling loop over the version word: every unproductive iteration is parked
