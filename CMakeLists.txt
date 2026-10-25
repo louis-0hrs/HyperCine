@@ -284,6 +284,14 @@ if(HYPERCINE_BUILD_STANDALONE)
                 --negative-control alter-output)
             set_tests_properties(cuda_filmscan3_negative_altered_output PROPERTIES
                 LABELS "cuda;negative-control" WILL_FAIL TRUE SKIP_RETURN_CODE 77 TIMEOUT 300)
+            # A single proved difference in a band claimed bit-exact before
+            # quantization must fail on its own. Quantization can absorb the
+            # difference, so coefficient hashes and the packet stay byte-equal
+            # here; only the stage check can catch it.
+            add_test(NAME cuda_filmscan3_negative_pre_quantized_stage COMMAND hypercine_cuda_frontend_compare
+                --negative-control alter-pre-quantized-stage)
+            set_tests_properties(cuda_filmscan3_negative_pre_quantized_stage PROPERTIES
+                LABELS "cuda;negative-control" WILL_FAIL TRUE SKIP_RETURN_CODE 77 TIMEOUT 300)
         endif()
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)

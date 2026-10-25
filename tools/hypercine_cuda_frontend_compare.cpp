@@ -29,6 +29,10 @@ namespace {
 struct Options {
     fs::path output_dir;
     CudaTestMode mode=CudaTestMode::Normal;
+    // Alters one pre-quantization coefficient in the GPU audit frame only. The
+    // encoder path is untouched, so coefficient hashes and the complete packet
+    // stay byte-equal: this isolates the stage check from the packet check.
+    bool alter_pre_quantized_stage=false;
 };
 
 Options Parse(int argc,char** argv) {
@@ -40,8 +44,9 @@ Options Parse(int argc,char** argv) {
             const std::string value=argv[++i];
             if(value=="skip-kernel") out.mode=CudaTestMode::SkipKernel;
             else if(value=="alter-output") out.mode=CudaTestMode::AlterOutput;
+            else if(value=="alter-pre-quantized-stage") out.alter_pre_quantized_stage=true;
             else throw std::invalid_argument("unknown negative control: "+value);
-        } else throw std::invalid_argument("usage: hypercine_cuda_frontend_compare [--output-dir DIR] [--negative-control skip-kernel|alter-output]");
+        } else throw std::invalid_argument("usage: hypercine_cuda_frontend_compare [--output-dir DIR] [--negative-control skip-kernel|alter-output|alter-pre-quantized-stage]");
     }
     return out;
 }
@@ -164,7 +169,14 @@ int Run(const Options& options) {
     auto cpu_frontend=detail::CpuFrontend({width,height,0});
     auto gpu_frontend=detail::CudaFrontend({width,height,0},options.mode);
     const auto cpu_audit=cpu_frontend->Transform(bytes,byte_count,width,height,width*4,true);
-    const auto gpu_audit=gpu_frontend->Transform(bytes,byte_count,width,height,width*4,true);
+    auto gpu_audit=gpu_frontend->Transform(bytes,byte_count,width,height,width*4,true);
+    if(options.alter_pre_quantized_stage) {
+        // Flip one coefficient bit in a highpass band that the audit exposes.
+        // Chosen so the value stays representable; quantization may well absorb
+        // it, which is exactly why the stage check must be able to fail alone.
+        auto& band=gpu_audit.levels[0][2].bands[3].pixels;
+        if(!band.empty()) band[0]=static_cast<int16_t>(band[0]^0x0001);
+    }
     const auto stage_difference=FirstStageDifference(cpu_audit,gpu_audit);
     FilmScan3Encoder cpu({width,height,0});
     FilmScan3Encoder gpu({width,height,0});
@@ -213,15 +225,25 @@ int Run(const Options& options) {
         std::cerr<<"\n";
     }
 
-    if(options.mode!=CudaTestMode::Normal) {
-        if(!hashes_equal || !packet_equal) {
+    const bool stages_equal=!stage_difference.found;
+
+    if(options.mode!=CudaTestMode::Normal || options.alter_pre_quantized_stage) {
+        if(!stages_equal || !hashes_equal || !packet_equal) {
             std::cerr<<"NEGATIVE_CONTROL: FIRED; deliberate "
-                     <<(options.mode==CudaTestMode::SkipKernel ? "kernel skip (0x5A poison preserved)" : "GPU output alteration")
+                     <<(options.mode==CudaTestMode::SkipKernel ? "kernel skip (0x5A poison preserved)"
+                        : options.alter_pre_quantized_stage ? "pre-quantized stage alteration"
+                        : "GPU output alteration")
                      <<" was rejected\nFAIL\n";
             return 1;
         }
         std::cerr<<"NEGATIVE_CONTROL: DID NOT FIRE\n";
         return 0;
+    }
+    if(!stages_equal) {
+        // Byte-equal hashes and packet do NOT excuse a proved difference in the
+        // bands claimed bit-exact before quantization.
+        std::cerr<<"FAIL: pre-quantized wavelet stage differs while the packet is equal\n";
+        return 1;
     }
     if(!hashes_equal || !packet_equal) {std::cerr<<"FAIL\n";return 1;}
     std::cout<<"PASS: complete 1920x1080 FilmScan3 CPU/A2 CUDA sample\n";

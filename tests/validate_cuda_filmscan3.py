@@ -30,10 +30,21 @@ def main() -> int:
     parser.add_argument('--ffmpeg',required=True,type=Path)
     parser.add_argument('--output-dir',required=True,type=Path)
     args=parser.parse_args()
-    if args.output_dir.exists():
-        shutil.rmtree(args.output_dir)
-    args.output_dir.mkdir(parents=True)
-    run=subprocess.run([str(args.compare),'--output-dir',str(args.output_dir)],text=True,capture_output=True)
+    # Never delete a caller-chosen directory, and never delete its contents.
+    # The test writes only into a subdirectory it creates itself; clearing that
+    # one is what makes a rerun reproducible. Anything a caller left behind in
+    # the parent survives, because nothing here walks above our own directory.
+    if args.output_dir.exists() and not args.output_dir.is_dir():
+        raise ValueError(f'output path exists and is not a directory: {args.output_dir}')
+    work_dir=args.output_dir/'cuda-filmscan3-run'
+    if work_dir.is_symlink():
+        raise ValueError(f'refusing to write through a symlinked working directory: {work_dir}')
+    if work_dir.is_dir():
+        shutil.rmtree(work_dir)
+    elif work_dir.exists():
+        raise ValueError(f'working path exists and is not a directory: {work_dir}')
+    work_dir.mkdir(parents=True)
+    run=subprocess.run([str(args.compare),'--output-dir',str(work_dir)],text=True,capture_output=True)
     sys.stdout.write(run.stdout);sys.stderr.write(run.stderr)
     if run.returncode==77:
         print('SKIP77: CUDA GPU required')
@@ -42,12 +53,12 @@ def main() -> int:
         raise ValueError(f'complete packet comparator failed with {run.returncode}')
     if 'COEFFICIENT_HASHES: PASS (30/30)' not in run.stdout or 'FULL_PACKET: PASS' not in run.stdout:
         raise ValueError('comparator did not prove all 30 hashes and complete packet equality')
-    trace=json.loads((args.output_dir/'trace.json').read_text())
+    trace=json.loads((work_dir/'trace.json').read_text())
     cpu_hashes=trace['cpu_coefficient_fnv64'];gpu_hashes=trace['gpu_coefficient_fnv64']
     if len(cpu_hashes)!=30 or cpu_hashes!=gpu_hashes:
         raise ValueError('trace does not contain 30 equal CPU/CUDA coefficient hashes')
-    cpu=decode(args.ffmpeg,args.output_dir/'cpu.cfhd',args.output_dir/'cpu.yuv')
-    gpu=decode(args.ffmpeg,args.output_dir/'gpu.cfhd',args.output_dir/'gpu.yuv')
+    cpu=decode(args.ffmpeg,work_dir/'cpu.cfhd',work_dir/'cpu.yuv')
+    gpu=decode(args.ffmpeg,work_dir/'gpu.cfhd',work_dir/'gpu.yuv')
     if cpu!=gpu:
         first=next(i for i,(a,b) in enumerate(zip(cpu,gpu)) if a!=b)
         raise ValueError(f'independent FFmpeg decodes differ at byte {first}')
