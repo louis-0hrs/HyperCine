@@ -18,9 +18,10 @@ Machine-readable companions:
 - `docs/validation/rca159_band0_guard_preregistration_2026-10-25.json` — the
   pre-registered A/B for the unpublished guard, with `executed: false`.
 - `tools/rca159_witness_contract.py` — validator. Recomputes the published
-  Fisher-exact statistics from the contingency tables, requires the withdrawn
-  claim to remain contradicted by its own observations, and refuses any host
-  path in either record. Exits 1 on failure.
+  Fisher-exact statistics from the contingency tables, ties the witness
+  population and the rate contrast to the arms they summarise, requires the
+  withdrawn claim to remain contradicted by its own observations, and refuses
+  any host path in either record, as a key or as a value. Exits 1 on failure.
 - CTest `test_rca159_witness_contract` runs the same contract, plus negative
   controls that tamper with a copy and must fail.
 
@@ -58,7 +59,7 @@ recorder dumped once at exit, six reader calls per process:
 
 Both arms cover the identical file set, so this is an exact correspondence, not
 a sampled one. Fisher exact, two-sided, recomputed from the table:
-**p = 2.1 × 10⁻⁶** (2.049 × 10⁻⁶ before rounding).
+**p = 2.1 × 10⁻⁶** (2.050714 × 10⁻⁶ before rounding, i.e. 1 / 487635).
 
 ## Rate arms, and why only one may be quoted
 
@@ -136,4 +137,8 @@ source copy, the fail-closed controls and negative mutation, and the bounded A/B
 execution with its verdict — are `BLOCKED_HARDWARE_AND_PRIVATE_CORPUS` here and
 belong to the Linux original-SDK RCA owner. The pre-registration file fixes the
 arms, controls, invariants, deadline and verdict vocabulary before that run, so
-the outcome cannot be redefined afterwards.
+the outcome cannot be redefined afterwards. Its runner schema requires each
+arm's divergent/modal counts, process count, exit code, output digest and
+early-reader flag, and each control's executed/outcome/deadline fields, so a run
+record cannot satisfy the contract while leaving either arm or any control
+unreported; a control that was not executed must appear as `SKIPPED`.

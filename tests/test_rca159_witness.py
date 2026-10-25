@@ -72,10 +72,43 @@ class RepositoryRecordTests(unittest.TestCase):
         with self.assertRaises(contract.ContractError):
             contract.validate_evidence(document)
 
+    def test_rate_contrast_must_match_the_arms_it_summarises(self):
+        document = evidence()
+        document["rate_arms"]["arms"][2]["divergent"] = 9
+        document["rate_arms"]["arms"][2]["modal"] = 51
+        with self.assertRaises(contract.ContractError):
+            contract.validate_evidence(document)
+
+    def test_rate_contrast_rows_must_name_their_arms_in_order(self):
+        document = evidence()
+        document["rate_arms"]["traced_vs_uninstrumented"]["rows"] = [
+            "uninstrumented", "buffered_recorder"]
+        with self.assertRaises(contract.ContractError):
+            contract.validate_evidence(document)
+
+    def test_witness_population_must_equal_the_contingency_total(self):
+        for population in (1, 99):
+            document = evidence()
+            document["witness"]["population"]["fresh_processes"] = population
+            with self.assertRaises(contract.ContractError):
+                contract.validate_evidence(document)
+
+    def test_sentinel_byte_value_must_fit_in_one_byte(self):
+        document = evidence()
+        document["hash_domains"]["entries"][1]["sentinel_byte_value"] = 999
+        with self.assertRaises(contract.ContractError):
+            contract.validate_evidence(document)
+
     def test_unsanitized_host_path_is_refused(self):
         document = evidence()
         # Built from parts so the fixture itself carries no literal share path.
         document["provenance"]["instrumentation"] = "C:" + chr(92) + "work" + chr(92) + "golden"
+        with self.assertRaises(contract.ContractError):
+            contract.validate_evidence(document)
+
+    def test_unsanitized_host_path_is_refused_as_a_json_key(self):
+        document = evidence()
+        document["provenance"]["C:" + chr(92) + "work" + chr(92) + "golden"] = "recorded"
         with self.assertRaises(contract.ContractError):
             contract.validate_evidence(document)
 
@@ -114,6 +147,34 @@ class PreregistrationTests(unittest.TestCase):
     def test_guarded_arm_must_actually_carry_the_guard(self):
         document = protocol()
         document["arms"][1]["guard_enabled"] = False
+        with self.assertRaises(contract.ContractError):
+            contract.validate_protocol(document, evidence())
+
+    def test_runner_fields_must_express_each_arm(self):
+        for field in ("run.arms.A.divergent", "run.arms.B.output_sha256",
+                      "run.arms.B.early_reader_observed"):
+            document = protocol()
+            document["runner_required_fields"].remove(field)
+            with self.assertRaises(contract.ContractError):
+                contract.validate_protocol(document, evidence())
+
+    def test_runner_fields_must_express_each_control(self):
+        for field in ("run.controls.C1.outcome", "run.controls.C2.executed",
+                      "run.controls.C4.deadline_violated"):
+            document = protocol()
+            document["runner_required_fields"].remove(field)
+            with self.assertRaises(contract.ContractError):
+                contract.validate_protocol(document, evidence())
+
+    def test_a_single_aggregate_control_execution_flag_is_refused(self):
+        document = protocol()
+        document["runner_required_fields"].append("run.controls.executed")
+        with self.assertRaises(contract.ContractError):
+            contract.validate_protocol(document, evidence())
+
+    def test_control_outcomes_must_keep_skipped_visible(self):
+        document = protocol()
+        document["control_outcomes"].remove("SKIPPED")
         with self.assertRaises(contract.ContractError):
             contract.validate_protocol(document, evidence())
 
