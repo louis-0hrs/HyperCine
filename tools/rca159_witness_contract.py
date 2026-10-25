@@ -26,6 +26,10 @@ SOURCE_LOCI = (
 )
 CONTROL_IDS = ('C1', 'C2', 'C3', 'C4')
 VERDICTS = ('CURE_CONFIRMED', 'NO_EFFECT', 'INCONCLUSIVE_TIMING', 'BLOCKED_UPSTREAM_PATCH')
+PER_ARM_RUNNER_FIELDS = ('divergent', 'modal', 'processes', 'exit_code', 'output_sha256',
+                         'early_reader_observed')
+PER_CONTROL_RUNNER_FIELDS = ('executed', 'outcome', 'deadline_violated')
+CONTROL_OUTCOMES = ('PASS', 'FAIL', 'SKIPPED', 'NOT_APPLICABLE')
 HEX64 = re.compile(r'^[0-9a-f]{64}$')
 UNSANITIZED = (
     re.compile(r'[A-Za-z]:[\\/]'),
@@ -82,7 +86,8 @@ def strings(node):
     if isinstance(node, str):
         yield node
     elif isinstance(node, dict):
-        for value in node.values():
+        for key, value in node.items():
+            yield key
             for text in strings(value):
                 yield text
     elif isinstance(node, list):
@@ -151,22 +156,50 @@ def validate_evidence(document):
     witness_p = document['witness']['contingency'].get('published_p_two_sided')
     exact = fisher_two_sided(*counts[0], *counts[1])
     matches_published(exact, witness_p, 'witness')
+    witness_divergent, witness_modal = sum(counts[0]), sum(counts[1])
+    require(population.get('fresh_processes') == witness_divergent + witness_modal,
+            'witness population must equal the contingency total %d, found %r'
+            % (witness_divergent + witness_modal, population.get('fresh_processes')))
 
     arms = document.get('rate_arms', {}).get('arms', [])
     require(len(arms) >= 2, 'rate arms missing')
     quotable = [arm.get('id') for arm in arms if arm.get('quotable_as_rate') is True]
     require(quotable == ['uninstrumented'],
             'only the uninstrumented arm may be quoted as a rate, found %r' % (quotable,))
+    by_id = {}
     for arm in arms:
-        divergent = integer(arm.get('divergent'), 'arm %r divergent count' % arm.get('id'))
-        modal = integer(arm.get('modal'), 'arm %r modal count' % arm.get('id'))
-        processes = integer(arm.get('processes'), 'arm %r process count' % arm.get('id'))
+        arm_id = arm.get('id')
+        require(arm_id and arm_id not in by_id, 'rate arms need unique ids, found %r' % (arm_id,))
+        by_id[arm_id] = arm
+        divergent = integer(arm.get('divergent'), 'arm %r divergent count' % arm_id)
+        modal = integer(arm.get('modal'), 'arm %r modal count' % arm_id)
+        processes = integer(arm.get('processes'), 'arm %r process count' % arm_id)
         require(divergent + modal == processes,
-                'arm %r: divergent + modal must equal the process count' % arm.get('id'))
+                'arm %r: divergent + modal must equal the process count' % arm_id)
 
-    contrast = check_table(document.get('rate_arms', {}).get('traced_vs_uninstrumented', {}), 'rate contrast')
+    traced = [arm for arm in arms
+              if (arm['divergent'], arm['modal'], arm['processes'])
+              == (witness_divergent, witness_modal, witness_divergent + witness_modal)]
+    require(len(traced) == 1,
+            'exactly one rate arm must reproduce the witness table, found %r'
+            % ([arm.get('id') for arm in traced],))
+    traced = traced[0]
+    require(traced.get('quotable_as_rate') is False,
+            'the arm that reproduces the witness table is traced and may not be quoted as a rate')
+
+    contrast_table = document.get('rate_arms', {}).get('traced_vs_uninstrumented', {})
+    contrast = check_table(contrast_table, 'rate contrast')
+    require(contrast_table.get('rows') == [traced['id'], 'uninstrumented'],
+            'the rate contrast must name the traced arm first and the uninstrumented arm second, found %r'
+            % (contrast_table.get('rows'),))
+    require(contrast_table.get('columns') == ['divergent', 'modal'],
+            'the rate contrast columns must be divergent then modal, found %r'
+            % (contrast_table.get('columns'),))
+    require(contrast == [[traced['divergent'], traced['modal']],
+                         [by_id['uninstrumented']['divergent'], by_id['uninstrumented']['modal']]],
+            'the rate contrast must be the arms it summarises, found %r' % (contrast,))
     matches_published(fisher_two_sided(*contrast[0], *contrast[1]),
-                      document['rate_arms']['traced_vs_uninstrumented'].get('published_p_two_sided'),
+                      contrast_table.get('published_p_two_sided'),
                       'rate contrast')
 
     withdrawn = document.get('withdrawn_hypotheses', [])
@@ -204,6 +237,8 @@ def validate_evidence(document):
     require(extended.get('bytes') == image.get('bytes') + extended.get('sentinel_bytes', -1),
             'sentinel domain must extend the image domain by its sentinel bytes')
     require(image.get('pitch') == extended.get('pitch'), 'both domains must share the recorded pitch')
+    sentinel = integer(extended.get('sentinel_byte_value'), 'sentinel byte value must be an integer')
+    require(0 <= sentinel <= 255, 'sentinel byte value must fit in one byte, found %r' % (sentinel,))
     for entry in entries:
         require(HEX64.match(entry.get('sha256', '')), 'recorded hashes must be lowercase sha256')
 
@@ -262,6 +297,20 @@ def validate_protocol(document, evidence):
     for required in ('packet_sha256', 'worker_count', 'verdict'):
         require(any(field.endswith(required) for field in fields),
                 'runner field %r is required' % required)
+    for arm_id in ('A', 'B'):
+        for name in PER_ARM_RUNNER_FIELDS:
+            field = 'run.arms.%s.%s' % (arm_id, name)
+            require(field in fields,
+                    'runner field %r is required so arm %s can be reported' % (field, arm_id))
+    for control_id in CONTROL_IDS:
+        for name in PER_CONTROL_RUNNER_FIELDS:
+            field = 'run.controls.%s.%s' % (control_id, name)
+            require(field in fields,
+                    'runner field %r is required so control %s can be reported' % (field, control_id))
+    require('run.controls.executed' not in fields,
+            'an aggregate run.controls.executed cannot show which control was skipped')
+    require(tuple(document.get('control_outcomes', ())) == CONTROL_OUTCOMES,
+            'the control outcome vocabulary must keep skipped controls visible')
 
     check_all_false(document.get('non_claims'), 'protocol')
     check_sanitized(document, 'protocol')
