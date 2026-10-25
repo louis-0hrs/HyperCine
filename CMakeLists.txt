@@ -24,6 +24,28 @@ option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
 option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
 
+# SDK-free Python contracts, registered by both the regular test tree and the
+# standalone build, which returns before add_subdirectory(tests). Kept in one
+# function so the two build modes cannot drift apart.
+function(hypercine_register_sdk_free_contracts)
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(NOT Python3_Interpreter_FOUND)
+        return()
+    endif()
+    set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME test_reference_release_inventory
+        COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_reference_release.py")
+    set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
+    add_test(NAME test_compare_sdk_oracle
+        COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_compare_sdk_oracle.py")
+    set_tests_properties(test_compare_sdk_oracle PROPERTIES LABELS "reference-oracle")
+    # Recorded RCA-159 band-0 witness (#234). Recomputed statistics and the
+    # sanitized records only; no private corpus and no GPU are involved.
+    add_test(NAME test_rca159_witness_contract
+        COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_rca159_witness.py")
+    set_tests_properties(test_rca159_witness_contract PROPERTIES LABELS "validation")
+endfunction()
+
 # Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
 option(HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY "Build only the synthetic decode task graph" OFF)
 if(HYPERCINE_BUILD_TESTS OR HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY)
@@ -167,6 +189,9 @@ if(HYPERCINE_BUILD_STANDALONE)
     endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
+        # This branch returns before add_subdirectory(tests), so the SDK-free
+        # contracts must be registered here as well.
+        hypercine_register_sdk_free_contracts()
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
