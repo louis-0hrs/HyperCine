@@ -6,6 +6,7 @@
 No FFmpeg and no SDK are needed: these pin the fail-closed decisions that the
 harness makes before any external decoder runs.
 """
+import os
 import shutil
 import struct
 import sys
@@ -28,6 +29,36 @@ class QualificationContractTest(unittest.TestCase):
         for token in ('9.1.0', 'n7.1', '7.0.2', '9.0.20', 'n8.0.1'):
             with self.assertRaises(harness.Blocked):
                 harness.require_qualified_build(token)
+
+    def test_unrecognized_banner_is_blocked_not_failed(self):
+        # Contract row 77: "build not on the measured list", not a failed
+        # control. A wrapper or a non-FFmpeg executable lands here.
+        for banner in ('definitely not ffmpeg', '', 'ffmpeg version',
+                       'ffmpeg 9.0.2-essentials_build-www.gyan.dev'):
+            with self.assertRaises(harness.Blocked):
+                harness.parse_banner(banner)
+        self.assertEqual(
+            harness.parse_banner(
+                'ffmpeg version 9.0.2-essentials_build-www.gyan.dev\n'
+                'built with gcc 13.2.0\n'),
+            '9.0.2-essentials_build-www.gyan.dev')
+
+    def test_unrunnable_candidate_is_blocked(self):
+        # A real executable that is not FFmpeg at all: this interpreter
+        # rejects `-version`, so the run itself fails and the harness blocks.
+        with self.assertRaises(harness.Blocked):
+            harness.build_token(sys.executable)
+
+    @unittest.skipUnless(os.name == 'posix', 'needs a POSIX executable shim')
+    def test_non_ffmpeg_executable_is_blocked(self):
+        # End-to-end over a real subprocess: exit 0 with an unparseable
+        # banner must skip, not fail the lane.
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-banner-') as temporary:
+            shim = Path(temporary) / 'not-ffmpeg'
+            shim.write_text('#!/bin/sh\nprintf "%s\\n" "definitely not ffmpeg"\n')
+            shim.chmod(0o755)
+            with self.assertRaises(harness.Blocked):
+                harness.build_token(str(shim))
 
     def test_adapter_rejects_out_of_contract_output(self):
         harness.validate_output(bytes(harness.OUTPUT_BYTES))

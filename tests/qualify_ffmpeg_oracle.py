@@ -99,17 +99,27 @@ def find_tool(explicit, name):
     return found
 
 
+def parse_banner(banner):
+    """Bind the candidate's `-version` output to a version token.
+
+    An executable whose banner cannot be bound to an FFmpeg build is not a
+    measured candidate, so this is the blocked state and never a failed
+    control; the banner is kept in the reason so the evidence is not lost.
+    """
+    first = banner.splitlines()[0] if banner.splitlines() else ''
+    match = re.match(r'ffmpeg version (\S+)', first)
+    if not match:
+        raise Blocked('unrecognized decoder banner: {!r}'.format(first))
+    return match.group(1)
+
+
 def build_token(ffmpeg):
     try:
         banner = subprocess.check_output(
             [ffmpeg, '-version'], stderr=subprocess.STDOUT, text=True)
     except (OSError, subprocess.CalledProcessError) as error:
         raise Blocked('cannot run the candidate decoder: {}'.format(error))
-    first = banner.splitlines()[0] if banner.splitlines() else ''
-    match = re.match(r'ffmpeg version (\S+)', first)
-    if not match:
-        raise Failed('unrecognized decoder banner: {!r}'.format(first))
-    return match.group(1)
+    return parse_banner(banner)
 
 
 def require_qualified_build(token):

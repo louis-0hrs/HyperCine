@@ -98,8 +98,10 @@ Fixed before the run:
 
 Failure paths exercised on the same host: running with FFmpeg absent from
 `PATH` prints `ORACLE_QUALIFICATION_BLOCKED reason=ffmpeg is not on PATH` and
-exits `77` (CTest reports it as Skipped); the contract test refuses an unlisted
-build token such as `9.1.0`; a one-byte change to `canonical.p10` or
+exits `77` (CTest reports it as Skipped); an executable whose `-version` banner
+cannot be bound to an FFmpeg build is blocked the same way (exit `77`), not
+failed, because it is not a measured candidate; the contract test refuses an
+unlisted build token such as `9.1.0`; a one-byte change to `canonical.p10` or
 `canonical.cfhd` exits `1` at the manifest check.
 
 Full native Release CTest at the commit that adds this harness: **25/25
@@ -112,7 +114,7 @@ passed** (129.07 s), including `ffmpeg_oracle_qualification` (8.00 s) and
 | ---: | --- | --- |
 | 0 | `QUALIFIED` | Every positive and negative control passed for this build |
 | 1 | `QUALIFICATION_FAILED` | Bound input tampered, repeat divergence, reference mismatch, or a control did not discriminate |
-| 77 | `ORACLE_QUALIFICATION_BLOCKED` | Tool absent or build not on the measured list; never a pass |
+| 77 | `ORACLE_QUALIFICATION_BLOCKED` | Tool absent, banner not recognizable as FFmpeg, or build not on the measured list; never a pass |
 
 CTest registers `ffmpeg_oracle_qualification` with `SKIP_RETURN_CODE 77` and
 the `reference-oracle` label. A hosted or developer machine without FFmpeg
