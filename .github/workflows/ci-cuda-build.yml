@@ -31,6 +31,7 @@ on:
       - 'benchmarks/**'
       - 'tests/**'
       - 'upstream/**'
+      - 'ci/**'
       - '.github/workflows/ci-cuda-build.yml'
   pull_request:
     paths:
@@ -41,6 +42,7 @@ on:
       - 'benchmarks/**'
       - 'tests/**'
       - 'upstream/**'
+      - 'ci/**'
       - '.github/workflows/ci-cuda-build.yml'
 
 permissions:
@@ -133,11 +135,23 @@ jobs:
 
       - name: Report build inventory
         if: always()
+        # These numbers are published, so each one is taken from the artefact
+        # that actually carries it, and the patterns are the parser patterns,
+        # not hand-written approximations of them:
+        #   - Ninja prints `[68/167] <action>`. Only `Building C/CXX/CUDA
+        #     object` lines are compiled objects; linking and custom commands
+        #     share the same `[n/m]` prefix and inflated this count from 129
+        #     to 167 before.
+        #   - `ctest -N` right-aligns the number: `Test #10:` but `Test  #1:`.
+        #     A `Test #[0-9]` pattern therefore misses single-digit ids and
+        #     reported 25 of the 31 registered tests.
         run: |
           echo "source_sha=$(git rev-parse HEAD)"
-          echo "compiled_translation_units=$(grep -c '^\[[0-9]*/[0-9]*\]' build.log || true)"
+          echo "compiled_objects=$(grep -cE '^\[[0-9]+/[0-9]+\] Building (C|CXX|CUDA) object ' build.log || true)"
+          echo "ninja_progress_lines=$(grep -cE '^\[[0-9]+/[0-9]+\] ' build.log || true)"
           echo "ninja_build_edges=$(ninja -C build-cuda -t targets all | wc -l || true)"
-          echo "registered_ctest_tests=$(ctest --test-dir build-cuda -N | grep -c 'Test #[0-9]' || true)"
+          echo "registered_ctest_tests=$(ctest --test-dir build-cuda -N | grep -cE '^ *Test +#[0-9]+:' || true)"
+          echo "ctest_total_line=$(ctest --test-dir build-cuda -N | sed -n 's/^ *Total Tests: *\([0-9]*\)$/\1/p' || true)"
           echo "compile_errors=$(grep -c 'error:' build.log || true)"
 
       - name: Preserve build log
