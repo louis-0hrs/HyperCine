@@ -147,3 +147,38 @@ jobs:
           name: cuda-build-log
           path: build.log
           if-no-files-found: warn
+
+  inventory-gate-selftest:
+    # The gate in cuda-build only proves the inventory it measures is complete.
+    # Nothing above proves the gate *fails* when coverage disappears, which is
+    # the whole reason it exists. These controls build a synthetic build tree
+    # (no CUDA toolkit, ~1 s) and remove exactly one measurement at a time.
+    name: CUDA-ON inventory gate (negative controls)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref || github.sha }}
+
+      - name: Verify upstream immutability
+        run: |
+          status="$(git status --porcelain upstream/)"
+          if [ -n "$status" ]; then
+            echo "upstream/ directory has been modified: $status" >&2
+            exit 1
+          fi
+
+      - name: Run the negative controls for the inventory gate
+        run: |
+          set -o pipefail
+          python3 ci/test_cuda_build_inventory.py 2>&1 | tee inventory-gate-selftest.log
+
+      - name: Preserve selftest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cuda-inventory-gate-selftest-log
+          path: inventory-gate-selftest.log
+          if-no-files-found: warn
