@@ -55,4 +55,17 @@ if(HYPERCINE_BUILD_TESTS)
             TIMEOUT 120
             PASS_REGULAR_EXPRESSION "SCHEDULER-T1T2 PASS")
     endforeach()
+
+    # S2 output completion: a callback return is not a result. Completion is a
+    # BufferVersion of this generation retained by the graph. Same worker matrix
+    # as the T1/T2 gate. Synthetic only; no decoder integration.
+    add_executable(test_scheduler_s2_output_144 test_scheduler_s2_output_144.cpp)
+    target_link_libraries(test_scheduler_s2_output_144 PRIVATE hypercine_decode_task_graph)
+    foreach(workers 1 2 4 16)
+        add_test(NAME scheduler_s2_output_144_workers_${workers}
+                 COMMAND test_scheduler_s2_output_144 ${workers})
+        set_tests_properties(scheduler_s2_output_144_workers_${workers} PROPERTIES
+            TIMEOUT 120
+            PASS_REGULAR_EXPRESSION "SCHEDULER-S2-OUTPUT PASS")
+    endforeach()
 endif()

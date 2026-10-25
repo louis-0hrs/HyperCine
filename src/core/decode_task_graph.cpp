@@ -137,11 +137,15 @@ TaskState DecodeTaskGraph::state(std::size_t node) const {
     std::lock_guard<std::mutex> lock(mutex_);
     return nodes_.at(node).state;
 }
-// Publication (T2). The payload record is written first; only the final
-// release-store makes it observable, and the store is made under the graph
-// mutex so the Ready transition of a successor is ordered with it. One publish
-// per task and generation: a second call is refused rather than silently
-// replacing bytes a consumer may already be reading.
+// Publication (T2 + S2). The caller's bytes are copied into the node first.
+// Only then is the payload record pointed at that copy, and only the final
+// release-store makes the version observable. The store is made under the graph
+// mutex. One publish per task and generation: a second call is refused rather
+// than replacing bytes a consumer may already be reading.
+//
+// The copy is the lifetime. After this returns, the caller may free `data`.
+// Every dependent reads `owned_bytes`, which is not resized again and which
+// dies with the graph, after run() has joined the workers.
 bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t bytes) noexcept {
     std::lock_guard<std::mutex> lock(mutex_);
     if (node >= nodes_.size()) return false;
@@ -156,8 +160,18 @@ bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t by
     //   bytes == 0            : not a decoder output, with or without an address
     //                           (non-null zero-length, and nullptr with bytes 0).
     if (data == nullptr || bytes == 0) return false;
-    target.payload.store(data, std::memory_order_relaxed);
-    target.payload_bytes.store(bytes, std::memory_order_relaxed);
+    const auto* source = static_cast<const unsigned char*>(data);
+    std::vector<unsigned char> copy;
+    try {
+        copy.assign(source, source + bytes);
+    } catch (...) {
+        // noexcept: a failed copy is not a publication. The version stays 0.
+        return false;
+    }
+    target.owned_bytes.swap(copy);
+    target.published_generation = generation_;
+    target.payload.store(target.owned_bytes.data(), std::memory_order_relaxed);
+    target.payload_bytes.store(target.owned_bytes.size(), std::memory_order_relaxed);
 #ifdef HYPERCINE_DECODE_TASK_GRAPH_TEST_HOOK
     // Test seam: sits between the payload record and its release. A build
     // without the macro has no seam, no branch and no extra store.
@@ -167,6 +181,27 @@ bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t by
     // version. Nothing before this line is readable by a consumer.
     target.version.store(1, std::memory_order_release);
     changed_.notify_all();
+    return true;
+}
+bool DecodeTaskGraph::published_output(std::size_t index) const {
+    const Node& node = nodes_[index];
+    const auto version = node.version.load(std::memory_order_relaxed);
+    const void* data = node.payload.load(std::memory_order_relaxed);
+    const auto bytes = node.payload_bytes.load(std::memory_order_relaxed);
+    // Guard (no-op producer): the callback returned and publish() never stored
+    // a version. Later checks are reached only when version != 0, so this line
+    // is the only rejection of "nothing was published".
+    if (version == 0) return false;
+    // Guard (missing publication): a version word is not a result unless it is
+    // a readable buffer that was published for THIS generation.
+    if (version != 0 && (!(node.published_generation == generation_) || data == nullptr ||
+                         bytes == 0))
+        return false;
+    // The bytes the version names are the graph-owned copy, not the caller's
+    // address. An external pointer is not a retained result.
+    if (version != 0 && (node.owned_bytes.empty() || data != node.owned_bytes.data() ||
+                         bytes != node.owned_bytes.size()))
+        return false;
     return true;
 }
 bool DecodeTaskGraph::input_published(std::size_t node, std::size_t input) const {
@@ -179,11 +214,13 @@ BufferVersion DecodeTaskGraph::input(std::size_t node, std::size_t input) const 
     BufferVersion view;
     if (node >= nodes_.size() || input >= nodes_[node].sources.size()) return view;
     const Node& source = nodes_[nodes_[node].sources[input]];
-    view.generation = generation_;
     // Acquire pairs with the release-store in publish(). The payload fields are
-    // read only when that store was observed; otherwise the view stays empty.
-    view.version = source.version.load(std::memory_order_acquire);
-    if (view.version != 0) {
+    // read only when that store was observed AND the stored generation is this
+    // graph's generation. A foreign generation is not a readable input.
+    const auto version = source.version.load(std::memory_order_acquire);
+    if (version != 0 && source.published_generation == generation_) {
+        view.generation = source.published_generation;
+        view.version = version;
         view.data = source.payload.load(std::memory_order_relaxed);
         view.bytes = source.payload_bytes.load(std::memory_order_relaxed);
     }
@@ -251,7 +288,13 @@ bool DecodeTaskGraph::complete(Generation generation, std::size_t index, GraphEr
     if (error != GraphError::None) {
         fail_locked(error, index);
     } else if (stop_) {
+        // Cancellation outranks a missing buffer: the node is Canceled, not a
+        // later OutputNotPublished, and its dependents were already stopped.
         nodes_[index].state = TaskState::Canceled;
+    } else if (!published_output(index)) {
+        // No valid buffer for this generation. Do not Complete, and do not
+        // ready any dependent: fail_locked marks them Failed, never Ready.
+        fail_locked(GraphError::OutputNotPublished, index);
     } else {
         nodes_[index].state = TaskState::Completed;
         ++completed_;
@@ -261,6 +304,9 @@ bool DecodeTaskGraph::complete(Generation generation, std::size_t index, GraphEr
                 fail_locked(GraphError::InvalidGraph, child);
                 break;
             }
+            // Guard (removed dependency): a successor becomes Ready only when
+            // EVERY declared predecessor has completed. Decrementing is not
+            // enough; remaining must actually hit zero.
             if (--n.remaining == 0) {
                 n.state = TaskState::Ready;
                 ++ready_transitions_;
