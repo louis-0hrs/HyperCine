@@ -103,6 +103,8 @@ void Lowpass(Writer& s,const Plane& p) {
 }
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::SelectFrontend(backend)) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry) : frontend_(detail::CpuFrontend(geometry)) {}
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry)
+    : frontend_(detail::SelectFrontend(backend, geometry)) {}
 FilmScan3Geometry FilmScan3Encoder::geometry() const noexcept {
     return frontend_ ? frontend_->Geometry() : FilmScan3Geometry{};
 }
