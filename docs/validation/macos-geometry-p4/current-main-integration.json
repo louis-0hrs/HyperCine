@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS_NATIVE_INTEGRATION",
+  "platform": "macOS ARM64",
+  "compiler": "AppleClang 21.0.0",
+  "parents": {
+    "p4": "66568157de2958452df3800cd1c2b4739d60410f",
+    "main": "5c87391e82f307fbe7db0be6a53fd0edbdaad527"
+  },
+  "merge": "conflict-free; no implementation corrections required",
+  "tested_code_sha256": "1169dd14287f7658eb1971fed9daf955448342a0db1f48aefc164bb1e4be3190",
+  "code_hash_method": "SHA-256 of canonical compact sorted JSON mapping tracked CMakeLists.txt/include/src/tests/ci/cmake/.github/workflows paths to file SHA-256; documentation excluded",
+  "native": {
+    "release": {
+      "status": "PASS",
+      "tests": 34,
+      "elapsed_seconds": 230.0,
+      "skipped": 0
+    },
+    "asan_ubsan": {
+      "status": "PASS",
+      "tests": 34,
+      "elapsed_seconds": 403.0,
+      "skipped": 0,
+      "asan_options": "detect_leaks=0:halt_on_error=1",
+      "ubsan_options": "halt_on_error=1:print_stacktrace=1"
+    },
+    "metal_1080p_regression": {
+      "status": "PASS",
+      "tests": 7,
+      "elapsed_seconds": 67.0,
+      "skipped": 0
+    },
+    "quality_state_configuration": {
+      "status": "PASS",
+      "tests": 2,
+      "elapsed_seconds": 0.38,
+      "scope": "quality-state-only CMake configuration plus ISA selection; no SDK corpus configured"
+    },
+    "ci_inventory_unit_tests": 6,
+    "privacy_guard_unit_tests": 13
+  },
+  "four_k": {
+    "independent_decodes": 19,
+    "sequence_frames": 16,
+    "sequence_pixel_identity": "PASS",
+    "minimum_p10_psnr_db": 52.32134949615484,
+    "release_encoder_peak_rss_bytes": 242827264,
+    "asan_encoder_peak_rss_bytes": 439713792,
+    "rss_method": "maximum child RSS after exporter and ffmpeg -version; exporter dominates",
+    "baseline_p4_all_19_inputs_packets_coefficients_payloads_tables_decoded_frames": "IDENTICAL",
+    "release_vs_asan_all_19_inputs_packets_coefficients_payloads_tables_decoded_frames": "IDENTICAL",
+    "sequence_decoded_sha256": [
+      "f7da47a0a9a1819be465f595767c73a490ac550db2fcec979ebbfaff7bf74b59",
+      "af4014c35fad1ec51b277a2b33c121c4792a4755179c2c8490b9c1ba2354d0b3",
+      "b11eabc8b1f186068b50387e387cf0c73fa67257aa1496a54d45f72ec8aa5341",
+      "47d0416f6b796b38127f6d168bc60d28a33e74a066b273120e12bcd56b3405c7",
+      "2503a4f7e5faaa824fa1d41591d87e126375046d9cb7bced7a04acd0ea4bb09d",
+      "749d3f96164cf20bde5d64c5f26c66697bb541d357b64812bff47ee7e64b4ca3",
+      "c2bf0ea751b0bb8d1138881ba503bc5de5e12f5c75e8b27d3bddd7f22f613f29",
+      "ab500d2d3509b1b2861ca4e17910afd7a5a21297c49fba10c19f9e16b2091e60",
+      "9dcd0aed72cc16e7e75c37d0cfe11d550f05efba625bd11dc8814d805d2a3a55",
+      "7eb644dcc7341ade3ba56e795f4af8278eaf1a488ec68333a5ef8dd6544d4605",
+      "1efee646c933a1b03a381ba4318bcf3e4d84aff8da77dba6363d1f94f158203c",
+      "44d7b64c5ba35ab4d55263d9c2ef7d2daf701f9fe9fde0617277eef59ca432c1",
+      "ea41e55a9f3abeff7893e745d21c27bcd7a09898a3af3543d7a8968ca5201d8e",
+      "f0a52caed706d266e966c5b7d1bac77eda11abcc726619b1caafc5b859bcc31a",
+      "0148985b5162cd5a5637ff82299171e8fa95b04c44c06fbfcdf92aa552f88fa8",
+      "081558b4be26b0a666c0b8d138e0a6b81a019d715d364cf5db1efa3cfb3d0304"
+    ]
+  },
+  "qualification": {
+    "actual_1080p_sdk_corpus": "PASS: original 16-frame and 120-frame raw-packet tests in both native suites and Metal regression",
+    "original_sdk_four_k": "REFERENCE_BLOCKED",
+    "eight_k_twelve_k_seventeen_k": "NOT_QUALIFIED",
+    "metal_four_k": "NOT_IMPLEMENTED_NOT_CLAIMED",
+    "cuda_vulkan": "NOT_RUN",
+    "p4_parent_hosted_checks": "14/14 SUCCESS on parent head 6656815",
+    "integration_branch_hosted_checks": "PENDING_AT_PUBLICATION",
+    "neon_metal_p5": "WAIT_FOR_P4_ACCEPTANCE"
+  },
+  "privacy": {
+    "current_tree_redactions": [
+      "docs/MACOS_GEOMETRY_P4.md",
+      "docs/validation/macos-geometry-p4/validation.json"
+    ],
+    "reference_location": "HYPERCINE_GOLDEN_DIR configured privately",
+    "raw_logs_and_build_artifacts": "LOCAL_ONLY_OUTSIDE_GIT",
+    "historical_disclosures": "Tracked in #54; current-tree redaction does not remove public history"
+  },
+  "next_action": "Review this stacked integration branch, then decide experimental P4 integration into main; no automatic merge or production SDK 4K parity claim."
+}

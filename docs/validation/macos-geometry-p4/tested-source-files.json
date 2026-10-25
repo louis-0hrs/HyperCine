@@ -1,0 +1,14 @@
+{
+  "CMakeLists.txt": "8dc989bd2384f37a0c84b9b091d35f7d23e78fece227808b1966d6ef651aabc3",
+  "ci/run_standalone.py": "1f6d3072231b588c90bacd7f73e90b1c9e752b9f63b0bff910a9837780799ca5",
+  "include/hypercine/filmscan3.h": "bad9bb8118d49e6d00ed2794e29a7f56367083cb8401e758da5cf32385739703",
+  "include/hypercine/standalone.h": "32b91ee60666daa48e4b35bdc2346d6a3757a5dfcfa15c8089eacb39c30fe677",
+  "src/core/filmscan3_backend.cpp": "7794e6ef2b86b716a19d96f83e3fee6b5a35b19113b95dcfbb13fdf6d151b655",
+  "src/core/filmscan3_backend.h": "e586ac4eaa2593033a8b6886c6034436f77c02170bd349af9a9afa992f95f53b",
+  "src/core/filmscan3_encoder.cpp": "44a8f11c671e3d7137e2a9ce44b1fb8ae29601158502a3fcc01e75384f3454ae",
+  "src/core/standalone_encoder.cpp": "2b4ba2ae7065a265c609f5676dbb68f0d51fef4700c3d29debc84163a21e0c6f",
+  "src/cpu/filmscan3_frontend.cpp": "a87c4420e1a75973ae36f59b20482606646630ad64f8115a453901c251edfac0",
+  "src/cpu/standalone_frontend.cpp": "5bcb9f99614802630e7cd785c4fff114c3d1036869eb69fb1e773e120de2294a",
+  "tests/test_filmscan3_geometry.cpp": "63155edba3e09c78ba8d66372ca819be488b59618f2994065f98a15792cbaa7b",
+  "tests/validate_filmscan3_geometry.py": "620628d2a83c4f78c39278527b03302e3fab90172baf3d36554f9df9823433ed"
+}
