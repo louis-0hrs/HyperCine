@@ -7,7 +7,15 @@
 
 namespace hypercine { namespace standalone {
 // Separate from the legacy fixed-Q2 profile. This initial profile is restricted
-// to the corpus-backed 1920x1080 BGRA8 -> progressive YUV422 p10, GOP1 domain.
+// to BGRA8 -> progressive YUV422 p10, GOP1. Existing constructors remain 1080p.
+// Explicit CPU session geometry. Fixed for the session, including across Reset.
+// 4K is experimental pending original-SDK reference qualification; 8K rejected.
+struct FilmScan3Geometry {
+    int width = 1920, height = 1080;
+    // Zero selects the geometric bound; nonzero may only reduce that bound.
+    std::size_t sample_capacity_bytes = 0;
+};
+void ValidateFilmScan3Geometry(FilmScan3Geometry geometry);
 struct FilmScan3Tables { std::array<unsigned,36> quant{}, scale{}; };
 struct FilmScan3State {
     unsigned frame_index = 0;
@@ -43,6 +51,8 @@ class FilmScan3Encoder {
 public:
     FilmScan3Encoder() = default; // scalar CPU remains the default
     explicit FilmScan3Encoder(FilmScan3Backend backend);
+    explicit FilmScan3Encoder(FilmScan3Geometry geometry); // CPU only
+    FilmScan3Geometry geometry() const noexcept;
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
                          const FilmScan3Metadata& metadata);

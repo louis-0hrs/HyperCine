@@ -1,0 +1,58 @@
+{
+  "arithmetic": "checked uint64 multiplication/addition; no future buffers allocated",
+  "cases": [
+    {
+      "width": 3840,
+      "height": 2160,
+      "accepted": true,
+      "width_mod_128": 0,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 240,
+      "ll3_chroma_width_mod_8": 0,
+      "sample_bound_bytes": 66371584,
+      "conservative_live_bytes": 299646976,
+      "rate_numerator_before_div8": 248832000,
+      "session_unchanged": true
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "accepted": false,
+      "width_mod_128": 0,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 480,
+      "ll3_chroma_width_mod_8": 0,
+      "sample_bound_bytes": 265437184,
+      "conservative_live_bytes": 1195442176,
+      "rate_numerator_before_div8": 995328000,
+      "session_unchanged": true
+    },
+    {
+      "width": 12288,
+      "height": 8040,
+      "accepted": false,
+      "width_mod_128": 0,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 768,
+      "ll3_chroma_width_mod_8": 0,
+      "sample_bound_bytes": 790380544,
+      "conservative_live_bytes": 3557687296,
+      "rate_numerator_before_div8": 2963865600,
+      "session_unchanged": true
+    },
+    {
+      "width": 17520,
+      "height": 8040,
+      "accepted": false,
+      "width_mod_128": 112,
+      "width_mod_16": 0,
+      "ll3_chroma_width": 1095,
+      "ll3_chroma_width_mod_8": 7,
+      "sample_bound_bytes": 1126902784,
+      "conservative_live_bytes": 5072037376,
+      "rate_numerator_before_div8": 4225824000,
+      "session_unchanged": true
+    }
+  ],
+  "source_sha256": "27111b97ebd24000928e816d9de2f4fc63b637bcfd39ce4133a09fb037f2ed2c"
+}
