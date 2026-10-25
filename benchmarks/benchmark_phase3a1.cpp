@@ -11,6 +11,7 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 
 extern "C" {
@@ -47,6 +48,7 @@ extern "C" {
 #include <string>
 #include <thread>
 #include <vector>
+#include "bench_host.h"
 
 #ifdef _WIN32
 #include <intrin.h>
@@ -140,11 +142,11 @@ std::string JsonEscape(const std::string& text) {
 
 std::string Capture(const std::string& command) {
     std::string output;
-    FILE* pipe = _popen(command.c_str(), "r");
+    FILE* pipe = hypercine::bench::OpenReadPipe(command.c_str());
     if (!pipe) return output;
     char buf[512];
     while (std::fgets(buf, sizeof(buf), pipe)) output += buf;
-    _pclose(pipe);
+    hypercine::bench::CloseReadPipe(pipe);
     while (!output.empty() && (output.back() == '\n' || output.back() == '\r')) output.pop_back();
     return output;
 }
@@ -1632,15 +1634,12 @@ int main(int argc, char** argv) {
     }
     json << "  ]\n}\n";
 
-    std::error_code ec;
-    if (out_file.has_parent_path()) std::filesystem::create_directories(out_file.parent_path(), ec);
-    std::ofstream file(out_file, std::ios::binary);
-    if (!file) {
+    const std::string body = json.str();
+    if (!hypercine::bench::WriteCompleteFile(out_file, body)) {
         std::cerr << "failed to write " << out_file.string() << "\n";
         return 1;
     }
-    file << json.str();
-    std::cout << "Wrote " << out_file.string() << " (" << json.str().size()
+    std::cout << "Wrote " << out_file.string() << " (" << body.size()
               << " bytes, runs=" << records.size()
               << ", equivalence_verified=" << (all_eq_verified ? "true" : "false") << ")\n";
     return all_eq_verified ? 0 : 3;

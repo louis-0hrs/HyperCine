@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -25,6 +26,15 @@ REQUIRED = ("test_reference_oracle", "test_phase2a", "test_phase2b",
 PHASE2 = ("test_phase2a", "test_phase2b", "test_phase2c", "test_phase2d")
 LANE_LABEL = "reference-oracle"
 ORACLE_SKIP = "SKIP_RETURN_CODE=77"
+
+# The allocator's documented capacity diagnostic (include/hypercine/entropy_gpu.h).
+# Only this exact contract may relabel a strict failure as device-capacity-bound;
+# the row stays FAIL so a limited device is never reported as a passing gate.
+CAPACITY_BOUND = re.compile(
+    r"UNSUPPORTED_RESOURCE_BOUND: [^\n]*? allocation failed: "
+    r"requested (\d+) B; "
+    r"(?:free (\d+) B of (\d+) B|device memory query failed); "
+    r"CUDA (cudaError[A-Za-z]+) \(")
 
 
 def _as_labels(value):
@@ -66,6 +76,71 @@ def _skip_text(node):
     return " ".join(part for part in ((node.get("message") or ""),
                                       (node.text or "").strip(),
                                       (node.get("value") or "")) if part)
+
+
+def _evidence_text(node):
+    """Collect a testcase's failure and captured output text."""
+    parts = []
+    for child in node:
+        if child.tag in ("failure", "error", "system-out", "system-err"):
+            parts.append(_skip_text(child))
+    return "\n".join(part for part in parts if part)
+
+
+# HyperCine's tests fail through `Fail()`: `FAIL: <reason>` on stderr, then
+# exit 1. The diagnostic that ended the run is therefore the last such line;
+# everything printed before it was handled and did not terminate the test.
+FATAL_LINE = re.compile(r'^FAIL: ', re.MULTILINE)
+
+
+def fatal_diagnostic(text):
+    """Return the text of the diagnostic that actually terminated the test.
+
+    Returns None when the output carries no `FAIL:` line. Callers must treat
+    None as "no attributable terminal diagnostic" and fall back to the plain
+    strict classification -- never to the whole captured output. A testcase
+    that printed a handled capacity marker and then died through <error> or a
+    separate channel would otherwise be relabelled from unrelated text.
+    """
+    starts = [match.start() for match in FATAL_LINE.finditer(text)]
+    if not starts:
+        return None
+    start = starts[-1]
+    end = text.find('\n', start)
+    return text[start:] if end < 0 else text[start:end]
+
+
+def capacity_bound(text):
+    """Read the exact allocator capacity contract from the fatal diagnostic.
+
+    The marker is bound to the line that ended the run, not to the whole
+    captured output. A test may print a capacity message and then survive it:
+    on a device where a smaller configuration fits, that message is context,
+    and a later unrelated failure (a coefficient mismatch, say) must not be
+    relabelled as device-capacity-bound. Searching the whole output made those
+    two cases indistinguishable.
+
+    A malformed or partial message stays an ordinary strict failure, so an
+    unverified device-capacity claim cannot be manufactured from test output.
+
+    With no terminal `FAIL:` line there is no attributable diagnostic at all,
+    so the strict classification is kept and the capacity marker is not read.
+    Searching the whole output in that case was the remaining hole: a testcase
+    that printed a handled capacity line and then aborted through <error> was
+    still labelled device-capacity-bound even though nothing bound the marker
+    to the failure.
+    """
+    fatal = fatal_diagnostic(text)
+    if fatal is None:
+        return None
+    match = CAPACITY_BOUND.search(fatal)
+    if match is None:
+        return None
+    requested, free_bytes, total_bytes, status = match.groups()
+    return dict(requested_bytes=int(requested),
+                free_bytes=None if free_bytes is None else int(free_bytes),
+                total_bytes=None if total_bytes is None else int(total_bytes),
+                cuda_status=status)
 
 
 def _registration_problem(name, entry):
@@ -139,9 +214,18 @@ def inventory(xml_text, ctest_exit, registration):
                              reason="registered with the lane label but no result was produced"))
             continue
         if node.find("failure") is not None or node.find("error") is not None:
-            rows.append(dict(test=name, required=required, state="FAIL", gate_exit=1,
-                             classification="STRICT_FAILURE",
-                             reason="CTest failure"))
+            capacity = capacity_bound(_evidence_text(node))
+            if capacity is None:
+                rows.append(dict(test=name, required=required, state="FAIL",
+                                 gate_exit=1, classification="STRICT_FAILURE",
+                                 reason="CTest failure"))
+            else:
+                rows.append(dict(test=name, required=required, state="FAIL",
+                                 gate_exit=1,
+                                 classification="STRICT_FAILURE_CAPACITY_BOUND",
+                                 capacity=capacity,
+                                 reason="device capacity exhausted before the strict "
+                                        "gate could run; still a hard failure"))
         elif node.find("skipped") is not None:
             skipped = node.find("skipped")
             if ORACLE_SKIP in _skip_text(skipped):
