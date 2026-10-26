@@ -432,9 +432,26 @@ int main() {
         auto embed = Film(1920, 1080);
         embed.diagnostic = DiagnosticMode::EmbedHashesInSample;
         Check("embed-hash", embed, host, CapabilityReason::ValidButNotImplemented);
+        // Fail closed on declared frame rates not emitted by the present
+        // FilmScan3 metadata-less writer. #262 pins its 30fps TIMC behaviour.
+        // The capability must not turn a 'valid rational' into a promise that
+        // this encoder has already implemented that requested timebase.
         auto rate = Film(1920, 1080);
+        Check("timebase-30-1", rate, host, CapabilityReason::ExperimentallySupported);
+        for (const auto candidate : {Rational{24, 1}, Rational{25, 1},
+                                     Rational{50, 1}, Rational{60000, 1001},
+                                     Rational{60, 2}}) {
+            rate.frame_rate = candidate;
+            const auto rejected = Check("timebase-not-implemented", rate, host,
+                                        CapabilityReason::ValidButNotImplemented);
+            Require(rejected.reasons.valid_but_not_implemented &&
+                    !rejected.allocation_permitted && rejected.geometry_validator_passed,
+                    "a valid unsupported requested timebase was advertised as available");
+        }
         rate.frame_rate = {30, 0};
         Check("bad-rate", rate, host, CapabilityReason::FormatMathematicallyInvalid);
+        rate.frame_rate = {0, 1};
+        Check("zero-numerator", rate, host, CapabilityReason::FormatMathematicallyInvalid);
 
         auto other = Check("384x40", Film(384, 40), host, CapabilityReason::BackendNotQualifiedForGeometry);
         Require(other.geometry_validator_passed && other.pixel_budget_ok && !other.evidence_record, "other in-budget geometry");
