@@ -18,9 +18,13 @@ CUDA runtime/driver: 12040/12040
 
 Driver 550.163.01, CUDA toolkit 12.4.131, 15,356 MiB total.
 
+## Reproduction scope and registered CUDA suite
+
+The native six-test suite used its default 1920×1080 geometry. Additional 3840×2160 and 16-frame comparisons were run directly by the owner, but the exact invocation strings were not included in this report. For reproducibility, attach the exact commands and sanitized exit codes for those two runs before elevating this documentation to qualification evidence. The reported CUDA version was 12.4.131; a pinned FFmpeg binary/version for the reported 1080p digest has not yet been recorded.
+
 ## Registered CUDA suite
 
-Six CUDA tests, all passed:
+Six registered CUDA tests were **reported PASS, 0 failed** (GPU-required; no SKIP77 reported in this subset):
 
 | Test | Time |
 |---|---|
@@ -54,8 +58,7 @@ FULL_PACKET: PASS (15325284 bytes byte-equal)
 PASS: complete 3840x2160 FilmScan3 CPU/A2 CUDA sample
 ```
 
-`15,325,284` bytes matches the #249 figure exactly. The pre-merge claim survives the
-merge.
+`15,325,284` bytes are a **new recorded post-merge 4K measurement** in this report. The mandatory #249 native release gate previously established a 1920×1080 packet; this does not retroactively turn 4K into the original registered #249 gate.
 
 ### 16-frame session at 1920x1080
 
@@ -72,16 +75,16 @@ PASS: complete 1920x1080 x 16 frames FilmScan3 CPU/A2 CUDA sample
 ```
 
 The limiter walks 4 → 9 → 14 → 17 → 20 and stays there; 16 distinct byte counts;
-frame indices contiguous 0..15. `51,045,800` bytes total matches #249.
+frame indices contiguous 0..15. `51,045,800` bytes are the **post-merge 16-frame measurement** recorded here. This is additional evidence beyond the original registered single-frame 1080p gate.
 
-## Independent decode
+## Independent decode — registered 1080p single-frame scope
 
 ```
 FFMPEG_DECODE: PASS CPU and CUDA packets decoded independently;
                yuv_sha256=6fbc6b590d385077276ebecf112c1f37acf1a745e86e528ce9333d0cd80f7017
 ```
 
-CPU and CUDA packets were decoded separately by FFmpeg, not compared as bytes only.
+For the registered **1920×1080 single-frame** gate, CPU and CUDA packets were decoded separately by FFmpeg, not compared as bytes only. The 4K and 16-frame direct comparator invocations above demonstrate full packet equality but this report does **not** include independent FFmpeg outputs for every one of those packets. Therefore an independent 4K/16-frame decode cannot be inferred from this one 1080p digest.
 
 ## Negative controls
 
@@ -110,8 +113,8 @@ particular would be meaningless here; none are quoted above for that reason.
 
 ## What this does and does not establish
 
-**Established:** main's CUDA frontend produces byte-identical packets to the CPU path
-at 720p-class through 4K on real SM86 hardware, keeps rate-state and frame counters
+**Established by this report:** main's CUDA frontend produces byte-identical packets to the CPU path
+at the explicitly reported 1920×1080 and 3840×2160 geometries on real SM86 hardware, keeps rate-state and frame counters
 correct across a 16-frame session, rejects three kinds of deliberate corruption, and
 yields packets that an independent FFmpeg pass decodes identically.
 
