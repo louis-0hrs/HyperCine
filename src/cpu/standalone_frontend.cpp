@@ -18,8 +18,8 @@ void Validate(const Plane& p) {
 // Explicit floor division: negative right shifts are implementation-defined in C++17.
 int RoundChroma(int v) { v += 16384; return v >= 0 ? v / 32768 : -((-v + 32767) / 32768); }
 }
-// Same split as ValidateFilmScan3Geometry: shape and wire bound are the format
-// question, the pixel budget is the resource question.
+// Legacy Fixed-Q2 preserves its pre-existing <=4096 geometry error contract.
+// New FilmScan3 geometry/budget diagnostics do not silently change this API.
 void ValidateGeometry(int w, int h) {
     // The legacy Fixed-Q2 API keeps its historically observable 4096
     // dimension rejection (invalid_argument), independent of the new
@@ -73,11 +73,3 @@ WaveletLevel ForwardLevel(const Plane& in, int prescale) {
     if (in.width < 6 || in.height < 6 || in.width % 2 || in.height % 2 || (prescale != 0 && prescale != 2))
         throw std::invalid_argument("invalid spatial dimensions or prescale");
     WaveletLevel out{{Plane(in.width/2,in.height/2), Plane(in.width/2,in.height/2),
-                      Plane(in.width/2,in.height/2), Plane(in.width/2,in.height/2)}};
-    Plane low(in.width/2,in.height), high(in.width/2,in.height);
-    if (prescale == 0) {
-        if (HyperCine_ForwardHorizontal26_CPU(in.pixels.data(),in.width,in.height,in.stride,
-                low.pixels.data(),low.stride,high.pixels.data(),high.stride) != HYPERCINE_STATUS_SUCCESS)
-            throw std::runtime_error("horizontal transform failed");
-    } else {
-        // Reuse the existing scalar filter for individually rounded highpass taps.
