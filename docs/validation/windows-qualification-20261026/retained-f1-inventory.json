@@ -1,0 +1,4228 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "scope": "Read-only audit of retained local diagnostic subsets; not the complete F1 or shared corpus",
+  "shared_corpus_status": "BLOCKED_SHARED_CORPUS_STORAGE",
+  "corpora": 28,
+  "verified": 28,
+  "records": [
+    {
+      "local_subset_id": "checkcase",
+      "manifest_sha256": "a844047c959aae25a2698b0d0a788c69cfe99dc9abc97118fd254e9b645ff735",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "5f06372ccfd8595eb5fef797950820608d6853f97cd4db273084e35c3e05319c",
+        "byte_length": 523
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BGRA"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/BGRA/filmscan1/alpha_half/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "BGRA",
+          "source_format_code": 1111970369,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_half",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "3d7be123678b9a49944b30afed34febfa8c4b5b7636f82d4c48d31559cf55091",
+            "byte_length": 65536,
+            "pitch": 512,
+            "components": 4,
+            "component_bits": 8,
+            "layout": "packed B,G,R,A 8-bit, bottom-up as interpreted by the SDK"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 5976,
+            "sample_bytes": 5976,
+            "sample_sha256": "3dce4708368762d32d10eaea21aa43f3937274e2fd2ec995d7a015a4f8ea9490",
+            "normalized_sha256": "fbe7fb1893cb8c3bf48913cea5c05945e209c11c82f3cdcdc53997f940b208a5",
+            "normalized_byte_length": 5976,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "fd12dca4c4255f6bf109446e274bc1a8e5cb956361f8d95f2221c5cd9fb5490f",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 52.897,
+              "g": 52.815,
+              "b": 53.633,
+              "a": 53.223
+            },
+            "max_abs_diff": 255,
+            "exact_match_ratio": 0,
+            "alpha_exact_ratio": 0,
+            "alpha_max_abs_diff": 143
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_BAYER_BYR4_detail_a",
+      "manifest_sha256": "a83450e64ad3419943648a5a8ef6baa051676bbcbdd0ec0e4e0a596123c5166d",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "6a5cbe3667ec6140795cde8586414e6078016dc254dcec5a3b811cfcb8538099",
+        "byte_length": 492
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/detail/128x128",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "detail",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "124da299d869071c51d8d53f6e42bdf931babaaffd5e7e356ed5e86c7ed35760",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 21000,
+            "sample_bytes": 21000,
+            "sample_sha256": "7757ed192dfb97e6b16f4de95d019b629ca69116a9327a6be505b71430a58ec2",
+            "normalized_sha256": "3895b22357a8f3ee0d61919046abe7c30df3aa5dd81619b824fbef5840d046bc",
+            "normalized_byte_length": 21000,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "7e85b03f2ad62e7ca5f00ba6b97c41e154766a4e6538859ccacfd7a099a3dc60",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 28.912
+            },
+            "max_abs_diff": 55790,
+            "exact_match_ratio": 0.000732422
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_BAYER_BYR4_detail_b",
+      "manifest_sha256": "4796d8a1418110ee61e293b653cc0fa98424ecf94e06b1a2a181c46841d3e484",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "6533bf3ca813994d8ae5584bacb3a9299ea4f1ab3491c6410879cdb9c2772304",
+        "byte_length": 492
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/detail/128x128",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "detail",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "124da299d869071c51d8d53f6e42bdf931babaaffd5e7e356ed5e86c7ed35760",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 21000,
+            "sample_bytes": 21000,
+            "sample_sha256": "59ddc216e1d869d1c3f40a92293ce2a6ed1d0aa1f737d156813dd7a3431774a2",
+            "normalized_sha256": "0aa00f5150737ab060265b436110aefb8c97c60f02a189bf7f3b4b19adc16038",
+            "normalized_byte_length": 21000,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "a67de7235b7af0066187ab457cc8f5a775b05fa661568ce4eb0ea5f22706550e",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 28.904
+            },
+            "max_abs_diff": 55790,
+            "exact_match_ratio": 0.000732422
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_BAYER_BYR4_flat_a",
+      "manifest_sha256": "331ecf2c3750c3080b9adaf16e5c89e8f11d8f9d37a3ffcf739548b6fd070d38",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "fe32105317645dae62184768542d1f57e60985809a6ed789bfccce13039ac578",
+        "byte_length": 482
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/flat/128x128",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "flat",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "3ee6d0365f9d1e5297cff3c44da13ac69e147d518f411bd33cc9f5e40166c94d",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4216,
+            "sample_bytes": 4216,
+            "sample_sha256": "cbdc9492e60bef81184cfdbb65a4d07dcbc8b1f2b597734ad62390106f7167ac",
+            "normalized_sha256": "da6f9553b4e2d0878f4c5e286029103ff3b6739c3bf4d87d7afee1984685ed0a",
+            "normalized_byte_length": 4216,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "d7b8a592a6195fb66309a672e4256ca5992a88ceb19f533a895f5de69c96f8b3",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 31.877
+            },
+            "max_abs_diff": 49132,
+            "exact_match_ratio": 0.000671387
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_BAYER_BYR4_flat_b",
+      "manifest_sha256": "67cb522d93208abb79a4a3a9631095a67709f25d6d8d8de3796458b1b3bab812",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "393729f78aa2904ee5ce09e5db0866f3c0a034833eb2e63ba516310125aee73a",
+        "byte_length": 482
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/flat/128x128",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "flat",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "3ee6d0365f9d1e5297cff3c44da13ac69e147d518f411bd33cc9f5e40166c94d",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4216,
+            "sample_bytes": 4216,
+            "sample_sha256": "3eafd29e520cb01b2947d5351b0f685a93ca0c38d6d05316c430c3d41812a297",
+            "normalized_sha256": "70aebbaa80f106850d168215a71ff9ed4839f974fa2c49a670f65f6761b82a53",
+            "normalized_byte_length": 4216,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "fdc86d73c0c974630c651ff09aaf358764af25ceac4805e049def8244b2de48c",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 31.946
+            },
+            "max_abs_diff": 49132,
+            "exact_match_ratio": 0.00408936
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_BAYER_flat_a",
+      "manifest_sha256": "4962fd82ed2045052158e89fad924f420323cbf232c6a3e0a36987472fc1ff0b",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "59f76fd54309489282400b088c2dc5d464ce7a0e7b1a5ba453bb386c51f33d18",
+        "byte_length": 490
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/flat/128x128/bfmt-1",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "flat",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "3ee6d0365f9d1e5297cff3c44da13ac69e147d518f411bd33cc9f5e40166c94d",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4216,
+            "sample_bytes": 4216,
+            "sample_sha256": "94714fb13a54436042d5f441eb1f9694a9ed05afcd86962be7f0f4bdd29466a7",
+            "normalized_sha256": "c17d8faf347644db9eb8d1923117aa18b2f40f248625e54171363273cc01a265",
+            "normalized_byte_length": 4216,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "436b490449ef3086e5728f5052b272e59a17bf1bb0b09cf9481a25332533b3d5",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 31.939
+            },
+            "max_abs_diff": 49132,
+            "exact_match_ratio": 0.00421143
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_BAYER_flat_b",
+      "manifest_sha256": "6474e8f4aca3bba718c5b3ddf32485260a9798eecb2785ae5d8a4a164689a534",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "8441da6d519286aecfef31f75795f4fdda77896a9d4863c43d5cfc746e5ebc9d",
+        "byte_length": 490
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/flat/128x128/bfmt-1",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "flat",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "3ee6d0365f9d1e5297cff3c44da13ac69e147d518f411bd33cc9f5e40166c94d",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4216,
+            "sample_bytes": 4216,
+            "sample_sha256": "71f64efc9eb4562f4089720394e905e6a2aac71a452169ac083f7c113bfff516",
+            "normalized_sha256": "c17d8faf347644db9eb8d1923117aa18b2f40f248625e54171363273cc01a265",
+            "normalized_byte_length": 4216,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "436b490449ef3086e5728f5052b272e59a17bf1bb0b09cf9481a25332533b3d5",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 31.939
+            },
+            "max_abs_diff": 49132,
+            "exact_match_ratio": 0.00421143
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_omp_a",
+      "manifest_sha256": "6edcb367ba106457554af723d7d74b367b198c1f2c93d19cf6fa688acdb46da6",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "2f112c034ed1d88d45c66645179afa7be1210176418f89483abd80d060e5e1e8",
+        "byte_length": 500
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/detail/128x128/bfmt-1",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "detail",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "124da299d869071c51d8d53f6e42bdf931babaaffd5e7e356ed5e86c7ed35760",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 21000,
+            "sample_bytes": 21000,
+            "sample_sha256": "0568bd4eb6e05abcb2b41a86fcde194067c23251b2cee175c02d5ab8d638e7f0",
+            "normalized_sha256": "0aa00f5150737ab060265b436110aefb8c97c60f02a189bf7f3b4b19adc16038",
+            "normalized_byte_length": 21000,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "a67de7235b7af0066187ab457cc8f5a775b05fa661568ce4eb0ea5f22706550e",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 28.904
+            },
+            "max_abs_diff": 55790,
+            "exact_match_ratio": 0.000732422
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_omp_b",
+      "manifest_sha256": "353a31bfecd80d6c7e16ab071f33e02d2a9d1adef2edad4a750ebaed61d1c30e",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "8e760c59e92580e622b458d8a68096cc5cc3119970887bef7fd17f22a7ac6de1",
+        "byte_length": 500
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/detail/128x128/bfmt-1",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "detail",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "124da299d869071c51d8d53f6e42bdf931babaaffd5e7e356ed5e86c7ed35760",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 21000,
+            "sample_bytes": 21000,
+            "sample_sha256": "8a0e280bc0fdc1e18b841394740e97161d1937ee1721f6acd44d8e15bb0dc246",
+            "normalized_sha256": "79e746955bdfa8b162cce90eabb0a2f7d8875493c5e119a8384753099dfb6895",
+            "normalized_byte_length": 21000,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "9397335d7638205489bfab235e6514f5364929044b17f28650d9e4f919aa5823",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 28.93
+            },
+            "max_abs_diff": 55790,
+            "exact_match_ratio": 0.000732422
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGB_444_asymmetric_a",
+      "manifest_sha256": "5126a42e1a20bb8538f62d83995a4cc74573905767407185b5ac1bcc3225b2b5",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "d495294096b42f8bacfbfa3f1e7cfa01e1f57a104976d578a1e899ba55463cbc",
+        "byte_length": 494
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG48"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG48/filmscan1/asymmetric/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG48",
+          "source_format_code": 1380398136,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "asymmetric",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "d30c2c0f67299c3f614bb667aec639787e13c4191f82ccf4d7e7dc8ebcd29d5a",
+            "byte_length": 98304,
+            "pitch": 768,
+            "components": 3,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4660,
+            "sample_bytes": 4660,
+            "sample_sha256": "8425000eadede9320761926539b1472e2e423ef50bb6ba6821b5ed3177512185",
+            "normalized_sha256": "e8ab987204d948fc6039074bd786ee57f3b52aad8e93c7654f6b0a5f1fef814e",
+            "normalized_byte_length": 4660,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "9b782a2333186dea74e73ade036a86806999059a54b7b2573714ae32f9c6d41b",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 75.073
+            },
+            "max_abs_diff": 38,
+            "exact_match_ratio": 6.10352e-05
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGB_444_asymmetric_b",
+      "manifest_sha256": "0b16e0e73e7ac793e3a3c54f218dcf876c8c70400b1dfa71c87086eee3568611",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "01c078884c9b7310342c6814b5ef0e2308636cb53257b0834fddc4d0d1bafca0",
+        "byte_length": 494
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG48"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG48/filmscan1/asymmetric/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG48",
+          "source_format_code": 1380398136,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "asymmetric",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "d30c2c0f67299c3f614bb667aec639787e13c4191f82ccf4d7e7dc8ebcd29d5a",
+            "byte_length": 98304,
+            "pitch": 768,
+            "components": 3,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4660,
+            "sample_bytes": 4660,
+            "sample_sha256": "eb1fe0884f64863d0a729671ce9e249c8dba6aa9fc2ca28bb00ce0bbd32229eb",
+            "normalized_sha256": "e8ab987204d948fc6039074bd786ee57f3b52aad8e93c7654f6b0a5f1fef814e",
+            "normalized_byte_length": 4660,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "9b782a2333186dea74e73ade036a86806999059a54b7b2573714ae32f9c6d41b",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 75.073
+            },
+            "max_abs_diff": 38,
+            "exact_match_ratio": 6.10352e-05
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGB_444_RG24_minmax_a",
+      "manifest_sha256": "5234ca16056b258fc0986e1303522fa44ee1377c7e04bea486efb39792cd4acb",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "546156305397295b118ab9d722468329a5e733bb55361ae100f447cfcab93f2d",
+        "byte_length": 500
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG24"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG24/filmscan1/minmax/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG24",
+          "source_format_code": 1380397620,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "minmax",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "2e9e74b8d646e05f95958123b18bd9adb76410317d6f08bcda68907d5cbe8e05",
+            "byte_length": 49152,
+            "pitch": 384,
+            "components": 3,
+            "component_bits": 8,
+            "layout": "packed B,G,R 8-bit (SDK inverted RGB24), bottom-up"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 23656,
+            "sample_bytes": 23656,
+            "sample_sha256": "99e3821b0721d97226081181042f1fcb71576a1642faf80c6fd620fe771da2fb",
+            "normalized_sha256": "2c119e75894fe1a2f823e9e5e370a8d178959d94076cc72f3868674a9226ee7a",
+            "normalized_byte_length": 23656,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "eed66169ddba418f12e41648af61b831a5bb30174df67377e86e5150449c87ee",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 49.869,
+              "g": 50.911,
+              "b": 47.005
+            },
+            "max_abs_diff": 1855,
+            "exact_match_ratio": 0
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGB_444_RG24_minmax_b",
+      "manifest_sha256": "cf37c1feae5c37b0bd28bf974485c500909a15ad32a7182522e6cd51896eb50c",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "5046c80ef2e065cb51ca754c0643d3fd3d7d08adf1684f8ba4d9f2cc06caf76e",
+        "byte_length": 500
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG24"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG24/filmscan1/minmax/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG24",
+          "source_format_code": 1380397620,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "minmax",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "2e9e74b8d646e05f95958123b18bd9adb76410317d6f08bcda68907d5cbe8e05",
+            "byte_length": 49152,
+            "pitch": 384,
+            "components": 3,
+            "component_bits": 8,
+            "layout": "packed B,G,R 8-bit (SDK inverted RGB24), bottom-up"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 23656,
+            "sample_bytes": 23656,
+            "sample_sha256": "31160c65f880c8cd3d29e0dd0596da0b068117178e1f859f5eb83f7e2de03a4c",
+            "normalized_sha256": "2c119e75894fe1a2f823e9e5e370a8d178959d94076cc72f3868674a9226ee7a",
+            "normalized_byte_length": 23656,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "eed66169ddba418f12e41648af61b831a5bb30174df67377e86e5150449c87ee",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 49.869,
+              "g": 50.911,
+              "b": 47.005
+            },
+            "max_abs_diff": 1855,
+            "exact_match_ratio": 0
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGB_444_RG48_noise_a",
+      "manifest_sha256": "862e53ae2784caf70e92cf02e8aac8f1364e28ee2bc91a77adc8b397c7f3de64",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "2c641dd97985b983265893428e525d08402e454f9e9725e4b32875139f86abfe",
+        "byte_length": 496
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG48"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG48/filmscan1/noise/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG48",
+          "source_format_code": 1380398136,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "noise",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "b5642ac684a4ef6270f193b901666f20cd7b60ad7fa4f316da3dffd53c9ee832",
+            "byte_length": 98304,
+            "pitch": 768,
+            "components": 3,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 65964,
+            "sample_bytes": 65964,
+            "sample_sha256": "1610d92bf4696a983bd6f1a93aac7c9369a34344e0ee308e45fd8d1fccb88ac1",
+            "normalized_sha256": "ed03717d4b22c3bb8e366af015c8e4985c401cab6327d37389fe276303335aae",
+            "normalized_byte_length": 65964,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "9c75eeada1acfc694d743e36b516266223bb3b67215b079d50a6e3dafabe7a56",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 42.59,
+              "g": 46.804,
+              "b": 42.629
+            },
+            "max_abs_diff": 2040,
+            "exact_match_ratio": 0
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGB_444_RG48_noise_b",
+      "manifest_sha256": "9a8b965894e8a6456ce407701bd2606f56886dc105668ad47641f0c43cadc7df",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "46ca7e9b718d5c5d737a8b86152f93b68b53e12a11b4558909b6a70bb9de7239",
+        "byte_length": 496
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG48"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG48/filmscan1/noise/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG48",
+          "source_format_code": 1380398136,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "noise",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "b5642ac684a4ef6270f193b901666f20cd7b60ad7fa4f316da3dffd53c9ee832",
+            "byte_length": 98304,
+            "pitch": 768,
+            "components": 3,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 65964,
+            "sample_bytes": 65964,
+            "sample_sha256": "d5ec68cbc235165fdd5e6e29ff74cb965202d45973a54cb9419a9519b351e629",
+            "normalized_sha256": "ed03717d4b22c3bb8e366af015c8e4985c401cab6327d37389fe276303335aae",
+            "normalized_byte_length": 65964,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "9c75eeada1acfc694d743e36b516266223bb3b67215b079d50a6e3dafabe7a56",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 42.59,
+              "g": 46.804,
+              "b": 42.629
+            },
+            "max_abs_diff": 2040,
+            "exact_match_ratio": 0
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGBA_4444_alpha_ramp_a",
+      "manifest_sha256": "3ba9e432d58b1a94c4afc9b98c96baa9b51872b0428cc39d2abca48a316bf6ff",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "024ac48384a8550de5d5a81b38c147ce9a696eeb1d4666d01674fced9893cdd1",
+        "byte_length": 504
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG64"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/RG64/filmscan1/alpha_ramp/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "RG64",
+          "source_format_code": 1380398644,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_ramp",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "9203eb205ec4bbcf3810616e8bf116022bccea34b94aec5ac0771dd4e4f83b78",
+            "byte_length": 131072,
+            "pitch": 1024,
+            "components": 4,
+            "component_bits": 16,
+            "layout": "packed RGBA, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 6304,
+            "sample_bytes": 6304,
+            "sample_sha256": "6327c1272205d749bb2c8ff4891100f8938d2fee8ce93a165bd3c89a127b0034",
+            "normalized_sha256": "cdfe3f203a1d7e50e0cfd3b74086ef3ad4e510dc80679a6328d351d4cb156942",
+            "normalized_byte_length": 6304,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "5e8c2115464179ec631fb539661b7d63dc85ea2903f469fee3cc463420a9a4e9",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 72.808,
+              "a": 59.268
+            },
+            "max_abs_diff": 22,
+            "exact_match_ratio": 6.10352e-05,
+            "alpha_exact_ratio": 0.015625,
+            "alpha_max_abs_diff": 335
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGBA_4444_alpha_ramp_b",
+      "manifest_sha256": "03549d5580b96e05f3ad1bc73e5140e1dcb5810e10873a64cb808324a420b4d3",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "6df91a81a216b4c4c35e9da4796234af1ce945244c20e80b540f0f830529fe1f",
+        "byte_length": 504
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG64"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/RG64/filmscan1/alpha_ramp/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "RG64",
+          "source_format_code": 1380398644,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_ramp",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "9203eb205ec4bbcf3810616e8bf116022bccea34b94aec5ac0771dd4e4f83b78",
+            "byte_length": 131072,
+            "pitch": 1024,
+            "components": 4,
+            "component_bits": 16,
+            "layout": "packed RGBA, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 6304,
+            "sample_bytes": 6304,
+            "sample_sha256": "7d0301e942b260f81c698030f43db56cd883dd5e9ae958285bcd2d392b3e9318",
+            "normalized_sha256": "cdfe3f203a1d7e50e0cfd3b74086ef3ad4e510dc80679a6328d351d4cb156942",
+            "normalized_byte_length": 6304,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "5e8c2115464179ec631fb539661b7d63dc85ea2903f469fee3cc463420a9a4e9",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 72.808,
+              "a": 59.268
+            },
+            "max_abs_diff": 22,
+            "exact_match_ratio": 6.10352e-05,
+            "alpha_exact_ratio": 0.015625,
+            "alpha_max_abs_diff": 335
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGBA_4444_BGRA_alpha_half_a",
+      "manifest_sha256": "2ac25341c440b34594cd6f76076fe5146746f86217947eec9557207334451a66",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "6afd51b9264aeb13c711a97181ff0fc8c93a0b481c8a7df2eefb597d335fe549",
+        "byte_length": 523
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BGRA"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/BGRA/filmscan1/alpha_half/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "BGRA",
+          "source_format_code": 1111970369,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_half",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "3d7be123678b9a49944b30afed34febfa8c4b5b7636f82d4c48d31559cf55091",
+            "byte_length": 65536,
+            "pitch": 512,
+            "components": 4,
+            "component_bits": 8,
+            "layout": "packed B,G,R,A 8-bit, bottom-up as interpreted by the SDK"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 5976,
+            "sample_bytes": 5976,
+            "sample_sha256": "6ff8e7dd4c80582e430fb632aec6558895abb6876f59d237dc36808f730a1180",
+            "normalized_sha256": "fbe7fb1893cb8c3bf48913cea5c05945e209c11c82f3cdcdc53997f940b208a5",
+            "normalized_byte_length": 5976,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "fd12dca4c4255f6bf109446e274bc1a8e5cb956361f8d95f2221c5cd9fb5490f",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 52.897,
+              "g": 52.815,
+              "b": 53.633,
+              "a": 53.223
+            },
+            "max_abs_diff": 255,
+            "exact_match_ratio": 0,
+            "alpha_exact_ratio": 0,
+            "alpha_max_abs_diff": 143
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGBA_4444_BGRA_alpha_half_b",
+      "manifest_sha256": "56a6723777c80ea73ed4cd0610e3b8b0abca52916345cc81b74603099a36806a",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "d3f64b0e6dbefb8e197f9e40c3e415dcd212f5c0e7171929d67d9384a3085de9",
+        "byte_length": 523
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BGRA"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/BGRA/filmscan1/alpha_half/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "BGRA",
+          "source_format_code": 1111970369,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_half",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "3d7be123678b9a49944b30afed34febfa8c4b5b7636f82d4c48d31559cf55091",
+            "byte_length": 65536,
+            "pitch": 512,
+            "components": 4,
+            "component_bits": 8,
+            "layout": "packed B,G,R,A 8-bit, bottom-up as interpreted by the SDK"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 5976,
+            "sample_bytes": 5976,
+            "sample_sha256": "db2ef0b91072537df8f689e26c9cf75f43ecc2ac40e81efe42fdcb0b11001c47",
+            "normalized_sha256": "fbe7fb1893cb8c3bf48913cea5c05945e209c11c82f3cdcdc53997f940b208a5",
+            "normalized_byte_length": 5976,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "fd12dca4c4255f6bf109446e274bc1a8e5cb956361f8d95f2221c5cd9fb5490f",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 52.897,
+              "g": 52.815,
+              "b": 53.633,
+              "a": 53.223
+            },
+            "max_abs_diff": 255,
+            "exact_match_ratio": 0,
+            "alpha_exact_ratio": 0,
+            "alpha_max_abs_diff": 143
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGBA_4444_RG64_alpha_noise_a",
+      "manifest_sha256": "90dda5fb05d7adeef697397c3cb998b0ddbaaccf3a23ad144761d0d96676e1b1",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "8396efc903a971c64fcb40edbb9a6419e757d18819cccb31048a8f935934f1c3",
+        "byte_length": 530
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG64"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/RG64/filmscan1/alpha_noise/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "RG64",
+          "source_format_code": 1380398644,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_noise",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "bfa046bc8c7c61235b3d6a7f366706f6bddf8c274828c29064281070a0f673ab",
+            "byte_length": 131072,
+            "pitch": 1024,
+            "components": 4,
+            "component_bits": 16,
+            "layout": "packed RGBA, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 24232,
+            "sample_bytes": 24232,
+            "sample_sha256": "94430c540f654de65f8a740f1a36c05e03e65169bd0b83cb6920b2f9e2804ca4",
+            "normalized_sha256": "73022b05cdb37faa487c4938e8bf05de4a811c536f5a02315f00d6644e336db5",
+            "normalized_byte_length": 24232,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "cd3c263c24923661e71f5159767a4699fe1f053086ddee954a3b4473744042b4",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 72.808,
+              "a": 41.543
+            },
+            "max_abs_diff": 22,
+            "exact_match_ratio": 0,
+            "alpha_exact_ratio": 0.000244141,
+            "alpha_max_abs_diff": 2062
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "det_RGBA_4444_RG64_alpha_noise_b",
+      "manifest_sha256": "e57133c22126c7f1a889b8fd3476f98166c68a053530c1393c707ebb65ef8c26",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "909f574854f517352a46cf5ff0596ceab307eebbb25857ce642a0995c203cee6",
+        "byte_length": 530
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG64"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/RG64/filmscan1/alpha_noise/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "RG64",
+          "source_format_code": 1380398644,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_noise",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "bfa046bc8c7c61235b3d6a7f366706f6bddf8c274828c29064281070a0f673ab",
+            "byte_length": 131072,
+            "pitch": 1024,
+            "components": 4,
+            "component_bits": 16,
+            "layout": "packed RGBA, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 24232,
+            "sample_bytes": 24232,
+            "sample_sha256": "b3c0e2d2599fdc525137ee4a35f2d38c822681880f23c0624a5ca112ef3ae88a",
+            "normalized_sha256": "73022b05cdb37faa487c4938e8bf05de4a811c536f5a02315f00d6644e336db5",
+            "normalized_byte_length": 24232,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "cd3c263c24923661e71f5159767a4699fe1f053086ddee954a3b4473744042b4",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 72.808,
+              "a": 41.543
+            },
+            "max_abs_diff": 22,
+            "exact_match_ratio": 0,
+            "alpha_exact_ratio": 0.000244141,
+            "alpha_max_abs_diff": 2062
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "f1-bayer",
+      "manifest_sha256": "3a182f4836c3fe33df15eb026adac8f7dc723b6d2e0ab9dce29af4217f7237cf",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "6fea99d9928d92ce6ae3cdd089e80c63dbfb93d6c44c361c4916f15f3cce56f6",
+        "byte_length": 500
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/detail/128x128/bfmt-1",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "detail",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "124da299d869071c51d8d53f6e42bdf931babaaffd5e7e356ed5e86c7ed35760",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 21000,
+            "sample_bytes": 21000,
+            "sample_sha256": "a91940968dec78890bdbd5a7eef614d0bc24b49df60c39e057c806907ce4b3b9",
+            "normalized_sha256": "0aa00f5150737ab060265b436110aefb8c97c60f02a189bf7f3b4b19adc16038",
+            "normalized_byte_length": 21000,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "a67de7235b7af0066187ab457cc8f5a775b05fa661568ce4eb0ea5f22706550e",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 28.904
+            },
+            "max_abs_diff": 55790,
+            "exact_match_ratio": 0.000732422
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "f1-det-a",
+      "manifest_sha256": "146e62a5798b85097d812c9639f95a82b68e8201b686a828849b733d61b4ee91",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "5951c426981a3e10e4471d118ca5c13b0be6fbc5dded7ea02eb68524f46f5c94",
+        "byte_length": 500
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/detail/128x128/bfmt-1",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "detail",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "124da299d869071c51d8d53f6e42bdf931babaaffd5e7e356ed5e86c7ed35760",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 21000,
+            "sample_bytes": 21000,
+            "sample_sha256": "64be897531c5b3fa12fe060a6f407e88aa9e6cd287de4c240a4fce3a3ec3785f",
+            "normalized_sha256": "96384ccb8d1c7e6dfc1d3c119ae15f5f68b36a1cadc4e54bf563047e6696d767",
+            "normalized_byte_length": 21000,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "ccc1e1bd58d6ae02dda62fa0d0180309792615a2ca31634e873bfc6d35f56fc8",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 28.905
+            },
+            "max_abs_diff": 55790,
+            "exact_match_ratio": 0.000732422
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "f1-det-b",
+      "manifest_sha256": "c6447ba002f839cb6c764694241d8086114f8f98b55c58d6ad676342c147f99c",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "a5cef27f90dd63876cceb44c2d1a64d75c22b4746958ede34a4c0edf9e2883d9",
+        "byte_length": 500
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "BYR4"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "BAYER/BYR4/filmscan1/detail/128x128/bfmt-1",
+          "family": "BAYER",
+          "family_code": 3,
+          "source_format": "BYR4",
+          "source_format_code": 1113150004,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "detail",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "124da299d869071c51d8d53f6e42bdf931babaaffd5e7e356ed5e86c7ed35760",
+            "byte_length": 32768,
+            "pitch": 256,
+            "components": 1,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 21000,
+            "sample_bytes": 21000,
+            "sample_sha256": "f2f2da63a13e699e2b24ff7e9999131e794a103742fdcd08ef7e11fc7343fac9",
+            "normalized_sha256": "79e746955bdfa8b162cce90eabb0a2f7d8875493c5e119a8384753099dfb6895",
+            "normalized_byte_length": 21000,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 3,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "BYR2",
+              "BYR4",
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "BYR4",
+            "output_format": "BYR4",
+            "width": 128,
+            "height": 128,
+            "pitch": 256,
+            "component_bits": 16,
+            "layout": "raw CFA, native-endian uint16 per photosite, top-down",
+            "decoded_sha256": "9397335d7638205489bfab235e6514f5364929044b17f28650d9e4f919aa5823",
+            "decoded_byte_length": 32768
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "cfa": 28.93
+            },
+            "max_abs_diff": 55790,
+            "exact_match_ratio": 0.000732422
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "f1-manual",
+      "manifest_sha256": "1493207319b5155396a7abdf86f7ed3f5015c41c1a0f032d31bfa297689e1d3c",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "0979349ffccb14b2f603541f8280d47372a0dbf5d03909e5e8dd3eba6a771bf8",
+        "byte_length": 494
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG48"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG48/filmscan1/asymmetric/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG48",
+          "source_format_code": 1380398136,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "asymmetric",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "d30c2c0f67299c3f614bb667aec639787e13c4191f82ccf4d7e7dc8ebcd29d5a",
+            "byte_length": 98304,
+            "pitch": 768,
+            "components": 3,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "metadata_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4660,
+            "sample_bytes": 4660,
+            "sample_sha256": "006a3976f6ec1f7df04955a6253d88e0415320d06e36e934993f50047f6922b9",
+            "normalized_sha256": "e8ab987204d948fc6039074bd786ee57f3b52aad8e93c7654f6b0a5f1fef814e",
+            "normalized_byte_length": 4660,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY"
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "9b782a2333186dea74e73ade036a86806999059a54b7b2573714ae32f9c6d41b",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 75.073
+            },
+            "max_abs_diff": 38,
+            "exact_match_ratio": 6.10352e-05
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "f1-rgba",
+      "manifest_sha256": "a8f5160ffe6c4e0b527d148d8d8f5183795dc6aba6153115f38abf8eb15c3008",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "ef989519bed52ebac44f9283f6d4d108789f7ccfd1d506fc2d8a4f540812ef4d",
+        "byte_length": 504
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG64"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGBA_4444/RG64/filmscan1/alpha_ramp/128x128",
+          "family": "RGBA_4444",
+          "family_code": 2,
+          "source_format": "RG64",
+          "source_format_code": 1380398644,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "alpha_ramp",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "9203eb205ec4bbcf3810616e8bf116022bccea34b94aec5ac0771dd4e4f83b78",
+            "byte_length": 131072,
+            "pitch": 1024,
+            "components": 4,
+            "component_bits": 16,
+            "layout": "packed RGBA, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 6304,
+            "sample_bytes": 6304,
+            "sample_sha256": "8db83fd2dab19b49aef81b4506d01d414f8a8c30db973fa4b8b0ae48626ea6b8",
+            "normalized_sha256": "cdfe3f203a1d7e50e0cfd3b74086ef3ad4e510dc80679a6328d351d4cb156942",
+            "normalized_byte_length": 6304,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 112,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 136,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 156,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 172,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 2,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "b64a",
+            "output_format": "b64a",
+            "width": 128,
+            "height": 128,
+            "pitch": 1024,
+            "component_bits": 16,
+            "layout": "packed A,R,G,B, native-endian uint16 per component, top-down",
+            "decoded_sha256": "5e8c2115464179ec631fb539661b7d63dc85ea2903f469fee3cc463420a9a4e9",
+            "decoded_byte_length": 131072
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 72.808,
+              "a": 59.268
+            },
+            "max_abs_diff": 22,
+            "exact_match_ratio": 6.10352e-05,
+            "alpha_exact_ratio": 0.015625,
+            "alpha_max_abs_diff": 335
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "f1-smoke",
+      "manifest_sha256": "4cb1a2889c181c2509a84c54f90e5d762d0e2f049fe1d963369ba13ce6178db7",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "24ac0c45796ddbb3fa2e6028501322fd5b3b6be236e7128126d53db3e6c7b70a",
+        "byte_length": 514
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 128,
+        "height": 128,
+        "qualities": "filmscan1",
+        "sources": "RG48"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG48/filmscan1/asymmetric/128x128",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG48",
+          "source_format_code": 1380398136,
+          "quality": "filmscan1",
+          "quality_code": 4,
+          "pattern": "asymmetric",
+          "geometry": {
+            "width": 128,
+            "height": 128
+          },
+          "source": {
+            "sha256": "d30c2c0f67299c3f614bb667aec639787e13c4191f82ccf4d7e7dc8ebcd29d5a",
+            "byte_length": 98304,
+            "pitch": 768,
+            "components": 3,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 4660,
+            "sample_bytes": 4660,
+            "sample_sha256": "433d0ae26a9e55295bd9de604d047e07de2c2cda5acff6b57eba2c8d48309e82",
+            "normalized_sha256": "e8ab987204d948fc6039074bd786ee57f3b52aad8e93c7654f6b0a5f1fef814e",
+            "normalized_byte_length": 4660,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 128,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 128,
+            "height": 128,
+            "pitch": 768,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "9b782a2333186dea74e73ade036a86806999059a54b7b2573714ae32f9c6d41b",
+            "decoded_byte_length": 98304
+          },
+          "comparison": {
+            "comparable": true,
+            "note": "same-layout comparison against the exact source bytes",
+            "psnr_db": {
+              "r": 77.873,
+              "g": 72.458,
+              "b": 75.073
+            },
+            "max_abs_diff": 38,
+            "exact_match_ratio": 6.10352e-05
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "local_subset_id": "probe_case",
+      "manifest_sha256": "a1823509fb470e5c5e1e8f659acec0205646c14fe245100a589046930b7ed809",
+      "verified": true,
+      "transfer_manifest": {
+        "path": "TRANSFER_SHA256.tsv",
+        "sha256": "9d86db5cf3c3c6597705c8f2c0afd1e435e1c0f07d81606f8d6c191946c24009",
+        "byte_length": 487
+      },
+      "sdk": {
+        "frozen_upstream_commit": "11574d0295771edccadd17af14af74a539f924c7",
+        "usage": "pristine GoPro CineForm SDK, no upstream modification"
+      },
+      "host": {
+        "os": "Windows",
+        "compiler": "MSVC 194435229"
+      },
+      "selection": {
+        "width": 1920,
+        "height": 1080,
+        "qualities": "high",
+        "sources": "RG24"
+      },
+      "summary": {
+        "cases": 1,
+        "exported": 1,
+        "encode_failed": 0,
+        "decode_failed": 0,
+        "write_failed": 0
+      },
+      "cases": [
+        {
+          "case_id": "RGB_444/RG24/high/primaries/1920x1080",
+          "family": "RGB_444",
+          "family_code": 1,
+          "source_format": "RG24",
+          "source_format_code": 1380397620,
+          "quality": "high",
+          "quality_code": 3,
+          "pattern": "primaries",
+          "geometry": {
+            "width": 1920,
+            "height": 1080
+          },
+          "source": {
+            "sha256": "4adf2abea770048967f8dd0827372fa8bb7c65d336a9d459bf9e56544ad65470",
+            "byte_length": 6220800,
+            "pitch": 5760,
+            "components": 3,
+            "component_bits": 8,
+            "layout": "packed RGB 8-bit, top-down"
+          },
+          "encode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "encode_error": "CFHD_ERROR_OKAY",
+            "sample_error": "CFHD_ERROR_OKAY",
+            "sdk_sample_bytes": 252220,
+            "sample_bytes": 252220,
+            "sample_sha256": "17b7da5c27a318f506da0d2dd78eed26cff20b5e8abfb5ff778be84e691339b4",
+            "normalized_sha256": "36d1c787d3f514ebba14c5dca900a6996c2de33a4ccd33a91d44d5ee4ca61f26",
+            "normalized_byte_length": 252220,
+            "volatile_metadata_masks": [
+              {
+                "tag": "GUID",
+                "offset": 108,
+                "length": 16
+              },
+              {
+                "tag": "DATE",
+                "offset": 132,
+                "length": 10
+              },
+              {
+                "tag": "TIME",
+                "offset": 152,
+                "length": 8
+              },
+              {
+                "tag": "TIMC",
+                "offset": 168,
+                "length": 11
+              }
+            ]
+          },
+          "sample_info": {
+            "encoded_format": 1,
+            "channels": 1,
+            "display_width": 1920,
+            "display_height": 0,
+            "progressive": 1,
+            "key_frame": 1,
+            "sdk_version": 655616,
+            "encode_version": 655616,
+            "bayer_format": -1,
+            "bayer_format_error": "CFHD_ERROR_OKAY",
+            "encode_curve": -1,
+            "decode_curve": -1,
+            "encode_preset": -1
+          },
+          "decode": {
+            "threw": false,
+            "thrown_error_code": 0,
+            "prepare_error": "CFHD_ERROR_OKAY",
+            "decode_error": "CFHD_ERROR_OKAY",
+            "offered_output_formats": [
+              "b64a",
+              "r210",
+              "DPX0",
+              "RG30",
+              "AB10",
+              "AR10",
+              "RG48",
+              "WP13",
+              "W13A",
+              "BGRA",
+              "BGRa",
+              "RG24",
+              "v210",
+              "2vuy",
+              "YUY2"
+            ],
+            "requested_output_format": "RG48",
+            "output_format": "RG48",
+            "width": 1920,
+            "height": 1080,
+            "pitch": 11520,
+            "component_bits": 16,
+            "layout": "packed RGB, native-endian uint16 per component, top-down",
+            "decoded_sha256": "997b528982c39aa283740cdc3eacf17d1a088980e784a424341f04c485697375",
+            "decoded_byte_length": 12441600
+          },
+          "comparison": {
+            "comparable": false,
+            "note": "decoded output format differs from the source layout; no pixel comparison is asserted",
+            "psnr_db": {},
+            "max_abs_diff": -1,
+            "exact_match_ratio": 0
+          },
+          "status": "EXPORTED"
+        }
+      ],
+      "independent_pixel_reference": "NOT_QUALIFIED",
+      "provenance_limit": "manifest records generator name and seed but not exporter source commit; retained exporter checkout f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    }
+  ]
+}
