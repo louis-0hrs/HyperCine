@@ -22,6 +22,9 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#if defined(_WIN32)
+#include <malloc.h>
+#endif
 #include <cstring>
 #include <functional>
 #include <mutex>
@@ -86,17 +89,37 @@ PlaneIdentity identity(std::uint32_t channel, std::uint32_t wavelet, std::uint32
     return id;
 }
 
+namespace {
+// MSVC has no posix_memalign, and this test is built by the Windows CI jobs. One
+// helper keeps the platform difference in one place instead of two call sites.
+void* AllocateAligned(std::size_t bytes, std::size_t alignment) {
+#if defined(_WIN32)
+    return _aligned_malloc(bytes, alignment);
+#else
+    void* memory = nullptr;
+    return posix_memalign(&memory, alignment, bytes) == 0 ? memory : nullptr;
+#endif
+}
+void FreeAligned(void* memory) {
+#if defined(_WIN32)
+    _aligned_free(memory);
+#else
+    std::free(memory);
+#endif
+}
+} // namespace
+
 struct HeapPlane {
     std::int16_t* data = nullptr;
     HeapPlane() {
-        void* memory = nullptr;
-        if (posix_memalign(&memory, 32, kBytes) != 0) throw std::bad_alloc();
+        void* memory = AllocateAligned(kBytes, 32);
+        if (!memory) throw std::bad_alloc();
         data = static_cast<std::int16_t*>(memory);
         std::memset(data, 0, kBytes);
     }
     HeapPlane(const HeapPlane&) = delete;
     HeapPlane& operator=(const HeapPlane&) = delete;
-    ~HeapPlane() { std::free(data); }
+    ~HeapPlane() { FreeAligned(data); }
     void fill(std::uint32_t band) {
         for (std::size_t i = 0; i < kSamples; ++i) data[i] = sample_at(band, i);
     }
@@ -260,15 +283,15 @@ void rule_premature_free(std::size_t workers) {
         {TaskSpec{plane_key(0, 5, 0),
                   {},
                   [&](const TaskContext& context) {
-                      void* memory = nullptr;
-                      if (posix_memalign(&memory, 32, kBytes) != 0) throw std::bad_alloc();
+                      void* memory = AllocateAligned(kBytes, 32);
+                      if (!memory) throw std::bad_alloc();
                       auto* samples = static_cast<std::int16_t*>(memory);
                       for (std::size_t i = 0; i < kSamples; ++i) samples[i] = sample_at(0, i);
                       const bool published =
                           context.publish_plane(samples, kBytes, kWidth, kHeight, kPitch);
                       freed = samples;
                       std::memset(samples, 0x5A, kBytes);
-                      std::free(samples);
+                      FreeAligned(samples);
                       if (!published) throw std::runtime_error("plane publish failed");
                   }},
          TaskSpec{plane_key(0, 4, 0), {plane_key(0, 5, 0)}, consume},
