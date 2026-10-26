@@ -4,6 +4,7 @@
 #include "hypercine/standalone.h"
 #include "hypercine/wavelet.h"
 #include <algorithm>
+#include <cstdint>
 #include <stdexcept>
 #include <utility>
 
@@ -75,33 +76,74 @@ namespace {
 inline bool UseNeon() {
     return HyperCine_IsNEONWaveletAvailable() && HyperCine_IsNEONWaveletEnabled();
 }
+// Thread-local dispatch witness (issue #70). A packet cannot reveal the kernel because
+// both are bit-exact; a timestamp cannot either once another thread flips the global
+// default. These counters are written on the thread that actually entered a kernel, so
+// a test can assert its own session's path without perturbing another session's numbers.
+thread_local std::uint64_t t_scalar_dispatches = 0;
+thread_local std::uint64_t t_neon_dispatches = 0;
+// Dispatch against an already-resolved choice. `Scalar` never touches the global
+// switch, which is the whole point: a Neon session keeps Neon while another thread
+// flips the process-wide default.
+inline bool UseNeon(WaveletIsa isa) { return isa == WaveletIsa::Neon; }
 inline HyperCineStatus ForwardHorizontal26(const int16_t* src, int width, int height, int src_stride,
                                           int16_t* lowpass, int low_stride,
-                                          int16_t* highpass, int high_stride) {
-    if (UseNeon()) {
+                                          int16_t* highpass, int high_stride, WaveletIsa isa) {
+    if (UseNeon(isa)) {
         const auto status = HyperCine_ForwardHorizontal26_NEON(src, width, height, src_stride,
                                                               lowpass, low_stride,
                                                               highpass, high_stride);
-        if (status != HYPERCINE_STATUS_NOT_SUPPORTED) return status;
+        if (status != HYPERCINE_STATUS_NOT_SUPPORTED) { ++t_neon_dispatches; return status; }
     }
+    ++t_scalar_dispatches;
     return HyperCine_ForwardHorizontal26_CPU(src, width, height, src_stride,
                                              lowpass, low_stride, highpass, high_stride);
 }
 inline HyperCineStatus ForwardVertical26(const int16_t* src, int width, int height, int src_stride,
                                         int16_t* lowpass, int low_stride,
-                                        int16_t* highpass, int high_stride) {
-    if (UseNeon()) {
+                                        int16_t* highpass, int high_stride, WaveletIsa isa) {
+    if (UseNeon(isa)) {
         const auto status = HyperCine_ForwardVertical26_NEON(src, width, height, src_stride,
                                                             lowpass, low_stride,
                                                             highpass, high_stride);
-        if (status != HYPERCINE_STATUS_NOT_SUPPORTED) return status;
+        if (status != HYPERCINE_STATUS_NOT_SUPPORTED) { ++t_neon_dispatches; return status; }
     }
+    ++t_scalar_dispatches;
     return HyperCine_ForwardVertical26_CPU(src, width, height, src_stride,
                                            lowpass, low_stride, highpass, high_stride);
 }
 } // namespace
 
+detail::WaveletDispatchCounts detail::WaveletDispatchSnapshot() noexcept {
+    WaveletDispatchCounts counts;
+    counts.scalar = t_scalar_dispatches;
+    counts.neon = t_neon_dispatches;
+    return counts;
+}
+
+WaveletIsa detail::ResolveWaveletIsa(WaveletIsa requested) {
+    switch (requested) {
+    case WaveletIsa::Auto:
+        // The only place the process-global default is still read. A session calls
+        // this once; a direct ForwardLevel call reads it once per call, as before.
+        return UseNeon() ? WaveletIsa::Neon : WaveletIsa::Scalar;
+    case WaveletIsa::Scalar:
+        return WaveletIsa::Scalar;
+    case WaveletIsa::Neon:
+        // An explicit request must not degrade silently, otherwise a caller cannot
+        // tell "I asked for NEON and got it" from "I asked and got scalar anyway".
+        if (!HyperCine_IsNEONWaveletAvailable())
+            throw std::invalid_argument("NEON wavelet backend is not available in this build");
+        return WaveletIsa::Neon;
+    }
+    throw std::invalid_argument("unknown wavelet ISA policy");
+}
+
 WaveletLevel ForwardLevel(const Plane& in, int prescale) {
+    return ForwardLevel(in, prescale, detail::ResolveWaveletIsa(WaveletIsa::Auto));
+}
+
+WaveletLevel ForwardLevel(const Plane& in, int prescale, WaveletIsa isa) {
     Validate(in);
     if (in.width < 6 || in.height < 6 || in.width % 2 || in.height % 2 || (prescale != 0 && prescale != 2))
         throw std::invalid_argument("invalid spatial dimensions or prescale");
@@ -110,7 +152,7 @@ WaveletLevel ForwardLevel(const Plane& in, int prescale) {
     Plane low(in.width/2,in.height), high(in.width/2,in.height);
     if (prescale == 0) {
         if (ForwardHorizontal26(in.pixels.data(),in.width,in.height,in.stride,
-                low.pixels.data(),low.stride,high.pixels.data(),high.stride) != HYPERCINE_STATUS_SUCCESS)
+                low.pixels.data(),low.stride,high.pixels.data(),high.stride,isa) != HYPERCINE_STATUS_SUCCESS)
             throw std::runtime_error("horizontal transform failed");
     } else {
         // Reuse the existing scalar filter for individually rounded highpass taps.
@@ -131,10 +173,10 @@ WaveletLevel ForwardLevel(const Plane& in, int prescale) {
     }
     auto& b=out.bands;
     if (ForwardVertical26(low.pixels.data(),low.width,low.height,low.stride,
-                          b[0].pixels.data(),b[0].stride,b[2].pixels.data(),b[2].stride) != HYPERCINE_STATUS_SUCCESS)
+                          b[0].pixels.data(),b[0].stride,b[2].pixels.data(),b[2].stride,isa) != HYPERCINE_STATUS_SUCCESS)
         throw std::runtime_error("vertical lowpass transform failed");
     if (ForwardVertical26(high.pixels.data(),high.width,high.height,high.stride,
-                          b[1].pixels.data(),b[1].stride,b[3].pixels.data(),b[3].stride) != HYPERCINE_STATUS_SUCCESS)
+                          b[1].pixels.data(),b[1].stride,b[3].pixels.data(),b[3].stride,isa) != HYPERCINE_STATUS_SUCCESS)
         throw std::runtime_error("vertical highpass transform failed");
     return out;
 }

@@ -48,7 +48,39 @@ struct WaveletLevel { std::array<Plane, 4> bands; }; // LL, LH, HL, HH
 using Planes = std::array<Plane, 3>; // Y, Cr, Cb (CFHD channel order)
 Planes ConvertBgra(const uint8_t* data, std::size_t bytes, int width, int height, std::size_t stride);
 Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride);
-WaveletLevel ForwardLevel(const Plane& input, int prescale); // 0 or 2
+// Per-session wavelet ISA policy (issue #70).
+//
+// `Auto` is the only value that consults the process-global NEON switch, and a
+// session resolves it exactly once at construction. A session that asked for a
+// concrete ISA therefore keeps that kernel for its whole lifetime, even while
+// another thread changes the global default. The two kernels are bit-exact, so
+// the choice never changes a packet byte -- only which code ran.
+//
+// `Neon` on a target where NEON is not built in throws instead of silently
+// degrading, matching how an explicitly requested Metal backend behaves.
+enum class WaveletIsa { Auto, Scalar, Neon };
+// Prescale 0 or 2. The two-argument form keeps the historical behaviour: `Auto`
+// resolved per call against the process-global switch.
+WaveletLevel ForwardLevel(const Plane& input, int prescale);
+WaveletLevel ForwardLevel(const Plane& input, int prescale, WaveletIsa isa);
+namespace detail {
+// Resolve a session policy to a concrete kernel choice exactly once. `Auto`
+// consults the process-global default at that moment; `Neon` throws when NEON is
+// not compiled into this build rather than silently degrading to scalar.
+WaveletIsa ResolveWaveletIsa(WaveletIsa requested);
+// Deterministic dispatch witness for tests (issue #70).
+//
+// A packet cannot reveal which kernel ran, because the two are bit-exact -- that is
+// the whole reason the bit-exactness test exists. Timing cannot reveal it either
+// once a second thread flips the global default. So count the dispatch decisions
+// themselves, per thread, and let a test assert which kernel its own session
+// actually entered. Counts are thread-local so a concurrent test cannot blur them.
+struct WaveletDispatchCounts {
+    std::uint64_t scalar = 0;
+    std::uint64_t neon = 0;
+};
+WaveletDispatchCounts WaveletDispatchSnapshot() noexcept;
+}
 int16_t Quantize(int16_t value, unsigned divisor);
 // Table17, cubic companding, MSB first, end code and zero pad to 32 bits.
 // Width must be a multiple of 8 (the fixed profile has no virtual row gaps).

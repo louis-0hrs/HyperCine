@@ -81,7 +81,14 @@ public:
     // not allowed to fall back to CPU; only MetalOrCpu may, and only during
     // initialization, in which case the CPU fallback keeps this geometry.
     FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry);
+    // CPU session with an explicit wavelet ISA policy. Resolved once here, so the
+    // session keeps its kernel even if another thread changes the process-wide
+    // default. `WaveletIsa::Neon` on a build without NEON throws rather than
+    // degrading silently; `Auto` keeps the historical behaviour exactly.
+    FilmScan3Encoder(FilmScan3Geometry geometry, WaveletIsa isa);
     FilmScan3Geometry geometry() const noexcept;
+    // Concrete kernel this session dispatches to, resolved at construction.
+    WaveletIsa wavelet_isa() const noexcept;
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
                          const FilmScan3Metadata& metadata);

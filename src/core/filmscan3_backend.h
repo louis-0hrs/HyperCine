@@ -26,6 +26,10 @@ struct Frontend {
     virtual Planes Convert(const uint8_t*, std::size_t, int, int, std::size_t) = 0;
     virtual WaveletLevel Forward(const Plane&, int) = 0;
     virtual std::string DeviceName() const = 0;
+    // Wavelet ISA this session actually dispatches to, resolved once at
+    // construction. A caller can read it instead of inferring the kernel from a
+    // timing measurement, which cannot work because both kernels are bit-exact.
+    virtual WaveletIsa Isa() const noexcept { return WaveletIsa::Auto; }
     // Full audit retains color and intermediate LL storage. Production consumers
     // require only L3 LL + nine highpass bands per channel; other LL layouts remain.
     virtual FrontendFrame Transform(const uint8_t*, std::size_t, int, int, std::size_t, bool audit=false);
@@ -44,6 +48,9 @@ struct MetalTiming {
 };
 std::shared_ptr<Frontend> CpuFrontend();
 std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry);
+// Session-bound ISA policy: the requested value is resolved exactly once here, so
+// the session keeps its kernel even if the process-global NEON default changes.
+std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry, WaveletIsa);
 // Internal test modes exercise the parity gate itself; neither is a production
 // selection API and both must make the complete-sample comparison fail.
 enum class CudaTestMode { Normal, SkipKernel, AlterOutput };
