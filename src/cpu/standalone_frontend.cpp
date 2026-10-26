@@ -21,9 +21,8 @@ int RoundChroma(int v) { v += 16384; return v >= 0 ? v / 32768 : -((-v + 32767) 
 // Legacy Fixed-Q2 preserves its pre-existing <=4096 geometry error contract.
 // New FilmScan3 geometry/budget diagnostics do not silently change this API.
 void ValidateGeometry(int w, int h) {
-    // The legacy Fixed-Q2 API keeps its historically observable 4096
-    // dimension rejection (invalid_argument), independent of the new
-    // FilmScan3 budget/shape classification. Do not silently change callers.
+    // Fixed-Q2 compatibility: retain existing <=4096 dimension failures as
+    // invalid_argument, independent from the FilmScan3 allocation/shape gate.
     if (w < 128 || w > kMaxDimension || w % 128)
         throw std::invalid_argument("frame width must be a multiple of 128 in [128,4096]");
     if (h < 24 || h > kMaxDimension || h % 8)
@@ -73,3 +72,40 @@ WaveletLevel ForwardLevel(const Plane& in, int prescale) {
     if (in.width < 6 || in.height < 6 || in.width % 2 || in.height % 2 || (prescale != 0 && prescale != 2))
         throw std::invalid_argument("invalid spatial dimensions or prescale");
     WaveletLevel out{{Plane(in.width/2,in.height/2), Plane(in.width/2,in.height/2),
+                      Plane(in.width/2,in.height/2), Plane(in.width/2,in.height/2)}};
+    Plane low(in.width/2,in.height), high(in.width/2,in.height);
+    if (prescale == 0) {
+        if (HyperCine_ForwardHorizontal26_CPU(in.pixels.data(),in.width,in.height,in.stride,
+                low.pixels.data(),low.stride,high.pixels.data(),high.stride) != HYPERCINE_STATUS_SUCCESS)
+            throw std::runtime_error("horizontal transform failed");
+    } else {
+        // Reuse the existing scalar filter for individually rounded highpass taps.
+        Plane scaled(in.width,in.height);
+        for (int y=0;y<in.height;++y) for (int x=0;x<in.width;++x) {
+            int v = in.pixels[y*in.stride+x]+3;
+            scaled.pixels[y*scaled.stride+x] = static_cast<int16_t>(v>=0 ? v/4 : -((-v+3)/4));
+        }
+        HyperCine_ForwardHorizontal26_CPU(scaled.pixels.data(),in.width,in.height,scaled.stride,
+                                        low.pixels.data(),low.stride,high.pixels.data(),high.stride);
+        // Lowpass rounding is applied to the pair sum, not each individual tap.
+        for (int y=0;y<in.height;++y) for (int x=0;x<in.width/2;++x) {
+            const int v = in.pixels[y*in.stride+2*x]+in.pixels[y*in.stride+2*x+1]+3;
+            low.pixels[y*low.stride+x] = static_cast<int16_t>(v>=0 ? v/4 : -((-v+3)/4));
+        }
+    }
+    auto& b=out.bands;
+    HyperCine_ForwardVertical26_CPU(low.pixels.data(),low.width,low.height,low.stride,
+                                  b[0].pixels.data(),b[0].stride,b[2].pixels.data(),b[2].stride);
+    HyperCine_ForwardVertical26_CPU(high.pixels.data(),high.width,high.height,high.stride,
+                                  b[1].pixels.data(),b[1].stride,b[3].pixels.data(),b[3].stride);
+    return out;
+}
+int16_t Quantize(int16_t value, unsigned divisor) {
+    if (divisor < 1 || divisor > 32768) throw std::invalid_argument("invalid quantization divisor");
+    if (divisor == 1) return value;
+    const int v = value;
+    const unsigned magnitude = v < 0 ? -v : v;
+    const int q = static_cast<int>((magnitude * (65536u / divisor)) / 65536u);
+    return static_cast<int16_t>(v < 0 ? -q : q);
+}
+}}
