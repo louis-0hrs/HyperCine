@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 
 #include "hypercine/wavelet.h"
+#include <atomic>
 #include <vector>
 #include <cstring>
 #include <cstdlib>
@@ -44,7 +45,14 @@ inline int16_t Saturate16S(int32_t val) {
 
 namespace {
 
-bool g_neon_enabled = true;
+// Process-wide dispatch state, deliberately atomic.
+//
+// Several encoder sessions can run concurrently, and a plain bool here is a data
+// race as soon as one session flips the switch while another reads it. Making it
+// atomic fixes the race, but it does NOT make the setting per-session: session A
+// can still change which kernel session B runs. That limitation is why the header
+// documents this as a process-wide default and not as the final architecture.
+std::atomic<bool> g_neon_enabled{true};
 
 // FloorDivide8(v + 4) in the scalar code is exactly (v + 4) >> 3.
 inline int32x4_t Shift8x4(int32x4_t v) { return vshrq_n_s32(v, 3); }
@@ -52,8 +60,12 @@ inline int32x4_t Shift8x4(int32x4_t v) { return vshrq_n_s32(v, 3); }
 } // anonymous namespace
 
 bool HyperCine_IsNEONWaveletAvailable(void) { return true; } // baseline on arm64
-void HyperCine_SetNEONWaveletEnabled(bool enabled) { g_neon_enabled = enabled; }
-bool HyperCine_IsNEONWaveletEnabled(void) { return g_neon_enabled; }
+void HyperCine_SetNEONWaveletEnabled(bool enabled) {
+    g_neon_enabled.store(enabled, std::memory_order_release);
+}
+bool HyperCine_IsNEONWaveletEnabled(void) {
+    return g_neon_enabled.load(std::memory_order_acquire);
+}
 
 HyperCineStatus HyperCine_ForwardHorizontal26_NEON(
     const int16_t* src, int width, int height, int src_stride,
