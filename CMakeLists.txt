@@ -136,7 +136,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/core/standalone_encoder.cpp
         src/cpu/filmscan3_frontend.cpp
         src/core/filmscan3_encoder.cpp
-        src/core/filmscan3_backend.cpp)
+        src/core/filmscan3_backend.cpp
+        src/core/encoder_capability.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     if(HYPERCINE_ENABLE_VULKAN)
         # Vulkan is loaded through dlopen at runtime, so only the headers are a
@@ -318,6 +319,21 @@ if(HYPERCINE_BUILD_STANDALONE)
                     --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}")
                 set_tests_properties(filmscan3_metal_4k_ffmpeg_gate PROPERTIES TIMEOUT 1800)
             endif()
+            # #259 capability contract: refuses before allocating, then encodes a
+            # geometry matrix and decodes each packet with FFmpeg. Registered here
+            # because it needs both ffmpeg and ffprobe -- without them the matrix
+            # half would be untested and the test would pass on the contract alone.
+            add_executable(test_encoder_capability
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_encoder_capability.cpp")
+            target_include_directories(test_encoder_capability PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+            target_link_libraries(test_encoder_capability PRIVATE hypercine_standalone)
+            add_test(NAME encoder_capability_contract COMMAND test_encoder_capability)
+            set_tests_properties(encoder_capability_contract PROPERTIES
+                LABELS "cpu;capability;external-decode" TIMEOUT 1800
+                ENVIRONMENT "HYPERCINE_FFMPEG_EXECUTABLE=${HYPERCINE_FFMPEG_EXECUTABLE};HYPERCINE_FFPROBE_EXECUTABLE=${HYPERCINE_FFPROBE_EXECUTABLE}"
+                PASS_REGULAR_EXPRESSION "PASS capability contract and encoded matrix")
             add_test(NAME filmscan3_geometry_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry.py"
                 --encoder $<TARGET_FILE:test_filmscan3_geometry>

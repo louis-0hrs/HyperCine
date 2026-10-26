@@ -199,6 +199,18 @@ std::vector<std::uint8_t> Avi(const std::vector<std::uint8_t>& packet, int width
     return avi;
 }
 
+// Tool paths are configurable so the test can run on any host. Hardcoding
+// /usr/bin/ffmpeg would fail on Windows and on any distribution that puts it
+// elsewhere -- the test would then look broken rather than unavailable.
+std::string Ffmpeg() {
+    if (const char* env = std::getenv("HYPERCINE_FFMPEG_EXECUTABLE")) return env;
+    return "ffmpeg";
+}
+std::string Ffprobe() {
+    if (const char* env = std::getenv("HYPERCINE_FFPROBE_EXECUTABLE")) return env;
+    return "ffprobe";
+}
+
 std::string Run(const std::string& command, const std::filesystem::path& err) {
     const auto wrapped = command + " >'" + err.string() + ".out' 2>'" + err.string() + "'";
     const int rc = std::system(wrapped.c_str());
@@ -254,7 +266,8 @@ void EncodeAndDecode(const std::filesystem::path& dir, int width, int height) {
         out.write(reinterpret_cast<const char*>(avi_bytes.data()), static_cast<std::streamsize>(avi_bytes.size()));
         Require(static_cast<bool>(out), "avi write");
     }
-    const auto probed = Run("/usr/bin/ffprobe -v error -count_frames -select_streams v:0 "
+    const auto probed = Run("\"" + Ffprobe() +
+                            "\" -v error -count_frames -select_streams v:0 "
                             "-show_entries stream=width,height,pix_fmt,nb_read_frames -of default=nw=1 '" +
                             stem.string() + ".avi'",
                             stem.string() + ".ffprobe");
@@ -263,8 +276,9 @@ void EncodeAndDecode(const std::filesystem::path& dir, int width, int height) {
     Require(Field(probed, "pix_fmt") == "yuv422p10le", "ffprobe pix_fmt");
     Require(Field(probed, "nb_read_frames") == "1", "ffprobe frame count");
     const auto yuv = stem.string() + ".yuv";
-    Run("/usr/bin/ffmpeg -v error -xerror -y -i '" + stem.string() + ".avi' -frames:v 1 -pix_fmt yuv422p10le -f rawvideo '" +
-        yuv + "'", stem.string() + ".ffmpeg");
+    Run("\"" + Ffmpeg() + "\" -v error -xerror -y -i '" + stem.string() +
+        ".avi' -frames:v 1 -pix_fmt yuv422p10le -f rawvideo '" + yuv + "'",
+        stem.string() + ".ffmpeg");
     const auto decoded = std::filesystem::file_size(yuv);
     const auto expect = static_cast<std::uint64_t>(width) * static_cast<std::uint64_t>(height) * 4u;
     Require(decoded == expect, "decoded byte count");
@@ -416,10 +430,12 @@ int main() {
         auto fallback = Check("cuda-fallback", cuda_fallback, host, CapabilityReason::ExperimentallySupported);
         Require(fallback.fell_back_to_cpu_scalar && fallback.effective_backend == SessionBackend::CpuScalar, "explicit cuda fallback");
 
-        const auto version = Run("/usr/bin/ffmpeg -version", "/tmp/l2cap-ffmpeg-version");
+        const auto scratch = std::filesystem::temp_directory_path();
+        const auto version = Run("\"" + Ffmpeg() + "\" -version",
+            scratch / "hypercine-capability-ffmpeg-version");
         const auto newline = version.find('\n');
         std::cout << "FFMPEG " << version.substr(0, newline == std::string::npos ? version.size() : newline) << '\n';
-        const auto dir = std::filesystem::path("/tmp/l2cap-cap-ev");
+        const auto dir = scratch / "hypercine-capability-evidence";
         std::filesystem::create_directories(dir);
         for (const auto& item : pass) EncodeAndDecode(dir, item.w, item.h);
         std::cout << "PASS capability contract and encoded matrix\n";
