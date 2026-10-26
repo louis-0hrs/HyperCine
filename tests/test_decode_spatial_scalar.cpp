@@ -202,7 +202,7 @@ void graph_tests(unsigned workers) {
             published=true; // downstream consumer after arithmetic completion
         }});
         {
-            DecodeTaskGraph graph(g,GraphProfile::Synthetic,std::move(tasks));
+            DecodeTaskGraph graph(g,GraphProfile::Synthetic,std::move(tasks), {4096, 65536, false});
             owner.reset();bool ok=false;
             std::thread thread([&]{ok=graph.run(workers);});
             const bool entered=gate.await();const bool pending=graph.state(0)==TaskState::Pending;
@@ -231,7 +231,7 @@ void graph_tests(unsigned workers) {
         }});
         tasks.push_back({key(5),{key(4)},[&](const TaskContext&){published=true;}});
         {
-        DecodeTaskGraph graph(gen,GraphProfile::Synthetic,std::move(tasks));bool ok=false;
+        DecodeTaskGraph graph(gen,GraphProfile::Synthetic,std::move(tasks), {4096, 65536, false});bool ok=false;
         owner.reset();
         std::thread thread([&]{ok=graph.run(workers);});
         if(!fail_producer){const bool entered=gate.await();const bool stopped=graph.cancel(gen);gate.release();thread.join();check(entered && stopped);}
@@ -243,12 +243,16 @@ void graph_tests(unsigned workers) {
         }
         check(weak.expired());
     }
+    // These graphs are worker pools, not publication contracts: the callbacks
+    // write into caller-owned frames and never call publish(), so the graph-wide
+    // S2 rule is opted out explicitly (GraphLimits::require_published_output).
+    // The default stays strict for every decoder-facing graph.
     // A wrong-generation actual scalar callback fails before any consumer can
     // publish, even though all synthetic producers completed successfully.
     Frame f(24,4);bool consumed=false;
     DecodeTaskGraph wrong(gen,GraphProfile::Synthetic,{
         {key(4),{},[&](const TaskContext&){InverseWavelet5To4(f.bands({144,1,2}),f.out());}},
-        {key(5),{key(4)},[&](const TaskContext&){consumed=true;}}});
+        {key(5),{key(4)},[&](const TaskContext&){consumed=true;}}}, {4096, 65536, false});
     check(!wrong.run(workers) && !consumed && wrong.quiescent());
 }
 // Test-only runner: original compact little-endian files enter aligned planes;

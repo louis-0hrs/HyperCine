@@ -152,12 +152,26 @@ void rule_s2_output_completeness(std::size_t workers) {
         int value = 0;
         int consumed = 0;
         DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
-            {key(1), {}, [&](const TaskContext&) { value = 147; wrote = true; },
+            {key(1), {},
+             [&](const TaskContext& context) {
+                 value = 147;
+                 wrote = true;
+                 if (!context.publish(&value, sizeof(value)))
+                     throw std::runtime_error("producer publish failed");
+             },
              {[&wrote] { return wrote; }}},
             {key(2), {key(1)},
-             [&](const TaskContext&) {
-                 if (!wrote || value != 147) throw std::runtime_error("read before publish");
+             [&](const TaskContext& context) {
+                 context.wait_for_input(0, std::chrono::milliseconds(1000));
+                 const BufferVersion view = context.input(0);
+                 const auto* seen = view.data ? static_cast<const int*>(view.data) : nullptr;
+                 if (!wrote || !view.valid() || view.bytes != sizeof(value) || !seen ||
+                     *seen != 147)
+                     throw std::runtime_error("read before publish");
                  ++consumed;
+                 static constexpr unsigned char token = 1;
+                 if (!context.publish(&token, 1))
+                     throw std::runtime_error("consumer publish failed");
              },
              {[&consumed] { return consumed == 1; }}}});
         require_fully_contracted(graph, "S2-positive-control");
@@ -173,7 +187,13 @@ void rule_s2_output_completeness(std::size_t workers) {
         int tail_ran = 0;
         bool wrote = false;
         DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
-            {key(1), {}, [&](const TaskContext&) { wrote = true; }, {[&wrote] { return wrote; }}},
+            {key(1), {},
+         [&](const TaskContext& context) {
+             wrote = true;
+             static constexpr unsigned char token = 1;
+             if (!context.publish(&token, 1)) throw std::runtime_error("publish failed");
+         },
+         {[&wrote] { return wrote; }}},
             {key(2), {key(1)}, [](const TaskContext&) {}, {[] { return false; }}},
             {key(3), {key(2)}, [&](const TaskContext&) { ++tail_ran; }, {[] { return true; }}}});
         require_fully_contracted(graph, "S2-transitive-tail");
@@ -183,9 +203,8 @@ void rule_s2_output_completeness(std::size_t workers) {
                      graph.state(1) == TaskState::Failed && graph.state(2) == TaskState::Failed,
                  "a false predicate fails its own node and its transitive dependents");
     }
-    note("S2 limit: the predicate is a declaration. A callback that sets its own flag "
-         "without writing the buffer is still reported as published; the graph can "
-         "check what the task declares, not what the memory contains.");
+    note("S2 output: a true publication predicate is not a buffer. Completion also "
+         "requires a BufferVersion of this generation retained by the graph.");
 }
 
 // ---------------------------------------------------------------------------
@@ -216,18 +235,27 @@ void rule_s2_predicate_reads_owned_storage(std::size_t workers) {
     DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
         {key(1), {},
          // The lambda's own frame dies here; only `payload` survives it.
-         [payload, &callback_ran](const TaskContext&) {
+         [payload, &callback_ran](const TaskContext& context) {
              payload->written = 147;
              callback_ran = true;
+             if (!context.publish(&payload->written, sizeof(payload->written)))
+                 throw std::runtime_error("publish failed");
          },
          // Reads independently owned storage, not a callback local.
          [payload] { return payload && payload->written == 147; }},
         {key(2), {key(1)},
-         [payload, &callback_ran](const TaskContext&) {
-             // The producer's storage is still valid for downstream consumers.
-             if (!callback_ran || payload->written != 147)
+         [payload, &callback_ran](const TaskContext& context) {
+             context.wait_for_input(0, std::chrono::milliseconds(1000));
+             const BufferVersion view = context.input(0);
+             const auto* seen = view.data ? static_cast<const int*>(view.data) : nullptr;
+             // The producer's storage is still valid for downstream consumers,
+             // and the graph-owned copy agrees with it.
+             if (!callback_ran || payload->written != 147 || !view.valid() || !seen ||
+                 *seen != 147)
                  throw std::runtime_error("consumer read a dead or unwritten payload");
              ++payload->consumed;
+             static constexpr unsigned char token = 1;
+             if (!context.publish(&token, 1)) throw std::runtime_error("publish failed");
          },
          [payload] { return payload->consumed == 1; }}});
 
@@ -339,7 +367,13 @@ void rule_s4_failure_does_not_publish(std::size_t workers) {
 void rule_s5_must_complete(std::size_t workers) {
     int ran = 0;
     DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic,
-                          {{key(1), {}, [&](const TaskContext&) { ++ran; },
+                          {{key(1), {},
+                            [&](const TaskContext& context) {
+                                ++ran;
+                                static constexpr unsigned char token = 1;
+                                if (!context.publish(&token, 1))
+                                    throw std::runtime_error("publish failed");
+                            },
                             {[&ran] { return ran == 1; }}}});
     require_fully_contracted(graph, "S5-run-once");
     const bool first = graph.run(workers);

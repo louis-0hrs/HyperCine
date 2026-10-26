@@ -37,13 +37,19 @@ namespace hypercine::detail {
 // that stored the version before the payload is observable here instead of being
 // hidden behind the scheduler's mutex.
 struct DecodeTaskGraphTestAccess {
+    static void wait(const DecodeTaskGraph& g, std::size_t node, std::size_t input,
+                     std::chrono::milliseconds timeout) {
+        g.wait_for_input(node, input, timeout);
+    }
     static BufferVersion observe(const DecodeTaskGraph& g, std::size_t node) {
         BufferVersion view;
         if (node >= g.nodes_.size()) return view;
         const auto& source = g.nodes_[node];
-        view.generation = g.generation_;
+        // Acquire first. published_generation and the payload are written
+        // before the release-store, so they are read only after that store.
         view.version = source.version.load(std::memory_order_acquire);
         if (view.version != 0) {
+            view.generation = source.published_generation;
             view.data = source.payload.load(std::memory_order_relaxed);
             view.bytes = source.payload_bytes.load(std::memory_order_relaxed);
         }
@@ -280,45 +286,51 @@ void rule_t2_version_is_generation_bound() {
 }
 
 // ---------------------------------------------------------------------------
-// T2 -- deadline. A producer returns without publishing (no output contract
-// declared, i.e. exactly the RCA-195 assumption), its consumer is released and
-// waits on that edge. The wait must end in a defined error, not a hang, not a
-// spin and not a read.
+// T2 -- deadline, and the closed escape hatch.
+//
+// A producer that returns without publishing no longer Completes and no longer
+// releases its consumer (that was the RCA-195 assumption). The consumer must
+// not become Ready. The bounded wait itself is still terminal: asked directly
+// about an unpublished edge, wait_for_input throws PublicationTimeout, does not
+// hang, and does not hand back a payload.
 // ---------------------------------------------------------------------------
 void rule_t2_deadline_is_terminal() {
-    std::atomic<int> data_accesses{0};
-    std::atomic<long long> elapsed_ms{-1};
+    std::atomic<int> consumer_runs{0};
     DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic, {
         {key(1), {}, [](const TaskContext&) { /* returns, publishes nothing */ },
-         {/* deliberately no contract: this is the RCA-195 assumption */}},
-        {key(2), {key(1)},
-         [&](const TaskContext& context) {
-             const auto begin = std::chrono::steady_clock::now();
-             bool loaded = false;
-             try {
-                 context.wait_for_input(0, std::chrono::milliseconds(50));
-                 loaded = context.input_published(0);
-             } catch (const PublicationTimeout&) {
-                 elapsed_ms.store(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                      std::chrono::steady_clock::now() - begin).count());
-                 // A deadline is terminal, not a retry hint: rethrow so the node
-                 // fails closed instead of continuing with an unreadable edge.
-                 throw;
-             }
-             if (loaded) ++data_accesses;
-         },
-         {[] { return true; }}}});
+         {/* no predicate and no buffer: must not Complete */}},
+        {key(2), {key(1)}, [&](const TaskContext&) { ++consumer_runs; }, {[] { return true; }}}});
     const auto began = std::chrono::steady_clock::now();
     const bool ran = graph.run(1);
     const auto total_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                               std::chrono::steady_clock::now() - began).count();
+
+    bool threw = false;
+    long long elapsed_ms = -1;
+    DecodeTaskGraph parked({7, 3, 9}, GraphProfile::Synthetic, {
+        {key(1), {}, [](const TaskContext&) {}, {[] { return true; }}},
+        {key(2), {key(1)}, [](const TaskContext&) {}, {[] { return true; }}}});
+    const auto wait_began = std::chrono::steady_clock::now();
+    try {
+        DecodeTaskGraphTestAccess::wait(parked, 1, 0, std::chrono::milliseconds(50));
+    } catch (const PublicationTimeout&) {
+        threw = true;
+        elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                         std::chrono::steady_clock::now() - wait_began)
+                         .count();
+    }
+    const BufferVersion unseen = DecodeTaskGraphTestAccess::observe(parked, 0);
+    const bool consumer_not_ready = graph.state(1) != TaskState::Ready &&
+                                    graph.state(1) != TaskState::Running &&
+                                    graph.state(1) != TaskState::Completed;
     required("T2-deadline-terminal-not-hang",
-             !ran && graph.error() == GraphError::Timeout && graph.quiescent() &&
-                 data_accesses.load() == 0 && elapsed_ms.load() >= 0 &&
-                 elapsed_ms.load() < 2000 && total_ms < 3000 &&
-                 graph.state(1) == TaskState::Failed,
-             "an unpublished edge with an expired deadline is a terminal Timeout: run() "
-             "returned, the consumer failed, and no payload was touched");
+             !ran && graph.error() == GraphError::OutputNotPublished && graph.quiescent() &&
+                 consumer_runs.load() == 0 && consumer_not_ready &&
+                 graph.state(0) == TaskState::Failed && total_ms < 3000 && threw &&
+                 elapsed_ms >= 0 && elapsed_ms < 2000 && !unseen.valid(),
+             "an unpublished producer is OutputNotPublished and does not ready its "
+             "consumer; a direct wait on that unpublished edge throws PublicationTimeout "
+             "instead of hanging or returning a payload");
 }
 
 // ---------------------------------------------------------------------------
@@ -351,10 +363,12 @@ bool reject_publish_isolated(const void* data, std::size_t bytes, Generation gen
          {/* no output contract: rejection itself must not fail the task */}}});
     graph_ptr = &graph;
     const bool ran = graph.run(1);
-    const bool holds = ran && rejected && running_before && running_after && seen.version == 0 &&
+    // Rejection itself must not publish. Returning from the callback with no
+    // later valid publish must also not Complete: there is still no buffer.
+    const bool holds = !ran && rejected && running_before && running_after && seen.version == 0 &&
                        seen.data == nullptr && seen.bytes == 0 && ready_before >= 0 &&
-                       ready_before == ready_after && graph.state(0) == TaskState::Completed &&
-                       graph.error() == GraphError::None;
+                       ready_before == ready_after && graph.state(0) == TaskState::Failed &&
+                       graph.error() == GraphError::OutputNotPublished;
     char line[256];
     std::snprintf(line, sizeof(line),
                   "[bytes=%zu data=%s rejected=%d version=%llu payload=%s span=%zu "
@@ -409,7 +423,8 @@ void rule_publish_rejects_null_and_zero_length() {
              null_positive && zero_length && null_zero && ran && rej_null && rej_zero &&
                  rej_both && still_running && accepted &&
                  graph.state(0) == TaskState::Completed && final_view.valid() &&
-                 final_view.data == &byte && final_view.bytes == 1,
+                 final_view.bytes == 1 && final_view.data != nullptr &&
+                 *static_cast<const unsigned char*>(final_view.data) == byte,
              detail);
 }
 
@@ -546,6 +561,95 @@ void rule_recorded_error_precedes_published_version(std::size_t workers) {
 }
 
 // ---------------------------------------------------------------------------
+// Non-blocking abort. Two producers, one consumer. A publishes a real buffer
+// and completes, which is what releases the consumer. B then records a callback
+// error while the consumer is already inside its callback. The consumer must
+// not call wait_for_input(); it probes input_published() and input() directly.
+// A version that was published earlier must not become a readable view after
+// that error: zero payload bytes may be read.
+//
+// Needs two workers so B can run while the consumer is inside the callback.
+// At workers == 1 the scenario therefore runs at width 2, same as the waiting
+// error-precedence rule above. Removing the stop/error admission in
+// admitted_input() makes input_published() succeed and input() hand out the
+// buffer, so this rule goes BROKEN. That is the negative control.
+// ---------------------------------------------------------------------------
+void rule_nonblocking_abort_admits_no_payload(std::size_t workers) {
+    const std::size_t width = workers < 2 ? 2 : workers;
+    const Generation generation{7, 3, 21};
+    std::vector<unsigned char> payload(kPayload);
+    for (std::size_t i = 0; i < payload.size(); ++i)
+        payload[i] = static_cast<unsigned char>(0x40 + (i & 0x0F));
+    std::atomic<bool> consumer_entered{false};
+    std::atomic<int> published_probes{0};
+    std::atomic<int> payload_reads{0};
+    std::atomic<int> partial_views{0};
+    std::atomic<unsigned> payload_sink{0};
+    DecodeTaskGraph* graph_ptr = nullptr;
+    DecodeTaskGraph graph(generation, GraphProfile::Synthetic, {
+        {key(1), {},
+         [&](const TaskContext& context) {
+             if (!context.publish(payload.data(), payload.size()))
+                 throw std::runtime_error("producer A publish failed");
+         },
+         {[] { return true; }}},
+        {key(2), {},
+         [&](const TaskContext&) {
+             const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+             while (!consumer_entered.load() && std::chrono::steady_clock::now() < until)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+             throw std::runtime_error("producer B callback error after A published");
+         },
+         {[] { return true; }}},
+        {key(3), {key(1)},
+         [&](const TaskContext& context) {
+             consumer_entered.store(true);
+             const auto until = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+             while (graph_ptr->error() == GraphError::None &&
+                    std::chrono::steady_clock::now() < until)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
+             // No wait_for_input(). These two probes are the whole gate.
+             if (context.input_published(0)) ++published_probes;
+             const BufferVersion view = context.input(0);
+             const bool empty = !view.valid() && view.version == 0 && view.data == nullptr &&
+                                view.bytes == 0 && view.generation.session == 0 &&
+                                view.generation.slot == 0 && view.generation.value == 0;
+             if (!empty) ++partial_views;
+             const bool readable = view.valid() && view.data != nullptr && view.bytes == kPayload &&
+                                   (view.generation == generation);
+             if (readable) {
+                 const auto* bytes = static_cast<const unsigned char*>(view.data);
+                 unsigned sum = 0;
+                 for (std::size_t i = 0; i < view.bytes; ++i) sum += bytes[i];
+                 payload_sink.fetch_add(sum + 1, std::memory_order_relaxed);
+                 ++payload_reads;
+             }
+         },
+         {[] { return true; }}}});
+    graph_ptr = &graph;
+    const bool ran = graph.run(width);
+    const BufferVersion published = DecodeTaskGraphTestAccess::observe(graph, 0);
+    char detail[640];
+    std::snprintf(detail, sizeof(detail),
+                  "width=%zu entered=%d published_probes=%d partial_views=%d "
+                  "payload_reads=%d (expected 0) error=%d (expected %d Callback) "
+                  "A=%d B=%d consumer=%d published_version=%llu run=%d",
+                  width, static_cast<int>(consumer_entered.load()), published_probes.load(),
+                  partial_views.load(), payload_reads.load(), static_cast<int>(graph.error()),
+                  static_cast<int>(GraphError::Callback), static_cast<int>(graph.state(0)),
+                  static_cast<int>(graph.state(1)), static_cast<int>(graph.state(2)),
+                  static_cast<unsigned long long>(published.version), static_cast<int>(ran));
+    required("T2-nonblocking-abort-admits-no-payload",
+             !ran && consumer_entered.load() && published_probes.load() == 0 &&
+                 partial_views.load() == 0 && payload_reads.load() == 0 &&
+                 graph.error() == GraphError::Callback && graph.quiescent() &&
+                 graph.state(0) == TaskState::Completed && graph.state(1) == TaskState::Failed &&
+                 graph.state(2) == TaskState::Canceled && published.valid() &&
+                 published.bytes == kPayload,
+             detail);
+}
+
+// ---------------------------------------------------------------------------
 // First-Error, write-once. Two producers are made Running at the same time by a
 // rendezvous; the first records Callback, the second (already Running, so its
 // completion is accepted) raises Allocation. The slot must keep Callback, and no
@@ -630,6 +734,7 @@ int main(int argc, char** argv) {
     rule_publish_rejects_null_and_zero_length();
     rule_stop_precedes_published_version(workers);
     rule_recorded_error_precedes_published_version(workers);
+    rule_nonblocking_abort_admits_no_payload(workers);
     rule_first_error_write_once(workers);
     std::printf("SUMMARY %d rule(s) hold, %d broken\n", holds, failures);
     if (failures) {
