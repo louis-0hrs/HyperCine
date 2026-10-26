@@ -8,7 +8,7 @@ Measured on the real machine. Nothing below is extrapolated from 1080p.
 |---|---|
 | Hardware | Apple M2 Pro, arm64 |
 | OS | macOS 26.5.2 (build 25F84) |
-| Source SHA | `ab47a47` (main, after #248) plus the validator fix in this branch |
+| Source / provenance | `ab47a47` is the tested 4K encoder parent; the genuine 4K benchmark source is in PR #251 (initial correction head `4a684084`). The exact local measurement commit must be recorded separately before production performance qualification |
 | Compiler | Apple clang 21.0.0 (clang-2100.1.1.101) |
 | CMake | 3.31.5 |
 | Build | Release, `-DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_ENABLE_METAL=ON -DHYPERCINE_BUILD_UPSTREAM=OFF` |
@@ -82,35 +82,27 @@ does not grow with resolution the way a GPU-bound pipeline would.
 Scenario 8 (16 frames, mixed patterns) is not shown as a row: it mixes patterns
 within one geometry, so its p95 reflects pattern changes, not a slowdown.
 
-## Where the Metal time goes (real 4K, median frame)
+## Stage timings — real 4K scenario, **two different encoders**
 
-| stage | value |
-|---|---|
-| upload | 0.67 ms |
-| submit | 0.07 ms |
-| GPU wait | 4.23 ms |
-| batch GPU | 3.51 ms |
-| readback | 0.89 ms |
-| CPU conversion | 19.66 ms |
-| CPU wavelet | 19.74 ms |
-| quantization | 19.47 ms |
-| coefficient hashing | 42.68 ms |
-| entropy | 7.04 ms |
-| framing | 0.73 ms |
+The benchmark executes **two independent encodes** on the same input. `CpuMeter` instruments the standalone scalar CPU reference; `MetalTiming` records the Metal frontend plus shared host quantization/entropy work. **Do not add CPU reference conversion/wavelet to the Metal encode time.** GPU batch execution is included within the command-buffer wait rather than being an extra serial stage.
 
-Two honest notes:
+| Reported measurement | Time | Actually belongs to |
+| --- | ---: | --- |
+| Input upload | 0.67 ms | Metal transfer |
+| Submit | 0.07 ms | Metal submit |
+| GPU wait | 4.23 ms | Metal command-buffer wait (includes device GPU execution) |
+| GPU batch execution | 3.51 ms | Subset of the wait, **not additive** |
+| Band readback | 0.89 ms | Metal transfer |
+| Quantization | 19.47 ms | Shared CPU writer processing Metal frontend output |
+| Coefficient hashing | 42.68 ms | Shared CPU writer processing Metal frontend output |
+| Entropy | 7.04 ms | Shared CPU writer processing Metal frontend output |
+| Framing | 0.73 ms | Shared CPU writer, derived timing |
+| CPU reference conversion | 19.66 ms | **Separate scalar CPU encoder, not Metal** |
+| CPU reference wavelet | 19.74 ms | **Separate scalar CPU encoder, not Metal** |
 
-1. `color_gpu_ms` and `wavelet_gpu_ms` report **0** while `batch_gpu_ms` carries
-   the GPU work. Per-stage GPU timing is not available from this build; reading
-   the zeroes as "no GPU work" would be wrong.
-2. At 4K, **~109 of the ~110 ms that remain on the Metal path are CPU-side
-   stages**: conversion, wavelet, quantization and hashing. GPU wait plus batch
-   work is about 7.7 ms. Optimising the GPU kernel further would move almost
-   nothing; hashing alone is 42.7 ms and is the single largest term.
+These are owner-reported values for the actual 3840×2160 run; stage timings are not a lossless additive decomposition of the measured 76.13 ms full Metal median. `color_gpu_ms` and `wavelet_gpu_ms` remain zero in this reporting mode while `batch_gpu_ms` measures device time. Zero per-stage GPU counters do not mean the GPU was idle.
 
-The 1080p run had entropy as the dominant term (20.4 ms). At 4K, entropy drops
-to 7.0 ms while hashing rises to 42.7 ms — the coefficient count grew far more
-than the entropy payload did.
+For this particular 4K pattern, hashing and quantization together are far more expensive than the GPU batch. Entropy runtime varies strongly by content and must not be generalized from one synthetic sample.
 
 ## Memory
 
@@ -123,60 +115,11 @@ than the entropy payload did.
 | buffer allocations, steady state | 0 | 0 |
 | readbacks per frame | 30 | 30 |
 
-Peak RSS was measured across the whole run, so the 345.2 MiB figure includes
-both geometries being held resident. The per-geometry Metal figures are the
-meaningful ones. Buffer allocations are zero after the first frame at both
-geometries.
-
-## Where the Metal time goes (4K, steady state)
-
-| stage | value |
-|---|---|
-| upload | 0.18 ms |
-| submit | ~0.03 ms |
-| GPU wait | 2.84 ms |
-| batch GPU | 1.13 ms |
-| readback | 0.23 ms |
-| CPU conversion | 4.86 ms |
-| CPU wavelet | 4.70 ms |
-| quantization | 4.88 ms |
-| coefficient hashing | 10.68 ms |
-| entropy | 20.40 ms |
-| framing | 0.40 ms |
-
-Two honest notes:
-
-1. `color_gpu_ms` and `wavelet_gpu_ms` report **0** while `batch_gpu_ms` carries
-   the GPU work. The per-stage split is therefore *not* available from this
-   build; the batch number is what the driver reported. Reading the zeroes as
-   "no GPU work" would be wrong.
-2. **Coefficient hashing (10.7 ms) plus entropy (20.4 ms) dominate the Metal
-   path**, not the GPU. At 4K, 31 of ~39 ms are CPU-side stages that Metal does
-   not touch. Optimising the GPU kernel further would move at most the
-   remaining ~1 ms of GPU wait plus 1.1 ms of batch work.
-
-## Memory (4K)
-
-| item | value |
-|---|---|
-| process peak RSS | 100.6 MiB (105,414,656 B) |
-| Metal peak buffer | 30.2 MiB (31,622,400 B) |
-| device allocated | 30.7 MiB (32,194,560 B) |
-| buffer allocations, cold frame | 42 |
-| buffer allocations, steady state | 0 |
-| command buffers per frame | 1 |
-| uploads / readbacks per frame | 1 / 30 |
-
-Buffer allocations drop to **zero** after the first frame: the workspace is
-reused, as intended. 30 readbacks per frame correspond to the 30 coefficient
-bands.
+Peak RSS is a **process-wide maximum across sequential benchmark scenarios**, not a directly measured per-session allocation and not evidence that both geometry workspaces were simultaneously resident. The per-geometry Metal buffer counters are more useful for comparing session footprint. The reported warm-path allocation counter is zero at both geometries.
 
 ## External decoder
 
-FFmpeg decodes both CPU and Metal packets of the 4K sample at 3840x2160,
-`yuv422p10le`, and the byte count matches the geometry expectation. This is
-asserted by `filmscan3_metal_4k_ffmpeg_gate`, which also proves the gate fails
-when the declared container geometry is wrong.
+The hosted `filmscan3_metal_4k_ffmpeg_gate` invokes the **CPU** `hypercine_encode_filmscan3` tool and verifies a 3840×2160 `yuv422p10le` FFmpeg decode and geometry rejection. It is *not*, by itself, a GPU-required Metal decode gate. Independent native M2 Pro CPU/Metal full-packet equality and FFmpeg decodes were reported separately for merged #248. Preserve that distinction.
 
 ## Known limits
 
@@ -193,6 +136,4 @@ when the declared container geometry is wrong.
 
 ## Verdict
 
-The 4K Metal path is reproducible, CPU-identical and independently decodable on
-real M2 Pro hardware. Its remaining cost is dominated by CPU-side entropy and
-hashing, not by the GPU.
+The 4K Metal path was reported CPU-packet-identical and independently decodable on a real M2 Pro. For the measured 4K benchmark patterns, the host-side **coefficient hashing and quantization** account for much of the runtime; these are separate from GPU batch timing and from the scalar reference encoder. These numbers do not establish a production performance guarantee or original GoPro 4K packet parity.
