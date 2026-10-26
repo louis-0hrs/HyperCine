@@ -99,11 +99,10 @@ A test count from this configuration is a **subset**, never a full-suite figure.
 For the complete reference suite use the CPU-only build above.
 
 `-DHYPERCINE_ENABLE_CUDA=ON` together with `-DHYPERCINE_BUILD_UPSTREAM=OFF` is
-still not a working pairing, and for a different reason: the CUDA
-`hypercine_wavelet` sources call the frozen `CFHD_*` encoder entry points, so an
-executable that links that archive fails with unresolved `CFHD_*` symbols even
-though no target names it. Only `hypercine_m4_resolution_probe` reaches that
-state today. That is a separate follow-up, not a guard gap.
+not a supported pairing outside standalone mode: the CUDA `hypercine_wavelet`
+sources still call frozen `CFHD_*` encoder entry points. Configure rejects this
+combination explicitly instead of allowing `hypercine_m4_resolution_probe` to
+reach unresolved SDK symbols at link time.
 
 ### NVIDIA CUDA release build
 
