@@ -211,8 +211,23 @@ std::string Ffprobe() {
     return "ffprobe";
 }
 
+// Shell quoting is platform-specific and this bit me on the Windows runner:
+// POSIX single quotes are literal characters to cmd.exe, so the redirect was
+// parsed as an argument and ffmpeg -version died with exit 1. Quoting every path
+// through one helper keeps that mistake from coming back per call site.
+#if defined(_WIN32)
+std::string Quote(const std::string& text) { return "\"" + text + "\""; }
+#else
+std::string Quote(const std::string& text) { return "'" + text + "'"; }
+#endif
+std::string Quote(const std::filesystem::path& path) { return Quote(path.string()); }
+
 std::string Run(const std::string& command, const std::filesystem::path& err) {
-    const auto wrapped = command + " >'" + err.string() + ".out' 2>'" + err.string() + "'";
+    // .out and the stderr file are built as strings and quoted once, rather than
+    // assembling quote characters inline at each call site.
+    const auto out_path = err.string() + ".out";
+    const auto err_path = err.string();
+    const auto wrapped = command + " >" + Quote(out_path) + " 2>" + Quote(err_path);
     const int rc = std::system(wrapped.c_str());
     std::string output, error;
     if (std::ifstream in(err.string() + ".out"); in) output.assign(std::istreambuf_iterator<char>(in), {});
@@ -266,18 +281,18 @@ void EncodeAndDecode(const std::filesystem::path& dir, int width, int height) {
         out.write(reinterpret_cast<const char*>(avi_bytes.data()), static_cast<std::streamsize>(avi_bytes.size()));
         Require(static_cast<bool>(out), "avi write");
     }
-    const auto probed = Run("\"" + Ffprobe() +
-                            "\" -v error -count_frames -select_streams v:0 "
-                            "-show_entries stream=width,height,pix_fmt,nb_read_frames -of default=nw=1 '" +
-                            stem.string() + ".avi'",
+    const auto probed = Run(Quote(Ffprobe()) +
+                            " -v error -count_frames -select_streams v:0 "
+                            "-show_entries stream=width,height,pix_fmt,nb_read_frames -of default=nw=1 " +
+                            Quote(stem.string() + ".avi"),
                             stem.string() + ".ffprobe");
     Require(Field(probed, "width") == std::to_string(width), "ffprobe width");
     Require(Field(probed, "height") == std::to_string(height), "ffprobe height");
     Require(Field(probed, "pix_fmt") == "yuv422p10le", "ffprobe pix_fmt");
     Require(Field(probed, "nb_read_frames") == "1", "ffprobe frame count");
     const auto yuv = stem.string() + ".yuv";
-    Run("\"" + Ffmpeg() + "\" -v error -xerror -y -i '" + stem.string() +
-        ".avi' -frames:v 1 -pix_fmt yuv422p10le -f rawvideo '" + yuv + "'",
+    Run(Quote(Ffmpeg()) + " -v error -xerror -y -i " + Quote(stem.string() + ".avi") +
+        " -frames:v 1 -pix_fmt yuv422p10le -f rawvideo " + Quote(yuv),
         stem.string() + ".ffmpeg");
     const auto decoded = std::filesystem::file_size(yuv);
     const auto expect = static_cast<std::uint64_t>(width) * static_cast<std::uint64_t>(height) * 4u;
@@ -431,7 +446,7 @@ int main() {
         Require(fallback.fell_back_to_cpu_scalar && fallback.effective_backend == SessionBackend::CpuScalar, "explicit cuda fallback");
 
         const auto scratch = std::filesystem::temp_directory_path();
-        const auto version = Run("\"" + Ffmpeg() + "\" -version",
+        const auto version = Run(Quote(Ffmpeg()) + " -version",
             scratch / "hypercine-capability-ffmpeg-version");
         const auto newline = version.find('\n');
         std::cout << "FFMPEG " << version.substr(0, newline == std::string::npos ? version.size() : newline) << '\n';
