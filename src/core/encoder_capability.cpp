@@ -147,6 +147,14 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     if (config.frame_rate.numerator <= 0 || config.frame_rate.denominator <= 0) {
         result.reasons.format_mathematically_invalid = true;
         format_detail = "frame rate rational must be positive";
+    } else if (config.codec == CodecFamily::FilmScan3 &&
+               (config.frame_rate.numerator != 30 || config.frame_rate.denominator != 1)) {
+        // The current metadata-less FilmScan3 writer generates TIMC with a
+        // fixed 30fps split (pinned by #262). Accepting an arbitrary positive
+        // rate here would falsely promise a timebase the writer cannot emit.
+        // Per-session rational timecode is future #259 work, not a validator fix.
+        result.reasons.valid_but_not_implemented = true;
+        unimplemented_detail = "FilmScan3 automatic TIMC supports only 30/1; requested timebase is not implemented";
     }
 
     std::uint64_t pixels = 0;
