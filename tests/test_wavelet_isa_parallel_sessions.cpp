@@ -27,6 +27,10 @@
 #include "hypercine/standalone.h"
 #include "hypercine/wavelet.h"
 
+// <algorithm> is needed explicitly for std::min. libc++ happens to pull it in
+// transitively through <vector>; MSVC does not, and the Windows job failed on
+// exactly this. Relying on a transitive include was my mistake, not a compiler quirk.
+#include <algorithm>
 #include <atomic>
 #include <cstdio>
 #include <cstdint>
@@ -325,8 +329,10 @@ void phase_failure_isolation() {
     } catch (const std::invalid_argument&) {
     }
     runner.join();
-    CompareSessions(SessionRun{healthy_run.frames, {}, {}},
-                    SessionRun{{reference0}, {}, {}}, "healthy session beside a failing one", W, H);
+    SessionRun healthy_reference;
+    healthy_reference.frames.push_back(reference0);
+    CompareSessions(healthy_run, healthy_reference,
+                    "healthy session beside a failing one", W, H);
 
     // Reset must still restore the victim to a working state.
     victim.Reset();
