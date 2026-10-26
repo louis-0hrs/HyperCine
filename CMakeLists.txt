@@ -187,6 +187,18 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(benchmark_codec benchmarks/benchmark_metal_p2.cpp)
         target_link_libraries(benchmark_codec PRIVATE hypercine_standalone)
     endif()
+    if(HYPERCINE_BUILD_BENCHMARKS)
+        # Issue #70: NEON vs scalar, kernel and whole frame. Registered here and
+        # not in benchmarks/CMakeLists.txt because the standalone build returns
+        # before add_subdirectory(benchmarks), so a registration there would
+        # silently never produce a target. It is a benchmark, not a gate: built,
+        # not run by ctest.
+        add_executable(benchmark_neon_wavelet benchmarks/benchmark_neon_wavelet.cpp)
+        target_link_libraries(benchmark_neon_wavelet PRIVATE hypercine_standalone)
+        set_property(TARGET benchmark_neon_wavelet PROPERTY INCLUDE_DIRECTORIES
+            "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"
+            "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
         # This branch returns before add_subdirectory(tests), so the SDK-free
