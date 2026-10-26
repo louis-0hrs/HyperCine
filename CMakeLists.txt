@@ -79,6 +79,11 @@ function(hypercine_register_sdk_free_contracts)
         return()
     endif()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME qualification_report_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_summarize_qualification.py")
+    set_tests_properties(qualification_report_contract PROPERTIES LABELS "validation;reference-oracle")
+    add_test(NAME cuda_output_dir_platform_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_cuda_output_dir_platform.py")
     add_test(NAME test_reference_release_inventory
         COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_reference_release.py")
     set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
@@ -176,7 +181,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/core/standalone_encoder.cpp
         src/cpu/filmscan3_frontend.cpp
         src/core/filmscan3_encoder.cpp
-        src/core/filmscan3_backend.cpp)
+        src/core/filmscan3_backend.cpp
+        src/core/encoder_capability.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     if(HYPERCINE_ENABLE_CUDA)
         find_package(CUDAToolkit REQUIRED)
@@ -445,7 +451,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME cuda_filmscan3_output_dir_negative COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3_output_dir.py")
             set_tests_properties(cuda_filmscan3_output_dir_negative PROPERTIES
-                LABELS "cuda;output-dir;no-gpu" TIMEOUT 120
+                SKIP_RETURN_CODE 77
+                LABELS "cuda;output-dir;no-gpu;platform-required" TIMEOUT 120
                 PASS_REGULAR_EXPRESSION "CUDA-OUTPUT-DIR-NEGATIVE: PASS")
             # #45: a real 4K FFmpeg gate with its own negative controls. Kept apart
             # from the 1080p evidence so a 4K claim always has a 4K decode behind it.
@@ -457,6 +464,21 @@ if(HYPERCINE_BUILD_STANDALONE)
                     --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}")
                 set_tests_properties(filmscan3_metal_4k_ffmpeg_gate PROPERTIES TIMEOUT 1800)
             endif()
+            # #259 capability contract: refuses before allocating, then encodes a
+            # geometry matrix and decodes each packet with FFmpeg. Registered here
+            # because it needs both ffmpeg and ffprobe -- without them the matrix
+            # half would be untested and the test would pass on the contract alone.
+            add_executable(test_encoder_capability
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_encoder_capability.cpp")
+            target_include_directories(test_encoder_capability PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+            target_link_libraries(test_encoder_capability PRIVATE hypercine_standalone)
+            add_test(NAME encoder_capability_contract COMMAND test_encoder_capability)
+            set_tests_properties(encoder_capability_contract PROPERTIES
+                LABELS "cpu;capability;external-decode" TIMEOUT 1800
+                ENVIRONMENT "HYPERCINE_FFMPEG_EXECUTABLE=${HYPERCINE_FFMPEG_EXECUTABLE};HYPERCINE_FFPROBE_EXECUTABLE=${HYPERCINE_FFPROBE_EXECUTABLE}"
+                PASS_REGULAR_EXPRESSION "PASS capability contract and encoded matrix")
             add_test(NAME filmscan3_geometry_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry.py"
                 --encoder $<TARGET_FILE:test_filmscan3_geometry>
@@ -696,4 +718,3 @@ endif()
 if(HYPERCINE_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
-

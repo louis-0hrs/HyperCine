@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "decode_task_graph.h"
+#include "decode_s3_plane.h"
 #include <algorithm>
 #include <limits>
 #include <new>
@@ -65,7 +66,10 @@ GraphError DecodeTaskGraph::validate(const std::vector<TaskSpec>& tasks, GraphPr
 
 DecodeTaskGraph::DecodeTaskGraph(Generation generation, GraphProfile profile,
                                std::vector<TaskSpec> tasks, GraphLimits limits)
-    : generation_(generation), require_published_output_(limits.require_published_output) {
+    : generation_(generation), require_published_output_(limits.require_published_output),
+      generation_budget_(limits.generation_budget_bytes < kPlaneGenerationBudget
+                             ? limits.generation_budget_bytes
+                             : kPlaneGenerationBudget) {
     // Throws before nodes_ is populated: a rejected topology owns no state and
     // starts no thread, so no callback can have run.
     if (validate(tasks, profile, generation, limits) != GraphError::None)
@@ -110,9 +114,20 @@ std::size_t DecodeTaskGraph::ready_transitions() const {
     std::lock_guard<std::mutex> lock(mutex_);
     return ready_transitions_;
 }
+std::size_t DecodeTaskGraph::owned_publication_bytes() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return owned_budget_;
+}
 bool TaskContext::cancellation_requested() const { return graph_.cancellation_requested(); }
 bool TaskContext::publish(const void* data, std::size_t bytes) const noexcept {
     return graph_.publish(node_, data, bytes);
+}
+bool TaskContext::publish_plane(const void* data, std::size_t bytes, std::uint32_t width,
+                               std::uint32_t height, std::size_t pitch) const noexcept {
+    return graph_.publish_plane(node_, data, bytes, width, height, pitch);
+}
+PlaneView TaskContext::input_plane(std::size_t index, const PlaneIdentity& expected) const {
+    return graph_.input_plane(node_, index, expected);
 }
 void TaskContext::wait_for_input(std::size_t index, std::chrono::milliseconds timeout) const {
     graph_.wait_for_input(node_, index, timeout);
@@ -160,6 +175,13 @@ bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t by
     //   bytes == 0            : not a decoder output, with or without an address
     //                           (non-null zero-length, and nullptr with bytes 0).
     if (data == nullptr || bytes == 0) return false;
+    return commit_copy_locked(target, data, bytes);
+}
+// Shared tail of publish() and publish_plane(). mutex_ is held. The copy is
+// installed and the payload record written before the release-store. A failed
+// allocation leaves version at 0 and does not notify.
+bool DecodeTaskGraph::commit_copy_locked(Node& target, const void* data,
+                                        std::size_t bytes) noexcept {
     const auto* source = static_cast<const unsigned char*>(data);
     std::vector<unsigned char> copy;
     try {
@@ -182,6 +204,90 @@ bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t by
     target.version.store(1, std::memory_order_release);
     changed_.notify_all();
     return true;
+}
+// Plane publication (T4). Extent, key and budget are decided before the copy.
+// A rejection does not store a version, does not notify and does not charge
+// the generation. Geometry is written before commit_copy_locked()'s release
+// so a consumer that observes the version also observes the extent.
+bool DecodeTaskGraph::publish_plane(std::size_t node, const void* data, std::size_t bytes,
+                                   std::uint32_t width, std::uint32_t height,
+                                   std::size_t pitch) noexcept {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (node >= nodes_.size()) return false;
+    Node& target = nodes_[node];
+    if (target.state != TaskState::Running || stop_ || error_ != GraphError::None) return false;
+    if (target.version.load(std::memory_order_relaxed) != 0) return false;
+    if (data == nullptr || bytes == 0 || width == 0 || height == 0 || pitch == 0) return false;
+    const TaskKey& key = target.task.key;
+    // Guard (T4-KEY): only Y/V/U, wavelet5 bands 0..3, or the wavelet4 lowpass
+    // (level 4, band 0). A control record or a foreign channel is not a plane.
+    if (key.channel > 2 || key.band > 3 || key.transform != 0 ||
+        (key.level != 4 && key.level != 5) || (key.level == 4 && key.band != 0))
+        return false;
+    SignedPlaneDesc claimed;
+    claimed.data = static_cast<const std::int16_t*>(data);
+    claimed.width = width;
+    claimed.height = height;
+    claimed.pitch = pitch;
+    claimed.bytes = bytes;
+    // Guard (T4-EXTENT): alignment, geometry, stride and the pitched byte count
+    // are one decision. A short span does not become a version.
+    if (check_signed_plane(claimed) != PlaneStatus::Ok) return false;
+    // Guard (T4-BUDGET): the generation pays for the copy up front. Over budget
+    // is not a publication. Checked before the copy so a refusal retains nothing.
+    if (bytes > generation_budget_ || owned_budget_ > generation_budget_ - bytes) return false;
+    target.plane_width = width;
+    target.plane_height = height;
+    target.plane_pitch = pitch;
+    if (!commit_copy_locked(target, data, bytes)) {
+        target.plane_width = 0;
+        target.plane_height = 0;
+        target.plane_pitch = 0;
+        return false;
+    }
+    owned_budget_ += bytes;
+    return true;
+}
+PlaneView DecodeTaskGraph::input_plane(std::size_t node, std::size_t input,
+                                      const PlaneIdentity& expected) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    PlaneView empty;
+    if (node >= nodes_.size() || input >= nodes_[node].sources.size()) return empty;
+    // Guard (T4-STALE): a read named for another generation must not observe
+    // this generation's bytes, even when the address would otherwise be valid.
+    if (!(expected.generation == generation_)) return empty;
+    if (stop_ || error_ != GraphError::None) return empty;
+    const Node& source = nodes_[nodes_[node].sources[input]];
+    // Guard (T4-IDENTITY): channel, wavelet, band, frame and transform are the
+    // producer key of this edge. Another band's plane does not satisfy it.
+    if (source.task.key.channel != expected.channel || source.task.key.band != expected.band ||
+        source.task.key.level != expected.wavelet || source.task.key.transform != expected.transform ||
+        source.task.key.frame != expected.frame)
+        return empty;
+    const BufferVersion view = admitted_input(source);
+    if (!view.valid()) return empty;
+    // Guard (T4-GEOMETRY): the stored extent must be the one this edge named.
+    // A readable span of a different width is a different plane, not a view
+    // the caller may index at the size it hoped for.
+    if (source.plane_width != expected.width || source.plane_height != expected.height ||
+        source.plane_pitch != expected.pitch || expected.width == 0 || expected.pitch == 0)
+        return empty;
+    if (expected.height != 0 &&
+        expected.pitch > std::numeric_limits<std::size_t>::max() / expected.height)
+        return empty;
+    const std::size_t need = expected.pitch * static_cast<std::size_t>(expected.height);
+    if (view.bytes < need) return empty;
+    PlaneView out;
+    out.generation = view.generation;
+    out.channel = source.task.key.channel;
+    out.wavelet = source.task.key.level;
+    out.band = source.task.key.band;
+    out.width = source.plane_width;
+    out.height = source.plane_height;
+    out.pitch = source.plane_pitch;
+    out.data = view.data;
+    out.bytes = view.bytes;
+    return out;
 }
 bool DecodeTaskGraph::published_output(std::size_t index) const {
     const Node& node = nodes_[index];

@@ -13,6 +13,8 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <sys/resource.h>
 using namespace hypercine::standalone;
@@ -41,6 +43,9 @@ template <class F> void Reject(F fn, const char* what) {
 // difference is reported at its exact offset by EqualPacket.
 void CompareFrame(const FilmScan3Frame& cpu, const FilmScan3Frame& metal, int frame) {
     EqualPacket(cpu.sample, metal.sample);
+    if (cpu.coefficient_hash != FilmScan3CoefficientHash::Full ||
+        metal.coefficient_hash != FilmScan3CoefficientHash::Full)
+        throw std::runtime_error("bit-exact gate requires full coefficient hashing");
     if (cpu.coefficient_fnv64 != metal.coefficient_fnv64)
         for (int k = 0; k < 30; ++k)
             if (cpu.coefficient_fnv64[k] != metal.coefficient_fnv64[k]) {
@@ -114,6 +119,8 @@ int main(int argc, char** argv) try {
         const auto c = cpu.Encode(input.data(), input.size(), STRIDE, metadata);
         const auto m = metal.Encode(input.data(), input.size(), STRIDE, metadata);
         CompareFrame(c, m, i);
+        Require(c.coefficient_hash == FilmScan3CoefficientHash::Full,
+                "16-frame gate requires full coefficient hashing");
         std::ostringstream h;
         for (auto v : c.coefficient_fnv64) h << std::hex << std::setw(16) << std::setfill('0') << v;
         hashes.push_back(h.str());

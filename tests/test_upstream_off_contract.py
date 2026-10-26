@@ -20,6 +20,7 @@ Configure-only, no GPU and no private corpus. Each child configure is a fresh
 build directory outside the parent build tree.
 """
 import os
+import json
 from pathlib import Path
 import re
 import shutil
@@ -59,6 +60,9 @@ def _generator_args():
 
 
 def _configure(build_dir, **defines):
+    query = Path(build_dir) / '.cmake/api/v1/query/codemodel-v2'
+    query.parent.mkdir(parents=True, exist_ok=True)
+    query.touch()
     args = ['cmake', '-S', str(ROOT), '-B', str(build_dir)]
     args += _generator_args()
     args += ['-DCMAKE_BUILD_TYPE=Release']
@@ -75,16 +79,18 @@ def _configure(build_dir, **defines):
 
 
 def _tool_is_built(build_dir, name):
-    """True when the build rules produce the benchmark tool binary."""
-    for candidate in ('build.ninja', 'Makefile'):
-        path = Path(build_dir) / candidate
-        if not path.is_file():
-            continue
-        text = path.read_text(errors='ignore')
-        if re.search(r'build\s+\S*{}:'.format(re.escape(name)), text):
-            return True
-        if re.search(r'/{}$'.format(re.escape(name)), text, re.MULTILINE):
-            return True
+    """Inspect exact executable targets for VS, Ninja and Make alike."""
+    reply = Path(build_dir) / '.cmake/api/v1/reply'
+    models = list(reply.glob('codemodel-v2-*.json'))
+    if len(models) != 1:
+        raise AssertionError('expected one fresh CMake codemodel reply')
+    model = json.loads(models[0].read_text())
+    for config in model['configurations']:
+        for target in config.get('targets', []):
+            if target['name'] == name:
+                details = json.loads((reply / target['jsonFile']).read_text())
+                if details['name'] == name and details['type'] == 'EXECUTABLE':
+                    return True
     return False
 
 
@@ -120,6 +126,31 @@ def _archive_references(build_dir):
                     hits.append('{}: {}'.format(path.relative_to(build_dir),
                                                 line.strip()[:160]))
     return hits
+
+
+class GeneratedTargetTests(unittest.TestCase):
+    def test_exact_executable_required(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            reply = Path(temporary) / '.cmake/api/v1/reply'
+            reply.mkdir(parents=True)
+            target = dict(name=SDK_BACKED_TOOL, jsonFile='target.json')
+            (reply / 'codemodel-v2-test.json').write_text(json.dumps(
+                dict(configurations=[dict(targets=[target])])))
+            for name, kind, expected in [(SDK_BACKED_TOOL, 'EXECUTABLE', True),
+                                         (SDK_BACKED_TOOL, 'STATIC_LIBRARY', False),
+                                         (SDK_BACKED_TOOL + '_other', 'EXECUTABLE', False)]:
+                (reply / 'target.json').write_text(json.dumps(dict(name=name, type=kind)))
+                self.assertEqual(_tool_is_built(temporary, SDK_BACKED_TOOL), expected)
+
+    def test_absent_and_malformed_model_are_fatal(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with self.assertRaises(AssertionError):
+                _tool_is_built(temporary, SDK_BACKED_TOOL)
+            reply = Path(temporary) / '.cmake/api/v1/reply'
+            reply.mkdir(parents=True)
+            (reply / 'codemodel-v2-test.json').write_text('{broken')
+            with self.assertRaises(ValueError):
+                _tool_is_built(temporary, SDK_BACKED_TOOL)
 
 
 class UpstreamOffContractTests(unittest.TestCase):

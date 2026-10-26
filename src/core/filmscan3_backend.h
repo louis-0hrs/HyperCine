@@ -67,6 +67,12 @@ struct FrontendAccess {
         if (!frontend) throw std::invalid_argument("null FilmScan3 frontend");
         encoder.frontend_=std::move(frontend);
     }
+    // Test seam for tombstone identity. Not a production control: the public
+    // gate still rejects anything that is not Full on both sides.
+    static uint32_t DiagnosticSerial(const FilmScan3Encoder& encoder) noexcept { return encoder.diagnostic_serial_; }
+    static uint32_t HashSession(const FilmScan3Encoder& encoder) noexcept { return encoder.hash_session_; }
+    static void SetDiagnosticSerial(FilmScan3Encoder& encoder, uint32_t serial) noexcept { encoder.diagnostic_serial_ = serial; }
+    static void SetHashSession(FilmScan3Encoder& encoder, uint32_t session) noexcept { encoder.hash_session_ = session; }
 };
 void ValidateFilmScan3Input(const uint8_t*, std::size_t, int, int, std::size_t);
 void ValidateWaveletInput(const Plane&, int);
