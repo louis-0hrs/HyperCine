@@ -5,15 +5,15 @@
 // Format legality vs resource budget.
 //
 // The bug this locks down: 4096x2160 and 8K were reported as *invalid geometry*
-// although their shape is perfectly legal for a 3-level YUV422 wavelet codec.
+// although they meet the alignment required by our current 3-level YUV422 pipeline.
 // They were merely too large for this build's session budget. A caller could not
-// tell "this format does not exist" from "this build cannot afford it", and the
+// tell "this pipeline refuses the shape" from "this build cannot afford it", and the
 // error text claimed "[128,4096] ... 8K unqualified" as if 8K were not a format.
 //
 // Contract proven here:
-//   legal shape        -> no throw from the format gate
+//   current pipeline shape -> no throw from the shape gate
 //   legal but too big  -> std::length_error (budget)
-//   illegal shape      -> std::invalid_argument (format)
+//   unsupported shape  -> std::invalid_argument (current implementation)
 //   width not %128     -> invalid_argument, even if it would fit the budget
 
 #include "hypercine/filmscan3.h"
@@ -77,8 +77,9 @@ int main() {
     Check(Classify(8192, 4320) == "budget", "8192x4320 legal shape, budget error");
     Check(Classify(12288, 8040) == "budget", "12288x8040 legal shape, budget error");
 
-    // 17520 is the URSA 17K width and is NOT a multiple of 128 (17520 = 136*128 + 112).
-    // It must stay a format error so nobody builds against an impossible format.
+    // 17520 is NOT a multiple of 128 (17520 = 136*128 + 112), so our
+    // CURRENT FilmScan3 pipeline rejects it. Do not infer that an original
+    // CineForm encoder cannot pad or represent this camera raster.
     Check(Classify(17520, 8040) == "format", "17520x8040 width not %128 -> format error");
     // The nearest legal widths on either side are.
     Check(Classify(17408, 8040) == "budget", "17408x8040 legal shape, budget error");
@@ -94,6 +95,16 @@ int main() {
     // Above the 16-bit wire field: format-illegal, not merely large.
     Check(Classify(65664, 2160) == "format", "width above 65535 -> format (wire bound)");
     Check(Classify(65536, 2160) == "format", "width 65536 -> format (wire bound)");
+
+    // Legacy Fixed-Q2 retains <=4096 and invalid_argument rejection,
+    // even for shapes whose pixels would otherwise be under kMaxPixels.
+    bool legacy_width = false, legacy_height = false;
+    try { hypercine::standalone::ValidateGeometry(4224, 24); }
+    catch (const std::invalid_argument&) { legacy_width = true; }
+    try { hypercine::standalone::ValidateGeometry(128, 4104); }
+    catch (const std::invalid_argument&) { legacy_height = true; }
+    Check(legacy_width, "legacy fixed-Q2 width>4096 remains invalid_argument");
+    Check(legacy_height, "legacy fixed-Q2 height>4096 remains invalid_argument");
 
     // --- The two failures must be distinguishable by type, not just by text --
     bool budget_is_length_error = false;
