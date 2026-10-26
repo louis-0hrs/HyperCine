@@ -83,16 +83,15 @@ def main():
         after = digest_tree(root)
 
         # 1. Every pre-existing entry is byte- and inode-identical, still there.
-        preexisting = {k: val for k, val in before.items() if not k.startswith('cuda-filmscan3-')
-                       or k == 'outlink' or k.startswith('outlink/')
-                       or k == 'real-target' or k.startswith('real-target/')
-                       or k == 'out' or k == 'out/KEEP_PARENT'
-                       or k == 'out/cuda-filmscan3-run'
-                       or k.startswith('out/cuda-filmscan3-run/')}
-        for key, val in preexisting.items():
+        # Iterate the whole before-snapshot rather than a hand-maintained subset:
+        # key matching by literal forward-slash path would silently skip everything
+        # on Windows, where str(PurePath) uses backslashes. New entries that only
+        # exist after (the two mkdtemp directories) are simply not iterated here.
+        for key, val in before.items():
             check(key in after, f'pre-existing entry disappeared: {key}')
             if key in after:
                 check(after[key] == val, f'pre-existing entry changed: {key}')
+        check(len(before) > 0, 'before-snapshot was empty, so rule 1 proves nothing')
 
         # 2. The sentinel files specifically, named so a failure is readable.
         check((output_dir / 'KEEP_PARENT').read_bytes() == b'sentinel-parent\n',
@@ -106,7 +105,13 @@ def main():
 
         # 3. The symlink still points where it did; it was not followed or replaced.
         check(link.is_symlink(), 'output symlink was replaced by a real directory')
-        check(os.readlink(link) == str(real_target), 'output symlink target changed')
+        # Compare resolved paths, not the raw readlink text. Windows returns the
+        # target in its own form (separators, possible drive prefix), so a string
+        # comparison against str(path) is a POSIX-only assumption -- it failed on
+        # the Windows runner while the link was in fact untouched. What the test
+        # actually cares about is that the link still resolves to the same place.
+        check(link.resolve() == real_target.resolve(),
+              'output symlink target changed')
 
         # 4. Each run produced its own directory, and they differ.
         check(len(work_dirs) == 2, 'expected two work directories')
