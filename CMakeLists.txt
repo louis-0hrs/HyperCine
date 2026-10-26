@@ -229,6 +229,17 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME neon_wavelet_bitexact COMMAND test_neon_wavelet)
         set_tests_properties(neon_wavelet_bitexact PROPERTIES
             LABELS "cpu;neon" TIMEOUT 600)
+
+        # Issue #70 / #259: the dispatch switch was a process-global plain bool.
+        # This binary answers two questions that an atomic does not answer by
+        # itself: does ThreadSanitizer see a race (it must not), and does one
+        # session actually own its kernel (it does not -- proven, not described).
+        find_package(Threads REQUIRED)
+        add_executable(test_neon_concurrency tests/test_neon_concurrency.cpp)
+        target_link_libraries(test_neon_concurrency PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME neon_concurrency_contract COMMAND test_neon_concurrency)
+        set_tests_properties(neon_concurrency_contract PROPERTIES
+            LABELS "cpu;neon;concurrency" TIMEOUT 900)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
