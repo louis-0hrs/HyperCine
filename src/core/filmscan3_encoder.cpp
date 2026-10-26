@@ -196,13 +196,16 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
         if(channel_bytes>std::numeric_limits<uint32_t>::max())throw std::length_error("CFHD channel index overflow");
         s.Patch(index+4*c,static_cast<uint32_t>(channel_bytes));
     }
-    if(coefficient_hashing_) result.coefficient_hash=FilmScan3CoefficientHash::Full;
-    else StampDiagnosticOff(result);
     s.Tag(24,0);s.End(sample,0x2200);
     result.sample=std::move(s.bytes);
     timing.framing_ms=elapsed(host_start)-timing.quant_ms-timing.coefficient_hash_ms-timing.entropy_ms;
     if(profile)frontend.RecordHostTiming(timing);
-    // Commit state only after a complete sample exists (strong exception guarantee).
+    // Stamp only after the sample is closed and host timing has returned.
+    // Both of those can throw. StampDiagnosticOff cannot, and it is the first
+    // write to the diagnostic serial and hash session. A failed Encode therefore
+    // leaves that identity untouched. Rate state is committed immediately after.
+    if(coefficient_hashing_) result.coefficient_hash=FilmScan3CoefficientHash::Full;
+    else StampDiagnosticOff(result);
     state_.fs_rate_limiter=result.state.fs_rate_limiter;state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
     return result;
 }

@@ -86,7 +86,10 @@ public:
     void Reset() noexcept { state_ = FilmScan3State{}; }
     // Per session, not process-global. Default is full hashing so existing
     // bit-exact gates keep real fingerprints. false skips the 30 hashes for
-    // later frames and marks them DiagnosticOff. Sample bytes are unchanged.
+    // later frames and marks them DiagnosticOff. Sample bytes, quantization,
+    // entropy, rate state and metadata are unchanged. DiagnosticOff is stamped
+    // only after the sample is finalized, so a failed Encode does not consume
+    // a tombstone serial or mint a hash session.
     void SetCoefficientHashing(bool enabled) noexcept;
     bool coefficient_hashing() const noexcept { return coefficient_hashing_; }
 private:

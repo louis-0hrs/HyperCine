@@ -239,9 +239,208 @@ void CheckRateState(const std::vector<uint8_t>& golden,const std::vector<uint8_t
     Require(stopped,"frame 65536 was encoded or wrapped");
     RequireSameState(exhausted,limited.state(),"exhausted session mutated rate state");
 }
+class TimingProbe final : public detail::Frontend {
+    std::shared_ptr<detail::Frontend> inner_;
+    int fail_=0;
+public:
+    detail::HostTiming timing{};
+    explicit TimingProbe(std::shared_ptr<detail::Frontend> inner):inner_(std::move(inner)){}
+    void FailOnce(){fail_=1;}
+    FilmScan3Geometry Geometry() const noexcept override {return inner_->Geometry();}
+    Planes Convert(const uint8_t* p,std::size_t n,int w,int h,std::size_t s) override {return inner_->Convert(p,n,w,h,s);}
+    WaveletLevel Forward(const Plane& p,int prescale) override {return inner_->Forward(p,prescale);}
+    std::string DeviceName() const override {return inner_->DeviceName();}
+    detail::FrontendFrame Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool audit) override {return inner_->Transform(p,n,w,h,s,audit);}
+    bool ProfileHost() const override {return true;}
+    void RecordHostTiming(const detail::HostTiming& t) override {
+        if(fail_){fail_=0;throw std::runtime_error("host timing failed");}
+        timing=t;
+    }
+};
+// Removes or weakens FilmScan3FullCoefficientHashesEqual and this throws.
+// Full/Full passes only when the 30 words were actually compared. Equal words
+// with DiagnosticOff, Absent, or any other status must not pass, including the
+// all-zero Absent pair that would otherwise look like a null hash.
+void CheckCoefficientGate(){
+    FilmScan3Frame full;
+    full.coefficient_hash=FilmScan3CoefficientHash::Full;
+    full.coefficient_fnv64.fill(0x123456789abcdef0ull);
+    auto full_same=full;
+    auto full_diff=full;full_diff.coefficient_fnv64[29]^=1ull;
+    auto off=full;off.coefficient_hash=FilmScan3CoefficientHash::DiagnosticOff;
+    auto off_same=off;
+    FilmScan3Frame absent,absent_same;
+    auto absent_words=full;absent_words.coefficient_hash=FilmScan3CoefficientHash::Absent;
+    auto garbage=full;garbage.coefficient_hash=static_cast<FilmScan3CoefficientHash>(255);
+    int passes=0;
+    std::string failures;
+    auto gate=[&](const FilmScan3Frame& a,const FilmScan3Frame& b,bool expect,const char* label){
+        const bool got=FilmScan3FullCoefficientHashesEqual(a,b);
+        if(got!=expect) failures+=std::string(label)+"; ";
+        if(got)++passes;
+    };
+    gate(full,full_same,true,"Full vs Full equal words must pass");
+    gate(full_same,full,true,"Full vs Full is not symmetric");
+    gate(full,full_diff,false,"Full vs Full skipped the word check");
+    gate(full,off,false,"Full vs DiagnosticOff passed");
+    gate(off,full,false,"DiagnosticOff vs Full passed");
+    gate(off,off_same,false,"DiagnosticOff vs DiagnosticOff passed");
+    gate(absent,absent_same,false,"absent zero hashes passed");
+    gate(absent_words,absent_words,false,"absent nonzero hashes passed");
+    gate(full,absent_words,false,"Full vs Absent passed on equal words");
+    gate(garbage,garbage,false,"unknown hash status passed");
+    gate(full,garbage,false,"Full vs unknown status passed");
+    if(!failures.empty()) throw std::runtime_error(failures);
+    Require(passes==2,"gate passed something other than the two Full/Full checks");
+}
+void CompareDiagnosticFrame(FilmScan3Encoder& on,FilmScan3Encoder& off,const uint8_t* data,std::size_t bytes,std::size_t stride,const char* label){
+    auto a=on.Encode(data,bytes,stride);
+    auto b=off.Encode(data,bytes,stride);
+    Require(a.sample==b.sample,label);
+    Require(a.tables.quant==b.tables.quant && a.tables.scale==b.tables.scale,"DiagnosticOff changed quant or scale tables");
+    Require(a.state.frame_index==b.state.frame_index && a.state.fs_rate_limiter==b.state.fs_rate_limiter && a.state.previous_sample_bytes==b.state.previous_sample_bytes,"DiagnosticOff changed the rate state used for this frame");
+    Require(on.state().frame_index==off.state().frame_index && on.state().fs_rate_limiter==off.state().fs_rate_limiter && on.state().previous_sample_bytes==off.state().previous_sample_bytes,"DiagnosticOff changed committed rate state");
+    Require(a.coefficient_hash==FilmScan3CoefficientHash::Full && b.coefficient_hash==FilmScan3CoefficientHash::DiagnosticOff,"DiagnosticOff did not stay a status-only change");
+    const auto ah=ReadHeader(a.sample),bh=ReadHeader(b.sample);
+    Require(ah.frame_number==bh.frame_number && ah.quality==bh.quality && ah.frame_hits==1 && ah.quality_hits==1,"DiagnosticOff changed frame or quality metadata");
+    Require(RecordText(a.sample,"TIMC",11,'c')==RecordText(b.sample,"TIMC",11,'c'),"DiagnosticOff changed timecode");
+    Require(RecordUfrm(a.sample)==RecordUfrm(b.sample),"DiagnosticOff changed UFRM");
+}
+// Sample bytes hold the quantized entropy payload and the metadata records.
+// Matching bytes, tables and rate state across the known 1080p limiter step
+// (4 then 0) are the executed proof. coefficient_hash_ms stays 0 when hashing
+// is off. framing_ms is the residual of that skipped measurement and is not
+// claimed stable. Nothing here proves an FNV word cannot collide with a
+// tombstone pattern; the gate does not rely on that.
+void CheckDiagnosticBounds(){
+    AlignedVector<uint32_t> hd(1920*1080);
+    auto* hddata=reinterpret_cast<uint8_t*>(hd.data());
+    const auto hdbytes=hd.size()*4;
+    FilmScan3Encoder on,off;off.SetCoefficientHashing(false);
+    reference_fixture::GeneratePhase3AFrame(1920,1080,0,reference_fixture::Phase3APattern::FlatBlack,hddata,7680,0x1337beef);
+    CompareDiagnosticFrame(on,off,hddata,hdbytes,7680,"DiagnosticOff changed 1080p frame 0");
+    Require(on.state().fs_rate_limiter==4 && off.state().fs_rate_limiter==4,"1080p frame 0 limiter is not 4");
+    reference_fixture::GeneratePhase3AFrame(1920,1080,1,reference_fixture::Phase3APattern::DeterministicNoise,hddata,7680,0x1337beef);
+    CompareDiagnosticFrame(on,off,hddata,hdbytes,7680,"DiagnosticOff changed 1080p frame 1");
+    Require(on.state().frame_index==2 && off.state().frame_index==2,"1080p pair did not both commit two frames");
+    Require(on.state().fs_rate_limiter==0 && off.state().fs_rate_limiter==0,"1080p feedback did not reach limiter 0");
+    const FilmScan3Geometry geometry{128,24};
+    AlignedVector<uint8_t> tiny(128u*24u*4,128),noise(128u*24u*4);
+    reference_fixture::GeneratePhase3AFrame(128,24,2,reference_fixture::Phase3APattern::DeterministicNoise,noise.data(),512,0x1337beef);
+    FilmScan3Encoder son(geometry),soff(geometry);soff.SetCoefficientHashing(false);
+    CompareDiagnosticFrame(son,soff,tiny.data(),tiny.size(),512,"DiagnosticOff changed 128x24 flat");
+    CompareDiagnosticFrame(son,soff,noise.data(),noise.size(),512,"DiagnosticOff changed 128x24 noise");
+    Require(son.state().fs_rate_limiter==soff.state().fs_rate_limiter && son.state().previous_sample_bytes==soff.state().previous_sample_bytes,"128x24 rate feedback diverged");
+    FilmScan3Metadata meta;
+    meta.timecode={{'0','1',':','0','2',':','0','3',':','0','4'}};
+    meta.guid[0]=0x11;
+    FilmScan3Encoder mon(geometry),moff(geometry);moff.SetCoefficientHashing(false);
+    auto ma=mon.Encode(tiny.data(),tiny.size(),512,meta);
+    auto mb=moff.Encode(tiny.data(),tiny.size(),512,meta);
+    Require(ma.sample==mb.sample,"DiagnosticOff changed explicit metadata bytes");
+    Require(ma.coefficient_hash==FilmScan3CoefficientHash::Full && mb.coefficient_hash==FilmScan3CoefficientHash::DiagnosticOff,"explicit metadata path changed hash status");
+    Require(RecordText(mb.sample,"TIMC",11,'c')=="01:02:03:04","explicit timecode missing under DiagnosticOff");
+    Require(ma.tables.quant==mb.tables.quant && ma.tables.scale==mb.tables.scale,"explicit metadata path changed tables");
+    Require(ma.state.fs_rate_limiter==mb.state.fs_rate_limiter && ma.state.previous_sample_bytes==mb.state.previous_sample_bytes,"explicit metadata path changed rate state");
+    auto probe=std::make_shared<TimingProbe>(detail::CpuFrontend(geometry));
+    FilmScan3Encoder probed(geometry);probed.SetCoefficientHashing(false);
+    detail::FrontendAccess::Use(probed,probe);
+    FilmScan3Encoder plain(geometry);plain.SetCoefficientHashing(false);
+    auto timed=probed.Encode(tiny.data(),tiny.size(),512);
+    auto untimed=plain.Encode(tiny.data(),tiny.size(),512);
+    Require(timed.sample==untimed.sample,"profiling DiagnosticOff changed CFHD bytes");
+    Require(timed.tables.quant==untimed.tables.quant && timed.state.fs_rate_limiter==untimed.state.fs_rate_limiter,"profiling DiagnosticOff changed quant or rate");
+    Require(probe->timing.coefficient_hash_ms==0.0,"DiagnosticOff still recorded coefficient hash time");
+}
+void RequireUntouchedIdentity(const FilmScan3Encoder& encoder,const char* label){
+    Require(detail::FrontendAccess::DiagnosticSerial(encoder)==1 && detail::FrontendAccess::HashSession(encoder)==0,label);
+}
+void CheckDiagnosticFailure(){
+    const FilmScan3Geometry geometry{128,24};
+    AlignedVector<uint8_t> tiny(128u*24u*4,128);
+    FilmScan3Encoder sized(geometry);
+    const auto fit=sized.Encode(tiny.data(),tiny.size(),512).sample.size();
+    FilmScan3Encoder tight(FilmScan3Geometry{128,24,fit-1});
+    tight.SetCoefficientHashing(false);
+    RequireUntouchedIdentity(tight,"fresh encoder does not start at serial 1");
+    const auto before=tight.state();
+    bool capacity=false;
+    try{tight.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::length_error& e){capacity=std::string(e.what())=="CFHD capacity exceeded";}
+    Require(capacity,"near-full budget did not fail closed");
+    RequireSameState(before,tight.state(),"capacity failure committed rate state");
+    RequireUntouchedIdentity(tight,"failed packet finalization consumed diagnostic identity");
+    FilmScan3Encoder early(geometry);early.SetCoefficientHashing(false);
+    detail::FrontendAccess::Use(early,std::make_shared<Failure>(false));
+    bool oom=false;
+    try{early.Encode(tiny.data(),tiny.size(),512);}catch(const std::bad_alloc&){oom=true;}
+    Require(oom,"transform failure was not bad_alloc");
+    RequireUntouchedIdentity(early,"tombstone created before transform");
+    FilmScan3Encoder mid(geometry);mid.SetCoefficientHashing(false);
+    detail::FrontendAccess::Use(mid,std::make_shared<Failure>(true));
+    bool entropy=false;
+    try{mid.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::invalid_argument& e){entropy=std::string(e.what())=="invalid entropy plane";}
+    Require(entropy,"post-quant entropy failure missing");
+    RequireSameState(before,mid.state(),"entropy failure committed rate state");
+    RequireUntouchedIdentity(mid,"tombstone created before the packet was complete");
+    auto probe=std::make_shared<TimingProbe>(detail::CpuFrontend(geometry));
+    probe->FailOnce();
+    FilmScan3Encoder timed(geometry);timed.SetCoefficientHashing(false);
+    detail::FrontendAccess::Use(timed,probe);
+    const auto timed_before=timed.state();
+    bool timing_failed=false;
+    try{timed.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::runtime_error& e){timing_failed=std::string(e.what())=="host timing failed";}
+    Require(timing_failed,"host timing failure did not surface");
+    RequireSameState(timed_before,timed.state(),"timing failure committed rate state");
+    RequireUntouchedIdentity(timed,"timing failure consumed diagnostic identity");
+    auto recovered=timed.Encode(tiny.data(),tiny.size(),512);
+    FilmScan3Encoder fresh(geometry);fresh.SetCoefficientHashing(false);
+    auto first=fresh.Encode(tiny.data(),tiny.size(),512);
+    Require(recovered.sample==first.sample,"recovery after timing failure changed CFHD bytes");
+    Require(recovered.coefficient_hash==FilmScan3CoefficientHash::DiagnosticOff,"recovery lost DiagnosticOff");
+    Require(detail::FrontendAccess::DiagnosticSerial(timed)==2,"recovery did not consume exactly one serial");
+    Require((recovered.coefficient_fnv64[0]&0xffffffu)==1 && (first.coefficient_fnv64[0]&0xffffffu)==1,"failed finalization shifted the diagnostic serial");
+    Require((recovered.coefficient_fnv64[0]>>56)==0xD1,"recovered tombstone lost its marker");
+    Require(probe->timing.coefficient_hash_ms==0.0,"recovered DiagnosticOff recorded hash time");
+}
+void CheckDiagnosticSerialReuse(){
+    const FilmScan3Geometry geometry{128,24};
+    AlignedVector<uint8_t> tiny(128u*24u*4,128);
+    FilmScan3Encoder enc(geometry);enc.SetCoefficientHashing(false);
+    detail::FrontendAccess::SetHashSession(enc,0x2Au);
+    detail::FrontendAccess::SetDiagnosticSerial(enc,0xFFFFFFFFu);
+    auto hi=enc.Encode(tiny.data(),tiny.size(),512);
+    Require(detail::FrontendAccess::DiagnosticSerial(enc)==0,"uint32 diagnostic serial did not wrap");
+    auto wrapped=enc.Encode(tiny.data(),tiny.size(),512);
+    Require((hi.coefficient_fnv64[0]&0xffffffu)==0xFFFFFFu,"high serial was truncated early");
+    Require((wrapped.coefficient_fnv64[0]&0xffffffu)==0u,"wrapped serial was not zero in the low 24 bits");
+    Require(wrapped.coefficient_fnv64[0]!=0,"wrapped tombstone collapsed to a zero hash");
+    detail::FrontendAccess::SetDiagnosticSerial(enc,0x00FFFFFFu);
+    auto again=enc.Encode(tiny.data(),tiny.size(),512);
+    Require(hi.coefficient_fnv64==again.coefficient_fnv64,"24-bit serial window did not reuse the tombstone");
+    Require(!FilmScan3FullCoefficientHashesEqual(hi,again),"reused diagnostic tombstones passed the hash gate");
+    FilmScan3Encoder low(geometry),high(geometry);
+    low.SetCoefficientHashing(false);high.SetCoefficientHashing(false);
+    detail::FrontendAccess::SetHashSession(low,0x11u);
+    detail::FrontendAccess::SetHashSession(high,0x1000011u);
+    detail::FrontendAccess::SetDiagnosticSerial(low,7u);
+    detail::FrontendAccess::SetDiagnosticSerial(high,7u);
+    auto a=low.Encode(tiny.data(),tiny.size(),512);
+    auto b=high.Encode(tiny.data(),tiny.size(),512);
+    Require(a.coefficient_fnv64==b.coefficient_fnv64,"24-bit session window did not reuse the tombstone");
+    Require(!FilmScan3FullCoefficientHashesEqual(a,b),"reused session ids passed the hash gate");
+    for(unsigned i=0;i<30;++i){
+        Require((a.coefficient_fnv64[i]>>56)==0xD1,"tombstone marker missing");
+        Require(((a.coefficient_fnv64[i]>>48)&0xffu)==i,"tombstone slot missing");
+        Require(a.coefficient_fnv64[i]!=0,"tombstone slot is a zero hash");
+    }
+}
 }
 
 int main(){try{
+    CheckCoefficientGate();
     Require(QuantizeFilmScan3(5,6)==1 && QuantizeFilmScan3(-5,6)==-1,"FS3 midpoint signed rounding");
     Require(Quantize(5,6)==0,"legacy quantization changed");
     Reject([]{QuantizeFilmScan3(1,0);});Reject([]{QuantizeFilmScan3(1,32769);});
@@ -313,6 +512,9 @@ int main(){try{
     Require(FilmScan3FullCoefficientHashesEqual(noise_on,replay_frame),"full hashes of the same coefficients differ");
     replay_frame.coefficient_hash=FilmScan3CoefficientHash::Absent;
     Require(!FilmScan3FullCoefficientHashesEqual(noise_on,replay_frame),"clearing Full status must fail the gate even when the words match");
+    CheckDiagnosticBounds();
+    CheckDiagnosticFailure();
+    CheckDiagnosticSerialReuse();
     CheckRateState(first.sample,second.sample);
-    std::cout<<"PASS: production FS3 API arithmetic, initial tables, feedback, invalid storage, reset, coefficient-hash gate, 30fps metadata split, budget/entropy rollback, parallel sessions, 65535-frame stop\n";return 0;
+    std::cout<<"PASS: production FS3 API arithmetic, initial tables, feedback, invalid storage, reset, coefficient-hash gate, diagnostic-off isolation, tombstone rollback, 24-bit serial reuse, 30fps metadata split, budget/entropy rollback, parallel sessions, 65535-frame stop\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
