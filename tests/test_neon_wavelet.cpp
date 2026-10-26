@@ -368,6 +368,140 @@ int main() {
         }
     }
 
+
+    // ---------------------------------------------------------------------
+    // FilmScan3 full-packet parity across real geometries (issue #70, M1-C).
+    //
+    // The EncodeBgra loop above only reaches small tiles because the legacy
+    // encoder carries kMaxPixels = 2,097,152 -- below 4K UHD. FilmScan3Encoder
+    // has its own, larger budget, so the geometries that actually matter for a
+    // production claim have to go through it. Anything less leaves the question
+    // "does NEON agree at more than 512 pixels wide" unanswered.
+    // ---------------------------------------------------------------------
+    {
+        struct Geometry { int width, height; const char* label; };
+        const Geometry geometries[] = {
+            {128,   24,   "minimum"},
+            {1280,  720,  "hd-720"},
+            {1920,  1080, "fhd-1080"},
+            {2048,  1080, "dci-2048"},
+            {3840,  2160, "uhd-4k"},
+        };
+        for (const auto& g : geometries) {
+            const std::size_t pixels =
+                static_cast<std::size_t>(g.width) * static_cast<std::size_t>(g.height);
+            std::vector<uint8_t> bgra(pixels * 4);
+            // Deterministic, and different per geometry so one geometry cannot
+            // accidentally reuse another's passing result.
+            uint32_t state = 0x5EED0000u + static_cast<uint32_t>(pixels & 0xFFFFu);
+            for (std::size_t i = 0; i < pixels; ++i) {
+                state = state * 1664525u + 1013904223u;
+                const uint8_t texture = static_cast<uint8_t>(state >> 24);
+                uint8_t* px = bgra.data() + i * 4;
+                px[0] = static_cast<uint8_t>((i * 7u + texture) & 0xFF);
+                px[1] = static_cast<uint8_t>((i * 13u + texture) & 0xFF);
+                px[2] = static_cast<uint8_t>((i * 29u + texture) & 0xFF);
+                px[3] = 0xFF;
+            }
+            const std::size_t stride = static_cast<std::size_t>(g.width) * 4;
+
+            hypercine::standalone::FilmScan3Geometry geometry{g.width, g.height, 0};
+
+            HyperCine_SetNEONWaveletEnabled(true);
+            hypercine::standalone::FilmScan3Encoder with_neon(geometry);
+            const auto neon_frame = with_neon.Encode(bgra.data(), bgra.size(), stride);
+
+            HyperCine_SetNEONWaveletEnabled(false);
+            hypercine::standalone::FilmScan3Encoder without(geometry);
+            const auto scalar_frame = without.Encode(bgra.data(), bgra.size(), stride);
+            HyperCine_SetNEONWaveletEnabled(true);
+
+            // A vacuous pass would be two empty packets.
+            check(!neon_frame.sample.empty() && neon_frame.sample.size() > 1024,
+                  "filmscan3 packet is real", g.width, g.height, g.label, 0, 0, 1,
+                  static_cast<long long>(neon_frame.sample.size()));
+            check(neon_frame.sample.size() == scalar_frame.sample.size(),
+                  "filmscan3 packet size", g.width, g.height, g.label, 0, 0,
+                  static_cast<long long>(scalar_frame.sample.size()),
+                  static_cast<long long>(neon_frame.sample.size()));
+
+            if (neon_frame.sample.size() == scalar_frame.sample.size()) {
+                std::size_t first_diff = neon_frame.sample.size();
+                for (std::size_t i = 0; i < neon_frame.sample.size(); ++i) {
+                    if (neon_frame.sample[i] != scalar_frame.sample[i]) { first_diff = i; break; }
+                }
+                check(first_diff == neon_frame.sample.size(),
+                      "filmscan3 packet bytes", g.width, g.height, g.label,
+                      static_cast<int>(first_diff), 0, 0, 1);
+                if (first_diff != neon_frame.sample.size()) {
+                    std::printf("  first differing byte %zu: neon=%u scalar=%u (%s)\n",
+                                first_diff, neon_frame.sample[first_diff],
+                                scalar_frame.sample[first_diff], g.label);
+                }
+            }
+
+            // All 30 coefficient hashes, not just the packet. A packet can match
+            // while an individual band differs and quantization absorbs it.
+            bool hashes_equal = neon_frame.coefficient_fnv64.size() ==
+                                scalar_frame.coefficient_fnv64.size();
+            std::size_t first_hash = 0;
+            if (hashes_equal) {
+                for (std::size_t i = 0; i < neon_frame.coefficient_fnv64.size(); ++i) {
+                    if (neon_frame.coefficient_fnv64[i] != scalar_frame.coefficient_fnv64[i]) {
+                        hashes_equal = false; first_hash = i; break;
+                    }
+                }
+            }
+            check(hashes_equal, "filmscan3 coefficient hashes", g.width, g.height, g.label,
+                  static_cast<int>(first_hash), 0, 0, 1);
+            check(neon_frame.coefficient_fnv64.size() == 30,
+                  "filmscan3 has 30 hashes", g.width, g.height, g.label, 0, 0, 30,
+                  static_cast<long long>(neon_frame.coefficient_fnv64.size()));
+        }
+
+        // Sequential frames must also agree: the frontend workspace is reused and
+        // the rate state evolves, so a first-frame-only comparison would miss it.
+        {
+            const int w = 1280, h = 720;
+            const std::size_t pixels = static_cast<std::size_t>(w) * h;
+            hypercine::standalone::FilmScan3Geometry geometry{w, h, 0};
+            HyperCine_SetNEONWaveletEnabled(true);
+            hypercine::standalone::FilmScan3Encoder neon_enc(geometry);
+            HyperCine_SetNEONWaveletEnabled(false);
+            hypercine::standalone::FilmScan3Encoder scalar_enc(geometry);
+            HyperCine_SetNEONWaveletEnabled(true);
+
+            for (int frame = 0; frame < 8; ++frame) {
+                std::vector<uint8_t> bgra(pixels * 4);
+                uint32_t state = 0xC0FFEE00u + static_cast<uint32_t>(frame) * 0x9E3779B9u;
+                for (std::size_t i = 0; i < pixels; ++i) {
+                    state = state * 1664525u + 1013904223u;
+                    const uint8_t t = static_cast<uint8_t>(state >> 24);
+                    uint8_t* px = bgra.data() + i * 4;
+                    px[0] = static_cast<uint8_t>((i * (7 + frame) + t) & 0xFF);
+                    px[1] = static_cast<uint8_t>((i * (13 + frame) + t) & 0xFF);
+                    px[2] = static_cast<uint8_t>((i * (29 + frame) + t) & 0xFF);
+                    px[3] = 0xFF;
+                }
+                HyperCine_SetNEONWaveletEnabled(true);
+                const auto a = neon_enc.Encode(bgra.data(), bgra.size(), w * 4);
+                HyperCine_SetNEONWaveletEnabled(false);
+                const auto b = scalar_enc.Encode(bgra.data(), bgra.size(), w * 4);
+                HyperCine_SetNEONWaveletEnabled(true);
+
+                const bool same = a.sample == b.sample &&
+                                  a.state.frame_index == b.state.frame_index &&
+                                  a.state.fs_rate_limiter == b.state.fs_rate_limiter;
+                check(same, "filmscan3 8-frame sequence", w, h, "sequence", frame, 0, 0, 1);
+                if (!same) {
+                    std::printf("  frame %d differs: bytes %zu vs %zu, limiter %d vs %d\n",
+                                frame, a.sample.size(), b.sample.size(),
+                                a.state.fs_rate_limiter, b.state.fs_rate_limiter);
+                }
+            }
+        }
+    }
+
     // Switch sanity: the flag must actually flip.
     HyperCine_SetNEONWaveletEnabled(true);
     const bool on = HyperCine_IsNEONWaveletEnabled();
