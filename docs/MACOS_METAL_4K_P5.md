@@ -86,21 +86,33 @@ within one geometry, so its p95 reflects pattern changes, not a slowdown.
 
 The benchmark executes **two independent encodes** on the same input. `CpuMeter` instruments the standalone scalar CPU reference; `MetalTiming` records the Metal frontend plus shared host quantization/entropy work. **Do not add CPU reference conversion/wavelet to the Metal encode time.** GPU batch execution is included within the command-buffer wait rather than being an extra serial stage.
 
-| Reported measurement | Time | Actually belongs to |
-| --- | ---: | --- |
-| Input upload | 0.67 ms | Metal transfer |
-| Submit | 0.07 ms | Metal submit |
-| GPU wait | 4.23 ms | Metal command-buffer wait (includes device GPU execution) |
-| GPU batch execution | 3.51 ms | Subset of the wait, **not additive** |
-| Band readback | 0.89 ms | Metal transfer |
-| Quantization | 19.47 ms | Shared CPU writer processing Metal frontend output |
-| Coefficient hashing | 42.68 ms | Shared CPU writer processing Metal frontend output |
-| Entropy | 7.04 ms | Shared CPU writer processing Metal frontend output |
-| Framing | 0.73 ms | Shared CPU writer, derived timing |
-| CPU reference conversion | 19.66 ms | **Separate scalar CPU encoder, not Metal** |
-| CPU reference wavelet | 19.74 ms | **Separate scalar CPU encoder, not Metal** |
+Measured on this machine, scenario 5 (3840x2160), 28 steady-state frames with the
+first 4 discarded. Read from the JSON, not transcribed:
 
-These are owner-reported values for the actual 3840×2160 run; stage timings are not a lossless additive decomposition of the measured 76.13 ms full Metal median. `color_gpu_ms` and `wavelet_gpu_ms` remain zero in this reporting mode while `batch_gpu_ms` measures device time. Zero per-stage GPU counters do not mean the GPU was idle.
+| Reported measurement | Median | Actually belongs to |
+| --- | ---: | --- |
+| Input upload | 0.71 ms | Metal transfer |
+| Submit | 0.04 ms | Metal submit |
+| GPU wait | 4.66 ms | Metal command-buffer wait (includes device GPU execution) |
+| GPU batch execution | 3.97 ms | Subset of the wait, **not additive** |
+| Band readback | 0.91 ms | Metal transfer |
+| Quantization | 19.48 ms | Shared CPU writer processing Metal frontend output |
+| Coefficient hashing | 42.70 ms | Shared CPU writer processing Metal frontend output |
+| Entropy | 6.99 ms | Shared CPU writer processing Metal frontend output |
+| Framing | 0.67 ms | Shared CPU writer, derived timing |
+| CPU reference conversion | 19.70 ms | **Separate scalar CPU encoder, not Metal** |
+| CPU reference wavelet | 19.07 ms | **Separate scalar CPU encoder, not Metal** |
+
+Additivity check, because a stage table that does not add up is worse than no
+table: the Metal-side terms plus the shared writer sum to **76.16 ms** against a
+measured full Metal median of **76.19 ms** (difference 0.03 ms). `batch_gpu_ms`
+(3.97) sits inside `wait_ms` (4.66), leaving 0.69 ms — so it must not be added a
+second time.
+
+`color_gpu_ms` and `wavelet_gpu_ms` remain zero in this reporting mode while
+`batch_gpu_ms` measures device time. Zero per-stage GPU counters do not mean the
+GPU was idle. Entropy varies strongly by content and must not be generalised from
+one synthetic sample.
 
 For this particular 4K pattern, hashing and quantization together are far more expensive than the GPU batch. Entropy runtime varies strongly by content and must not be generalized from one synthetic sample.
 
