@@ -9,8 +9,12 @@
 // The test never reports a pass when NEON is absent: it reports SKIP with the
 // reason, because "the vector path ran and matched" is not a claim you can make
 // on a machine where the vector path does not exist.
+#include "hypercine/filmscan3.h"    // QuantizeFilmScan3 reference rule
 #include "hypercine/standalone.h"   // EncodeBgra for the end-to-end packet check
 #include "hypercine/wavelet.h"
+
+using hypercine::standalone::QuantizeFilmScan3;
+using hypercine::standalone::QuantizeFilmScan3Block;
 
 #include <cstdio>
 #include <cstdint>
@@ -214,6 +218,63 @@ void check_full_encode_parity(int width, int height, const char* pattern, unsign
     }
 }
 
+
+// Quantisation block parity. The encoder quantises whole planes through
+// QuantizeFilmScan3Block, so that function has to match the single-value
+// reference exactly -- including the `divisor == 1` identity and the unsigned
+// midpoint subtleties. Tested directly rather than only through a packet,
+// because a packet comparison cannot tell which stage differed.
+void check_quantize_block_parity() {
+    // Divisor coverage: every small value, then a spread across the legal range.
+    std::vector<unsigned> divisors;
+    for (unsigned q = 1; q <= 300; ++q) divisors.push_back(q);
+    for (unsigned q = 301; q <= 32768; q += 137) divisors.push_back(q);
+    divisors.push_back(32768);
+
+    // Values that stress the rule: extremes, the unsigned midpoint edge, and a
+    // deterministic sweep.
+    std::vector<int16_t> values;
+    for (int v : {-32768, -32767, -16384, -3, -2, -1, 0, 1, 2, 3, 16384, 32766, 32767})
+        values.push_back(static_cast<int16_t>(v));
+    uint32_t st = 0x5EEDu;
+    for (int i = 0; i < 37; ++i) {
+        st = st * 1664525u + 1013904223u;
+        values.push_back(static_cast<int16_t>(st >> 16));
+    }
+
+    for (unsigned q : divisors) {
+        std::vector<int16_t> block = values;
+        // Reference: element by element through the single-value function.
+        std::vector<int16_t> expected = values;
+        for (auto& v : expected) v = QuantizeFilmScan3(v, q);
+
+        QuantizeFilmScan3Block(block.data(), block.size(), q);
+
+        for (std::size_t i = 0; i < block.size(); ++i) {
+            check(block[i] == expected[i], "quantize block", 0, 0, "quantize",
+                  static_cast<int>(i), static_cast<int>(q),
+                  expected[i], block[i]);
+        }
+    }
+
+    // Tail lengths: the vector loop handles 8 at a time, every remainder must
+    // still go through the scalar rule.
+    for (std::size_t n = 1; n <= 24; ++n) {
+        std::vector<int16_t> block(values.begin(), values.begin() + n);
+        std::vector<int16_t> expected = block;
+        for (auto& v : expected) v = QuantizeFilmScan3(v, 7);
+        QuantizeFilmScan3Block(block.data(), block.size(), 7);
+        for (std::size_t i = 0; i < n; ++i)
+            check(block[i] == expected[i], "quantize tail", 0, 0, "quantize-tail",
+                  static_cast<int>(i), static_cast<int>(n), expected[i], block[i]);
+    }
+
+    // Empty and null must be no-ops, not crashes.
+    QuantizeFilmScan3Block(nullptr, 0, 5);
+    std::vector<int16_t> empty;
+    QuantizeFilmScan3Block(empty.data(), empty.size(), 5);
+}
+
 } // namespace
 
 // On a host without NEON the test must still be a real, passing test: it proves
@@ -295,6 +356,9 @@ int main() {
     for (unsigned pattern = 0; pattern < 10; ++pattern) {
         check_padded_stride(pattern);
     }
+
+    // Quantisation block parity, directly against the reference rule.
+    check_quantize_block_parity();
 
     // End-to-end: whole packets, both switch states.
     // Widths must be multiples of 128 for the encoder contract; heights 8.
