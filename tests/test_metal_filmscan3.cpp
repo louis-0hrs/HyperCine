@@ -64,7 +64,9 @@ int main(int argc,char** argv){try{
         start=Clock::now();auto b=metal.Encode(input.data(),input.size(),7680);double m=Ms(start);
         const auto after=detail::ReadMetalTiming(*timed);
         metal_test::EqualPacket(a.sample,b.sample);
-        if(a.coefficient_fnv64!=b.coefficient_fnv64)throw std::runtime_error("quantized coefficient hashes differ");
+        if(!FilmScan3FullCoefficientHashesEqual(a,b))
+            throw std::runtime_error(a.coefficient_hash!=FilmScan3CoefficientHash::Full || b.coefficient_hash!=FilmScan3CoefficientHash::Full
+                ? "bit-exact gate requires full coefficient hashing" : "quantized coefficient hashes differ");
         if(i){ct.push_back(c);mt.push_back(m);host+=m-(after.upload_ms-before.upload_ms)-(after.readback_ms-before.readback_ms)-(after.submit_ms-before.submit_ms)-(after.wait_ms-before.wait_ms);}
         if(i==0 && argc==2){std::ofstream f(argv[1],std::ios::binary);f.write(reinterpret_cast<const char*>(b.sample.data()),b.sample.size());if(!f)throw std::runtime_error("sample write failed");}
     }

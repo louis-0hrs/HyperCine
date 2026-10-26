@@ -79,6 +79,11 @@ function(hypercine_register_sdk_free_contracts)
         return()
     endif()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME qualification_report_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_summarize_qualification.py")
+    set_tests_properties(qualification_report_contract PROPERTIES LABELS "validation;reference-oracle")
+    add_test(NAME cuda_output_dir_platform_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_cuda_output_dir_platform.py")
     add_test(NAME test_reference_release_inventory
         COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_reference_release.py")
     set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
@@ -176,7 +181,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/core/standalone_encoder.cpp
         src/cpu/filmscan3_frontend.cpp
         src/core/filmscan3_encoder.cpp
-        src/core/filmscan3_backend.cpp)
+        src/core/filmscan3_backend.cpp
+        src/core/encoder_capability.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     if(HYPERCINE_ENABLE_CUDA)
         find_package(CUDAToolkit REQUIRED)
@@ -256,11 +262,47 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(benchmark_codec benchmarks/benchmark_metal_p2.cpp)
         target_link_libraries(benchmark_codec PRIVATE hypercine_standalone)
     endif()
+    if(HYPERCINE_BUILD_BENCHMARKS)
+        # Issue #70: NEON vs scalar, kernel and whole frame. Registered here and
+        # not in benchmarks/CMakeLists.txt because the standalone build returns
+        # before add_subdirectory(benchmarks), so a registration there would
+        # silently never produce a target. It is a benchmark, not a gate: built,
+        # not run by ctest.
+        add_executable(benchmark_neon_wavelet benchmarks/benchmark_neon_wavelet.cpp)
+        target_link_libraries(benchmark_neon_wavelet PRIVATE hypercine_standalone)
+        set_property(TARGET benchmark_neon_wavelet PROPERTY INCLUDE_DIRECTORIES
+            "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"
+            "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
         # This branch returns before add_subdirectory(tests), so the SDK-free
         # contracts must be registered here as well.
         hypercine_register_sdk_free_contracts()
+        # Issue #70: NEON proof. Registered from the SDK-free block so it runs in
+        # the configuration CI actually uses.
+        #
+        # No SKIP_RETURN_CODE on purpose. The mandatory standalone matrix treats a
+        # skip as a failure, and that is correct: a skipped test proves nothing
+        # about the build it ran in. The test therefore asserts the architecture
+        # contract instead -- real NEON-vs-scalar comparison on arm64, and
+        # NOT_SUPPORTED plus an intact scalar path everywhere else.
+        add_executable(test_neon_wavelet tests/test_neon_wavelet.cpp)
+        target_link_libraries(test_neon_wavelet PRIVATE hypercine_standalone)
+        add_test(NAME neon_wavelet_bitexact COMMAND test_neon_wavelet)
+        set_tests_properties(neon_wavelet_bitexact PROPERTIES
+            LABELS "cpu;neon" TIMEOUT 600)
+
+        # Issue #70 / #259: the dispatch switch was a process-global plain bool.
+        # This binary answers two questions that an atomic does not answer by
+        # itself: does ThreadSanitizer see a race (it must not), and does one
+        # session actually own its kernel (it does not -- proven, not described).
+        find_package(Threads REQUIRED)
+        add_executable(test_neon_concurrency tests/test_neon_concurrency.cpp)
+        target_link_libraries(test_neon_concurrency PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME neon_concurrency_contract COMMAND test_neon_concurrency)
+        set_tests_properties(neon_concurrency_contract PROPERTIES
+            LABELS "cpu;neon;concurrency" TIMEOUT 900)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
@@ -325,10 +367,7 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)
-
-        # Format legality vs resource budget. Registered because the distinction is
-        # what keeps 4096x2160 and 8K from being misreported as invalid formats --
-        # an unregistered test would let that regression back in silently.
+        # Separate current wavelet shape from the bounded FilmScan3 pixel budget.
         add_executable(test_filmscan3_geometry_budget tests/test_filmscan3_geometry_budget.cpp)
         target_link_libraries(test_filmscan3_geometry_budget PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry_budget COMMAND test_filmscan3_geometry_budget)
@@ -416,7 +455,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME cuda_filmscan3_output_dir_negative COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3_output_dir.py")
             set_tests_properties(cuda_filmscan3_output_dir_negative PROPERTIES
-                LABELS "cuda;output-dir;no-gpu" TIMEOUT 120
+                SKIP_RETURN_CODE 77
+                LABELS "cuda;output-dir;no-gpu;platform-required" TIMEOUT 120
                 PASS_REGULAR_EXPRESSION "CUDA-OUTPUT-DIR-NEGATIVE: PASS")
             # #45: a real 4K FFmpeg gate with its own negative controls. Kept apart
             # from the 1080p evidence so a 4K claim always has a 4K decode behind it.
@@ -428,6 +468,21 @@ if(HYPERCINE_BUILD_STANDALONE)
                     --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}")
                 set_tests_properties(filmscan3_metal_4k_ffmpeg_gate PROPERTIES TIMEOUT 1800)
             endif()
+            # #259 capability contract: refuses before allocating, then encodes a
+            # geometry matrix and decodes each packet with FFmpeg. Registered here
+            # because it needs both ffmpeg and ffprobe -- without them the matrix
+            # half would be untested and the test would pass on the contract alone.
+            add_executable(test_encoder_capability
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_encoder_capability.cpp")
+            target_include_directories(test_encoder_capability PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+            target_link_libraries(test_encoder_capability PRIVATE hypercine_standalone)
+            add_test(NAME encoder_capability_contract COMMAND test_encoder_capability)
+            set_tests_properties(encoder_capability_contract PROPERTIES
+                LABELS "cpu;capability;external-decode" TIMEOUT 1800
+                ENVIRONMENT "HYPERCINE_FFMPEG_EXECUTABLE=${HYPERCINE_FFMPEG_EXECUTABLE};HYPERCINE_FFPROBE_EXECUTABLE=${HYPERCINE_FFPROBE_EXECUTABLE}"
+                PASS_REGULAR_EXPRESSION "PASS capability contract and encoded matrix")
             add_test(NAME filmscan3_geometry_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry.py"
                 --encoder $<TARGET_FILE:test_filmscan3_geometry>
@@ -667,4 +722,3 @@ endif()
 if(HYPERCINE_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
-

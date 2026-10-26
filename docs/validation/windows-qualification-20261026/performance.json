@@ -1,0 +1,401 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "baseline_sha256": "d0b08c9d3c1b302da56eeba1e1b7e95f0f08c3ef5b91f7eca9deba75c614d356",
+  "baseline": [
+    {
+      "name": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "frames": 50,
+      "encode": {
+        "fps": 77.6958,
+        "megapixels_per_sec": 161.11,
+        "latency_avg_ms": 12.5634,
+        "latency_min_ms": 11.9338,
+        "latency_max_ms": 14.7025
+      },
+      "decode": {
+        "fps": 394.146,
+        "megapixels_per_sec": 817.301,
+        "latency_avg_ms": 2.5368,
+        "latency_min_ms": 2.0961,
+        "latency_max_ms": 3.0989
+      },
+      "compression": {
+        "avg_bytes": 1186352,
+        "ratio": 6.99152
+      },
+      "peak_memory_bytes": 96985088
+    },
+    {
+      "name": "4K_UHD",
+      "width": 3840,
+      "height": 2160,
+      "frames": 25,
+      "encode": {
+        "fps": 21.8373,
+        "megapixels_per_sec": 181.127,
+        "latency_avg_ms": 44.7897,
+        "latency_min_ms": 42.0681,
+        "latency_max_ms": 49.166
+      },
+      "decode": {
+        "fps": 125.313,
+        "megapixels_per_sec": 1039.4,
+        "latency_avg_ms": 7.97964,
+        "latency_min_ms": 7.3067,
+        "latency_max_ms": 9.0836
+      },
+      "compression": {
+        "avg_bytes": 4673177,
+        "ratio": 7.09958
+      },
+      "peak_memory_bytes": 240435200
+    },
+    {
+      "name": "8K_UHD",
+      "width": 7680,
+      "height": 4320,
+      "frames": 10,
+      "encode": {
+        "fps": 4.28232,
+        "megapixels_per_sec": 142.077,
+        "latency_avg_ms": 229.705,
+        "latency_min_ms": 158.417,
+        "latency_max_ms": 266.595
+      },
+      "decode": {
+        "fps": 27.964,
+        "megapixels_per_sec": 927.778,
+        "latency_avg_ms": 35.76,
+        "latency_min_ms": 32.8034,
+        "latency_max_ms": 38.2421
+      },
+      "compression": {
+        "avg_bytes": 17674354,
+        "ratio": 7.50864
+      },
+      "peak_memory_bytes": 644014080
+    }
+  ],
+  "current_sdk": [
+    {
+      "name": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "frames": 50,
+      "encode": {
+        "fps": 52.7194,
+        "megapixels_per_sec": 109.319,
+        "latency_avg_ms": 18.4966,
+        "latency_min_ms": 14.9229,
+        "latency_max_ms": 31.4623
+      },
+      "decode": {
+        "fps": 288.007,
+        "megapixels_per_sec": 597.211,
+        "latency_avg_ms": 3.47142,
+        "latency_min_ms": 2.9182,
+        "latency_max_ms": 4.6412
+      },
+      "compression": {
+        "avg_bytes": 1186352,
+        "ratio": 6.99152
+      },
+      "peak_memory_bytes": 96280576,
+      "peak_memory_metric": "windows_peak_working_set"
+    },
+    {
+      "name": "4K_UHD",
+      "width": 3840,
+      "height": 2160,
+      "frames": 25,
+      "encode": {
+        "fps": 13.7653,
+        "megapixels_per_sec": 114.175,
+        "latency_avg_ms": 71.0374,
+        "latency_min_ms": 59.6889,
+        "latency_max_ms": 105.026
+      },
+      "decode": {
+        "fps": 74.0043,
+        "megapixels_per_sec": 613.821,
+        "latency_avg_ms": 13.5121,
+        "latency_min_ms": 10.5374,
+        "latency_max_ms": 20.1619
+      },
+      "compression": {
+        "avg_bytes": 4673177,
+        "ratio": 7.09958
+      },
+      "peak_memory_bytes": 238985216,
+      "peak_memory_metric": "windows_peak_working_set"
+    }
+  ],
+  "simd_source_commit": "3f612a83a286815a7969d1759b33753bb2f821a3",
+  "simd": [
+    {
+      "stage": "horizontal",
+      "isa": 1,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 9.31788,
+      "min_ms": 7.9143,
+      "max_ms": 11.3272,
+      "median_ms": 9.2769,
+      "p95_ms": 10.7736,
+      "fps": 107.321,
+      "megapixels_per_sec": 222.54,
+      "peak_process_bytes": 17305600
+    },
+    {
+      "stage": "vertical",
+      "isa": 1,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 14.67,
+      "min_ms": 11.8355,
+      "max_ms": 21.2562,
+      "median_ms": 14.0091,
+      "p95_ms": 20.782,
+      "fps": 68.1661,
+      "megapixels_per_sec": 141.349,
+      "peak_process_bytes": 17326080
+    },
+    {
+      "stage": "horizontal",
+      "isa": 2,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 0.293684,
+      "min_ms": 0.2698,
+      "max_ms": 0.4653,
+      "median_ms": 0.279,
+      "p95_ms": 0.3844,
+      "fps": 3405.02,
+      "megapixels_per_sec": 7060.65,
+      "peak_process_bytes": 17326080
+    },
+    {
+      "stage": "vertical",
+      "isa": 2,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 0.306968,
+      "min_ms": 0.2793,
+      "max_ms": 0.3906,
+      "median_ms": 0.2971,
+      "p95_ms": 0.3654,
+      "fps": 3257.67,
+      "megapixels_per_sec": 6755.11,
+      "peak_process_bytes": 17326080
+    },
+    {
+      "stage": "horizontal",
+      "isa": 3,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 0.482768,
+      "min_ms": 0.3143,
+      "max_ms": 2.4838,
+      "median_ms": 0.3445,
+      "p95_ms": 1.0932,
+      "fps": 2071.39,
+      "megapixels_per_sec": 4295.23,
+      "peak_process_bytes": 17330176
+    },
+    {
+      "stage": "vertical",
+      "isa": 3,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 0.287023,
+      "min_ms": 0.2216,
+      "max_ms": 0.832,
+      "median_ms": 0.2699,
+      "p95_ms": 0.3375,
+      "fps": 3484.05,
+      "megapixels_per_sec": 7224.52,
+      "peak_process_bytes": 17330176
+    },
+    {
+      "stage": "horizontal",
+      "isa": 1,
+      "width": 3840,
+      "height": 2160,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 39.9167,
+      "min_ms": 34.4059,
+      "max_ms": 61.1029,
+      "median_ms": 37.7174,
+      "p95_ms": 51.1721,
+      "fps": 25.0522,
+      "megapixels_per_sec": 207.793,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "vertical",
+      "isa": 1,
+      "width": 3840,
+      "height": 2160,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 62.1069,
+      "min_ms": 51.9054,
+      "max_ms": 78.0264,
+      "median_ms": 61.7087,
+      "p95_ms": 73.6299,
+      "fps": 16.1013,
+      "megapixels_per_sec": 133.55,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "horizontal",
+      "isa": 2,
+      "width": 3840,
+      "height": 2160,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 2.08893,
+      "min_ms": 1.5713,
+      "max_ms": 4.334,
+      "median_ms": 1.885,
+      "p95_ms": 3.6438,
+      "fps": 478.714,
+      "megapixels_per_sec": 3970.65,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "vertical",
+      "isa": 2,
+      "width": 3840,
+      "height": 2160,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 2.92579,
+      "min_ms": 1.6974,
+      "max_ms": 6.7173,
+      "median_ms": 2.6091,
+      "p95_ms": 4.6119,
+      "fps": 341.788,
+      "megapixels_per_sec": 2834.92,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "horizontal",
+      "isa": 3,
+      "width": 3840,
+      "height": 2160,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 1.76405,
+      "min_ms": 1.352,
+      "max_ms": 3.1292,
+      "median_ms": 1.5944,
+      "p95_ms": 2.9356,
+      "fps": 566.876,
+      "megapixels_per_sec": 4701.89,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "vertical",
+      "isa": 3,
+      "width": 3840,
+      "height": 2160,
+      "workers": 1,
+      "frames": 31,
+      "warmups": 3,
+      "avg_ms": 1.59092,
+      "min_ms": 1.3474,
+      "max_ms": 2.3673,
+      "median_ms": 1.496,
+      "p95_ms": 2.2392,
+      "fps": 628.567,
+      "megapixels_per_sec": 5213.59,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "test_injected_fs3_session",
+      "isa": 1,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 16,
+      "warmups": 3,
+      "avg_ms": 135.405,
+      "min_ms": 119.255,
+      "max_ms": 172.612,
+      "median_ms": 130.313,
+      "p95_ms": 172.612,
+      "fps": 7.38526,
+      "megapixels_per_sec": 15.3141,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "test_injected_fs3_session",
+      "isa": 2,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 16,
+      "warmups": 3,
+      "avg_ms": 108.606,
+      "min_ms": 95.0374,
+      "max_ms": 138.251,
+      "median_ms": 105.715,
+      "p95_ms": 138.251,
+      "fps": 9.20758,
+      "megapixels_per_sec": 19.0928,
+      "peak_process_bytes": 54661120
+    },
+    {
+      "stage": "test_injected_fs3_session",
+      "isa": 3,
+      "width": 1920,
+      "height": 1080,
+      "workers": 1,
+      "frames": 16,
+      "warmups": 3,
+      "avg_ms": 107.194,
+      "min_ms": 95.2714,
+      "max_ms": 124.625,
+      "median_ms": 104.251,
+      "p95_ms": 124.625,
+      "fps": 9.32886,
+      "megapixels_per_sec": 19.3443,
+      "peak_process_bytes": 54661120
+    }
+  ],
+  "limitations": [
+    "One sequential unpinned process per measurement; OS-managed clocks/power; not a regression or optimization acceptance experiment",
+    "SIMD frontend is test injection only; production Auto remains scalar",
+    "4K has isolated horizontal/vertical kernel timings only; complete 4K SIMD sessions not measured",
+    "Peak process memory is cumulative within each process; not per-kernel allocations",
+    "Kernel timing is not whole-frame timing; standalone session timing is not comparable to pristine SDK benchmark"
+  ]
+}

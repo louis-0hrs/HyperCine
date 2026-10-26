@@ -1,0 +1,959 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "scope": "Existing pinned SDK/CUDA bitstream artifacts; no new encode/decode and no pixel-oracle promotion",
+  "status": "PASS",
+  "corpora": [
+    {
+      "corpus": "tier-a",
+      "manifest_sha256": "c10fbdd2a41709573ddc1f1826b49301d7bbb94233da213c7bb13440c325e9cd",
+      "parsed_manifest_matches_repository": true,
+      "archive_sha256": "fdc9cd0e881db417e23423c8cd3f9f1e27161f2c946e40edfa2bcb8b56d58dcf",
+      "archive_bytes": 86987753,
+      "artifacts_verified": 280,
+      "artifact_bytes_verified": 276444160,
+      "parsed_frames": [
+        {
+          "frame_index": 0,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 1,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 2,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 3,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 4,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 5,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 6,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 7,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 8,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 9,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 10,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 11,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 12,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 13,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 14,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 15,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        }
+      ],
+      "excluded_oracle_frames": [
+        {
+          "frame_index": 0,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 1,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 2,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 3,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 4,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 5,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 6,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 7,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 8,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 9,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 10,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 11,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 12,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 13,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 14,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 15,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 16,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 17,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 18,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 19,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 20,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 21,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 22,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 23,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 24,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 25,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 26,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 27,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 28,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 29,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 30,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 31,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 32,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 33,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 34,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 35,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 36,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 37,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 38,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        },
+        {
+          "frame_index": 39,
+          "width": 128,
+          "height": 128,
+          "reason": "retained known small-chroma mismatch; storage integrity is not encoder parity"
+        }
+      ],
+      "extra_archive_members": []
+    },
+    {
+      "corpus": "sequence-1080",
+      "manifest_sha256": "a784807bd47a99a729e91be49ff504561ec40e453124a9b485bfbd56a8768566",
+      "parsed_manifest_matches_repository": true,
+      "archive_sha256": "9667d078ca54dccaf4f849f0136a5a8aae674c2c5e603e29b6cfc225aab21b06",
+      "archive_bytes": 317566878,
+      "artifacts_verified": 480,
+      "artifact_bytes_verified": 784605872,
+      "parsed_frames": [
+        {
+          "frame_index": 0,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 1,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 2,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 3,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 4,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 5,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 6,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 7,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 8,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 9,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 10,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 11,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 12,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 13,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 14,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 15,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 16,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 17,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 18,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 19,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 20,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 21,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 22,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 23,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 24,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 25,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 26,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 27,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 28,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 29,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 30,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 31,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 32,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 33,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 34,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 35,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 36,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 37,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 38,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 39,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 40,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 41,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 42,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 43,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 44,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 45,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 46,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 47,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 48,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 49,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 50,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 51,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 52,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 53,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 54,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 55,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 56,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 57,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 58,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 59,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 60,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 61,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 62,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 63,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 64,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 65,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 66,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 67,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 68,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 69,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 70,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 71,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 72,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 73,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 74,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 75,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 76,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 77,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 78,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 79,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 80,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 81,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 82,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 83,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 84,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 85,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 86,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 87,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 88,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 89,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 90,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 91,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 92,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 93,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 94,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 95,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 96,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 97,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 98,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 99,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 100,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 101,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 102,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 103,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 104,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 105,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 106,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 107,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 108,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 109,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 110,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 111,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 112,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 113,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 114,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 115,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 116,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 117,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 118,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        },
+        {
+          "frame_index": 119,
+          "normalized_packet_equal": true,
+          "framed_band_pairs_equal": 30
+        }
+      ],
+      "excluded_oracle_frames": [],
+      "extra_archive_members": [
+        "SHA256SUMS",
+        "manifest.json",
+        "manifest.schema.json"
+      ]
+    }
+  ]
+}

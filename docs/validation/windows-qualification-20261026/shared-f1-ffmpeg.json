@@ -1,0 +1,182 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "decoder_build": "ffmpeg version n9.0.1-11-ge47273f4d9-20260831 Copyright (c) 2000-2026 the FFmpeg developers",
+  "oracle_qualification": "NOT_QUALIFIED: bounded observations only; no negative-control adapter qualification",
+  "cases": [
+    {
+      "case_id": "RGB_444/RG48/filmscan3/asymmetric/1920x1080",
+      "packet_sha256": "cd65bb52978a5e7c6e1a49468e79e96ebd49b2c4847c092980e9985251aa437d",
+      "sdk_output_format": "RG48",
+      "sdk_decoded_sha256": "81341ed267271226a1edae21146db87ddad371a7bebd68c651e292d93fd4bfb2",
+      "fresh_processes": 3,
+      "output_pixel_format": "rgb48le",
+      "outputs": [
+        {
+          "exit": 0,
+          "bytes": 12441600,
+          "sha256": "c7c8da5ed5eecc4bf6edb27587a8b37f1b54c4aadc3fac17267c86a6b0ea2f9b"
+        },
+        {
+          "exit": 0,
+          "bytes": 12441600,
+          "sha256": "c7c8da5ed5eecc4bf6edb27587a8b37f1b54c4aadc3fac17267c86a6b0ea2f9b"
+        },
+        {
+          "exit": 0,
+          "bytes": 12441600,
+          "sha256": "c7c8da5ed5eecc4bf6edb27587a8b37f1b54c4aadc3fac17267c86a6b0ea2f9b"
+        }
+      ],
+      "oracle_qualified": false,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 1080,
+            "pix_fmt": "gbrp12le",
+            "bits_per_raw_sample": "12"
+          }
+        ]
+      },
+      "distinct_outputs": 1,
+      "status": "DECODE_OBSERVED",
+      "same_layout_sdk_comparison": {
+        "channels": [
+          "R",
+          "G",
+          "B"
+        ],
+        "bit_exact": false,
+        "max_abs_difference": [
+          16,
+          31,
+          48
+        ],
+        "psnr_db": [
+          77.4215312345641,
+          75.31986391056557,
+          77.28244466087693
+        ],
+        "zero_mse": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    {
+      "case_id": "RGBA_4444/RG64/filmscan3/alpha_ramp/1920x1080",
+      "packet_sha256": "31c141cfb1a1c2bae6a58365d750c72bd68cd6c727fb67abb3f47b976cdc1b98",
+      "sdk_output_format": "b64a",
+      "sdk_decoded_sha256": "27811d42c583b8e3a4e4497f234b842d8d97fdcdd58e3b0de45a742c12212249",
+      "fresh_processes": 3,
+      "output_pixel_format": "rgba64le",
+      "outputs": [
+        {
+          "exit": 0,
+          "bytes": 16588800,
+          "sha256": "dea4c72fa79d54dba8f5d5375c0815a6d29f75182054c3aabaeace6654a59948"
+        },
+        {
+          "exit": 0,
+          "bytes": 16588800,
+          "sha256": "dea4c72fa79d54dba8f5d5375c0815a6d29f75182054c3aabaeace6654a59948"
+        },
+        {
+          "exit": 0,
+          "bytes": 16588800,
+          "sha256": "dea4c72fa79d54dba8f5d5375c0815a6d29f75182054c3aabaeace6654a59948"
+        }
+      ],
+      "oracle_qualified": false,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 1080,
+            "pix_fmt": "gbrap12le",
+            "bits_per_raw_sample": "12"
+          }
+        ]
+      },
+      "distinct_outputs": 1,
+      "status": "DECODE_OBSERVED",
+      "same_layout_sdk_comparison": {
+        "channels": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "bit_exact": false,
+        "max_abs_difference": [
+          16,
+          31,
+          32,
+          27
+        ],
+        "psnr_db": [
+          77.4215312345641,
+          75.31986391056557,
+          75.53440245800677,
+          79.94514553089292
+        ],
+        "zero_mse": [
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    {
+      "case_id": "BAYER/BYR4/filmscan3/detail/1920x1080",
+      "packet_sha256": "4203b71890ed10267d4bfdf202caf8f390b9f0ba2cde99452c8e090189569f44",
+      "sdk_output_format": "BYR4",
+      "sdk_decoded_sha256": "95439cc64b95f3e2c8bf94af7e62fdf14d347e5c433f449dd3f23b3020f2fbad",
+      "fresh_processes": 3,
+      "output_pixel_format": null,
+      "outputs": [
+        {
+          "exit": 0,
+          "bytes": 4147200,
+          "sha256": "9625622539dfe9b70769ac21758134044b336c8c672f58b732011ab7fefae830"
+        },
+        {
+          "exit": 0,
+          "bytes": 4147200,
+          "sha256": "9625622539dfe9b70769ac21758134044b336c8c672f58b732011ab7fefae830"
+        },
+        {
+          "exit": 0,
+          "bytes": 4147200,
+          "sha256": "9625622539dfe9b70769ac21758134044b336c8c672f58b732011ab7fefae830"
+        }
+      ],
+      "oracle_qualified": false,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 1080,
+            "pix_fmt": "bayer_rggb16le",
+            "bits_per_raw_sample": "12"
+          }
+        ]
+      },
+      "distinct_outputs": 1,
+      "status": "DECODE_OBSERVED",
+      "same_layout_sdk_comparison": "NOT_PERFORMED: no qualified native Bayer layout adapter"
+    }
+  ]
+}

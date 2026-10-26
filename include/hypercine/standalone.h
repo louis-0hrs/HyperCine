@@ -40,15 +40,14 @@ template<class T> using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 // just because both use the same width/height types.
 inline constexpr int kMaxWireDimension = 65535; // current FilmScan3 16-bit geometry field
 //
-// 2. Resource budget -- what one session may allocate on this build. Bounded by
-//    RAM, not by the format. A geometry beyond it is rejected as std::length_error
-//    with its own message, so callers can tell "cannot afford" from "illegal".
+// Current resource budget -- what one session may allocate on this build.
+// Passing the implementation shape check does not imply sufficient memory.
 inline constexpr std::size_t kMaxPixels = 2097152; // legacy frame/sample budget, unchanged
 // Separate bounded storage budget for CPU FilmScan3 4K, not wire geometry.
 inline constexpr std::size_t kMaxPlaneElements = 3840u * 2160u;
 //
-// 3. Backend qualification -- which backend can actually encode which geometry.
-//    Tracked per backend, deliberately not expressed as a global constant.
+// Backend qualification is tracked per backend/session, not represented
+// by any global wire-format or allocation constant.
 //
 // The legacy <=4096 dimension gate is retained for existing Fixed-Q2
 // callers and Plane allocations; the newer FilmScan3 validator classifies

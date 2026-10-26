@@ -4,6 +4,7 @@
 #include "hypercine/filmscan3.h"
 #include "filmscan3_backend.h"
 #include <algorithm>
+#include <atomic>
 #include <stdexcept>
 #include <utility>
 #include <chrono>
@@ -101,10 +102,30 @@ void Lowpass(Writer& s,const Plane& p) {
     s.Tag(4,0x1b4b);s.End(start,0x2000);
 }
 }
+namespace {
+uint32_t MintHashSession() {
+    static std::atomic<uint32_t> next{1};
+    return next.fetch_add(1, std::memory_order_relaxed);
+}
+}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::SelectFrontend(backend)) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry) : frontend_(detail::CpuFrontend(geometry)) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry)
     : frontend_(detail::SelectFrontend(backend, geometry)) {}
+void FilmScan3Encoder::SetCoefficientHashing(bool enabled) noexcept { coefficient_hashing_=enabled; }
+void FilmScan3Encoder::StampDiagnosticOff(FilmScan3Frame& result) {
+    // 0xD1 in the top byte, slot in the next, then session and serial. A skipped
+    // frame is never all zeros, and two skipped frames do not share a fingerprint
+    // inside the 24-bit session/serial window. These values are not FNV-64 hashes.
+    if(!hash_session_) hash_session_=MintHashSession();
+    const uint32_t serial=diagnostic_serial_++;
+    for(unsigned i=0;i<30;++i) {
+        result.coefficient_fnv64[i]=(uint64_t{0xD1}<<56) | (uint64_t{i}<<48)
+            | ((uint64_t{hash_session_}&0xffffffu)<<24)
+            | (uint64_t{serial}&0xffffffu);
+    }
+    result.coefficient_hash=FilmScan3CoefficientHash::DiagnosticOff;
+}
 FilmScan3Geometry FilmScan3Encoder::geometry() const noexcept {
     return frontend_ ? frontend_->Geometry() : FilmScan3Geometry{};
 }
@@ -142,8 +163,11 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
         auto& channel=pyramid.levels[c];
         WaveletLevel* levels[]={&channel[0],&channel[1],&channel[2]};int sub=0;
         auto start=stamp();
-        result.coefficient_fnv64[c*10+sub++]=Hash(channel[2].bands[0]);
-        timing.coefficient_hash_ms+=elapsed(start);Lowpass(s,channel[2].bands[0]);
+        if(coefficient_hashing_){
+            result.coefficient_fnv64[c*10+sub]=Hash(channel[2].bands[0]);
+            timing.coefficient_hash_ms+=elapsed(start);
+        }
+        ++sub;Lowpass(s,channel[2].bands[0]);
         for(int lv=2;lv>=0;--lv) {
             auto& bands=levels[lv]->bands;const auto& p=bands[0];
             s.Tag(4,0x0d0d);s.Tag(37,lv?3:5);s.Tag(38,lv+1);s.Tag(39,lv+1);s.Tag(40,4);
@@ -151,10 +175,14 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
             const auto level=s.Begin(0x2100);
             for(int b=1;b<4;++b) {
                 auto& p=bands[b];const auto at=c*12+lv*4+b;const auto q=result.tables.quant[at];
-                start=stamp();for(auto& v:p.pixels)v=QuantizeFilmScan3(v,q);
-                timing.quant_ms+=elapsed(start);start=stamp();
-                result.coefficient_fnv64[c*10+sub]=Hash(p);
-                timing.coefficient_hash_ms+=elapsed(start);start=stamp();
+                start=stamp();QuantizeFilmScan3Block(p.pixels.data(),p.pixels.size(),q);
+                timing.quant_ms+=elapsed(start);
+                if(coefficient_hashing_){
+                    start=stamp();
+                    result.coefficient_fnv64[c*10+sub]=Hash(p);
+                    timing.coefficient_hash_ms+=elapsed(start);
+                }
+                start=stamp();
                 const auto entropy=PackHighpass(p,4*(static_cast<std::size_t>(p.width)*p.height+1));
                 timing.entropy_ms+=elapsed(start);
                 s.Tag(4,0x0e0e);s.Tag(48,b);s.Tag(72,1);s.Tag(49,p.width);s.Tag(50,p.height);s.Tag(51,sub++);
@@ -164,6 +192,7 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
             s.Tag(4,0x0c0c);s.End(level,0x2100);
         }
         const auto channel_bytes=s.bytes.size()-begin;
+        if(sub!=10)throw std::logic_error("FilmScan3 coefficient slot count");
         if(channel_bytes>std::numeric_limits<uint32_t>::max())throw std::length_error("CFHD channel index overflow");
         s.Patch(index+4*c,static_cast<uint32_t>(channel_bytes));
     }
@@ -171,7 +200,12 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     result.sample=std::move(s.bytes);
     timing.framing_ms=elapsed(host_start)-timing.quant_ms-timing.coefficient_hash_ms-timing.entropy_ms;
     if(profile)frontend.RecordHostTiming(timing);
-    // Commit state only after a complete sample exists (strong exception guarantee).
+    // Stamp only after the sample is closed and host timing has returned.
+    // Both of those can throw. StampDiagnosticOff cannot, and it is the first
+    // write to the diagnostic serial and hash session. A failed Encode therefore
+    // leaves that identity untouched. Rate state is committed immediately after.
+    if(coefficient_hashing_) result.coefficient_hash=FilmScan3CoefficientHash::Full;
+    else StampDiagnosticOff(result);
     state_.fs_rate_limiter=result.state.fs_rate_limiter;state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
     return result;
 }
