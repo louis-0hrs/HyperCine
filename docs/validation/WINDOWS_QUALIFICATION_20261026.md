@@ -65,10 +65,12 @@ when changing these public C++ object layouts; no binary ABI promise follows.
 
 ## 2. Original-SDK corpus coverage (#36)
 
-The shared `HYPERCINE_GOLDEN_DIR` location is **BLOCKED_SHARED_CORPUS_STORAGE**,
-also when tested read-only outside the sandbox. Nothing was regenerated, moved
-or overwritten. In particular the existing 20-part, 1,760-file YUV archive was
-not recreated.
+The initially configured `HYPERCINE_GOLDEN_DIR` location was
+**BLOCKED_SHARED_CORPUS_STORAGE**, also outside the sandbox. The user subsequently
+provided a working alternate endpoint. The [complete read-only recheck](SHARED_CORPUS_RECHECK_20261026.md)
+now verifies all 1,760 YUV files, all 266 F1 cases and both FS3 archives. That
+follow-up supersedes the storage blocker for these identified corpora. Nothing
+was regenerated, moved or overwritten; endpoint details remain private.
 
 The retained F1 exporter at `f17355f2f391410fc2cf27065e54dcffe1ae45e7` verified all
 **28 local diagnostic/smoke subsets** again. Each contains one exported case,
@@ -80,7 +82,7 @@ SDK version fields, layouts, quality and measured comparison data.
 
 | Family / capability | Retained native evidence | Current qualification limit |
 | --- | --- | --- |
-| YUV422 progressive GOP1 | Historical F0: BGRA/BGRa/YUY2/2vuy/v210/YU64/RG24, all six regular qualities; existing 1080p 16/120-frame reference manifests | Current source/coefficients/manifest checks pass; full external bytes cannot be reverified here. Coded p10 is distinct from input storage depth. |
+| YUV422 progressive GOP1 | Historical F0: BGRA/BGRa/YUY2/2vuy/v210/YU64/RG24, all six regular qualities; existing 1080p 16/120-frame reference manifests | All 20-part quality-corpus bytes and both FS3 archives reverified through the alternate endpoint. Coded p10 is distinct from input storage depth. |
 | RGB444 | F0: RG24/RG48/BGRA/RG30/AB10/AR10/r210/DPX0. Historical F1: 128 px matrix and 16 canonical RG48 1080p cases, FS1/FS3 | RG48 top-down RGB16; RG24 bottom-up BGR8; SDK output RG48. No general pixel-oracle qualification. |
 | RGBA4444 | F0: BGRA/BGRa/b64a/RG64. Historical F1: 128 px matrix and 14 RG64 1080p cases, FS1/FS3 | SDK output b64a is A,R,G,B16; alpha has a coded curve and is not a bit-exact 16-bit roundtrip. |
 | Bayer | F0/F1 BYR4, including 14 historical 1080p FS1/FS3 cases; retained subsets reverified | Default CFA only; source storage16 versus reported coded log12. Dither makes hashes run-dependent. CFA variants and internal pre-quant stages remain BLOCKED. |
@@ -101,7 +103,9 @@ Provenance gap: retained F1 manifests bind artifacts, SDK baseline, compiler,
 generator name and seed, but omit an exact exporter source commit. The current
 exporter checkout is recorded separately; it cannot retroactively authenticate
 the original generating binary. Preserve this distinction when accepting F1/F2.
-Independent FFmpeg per-case qualification for RGB/RGBA/Bayer remains unavailable.
+Three bounded 1080p RGB/RGBA/Bayer FFmpeg observations were subsequently measured
+from the recovered F1 samples; see the recheck. None grants independent
+pixel-oracle qualification.
 
 ## 3. Build/test results and decoder evidence (#120/#195)
 
@@ -299,10 +303,11 @@ Exact delivered commit and Draft URL are reported with the handoff.
 2. Verify the newly integrated #261/#262 revision and its chosen diagnostic
    serial failure semantics. Keep full hashes mandatory for parity gates; Mac
    owns native Metal/Vulkan follow-up as applicable.
-3. Restore read-only external corpus access, reverify the existing transfer SHA
-   inventories, then independently accept the stacked #82/#156/#165 evidence.
-   Record exact generator/build provenance in future exports. Do not regenerate
-   existing YUV multi-GB material or assert unavailable CFA/stereo support.
+3. External access and identified YUV/F1/FS3 integrity rechecks are now complete.
+   Independently decide acceptance of stacked #82/#156; locate the separate #165
+   F2 bytes before requalifying them. Record exact generator/build provenance in
+   future exports. Do not regenerate existing YUV material or assert unavailable
+   CFA/stereo support.
 4. Keep #120 decoder release blocked. Review an oracle adapter per packet/build/
    layout with genuine negative controls; qualify the local FFmpeg build before
    considering an allowlist extension. SDK API success or stable repeated hashes
