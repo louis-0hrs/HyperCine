@@ -227,7 +227,12 @@ std::string Run(const std::string& command, const std::filesystem::path& err) {
     // assembling quote characters inline at each call site.
     const auto out_path = err.string() + ".out";
     const auto err_path = err.string();
-    const auto wrapped = command + " >" + Quote(out_path) + " 2>" + Quote(err_path);
+    auto wrapped = command + " >" + Quote(out_path) + " 2>" + Quote(err_path);
+#if defined(_WIN32)
+    // cmd.exe strips the outer quotes when /C starts with a quoted executable.
+    // Keep a separate outer pair around the entire command, including redirects.
+    wrapped = "\"" + wrapped + "\"";
+#endif
     const int rc = std::system(wrapped.c_str());
     std::string output, error;
     if (std::ifstream in(err.string() + ".out"); in) output.assign(std::istreambuf_iterator<char>(in), {});
@@ -240,7 +245,7 @@ std::string Field(const std::string& text, const char* key) {
     const auto needle = std::string(key) + "=";
     const auto at = text.find(needle);
     Require(at != std::string::npos, std::string("missing ffprobe ") + key);
-    const auto end = text.find('\n', at);
+    const auto end = text.find_first_of("\r\n", at);
     return text.substr(at + needle.size(), end == std::string::npos ? std::string::npos : end - (at + needle.size()));
 }
 
