@@ -280,6 +280,15 @@ the reviewed source or add registration to its normal suite.
 
 ## 8. Delivery, architecture decisions and next steps
 
+Post-review update: while this report was being published, protected main moved
+from `81d8a94` to `c7a552c1e1183bd80ce9178bb9099bdbad14c4c1`, integrating #261.
+The table above records the decision on the older exact reviewed head, not a
+claim that the subsequently integrated implementation is still unmerged. These
+native results remain pinned to their original baseline/PR heads. The new main
+has no overlapping changed files with this draft; a local merge preview and
+GitHub confirm the draft is conflict-free. No main or owner-branch merge was
+performed here. Requalifying the integrated hashing revision is a follow-up.
+
 The branch contains test/reporting changes only and is intended as a Draft PR.
 No main merge, production promotion or existing PR branch rewrite is authorized.
 Exact delivered commit and Draft URL are reported with the handoff.
@@ -287,7 +296,7 @@ Exact delivered commit and Draft URL are reported with the handoff.
 1. Linux owner fixes #263 requested-timebase semantics, reconciles current main,
    refreshes stale description and runs exact-head registered CI. Windows then
    reruns this unchanged negative harness until the unsupported rates reject.
-2. Linux owner resolves #261/#262 overlap and explicitly chooses diagnostic
+2. Verify the newly integrated #261/#262 revision and its chosen diagnostic
    serial failure semantics. Keep full hashes mandatory for parity gates; Mac
    owns native Metal/Vulkan follow-up as applicable.
 3. Restore read-only external corpus access, reverify the existing transfer SHA
