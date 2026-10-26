@@ -54,7 +54,11 @@ def main():
     args = parser.parse_args()
 
     with tempfile.TemporaryDirectory(prefix='cuda-outdir-') as scratch:
-        root = Path(scratch)
+        # macOS exposes its system temp directory through /var -> /private/var.
+        # Canonicalize only this newly-created trusted scratch root, not a
+        # caller-provided --output-dir. Otherwise the security helper rightly
+        # rejects the system /var alias before this test reaches its sentinels.
+        root = Path(scratch).resolve(strict=True)
         output_dir = root / 'out'
         output_dir.mkdir()
 
