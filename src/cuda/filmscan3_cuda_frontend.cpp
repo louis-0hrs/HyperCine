@@ -2,13 +2,18 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "../core/filmscan3_backend.h"
+#include "filmscan3_cuda_stats.h"
 #include "hypercine/wavelet.h"
+#include <atomic>
 #include <cuda_runtime.h>
+#include <cstdint>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
 
 namespace hypercine { namespace standalone { namespace detail {
+std::atomic<std::uint64_t> g_cuda_spatial_dispatches{0};
+std::atomic<std::uint64_t> g_cuda_fail_after{0};
 namespace {
 
 [[noreturn]] void ThrowCuda(cudaError_t error, const char* operation) {
@@ -94,6 +99,23 @@ private:
                       stream),"CUDA FilmScan3 poison");
 
         if (mode_ != CudaTestMode::SkipKernel) {
+            if (CudaSpatialLaunchShouldFail()) {
+                // Real, deterministic CUDA failure (allocation of size_t max).
+                // Measured on this driver: the next cudaMalloc still succeeds,
+                // but cudaPeekAtLastError stays at out-of-memory until cleared.
+                // Clear it here so the failed frame cannot leak that status.
+                void* sink = nullptr;
+                const cudaError_t err = cudaMalloc(&sink, static_cast<std::size_t>(-1));
+                if (err == cudaSuccess) {
+                    if (sink) cudaFree(sink);
+                    throw std::runtime_error("CUDA FilmScan3 mid-frame failure: injection did not fail");
+                }
+                cudaGetLastError();
+                std::ostringstream message;
+                message << "CUDA FilmScan3 mid-frame failure: " << cudaGetErrorString(err)
+                        << " code=" << static_cast<int>(err);
+                throw std::runtime_error(message.str());
+            }
             CheckWavelet(HyperCine_ForwardSpatial2D_CUDA(
                 HYPERCINE_BACKEND_CUDA_REFERENCE,
                 source.get(),input.width,input.height,input.stride,
@@ -101,6 +123,7 @@ private:
                 lh.get(),output.bands[1].stride,
                 hl.get(),output.bands[2].stride,
                 hh.get(),output.bands[3].stride,stream),"CUDA FilmScan3 spatial wavelet");
+            NoteCudaSpatialDispatch();
         }
 
         int16_t* device_bands[]={ll.get(),lh.get(),hl.get(),hh.get()};
@@ -123,6 +146,24 @@ private:
     cudaDeviceProp properties_{};
 };
 } // namespace
+
+std::uint64_t CudaSpatialDispatchCount() noexcept {
+    return g_cuda_spatial_dispatches.load(std::memory_order_relaxed);
+}
+void ResetCudaSpatialDispatchCount() noexcept {
+    g_cuda_spatial_dispatches.store(0, std::memory_order_relaxed);
+}
+void ArmCudaMidframeFailureAfter(std::uint64_t successful_dispatches) noexcept {
+    g_cuda_fail_after.store(successful_dispatches, std::memory_order_relaxed);
+}
+bool CudaSpatialLaunchShouldFail() noexcept {
+    const std::uint64_t fail_after = g_cuda_fail_after.load(std::memory_order_relaxed);
+    if (!fail_after) return false;
+    return g_cuda_spatial_dispatches.load(std::memory_order_relaxed) >= fail_after;
+}
+void NoteCudaSpatialDispatch() noexcept {
+    g_cuda_spatial_dispatches.fetch_add(1, std::memory_order_relaxed);
+}
 
 std::shared_ptr<Frontend> CudaFrontend(FilmScan3Geometry geometry, CudaTestMode mode) {
     return std::make_shared<Cuda>(geometry,mode);

@@ -360,6 +360,17 @@ if(HYPERCINE_BUILD_STANDALONE)
                 --negative-control alter-pre-quantized-stage)
             set_tests_properties(cuda_filmscan3_negative_pre_quantized_stage PROPERTIES
                 LABELS "cuda;negative-control" WILL_FAIL TRUE SKIP_RETURN_CODE 77 TIMEOUT 300)
+            # Issue #33 L1: geometry matrix, 16-frame session, reset, parallel
+            # sessions and a real mid-frame CUDA failure. Registered here because
+            # the standalone build returns before add_subdirectory(tests).
+            add_executable(test_cuda_multigeometry tests/test_cuda_multigeometry.cpp)
+            target_include_directories(test_cuda_multigeometry PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda")
+            target_link_libraries(test_cuda_multigeometry PRIVATE hypercine_standalone CUDA::cudart Threads::Threads)
+            add_test(NAME cuda_filmscan3_multigeometry_sequence COMMAND test_cuda_multigeometry)
+            set_tests_properties(cuda_filmscan3_multigeometry_sequence PROPERTIES
+                LABELS "cuda;gpu-required" SKIP_RETURN_CODE 77 TIMEOUT 1800)
         endif()
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
