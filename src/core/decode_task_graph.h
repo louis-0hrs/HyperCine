@@ -54,6 +54,11 @@ struct TaskKey {
 // A BufferVersion carries the generation it was published for; a consumer must
 // compare `generation` against its own graph generation before reading.
 //
+// T4 plane reads do that comparison inside input_plane(). The untyped input()
+// span stays the S2 byte view: it does not know channel or band. A decoder-shaped
+// consumer must use input_plane(), which is empty unless generation, producer
+// key and extent were admitted together.
+//
 // Ownership (S2). publish() copies the bytes into storage owned by this graph
 // before the version becomes visible. The pointer in a valid BufferVersion
 // addresses that copy, not the caller's buffer. The copy lives until the graph
@@ -81,6 +86,37 @@ struct BufferVersion {
     const void* data = nullptr;
     std::size_t bytes = 0;
     bool valid() const noexcept { return version != 0; }
+};
+
+// T4. The identity a consumer claims for one declared input. Every field is
+// part of the admission: a stale generation, another channel, or another band
+// is a different edge, not a readable subset of this plane.
+struct PlaneIdentity {
+    Generation generation{};
+    std::uint32_t channel = 0;
+    std::uint32_t wavelet = 0;
+    std::uint32_t band = 0;
+    std::uint32_t transform = 0;
+    std::uint32_t frame = 0;
+    std::uint32_t width = 0;
+    std::uint32_t height = 0;
+    std::size_t pitch = 0;
+};
+
+// Empty unless input_plane() admitted generation, identity, extent and the
+// graph-owned bytes together. valid() is false for a stale generation, a
+// foreign channel or band, a short span, or a generation that has stopped.
+struct PlaneView {
+    Generation generation{};
+    std::uint32_t channel = 0;
+    std::uint32_t wavelet = 0;
+    std::uint32_t band = 0;
+    std::uint32_t width = 0;
+    std::uint32_t height = 0;
+    std::size_t pitch = 0;
+    const void* data = nullptr;
+    std::size_t bytes = 0;
+    bool valid() const noexcept { return data != nullptr && bytes != 0 && width != 0; }
 };
 
 // Thrown by TaskContext::wait_for_input() when the deadline expires, the graph
@@ -153,7 +189,25 @@ public:
     // the graph-owned copy. Only meaningful when input_published() is true;
     // after wait_for_input() returns it is still re-checked, so a stop that
     // lands between the wait and this call cannot hand out the payload.
+    // This span is untyped. It does not check channel, band or plane extent.
     BufferVersion input(std::size_t index) const;
+
+    // Plane publication (T4). Copies into graph-owned storage before the version
+    // release-store, like publish(). The caller may free `data` when this
+    // returns. Not a publication, and does not wake a waiter or charge the
+    // budget, when the signed-plane extent is illegal, the node key is not a
+    // Y/V/U wavelet5 band or the wavelet4 lowpass, or the copy would exceed the
+    // generation budget. Channel and band are the node key, not a caller tag.
+    // A later legal publish of the same task is still admitted.
+    bool publish_plane(const void* data, std::size_t bytes, std::uint32_t width,
+                       std::uint32_t height, std::size_t pitch) const noexcept;
+
+    // Typed read of one declared input. Empty unless this generation is still
+    // open and `expected` names that producer exactly: generation, channel,
+    // wavelet, band, frame, transform and extent. Stop, the first error, a
+    // stale generation and a foreign channel or band return an empty view and
+    // do not expose payload bytes. A valid pointer is the graph-owned copy.
+    PlaneView input_plane(std::size_t index, const PlaneIdentity& expected) const;
 
 private:
     friend class DecodeTaskGraph;
@@ -199,8 +253,15 @@ struct TaskSpec {
     // The only exception is graph-wide and explicit: GraphLimits::
     // require_published_output == false, for pools that never publish. It cannot
     // be expressed per task, so a single lax task cannot hide inside a strict graph.
-    std::function<bool()> published;
+    std::function<bool()> published{};
 };
+
+// Three SDK channels (Y, V, U) times four wavelet5 bands times the 2 MiB plane
+// cap is 24 MiB of owned input, plus one 2 MiB lowpass. Synthetic ceiling for
+// one generation, not a frame cache and not a licence to overlap generations.
+inline constexpr std::size_t kPlaneGenerationBudget =
+    (24u * 1024u * 1024u) + (2u * 1024u * 1024u);
+
 struct GraphLimits {
     std::size_t nodes = 4096, edges = 65536;
     // S2 completion rule. Default ON: a task becomes Completed only with a valid
@@ -213,6 +274,12 @@ struct GraphLimits {
     // uncontracted_tasks() == nodes, so the omission stays observable. It is NOT a
     // way to make a decoder graph lax -- a graph that publishes keeps the rule.
     bool require_published_output = true;
+    // T4. Bytes of graph-owned plane copies charged by publish_plane(). The
+    // absolute ceiling is kPlaneGenerationBudget. A smaller value is a tighter
+    // cap; a larger value is clamped down to the ceiling; zero admits no plane.
+    // Untyped publish() does not spend this budget. Appended last so existing
+    // positional GraphLimits braces keep their meaning.
+    std::size_t generation_budget_bytes = kPlaneGenerationBudget;
 };
 
 // One immutable graph per unique session/slot/generation. The owner must never
@@ -257,6 +324,10 @@ public:
     // construction, so it is readable at any time without the graph lock.
     std::size_t uncontracted_tasks() const noexcept;
     bool requires_published_output() const noexcept { return require_published_output_; }
+    // Bytes retained by successful publish_plane() calls. A rejection adds
+    // nothing. cancel() does not release them. The graph destructor does,
+    // and it is only safe after run() has joined every worker.
+    std::size_t owned_publication_bytes() const;
     // Number of Pending -> Ready transitions since construction, including the
     // initial roots. A generation that failed its first error must not gain a
     // single one afterwards; this counter makes that observable instead of
@@ -283,8 +354,19 @@ private:
         std::atomic<std::size_t> payload_bytes{0};
         Generation published_generation{};
         std::vector<unsigned char> owned_bytes;
+        // Set before the version release, only by publish_plane(). Zero on an
+        // untyped publish(), so input_plane() cannot treat a token as a plane.
+        std::uint32_t plane_width = 0;
+        std::uint32_t plane_height = 0;
+        std::size_t plane_pitch = 0;
     };
     bool publish(std::size_t node, const void* data, std::size_t bytes) noexcept;
+    bool publish_plane(std::size_t node, const void* data, std::size_t bytes,
+                       std::uint32_t width, std::uint32_t height, std::size_t pitch) noexcept;
+    // mutex_ must be held. Writes the owned copy and release-stores version.
+    // Does not check extent or budget; callers do that before this store.
+    bool commit_copy_locked(Node& target, const void* data, std::size_t bytes) noexcept;
+    PlaneView input_plane(std::size_t node, std::size_t input, const PlaneIdentity& expected) const;
     // True only for a readable owned BufferVersion of this generation.
     // version == 0 is rejected on its own. A non-zero version that is not a
     // buffer of this generation is a different rejection, so disabling one
@@ -313,6 +395,10 @@ private:
     std::size_t uncontracted_ = 0;
     // Graph-wide S2 completion rule, captured at construction. Default true.
     bool require_published_output_ = true;
+    // Effective T4 ceiling, clamped in the constructor. Spent only by
+    // publish_plane(), under mutex_.
+    std::size_t generation_budget_ = kPlaneGenerationBudget;
+    std::size_t owned_budget_ = 0;
     GraphError error_ = GraphError::None;
     bool started_ = false, drained_ = true, stop_ = false;
 };

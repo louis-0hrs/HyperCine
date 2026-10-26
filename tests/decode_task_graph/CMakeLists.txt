@@ -83,4 +83,17 @@ if(HYPERCINE_BUILD_TESTS)
     set_tests_properties(decode_s3_plane PROPERTIES
         TIMEOUT 30
         PASS_REGULAR_EXPRESSION "DECODE-S3 PASS")
+
+    # T4 plane dependency (issue #144). Synthetic four-band edge plus the
+    # generation budget. Not a decoder and not a fix for the #195 SDK races.
+    # Guards: T4-EXTENT, T4-BUDGET, T4-KEY, T4-STALE, T4-IDENTITY, T4-GEOMETRY.
+    add_executable(test_scheduler_t4_plane_144 test_scheduler_t4_plane_144.cpp)
+    target_link_libraries(test_scheduler_t4_plane_144 PRIVATE hypercine_decode_task_graph)
+    foreach(workers 1 2 4 8)
+        add_test(NAME scheduler_t4_plane_144_workers_${workers}
+                 COMMAND test_scheduler_t4_plane_144 ${workers})
+        set_tests_properties(scheduler_t4_plane_144_workers_${workers} PROPERTIES
+            TIMEOUT 120
+            PASS_REGULAR_EXPRESSION "SCHEDULER-T4 PASS")
+    endforeach()
 endif()
