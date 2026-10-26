@@ -163,10 +163,68 @@ void run_frame(unsigned pattern, int width, int height) {
 
 } // namespace
 
+// On a host without NEON the test must still be a real, passing test: it proves
+// the fallback contract instead of skipping. The mandatory standalone matrix
+// treats a skip as a failure, and rightly so -- a skipped test proves nothing
+// about the build it ran in.
+//
+// What is proven here on a non-ARM host:
+//   * IsNEONWaveletAvailable() is false,
+//   * the NEON entry points refuse with NOT_SUPPORTED rather than silently
+//     returning zeros, partial data, or a success code,
+//   * the scalar path still works, so the refusal is about NEON, not a broken build.
+int check_unavailable_contract() {
+    int failures = 0;
+    auto check = [&failures](bool ok, const char* what) {
+        if (!ok) {
+            std::printf("FAIL %s\n", what);
+            ++failures;
+        }
+    };
+
+    check(!HyperCine_IsNEONWaveletAvailable(), "availability must be false on this host");
+    check(!HyperCine_IsNEONWaveletEnabled(), "dispatch must not report NEON as active");
+
+    // A minimal valid frame: 8 wide (contract minimum is 6), 6 high.
+    const int width = 8, height = 6, half = width / 2;
+    std::vector<int16_t> in(static_cast<size_t>(width) * height, 100);
+    std::vector<int16_t> low(static_cast<size_t>(half) * height, 0);
+    std::vector<int16_t> high(low.size(), 0);
+
+    const auto h = HyperCine_ForwardHorizontal26_NEON(
+        in.data(), width, height, width, low.data(), half, high.data(), half);
+    check(h == HYPERCINE_STATUS_NOT_SUPPORTED, "horizontal NEON must return NOT_SUPPORTED");
+    check(low[0] == 0 && high[0] == 0, "NEON must not write partial output when refusing");
+
+    const auto v = HyperCine_ForwardVertical26_NEON(
+        in.data(), width, height, width, low.data(), width, high.data(), width);
+    check(v == HYPERCINE_STATUS_NOT_SUPPORTED, "vertical NEON must return NOT_SUPPORTED");
+
+    // Turning the switch on must not fabricate availability.
+    HyperCine_SetNEONWaveletEnabled(true);
+    check(!HyperCine_IsNEONWaveletEnabled(), "enabling NEON must not claim success where absent");
+    check(!HyperCine_IsNEONWaveletAvailable(), "availability must stay false after enabling");
+    HyperCine_SetNEONWaveletEnabled(false);
+
+    // The scalar reference must be intact on this host.
+    std::vector<int16_t> sc_low(static_cast<size_t>(half) * height, 0);
+    std::vector<int16_t> sc_high(sc_low.size(), 0);
+    const auto s = HyperCine_ForwardHorizontal26_CPU(
+        in.data(), width, height, width, sc_low.data(), half, sc_high.data(), half);
+    check(s == HYPERCINE_STATUS_SUCCESS, "scalar path must still succeed");
+
+    if (failures) {
+        std::printf("NEON-UNAVAILABLE-CONTRACT: FAIL (%d violations)\n", failures);
+        return 1;
+    }
+    std::printf("NEON-UNAVAILABLE-CONTRACT: PASS (NEON absent, refuses with NOT_SUPPORTED, "
+                "scalar intact)\n");
+    return 0;
+}
+
 int main() {
     if (!HyperCine_IsNEONWaveletAvailable()) {
-        std::printf("SKIP77: NEON wavelet not compiled in (not an arm64 build)\n");
-        return 77;
+        return check_unavailable_contract();
     }
 
     // Widths chosen to exercise: exact vector multiples, tails of every length
