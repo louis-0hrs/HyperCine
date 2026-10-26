@@ -16,22 +16,22 @@ This document maps the boundaries between architectural layers in HyperCine to p
 Handles bitstream structure, chunk headers, and overall CineForm container format.
 - **Status**: Implementiert
 - **Anchor**: `src/core/standalone_encoder.cpp` (Writer/Sample classes), `src/core/filmscan3_encoder.cpp` (Writer class), `tests/test_standalone.cpp`
-- **Evidence**: Bitstream writing functionality for both standalone and FilmScan3 encoders
+- **Evidence**: Two currently distinct writers (legacy fixed-Q2 and FilmScan3); FilmScan3 CPU, Metal, internal CUDA share the **FilmScan3** writer. The two codec families are not silently one writer.
 
 ### 2. Profil- und Qualitaetszustand (Profile and Quality State)
 Manages encoding profiles, quality settings, and rate limiting state.
 - **Status**: Implementiert
 - **Anchor**: `src/core/quality_state.cpp`, `src/core/filmscan3_encoder.cpp` (state management), `tests/test_quality_state.cpp`
-- **Evidence**: Quality state machine with limiter calculations and table lookups
+- **Evidence**: Quality-state arithmetic is tested; FilmScan3 still maintains a separate per-session limiter. Six GoPro profiles are not yet all implemented in the shared FilmScan3 writer.
 
 ### 3. Pixelkonvertierung (Pixel Conversion)
 Converts input pixel formats (BGRA, etc.) to internal working color space (YUV).
-- **Status**: Nativ getestet (CPU scalar, CPU NEON, Metal)
-- **Platform**: Linux x86_64 (CPU), macOS arm64 M2 Pro (NEON, Metal). **Nicht** auf der A2 qualifiziert.
+- **Status**: Nativ getestet (CPU scalar, Metal); NEON BGRA-to-YUV converter **not implemented**
+- **Platform**: Linux x86_64 (CPU scalar), macOS arm64 M2 Pro (CPU scalar/Metal). NEON #255 works on wavelets/quantization, **not** on color conversion; the A2 uses the existing host CPU color conversion.
 - **Anchor**: `src/cpu/filmscan3_frontend.cpp::ConvertFilmScan3Bgra()`, `src/core/filmscan3_encoder.cpp` (frontend.Transform),
   `tests/test_filmscan3.cpp`, `tests/test_metal_filmscan3_4k.cpp`
 - **Evidence**: Synthetic BGRA encoding validated at 3840x2160 with CPU/Metal packet parity and independent FFmpeg
-  decode (#248, #251). NEON parity extended to 4K with 1,457,338 checks (#255).
+  decode (#248, #251). NEON #255 is an experimental wavelet/quantization Draft, not evidence of a color-conversion implementation.
 - **Correction**: an earlier version of this row cited `CAPABILITY_8K_17K_AUDIT.md` as an A2 platform proof.
   That document states of itself: "Source/measurement audit, not a 8K/12K/17K codec qualification." It is not a
   platform qualification for this layer and was misused as one.
@@ -42,10 +42,9 @@ Performs the 2-6 biorthogonal wavelet decomposition and reconstruction.
 - **Platform**: Linux x86_64 (CPU, CUDA-A2), macOS arm64 M2 Pro (NEON, Metal)
 - **Anchor**: `src/core/filmscan3_encoder.cpp` (WaveletLevel processing), `src/cpu/filmscan3_frontend.cpp` (ForwardLevel),
   `tests/test_cuda_wavelet.cpp`, `tests/test_transform_wavelet.cpp`, `tests/test_neon_wavelet.cpp`
-- **Evidence**: CPU/CUDA coefficient parity and full packet equality at 720p/1080p/2048x1080/4K (#249);
-  NEON kernel 3.1-3.4x scalar with bit-exact parity to 4K (#255); Metal 4K CPU parity, 68/68 native (#251).
-- **Grenze**: the CUDA path is an experimental SDK-free frontend, not a qualified backend. #249 evidence was
-  produced before the merge; a post-merge A2 rerun is still outstanding.
+- **Evidence**: Merged #249 registered CUDA GPU-required gate covers complete 1080p CPU/CUDA packet equality; the pending postmerge #267 native A2 report additionally documents 4K and 16×1080p, subject to its own explicit checks.
+  720p/2048x1080 CUDA were **not established by those specific recorded gates**. Draft #255 reports native ARM64 NEON coefficient parity and kernel benchmarks; experimental, not yet mainline. Metal 4K CPU parity is recorded in merged #248/#251.
+- **Grenze**: the CUDA path is an experimental SDK-free frontend, not a public selectable backend. Post-merge A2 owner evidence is now present in pending Draft #267 (1080p/4K/16×1080p), with explicit shared-GPU-memory and FFmpeg-scope caveats.
 
 ### 5. Quantisierung (Quantization)
 Applies dead-zone uniform quantization to wavelet coefficients.
@@ -103,14 +102,14 @@ The geometry constraint layer suffers from mixed concerns:
 - **Pure format rule**: Breite%128==0, Hoehe%8==0, Breite>=128, Hoehe>=24 (per `WaveletShape` in `src/core/encoder_capability.cpp` and `ValidateFilmScan3Geometry` in `src/cpu/filmscan3_frontend.cpp`)
 - **Status**: Bekannt blockiert
 - **Anchor**: `include/hypercine/standalone.h` (lines defining kMaxDimension/kMaxPlaneElements), `src/cpu/filmscan3_frontend.cpp::ValidateFilmScan3Geometry()`, `docs/CAPABILITY_8K_17K_AUDIT.md`
-- **Blocking reason**: Couples format constraints with memory budgets preventing independent evolution
+- **Blocking reason**: Couples current pipeline-shape checks with this implementation's memory budget, obscuring whether a request is structurally rejected or simply unaffordable
 - **Ongoing work**: Branch `codex/issue259-geometry-budget-separation-20261026` seeks to separate these concerns
 
-### Illegal Format Notification
-Per the pure format rule (Breite%128==0, Hoehe%8==0, Breite>=128, Hoehe>=24):
-- **17520x8040 is ILLEGAL** because 17520 % 128 = 112 (not 0)
-- Next legal widths: 17408 (17520-112) or 17536 (17520+16)
-- **Status**: Dokumentierte Grenze
+### Current Pipeline Shape Rejection (not a universal CineForm format ruling)
+Per the CURRENT 3-level FilmScan3 YUV422 pipeline shape (Breite%128==0, Hoehe%8==0, Breite>=128, Hoehe>=24), which is not established as a restriction for every CineForm family:
+- **17520x8040 is rejected by the CURRENT 3-level FilmScan3 YUV422 shape gate** because 17520 % 128 = 112 (not 0); this is NOT a proven global CineForm/GoPro format prohibition
+- Nearby accepted shape-aligned widths in this pipeline: 17408 (17520-112) and 17536 (17520+16), still beyond present allocation budgets
+- **Status**: Documented current-implementation alignment gate; original CineForm format support unverified
 - **Anchor**: `src/cpu/filmscan3_frontend.cpp::ValidateFilmScan3Geometry()` (width%128 check), `docs/CAPABILITY_8K_17K_AUDIT.md` (URSA 17K width discussion)
 
 ## Layer Status Summary
@@ -119,8 +118,8 @@ Per the pure format rule (Breite%128==0, Hoehe%8==0, Breite>=128, Hoehe>=24):
 |-------|--------|-----------------|
 | 1. Codec-/Bitstream-Core | Implementiert | standalone_encoder.cpp, filmscan3_encoder.cpp |
 | 2. Profil- und Qualitaetszustand | Implementiert | quality_state.cpp |
-| 3. Pixelkonvertierung | Nativ getestet (CPU scalar/NEON, Metal) | test_filmscan3.cpp, test_metal_filmscan3_4k.cpp, ConvertFilmScan3Bgra |
-| 4. Wavelet-Compute | Nativ getestet (CPU scalar/NEON, Metal); CUDA experimentell | test_cuda_wavelet.cpp, test_neon_wavelet.cpp, filmscan3_encoder.cpp |
+| 3. Pixelkonvertierung | Nativ getestet (CPU scalar, Metal), not NEON | test_filmscan3.cpp, test_metal_filmscan3_4k.cpp, ConvertFilmScan3Bgra |
+| 4. Wavelet-Compute | CPU scalar/Metal native; NEON #255 Draft, CUDA #249 experimental | test_cuda_wavelet.cpp, test_neon_wavelet.cpp, filmscan3_encoder.cpp |
 | 5. Quantisierung | Implementiert | quality_state.cpp, QuantizeFilmScan3 |
 | 6. Entropiekodierung | Implementiert | entropy_fast.h, PackHighpass |
 | 7. Backend-Auswahl | Experimentell | MACOS_METAL_BACKEND.md, FilmScan3Encoder ctors |
