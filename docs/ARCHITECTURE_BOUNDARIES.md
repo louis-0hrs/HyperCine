@@ -37,7 +37,7 @@ Converts input pixel formats (BGRA, etc.) to internal working color space (YUV).
   platform qualification for this layer and was misused as one.
 
 ### 4. Wavelet-Compute
-Performs the 2-6 biorthogonal wavelet decomposition and reconstruction.
+Implements 2-6 forward wavelet decomposition for encoding. Synthetic inverse research exists under Decoder-Scheduling, but no complete production inverse/decoder is qualified.
 - **Status**: Nativ getestet (CPU scalar, CPU NEON, Metal); CUDA-Frontend experimentell
 - **Platform**: Linux x86_64 (CPU, CUDA-A2), macOS arm64 M2 Pro (NEON, Metal)
 - **Anchor**: `src/core/filmscan3_encoder.cpp` (WaveletLevel processing), `src/cpu/filmscan3_frontend.cpp` (ForwardLevel),
@@ -56,10 +56,10 @@ Applies dead-zone uniform quantization to wavelet coefficients.
 Encodes quantized coefficients using run-length and VLC entropy coding.
 - **Status**: Implementiert
 - **Anchor**: `src/core/entropy_fast.h` (EntropyBits class), `src/core/filmscan3_encoder.cpp` (PackHighpass usage), `tests/test_entropy_bitexact.cpp`, `tests/test_entropy_capacity.cpp`
-- **Evidence**: Entropy coding implementation with bit-exact testing against upstream reference
+- **Evidence**: Entropy coding implementation with deterministic bit-exact tests and bounded reference checks. Do not infer original GoPro parity for untested formats or profiles.
 
 ### 7. Backend-Auswahl (Backend Selection)
-Selects between CPU, Metal, CUDA backends for computation.
+Public FilmScan3 selection currently covers CPU and Metal; the merged CUDA frontend is experimental and internally injected, not a public backend selector.
 - **Status**: Experimentell
 - **Anchor**: `src/core/filmscan3_encoder.cpp` (FilmScan3Encoder constructors), `detail::SelectFrontend()` in filmscan3_encoder.cpp, `docs/MACOS_METAL_BACKEND.md`
 - **Evidence**: Backend selection mechanism exists but Metal backend is marked experimental (see MACOS_METAL_BACKEND.md)
@@ -98,8 +98,8 @@ Manages decode task dependencies and parallelism.
 ### Geometry Constraint Mixing (Blocked)
 The geometry constraint layer suffers from mixed concerns:
 - `kMaxDimension = 4096` in `include/hypercine/standalone.h` serves dual purpose as both format limit and memory budget
-- `kMaxPlaneElements = 3840*2160` excludes 4096x2160 despite being format-legal
-- **Pure format rule**: Breite%128==0, Hoehe%8==0, Breite>=128, Hoehe>=24 (per `WaveletShape` in `src/core/encoder_capability.cpp` and `ValidateFilmScan3Geometry` in `src/cpu/filmscan3_frontend.cpp`)
+- `kMaxPlaneElements = 3840*2160` excludes 4096x2160 despite satisfying this implementation's current wavelet alignment rules
+- **Current FilmScan3 YUV422 pipeline shape gate**: Breite%128==0, Hoehe%8==0, Breite>=128, Hoehe>=24 (per draft `WaveletShape` in `src/core/encoder_capability.cpp` and current `ValidateFilmScan3Geometry`). This is not the full GoPro format specification.
 - **Status**: Bekannt blockiert
 - **Anchor**: `include/hypercine/standalone.h` (lines defining kMaxDimension/kMaxPlaneElements), `src/cpu/filmscan3_frontend.cpp::ValidateFilmScan3Geometry()`, `docs/CAPABILITY_8K_17K_AUDIT.md`
 - **Blocking reason**: Couples current pipeline-shape checks with this implementation's memory budget, obscuring whether a request is structurally rejected or simply unaffordable
