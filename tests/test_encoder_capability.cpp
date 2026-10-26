@@ -5,6 +5,7 @@
 #include "hypercine/filmscan3.h"
 #include "reference_frame_generator.h"
 
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -197,6 +198,24 @@ std::vector<std::uint8_t> Avi(const std::vector<std::uint8_t>& packet, int width
     std::vector<std::uint8_t> avi;
     Chunk(avi, "RIFF", riff_payload);
     return avi;
+}
+
+// Each test run owns a fresh, atomically created scratch directory.
+// The previous fixed "hypercine-capability-evidence" temp path could be a
+// pre-existing user directory/symlink and its named .cfhd/.yuv files could
+// be overwritten. Never reuse or clean a directory this test did not create.
+std::filesystem::path FreshScratch() {
+    const auto base = std::filesystem::temp_directory_path();
+    for (unsigned attempt = 0; attempt < 128; ++attempt) {
+        const auto tick = std::chrono::steady_clock::now().time_since_epoch().count();
+        const auto path = base / ("hypercine-capability-" + std::to_string(tick) +
+                                  "-" + std::to_string(attempt));
+        std::error_code ec;
+        if (std::filesystem::create_directory(path, ec))
+            return path;
+        if (ec) throw std::filesystem::filesystem_error("cannot create isolated test directory", path, ec);
+    }
+    throw std::runtime_error("could not create exclusive capability test directory");
 }
 
 // Tool paths are configurable so the test can run on any host. Hardcoding
@@ -467,13 +486,13 @@ int main() {
         auto fallback = Check("cuda-fallback", cuda_fallback, host, CapabilityReason::ExperimentallySupported);
         Require(fallback.fell_back_to_cpu_scalar && fallback.effective_backend == SessionBackend::CpuScalar, "explicit cuda fallback");
 
-        const auto scratch = std::filesystem::temp_directory_path();
+        const auto scratch = FreshScratch();
         const auto version = Run(Quote(Ffmpeg()) + " -version",
-            scratch / "hypercine-capability-ffmpeg-version");
+            scratch / "ffmpeg-version");
         const auto newline = version.find('\n');
         std::cout << "FFMPEG " << version.substr(0, newline == std::string::npos ? version.size() : newline) << '\n';
-        const auto dir = scratch / "hypercine-capability-evidence";
-        std::filesystem::create_directories(dir);
+        const auto dir = scratch / "samples";
+        Require(std::filesystem::create_directory(dir), "exclusive sample directory");
         for (const auto& item : pass) EncodeAndDecode(dir, item.w, item.h);
         std::cout << "PASS capability contract and encoded matrix\n";
         return 0;
