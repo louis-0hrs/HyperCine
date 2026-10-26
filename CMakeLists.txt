@@ -192,6 +192,14 @@ if(HYPERCINE_BUILD_STANDALONE)
         # This branch returns before add_subdirectory(tests), so the SDK-free
         # contracts must be registered here as well.
         hypercine_register_sdk_free_contracts()
+        # Issue #70: NEON dispatch proof. Registered from the SDK-free block so it
+        # runs in the same configuration CI uses; a non-arm64 host reports SKIP77
+        # instead of pretending the vector path was exercised.
+        add_executable(test_neon_wavelet tests/test_neon_wavelet.cpp)
+        target_link_libraries(test_neon_wavelet PRIVATE hypercine_standalone)
+        add_test(NAME neon_wavelet_bitexact COMMAND test_neon_wavelet)
+        set_tests_properties(neon_wavelet_bitexact PROPERTIES
+            LABELS "cpu;neon" SKIP_RETURN_CODE 77 TIMEOUT 600)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
