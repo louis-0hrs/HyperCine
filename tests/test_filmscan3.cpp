@@ -3,12 +3,244 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/filmscan3.h"
 #include "reference_frame_generator.h"
-#include <iostream>
+#include "../src/core/filmscan3_backend.h"
+#include <cstdint>
 #include <cstring>
+#include <iostream>
+#include <new>
 #include <stdexcept>
+#include <string>
+#include <vector>
 using namespace hypercine::standalone;
 void Require(bool value,const char* label){if(!value)throw std::runtime_error(label);}
 template<class F>void Reject(F f){bool rejected=false;try{f();}catch(const std::exception&){rejected=true;}Require(rejected,"invalid input accepted");}
+
+namespace {
+uint32_t Rotr(uint32_t x,uint32_t n){return (x>>n)|(x<<(32-n));}
+std::string Sha256(const uint8_t* data,std::size_t len){
+    static const uint32_t K[64]={
+        0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+        0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+        0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+        0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+        0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+        0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+        0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+        0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2};
+    uint32_t h[8]={0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19};
+    const uint64_t bitlen=static_cast<uint64_t>(len)*8;
+    std::vector<uint8_t> m(data,data+len);
+    m.push_back(0x80);
+    while((m.size()%64)!=56)m.push_back(0);
+    for(int i=7;i>=0;--i)m.push_back(static_cast<uint8_t>(bitlen>>(i*8)));
+    for(std::size_t off=0;off<m.size();off+=64){
+        uint32_t w[64];
+        for(int i=0;i<16;++i)
+            w[i]=(uint32_t(m[off+4*i])<<24)|(uint32_t(m[off+4*i+1])<<16)|(uint32_t(m[off+4*i+2])<<8)|uint32_t(m[off+4*i+3]);
+        for(int i=16;i<64;++i){
+            const uint32_t s0=Rotr(w[i-15],7)^Rotr(w[i-15],18)^(w[i-15]>>3);
+            const uint32_t s1=Rotr(w[i-2],17)^Rotr(w[i-2],19)^(w[i-2]>>10);
+            w[i]=w[i-16]+s0+w[i-7]+s1;
+        }
+        uint32_t a=h[0],b=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+        for(int i=0;i<64;++i){
+            const uint32_t s1=Rotr(e,6)^Rotr(e,11)^Rotr(e,25);
+            const uint32_t ch=(e&f)^((~e)&g);
+            const uint32_t t1=hh+s1+ch+K[i]+w[i];
+            const uint32_t s0=Rotr(a,2)^Rotr(a,13)^Rotr(a,22);
+            const uint32_t maj=(a&b)^(a&c)^(b&c);
+            hh=g;g=f;f=e;e=d+t1;d=c;c=b;b=a;a=t1+s0+maj;
+        }
+        h[0]+=a;h[1]+=b;h[2]+=c;h[3]+=d;h[4]+=e;h[5]+=f;h[6]+=g;h[7]+=hh;
+    }
+    static const char* hex="0123456789abcdef";
+    std::string out(64,'0');
+    for(int i=0;i<8;++i)for(int shift=28;shift>=0;shift-=4)
+        out[i*8+(28-shift)/4]=hex[(h[i]>>shift)&15];
+    return out;
+}
+struct HeaderFields {
+    unsigned frame_number=0,quality=0;
+    int frame_hits=0,quality_hits=0;
+    bool saw_sample=false;
+};
+unsigned U16(const std::vector<uint8_t>& s,std::size_t at){return (unsigned(s[at])<<8)|s[at+1];}
+HeaderFields ReadHeader(const std::vector<uint8_t>& s){
+    HeaderFields h;
+    for(std::size_t at=0;at+4<=s.size();){
+        const unsigned raw=U16(s,at),value=U16(s,at+2);
+        const unsigned tag=raw>=32768 ? 65536u-raw : raw;
+        at+=4;
+        if(tag==69){h.frame_number=value;++h.frame_hits;}
+        if(tag==80){h.quality=value;++h.quality_hits;}
+        if(tag==0x4002){
+            Require(value<=(s.size()-at)/4,"metadata extent");
+            at+=4*static_cast<std::size_t>(value);
+            continue;
+        }
+        const unsigned type=tag&0xff00u;
+        if(type==0x2000 || type==0x2100 || type==0x2200){
+            const unsigned words=((tag&255u)<<16)|value;
+            Require(words<=(s.size()-at)/4,"chunk extent");
+            if(type==0x2200){h.saw_sample=true;break;}
+            at+=4*static_cast<std::size_t>(words);
+        }
+    }
+    return h;
+}
+std::size_t CountFourcc(const std::vector<uint8_t>& s,const char* key){
+    std::size_t n=0;
+    for(std::size_t i=0;i+4<=s.size();++i)
+        if(std::memcmp(s.data()+i,key,4)==0)++n;
+    return n;
+}
+std::string RecordText(const std::vector<uint8_t>& s,const char* key,unsigned size,char type){
+    const std::string want(key,4);
+    std::string found;
+    int hits=0;
+    for(std::size_t i=0;i+8+size<=s.size();++i){
+        if(std::memcmp(s.data()+i,key,4)!=0 || s[i+7]!=static_cast<uint8_t>(type))continue;
+        const unsigned n=unsigned(s[i+4])|(unsigned(s[i+5])<<8)|(unsigned(s[i+6])<<16);
+        if(n!=size)continue;
+        found.assign(reinterpret_cast<const char*>(s.data()+i+8),size);
+        ++hits;
+    }
+    Require(hits==1,want.c_str());
+    return found;
+}
+uint32_t RecordUfrm(const std::vector<uint8_t>& s){
+    int hits=0;uint32_t value=0;
+    for(std::size_t i=0;i+12<=s.size();++i){
+        if(std::memcmp(s.data()+i,"UFRM",4)!=0 || s[i+7]!='L')continue;
+        const unsigned n=unsigned(s[i+4])|(unsigned(s[i+5])<<8)|(unsigned(s[i+6])<<16);
+        if(n!=4)continue;
+        value=uint32_t(s[i+8])|(uint32_t(s[i+9])<<8)|(uint32_t(s[i+10])<<16)|(uint32_t(s[i+11])<<24);
+        ++hits;
+    }
+    Require(hits==1,"UFRM");
+    return value;
+}
+std::size_t Diffs(const std::vector<uint8_t>& a,const std::vector<uint8_t>& b){
+    Require(a.size()==b.size(),"metadata override changed packet size");
+    std::size_t n=0;for(std::size_t i=0;i<a.size();++i)n+=a[i]!=b[i];return n;
+}
+void RequireSameState(const FilmScan3State& a,const FilmScan3State& b,const char* label){
+    Require(a.frame_index==b.frame_index && a.fs_rate_limiter==b.fs_rate_limiter && a.previous_sample_bytes==b.previous_sample_bytes,label);
+}
+class Failure final : public detail::Frontend {
+    bool corrupt_;
+public:
+    explicit Failure(bool corrupt):corrupt_(corrupt){}
+    FilmScan3Geometry Geometry() const noexcept override {return {128,24};}
+    Planes Convert(const uint8_t* p,std::size_t n,int w,int h,std::size_t s) override {return ConvertFilmScan3Bgra(p,n,w,h,s);}
+    WaveletLevel Forward(const Plane& p,int prescale) override {return ForwardLevel(p,prescale);}
+    std::string DeviceName() const override {return "rate-state failure";}
+    detail::FrontendFrame Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool audit) override {
+        if(!corrupt_)throw std::bad_alloc();
+        auto result=Frontend::Transform(p,n,w,h,s,audit);
+        // Quantize runs on the returned bands before PackHighpass. Width 1 is legal
+        // for the quantizer and illegal for entropy (width must be a multiple of 8).
+        result.levels[2][0].bands[3].width=1;
+        return result;
+    }
+};
+void CheckRateState(const std::vector<uint8_t>& golden,const std::vector<uint8_t>& second){
+    Require(Sha256(reinterpret_cast<const uint8_t*>("abc"),3)=="ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad","sha256 abc");
+    Require(Sha256(golden.data(),golden.size())=="d75e6af7980558e42a520e8ce3bd3513626a854c3210da1c8b78240f4d75d6df","30fps golden bytes changed");
+    const auto g=ReadHeader(golden),s=ReadHeader(second);
+    Require(g.saw_sample && g.frame_hits==1 && g.frame_number==1 && g.quality_hits==1 && g.quality==6,"golden header");
+    Require(s.saw_sample && s.frame_hits==1 && s.frame_number==2 && s.quality_hits==1 && s.quality==6,"second frame still quality 6");
+    Require(RecordText(golden,"TIMC",11,'c')=="00:00:00:00","golden timecode");
+    Require(RecordUfrm(golden)==0,"golden UFRM");
+    Require(CountFourcc(golden,"TIMB")==0 && CountFourcc(golden,"TIMD")==0,"golden gained TIMB/TIMD");
+    AlignedVector<uint8_t> tiny(128u*24u*4,128);
+    const FilmScan3Geometry geometry{128,24};
+    FilmScan3Encoder clock(geometry);
+    std::string tc29,tc30;
+    for(unsigned i=0;i<31;++i){
+        auto frame=clock.Encode(tiny.data(),tiny.size(),512);
+        const auto header=ReadHeader(frame.sample);
+        Require(header.frame_hits==1 && header.frame_number==i+1 && header.quality==6,"128x24 header");
+        Require(RecordUfrm(frame.sample)==i,"128x24 UFRM");
+        if(i==29)tc29=RecordText(frame.sample,"TIMC",11,'c');
+        if(i==30)tc30=RecordText(frame.sample,"TIMC",11,'c');
+    }
+    Require(tc29=="00:00:00:29" && tc30=="00:00:01:00","30fps split");
+    FilmScan3Encoder plain(geometry),timecode_only(geometry),guid_only(geometry);
+    auto base=plain.Encode(tiny.data(),tiny.size(),512);
+    FilmScan3Metadata metadata;
+    metadata.timecode={{'0','1',':','0','2',':','0','3',':','0','4'}};
+    auto timed=timecode_only.Encode(tiny.data(),tiny.size(),512,metadata);
+    Require(Diffs(base.sample,timed.sample)==4,"timecode override spilled");
+    Require(RecordText(timed.sample,"TIMC",11,'c')=="01:02:03:04","caller timecode");
+    Require(RecordUfrm(timed.sample)==0 && ReadHeader(timed.sample).frame_number==1,"timecode moved frame identity");
+    metadata=FilmScan3Metadata{};
+    metadata.guid[0]=0x11;
+    auto guided=guid_only.Encode(tiny.data(),tiny.size(),512,metadata);
+    Require(Diffs(base.sample,guided.sample)==1,"guid override spilled");
+    Require(RecordText(guided.sample,"TIMC",11,'c')=="00:00:00:00" && RecordUfrm(guided.sample)==0,"guid moved timecode or UFRM");
+    auto fit=base.sample.size();
+    Require(fit==3116,"128x24 reference size drifted");
+    FilmScan3Encoder almost(FilmScan3Geometry{128,24,fit-1});
+    const auto almost_before=almost.state();
+    bool capacity=false;
+    try{almost.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::length_error& e){capacity=std::string(e.what())=="CFHD capacity exceeded";}
+    Require(capacity,"near-full budget did not fail closed");
+    RequireSameState(almost_before,almost.state(),"near-full budget committed state");
+    FilmScan3Encoder early(FilmScan3Geometry{128,24,4});
+    const auto early_before=early.state();
+    capacity=false;
+    try{early.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::length_error& e){capacity=std::string(e.what())=="CFHD capacity exceeded";}
+    Require(capacity,"tiny budget did not fail closed");
+    RequireSameState(early_before,early.state(),"tiny budget committed state");
+    FilmScan3Encoder injected(geometry);
+    const auto injected_before=injected.state();
+    detail::FrontendAccess::Use(injected,std::make_shared<Failure>(false));
+    bool oom=false;
+    try{injected.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::bad_alloc&){oom=true;}
+    Require(oom,"transform failure was not bad_alloc");
+    RequireSameState(injected_before,injected.state(),"bad_alloc committed state");
+    detail::FrontendAccess::Use(injected,std::make_shared<Failure>(true));
+    bool entropy=false;
+    try{injected.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::invalid_argument& e){entropy=std::string(e.what())=="invalid entropy plane";}
+    Require(entropy,"post-quant entropy failure missing");
+    RequireSameState(injected_before,injected.state(),"post-quant entropy committed state");
+    Reject([&]{Plane bad(1,1);PackHighpass(bad,64);});
+    bool bits=false;
+    try{Plane band(8,8);PackHighpass(band,0);}
+    catch(const std::length_error& e){bits=std::string(e.what())=="entropy capacity exceeded";}
+    Require(bits,"zero entropy budget accepted");
+    injected.Reset();
+    Require(injected.geometry().width==128 && injected.geometry().height==24,"Reset changed geometry");
+    detail::FrontendAccess::Use(injected,detail::CpuFrontend(geometry));
+    FilmScan3Encoder fresh(geometry);
+    Require(injected.Encode(tiny.data(),tiny.size(),512).sample==fresh.Encode(tiny.data(),tiny.size(),512).sample,"Reset after failure");
+    FilmScan3Encoder left(geometry),right(geometry);
+    auto left0=left.Encode(tiny.data(),tiny.size(),512);
+    auto right0=right.Encode(tiny.data(),tiny.size(),512);
+    Require(left0.sample==right0.sample,"parallel sessions diverged on frame 0");
+    left.Encode(tiny.data(),tiny.size(),512);
+    Require(left.state().frame_index==2 && right.state().frame_index==1,"parallel sessions shared the frame counter");
+    Require(ReadHeader(left0.sample).quality==6 && ReadHeader(right0.sample).quality==6,"parallel sessions changed quality tag");
+    right.Reset();
+    Require(left.state().frame_index==2 && right.state().frame_index==0,"Reset crossed sessions");
+    Require(right.Encode(tiny.data(),tiny.size(),512).sample==left0.sample,"reset session did not restart");
+    FilmScan3Encoder limited(geometry);
+    for(unsigned i=0;i<65535u;++i)limited.Encode(tiny.data(),tiny.size(),512);
+    const auto exhausted=limited.state();
+    Require(exhausted.frame_index==65535u && exhausted.previous_sample_bytes==3116 && exhausted.fs_rate_limiter==20,"65535-frame session state");
+    bool stopped=false;
+    try{limited.Encode(tiny.data(),tiny.size(),512);}
+    catch(const std::length_error& e){stopped=std::string(e.what())=="FilmScan3 frame counter exhausted";}
+    Require(stopped,"frame 65536 was encoded or wrapped");
+    RequireSameState(exhausted,limited.state(),"exhausted session mutated rate state");
+}
+}
+
 int main(){try{
     Require(QuantizeFilmScan3(5,6)==1 && QuantizeFilmScan3(-5,6)==-1,"FS3 midpoint signed rounding");
     Require(Quantize(5,6)==0,"legacy quantization changed");
@@ -81,5 +313,6 @@ int main(){try{
     Require(FilmScan3FullCoefficientHashesEqual(noise_on,replay_frame),"full hashes of the same coefficients differ");
     replay_frame.coefficient_hash=FilmScan3CoefficientHash::Absent;
     Require(!FilmScan3FullCoefficientHashesEqual(noise_on,replay_frame),"clearing Full status must fail the gate even when the words match");
-    std::cout<<"PASS: production FS3 API arithmetic, initial tables, feedback, invalid storage and reset\n";return 0;
+    CheckRateState(first.sample,second.sample);
+    std::cout<<"PASS: production FS3 API arithmetic, initial tables, feedback, invalid storage, reset, coefficient-hash gate, 30fps metadata split, budget/entropy rollback, parallel sessions, 65535-frame stop\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

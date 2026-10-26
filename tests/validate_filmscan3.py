@@ -40,6 +40,12 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
             records = {v['tag']: raw[v['offset']:v['offset']+v['length']] for v in parsed['metadata_mask_ranges']}
             for key, size in [('TAG_CLIP_GUID', 16), ('TAG_ENCODE_DATE', 10), ('TAG_ENCODE_TIME', 8), ('TAG_TIMECODE', 11)]:
                 metadata.extend(records[key][:size])
+    if not expected:
+        # A requested geometry with no matching manifest frames is an UNCHECKED
+        # corpus, never a pass. Reporting success here would claim 4K coverage
+        # that was never exercised.
+        raise ValueError('no manifest frames match the requested geometry %dx%d; '
+                         'this geometry is NOT validated' % geometry)
     arguments = [str(encoder)]
     if geometry != (1920, 1080):
         arguments += ['--geometry', '%dx%d' % geometry]
@@ -59,12 +65,6 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
         subprocess.run([str(cpu_encoder)] + cpu_options + [str(cpu_output)] + inputs, check=True)
         if json.loads((cpu_output/'trace.json').read_text())['frames'] != trace:
             raise ValueError('same-input comparison encoder state/tables/30 bands differ')
-    if not expected:
-        # A requested geometry with no matching manifest frames is an UNCHECKED
-        # corpus, never a pass. Reporting success here would claim 4K coverage
-        # that was never exercised.
-        raise ValueError('no manifest frames match the requested geometry %dx%d; '
-                         'this geometry is NOT validated' % geometry)
     if len(trace) != len(expected):
         raise ValueError('missing encoder trace frames')
     results = []

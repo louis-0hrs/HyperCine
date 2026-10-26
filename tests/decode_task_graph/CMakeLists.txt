@@ -68,4 +68,19 @@ if(HYPERCINE_BUILD_TESTS)
             TIMEOUT 120
             PASS_REGULAR_EXPRESSION "SCHEDULER-S2-OUTPUT PASS")
     endforeach()
+
+    # S3 signed-plane attachment (issues #144 / #195). Synthetic only:
+    # typed extent, channel/band match, bounded wavelet5 consumer, and the
+    # existing S2 publication rule. Not a GoPro/CFHD integration.
+    # Removing the short-extent comparison must fail S3-extent-negative.
+    add_executable(test_decode_s3_plane
+        test_decode_s3_plane.cpp
+        ../../src/core/decode_s3_consumer.cpp
+        ../../src/cpu/decode_spatial_scalar.cpp)
+    target_include_directories(test_decode_s3_plane PRIVATE ../../src/cpu)
+    target_link_libraries(test_decode_s3_plane PRIVATE hypercine_decode_task_graph)
+    add_test(NAME decode_s3_plane COMMAND test_decode_s3_plane)
+    set_tests_properties(decode_s3_plane PROPERTIES
+        TIMEOUT 30
+        PASS_REGULAR_EXPRESSION "DECODE-S3 PASS")
 endif()
