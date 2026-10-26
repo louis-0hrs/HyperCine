@@ -44,6 +44,10 @@ struct MetalTiming {
 };
 std::shared_ptr<Frontend> CpuFrontend();
 std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry);
+// Internal test modes exercise the parity gate itself; neither is a production
+// selection API and both must make the complete-sample comparison fail.
+enum class CudaTestMode { Normal, SkipKernel, AlterOutput };
+std::shared_ptr<Frontend> CudaFrontend(FilmScan3Geometry, CudaTestMode = CudaTestMode::Normal);
 std::shared_ptr<Frontend> MetalFrontend(); // throws if disabled/device/pipeline unavailable
 // Geometry-carrying Metal frontend. Same failure contract: it throws rather than
 // degrading, so an explicitly requested Metal backend cannot silently become CPU.
