@@ -13,9 +13,11 @@ compares them:
     time, and the SDK-free targets are still registered.
   * BUILD_UPSTREAM=ON (default) -- the same targets ARE registered again, so a
     guard that quietly disabled everything would be caught here.
+  * CUDA=ON with BUILD_UPSTREAM=OFF -- configuration fails before CUDA setup,
+    rather than reaching unresolved frozen-SDK symbols at link time.
 
-Configure-only, CPU-only, no GPU and no private corpus. Each child configure is
-a fresh build directory outside the parent build tree.
+Configure-only, no GPU and no private corpus. Each child configure is a fresh
+build directory outside the parent build tree.
 """
 import os
 from pathlib import Path
@@ -136,6 +138,13 @@ class UpstreamOffContractTests(unittest.TestCase):
             HYPERCINE_BUILD_UPSTREAM='ON',
             HYPERCINE_BUILD_TESTS='ON',
             HYPERCINE_BUILD_STANDALONE='OFF')
+        cls.cuda_off_dir = cls.tmp / 'cuda-upstream-off'
+        (cls.cuda_off_code, cls.cuda_off_log) = _configure(
+            cls.cuda_off_dir,
+            HYPERCINE_BUILD_UPSTREAM='OFF',
+            HYPERCINE_BUILD_TESTS='ON',
+            HYPERCINE_BUILD_STANDALONE='OFF',
+            HYPERCINE_ENABLE_CUDA='ON')
 
     @classmethod
     def tearDownClass(cls):
@@ -185,6 +194,13 @@ class UpstreamOffContractTests(unittest.TestCase):
         self.assertTrue(_tool_is_built(self.on_dir, SDK_BACKED_TOOL),
                         '{} lost its build rule in the default configure'.format(
                             SDK_BACKED_TOOL))
+
+    def test_cuda_upstream_off_fails_at_configure(self):
+        self.assertNotEqual(
+            self.cuda_off_code, 0,
+            'CUDA with BUILD_UPSTREAM=OFF must not reach SDK-symbol link errors')
+        self.assertIn(
+            'CUDA requires HYPERCINE_BUILD_UPSTREAM=ON', self.cuda_off_log)
 
 
 if __name__ == '__main__':
