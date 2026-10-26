@@ -328,6 +328,16 @@ if(HYPERCINE_BUILD_STANDALONE)
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
                 --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
                 --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}")
+            # #45: the geometry contract of the real validator, not a wrapper
+            # around it. Wrong geometries must be rejected with the reason that
+            # was actually intended, and the manifest geometry must still pass.
+            add_test(NAME filmscan3_geometry_negative_gate COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_geometry_negative.py"
+                --validator "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
+                --probe $<TARGET_FILE:hypercine_reference_probe>
+                --encoder $<TARGET_FILE:hypercine_encode_filmscan3>)
+            set_tests_properties(filmscan3_geometry_negative_gate PROPERTIES
+                LABELS "validation;negative-control" TIMEOUT 900)
             add_test(NAME standalone_external_decode COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_standalone.py"
                 --encoder $<TARGET_FILE:hypercine_encode_smoke>
