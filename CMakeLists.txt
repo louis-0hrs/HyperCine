@@ -444,6 +444,20 @@ if(HYPERCINE_BUILD_STANDALONE)
                     --output-dir "${CMAKE_CURRENT_BINARY_DIR}/cuda-filmscan3-ffmpeg")
                 set_tests_properties(cuda_filmscan3_ffmpeg_decode PROPERTIES
                     LABELS "cuda;gpu-required;external-decode" SKIP_RETURN_CODE 77 TIMEOUT 300)
+                # The single-frame gate above cannot speak for a sequence: it decodes
+                # one packet per side, and the comparator writes per-frame files only
+                # when --frames > 1. A recorded "3 ordered frames" run therefore had
+                # no independent decode behind it at all. This registers the same
+                # validator with three ordered frames, so every frame of the session
+                # is decoded separately and its 30 stage hashes are read back.
+                add_test(NAME cuda_filmscan3_sequence_ffmpeg_decode COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3.py"
+                    --compare $<TARGET_FILE:hypercine_cuda_frontend_compare>
+                    --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                    --output-dir "${CMAKE_CURRENT_BINARY_DIR}/cuda-filmscan3-sequence-ffmpeg"
+                    --frames 3)
+                set_tests_properties(cuda_filmscan3_sequence_ffmpeg_decode PROPERTIES
+                    LABELS "cuda;gpu-required;external-decode" SKIP_RETURN_CODE 77 TIMEOUT 600)
             endif()
             # #249 review: prove the validator never disturbs a caller's output
             # directory. Needs no GPU and no CUDA build, so it is registered
