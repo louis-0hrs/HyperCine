@@ -26,17 +26,26 @@ Manages encoding profiles, quality settings, and rate limiting state.
 
 ### 3. Pixelkonvertierung (Pixel Conversion)
 Converts input pixel formats (BGRA, etc.) to internal working color space (YUV).
-- **Status**: Nativ getestet
-- **Platform**: Linux x86_64 with NVIDIA A2 (as per CAPABILITY_8K_17K_AUDIT.md)
-- **Anchor**: `src/cpu/filmscan3_frontend.cpp::ConvertFilmScan3Bgra()`, `src/core/filmscan3_encoder.cpp` (frontend.Transform), `docs/CAPABILITY_8K_17K_AUDIT.md`
-- **Evidence**: Synthetic BGRA encoding validated for 3840x2160 (UHD 4K) with CPU/Metal packet parity and independent FFmpeg decode (#248)
+- **Status**: Nativ getestet (CPU scalar, CPU NEON, Metal)
+- **Platform**: Linux x86_64 (CPU), macOS arm64 M2 Pro (NEON, Metal). **Nicht** auf der A2 qualifiziert.
+- **Anchor**: `src/cpu/filmscan3_frontend.cpp::ConvertFilmScan3Bgra()`, `src/core/filmscan3_encoder.cpp` (frontend.Transform),
+  `tests/test_filmscan3.cpp`, `tests/test_metal_filmscan3_4k.cpp`
+- **Evidence**: Synthetic BGRA encoding validated at 3840x2160 with CPU/Metal packet parity and independent FFmpeg
+  decode (#248, #251). NEON parity extended to 4K with 1,457,338 checks (#255).
+- **Correction**: an earlier version of this row cited `CAPABILITY_8K_17K_AUDIT.md` as an A2 platform proof.
+  That document states of itself: "Source/measurement audit, not a 8K/12K/17K codec qualification." It is not a
+  platform qualification for this layer and was misused as one.
 
 ### 4. Wavelet-Compute
 Performs the 2-6 biorthogonal wavelet decomposition and reconstruction.
-- **Status**: Nativ getestet
-- **Platform**: Linux x86_64 with NVIDIA A2 (as per CAPABILITY_8K_17K_AUDIT.md)
-- **Anchor**: `src/core/filmscan3_encoder.cpp` (WaveletLevel processing), `src/cpu/filmscan3_frontend.cpp` (ForwardLevel), `tests/test_cuda_wavelet.cpp`, `tests/test_transform_wavelet.cpp`
-- **Evidence**: Wavelet transforms tested in CUDA and CPU implementations with reference comparisons
+- **Status**: Nativ getestet (CPU scalar, CPU NEON, Metal); CUDA-Frontend experimentell
+- **Platform**: Linux x86_64 (CPU, CUDA-A2), macOS arm64 M2 Pro (NEON, Metal)
+- **Anchor**: `src/core/filmscan3_encoder.cpp` (WaveletLevel processing), `src/cpu/filmscan3_frontend.cpp` (ForwardLevel),
+  `tests/test_cuda_wavelet.cpp`, `tests/test_transform_wavelet.cpp`, `tests/test_neon_wavelet.cpp`
+- **Evidence**: CPU/CUDA coefficient parity and full packet equality at 720p/1080p/2048x1080/4K (#249);
+  NEON kernel 3.1-3.4x scalar with bit-exact parity to 4K (#255); Metal 4K CPU parity, 68/68 native (#251).
+- **Grenze**: the CUDA path is an experimental SDK-free frontend, not a qualified backend. #249 evidence was
+  produced before the merge; a post-merge A2 rerun is still outstanding.
 
 ### 5. Quantisierung (Quantization)
 Applies dead-zone uniform quantization to wavelet coefficients.
@@ -65,14 +74,25 @@ Handles aligned allocations, buffer lifetimes, and memory budgets.
 ### 9. Hardware-Capabilities
 Queries and adapts to hardware capabilities (GPU compute, memory limits, etc.).
 - **Status**: Experimentell
-- **Anchor**: `src/core/phase3a_encoder.cpp` (CUDA capability checks), `docs/CAPABILITY_8K_17K_AUDIT.md` (A2 GPU validation), `src/cuda/filmscan3_cuda_frontend.cpp`
+- **Anchor**: `src/core/phase3a_encoder.cpp` (CUDA capability checks), `docs/CAPABILITY_8K_17K_AUDIT.md` (capability audit, **not** a GPU qualification), `src/cuda/filmscan3_cuda_frontend.cpp`
 - **Evidence**: CUDA backend queries device properties but lacks formal capability negotiation framework
 
 ### 10. Decoder-Scheduling
-Manages decode task dependencies and parallelism (research phase).
-- **Status**: Nicht implementiert (for GPU decode)
-- **Anchor**: `docs/DECODE_TASK_GRAPH_147.md`, `docs/WAVELET_DEPENDENCY_SCHEDULING_144.md`, `tests/test_decode_task_graph.cpp`
-- **Evidence**: Portable decode DAG exists but does not yet parse/entropy-decode/reconstruct arbitrary CFHD frames
+Manages decode task dependencies and parallelism.
+- **Status**: Synthetisch implementiert und nativ getestet; fuer echte Decoder **nicht** qualifiziert
+- **Anchor**: `src/core/decode_task_graph.{h,cpp}` (Generation, TaskKey, publish/admit, fail-closed),
+  `src/core/decode_s3_plane.h` + `src/core/decode_s3_consumer.cpp` (typisierte Signed-16-Plane, Extent, Generation),
+  `tests/decode_task_graph/test_scheduler_t1_t2_144.cpp`, `tests/decode_task_graph/test_scheduler_s2_output_144.cpp`,
+  `tests/decode_task_graph/test_decode_s3_plane.cpp`
+- **Evidence**: Merged on main: `eddad41` (topology + versioned publication), `9d290ab` (generation-owned output,
+  fail-closed nonblocking admission), `1e22aea` (bounded synthetic signed-plane S3, `holds=10 failures=0`).
+  T4 (four-band plane gated on generation/identity/budget) is in draft PR #265, ASan and TSan 21/21.
+- **Nicht belegt**: no parsing of real CFHD streams, no entropy decode, no validated inverse transform,
+  no GoPro integration. The original SDK races from #195 are **not** fixed and stay open.
+
+> This line previously read "Nicht implementiert". That was wrong: the scheduler, its S2 retention
+> contract and the S3 signed-plane attachment are merged and tested on `main`. The correct statement is
+> that the *synthetic* scheduler exists and is tested, while a real decoder still does not.
 
 ## Known Boundary Issues
 
@@ -99,14 +119,14 @@ Per the pure format rule (Breite%128==0, Hoehe%8==0, Breite>=128, Hoehe>=24):
 |-------|--------|-----------------|
 | 1. Codec-/Bitstream-Core | Implementiert | standalone_encoder.cpp, filmscan3_encoder.cpp |
 | 2. Profil- und Qualitaetszustand | Implementiert | quality_state.cpp |
-| 3. Pixelkonvertierung | Nativ getestet (Linux/NVIDIA A2) | CAPABILITY_8K_17K_AUDIT.md, ConvertFilmScan3Bgra |
-| 4. Wavelet-Compute | Nativ getestet (Linux/NVIDIA A2) | test_cuda_wavelet.cpp, ForwardLevel |
+| 3. Pixelkonvertierung | Nativ getestet (CPU scalar/NEON, Metal) | test_filmscan3.cpp, test_metal_filmscan3_4k.cpp, ConvertFilmScan3Bgra |
+| 4. Wavelet-Compute | Nativ getestet (CPU scalar/NEON, Metal); CUDA experimentell | test_cuda_wavelet.cpp, test_neon_wavelet.cpp, filmscan3_encoder.cpp |
 | 5. Quantisierung | Implementiert | quality_state.cpp, QuantizeFilmScan3 |
 | 6. Entropiekodierung | Implementiert | entropy_fast.h, PackHighpass |
 | 7. Backend-Auswahl | Experimentell | MACOS_METAL_BACKEND.md, FilmScan3Encoder ctors |
 | 8. Speicherverwaltung | Implementiert | standalone.h (AlignedAllocator), test_vectors.h |
 | 9. Hardware-Capabilities | Experimentell | CAPABILITY_8K_17K_AUDIT.md, phase3a_encoder.cpp |
-| 10. Decoder-Scheduling | Nicht implementiert | DECODE_TASK_GRAPH_147.md, WAVELET_DEPENDENCY_SCHEDULING_144.md |
+| 10. Decoder-Scheduling | Synthetisch implementiert + getestet; echte Decoder nicht qualifiziert | decode_task_graph.{h,cpp}, decode_s3_plane.h, test_scheduler_s2_output_144.cpp, test_decode_s3_plane.cpp |
 
 ## Verification Notes
 All status claims are anchored to specific files, tests, or documents. No speculative statements are included. Where evidence was unavailable, status reflects the highest verifiable implementation level.
