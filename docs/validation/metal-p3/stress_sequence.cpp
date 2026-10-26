@@ -15,7 +15,7 @@ int main(){try{
         if(i==500||i==800){cpu.Reset();metal.Reset();}
         auto a=cpu.Encode(input.data(),input.size(),7680);
         auto b=metal.Encode(input.data(),input.size(),7680);
-        if(a.sample!=b.sample||a.coefficient_fnv64!=b.coefficient_fnv64||a.tables.quant!=b.tables.quant||a.tables.scale!=b.tables.scale)
+        if(a.sample!=b.sample||!FilmScan3FullCoefficientHashesEqual(a,b)||a.tables.quant!=b.tables.quant||a.tables.scale!=b.tables.scale)
             throw std::runtime_error("stress CPU/Metal mismatch frame "+std::to_string(i));
     }
     std::cout<<"{\"frames_per_encoder\":1001,\"independent_instances\":2,\"resets\":[500,800],\"raw_packets_and_30_band_hashes\":\"PASS\"}\n";

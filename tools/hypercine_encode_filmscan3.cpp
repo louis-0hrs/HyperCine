@@ -43,7 +43,7 @@ FilmScan3Geometry ParseGeometry(const std::string& value) {
 }
 int main(int argc,char** argv) {
     try {
-        int begin=1;std::ifstream metadata;bool reference_yuv=false;
+        int begin=1;std::ifstream metadata;bool reference_yuv=false;bool coefficient_hashing=true;
         // Default stays 1080p so every existing caller keeps its exact contract.
         FilmScan3Geometry geometry{};
         while(begin<argc && std::string(argv[begin]).rfind("--",0)==0) {
@@ -52,14 +52,21 @@ int main(int argc,char** argv) {
             else if(flag=="--geometry" && begin<argc) {
                 geometry=ParseGeometry(argv[begin++]);
             }
+            else if(flag=="--coefficient-hash" && begin<argc) {
+                const std::string mode=argv[begin++];
+                if(mode=="full") coefficient_hashing=true;
+                else if(mode=="off") coefficient_hashing=false;
+                else throw std::invalid_argument("--coefficient-hash expects full or off");
+            }
             else if(flag=="--metadata-binary" && begin<argc) {
                 metadata.open(argv[begin++],std::ios::binary);if(!metadata)throw std::runtime_error("cannot read explicit metadata");
             } else throw std::invalid_argument("unknown or incomplete FilmScan3 option");
         }
-        if(argc-begin<2)throw std::invalid_argument("usage: hypercine_encode_filmscan3 [--geometry WIDTHxHEIGHT] [--metadata-binary values.raw] OUTPUT_DIR INPUT.bgra [INPUT.bgra ...]");
+        if(argc-begin<2)throw std::invalid_argument("usage: hypercine_encode_filmscan3 [--geometry WIDTHxHEIGHT] [--metadata-binary values.raw] [--coefficient-hash full|off] OUTPUT_DIR INPUT.bgra [INPUT.bgra ...]");
         const fs::path directory=argv[begin++];fs::create_directories(directory);
         std::ofstream trace(directory/"trace.json");trace<<"{\"profile\":\"FilmScan3\",\"frames\":[";
         FilmScan3Encoder encoder(geometry);
+        encoder.SetCoefficientHashing(coefficient_hashing);
         const std::size_t frame_bytes=static_cast<std::size_t>(geometry.width)*geometry.height*4;
         const std::size_t stride=static_cast<std::size_t>(geometry.width)*4;
 #ifdef HYPERCINE_METAL_AUDIT
@@ -98,8 +105,10 @@ int main(int argc,char** argv) {
             trace<<"{\"frame_index\":"<<result.state.frame_index<<",\"fs_rate_limiter\":"<<result.state.fs_rate_limiter
                  <<",\"previous_sample_bytes\":"<<result.state.previous_sample_bytes<<",\"sample_bytes\":"<<result.sample.size()<<",\"quant\":[";
             for(unsigned k=0;k<36;++k){if(k)trace<<',';trace<<result.tables.quant[k];}trace<<"],\"scale\":[";
-            for(unsigned k=0;k<36;++k){if(k)trace<<',';trace<<result.tables.scale[k];}trace<<"],\"coefficient_fnv64\":[";
-            for(unsigned k=0;k<30;++k){if(k)trace<<',';trace<<'"'<<std::hex<<std::setw(16)<<std::setfill('0')<<result.coefficient_fnv64[k]<<'"'<<std::dec;}trace<<"]}";
+            for(unsigned k=0;k<36;++k){if(k)trace<<',';trace<<result.tables.scale[k];}trace<<"],\"coefficient_hash\":\""<<FilmScan3CoefficientHashName(result.coefficient_hash)<<"\"";
+            if(result.coefficient_hash!=FilmScan3CoefficientHash::Full) trace<<",\"coefficient_fnv64\":null}";
+            else {trace<<",\"coefficient_fnv64\":[";
+            for(unsigned k=0;k<30;++k){if(k)trace<<',';trace<<'"'<<std::hex<<std::setw(16)<<std::setfill('0')<<result.coefficient_fnv64[k]<<'"'<<std::dec;}trace<<"]}";}
         }
         if(metadata.is_open() && metadata.peek()!=std::char_traits<char>::eof())throw std::runtime_error("excess explicit variable metadata");
         trace<<"]}\n";trace.close();if(!trace)throw std::runtime_error("trace write failed");

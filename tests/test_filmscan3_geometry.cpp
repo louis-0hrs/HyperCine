@@ -153,6 +153,7 @@ int main(int argc,char** argv) {try {
         reference_fixture::GeneratePhase3AFrame(3840,2160,i,pattern,input.data(),15360,0x1337beef);
         auto frame=encoder.Encode(input.data(),input.size(),15360);Inspect(frame.sample,3840,2160);
         Require(frame.state.frame_index==unsigned(i) && frame.state.previous_sample_bytes==prev,"sequence feedback");
+        Require(frame.coefficient_hash==FilmScan3CoefficientHash::Full,"sequence gate requires full coefficient hashing");
         identities.insert(std::vector<uint8_t>(reinterpret_cast<const uint8_t*>(frame.coefficient_fnv64.data()),reinterpret_cast<const uint8_t*>(frame.coefficient_fnv64.data()+30)));
         limiters.insert(frame.state.fs_rate_limiter);prev=frame.sample.size();Export(dir,3+i,input,frame);
     }
