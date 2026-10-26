@@ -175,7 +175,7 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
             const auto level=s.Begin(0x2100);
             for(int b=1;b<4;++b) {
                 auto& p=bands[b];const auto at=c*12+lv*4+b;const auto q=result.tables.quant[at];
-                start=stamp();for(auto& v:p.pixels)v=QuantizeFilmScan3(v,q);
+                start=stamp();QuantizeFilmScan3Block(p.pixels.data(),p.pixels.size(),q);
                 timing.quant_ms+=elapsed(start);
                 if(coefficient_hashing_){
                     start=stamp();

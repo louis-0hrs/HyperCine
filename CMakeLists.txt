@@ -262,11 +262,47 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(benchmark_codec benchmarks/benchmark_metal_p2.cpp)
         target_link_libraries(benchmark_codec PRIVATE hypercine_standalone)
     endif()
+    if(HYPERCINE_BUILD_BENCHMARKS)
+        # Issue #70: NEON vs scalar, kernel and whole frame. Registered here and
+        # not in benchmarks/CMakeLists.txt because the standalone build returns
+        # before add_subdirectory(benchmarks), so a registration there would
+        # silently never produce a target. It is a benchmark, not a gate: built,
+        # not run by ctest.
+        add_executable(benchmark_neon_wavelet benchmarks/benchmark_neon_wavelet.cpp)
+        target_link_libraries(benchmark_neon_wavelet PRIVATE hypercine_standalone)
+        set_property(TARGET benchmark_neon_wavelet PROPERTY INCLUDE_DIRECTORIES
+            "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"
+            "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
         # This branch returns before add_subdirectory(tests), so the SDK-free
         # contracts must be registered here as well.
         hypercine_register_sdk_free_contracts()
+        # Issue #70: NEON proof. Registered from the SDK-free block so it runs in
+        # the configuration CI actually uses.
+        #
+        # No SKIP_RETURN_CODE on purpose. The mandatory standalone matrix treats a
+        # skip as a failure, and that is correct: a skipped test proves nothing
+        # about the build it ran in. The test therefore asserts the architecture
+        # contract instead -- real NEON-vs-scalar comparison on arm64, and
+        # NOT_SUPPORTED plus an intact scalar path everywhere else.
+        add_executable(test_neon_wavelet tests/test_neon_wavelet.cpp)
+        target_link_libraries(test_neon_wavelet PRIVATE hypercine_standalone)
+        add_test(NAME neon_wavelet_bitexact COMMAND test_neon_wavelet)
+        set_tests_properties(neon_wavelet_bitexact PROPERTIES
+            LABELS "cpu;neon" TIMEOUT 600)
+
+        # Issue #70 / #259: the dispatch switch was a process-global plain bool.
+        # This binary answers two questions that an atomic does not answer by
+        # itself: does ThreadSanitizer see a race (it must not), and does one
+        # session actually own its kernel (it does not -- proven, not described).
+        find_package(Threads REQUIRED)
+        add_executable(test_neon_concurrency tests/test_neon_concurrency.cpp)
+        target_link_libraries(test_neon_concurrency PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME neon_concurrency_contract COMMAND test_neon_concurrency)
+        set_tests_properties(neon_concurrency_contract PROPERTIES
+            LABELS "cpu;neon;concurrency" TIMEOUT 900)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
@@ -682,4 +718,3 @@ endif()
 if(HYPERCINE_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
-

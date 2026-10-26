@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 
 #include "hypercine/wavelet.h"
+#include <atomic>
 #include <vector>
 #include <cstring>
 #include <cstdlib>
@@ -19,6 +20,255 @@ inline int16_t Saturate16S(int32_t val) {
 }
 
 } // anonymous namespace
+
+// ---------------------------------------------------------------------------
+// ARM64 NEON path (issue #70). Bit-exact against the scalar kernels above.
+//
+// Two identities make this vectorisable without changing a single result:
+//
+//   Saturate16S(v)  == vqmovn_s32(v)            (saturating narrow, exactly)
+//   FloorDivide8(v) == v >> 3                  (arithmetic shift == floor
+//                                               division by 8 for all int32)
+//
+// The interior horizontal highpass is -in[x-2]-in[x-1]+in[x+2]+in[x+3]. With
+// x = 2c and pair[k] = in[2k]+in[2k+1] (the unclamped terms the lowpass already
+// forms) that is exactly pair[c+1] - pair[c-1]. The remaining taps are
+// +in[x] - in[x+1], which is even[c] - odd[c]. Interior vertical rows use the
+// same shape over whole rows.
+//
+// Border coefficients stay scalar on purpose: there are two of them per row (or
+// two whole rows in the vertical pass) and their taps fall outside the interior
+// identity, so vectorising them would risk correctness for no measurable gain.
+// ---------------------------------------------------------------------------
+#if defined(__ARM_NEON)
+#include <arm_neon.h>
+
+namespace {
+
+// Process-wide dispatch state, deliberately atomic.
+//
+// Several encoder sessions can run concurrently, and a plain bool here is a data
+// race as soon as one session flips the switch while another reads it. Making it
+// atomic fixes the race, but it does NOT make the setting per-session: session A
+// can still change which kernel session B runs. That limitation is why the header
+// documents this as a process-wide default and not as the final architecture.
+std::atomic<bool> g_neon_enabled{true};
+
+// FloorDivide8(v + 4) in the scalar code is exactly (v + 4) >> 3.
+inline int32x4_t Shift8x4(int32x4_t v) { return vshrq_n_s32(v, 3); }
+
+} // anonymous namespace
+
+bool HyperCine_IsNEONWaveletAvailable(void) { return true; } // baseline on arm64
+void HyperCine_SetNEONWaveletEnabled(bool enabled) {
+    g_neon_enabled.store(enabled, std::memory_order_release);
+}
+bool HyperCine_IsNEONWaveletEnabled(void) {
+    return g_neon_enabled.load(std::memory_order_acquire);
+}
+
+HyperCineStatus HyperCine_ForwardHorizontal26_NEON(
+    const int16_t* src, int width, int height, int src_stride,
+    int16_t* lowpass, int low_stride,
+    int16_t* highpass, int high_stride
+) {
+    if (!src || !lowpass || !highpass) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (width < 6 || (width % 2) != 0 || height <= 0) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (src_stride < width || low_stride < (width / 2) || high_stride < (width / 2)) {
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    }
+
+    const int half_w = width / 2;
+    // pair[k] = in[2k] + in[2k+1], unclamped, as int32.
+    std::vector<int32_t> pair(static_cast<size_t>(half_w));
+
+    for (int y = 0; y < height; ++y) {
+        const int16_t* in_row = src + y * src_stride;
+        int16_t* low_row = lowpass + y * low_stride;
+        int16_t* high_row = highpass + y * high_stride;
+
+        // Pass 1: deinterleave, form pair sums, write saturating lowpass.
+        int c = 0;
+        for (; c + 8 <= half_w; c += 8) {
+            const int16x8x2_t ab = vld2q_s16(in_row + 2 * c);
+            const int32x4_t p_lo = vaddq_s32(vmovl_s16(vget_low_s16(ab.val[0])),
+                                             vmovl_s16(vget_low_s16(ab.val[1])));
+            const int32x4_t p_hi = vaddq_s32(vmovl_s16(vget_high_s16(ab.val[0])),
+                                             vmovl_s16(vget_high_s16(ab.val[1])));
+            vst1q_s32(pair.data() + c, p_lo);
+            vst1q_s32(pair.data() + c + 4, p_hi);
+            vst1q_s16(low_row + c, vqmovn_high_s32(vqmovn_s32(p_lo), p_hi));
+        }
+        for (; c < half_w; ++c) {
+            const int32_t p = static_cast<int32_t>(in_row[2 * c]) + in_row[2 * c + 1];
+            pair[c] = p;
+            low_row[c] = Saturate16S(p);
+        }
+
+        // Pass 2: interior highpass, 8 lanes per step.
+        // sum = ((pair[c+1] - pair[c-1] + 4) >> 3) + even[c] - odd[c]
+        const int interior_end = half_w - 1; // exclusive: last is a border case
+        c = 1;
+        for (; c + 8 <= interior_end; c += 8) {
+            const int32x4_t prev_lo = vld1q_s32(pair.data() + c - 1);
+            const int32x4_t prev_hi = vld1q_s32(pair.data() + c + 3);
+            const int32x4_t next_lo = vld1q_s32(pair.data() + c + 1);
+            const int32x4_t next_hi = vld1q_s32(pair.data() + c + 5);
+
+            const int32x4_t hp_lo = Shift8x4(vaddq_s32(vsubq_s32(next_lo, prev_lo),
+                                                        vdupq_n_s32(4)));
+            const int32x4_t hp_hi = Shift8x4(vaddq_s32(vsubq_s32(next_hi, prev_hi),
+                                                        vdupq_n_s32(4)));
+
+            const int16x8x2_t ab = vld2q_s16(in_row + 2 * c);
+            const int32x4_t diff_lo = vsubq_s32(vmovl_s16(vget_low_s16(ab.val[0])),
+                                                vmovl_s16(vget_low_s16(ab.val[1])));
+            const int32x4_t diff_hi = vsubq_s32(vmovl_s16(vget_high_s16(ab.val[0])),
+                                                vmovl_s16(vget_high_s16(ab.val[1])));
+
+            const int32x4_t sum_lo = vaddq_s32(hp_lo, diff_lo);
+            const int32x4_t sum_hi = vaddq_s32(hp_hi, diff_hi);
+            vst1q_s16(high_row + c, vqmovn_high_s32(vqmovn_s32(sum_lo), sum_hi));
+        }
+        for (; c < interior_end; ++c) {
+            int32_t hp = -pair[c - 1] + pair[c + 1];
+            hp = FloorDivide8(hp + 4);
+            high_row[c] = Saturate16S(hp + static_cast<int32_t>(in_row[2 * c])
+                                         - static_cast<int32_t>(in_row[2 * c + 1]));
+        }
+
+        // Pass 3: the two border coefficients, scalar.
+        {
+            const int32_t sum = 5 * static_cast<int32_t>(in_row[0])
+                              - 11 * static_cast<int32_t>(in_row[1])
+                              + 4 * static_cast<int32_t>(in_row[2])
+                              + 4 * static_cast<int32_t>(in_row[3])
+                              - static_cast<int32_t>(in_row[4])
+                              - static_cast<int32_t>(in_row[5]);
+            high_row[0] = Saturate16S(FloorDivide8(sum + 4));
+        }
+        {
+            const int x = (half_w - 1) * 2;
+            const int32_t sum = 11 * static_cast<int32_t>(in_row[x])
+                              - 5 * static_cast<int32_t>(in_row[x + 1])
+                              - 4 * static_cast<int32_t>(in_row[x - 1])
+                              - 4 * static_cast<int32_t>(in_row[x - 2])
+                              + static_cast<int32_t>(in_row[x - 3])
+                              + static_cast<int32_t>(in_row[x - 4]);
+            high_row[half_w - 1] = Saturate16S(FloorDivide8(sum + 4));
+        }
+    }
+    return HYPERCINE_STATUS_SUCCESS;
+}
+
+HyperCineStatus HyperCine_ForwardVertical26_NEON(
+    const int16_t* src, int width, int height, int src_stride,
+    int16_t* lowpass, int low_stride,
+    int16_t* highpass, int high_stride
+) {
+    if (!src || !lowpass || !highpass) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (height < 6 || (height % 2) != 0 || width <= 0) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (src_stride < width || low_stride < width || high_stride < width) {
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    }
+
+    const int half_h = height / 2;
+
+    for (int r = 0; r < half_h; ++r) {
+        const int y = r * 2;
+        const int16_t* row0 = src + y * src_stride;
+        const int16_t* row1 = src + (y + 1) * src_stride;
+        int16_t* low_row = lowpass + r * low_stride;
+        int16_t* high_row = highpass + r * high_stride;
+
+        if (r == 0 || r == half_h - 1) {
+            // Border rows: whole row scalar, matching the reference exactly.
+            const bool top = (r == 0);
+            for (int x = 0; x < width; ++x) {
+                low_row[x] = Saturate16S(static_cast<int32_t>(row0[x]) + row1[x]);
+                int32_t sum;
+                if (top) {
+                    sum = 5 * static_cast<int32_t>(src[x])
+                        - 11 * static_cast<int32_t>(src[src_stride + x])
+                        + 4 * static_cast<int32_t>(src[2 * src_stride + x])
+                        + 4 * static_cast<int32_t>(src[3 * src_stride + x])
+                        - static_cast<int32_t>(src[4 * src_stride + x])
+                        - static_cast<int32_t>(src[5 * src_stride + x]);
+                } else {
+                    sum = 11 * static_cast<int32_t>(row0[x])
+                        - 5 * static_cast<int32_t>(row1[x])
+                        - 4 * static_cast<int32_t>(src[(y - 1) * src_stride + x])
+                        - 4 * static_cast<int32_t>(src[(y - 2) * src_stride + x])
+                        + static_cast<int32_t>(src[(y - 3) * src_stride + x])
+                        + static_cast<int32_t>(src[(y - 4) * src_stride + x]);
+                }
+                high_row[x] = Saturate16S(FloorDivide8(sum + 4));
+            }
+            continue;
+        }
+
+        const int16_t* m2 = src + (y - 2) * src_stride;
+        const int16_t* m1 = src + (y - 1) * src_stride;
+        const int16_t* p2 = src + (y + 2) * src_stride;
+        const int16_t* p3 = src + (y + 3) * src_stride;
+
+        int x = 0;
+        for (; x + 8 <= width; x += 8) {
+            const int16x8_t s0 = vld1q_s16(row0 + x);
+            const int16x8_t s1 = vld1q_s16(row1 + x);
+
+            const int32x4_t p_lo = vaddq_s32(vmovl_s16(vget_low_s16(s0)),
+                                             vmovl_s16(vget_low_s16(s1)));
+            const int32x4_t p_hi = vaddq_s32(vmovl_s16(vget_high_s16(s0)),
+                                             vmovl_s16(vget_high_s16(s1)));
+            vst1q_s16(low_row + x, vqmovn_high_s32(vqmovn_s32(p_lo), p_hi));
+
+            const int16x8_t a = vld1q_s16(m2 + x);
+            const int16x8_t b = vld1q_s16(m1 + x);
+            const int16x8_t c = vld1q_s16(p2 + x);
+            const int16x8_t d = vld1q_s16(p3 + x);
+
+            const int32x4_t hp_lo = Shift8x4(vaddq_s32(
+                vsubq_s32(vaddq_s32(vmovl_s16(vget_low_s16(c)), vmovl_s16(vget_low_s16(d))),
+                          vaddq_s32(vmovl_s16(vget_low_s16(a)), vmovl_s16(vget_low_s16(b)))),
+                vdupq_n_s32(4)));
+            const int32x4_t hp_hi = Shift8x4(vaddq_s32(
+                vsubq_s32(vaddq_s32(vmovl_s16(vget_high_s16(c)), vmovl_s16(vget_high_s16(d))),
+                          vaddq_s32(vmovl_s16(vget_high_s16(a)), vmovl_s16(vget_high_s16(b)))),
+                vdupq_n_s32(4)));
+
+            const int32x4_t sum_lo = vaddq_s32(hp_lo, vsubq_s32(vmovl_s16(vget_low_s16(s0)),
+                                                                vmovl_s16(vget_low_s16(s1))));
+            const int32x4_t sum_hi = vaddq_s32(hp_hi, vsubq_s32(vmovl_s16(vget_high_s16(s0)),
+                                                                vmovl_s16(vget_high_s16(s1))));
+            vst1q_s16(high_row + x, vqmovn_high_s32(vqmovn_s32(sum_lo), sum_hi));
+        }
+        for (; x < width; ++x) {
+            low_row[x] = Saturate16S(static_cast<int32_t>(row0[x]) + row1[x]);
+            int32_t sum = -static_cast<int32_t>(m2[x])
+                          - static_cast<int32_t>(m1[x])
+                          + static_cast<int32_t>(p2[x])
+                          + static_cast<int32_t>(p3[x]);
+            sum = FloorDivide8(sum + 4) + static_cast<int32_t>(row0[x]) - row1[x];
+            high_row[x] = Saturate16S(sum);
+        }
+    }
+    return HYPERCINE_STATUS_SUCCESS;
+}
+
+#else
+
+bool HyperCine_IsNEONWaveletAvailable(void) { return false; }
+void HyperCine_SetNEONWaveletEnabled(bool) {}
+bool HyperCine_IsNEONWaveletEnabled(void) { return false; }
+HyperCineStatus HyperCine_ForwardHorizontal26_NEON(
+    const int16_t*, int, int, int, int16_t*, int, int16_t*, int)
+{ return HYPERCINE_STATUS_NOT_SUPPORTED; }
+HyperCineStatus HyperCine_ForwardVertical26_NEON(
+    const int16_t*, int, int, int, int16_t*, int, int16_t*, int)
+{ return HYPERCINE_STATUS_NOT_SUPPORTED; }
+
+#endif
 
 HyperCineStatus HyperCine_ForwardHorizontal26_CPU(
     const int16_t* src, int width, int height, int src_stride,

@@ -61,6 +61,9 @@ inline const char* FilmScan3CoefficientHashName(FilmScan3CoefficientHash hash) n
 // Independently callable CPU mathematics for stage tests/future backends.
 Planes ConvertFilmScan3Bgra(const uint8_t* data, std::size_t bytes, int width, int height, std::size_t stride);
 int16_t QuantizeFilmScan3(int16_t value, unsigned divisor);
+// Quantizes a contiguous coefficient block with the same scalar rounding rule.
+// NEON vectorization is an execution optimization, not a new codec profile.
+void QuantizeFilmScan3Block(int16_t* data, std::size_t count, unsigned divisor);
 FilmScan3Tables ComputeFilmScan3Tables(int fs_rate_limiter);
 // Metal requires an enabled Apple build and fails if device/pipeline creation fails.
 // MetalOrCpu falls back only during initialization; dispatch failures propagate.
