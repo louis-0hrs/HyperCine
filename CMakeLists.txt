@@ -313,6 +313,15 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME wavelet_isa_session_policy COMMAND test_wavelet_isa_policy)
         set_tests_properties(wavelet_isa_session_policy PROPERTIES
             LABELS "cpu;neon;concurrency" TIMEOUT 600)
+        # Issue #70 / #259, M1 task C: the scenario is not "one session keeps its
+        # kernel" but "two complete encoders run at the same time with different
+        # ISAs". A per-call decision over shared state can pass the single-session
+        # test in some interleavings; it cannot pass this one.
+        add_executable(test_wavelet_isa_parallel_sessions tests/test_wavelet_isa_parallel_sessions.cpp)
+        target_link_libraries(test_wavelet_isa_parallel_sessions PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME wavelet_isa_parallel_sessions COMMAND test_wavelet_isa_parallel_sessions)
+        set_tests_properties(wavelet_isa_parallel_sessions PROPERTIES
+            LABELS "cpu;neon;concurrency" TIMEOUT 900)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
