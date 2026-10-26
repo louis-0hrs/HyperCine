@@ -389,6 +389,14 @@ if(HYPERCINE_BUILD_STANDALONE)
                 set_tests_properties(cuda_filmscan3_ffmpeg_decode PROPERTIES
                     LABELS "cuda;gpu-required;external-decode" SKIP_RETURN_CODE 77 TIMEOUT 300)
             endif()
+            # #249 review: prove the validator never disturbs a caller's output
+            # directory. Needs no GPU and no CUDA build, so it is registered
+            # outside the CUDA gate and runs on every FFmpeg-enabled builder.
+            add_test(NAME cuda_filmscan3_output_dir_negative COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3_output_dir.py")
+            set_tests_properties(cuda_filmscan3_output_dir_negative PROPERTIES
+                LABELS "cuda;output-dir;no-gpu" TIMEOUT 120
+                PASS_REGULAR_EXPRESSION "CUDA-OUTPUT-DIR-NEGATIVE: PASS")
             # #45: a real 4K FFmpeg gate with its own negative controls. Kept apart
             # from the 1080p evidence so a 4K claim always has a 4K decode behind it.
             if(HYPERCINE_ENABLE_METAL)
