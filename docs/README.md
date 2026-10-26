@@ -40,6 +40,7 @@ These reports often record **specific native machines, fixtures and feature bran
 - [SDK-free quality-state model](QUALITY_STATE_SDKFREE.md) — standalone rate/quant-state calculation, not a complete encoder.
 - [Mac/Windows bitstream comparison](MACOS_WINDOWS_BITEXACT.md) and [Windows standalone reference decode](WINDOWS_STANDALONE_ORACLE.md) — pinned cross-platform checks.
 - [CPU instruction-set capability](CPU_ISA_P0.md) — dispatch/probe boundary; does not by itself establish vectorized codec-wide performance.
+- [Encoder capability contract](ENCODER_CAPABILITY_CONTRACT.md) — issue #259 session config and fail-closed query. Experimental CPU attempts are not a reference pass.
 
 ## Decoder, correctness and limits
 
