@@ -326,6 +326,13 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)
 
+        # Format legality vs resource budget. Registered because the distinction is
+        # what keeps 4096x2160 and 8K from being misreported as invalid formats --
+        # an unregistered test would let that regression back in silently.
+        add_executable(test_filmscan3_geometry_budget tests/test_filmscan3_geometry_budget.cpp)
+        target_link_libraries(test_filmscan3_geometry_budget PRIVATE hypercine_standalone)
+        add_test(NAME filmscan3_geometry_budget COMMAND test_filmscan3_geometry_budget)
+
         add_test(NAME filmscan3_fixture_integrity COMMAND "${CMAKE_COMMAND}"
             "-DROOT=${CMAKE_SOURCE_DIR}" -P "${CMAKE_SOURCE_DIR}/tests/verify_filmscan3_fixtures.cmake")
         add_executable(test_entropy_bitexact tests/test_entropy_bitexact.cpp)

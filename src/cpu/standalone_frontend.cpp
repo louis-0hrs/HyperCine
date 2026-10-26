@@ -18,13 +18,15 @@ void Validate(const Plane& p) {
 // Explicit floor division: negative right shifts are implementation-defined in C++17.
 int RoundChroma(int v) { v += 16384; return v >= 0 ? v / 32768 : -((-v + 32767) / 32768); }
 }
+// Same split as ValidateFilmScan3Geometry: shape and wire bound are the format
+// question, the pixel budget is the resource question.
 void ValidateGeometry(int w, int h) {
-    if (w < 128 || w > kMaxDimension || w % 128)
-        throw std::invalid_argument("frame width must be a multiple of 128 in [128,4096]");
-    if (h < 24 || h > kMaxDimension || h % 8)
-        throw std::invalid_argument("frame height must be a multiple of 8 in [24,4096]");
+    if (w < 128 || w % 128 || w > kMaxWireDimension)
+        throw std::invalid_argument("frame width must be a multiple of 128 in [128,65535]");
+    if (h < 24 || h % 8 || h > kMaxWireDimension)
+        throw std::invalid_argument("frame height must be a multiple of 8 in [24,65535]");
     if (static_cast<std::size_t>(w) * h > kMaxPixels)
-        throw std::length_error("frame exceeds 2097152-pixel allocation budget");
+        throw std::length_error("frame is format-legal but exceeds the 2097152-pixel allocation budget");
 }
 Plane::Plane(int w, int h) : width(w), height(h), stride(0) {
     if (w < 1 || h < 1 || w > kMaxDimension || h > kMaxDimension) throw std::invalid_argument("plane dimensions out of bounds");

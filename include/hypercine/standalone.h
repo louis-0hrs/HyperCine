@@ -27,11 +27,30 @@ template<class T> using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 
 // Experimental fixed-quant progressive YUV422 p10, GOP1. Throws on invalid
 // bounds/profile/capacity. No SDK or GPU types are part of this interface.
-// Conservative allocation budget, independent of the 16-bit wire dimensions.
-inline constexpr int kMaxDimension = 4096;
+// Three separate concepts. Keeping them apart matters: a format that is legal but
+// too large for the current session is a resource problem, not an invalid format,
+// and must not be reported as one.
+//
+// 1. Format legality -- only the wavelet shape and the 16-bit wire field bound.
+//    Width: multiple of 128 (deepest chroma band multiple of 8).
+//    Height: multiple of 8, >= 24 (six-tap input, final LL height >= 3).
+//    See ValidateGeometry() / ValidateFilmScan3Geometry().
+inline constexpr int kMaxWireDimension = 65535; // 16-bit wire dimension field
+//
+// 2. Resource budget -- what one session may allocate on this build. Bounded by
+//    RAM, not by the format. A geometry beyond it is rejected as std::length_error
+//    with its own message, so callers can tell "cannot afford" from "illegal".
 inline constexpr std::size_t kMaxPixels = 2097152; // legacy frame/sample budget, unchanged
 // Separate bounded storage budget for CPU FilmScan3 4K, not wire geometry.
 inline constexpr std::size_t kMaxPlaneElements = 3840u * 2160u;
+//
+// 3. Backend qualification -- which backend can actually encode which geometry.
+//    Tracked per backend, deliberately not expressed as a global constant.
+//
+// kMaxDimension is retired from the format path. It survives as the allocation
+// guard for the legacy non-FilmScan3 plane path, where it bounds storage rather
+// than declaring formats invalid.
+inline constexpr int kMaxDimension = 4096;
 inline bool PlaneStorageFits(int stride, int height) noexcept {
     return stride > 0 && height > 0 &&
         static_cast<std::size_t>(stride) <= kMaxPlaneElements / static_cast<std::size_t>(height);

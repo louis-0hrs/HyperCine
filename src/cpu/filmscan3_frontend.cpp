@@ -5,13 +5,28 @@
 #include "../core/filmscan3_backend.h"
 #include <algorithm>
 #include <stdexcept>
+#include <string>
 namespace hypercine { namespace standalone {
+// Format legality is deliberately separate from the resource budget. A legal
+// geometry that this build cannot afford must fail as a budget error, not as an
+// invalid format -- otherwise 4096x2160 and 8K look like format bugs when they are
+// only allocation limits.
+//
+// Illegal: shape does not match the 3-level YUV422 wavelet, or exceeds the 16-bit
+// wire field. Legal but unaffordable: passes the shape, exceeds the session budget.
 void ValidateFilmScan3Geometry(FilmScan3Geometry g) {
-    if (g.width < 128 || g.width > kMaxDimension || g.width % 128 ||
-        g.height < 24 || g.height > kMaxDimension || g.height % 8)
-        throw std::invalid_argument("FilmScan3 geometry requires width %128, height %8, width [128,4096], height [24,4096]; 8K unqualified");
-    if (static_cast<std::size_t>(g.width) > kMaxPlaneElements / static_cast<std::size_t>(g.height))
-        throw std::length_error("FilmScan3 exceeds 8294400-pixel CPU session budget");
+    if (g.width < 128 || g.width % 128 || g.height < 24 || g.height % 8 ||
+        g.width > kMaxWireDimension || g.height > kMaxWireDimension)
+        throw std::invalid_argument(
+            "FilmScan3 format requires width %128 in [128,65535] and height %8 in [24,65535]");
+    // Budget: checked after legality so the two failure modes stay distinguishable.
+    if (static_cast<std::size_t>(g.width) >
+            kMaxPlaneElements / static_cast<std::size_t>(g.height))
+        throw std::length_error(
+            "FilmScan3 geometry is legal but exceeds this build's pixel budget: "
+            + std::to_string(g.width) + "x" + std::to_string(g.height)
+            + " = " + std::to_string(static_cast<std::size_t>(g.width) * static_cast<std::size_t>(g.height))
+            + " px > " + std::to_string(kMaxPlaneElements) + " px");
     const auto pixels=static_cast<std::size_t>(g.width)*g.height;
     if (g.sample_capacity_bytes > 8*pixels+16384)
         throw std::length_error("FilmScan3 sample capacity exceeds geometric bound");
