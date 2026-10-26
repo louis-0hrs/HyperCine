@@ -27,15 +27,18 @@ template<class T> using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 
 // Experimental fixed-quant progressive YUV422 p10, GOP1. Throws on invalid
 // bounds/profile/capacity. No SDK or GPU types are part of this interface.
-// Three separate concepts. Keeping them apart matters: a format that is legal but
-// too large for the current session is a resource problem, not an invalid format,
-// and must not be reported as one.
-//
-// 1. Format legality -- only the wavelet shape and the 16-bit wire field bound.
-//    Width: multiple of 128 (deepest chroma band multiple of 8).
-//    Height: multiple of 8, >= 24 (six-tap input, final LL height >= 3).
-//    See ValidateGeometry() / ValidateFilmScan3Geometry().
-inline constexpr int kMaxWireDimension = 65535; // 16-bit wire dimension field
+// These are limits of our CURRENT implementations, not a verified global
+// CineForm/GoPro format specification. Keep three concerns distinct:
+// (1) FilmScan3 YUV422 3-level wavelet implementation shape; its present
+//     output fields use 16-bit geometry tags, but original SDK support for
+//     alternative families/packing/padding is not established.
+// (2) Resource budgets for each implementation/session; a wavelet-aligned
+//     geometry that cannot fit memory is not necessarily illegal CineForm.
+// (3) Native backend and independent decoder/reference qualification.
+// Legacy Fixed-Q2 deliberately retains its established 4096 limit and
+// invalid_argument semantics for compatibility; do not unify error paths
+// just because both use the same width/height types.
+inline constexpr int kMaxWireDimension = 65535; // current FilmScan3 16-bit geometry field
 //
 // 2. Resource budget -- what one session may allocate on this build. Bounded by
 //    RAM, not by the format. A geometry beyond it is rejected as std::length_error
@@ -47,9 +50,9 @@ inline constexpr std::size_t kMaxPlaneElements = 3840u * 2160u;
 // 3. Backend qualification -- which backend can actually encode which geometry.
 //    Tracked per backend, deliberately not expressed as a global constant.
 //
-// kMaxDimension is retired from the format path. It survives as the allocation
-// guard for the legacy non-FilmScan3 plane path, where it bounds storage rather
-// than declaring formats invalid.
+// The legacy <=4096 dimension gate is retained for existing Fixed-Q2
+// callers and Plane allocations; the newer FilmScan3 validator classifies
+// its own shape and pixel allocation budget separately.
 inline constexpr int kMaxDimension = 4096;
 inline bool PlaneStorageFits(int stride, int height) noexcept {
     return stride > 0 && height > 0 &&
