@@ -13,19 +13,19 @@ import tempfile
 from validate_standalone import avi
 
 
-def decode(ffmpeg: Path, sample: Path, output: Path) -> bytes:
+def decode(ffmpeg: Path, sample: Path, output: Path, width: int = 1920, height: int = 1080) -> bytes:
     if sample.is_symlink() or output.is_symlink():
         raise ValueError(f'refusing to write through a symlink: {output}')
     wrapper=output.with_suffix('.avi')
     if wrapper.is_symlink():
         raise ValueError(f'refusing to write through a symlink: {wrapper}')
-    wrapper.write_bytes(avi(sample.read_bytes(),1920,1080))
+    wrapper.write_bytes(avi(sample.read_bytes(),width,height))
     subprocess.run([str(ffmpeg),'-v','error','-xerror','-y','-i',str(wrapper),
                     '-frames:v','1','-pix_fmt','yuv422p10le','-f','rawvideo',str(output)],check=True)
     raw=output.read_bytes()
-    expected=1920*1080*4
+    expected=width*height*4
     if len(raw)!=expected:
-        raise ValueError(f'FFmpeg output size {len(raw)} != {expected}')
+        raise ValueError(f'FFmpeg output size {len(raw)} != {expected} for {width}x{height}')
     return raw
 
 
@@ -88,14 +88,24 @@ def main() -> int:
     parser.add_argument('--compare',required=True,type=Path)
     parser.add_argument('--ffmpeg',required=True,type=Path)
     parser.add_argument('--output-dir',required=True,type=Path)
+    parser.add_argument('--geometry',default='1920x1080',
+                        help='WIDTHxHEIGHT of the compared packets (default 1920x1080)')
     args=parser.parse_args()
+    try:
+        width_text,height_text=args.geometry.lower().split('x',1)
+        width,height=int(width_text),int(height_text)
+    except ValueError:
+        raise ValueError(f'--geometry expects WIDTHxHEIGHT, got: {args.geometry}')
+    if width<=0 or height<=0:
+        raise ValueError(f'--geometry needs positive dimensions, got: {args.geometry}')
     # Never delete a caller-chosen path. Each run writes only into a new
     # mkdtemp directory, so sentinels, a previous cuda-filmscan3-run, and any
     # symlink the caller left behind stay untouched.
     prepare_output_dir(args.output_dir)
     work_dir=exclusive_work_dir(args.output_dir)
     print(f'WORK_DIR: {work_dir}')
-    run=subprocess.run([str(args.compare),'--output-dir',str(work_dir)],text=True,capture_output=True)
+    run=subprocess.run([str(args.compare),'--output-dir',str(work_dir),
+                        '--geometry',f'{width}x{height}'],text=True,capture_output=True)
     sys.stdout.write(run.stdout);sys.stderr.write(run.stderr)
     if run.returncode==77:
         print('SKIP77: CUDA GPU required')
@@ -108,8 +118,8 @@ def main() -> int:
     cpu_hashes=trace['cpu_coefficient_fnv64'];gpu_hashes=trace['gpu_coefficient_fnv64']
     if len(cpu_hashes)!=30 or cpu_hashes!=gpu_hashes:
         raise ValueError('trace does not contain 30 equal CPU/CUDA coefficient hashes')
-    cpu=decode(args.ffmpeg,work_dir/'cpu.cfhd',work_dir/'cpu.yuv')
-    gpu=decode(args.ffmpeg,work_dir/'gpu.cfhd',work_dir/'gpu.yuv')
+    cpu=decode(args.ffmpeg,work_dir/'cpu.cfhd',work_dir/'cpu.yuv',width,height)
+    gpu=decode(args.ffmpeg,work_dir/'gpu.cfhd',work_dir/'gpu.yuv',width,height)
     if cpu!=gpu:
         first=next(i for i,(a,b) in enumerate(zip(cpu,gpu)) if a!=b)
         raise ValueError(f'independent FFmpeg decodes differ at byte {first}')

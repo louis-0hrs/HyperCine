@@ -28,6 +28,10 @@ using hypercine::standalone::detail::CudaTestMode;
 namespace {
 struct Options {
     fs::path output_dir;
+    // Geometry of the comparison. 1920x1080 is the historical reference, but the
+    // CUDA frontend is already geometry-capable, so the test has to be able to
+    // prove other sizes instead of only the one it was originally written for.
+    int width=1920, height=1080;
     CudaTestMode mode=CudaTestMode::Normal;
     // Alters one pre-quantization coefficient in the GPU audit frame only. The
     // encoder path is untouched, so coefficient hashes and the complete packet
@@ -40,13 +44,22 @@ Options Parse(int argc,char** argv) {
     for(int i=1;i<argc;++i) {
         const std::string arg=argv[i];
         if(arg=="--output-dir" && i+1<argc) out.output_dir=argv[++i];
+        else if(arg=="--geometry" && i+1<argc) {
+            const std::string value=argv[++i];
+            const auto separator=value.find('x');
+            if(separator==std::string::npos) throw std::invalid_argument("--geometry expects WIDTHxHEIGHT, got: "+value);
+            const int width=std::stoi(value.substr(0,separator));
+            const int height=std::stoi(value.substr(separator+1));
+            if(width<=0 || height<=0) throw std::invalid_argument("--geometry needs positive dimensions, got: "+value);
+            out.width=width; out.height=height;
+        }
         else if(arg=="--negative-control" && i+1<argc) {
             const std::string value=argv[++i];
             if(value=="skip-kernel") out.mode=CudaTestMode::SkipKernel;
             else if(value=="alter-output") out.mode=CudaTestMode::AlterOutput;
             else if(value=="alter-pre-quantized-stage") out.alter_pre_quantized_stage=true;
             else throw std::invalid_argument("unknown negative control: "+value);
-        } else throw std::invalid_argument("usage: hypercine_cuda_frontend_compare [--output-dir DIR] [--negative-control skip-kernel|alter-output|alter-pre-quantized-stage]");
+        } else throw std::invalid_argument("usage: hypercine_cuda_frontend_compare [--output-dir DIR] [--geometry WxH] [--negative-control skip-kernel|alter-output|alter-pre-quantized-stage]");
     }
     return out;
 }
@@ -55,8 +68,7 @@ void CudaCheck(cudaError_t error,const char* operation) {
     if(error!=cudaSuccess) throw std::runtime_error(std::string(operation)+": "+cudaGetErrorString(error));
 }
 
-AlignedVector<uint32_t> MakeInput() {
-    constexpr int width=1920,height=1080;
+AlignedVector<uint32_t> MakeInput(int width,int height) {
     AlignedVector<uint32_t> input(static_cast<std::size_t>(width)*height);
     uint32_t state=0x33c0ffeeu;
     for(int y=0;y<height;++y) for(int x=0;x<width;++x) {
@@ -161,8 +173,8 @@ int Run(const Options& options) {
              <<"CMAKE_CUDA_ARCHITECTURES="<<HYPERCINE_CUDA_ARCHITECTURES_STRING<<"\n"
              <<"Device native architecture: sm_"<<device.major<<device.minor<<"\n";
 
-    constexpr int width=1920,height=1080;
-    auto input=MakeInput();
+    const int width=options.width,height=options.height;
+    auto input=MakeInput(width,height);
     const auto* bytes=reinterpret_cast<const uint8_t*>(input.data());
     const auto byte_count=input.size()*sizeof(uint32_t);
     FilmScan3Metadata metadata;
@@ -246,7 +258,7 @@ int Run(const Options& options) {
         return 1;
     }
     if(!hashes_equal || !packet_equal) {std::cerr<<"FAIL\n";return 1;}
-    std::cout<<"PASS: complete 1920x1080 FilmScan3 CPU/A2 CUDA sample\n";
+    std::cout<<"PASS: complete "<<width<<'x'<<height<<" FilmScan3 CPU/A2 CUDA sample\n";
     return 0;
 }
 } // namespace
