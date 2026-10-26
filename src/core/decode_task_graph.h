@@ -54,12 +54,27 @@ struct TaskKey {
 // A BufferVersion carries the generation it was published for; a consumer must
 // compare `generation` against its own graph generation before reading.
 //
+// Ownership (S2). publish() copies the bytes into storage owned by this graph
+// before the version becomes visible. The pointer in a valid BufferVersion
+// addresses that copy, not the caller's buffer. The copy lives until the graph
+// is destroyed. run() joins every worker before it returns and there is no
+// asynchronous completion API, so the copy outlives every dependent callback
+// this graph can schedule. A per-node copy is used instead of a refcount: the
+// API has no retain/release, and dropping one successor from a count would free
+// bytes another dependent still has to read. See docs/SCHEDULER_S2_OUTPUT_144.md.
+//
+// This is still a synthetic graph. It does not decode a GoPro/CFHD bitstream and
+// it is not wired to a CUDA or Metal consumer.
+//
 // Precedence (fail-closed). A non-zero version is not admission. Once the graph
 // has been stopped or a GraphError has been recorded, that decision outranks an
-// already published version. TaskContext::wait_for_input() is the gate: it
-// checks stop/error first, then the version, then the deadline, and it throws
-// PublicationTimeout without handing the caller the payload when the decision
-// has already been made.
+// already published version. wait_for_input(), input_published() and input()
+// all apply it. The waiting gate checks stop/error first, then the version,
+// then the deadline, and throws PublicationTimeout without handing the caller
+// the payload. The non-blocking probes do not throw: after stop or the first
+// error they report "not published" and an empty view, so a buffer published
+// earlier cannot reopen an aborted generation. A non-empty view additionally
+// requires generation, version, payload address and length to be jointly valid.
 struct BufferVersion {
     Generation generation{};
     std::uint64_t version = 0;
@@ -85,8 +100,9 @@ public:
     // task's output. The payload record is written before the release-store of
     // the version; a consumer can only observe the version after that store.
     // Returns false when the graph already failed, was canceled, or this task
-    // is no longer Running -- the payload is then NOT published. `data` must
-    // outlive the graph; this graph never copies or frees it.
+    // is no longer Running -- the payload is then NOT published. On success the
+    // bytes are copied into graph-owned storage; the caller may free or reuse
+    // `data` as soon as publish() returns. Consumers read the copy.
     //
     // Null and zero-length are not publications (fail-closed). A rejected call
     // returns false before any store:
@@ -123,12 +139,20 @@ public:
     void wait_for_input(std::size_t index, std::chrono::milliseconds timeout) const;
 
     // Read-only probe of the same gate, without waiting. Returns true only when
-    // the acquire-load of that input's version observed a publish.
+    // the generation is still open (not stopped, no recorded error) and the
+    // acquire-load observed a publish whose generation, version, address and
+    // length are jointly a readable graph-owned buffer. Stop or the first error
+    // makes this return false even if that version is already non-zero.
     bool input_published(std::size_t index) const;
 
-    // const view of a published input; empty (valid() == false) when nothing
-    // was published. Only meaningful after wait_for_input() returned, or when
-    // input_published() is true.
+    // const view of a published input. Empty (valid() == false, null data,
+    // zero length) when nothing readable was published, and also after stop or
+    // a recorded error. Same precedence as wait_for_input(): an earlier publish
+    // does not reopen an aborted generation. A non-empty view means generation,
+    // version, address and length were admitted together, and the address is
+    // the graph-owned copy. Only meaningful when input_published() is true;
+    // after wait_for_input() returns it is still re-checked, so a stop that
+    // lands between the wait and this call cannot hand out the payload.
     BufferVersion input(std::size_t index) const;
 
 private:
@@ -152,27 +176,44 @@ struct TaskSpec {
     // Lifetime requirement -- note what is NOT guaranteed: execute() has already
     // returned when published() is evaluated, so the callback's stack frame is
     // gone. Capturing a local of the callback body is therefore a dangling read,
-    // not a supported pattern. The real requirement is on the produced storage:
-    // it must be owned independently of the callback frame (heap object, shared
-    // ownership, or a member of a longer-lived owner) and must stay alive from
-    // the point the callback publishes it until run() has drained and downstream
-    // consumers have finished with it. This graph never owns or frees payload
-    // memory; the caller does.
+    // not a supported pattern. The predicate may read storage that outlives the
+    // callback frame. It is not itself the buffer, and completion does not trust
+    // it.
     //
-    // NOT IMPLEMENTED (S2 ownership). A task marked complete must provably own
-    // valid output data, and the buffer lifetime must be pinned before the first
-    // productive decoder consumer. This graph does not implement that proof:
-    // `published` is only a caller-supplied boolean, completion does not retain
-    // or refcount the payload, and nothing here pins those bytes for a decoder
-    // consumer. A Completed state is not that guarantee.
+    // S2 ownership is the completion rule. A task becomes Completed only when
+    // publish() has installed a valid BufferVersion for this graph's generation:
+    // version != 0, generation match, a non-null non-zero span, and those bytes
+    // are the graph-owned copy. A callback that returns without that result is
+    // OutputNotPublished, whether or not `published` returned true. Dependents
+    // read the owned copy, including after the caller frees its own buffer.
+    // Failed publication, cancellation and timeout do not move a dependent to
+    // Ready. The first recorded GraphError is not overwritten.
     //
-    // An empty predicate means "no output contract declared": completion then
-    // rests on execute() returning, which is exactly the assumption RCA-195
-    // punished. Those tasks are counted by uncontracted_tasks() so the escape
-    // hatch is visible instead of silent.
+    // Not a decoder integration. No GoPro/CFHD producer is attached here; a real
+    // decoder consumer stays gated until this lifetime rule is qualified.
+    //
+    // An empty predicate means "no extra boolean contract". It is not permission
+    // to complete without a buffer. Tasks with an empty predicate are counted by
+    // uncontracted_tasks() so that omission stays visible.
+    //
+    // The only exception is graph-wide and explicit: GraphLimits::
+    // require_published_output == false, for pools that never publish. It cannot
+    // be expressed per task, so a single lax task cannot hide inside a strict graph.
     std::function<bool()> published;
 };
-struct GraphLimits { std::size_t nodes = 4096, edges = 65536; };
+struct GraphLimits {
+    std::size_t nodes = 4096, edges = 65536;
+    // S2 completion rule. Default ON: a task becomes Completed only with a valid
+    // published BufferVersion for this generation. This is the decoder-facing
+    // contract and it stays the default so that omitting it is never silently lax.
+    //
+    // Setting it false is an explicit, per-graph opt-out for callers that use the
+    // graph purely as a worker pool: their callbacks write into storage the caller
+    // already owns and never call publish(). Such a graph then reports
+    // uncontracted_tasks() == nodes, so the omission stays observable. It is NOT a
+    // way to make a decoder graph lax -- a graph that publishes keeps the rule.
+    bool require_published_output = true;
+};
 
 // One immutable graph per unique session/slot/generation. The owner must never
 // reuse a generation and must keep this object and callback storage alive until
@@ -215,6 +256,7 @@ public:
     // Tasks that declared no publication predicate. Immutable after
     // construction, so it is readable at any time without the graph lock.
     std::size_t uncontracted_tasks() const noexcept;
+    bool requires_published_output() const noexcept { return require_published_output_; }
     // Number of Pending -> Ready transitions since construction, including the
     // initial roots. A generation that failed its first error must not gain a
     // single one afterwards; this counter makes that observable instead of
@@ -230,19 +272,31 @@ private:
         std::vector<std::size_t> sources;
         std::size_t remaining = 0;
         TaskState state = TaskState::Pending;
-        // Publication record (T2). The producer writes the payload record and
-        // then release-stores `version`; a consumer acquire-loads `version` and
-        // only then reads payload/payload_bytes. Nothing else orders them --
-        // there is no flag word shared with any other node.
+        // Publication record (T2 + S2). The producer copies into `owned_bytes`,
+        // writes the payload record (which addresses that copy), and then
+        // release-stores `version`. A consumer acquire-loads `version` and only
+        // then reads payload/payload_bytes. `owned_bytes` is not resized after
+        // that copy, and Node is never relocated, so the address stays valid
+        // until the graph is destroyed.
         std::atomic<std::uint64_t> version{0};
         std::atomic<const void*> payload{nullptr};
         std::atomic<std::size_t> payload_bytes{0};
+        Generation published_generation{};
+        std::vector<unsigned char> owned_bytes;
     };
     bool publish(std::size_t node, const void* data, std::size_t bytes) noexcept;
+    // True only for a readable owned BufferVersion of this generation.
+    // version == 0 is rejected on its own. A non-zero version that is not a
+    // buffer of this generation is a different rejection, so disabling one
+    // does not silently keep the other.
+    bool published_output(std::size_t index) const;
     void wait_for_input(std::size_t node, std::size_t input,
                         std::chrono::milliseconds timeout) const;
     BufferVersion input(std::size_t node, std::size_t input) const;
     bool input_published(std::size_t node, std::size_t input) const;
+    // mutex_ must be held. Empty unless the generation is open and `source`
+    // holds one jointly valid owned buffer of this generation.
+    BufferVersion admitted_input(const Node& source) const;
     void worker() noexcept;
     bool complete(Generation generation, std::size_t node, GraphError error);
     void fail_locked(GraphError error, std::size_t cause);
@@ -257,6 +311,8 @@ private:
     std::vector<std::size_t> ready_; // reserved before any callback runs
     std::size_t next_ = 0, running_ = 0, completed_ = 0, ready_transitions_ = 0;
     std::size_t uncontracted_ = 0;
+    // Graph-wide S2 completion rule, captured at construction. Default true.
+    bool require_published_output_ = true;
     GraphError error_ = GraphError::None;
     bool started_ = false, drained_ = true, stop_ = false;
 };
