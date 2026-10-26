@@ -9,6 +9,7 @@
 // The test never reports a pass when NEON is absent: it reports SKIP with the
 // reason, because "the vector path ran and matched" is not a claim you can make
 // on a machine where the vector path does not exist.
+#include "hypercine/standalone.h"   // EncodeBgra for the end-to-end packet check
 #include "hypercine/wavelet.h"
 
 #include <cstdio>
@@ -161,6 +162,58 @@ void run_frame(unsigned pattern, int width, int height) {
     compare_vertical(in, width, height, stride, pattern_name(pattern));
 }
 
+
+// End-to-end parity: a complete FilmScan3 CPU encode must be byte-identical
+// whether the NEON kernels participate or not. Coefficient equality per level
+// is necessary but not sufficient -- quantization, hashing and entropy packing
+// all run on top, and a difference introduced by any of them would only show up
+// here.
+void check_full_encode_parity(int width, int height, const char* pattern, unsigned seed) {
+    // BGRA source with the same deterministic generator as the coefficient tests.
+    std::vector<uint8_t> bgra(static_cast<std::size_t>(width) * height * 4);
+    uint32_t state = seed;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            const int16_t v = sample(9, x, y, width, height, state);
+            uint8_t* px = bgra.data() + (static_cast<std::size_t>(y) * width + x) * 4;
+            px[0] = static_cast<uint8_t>(v & 0xFF);          // B
+            px[1] = static_cast<uint8_t>((v >> 3) & 0xFF);   // G
+            px[2] = static_cast<uint8_t>((v >> 7) & 0xFF);   // R
+            px[3] = 0xFF;                                     // A
+        }
+    }
+    const std::size_t stride = static_cast<std::size_t>(width) * 4;
+
+    HyperCine_SetNEONWaveletEnabled(true);
+    const auto with_neon = hypercine::standalone::EncodeBgra(
+        bgra.data(), bgra.size(), width, height, stride);
+    HyperCine_SetNEONWaveletEnabled(false);
+    const auto without = hypercine::standalone::EncodeBgra(
+        bgra.data(), bgra.size(), width, height, stride);
+    HyperCine_SetNEONWaveletEnabled(true);
+
+    // A vacuous pass would be two empty packets. Require a real packet before
+    // comparing bytes, otherwise "equal" proves nothing.
+    check(with_neon.size() > 1024, "encode produced a real packet", width, height, pattern,
+          0, 0, -1, static_cast<long long>(with_neon.size()));
+    check(with_neon.size() == without.size(), "encode packet size", width, height, pattern,
+          0, 0, static_cast<long long>(without.size()), static_cast<long long>(with_neon.size()));
+    if (with_neon.size() != without.size()) return;
+
+    std::size_t first_diff = with_neon.size();
+    for (std::size_t i = 0; i < with_neon.size(); ++i) {
+        if (with_neon[i] != without[i]) { first_diff = i; break; }
+    }
+    check(first_diff == with_neon.size(), "encode packet bytes", width, height, pattern,
+          static_cast<int>(first_diff), 0,
+          first_diff == with_neon.size() ? 0 : 1, 0);
+    if (first_diff != with_neon.size()) {
+        std::printf("  first differing byte %zu: neon=%u scalar=%u\n", first_diff,
+                    static_cast<unsigned>(with_neon[first_diff]),
+                    static_cast<unsigned>(without[first_diff]));
+    }
+}
+
 } // namespace
 
 // On a host without NEON the test must still be a real, passing test: it proves
@@ -243,8 +296,15 @@ int main() {
         check_padded_stride(pattern);
     }
 
-    // Full encoder parity: a real FilmScan3 CPU encode must be byte-identical
-    // whether the NEON kernels participate or not.
+    // End-to-end: whole packets, both switch states.
+    // Widths must be multiples of 128 for the encoder contract; heights 8.
+    for (int w : {128, 256, 384, 512}) {
+        for (int h : {48, 96}) {
+            check_full_encode_parity(w, h, "e2e-packet", 0xA5A5u + static_cast<unsigned>(w));
+        }
+    }
+
+    // Switch sanity: the flag must actually flip.
     HyperCine_SetNEONWaveletEnabled(true);
     const bool on = HyperCine_IsNEONWaveletEnabled();
     HyperCine_SetNEONWaveletEnabled(false);

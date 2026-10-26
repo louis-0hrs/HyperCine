@@ -63,6 +63,44 @@ Planes ConvertBgra(const uint8_t* data, std::size_t bytes, int width, int height
 Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride) {
     return ConvertBgra(data,bytes,128,128,stride);
 }
+// NEON dispatch (issue #70).
+//
+// The scalar kernels remain the reference. This only chooses which
+// implementation runs; both were proven coefficient-identical before either was
+// wired in. A missing NEON build or a disabled switch falls through to scalar
+// rather than failing, so a host without the vector path keeps working
+// unchanged -- and `HyperCine_IsNEONWaveletEnabled()` tells a caller which one
+// actually ran, so a benchmark cannot mislabel the path.
+namespace {
+inline bool UseNeon() {
+    return HyperCine_IsNEONWaveletAvailable() && HyperCine_IsNEONWaveletEnabled();
+}
+inline HyperCineStatus ForwardHorizontal26(const int16_t* src, int width, int height, int src_stride,
+                                          int16_t* lowpass, int low_stride,
+                                          int16_t* highpass, int high_stride) {
+    if (UseNeon()) {
+        const auto status = HyperCine_ForwardHorizontal26_NEON(src, width, height, src_stride,
+                                                              lowpass, low_stride,
+                                                              highpass, high_stride);
+        if (status != HYPERCINE_STATUS_NOT_SUPPORTED) return status;
+    }
+    return HyperCine_ForwardHorizontal26_CPU(src, width, height, src_stride,
+                                             lowpass, low_stride, highpass, high_stride);
+}
+inline HyperCineStatus ForwardVertical26(const int16_t* src, int width, int height, int src_stride,
+                                        int16_t* lowpass, int low_stride,
+                                        int16_t* highpass, int high_stride) {
+    if (UseNeon()) {
+        const auto status = HyperCine_ForwardVertical26_NEON(src, width, height, src_stride,
+                                                            lowpass, low_stride,
+                                                            highpass, high_stride);
+        if (status != HYPERCINE_STATUS_NOT_SUPPORTED) return status;
+    }
+    return HyperCine_ForwardVertical26_CPU(src, width, height, src_stride,
+                                           lowpass, low_stride, highpass, high_stride);
+}
+} // namespace
+
 WaveletLevel ForwardLevel(const Plane& in, int prescale) {
     Validate(in);
     if (in.width < 6 || in.height < 6 || in.width % 2 || in.height % 2 || (prescale != 0 && prescale != 2))
@@ -71,7 +109,7 @@ WaveletLevel ForwardLevel(const Plane& in, int prescale) {
                       Plane(in.width/2,in.height/2), Plane(in.width/2,in.height/2)}};
     Plane low(in.width/2,in.height), high(in.width/2,in.height);
     if (prescale == 0) {
-        if (HyperCine_ForwardHorizontal26_CPU(in.pixels.data(),in.width,in.height,in.stride,
+        if (ForwardHorizontal26(in.pixels.data(),in.width,in.height,in.stride,
                 low.pixels.data(),low.stride,high.pixels.data(),high.stride) != HYPERCINE_STATUS_SUCCESS)
             throw std::runtime_error("horizontal transform failed");
     } else {
@@ -81,6 +119,8 @@ WaveletLevel ForwardLevel(const Plane& in, int prescale) {
             int v = in.pixels[y*in.stride+x]+3;
             scaled.pixels[y*scaled.stride+x] = static_cast<int16_t>(v>=0 ? v/4 : -((-v+3)/4));
         }
+        // Prescaled path stays scalar on purpose: it rounds each tap individually
+        // before filtering, which the NEON interior identity does not model.
         HyperCine_ForwardHorizontal26_CPU(scaled.pixels.data(),in.width,in.height,scaled.stride,
                                         low.pixels.data(),low.stride,high.pixels.data(),high.stride);
         // Lowpass rounding is applied to the pair sum, not each individual tap.
@@ -90,10 +130,12 @@ WaveletLevel ForwardLevel(const Plane& in, int prescale) {
         }
     }
     auto& b=out.bands;
-    HyperCine_ForwardVertical26_CPU(low.pixels.data(),low.width,low.height,low.stride,
-                                  b[0].pixels.data(),b[0].stride,b[2].pixels.data(),b[2].stride);
-    HyperCine_ForwardVertical26_CPU(high.pixels.data(),high.width,high.height,high.stride,
-                                  b[1].pixels.data(),b[1].stride,b[3].pixels.data(),b[3].stride);
+    if (ForwardVertical26(low.pixels.data(),low.width,low.height,low.stride,
+                          b[0].pixels.data(),b[0].stride,b[2].pixels.data(),b[2].stride) != HYPERCINE_STATUS_SUCCESS)
+        throw std::runtime_error("vertical lowpass transform failed");
+    if (ForwardVertical26(high.pixels.data(),high.width,high.height,high.stride,
+                          b[1].pixels.data(),b[1].stride,b[3].pixels.data(),b[3].stride) != HYPERCINE_STATUS_SUCCESS)
+        throw std::runtime_error("vertical highpass transform failed");
     return out;
 }
 int16_t Quantize(int16_t value, unsigned divisor) {
