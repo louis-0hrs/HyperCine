@@ -23,6 +23,26 @@ option(HYPERCINE_BUILD_BENCHMARKS "Build HyperCine benchmark tool" ON)
 option(HYPERCINE_ENABLE_CUDA "Enable CUDA acceleration backends" OFF)
 option(HYPERCINE_ENABLE_METAL "Enable experimental Apple Metal FilmScan3 frontend" OFF)
 option(HYPERCINE_BUILD_QUALITY_STATE_ONLY "Build only the portable quality-state calculator and its tests" OFF)
+# Declared here, ahead of the CUDA configure block, so the policy guards below can
+# see it. The standalone path itself still lives further down; only the option
+# declaration moved.
+option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
+
+# Policy guards run BEFORE CUDA compiler detection, and that ordering is the point.
+# If detection ran first, a host without nvcc would fail with "no CUDA compiler was
+# detected", which masks the real reason the configuration is unsupported. The
+# contract tests assert the specific message, so the specific reason has to be the
+# one that surfaces.
+if(HYPERCINE_BUILD_QUALITY_STATE_ONLY AND
+   (HYPERCINE_BUILD_STANDALONE OR HYPERCINE_ENABLE_CUDA OR HYPERCINE_ENABLE_METAL OR
+    HYPERCINE_ENABLE_VULKAN OR HYPERCINE_REQUIRE_EXTERNAL_DECODE))
+    message(FATAL_ERROR
+        "Quality-state-only cannot satisfy standalone, CUDA, Metal, Vulkan or external decode requests")
+endif()
+if(HYPERCINE_ENABLE_CUDA AND NOT HYPERCINE_BUILD_UPSTREAM AND NOT HYPERCINE_BUILD_STANDALONE)
+    message(FATAL_ERROR
+        "CUDA requires HYPERCINE_BUILD_UPSTREAM=ON outside SDK-free standalone mode; hypercine_wavelet still depends on frozen SDK encoder symbols")
+endif()
 
 # Configure CUDA before the standalone early-return path. The standalone
 # FilmScan3 target below deliberately uses only HyperCine's SDK-free scalar
@@ -104,21 +124,15 @@ if(HYPERCINE_BUILD_TESTS)
 endif()
 
 option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)
-
-# This path intentionally returns before any SDK include directory or target.
-option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
+# This path intentionally returns before any SDK include directory or target.
 set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quality-profile corpus root")
 add_library(hypercine_quality_state STATIC src/core/quality_state.cpp)
 target_include_directories(hypercine_quality_state PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_features(hypercine_quality_state PUBLIC cxx_std_17)
+# The incompatibility guard for quality-state-only moved to the top of the file so
+# it runs before CUDA compiler detection; this block only builds that mode.
 if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
-    if(HYPERCINE_BUILD_STANDALONE OR HYPERCINE_ENABLE_CUDA OR
-       HYPERCINE_ENABLE_METAL OR HYPERCINE_ENABLE_VULKAN OR
-       HYPERCINE_REQUIRE_EXTERNAL_DECODE)
-        message(FATAL_ERROR
-            "Quality-state-only cannot satisfy standalone, CUDA, Metal, Vulkan or external decode requests")
-    endif()
     add_executable(quality_state_probe tests/quality_state_probe.cpp)
     target_link_libraries(quality_state_probe PRIVATE hypercine_quality_state)
     if(NOT HYPERCINE_BUILD_TESTS)
