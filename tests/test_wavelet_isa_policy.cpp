@@ -121,8 +121,8 @@ void phase_explicit_policy() {
 #endif
 }
 
-// Phase 2: the actual regression. Flip the process-global default *after* the
-// session was built and prove the session did not follow it.
+// Phase 2: the actual regression. Change the process-global default *after* the
+// session was built, in both directions, and prove the session did not follow it.
 void phase_session_outlives_global_switch() {
     std::printf("phase 2: session keeps its kernel while the global default flips\n");
     const auto frame = MakeFrame(2);
@@ -133,35 +133,48 @@ void phase_session_outlives_global_switch() {
     EncodeOnce(scalar, frame);        // warm up, take the baseline reading
     EncodeOnce(auto_session, frame);
 
-    // Now change the global default in a different thread, so the session is not
-    // merely reading a value this thread happened to leave behind.
-    std::thread flipper([&] { HyperCine_SetNEONWaveletEnabled(!original); });
-    flipper.join();
+    // Both directions, deliberately. A mutation that makes the session follow the
+    // global switch can hide in whichever direction happens to agree with the
+    // session's own choice: a first version of this test only flipped towards
+    // false, which is exactly where "Scalar session ran scalar" is true either way.
+    // Setting it to true is the direction that actually discriminates, because a
+    // leaking session would then run NEON while claiming Scalar.
+    for (const bool global : {true, false}) {
+        // Changed from another thread, so the session is not merely reading a value
+        // this thread happened to leave behind.
+        std::thread flipper([&] { HyperCine_SetNEONWaveletEnabled(global); });
+        flipper.join();
 
-    const auto ds = EncodeOnce(scalar, frame);
-    check(ds.neon == 0, "scalar session ignored the flipped global default", (long long)ds.neon);
-    check(ds.scalar > 0, "scalar session still ran scalar kernels", (long long)ds.scalar);
+        const auto ds = EncodeOnce(scalar, frame);
+        check(ds.neon == 0, global ? "scalar session ignored global=on"
+                                   : "scalar session ignored global=off",
+              (long long)ds.neon);
+        check(ds.scalar > 0, "scalar session still ran scalar kernels", (long long)ds.scalar);
+    }
 
     // Auto is documented to follow the global default per call, which is the
-    // historical behaviour. It must therefore have changed sides, proving the flip
-    // was real and not a no-op that would make the check above vacuous.
+    // historical behaviour. Checking that it does proves the global flips above
+    // were real and not no-ops that would make the scalar checks vacuous.
     //
     // On a build without a NEON kernel the flip is a no-op by construction -- there is
     // no vector path to switch to -- so the only correct expectation there is that the
     // global switch does not conjure a kernel that was never compiled in. Asserting
     // "Auto moved to neon" on x86 would be asserting a bug.
-    const auto da = EncodeOnce(auto_session, frame);
+    for (const bool global : {true, false}) {
+        HyperCine_SetNEONWaveletEnabled(global);
+        const auto da = EncodeOnce(auto_session, frame);
 #if defined(__ARM_NEON)
-    if (original) {
-        check(da.scalar > 0, "auto session followed the global default to scalar", (long long)da.scalar);
-    } else {
-        check(da.neon > 0, "auto session followed the global default to neon", (long long)da.neon);
-    }
+        if (global) {
+            check(da.neon > 0, "auto session followed the global default to neon", (long long)da.neon);
+        } else {
+            check(da.scalar > 0, "auto session followed the global default to scalar", (long long)da.scalar);
+        }
 #else
-    check(da.neon == 0, "auto session stayed scalar: no NEON kernel exists to switch to",
-          (long long)da.neon);
-    check(da.scalar > 0, "auto session kept encoding on scalar", (long long)da.scalar);
+        check(da.neon == 0, "auto session stayed scalar: no NEON kernel exists to switch to",
+              (long long)da.neon);
+        check(da.scalar > 0, "auto session kept encoding on scalar", (long long)da.scalar);
 #endif
+    }
 
     HyperCine_SetNEONWaveletEnabled(original);
 }
