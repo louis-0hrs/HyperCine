@@ -32,6 +32,15 @@ using Clock = std::chrono::steady_clock;
 
 namespace {
 
+// Emitted between rows so the output is valid JSON. Without it the four rows
+// were separated only by a newline, which no parser accepts -- found because a
+// downstream reader failed on it, not because the benchmark complained.
+bool g_first_row = true;
+const char* row_separator() {
+    if (g_first_row) { g_first_row = false; return ""; }
+    return ",\n";
+}
+
 double ms(Clock::time_point t) {
     return std::chrono::duration<double, std::milli>(Clock::now() - t).count();
 }
@@ -126,11 +135,11 @@ void measure_kernel(int w, int h) {
     HyperCine_SetNEONWaveletEnabled(true);
 
     const Stats s_on = stats_of(on), s_off = stats_of(off);
-    std::printf("{\"scope\":\"kernel\",\"width\":%d,\"height\":%d,\"iters\":%d,"
+    std::printf("%s{\"scope\":\"kernel\",\"width\":%d,\"height\":%d,\"iters\":%d,"
                 "\"neon_median_ms\":%.4f,\"neon_p95_ms\":%.4f,\"neon_worst_ms\":%.4f,"
                 "\"scalar_median_ms\":%.4f,\"scalar_p95_ms\":%.4f,\"scalar_worst_ms\":%.4f,"
                 "\"speedup\":%.3f,\"bands_bit_equal\":true}\n",
-                w, h, iters, s_on.median, s_on.p95, s_on.worst,
+                row_separator(), w, h, iters, s_on.median, s_on.p95, s_on.worst,
                 s_off.median, s_off.p95, s_off.worst, s_off.median / s_on.median);
 }
 
@@ -174,12 +183,12 @@ void measure_encode(int w, int h) {
     HyperCine_SetNEONWaveletEnabled(true);
 
     const Stats s_on = stats_of(on), s_off = stats_of(off);
-    std::printf("{\"scope\":\"encode\",\"width\":%d,\"height\":%d,\"iters\":%d,"
+    std::printf("%s{\"scope\":\"encode\",\"width\":%d,\"height\":%d,\"iters\":%d,"
                 "\"packet_bytes\":%zu,\"packet_equal\":true,"
                 "\"neon_median_ms\":%.3f,\"neon_p95_ms\":%.3f,"
                 "\"scalar_median_ms\":%.3f,\"scalar_p95_ms\":%.3f,"
                 "\"saved_ms\":%.3f,\"saved_percent\":%.2f,\"speedup\":%.4f}\n",
-                w, h, iters, ref_on.sample.size(),
+                row_separator(), w, h, iters, ref_on.sample.size(),
                 s_on.median, s_on.p95, s_off.median, s_off.p95,
                 s_off.median - s_on.median,
                 (s_off.median - s_on.median) / s_off.median * 100.0,
