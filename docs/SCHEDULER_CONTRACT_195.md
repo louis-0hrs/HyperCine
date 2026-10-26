@@ -86,12 +86,10 @@ simply wrong. Measured: a probe that captured the address of a callback local re
 dead slot and reported success in a Release build, while AddressSanitizer classified the
 same read as **`stack-use-after-return`**.
 
-The real requirement is on the produced storage, not the frame: it must be owned
-independently of the callback (heap object, shared ownership, or a member of a
-longer-lived owner) and must stay alive from publication until `run()` has drained and
-downstream consumers are finished with it. The graph never owns or frees payload memory;
-the caller does. This is now the required rule
-`S2-predicate-reads-owned-storage`. A `false` result — or a predicate
+The predicate may read storage that outlives the callback frame. It is not the
+buffer. Completion does not trust it: `Completed` requires a `BufferVersion` of this
+generation whose bytes were copied into graph-owned storage. See
+`docs/SCHEDULER_S2_OUTPUT_144.md`. A `false` result — or a predicate
 that throws, because a check that cannot answer is not evidence of an output — becomes
 the terminal error `GraphError::OutputNotPublished`. The node becomes `Failed`, its
 transitive dependents become `Failed`, and **no successor is released**.
@@ -115,11 +113,11 @@ Measured:
 | `S2-transitive-tail-fails` | false predicate in the middle of three nodes | tail never runs, tail `Failed` |
 | `S2-predicate-reads-owned-storage` | predicate reads caller-owned storage that outlives the callback frame | publishes correctly, consumer observes the written value, both nodes `Completed` |
 
-**What S2 still cannot do.** The predicate is a *declaration*: a callback that sets its
-own flag without writing the buffer is still reported as published. The graph can check
-what the task declares, not what the memory contains. Closing that needs a buffer
-contract the graph would have to own; it is out of scope here and is stated as a limit
-rather than implied as coverage.
+**What the predicate still cannot do.** A callback that sets its own flag without
+publishing a buffer is **not** reported as published. The flag is only an extra
+fail-closed check. The result is the retained `BufferVersion`. A true predicate and a
+returning callback, with version still 0, are `OutputNotPublished` and ready no
+dependent. That closure is `docs/SCHEDULER_S2_OUTPUT_144.md`, not a decoder integration.
 
 ### S3 — Cancellation drains, and a cancelled graph never reports success
 
@@ -255,8 +253,8 @@ cmake --build build-tsan -j && ctest --test-dir build-tsan -R scheduler_contract
 
 ## 6. Follow-up
 
-S2's declaration-level check is the right size for a wrapper whose only consumer today
-is a test. The next step, when the first production consumer appears, is to make the
-predicate a **buffer contract** (output view plus expected extent) instead of a bool,
-so "wrote something" becomes "wrote the declared extent". That is a change to the API
-and belongs with the consumer that needs it, not ahead of it.
+The declaration-only limit is closed for this synthetic graph: completion is bound to
+a retained `BufferVersion` of the current generation, not to the boolean predicate.
+A real GoPro/CFHD decoder is **not** integrated. Wiring a productive decoder consumer
+to this graph stays gated on the S2 lifetime qualification in
+`docs/SCHEDULER_S2_OUTPUT_144.md`. No CUDA or Metal target is part of that slice.

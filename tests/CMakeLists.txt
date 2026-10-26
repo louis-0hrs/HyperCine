@@ -43,6 +43,18 @@ if(Python3_Interpreter_FOUND)
         USES_TERMINAL VERBATIM)
 endif()
 
+# Issue #253: every target below links the frozen `CFHDCodecStatic` archive,
+# which only the upstream build defines. With -DHYPERCINE_BUILD_UPSTREAM=OFF an
+# unguarded link reached the linker as `cannot find -lCFHDCodecStatic` instead
+# of a truthful configuration, and the only tested configuration was the one
+# (standalone) that returns before this file. The SDK-free contracts above keep
+# building; the SDK-backed targets are guarded on the target and the omission is
+# reported at configure time instead of being silently unregistered.
+set(HYPERCINE_SDK_TESTS_OMITTED "")
+macro(hypercine_test_needs_sdk)
+    list(APPEND HYPERCINE_SDK_TESTS_OMITTED ${ARGN})
+endmacro()
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
@@ -61,6 +73,8 @@ if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
         target_link_options(test_small_chroma_oracle_asan PRIVATE /INCREMENTAL:NO /DEBUG)
         target_link_libraries(test_small_chroma_oracle_asan PRIVATE CFHDCodecStatic)
     endif()
+elseif(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+    hypercine_test_needs_sdk(test_small_chroma_oracle)
 endif()
 
 add_executable(test_transform_wavelet
@@ -70,29 +84,36 @@ add_executable(test_transform_wavelet
 add_test(NAME test_transform_wavelet COMMAND test_transform_wavelet)
 
 # 2. Codec-level roundtrip test
-add_executable(test_codec_roundtrip
-    test_codec_roundtrip.cpp
-)
-target_link_libraries(test_codec_roundtrip PRIVATE CFHDCodecStatic)
-add_test(NAME test_codec_roundtrip COMMAND test_codec_roundtrip)
+if(TARGET CFHDCodecStatic)
+    add_executable(test_codec_roundtrip
+        test_codec_roundtrip.cpp
+    )
+    target_link_libraries(test_codec_roundtrip PRIVATE CFHDCodecStatic)
+    add_test(NAME test_codec_roundtrip COMMAND test_codec_roundtrip)
 
-add_executable(test_yuy2_stability
-    test_yuy2_stability.cpp
-)
-target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
-add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
+    add_executable(test_yuy2_stability
+        test_yuy2_stability.cpp
+    )
+    target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
+    add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 
-# 3. Upstream sample AVI decode test
-add_executable(test_avi_sample
-    test_avi_sample.cpp
-    ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
-    ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp
-    ${CMAKE_SOURCE_DIR}/upstream/Example/fileio.cpp
-)
-target_link_libraries(test_avi_sample PRIVATE CFHDCodecStatic)
-add_test(NAME test_avi_sample
-    COMMAND test_avi_sample "${CMAKE_SOURCE_DIR}/upstream/Example/videos/CFHDsample422.AVI"
-)
+    # 3. Upstream sample AVI decode test
+    add_executable(test_avi_sample
+        test_avi_sample.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/fileio.cpp
+    )
+    target_link_libraries(test_avi_sample PRIVATE CFHDCodecStatic)
+    add_test(NAME test_avi_sample
+        COMMAND test_avi_sample "${CMAKE_SOURCE_DIR}/upstream/Example/videos/CFHDsample422.AVI"
+    )
+else()
+    # test_transform_wavelet above deliberately stays: it compiles the frozen
+    # WaveletDemo helper sources but links no SDK archive.
+    hypercine_test_needs_sdk(
+        test_codec_roundtrip test_yuy2_stability test_avi_sample)
+endif()
 
 # 4. Phase 1A CUDA wavelet transform test
 if(HYPERCINE_ENABLE_CUDA)
@@ -104,7 +125,7 @@ if(HYPERCINE_ENABLE_CUDA)
 endif()
 
 
-if(HYPERCINE_ENABLE_CUDA)
+if(HYPERCINE_ENABLE_CUDA AND TARGET CFHDCodecStatic)
     add_executable(test_cuda_pyramid test_cuda_pyramid.cpp)
     target_link_libraries(test_cuda_pyramid PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_cuda_pyramid COMMAND test_cuda_pyramid)
@@ -168,6 +189,14 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(test_phase3a PRIVATE psapi)
     endif()
     add_test(NAME test_phase3a COMMAND test_phase3a)
+elseif(HYPERCINE_ENABLE_CUDA)
+    # CUDA is on but the frozen SDK is not built, so every CUDA test below would
+    # only fail at link time. Keep test_cuda_wavelet (hypercine_core only) and
+    # report the archive-dependent ones explicitly.
+    hypercine_test_needs_sdk(
+        test_cuda_pyramid test_entropy_parallel test_hybrid_roundtrip
+        test_phase2a test_phase2b test_phase2c test_phase2d
+        test_entropy_capacity test_phase3a)
 endif()
 
 # Decode actual native Mac-produced 1080p FS3 fixtures with pristine GoPro SDK.
@@ -243,10 +272,30 @@ if(WIN32 AND MSVC AND TARGET CFHDCodecStatic)
     target_link_libraries(gop2_reference_export PRIVATE CFHDCodecStatic)
 endif()
 
+if(HYPERCINE_SDK_TESTS_OMITTED)
+    list(REMOVE_DUPLICATES HYPERCINE_SDK_TESTS_OMITTED)
+    list(LENGTH HYPERCINE_SDK_TESTS_OMITTED HYPERCINE_SDK_TESTS_OMITTED_COUNT)
+    message(STATUS
+        "HYPERCINE_BUILD_UPSTREAM=OFF: ${HYPERCINE_SDK_TESTS_OMITTED_COUNT} SDK-backed "
+        "test target(s) are unavailable and were not registered (they link the "
+        "frozen CFHDCodecStatic archive): ${HYPERCINE_SDK_TESTS_OMITTED}")
+endif()
+
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
     add_test(NAME gop2_reference_inventory_integrity
         COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_reference_inventory.py")
+endif()
+
+# Issue #253 contract: BUILD_UPSTREAM=OFF configures and reports its omission
+# instead of failing at link time. Configure-only; runs a fresh child configure
+# in both directions so a vacuous guard fails too.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME upstream_off_configure_contract
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_upstream_off_contract.py")
+    set_tests_properties(upstream_off_configure_contract PROPERTIES
+        LABELS "build-contract" TIMEOUT 900)
 endif()
 
 # Phase-B oracle contract: missing stages/neutrality evidence never pass.

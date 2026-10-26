@@ -87,12 +87,24 @@ add_library(hypercine_quality_state STATIC src/core/quality_state.cpp)
 target_include_directories(hypercine_quality_state PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_features(hypercine_quality_state PUBLIC cxx_std_17)
 if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
+    if(HYPERCINE_BUILD_STANDALONE OR HYPERCINE_ENABLE_CUDA OR
+       HYPERCINE_ENABLE_METAL OR HYPERCINE_ENABLE_VULKAN OR
+       HYPERCINE_REQUIRE_EXTERNAL_DECODE)
+        message(FATAL_ERROR
+            "Quality-state-only cannot satisfy standalone, CUDA, Metal, Vulkan or external decode requests")
+    endif()
+    add_executable(quality_state_probe tests/quality_state_probe.cpp)
+    target_link_libraries(quality_state_probe PRIVATE hypercine_quality_state)
+    if(NOT HYPERCINE_BUILD_TESTS)
+        return()
+    endif()
     enable_testing()
     add_executable(test_quality_state tests/test_quality_state.cpp)
     target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
     add_test(NAME quality_state_unit COMMAND test_quality_state)
-    add_executable(quality_state_probe tests/quality_state_probe.cpp)
-    target_link_libraries(quality_state_probe PRIVATE hypercine_quality_state)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME quality_cmake_mode_contract COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/ci/test_quality_cmake_mode.py")
     if(HYPERCINE_QUALITY_ORACLE_ROOT)
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
         add_test(NAME quality_state_windows_oracle COMMAND "${Python3_EXECUTABLE}"
@@ -398,6 +410,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         endforeach()
     endif()
     return()
+endif()
+
+if(HYPERCINE_ENABLE_CUDA AND NOT HYPERCINE_BUILD_UPSTREAM)
+    message(FATAL_ERROR
+        "CUDA requires HYPERCINE_BUILD_UPSTREAM=ON outside SDK-free standalone mode; hypercine_wavelet still depends on frozen SDK encoder symbols")
 endif()
 
 if(HYPERCINE_ENABLE_CUDA)
