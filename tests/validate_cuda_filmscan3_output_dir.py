@@ -26,6 +26,17 @@ checks = 0
 failures = []
 
 
+def create_directory_symlink(link, target):
+    """Only Windows' missing privilege is unavailable evidence, not a pass."""
+    try:
+        link.symlink_to(target, target_is_directory=True)
+    except OSError as error:
+        if os.name == 'nt' and getattr(error, 'winerror', None) == 1314:
+            return False
+        raise
+    return True
+
+
 def check(condition, label):
     global checks
     checks += 1
@@ -49,6 +60,8 @@ def digest_tree(root):
 
 
 def main():
+    global checks, failures
+    checks, failures = 0, []
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--keep', action='store_true', help='leave the scratch tree in place')
     args = parser.parse_args()
@@ -73,7 +86,7 @@ def main():
         real_target.mkdir()
         (real_target / 'KEEP_TARGET').write_bytes(b'sentinel-target\n')
         link = output_dir / 'outlink'
-        link.symlink_to(real_target, target_is_directory=True)
+        symlink_available = create_directory_symlink(link, real_target)
 
         before = digest_tree(root)
 
@@ -108,14 +121,12 @@ def main():
               'symlink target content changed')
 
         # 3. The symlink still points where it did; it was not followed or replaced.
-        check(link.is_symlink(), 'output symlink was replaced by a real directory')
-        # Compare resolved paths, not the raw readlink text. Windows returns the
-        # target in its own form (separators, possible drive prefix), so a string
-        # comparison against str(path) is a POSIX-only assumption -- it failed on
-        # the Windows runner while the link was in fact untouched. What the test
-        # actually cares about is that the link still resolves to the same place.
-        check(link.resolve() == real_target.resolve(),
-              'output symlink target changed')
+        if symlink_available:
+            check(link.is_symlink(), 'output symlink was replaced by a real directory')
+            # Windows readlink text can contain a native drive prefix. Compare
+            # resolved paths while retaining the unresolved snapshot above.
+            check(link.resolve() == real_target.resolve(),
+                  'output symlink target changed')
 
         # 4. Each run produced its own directory, and they differ.
         check(len(work_dirs) == 2, 'expected two work directories')
@@ -126,12 +137,13 @@ def main():
                   f'work directory escaped output dir: {work}')
 
         # 5. A symlink as the output directory itself is refused, not followed.
-        refused = False
-        try:
-            v.prepare_output_dir(link)
-        except ValueError as error:
-            refused = 'symlink' in str(error)
-        check(refused, 'prepare_output_dir accepted a symlink output directory')
+        if symlink_available:
+            refused = False
+            try:
+                v.prepare_output_dir(link)
+            except ValueError as error:
+                refused = 'symlink' in str(error)
+            check(refused, 'prepare_output_dir accepted a symlink output directory')
         check((real_target / 'KEEP_TARGET').read_bytes() == b'sentinel-target\n',
               'symlink target changed after the refused call')
 
@@ -143,6 +155,10 @@ def main():
         for failure in failures:
             print(f'FAIL: {failure}')
         return 1
+    if not symlink_available:
+        print('BLOCKED_SYMLINK_PRIVILEGE: file/directory sentinels verified; '
+              'live symlink checks require Windows symlink privilege or Developer Mode')
+        return 77
     print('CUDA-OUTPUT-DIR-NEGATIVE: PASS pre-existing files, subdirectories and '
           'symlinks survive repeated runs unchanged')
     return 0

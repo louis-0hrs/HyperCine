@@ -129,10 +129,22 @@ class InventoryGateTests(unittest.TestCase):
             listing.append(test_line(i, name))
         listing.append("")
         listing.append("Total Tests: {}".format(len(names) if total is None else total))
-        shim = self.root / "ctest-shim"
-        shim.write_text("#!/bin/sh\ncat <<'CTEST_EOF'\n" + "\n".join(listing)
-                        + "\nCTEST_EOF\n", encoding="utf-8")
-        shim.chmod(0o755)
+        if os.name == 'nt':
+            # Windows cannot execute a POSIX shebang (WinError193). Keep the
+            # real checker subprocess and all its negative controls; only the
+            # synthetic ctest provider uses a native launcher.
+            shim = self.root / 'ctest-shim.cmd'
+            script = self.root / 'ctest-shim.py'
+            script.write_text('from pathlib import Path\n'
+                              'print(Path(__file__).with_suffix(".txt").read_text(encoding="utf-8"), end="")\n',
+                              encoding='utf-8')
+            script.with_suffix('.txt').write_text('\n'.join(listing) + '\n', encoding='utf-8')
+            shim.write_text('@"{}" "{}"\n'.format(sys.executable, script), encoding='utf-8')
+        else:
+            shim = self.root / "ctest-shim"
+            shim.write_text("#!/bin/sh\ncat <<'CTEST_EOF'\n" + "\n".join(listing)
+                            + "\nCTEST_EOF\n", encoding="utf-8")
+            shim.chmod(0o755)
         self.ctest = str(shim)
 
     def run_gate(self, *extra):

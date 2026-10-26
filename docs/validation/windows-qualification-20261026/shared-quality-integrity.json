@@ -1,0 +1,892 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "scope": "Existing external files read-only; no new encode/decode or pixel-oracle qualification",
+  "transfer_sha256": "2343a5efae40590de81cc87b275fce382cc59565f3ae4689f21cc83f48218205",
+  "files_verified": 1760,
+  "bytes_verified": 5970674259,
+  "corpora": [
+    {
+      "corpus": "filmscan1/1080p-16f",
+      "files": 81,
+      "bytes": 233006116,
+      "manifest_sha256": "c7f18ce04161358c6a89838afdc8e110e53bccd3c07e7e1d8c18fb3c2b987edb",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan1",
+        "quality_sdk_enum": 4,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "exported_frames": 16,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 16
+    },
+    {
+      "corpus": "filmscan1/3840x2160-1f",
+      "files": 6,
+      "bytes": 35691047,
+      "manifest_sha256": "538f47fede86acbcc9212db5789095ab47c27912a628d4e4d04e48772510edb9",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan1",
+        "quality_sdk_enum": 4,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "filmscan1/7680x4320-1f",
+      "files": 6,
+      "bytes": 142439825,
+      "manifest_sha256": "50869d43ecfc47955261109273dfc89399750c1af2e0c63a7749cac2e7308abd",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan1",
+        "quality_sdk_enum": 4,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "filmscan2/1080p-16f",
+      "files": 81,
+      "bytes": 269370300,
+      "manifest_sha256": "d7044bb986e91e2dc4dcc109e5908e5de6197b606790d8b6fedbd0df948c20cf",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan2",
+        "quality_sdk_enum": 5,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "exported_frames": 16,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 16
+    },
+    {
+      "corpus": "filmscan2/3840x2160-1f",
+      "files": 6,
+      "bytes": 35730869,
+      "manifest_sha256": "ef9014c053c1945dc97469f74205117cd0a48816b0830e2d1cc72b34e23a8700",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan2",
+        "quality_sdk_enum": 5,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "filmscan2/7680x4320-1f",
+      "files": 6,
+      "bytes": 142479679,
+      "manifest_sha256": "597ebf23c4103e05c8878ceb8590f5239de0ab2b97f4c3a05319ac11141197dd",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan2",
+        "quality_sdk_enum": 5,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "filmscan2/sequence-120f",
+      "files": 601,
+      "bytes": 1758357069,
+      "manifest_sha256": "6ed7907589ab7e52fec6d588ba667b6d062cc9928316c1ba05ad64feac9d2792",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan2",
+        "quality_sdk_enum": 5,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 120,
+          "matched_frames": 120,
+          "exported_frames": 120,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 120
+    },
+    {
+      "corpus": "filmscan3/1080p-16f",
+      "files": 81,
+      "bytes": 271533496,
+      "manifest_sha256": "9197a632860efec625260f012166b4f46eca1a7fc23310e7054ac71dab3cfadf",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan3",
+        "quality_sdk_enum": 6,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "exported_frames": 16,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 16
+    },
+    {
+      "corpus": "filmscan3/3840x2160-1f",
+      "files": 6,
+      "bytes": 35738595,
+      "manifest_sha256": "2834ed349b49d3da5b2ff59845b67946ea331cd1a157f48155ee747990bee94d",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan3",
+        "quality_sdk_enum": 6,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "filmscan3/7680x4320-1f",
+      "files": 6,
+      "bytes": 142487421,
+      "manifest_sha256": "3d31557f46dba46320befb833e3df9c58d98686a1945e2ef9ebf60b0cb94deb6",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan3",
+        "quality_sdk_enum": 6,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "filmscan3/sequence-120f",
+      "files": 601,
+      "bytes": 1781415813,
+      "manifest_sha256": "bc56bd4556ef7177a8959674e359909c1c57e847f08262275c191065c723bba3",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "filmscan3",
+        "quality_sdk_enum": 6,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 120,
+          "matched_frames": 120,
+          "exported_frames": 120,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 120
+    },
+    {
+      "corpus": "high/1080p-16f",
+      "files": 81,
+      "bytes": 210105836,
+      "manifest_sha256": "161c132b94795eded8a307f0113ca950f545a8595cb1b4e81888ad8119d650b7",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "high",
+        "quality_sdk_enum": 3,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "exported_frames": 16,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 16
+    },
+    {
+      "corpus": "high/3840x2160-1f",
+      "files": 6,
+      "bytes": 35678881,
+      "manifest_sha256": "9b496fb2954f994f4c83f3da1215880aea9e2f9fcb5db8db906dbadd75059ff9",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "high",
+        "quality_sdk_enum": 3,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "high/7680x4320-1f",
+      "files": 6,
+      "bytes": 142427659,
+      "manifest_sha256": "17c619bd0c7bb80467acbbf43e4427a3ef178b34b8798e2750882baaed5bedac",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "high",
+        "quality_sdk_enum": 3,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "low/1080p-16f",
+      "files": 81,
+      "bytes": 185548135,
+      "manifest_sha256": "602a15e00b1a2fc1d0aebf90d6f63f21c01d0cc32649bb0497a8d6a131711f41",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "low",
+        "quality_sdk_enum": 1,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "exported_frames": 16,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 16
+    },
+    {
+      "corpus": "low/3840x2160-1f",
+      "files": 6,
+      "bytes": 35649639,
+      "manifest_sha256": "a4f2e2dab636a4abcea2c6989c6def5e294c1153106b4dfb51c11f1826773080",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "low",
+        "quality_sdk_enum": 1,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "low/7680x4320-1f",
+      "files": 6,
+      "bytes": 142398449,
+      "manifest_sha256": "afbd888f3aadb59fcdc378138bb685ce4eb0eda206abe21ab7991e6395dd0d4f",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "low",
+        "quality_sdk_enum": 1,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "medium/1080p-16f",
+      "files": 81,
+      "bytes": 192537154,
+      "manifest_sha256": "19a2bd96b23da910925c9addced8a5354aaddcc9b8104c3f624cadff821a0705",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "medium",
+        "quality_sdk_enum": 2,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "requested_frames": 16,
+          "matched_frames": 16,
+          "exported_frames": 16,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 16
+    },
+    {
+      "corpus": "medium/3840x2160-1f",
+      "files": 6,
+      "bytes": 35664725,
+      "manifest_sha256": "dbb64b0cb4f7203df0b853250a478a56531b534e275114af8fb452a350a441b4",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "medium",
+        "quality_sdk_enum": 2,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    },
+    {
+      "corpus": "medium/7680x4320-1f",
+      "files": 6,
+      "bytes": 142413551,
+      "manifest_sha256": "c5ffe8154e1390700088c93ba0f524cd0503ea18828ec9eed26b67b85d2efea5",
+      "profile": {
+        "input_format": "BGRA8",
+        "encoded_format": "YUV422",
+        "range": "CFHD upstream default for generated BGRA8 source values",
+        "row_orientation": "top-down",
+        "pitch_bytes": "width*4",
+        "color_conversion": "Rec.709 default; YUV_601 flag not set",
+        "chroma_convention": "CFHD YUV 4:2:2 default",
+        "encoder_flags": "CFHD_ENCODING_FLAGS_NONE",
+        "quality": "medium",
+        "quality_sdk_enum": 2,
+        "gop": 1,
+        "precision": 10,
+        "metadata": "SDK metadata preserved; normalization zeros only parsed GUID/DATE/TIME/TIMC value bytes"
+      },
+      "generator": {
+        "name": "hypercine_reference_export",
+        "source_commit": "26ee3e1ad155f9c6db09e809b3dfd4557677b200",
+        "working_tree_dirty": 0,
+        "pattern_generator": "GeneratePhase3AFrame",
+        "seed": "0x1337BEEF"
+      },
+      "sdk": {
+        "implementation": "pristine GoPro CFHD_EncodeSample",
+        "upstream_frozen_ref": "11574d0295771edccadd17af14af74a539f924c7"
+      },
+      "runs": [
+        {
+          "width": 7680,
+          "height": 4320,
+          "requested_frames": 1,
+          "matched_frames": 1,
+          "exported_frames": 1,
+          "status": "complete",
+          "error": ""
+        }
+      ],
+      "frame_count": 1
+    }
+  ],
+  "elapsed_seconds": 209.391
+}

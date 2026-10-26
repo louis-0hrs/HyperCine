@@ -79,6 +79,11 @@ function(hypercine_register_sdk_free_contracts)
         return()
     endif()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME qualification_report_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_summarize_qualification.py")
+    set_tests_properties(qualification_report_contract PROPERTIES LABELS "validation;reference-oracle")
+    add_test(NAME cuda_output_dir_platform_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_cuda_output_dir_platform.py")
     add_test(NAME test_reference_release_inventory
         COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_reference_release.py")
     set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
@@ -409,7 +414,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME cuda_filmscan3_output_dir_negative COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3_output_dir.py")
             set_tests_properties(cuda_filmscan3_output_dir_negative PROPERTIES
-                LABELS "cuda;output-dir;no-gpu" TIMEOUT 120
+                SKIP_RETURN_CODE 77
+                LABELS "cuda;output-dir;no-gpu;platform-required" TIMEOUT 120
                 PASS_REGULAR_EXPRESSION "CUDA-OUTPUT-DIR-NEGATIVE: PASS")
             # #45: a real 4K FFmpeg gate with its own negative controls. Kept apart
             # from the 1080p evidence so a 4K claim always has a 4K decode behind it.
