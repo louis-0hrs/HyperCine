@@ -388,18 +388,41 @@ void rule_budget(std::size_t workers) {
     const bool consumer_held = graph.state(2) != TaskState::Ready &&
                                graph.state(2) != TaskState::Running &&
                                graph.state(2) != TaskState::Completed;
+    // The budget is charged when publish_plane() succeeds, but a failed graph
+    // releases every publication whose producer did not reach Completed. Under
+    // parallel workers the accepted producer can race the other producer's
+    // OutputNotPublished failure: it either completed first (the copy remains)
+    // or is canceled while still Running (release_abandoned_locked refunds it).
+    // A fixed post-run kBytes expectation incorrectly rejects that valid cleanup.
+    const TaskState band0_state = graph.state(0);
+    const TaskState band1_state = graph.state(1);
+    const std::size_t completed_producers =
+        (band0_state == TaskState::Completed ? 1u : 0u) +
+        (band1_state == TaskState::Completed ? 1u : 0u);
+    const std::size_t expected_retained_bytes = completed_producers * kBytes;
+    const bool publication_matches_completion =
+        DecodeTaskGraphTestAccess::published_output(graph, 0) ==
+            (band0_state == TaskState::Completed) &&
+        DecodeTaskGraphTestAccess::published_output(graph, 1) ==
+            (band1_state == TaskState::Completed);
+    const bool budget_postdrain = completed_producers <= 1 &&
+                                  graph.owned_publication_bytes() == expected_retained_bytes &&
+                                  publication_matches_completion;
     const bool ok = !ran && graph.error() == GraphError::OutputNotPublished && graph.quiescent() &&
                     published.load() == 1 && refused.load() == 1 && consumer_runs.load() == 0 &&
-                    consumer_held && graph.owned_publication_bytes() == kBytes &&
+                    consumer_held && budget_postdrain &&
                     graph.ready_transitions() == ready_before && ready_before == ready_before_slot;
-    char detail[256];
+    char detail[320];
     std::snprintf(detail, sizeof detail,
-                  "run=%d error=%d published=%d refused=%d consumer=%d owned=%zu ready %zu->%zu state=%d",
+                  "run=%d error=%d published=%d refused=%d consumer=%d owned=%zu expected_owned=%zu "
+                  "producer_states=%d,%d publication_matches=%d ready %zu->%zu state=%d",
                   ran ? 1 : 0, static_cast<int>(graph.error()), published.load(), refused.load(),
-                  consumer_runs.load(), graph.owned_publication_bytes(), ready_before,
+                  consumer_runs.load(), graph.owned_publication_bytes(), expected_retained_bytes,
+                  static_cast<int>(band0_state), static_cast<int>(band1_state),
+                  publication_matches_completion ? 1 : 0, ready_before,
                   graph.ready_transitions(), static_cast<int>(graph.state(2)));
     required("T4-budget", ok,
-             ok ? "one plane was retained; the second was refused and the lowpass never ran"
+             ok ? "one plane was accepted, one refused; completed copies retained, canceled copies refunded"
                 : std::string(detail));
 }
 
