@@ -68,6 +68,21 @@ class JsonContract(unittest.TestCase):
             with self.subTest(raw=raw):
                 self.verify(raw)
 
+    def test_deeply_nested_baseline_fails_without_traceback(self):
+        # JSON decoders do not share one recursion threshold across Python versions.
+        # Damage a compared field so rejection also holds when parsing succeeds.
+        nested = '[' * 2048 + '0' + ']' * 2048
+        raw = json.dumps(self.report).replace('"frame_count": 24',
+                                              '"frame_count": ' + nested)
+        self.verify(raw)
+
+    def test_json_recursion_failure_is_sanitized(self):
+        # Exercise exhaustion deterministically, independent of the parser limit.
+        raw = json.dumps(self.report)
+        with patch.object(baseline.json, 'loads',
+                          side_effect=RecursionError('SYNTHETIC_PRIVATE_EVIDENCE')):
+            self.verify(raw)
+
     def test_malformed_tool_json_fails_without_traceback(self):
         import subprocess
         for raw in [b'[]', b'{"streams":[],"streams":[]}',

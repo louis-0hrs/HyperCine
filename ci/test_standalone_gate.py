@@ -23,6 +23,13 @@ class StandaloneGateTests(unittest.TestCase):
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
+    def test_p7_audit_must_be_registered(self):
+        for name in ('p7_plane_contract', 'p7_json_contract', 'p7_public_sdk_fixture'):
+            with self.subTest(name=name):
+                self.assertIn(name, REQUIRED)
+                with self.assertRaises(ValueError):
+                    registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.xml'
