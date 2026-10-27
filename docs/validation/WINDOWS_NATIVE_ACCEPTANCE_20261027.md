@@ -131,9 +131,10 @@ Do not overlap the large geometry suites when measuring their timeout contract.
 The native process runner command and fixed matrix are documented in
 [`WINDOWS_REFERENCE_PROCESS_PROTOCOL.md`](WINDOWS_REFERENCE_PROCESS_PROTOCOL.md).
 Use `HYPERCINE_GOLDEN_DIR` only as a private local binding for the Descale replay.
-The installed real-hook commit/push smoke and missing-identity rejection pass
-(2/2). An optional full installed-hook regression run was stopped after no
-observable progress; no full hook-matrix PASS is claimed. Publication requires
-installed hooks, staged/outgoing-commit privacy scans,
+The complete installed-hook regression matrix passed 102/102 tests in 626.65 s
+(SHA-1/SHA-256); the separate real-hook commit/push and missing-identity smoke
+also passed 2/2. The full run had completed before a stop attempt; its initially
+reported NOT_COMPLETED status is corrected from the final log and exit 0.
+Publication requires installed hooks, staged/outgoing-commit privacy scans,
 reviewed sanitized reports and explicit public Git identities. No automatic
 owner-branch/main merge, release, tag or history rewrite is performed.
