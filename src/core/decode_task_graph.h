@@ -313,11 +313,15 @@ struct GraphLimits {
     // uncontracted_tasks() == nodes, so the omission stays observable. It is NOT a
     // way to make a decoder graph lax -- a graph that publishes keeps the rule.
     bool require_published_output = true;
-    // T4. Bytes of graph-owned plane copies charged by publish_plane(). The
-    // absolute ceiling is kPlaneGenerationBudget. A smaller value is a tighter
-    // cap; a larger value is clamped down to the ceiling; zero admits no plane.
-    // Untyped publish() does not spend this budget. Appended last so existing
-    // positional GraphLimits braces keep their meaning.
+    // T4. Ceiling for graph-owned publication, typed and untyped alike. The
+    // absolute maximum is kPlaneGenerationBudget; a smaller value is a tighter
+    // cap; a larger value is clamped down to it; zero admits no owned publication
+    // of any kind. The decision and the charge both live in
+    // commit_copy_locked(), which every publication path calls, so a plain
+    // publish() pays exactly like publish_plane(). This comment previously said
+    // untyped publish() did not spend the budget -- true before BUDGET-ALL, false
+    // after it, and the kind of drift that lets a reader certify a closed hole.
+    // Appended last so existing positional GraphLimits braces keep their meaning.
     std::size_t generation_budget_bytes = kPlaneGenerationBudget;
 };
 
@@ -445,8 +449,10 @@ private:
     std::size_t uncontracted_ = 0;
     // Graph-wide S2 completion rule, captured at construction. Default true.
     bool require_published_output_ = true;
-    // Effective T4 ceiling, clamped in the constructor. Spent only by
-    // publish_plane(), under mutex_.
+    // Effective T4 ceiling, clamped in the constructor. Spent by
+    // commit_copy_locked(), under mutex_, for both publication paths -- not by
+    // publish_plane() alone. Refunded by release_abandoned_locked() when a
+    // stopped generation drops storage it will never hand to a consumer.
     std::size_t generation_budget_ = kPlaneGenerationBudget;
     std::size_t owned_budget_ = 0;
     GraphError error_ = GraphError::None;
