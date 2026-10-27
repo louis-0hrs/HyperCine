@@ -29,6 +29,16 @@ def decode(ffmpeg: Path, sample: Path, output: Path, width: int = 1920, height: 
     return raw
 
 
+def decode_pair(ffmpeg: Path, work_dir: Path, frame: int, width: int, height: int) -> str:
+    """Decode frame `frame` of a multi-frame session on both sides and compare."""
+    cpu=decode(ffmpeg,work_dir/f'cpu.f{frame:03d}.cfhd',work_dir/f'cpu.f{frame:03d}.yuv',width,height)
+    gpu=decode(ffmpeg,work_dir/f'gpu.f{frame:03d}.cfhd',work_dir/f'gpu.f{frame:03d}.yuv',width,height)
+    if cpu!=gpu:
+        first=next(i for i,(a,b) in enumerate(zip(cpu,gpu)) if a!=b)
+        raise ValueError(f'independent FFmpeg decodes of frame {frame} differ at byte {first}')
+    return hashlib.sha256(cpu).hexdigest()
+
+
 def refuse_symlink_in_path(path: Path) -> None:
     if path.is_absolute():
         cursor=Path(path.anchor)
@@ -72,8 +82,14 @@ def exclusive_work_dir(output_dir: Path) -> Path:
     return work_dir
 
 
-def assert_exclusive_artifacts(work_dir: Path) -> None:
+def assert_exclusive_artifacts(work_dir: Path, frames: int = 1) -> None:
     names=('trace.json','cpu.cfhd','gpu.cfhd','cpu.yuv','gpu.yuv','cpu.avi','gpu.avi')
+    if frames>1:
+        names=()
+        for frame in range(frames):
+            names+= (f'cpu.f{frame:03d}.cfhd', f'gpu.f{frame:03d}.cfhd',
+                     f'trace.f{frame:03d}.json', f'cpu.f{frame:03d}.yuv',
+                     f'gpu.f{frame:03d}.yuv')
     for name in names:
         artifact=work_dir/name
         if artifact.is_symlink() or not artifact.is_file():
@@ -90,7 +106,11 @@ def main() -> int:
     parser.add_argument('--output-dir',required=True,type=Path)
     parser.add_argument('--geometry',default='1920x1080',
                         help='WIDTHxHEIGHT of the compared packets (default 1920x1080)')
+    parser.add_argument('--frames',default=1,type=int,
+                        help='ordered frames per session; above 1 every frame is decoded')
     args=parser.parse_args()
+    if args.frames<1:
+        raise ValueError(f'--frames needs at least 1, got: {args.frames}')
     try:
         width_text,height_text=args.geometry.lower().split('x',1)
         width,height=int(width_text),int(height_text)
@@ -105,13 +125,36 @@ def main() -> int:
     work_dir=exclusive_work_dir(args.output_dir)
     print(f'WORK_DIR: {work_dir}')
     run=subprocess.run([str(args.compare),'--output-dir',str(work_dir),
-                        '--geometry',f'{width}x{height}'],text=True,capture_output=True)
+                        '--geometry',f'{width}x{height}','--frames',str(args.frames)],
+                       text=True,capture_output=True)
     sys.stdout.write(run.stdout);sys.stderr.write(run.stderr)
     if run.returncode==77:
         print('SKIP77: CUDA GPU required')
         return 77
     if run.returncode!=0:
         raise ValueError(f'complete packet comparator failed with {run.returncode}')
+    if args.frames>1:
+        # A multi-frame session proves the rate state and frame counter stay in
+        # step, which a single frame cannot. The comparator prints one line per
+        # frame; every one of them has to say PASS, and the summary has to pass.
+        for frame in range(args.frames):
+            if f'FRAME {frame}: ' not in run.stdout:
+                raise ValueError(f'comparator did not report frame {frame}')
+        if f'MULTIFRAME: PASS ({args.frames} ordered frames' not in run.stdout:
+            raise ValueError('comparator did not prove identical ordered multi-frame sessions')
+        digests=[]
+        for frame in range(args.frames):
+            trace=json.loads((work_dir/f'trace.f{frame:03d}.json').read_text())
+            cpu_hashes=trace['cpu_coefficient_fnv64'];gpu_hashes=trace['gpu_coefficient_fnv64']
+            if len(cpu_hashes)!=30 or cpu_hashes!=gpu_hashes:
+                raise ValueError(f'frame {frame} trace lacks 30 equal CPU/CUDA coefficient hashes')
+            digests.append(decode_pair(args.ffmpeg,work_dir,frame,width,height))
+        assert_exclusive_artifacts(work_dir,args.frames)
+        print(f'FFMPEG_DECODE: PASS {args.frames} ordered CPU and CUDA packets decoded '
+              f'independently; per_frame_yuv_sha256='+','.join(digests))
+        print(f'MULTIFRAME_TRACE: PASS ({args.frames}x30 coefficient hashes from encoder traces)')
+        print('PASS')
+        return 0
     if 'COEFFICIENT_HASHES: PASS (30/30)' not in run.stdout or 'FULL_PACKET: PASS' not in run.stdout:
         raise ValueError('comparator did not prove all 30 hashes and complete packet equality')
     trace=json.loads((work_dir/'trace.json').read_text())

@@ -216,6 +216,13 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
 
     const bool geometry_is_filmscan3 = filmscan3 && FitsInt(config.width) && FitsInt(config.height);
     if (geometry_is_filmscan3) {
+        // Qualification is a distinct axis from the geometry validator's
+        // result. The geometry validator now accepts wavelet-aligned >4096
+        // SHAPES then rejects their pixel budget with length_error. Preserve
+        // "outside qualified envelope" independently of exception type, so
+        // 8K does not silently lose its backend-not-qualified reason.
+        if (config.width > kMaxDimension || config.height > kMaxDimension)
+            result.outside_qualified_dimension_envelope = true;
         std::size_t sample_cap = 0;
         const bool cap_fits = config.max_sample_bytes <= std::numeric_limits<std::size_t>::max();
         if (!cap_fits) {
@@ -233,8 +240,7 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
             ValidateFilmScan3Geometry(geometry);
             result.geometry_validator_passed = true;
         } catch (const std::invalid_argument&) {
-            if (config.width > kMaxDimension || config.height > kMaxDimension)
-                result.outside_qualified_dimension_envelope = true;
+            // Shape or wire-field rejection, never qualification evidence.
         } catch (const std::length_error&) {
             result.reasons.memory_budget_exceeded = true;
             memory_detail = result.pixel_budget_ok
