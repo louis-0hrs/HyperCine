@@ -399,6 +399,32 @@ if(HYPERCINE_BUILD_STANDALONE)
                 --negative-control alter-pre-quantized-stage)
             set_tests_properties(cuda_filmscan3_negative_pre_quantized_stage PROPERTIES
                 LABELS "cuda;negative-control" WILL_FAIL TRUE SKIP_RETURN_CODE 77 TIMEOUT 300)
+            # Issue #33 L1: geometry matrix, 16-frame session, reset, parallel
+            # sessions and a real mid-frame CUDA failure. Registered here because
+            # the standalone build returns before add_subdirectory(tests).
+            #
+            # Fail closed. Without --gpu-required the binary exits 77 when no CUDA
+            # device is usable, and SKIP_RETURN_CODE 77 turns that into a CTest
+            # skip, which is not a failure. A host with the toolkit but no usable
+            # GPU would then report this gate green having tested nothing.
+            # --gpu-required makes that path return 1. SKIP_RETURN_CODE is omitted:
+            # this registration does not return 77, and leaving the property would
+            # hide a later exit 77 as a skip.
+            add_executable(test_cuda_multigeometry tests/test_cuda_multigeometry.cpp)
+            target_include_directories(test_cuda_multigeometry PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda")
+            target_link_libraries(test_cuda_multigeometry PRIVATE hypercine_standalone CUDA::cudart Threads::Threads)
+            add_test(NAME cuda_filmscan3_multigeometry_sequence COMMAND test_cuda_multigeometry
+                --gpu-required)
+            set_tests_properties(cuda_filmscan3_multigeometry_sequence PROPERTIES
+                LABELS "cuda;gpu-required" TIMEOUT 1800)
+            # Host-portable subprocess and ffprobe text contract; runs without a GPU
+            # so Windows CMD quoting and CRLF regressions are not masked by SKIP77.
+            add_test(NAME cuda_filmscan3_tool_contract COMMAND test_cuda_multigeometry
+                --tool-contract)
+            set_tests_properties(cuda_filmscan3_tool_contract PROPERTIES
+                LABELS "cuda;tool-contract" TIMEOUT 30)
         endif()
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
