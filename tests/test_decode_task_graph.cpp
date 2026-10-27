@@ -44,7 +44,14 @@ TaskKey key(std::uint32_t band, std::uint32_t channel = 0) { return {channel, 0,
 void check(bool value) { if (!value) throw std::runtime_error("Contract assertion failed"); }
 TaskSpec task(std::uint32_t band, std::vector<TaskKey> inputs = {},
               std::function<void(const TaskContext&)> fn = [](const TaskContext&) {}) {
-    return {key(band), std::move(inputs), std::move(fn)};
+    // An empty callback stays empty so construction still rejects it. A real
+    // callback publishes one owned byte after its own work; a throw publishes nothing.
+    if (!fn) return {key(band), std::move(inputs), {}};
+    return {key(band), std::move(inputs), [fn = std::move(fn)](const TaskContext& context) {
+        fn(context);
+        static constexpr unsigned char token = 1;
+        (void)context.publish(&token, 1);
+    }};
 }
 struct Gate {
     std::mutex mutex;
@@ -117,15 +124,24 @@ void tests(std::size_t workers) {
         int published[3][4]{};
         std::vector<TaskSpec> tasks;
         // Bands 1,2,3 only; no implicit LL/bit-zero dependency.
-        tasks.push_back({key(9), {key(8, 0), key(8, 1), key(8, 2)}, [&](const TaskContext&) {
+        const auto retain = [](const TaskContext& context) {
+            static constexpr unsigned char token = 1;
+            check(context.publish(&token, 1));
+        };
+        tasks.push_back({key(9), {key(8, 0), key(8, 1), key(8, 2)}, [&](const TaskContext& context) {
             for (auto& channel : published) check(channel[0] == 6);
+            retain(context);
         }});
         for (std::uint32_t c = 0; c < 3; ++c) {
-            tasks.push_back({key(8, c), {key(1, c), key(2, c), key(3, c)}, [&, c](const TaskContext&) {
+            tasks.push_back({key(8, c), {key(1, c), key(2, c), key(3, c)}, [&, c](const TaskContext& context) {
                 published[c][0] = published[c][1] + published[c][2] + published[c][3];
+                retain(context);
             }});
             for (std::uint32_t band = 3; band > 0; --band)
-                tasks.push_back({key(band, c), {}, [&, c, band](const TaskContext&) { published[c][band] = int(band); }});
+                tasks.push_back({key(band, c), {}, [&, c, band](const TaskContext& context) {
+                    published[c][band] = int(band);
+                    retain(context);
+                }});
         }
         DecodeTaskGraph graph(generation, GraphProfile::Synthetic, std::move(tasks));
         check(graph.run(workers));

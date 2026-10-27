@@ -7,6 +7,10 @@
 #define NOMINMAX
 #endif
 #endif
+
+#include <cstddef>
+#include <cstring>
+
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
 #include "CFHDMetadata.h"
@@ -32,7 +36,6 @@ extern "C" {
 #include "hypercine/entropy_parallel.h"
 
 #include <iostream>
-#include <cstring>
 #include <vector>
 
 namespace {

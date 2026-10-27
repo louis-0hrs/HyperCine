@@ -8,6 +8,9 @@
 #endif
 #endif
 
+#include <cstddef>
+#include <cstring>
+
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
 #include "CFHDMetadata.h"
@@ -49,7 +52,6 @@ extern "C" {
 #include <set>
 #include <string>
 #include <vector>
-#include <cstring>
 #include <cmath>
 
 #ifdef _WIN32

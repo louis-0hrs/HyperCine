@@ -11,6 +11,7 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 
 extern "C" {
@@ -49,6 +50,7 @@ extern "C" {
 #include <sstream>
 #include <string>
 #include <vector>
+#include "bench_host.h"
 
 namespace {
 
@@ -128,7 +130,10 @@ int TimedFramesForHeight(int height) {
 
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+    const std::string json_path = (argc > 1 && argv[1] != nullptr && argv[1][0] != '-')
+        ? std::string(argv[1])
+        : std::string("benchmarks/results/phase2c.json");
     std::cout << std::fixed << std::setprecision(2);
     HyperCineDeviceLink link{};
     if (HyperCine_QueryDeviceLink(&link) != 0) {
@@ -559,11 +564,9 @@ int main() {
     json << "  ]\n";
     json << "}\n";
 
-    std::filesystem::create_directories("benchmarks/results");
-    std::ofstream out("benchmarks/results/phase2c.json");
-    if (out) {
-        out << json.str();
-        std::cout << "Wrote benchmarks/results/phase2c.json\n";
+    if (!hypercine::bench::WriteCompleteFile(json_path, json.str())) {
+        return 1;
     }
+    std::cout << "Wrote " << json_path << "\n";
     return 0;
 }

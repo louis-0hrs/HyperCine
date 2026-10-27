@@ -7,6 +7,10 @@
 #define NOMINMAX
 #endif
 #endif
+
+#include <cstddef>
+#include <cstring>
+
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
 #include "CFHDMetadata.h"
@@ -36,7 +40,6 @@ extern "C" {
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <cstring>
 
 static bool Decode(const std::vector<uint8_t>& sample, int width, int height, std::vector<uint8_t>* image, int* pitch_out) {
     CFHD_DecoderRef decoder = nullptr;

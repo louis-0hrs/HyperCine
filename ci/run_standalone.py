@@ -14,6 +14,14 @@ import xml.etree.ElementTree as ET
 REQUIRED = {
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
+    'filmscan3_geometry', 'filmscan3_geometry_external_decode',
+    'filmscan3_geometry_validation', 'filmscan3_geometry_reference_p10',
+    # SDK-free Python contracts shared with the regular test tree; they are
+    # registered by hypercine_register_sdk_free_contracts(), so their absence
+    # from this inventory would let a dropped registration stay green.
+    'test_reference_release_inventory', 'test_compare_sdk_oracle',
+    'test_rca159_witness_contract',
+    'qualification_report_contract', 'cuda_output_dir_platform_contract',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
     'windows_reference_sdk_coefficients', 'filmscan3_autonomous_manifest',

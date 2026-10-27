@@ -17,6 +17,17 @@ import subprocess
 from validate_standalone import avi, reference
 
 
+# Log lines that carry a Windows-run observation. The summary line keeps
+# quality_measured= and distinctOutputsMax= after the PASS marker was retired,
+# so replay must select it explicitly instead of silently recording less.
+OBSERVATION_MARKERS = ('distinctYU64=', 'quality_measured=', 'status=',
+                       'STRICT_FAILURE', 'Oracle harness error')
+
+
+def is_observation_line(line):
+    return any(marker in line for marker in OBSERVATION_MARKERS)
+
+
 def metric(a, b, peak=1023):
     assert len(a) == len(b) and len(a) > 0
     errors = [x-y for x, y in zip(a, b)]
@@ -61,7 +72,7 @@ def main():
         run_url = args.run_url
         log_sha = hashlib.sha256(Path(args.log).read_bytes()).hexdigest()
     for line in Path(args.log).read_text().splitlines() if args.log else []:
-        if 'distinctYU64=' in line or 'status=' in line or 'SDK decode PASS:' in line or 'SDK decode FAIL:' in line:
+        if is_observation_line(line):
             observations.append(dict(step=line.split('\t')[1], result=line.split('Z ', 1)[-1].strip()))
         if 'ORACLE_DATA_BEGIN ' in line:
             assert active is None

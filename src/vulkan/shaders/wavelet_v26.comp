@@ -1,0 +1,73 @@
+// Copyright (c) 2026 HyperCine Contributors.
+// Dual-licensed under the MIT License or Apache License, Version 2.0.
+// See LICENSE-MIT and LICENSE-APACHE for details.
+//
+// Bit-exact Vulkan compute port of HyperCine_ForwardVertical26_CPU
+// (src/cpu/wavelet_cpu.cpp): production 1D vertical 2-6 forward wavelet.
+// See wavelet_h26.comp for the arithmetic notes; this is the column-wise twin.
+
+#version 450
+
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(std430, binding = 0) readonly buffer Src {
+    int s[];
+} src;
+
+layout(std430, binding = 1) writeonly buffer Low {
+    int l[];
+} low;
+
+layout(std430, binding = 2) writeonly buffer High {
+    int h[];
+} high;
+
+layout(push_constant) uniform Push {
+    uint width;       // source columns (>= 6)
+    uint height;      // source rows (even, >= 6)
+    uint src_stride;
+    uint low_stride;
+    uint high_stride;
+    uint _pad0;
+} pc;
+
+int floor_div8(int v) {
+    return v >= 0 ? v / 8 : -((-v + 7) / 8);
+}
+
+int sat16(int v) {
+    return clamp(v, -32768, 32767);
+}
+
+int at(int row, uint x) {
+    return src.s[int(row) * int(pc.src_stride) + int(x)];
+}
+
+void main() {
+    uint x = gl_GlobalInvocationID.x;
+    uint r = gl_GlobalInvocationID.y;
+    int half_h = int(pc.height >> 1u);
+    if (int(x) >= int(pc.width) || int(r) >= half_h) {
+        return;
+    }
+    int y = int(r) * 2;
+
+    int low_sum = at(y, x) + at(y + 1, x);
+    low.l[int(r) * int(pc.low_stride) + int(x)] = sat16(low_sum);
+
+    int hp;
+    if (r == 0u) {
+        int sum = 5 * at(0, x) - 11 * at(1, x) + 4 * at(2, x)
+                + 4 * at(3, x) - at(4, x) - at(5, x);
+        hp = floor_div8(sum + 4);
+    } else if (int(r) < half_h - 1) {
+        int pre = -at(y - 2, x) - at(y - 1, x) + at(y + 2, x) + at(y + 3, x);
+        pre = floor_div8(pre + 4);
+        hp = pre + at(y, x) - at(y + 1, x);
+    } else {
+        int sum = 11 * at(y, x) - 5 * at(y + 1, x) - 4 * at(y - 1, x)
+                - 4 * at(y - 2, x) + at(y - 3, x) + at(y - 4, x);
+        hp = floor_div8(sum + 4);
+    }
+    high.h[int(r) * int(pc.high_stride) + int(x)] = sat16(hp);
+}
