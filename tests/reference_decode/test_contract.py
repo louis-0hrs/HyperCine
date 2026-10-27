@@ -136,5 +136,72 @@ class DecodeContract(unittest.TestCase):
             self.assertEqual(json.loads(run.stdout)['classification'], 'REFERENCE_DECODER_NONDETERMINISTIC')
 
 
+
+    def test_cli_never_echoes_rejected_arguments(self):
+        """A rejected CLI value must never reach the diagnostic.
+
+        argparse's stock error path prints the offending value, and this diagnostic
+        is publishable. Four malformed invocations cover the shapes that can carry
+        an untrusted value: an unknown option, an unexpected path, a malformed
+        value and an extra positional. Each must exit nonzero with the fixed
+        INVALID_CLI payload and must not contain the sentinel anywhere in either
+        stream.
+        """
+        sentinel = 'CANARY-SENTINEL-7f3a9d'
+        malformed = [
+            ['--' + sentinel],                       # unknown option
+            ['/nonexistent/' + sentinel],           # unexpected path -> INVALID_EVIDENCE
+            ['--evidence=' + sentinel],              # option that does not exist
+            ['one.json', sentinel],                  # extra positional
+        ]
+        for argv in malformed:
+            run = subprocess.run([sys.executable, str(Path(contract.__file__))] + argv,
+                                 capture_output=True, text=True)
+            with self.subTest(argv=argv):
+                self.assertNotEqual(run.returncode, 0)
+                self.assertNotIn(sentinel, run.stdout)
+                self.assertNotIn(sentinel, run.stderr)
+                payload = json.loads(run.stdout)
+                self.assertTrue(payload['release_blocked'])
+                self.assertIn(payload['classification'], ('INVALID_CLI', 'INVALID_EVIDENCE'))
+
+    def test_cli_help_is_not_redacted_and_succeeds(self):
+        """Redaction must not swallow --help; status 0 keeps its normal output."""
+        run = subprocess.run([sys.executable, str(Path(contract.__file__)), '--help'],
+                             capture_output=True, text=True)
+        self.assertEqual(run.returncode, 0)
+        self.assertIn('usage:', run.stdout)
+        self.assertNotIn('INVALID_CLI', run.stdout)
+
+    def test_cli_missing_argument_is_invalid_cli(self):
+        run = subprocess.run([sys.executable, str(Path(contract.__file__))],
+                             capture_output=True, text=True)
+        self.assertEqual(run.returncode, 2)
+        self.assertEqual(json.loads(run.stdout)['classification'], 'INVALID_CLI')
+
+    def test_stock_parser_would_have_leaked(self):
+        """Negative control: prove the canary detects the defect it guards against.
+
+        The same invocation against a plain ArgumentParser must echo the sentinel.
+        Without this, the canary above could pass because argparse never printed
+        the value at all, rather than because the override suppressed it.
+        """
+        sentinel = 'CANARY-SENTINEL-7f3a9d'
+        probe = (
+            'import argparse, sys\n'
+            'parser = argparse.ArgumentParser()\n'
+            'parser.add_argument("evidence")\n'
+            'parser.parse_args(sys.argv[1:])\n'
+        )
+        # The sentinel goes in as an EXTRA POSITIONAL, not an unknown option: argparse
+        # reports a missing required positional before it reports an unrecognized
+        # option, so an unknown flag would not reach the echoing path at all. The
+        # extra positional is the shape that actually prints the value, and it is the
+        # same shape the canary above exercises.
+        run = subprocess.run([sys.executable, '-c', probe, 'evidence.json', sentinel],
+                             capture_output=True, text=True)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn(sentinel, run.stderr)
+
 if __name__ == '__main__':
     unittest.main()

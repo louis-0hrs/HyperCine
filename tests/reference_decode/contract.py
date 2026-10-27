@@ -112,8 +112,33 @@ def report(document):
             'alternate_decoder': alternate}
 
 
+class _RedactingParser(argparse.ArgumentParser):
+    """Argument parser that never echoes caller-supplied text in a diagnostic.
+
+    argparse's stock error path prints the offending value: an unknown option, a
+    dangling option, an extra positional. On this path those values are untrusted
+    input from whoever invoked the command, and the diagnostic is publishable, so
+    the message is replaced by a fixed one. This mirrors the generic handler below,
+    which already refuses to repeat evidence or paths.
+    """
+
+    def error(self, message):
+        print(json.dumps({'schema_version': 1, 'classification': 'INVALID_CLI',
+                          'release_blocked': True}))
+        raise SystemExit(2)
+
+    def exit(self, status=0, message=None):
+        # Status 0 is --help/--version and keeps its normal output. A nonzero exit
+        # from argparse is an error, and must not carry the rejected text.
+        if status:
+            print(json.dumps({'schema_version': 1, 'classification': 'INVALID_CLI',
+                              'release_blocked': True}))
+            raise SystemExit(status)
+        raise SystemExit(status)
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = _RedactingParser(description=__doc__)
     parser.add_argument('evidence', type=Path)
     args = parser.parse_args()
     try:
