@@ -400,6 +400,12 @@ if(HYPERCINE_BUILD_STANDALONE)
                 --gpu-required)
             set_tests_properties(cuda_filmscan3_multigeometry_sequence PROPERTIES
                 LABELS "cuda;gpu-required" TIMEOUT 1800)
+            # Host-portable subprocess and ffprobe text contract; runs without a GPU
+            # so Windows CMD quoting and CRLF regressions are not masked by SKIP77.
+            add_test(NAME cuda_filmscan3_tool_contract COMMAND test_cuda_multigeometry
+                --tool-contract)
+            set_tests_properties(cuda_filmscan3_tool_contract PROPERTIES
+                LABELS "cuda;tool-contract" TIMEOUT 30)
         endif()
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
