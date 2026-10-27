@@ -1,0 +1,34 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 23,
+  "parent_commit": "6e6fe42734f8f2dd9900aa89ce7a1ff8e4448b4c",
+  "platform": {
+    "system": "macOS",
+    "architecture": "arm64",
+    "os_version": "26.5.2",
+    "compiler": "AppleClang 21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0"
+  },
+  "full_standalone_ctest": {
+    "registered": 30,
+    "passed": 30,
+    "skipped": 0,
+    "wall_seconds": 94.52,
+    "python_optimized": true,
+    "required_external_decode": true
+  },
+  "sources": [
+    {
+      "path": "tests/test_trace_contract.py",
+      "sha256": "a62bd4da3a66f75dbed9f97106bcb873681fce5baa7e595c5291ff406ba90ee0"
+    },
+    {
+      "path": "tests/validate_filmscan3.py",
+      "sha256": "3cb352ae7d777033e1e869c24057e960ddae0f59c02831f2cc093b5f3a704952"
+    }
+  ],
+  "scope": "Focused prerequisite fix; parent feature/reference gates remain open; no protected-main merge or release."
+}

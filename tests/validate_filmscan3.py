@@ -31,6 +31,30 @@ def decoded_psnr(actual, reference, width=1920, height=1080):
     return psnr
 
 
+def load_trace(text):
+    """Read the encoder's unambiguous trace envelope before validating rows."""
+    def unique_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError('duplicate trace key')
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError('nonstandard trace constant')
+
+    try:
+        result = json.loads(text, object_pairs_hook=unique_pairs,
+                            parse_constant=reject_constant)
+        require(type(result) is dict and set(result) == {'profile', 'frames'} and
+                result['profile'] == 'FilmScan3' and type(result['frames']) is list,
+                'invalid trace envelope')
+    except (ValueError, TypeError, RecursionError):
+        raise ValueError('invalid encoder trace JSON') from None
+    return result['frames']
+
+
 def validate_trace(trace, expected):
     require(type(trace) is list and type(expected) is list and bool(expected),
             'empty or invalid encoder trace inventory')
@@ -87,13 +111,13 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
     cpu_options = arguments[1:]
     output = directory/'samples';arguments += [str(output)] + inputs
     subprocess.run(arguments, check=True)
-    trace = json.loads((output/'trace.json').read_text())['frames']
+    trace = load_trace((output/'trace.json').read_text(encoding='utf-8'))
     cpu_output = directory/'cpu-samples'
     if cpu_encoder:
         # Identical input paths and explicit metadata; compare raw full packets,
         # independently from SDK-normalized hashes and the mandatory stage audit.
         subprocess.run([str(cpu_encoder)] + cpu_options + [str(cpu_output)] + inputs, check=True)
-        cpu_trace = json.loads((cpu_output/'trace.json').read_text())['frames']
+        cpu_trace = load_trace((cpu_output/'trace.json').read_text(encoding='utf-8'))
         validate_trace(cpu_trace, expected)
         if cpu_trace != trace:
             raise ValueError('same-input comparison encoder state/tables/30 bands differ')
