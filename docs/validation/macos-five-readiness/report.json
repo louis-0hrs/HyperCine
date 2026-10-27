@@ -1,0 +1,157 @@
+{
+  "license": "MIT OR Apache-2.0; Copyright (c) 2026 HyperCine Contributors",
+  "schema_version": 1,
+  "date": "2026-10-17",
+  "tested_source_commit": "e87ef0258ba37f5c78f1557c59d9c7331df5521c",
+  "platform": {
+    "os": "macOS",
+    "architecture": "arm64",
+    "compiler": "AppleClang 21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6"
+  },
+  "source_sha256": {
+    "include/hypercine/filmscan3.h": "bb37439efc4ed2e3ee49a7fd7f454efab88cf95fe96164e68aae103d81a76928",
+    "src/cpu/wavelet_cpu.cpp": "2a3afddf41b9d5450c94774f9d32d75eb6eea5a01ee67c09f46f36028dca853e",
+    "src/cpu/cpu_isa.cpp": "f307db340b54cae448469071a9c3c382b070d81c134ad3d5120b00f382f609de",
+    "tests/macos_readiness/scalar_plan_oracle.cpp": "ca09893c51ab6155e09bba0beac81c45c791b2736a0eac2c303f3d9d592618a4"
+  },
+  "standalone": {
+    "status": "PASS",
+    "passed": 31,
+    "skipped": 0,
+    "elapsed_seconds": 97.95,
+    "tests": [
+      "cpu_isa_selection",
+      "filmscan3_backend_selection",
+      "filmscan3_api",
+      "filmscan3_fixture_integrity",
+      "entropy_bitexact",
+      "standalone_color",
+      "standalone_wavelet",
+      "standalone_quantization",
+      "standalone_entropy",
+      "standalone_sample",
+      "standalone_geometry",
+      "standalone_oracle_fixtures",
+      "windows_reference_inputs",
+      "windows_reference_guardrails",
+      "windows_reference_parser",
+      "windows_reference_sdk_coefficients",
+      "windows_reference_binaries",
+      "filmscan3_autonomous_manifest",
+      "filmscan3_sequence_manifest",
+      "filmscan3_actual_tier_a",
+      "filmscan3_actual_sequence",
+      "filmscan3_external_decode",
+      "standalone_external_decode",
+      "standalone_external_256x256",
+      "standalone_external_1920x1080",
+      "standalone_external_128x24",
+      "standalone_external_384x40",
+      "standalone_external_4096x24",
+      "standalone_external_128x4096",
+      "standalone_external_2048x1024",
+      "standalone_windows_oracle_replay"
+    ]
+  },
+  "quality_state": {
+    "status": "PASS",
+    "passed": 2,
+    "original_sdk_six_profile_oracle": "NOT_RUN_NOT_CONFIGURED",
+    "native_profile_math_unit_vectors": 6
+  },
+  "scalar_plan_oracle": {
+    "status": "PASS",
+    "vectors": 1572864,
+    "coefficients": 25165824,
+    "axes": 2,
+    "width_or_height": 8,
+    "contexts": 3,
+    "tap_positions": 8,
+    "values_per_tap": 65536,
+    "padding_write_canaries": "PASS"
+  },
+  "scalar_plan_oracle_sanitizers": {
+    "status": "PASS",
+    "vectors": 1572864,
+    "coefficients": 25165824,
+    "axes": 2,
+    "width_or_height": 8,
+    "contexts": 3,
+    "tap_positions": 8,
+    "values_per_tap": 65536,
+    "padding_write_canaries": "PASS",
+    "asan": true,
+    "ubsan": true,
+    "leak_detection": false
+  },
+  "tasks": [
+    {
+      "issue": 23,
+      "deliverable": "Current-main input, quantized-band and actual-packet regression qualification",
+      "result": "PASS_SCOPED",
+      "actual_tier_a_frames": 16,
+      "actual_sequence_frames": 120,
+      "unquantized_signed_sdk_stage_oracle": "PENDING"
+    },
+    {
+      "issue": 44,
+      "deliverable": "Main versus pending P4 API reconciliation and bounded 4K rejection probe",
+      "result": "BLOCKED_BY_P4_ACCEPTANCE",
+      "main_4k_cli_exit": 1,
+      "main_4k_cli_reason": "frame exceeds 2097152-pixel allocation budget",
+      "sdk_4k_parity": "REFERENCE_BLOCKED"
+    },
+    {
+      "issue": 46,
+      "deliverable": "Native shared-quality prerequisite check and probe-input bug reproduction",
+      "result": "FOUND_TEST_HELPER_DEFECT",
+      "malformed_probe_inputs_accepted": 7,
+      "mac_profile_integration": "BLOCKED_BY_P4_P5",
+      "followup": {
+        "pr": "https://github.com/louis-0hrs/HyperCine/pull/133",
+        "head": "be0d01ddad0b9a6c8700efe56b75f06a470081ac",
+        "release_ctest_passed": 3,
+        "asan_ubsan_ctest_passed": 3,
+        "regression_subcases_failed_on_old_probe": 70
+      }
+    },
+    {
+      "issue": 47,
+      "deliverable": "Independent replay of P7.A public fixture and plane contract",
+      "result": "PASS_SCOPED",
+      "reviewed_source_commit": "fd844fd058e0d79d4eabd39769e453c65ea78ba3",
+      "plane_contract_tests": 2,
+      "packets": 24,
+      "frames": 24,
+      "fixture_sha256": "18baa60e401a9ebddddb5691d1c23c48ab1e26bc6f6cbc1aaa5b00869a2ccb44",
+      "native_hypercine_decoder": "NOT_IMPLEMENTED",
+      "sdk_pixel_parity": "PENDING"
+    },
+    {
+      "issue": 70,
+      "deliverable": "Independent arithmetic qualification of documented scalar reference and native ISA gate",
+      "result": "PASS_SCOPED",
+      "neon_implementation": "BLOCKED_BY_P4",
+      "production_auto": "Scalar",
+      "forced_neon": "REJECTED"
+    }
+  ],
+  "untested": [
+    "Metal",
+    "CUDA",
+    "Vulkan",
+    "Windows native",
+    "Linux native",
+    "4K SDK byte parity",
+    "8K/12K/17K",
+    "prescale-2 exhaustive sweep",
+    "row-padding read safety"
+  ],
+  "upstream_changes": false,
+  "additional_unit_tests": {
+    "standalone_inventory": 6,
+    "privacy_guard": 13
+  }
+}
