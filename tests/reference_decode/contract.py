@@ -17,13 +17,23 @@ SHA256 = re.compile(r'[0-9a-f]{64}\Z')
 MAX_CALLS = 150  # At most 30 independent processes, five calls each.
 
 
+def finite_measurement(value):
+    if type(value) not in (int, float):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        # JSON integers can exceed the float range used for PSNR measurements.
+        return False
+
+
 def classify(packet_equal, calls, minimum_psnr_db=35.0):
     """Classify observed reference gates; preserve encoder-failure precedence."""
     if packet_equal is False:
         return 'ENCODE_BITSTREAM_MISMATCH'
     if packet_equal is not None and packet_equal is not True:
         raise ValueError('packet_equal must be boolean or null')
-    if not math.isfinite(minimum_psnr_db) or minimum_psnr_db < 35.0:
+    if not finite_measurement(minimum_psnr_db) or minimum_psnr_db < 35.0:
         raise ValueError('quality threshold must be finite and at least 35 dB')
     if len(calls) > MAX_CALLS:
         raise ValueError('repeat matrix exceeds diagnostic bound')
@@ -65,7 +75,7 @@ def classify(packet_equal, calls, minimum_psnr_db=35.0):
         if psnr is None:
             if call.get('source_pixels_exact') is not True:
                 incomplete = True
-        elif type(psnr) not in (int, float) or not math.isfinite(psnr):
+        elif not finite_measurement(psnr):
             raise ValueError('invalid PSNR measurement')
         elif psnr <= minimum_psnr_db:
             quality_failed = True

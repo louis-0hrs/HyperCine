@@ -116,6 +116,26 @@ class DecodeContract(unittest.TestCase):
             call.update(psnr_db=None, source_pixels_exact=True)
         self.assertEqual(contract.classify(True, calls), 'PASS')
 
+    def test_oversized_integer_measurements_are_sanitized(self):
+        for value in (10**400, -(10**400)):
+            calls = observations()
+            calls[0]['psnr_db'] = value
+            with self.subTest(value_sign=value > 0), self.assertRaises(ValueError):
+                contract.classify(True, calls)
+            with self.assertRaises(ValueError):
+                contract.classify(True, observations(), value)
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / 'private-evidence-name.json'
+                doc = evidence()
+                doc['calls'] = calls
+                path.write_text(json.dumps(doc))
+                run = subprocess.run([sys.executable, str(Path(contract.__file__)), str(path)],
+                                     capture_output=True, text=True)
+                self.assertEqual(run.returncode, 2)
+                self.assertEqual(json.loads(run.stdout)['classification'], 'INVALID_EVIDENCE')
+                self.assertEqual(run.stderr, '')
+                self.assertNotIn(str(path), run.stdout)
+
     def test_ambiguous_json_is_invalid_without_echoing_input(self):
         clean = json.dumps(evidence())
         documents = [clean.replace('"encoder_packets_equal": true',
