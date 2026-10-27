@@ -266,8 +266,8 @@ void rule_ownership_through_scheduler() {
                     saw_caller.fetch_add(1);
                     return;
                 }
-                // Research inverse requires 32-byte alignment. S2's owned
-                // vector does not. Copy after the ownership check, then run.
+                // Distinct allocations: the inverse rejects overlapping planes.
+                // Copy after the ownership check, then run on the host plane.
                 std::memcpy(aligned[band].samples, admitted.plane.data, kBytes);
                 bands[band] = edge_of(aligned[band], band);
                 saw_owned.fetch_add(1);
