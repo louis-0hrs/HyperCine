@@ -12,6 +12,12 @@ class PlaneContract(unittest.TestCase):
         self.assertEqual([(p['name'], p['pitch_bytes'], p['first'], p['last'])
                           for p in planes], [('Y', 4, 1, 4), ('U', 2, 5, 6), ('V', 2, 7, 8)])
 
+    def test_geometry_types_are_binding(self):
+        for width, height in [(2, True), (2, 1.0), (2.0, 1), (False, 1),
+                              (2, "1"), (None, 1)]:
+            with self.subTest(width=width, height=height), self.assertRaises(ValueError):
+                summarize_frame(bytes(8), width, height)
+
     def test_truncation_extra_data_geometry_and_precision(self):
         for raw, w, h in [(b'\0' * 15, 2, 2), (b'\0' * 17, 2, 2),
                           (b'\0' * 12, 3, 1), (b'', 0, 1),

@@ -53,7 +53,8 @@ def same_value(actual, expected):
 
 
 def summarize_frame(data, width=WIDTH, height=HEIGHT):
-    if width <= 0 or width % 2 or height <= 0 or len(data) != width * height * 4:
+    if (type(width) is not int or type(height) is not int or
+            width <= 0 or width % 2 or height <= 0 or len(data) != width * height * 4):
         raise ValueError('invalid planar YUV422p10 frame size')
     planes = []
     at = 0
