@@ -7,9 +7,8 @@
 #include "../src/core/filmscan3_backend.h"
 #include "../src/cuda/filmscan3_cuda_stats.h"
 #include <cuda_runtime.h>
-#include <sys/wait.h>
-#include <unistd.h>
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -199,7 +198,7 @@ struct Compared {
 
 Compared EncodePair(Session& session, const AlignedVector<std::uint8_t>& input, int width, int height, bool audit) {
     Compared out;
-    out.launches_before = detail::CudaSpatialDispatchCount();
+    out.launches_before = detail::CudaSpatialDispatchCount(*session.gpu_frontend);
     const auto* bytes = input.data();
     const auto size = input.size();
     const auto stride = static_cast<std::size_t>(width) * 4u;
@@ -211,7 +210,7 @@ Compared EncodePair(Session& session, const AlignedVector<std::uint8_t>& input, 
     }
     out.cpu = session.cpu.Encode(bytes, size, stride);
     out.gpu = session.gpu.Encode(bytes, size, stride);
-    out.launches_after = detail::CudaSpatialDispatchCount();
+    out.launches_after = detail::CudaSpatialDispatchCount(*session.gpu_frontend);
     return out;
 }
 
@@ -228,35 +227,70 @@ std::string Tool(const char* env, const char* fallback) {
     return {};
 }
 
-std::string Capture(const std::vector<std::string>& args) {
-    int pipes[2];
-    Require(pipe(pipes) == 0, "pipe");
-    const pid_t pid = fork();
-    Require(pid >= 0, "fork");
-    if (pid == 0) {
-        dup2(pipes[1], STDOUT_FILENO);
-        dup2(pipes[1], STDERR_FILENO);
-        close(pipes[0]);
-        close(pipes[1]);
-        std::vector<char*> argv;
-        argv.reserve(args.size() + 1);
-        for (const auto& arg : args) argv.push_back(const_cast<char*>(arg.c_str()));
-        argv.push_back(nullptr);
-        execv(argv[0], argv.data());
-        _exit(127);
+// Run an external tool and return its combined output.
+//
+// The previous version used fork/execv/pipe/read, which is POSIX-only: the target
+// is registered unconditionally in the CUDA-enabled standalone block, so on native
+// Windows/MSVC with CUDA ON it did not compile (C1083 on <sys/wait.h>). The
+// repository has no subprocess abstraction and the core codec may not gain a
+// dependency for one test, so the portable floor is used: a shell redirect into a
+// temporary file, read back with the standard library.
+//
+// The arguments are quoted and the shell metacharacters that matter for a redirect
+// cannot appear unquoted. The tool is still a trusted local path from
+// HYPERCINE_FFMPEG_EXECUTABLE/HYPERCINE_FFPROBE_EXECUTABLE, never remote input.
+std::string ShellQuote(const std::string& value) {
+    std::string quoted = "\"";
+    for (const char c : value) {
+        if (c == '"') quoted += '\\';
+        quoted += c;
     }
-    close(pipes[1]);
-    std::string output;
-    char buffer[4096];
-    ssize_t count = 0;
-    while ((count = read(pipes[0], buffer, sizeof buffer)) > 0) output.append(buffer, static_cast<std::size_t>(count));
-    close(pipes[0]);
-    int status = 0;
-    Require(waitpid(pid, &status, 0) == pid, "waitpid");
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        throw std::runtime_error(args[0] + " failed:\n" + output);
+    quoted += '"';
+    return quoted;
+}
+
+int SystemStatusToExitCode(int status) {
+#ifdef _WIN32
+    // On Windows std::system returns the child's exit code directly.
+    return status;
+#else
+    // On POSIX it returns a wait status; decode it the same way WEXITSTATUS does.
+    if (status == -1) return -1;
+    if ((status & 0x7f) == 0) return (status >> 8) & 0xff;
+    return 128 + (status & 0x7f);  // terminated by a signal
+#endif
+}
+
+struct ChildOutput {
+    int exit_code = -1;
+    std::string text;
+};
+
+ChildOutput RunTool(const std::vector<std::string>& args, const fs::path& capture_path) {
+    std::string command;
+    for (const auto& arg : args) {
+        if (!command.empty()) command += ' ';
+        command += ShellQuote(arg);
     }
-    return output;
+    // Merge stderr so a failing tool's diagnosis is not lost on one platform only.
+    command += " > " + ShellQuote(capture_path.string()) + " 2>&1";
+    const int status = std::system(command.c_str());
+    ChildOutput out;
+    out.exit_code = SystemStatusToExitCode(status);
+    std::ifstream stream(capture_path, std::ios::binary);
+    if (stream) {
+        out.text.assign(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>());
+    }
+    return out;
+}
+
+std::string Capture(const std::vector<std::string>& args, const fs::path& capture_path) {
+    const auto out = RunTool(args, capture_path);
+    if (out.exit_code != 0) {
+        throw std::runtime_error(args[0] + " failed with exit code " +
+                                 std::to_string(out.exit_code) + ":\n" + out.text);
+    }
+    return out.text;
 }
 
 void Append(std::vector<std::uint8_t>& out, const void* data, std::size_t size) {
@@ -359,33 +393,40 @@ std::vector<std::uint8_t> ReadFile(const fs::path& path) {
 // pix_fmt, then the raw yuv422p10le byte count and CPU/CUDA pixel equality.
 void DecodePair(const std::string& ffmpeg, const std::string& ffprobe, int width, int height,
                 const std::vector<std::uint8_t>& cpu, const std::vector<std::uint8_t>& gpu) {
-    std::string directory(32, '\0');
-    directory = "/tmp/l1geo-ffXXXXXX";
-    Require(mkdtemp(directory.data()) != nullptr, "mkdtemp");
-    const fs::path root(directory.c_str());
+    // Portable unique directory: no mkdtemp, no hardcoded /tmp. A process id plus a
+    // monotonic counter keeps concurrent runs of this test from sharing a directory.
+    static std::atomic<unsigned> sequence{0};
+    const auto root = fs::temp_directory_path() /
+        ("hypercine-cuda-geometry-" + std::to_string(++sequence) + "-" + std::to_string(width) + "x" + std::to_string(height));
+    std::error_code ignored;
+    fs::remove_all(root, ignored);
+    fs::create_directories(root);
     try {
         WriteFile(root / "cpu.avi", Avi(cpu, width, height));
         WriteFile(root / "gpu.avi", Avi(gpu, width, height));
         for (const char* side : {"cpu", "gpu"}) {
             const auto probe = Capture({ffprobe, "-v", "error", "-select_streams", "v:0",
                                         "-show_entries", "stream=codec_name,width,height,pix_fmt",
-                                        "-of", "default=noprint_wrappers=1", (root / (std::string(side) + ".avi")).string()});
+                                        "-of", "default=noprint_wrappers=1", (root / (std::string(side) + ".avi")).string()},
+                                       root / (std::string(side) + ".probe.txt"));
             Require(Field(probe, "codec_name") == "cfhd", side + probe);
             Require(Field(probe, "width") == std::to_string(width), side + probe);
             Require(Field(probe, "height") == std::to_string(height), side + probe);
             Require(Field(probe, "pix_fmt") == "yuv422p10le", side + probe);
             Capture({ffmpeg, "-v", "error", "-xerror", "-y", "-i", (root / (std::string(side) + ".avi")).string(),
                      "-frames:v", "1", "-pix_fmt", "yuv422p10le", "-f", "rawvideo",
-                     (root / (std::string(side) + ".yuv")).string()});
+                     (root / (std::string(side) + ".yuv")).string()},
+                    root / (std::string(side) + ".decode.txt"));
         }
         const auto cpu_raw = ReadFile(root / "cpu.yuv");
         const auto gpu_raw = ReadFile(root / "gpu.yuv");
         const auto expected = static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u;
         Require(cpu_raw.size() == expected && gpu_raw.size() == expected, "decoded byte count");
         Require(cpu_raw == gpu_raw, "CPU and CUDA FFmpeg decodes differ");
-        fs::remove_all(root);
+        std::error_code cleanup_ignored;
+        fs::remove_all(root, cleanup_ignored);
     } catch (...) {
-        std::cerr << "FFMPEG artifacts left at " << root << "\n";
+        std::cerr << "FFMPEG artifacts left in the temporary directory\n";
         throw;
     }
 }
@@ -393,7 +434,6 @@ void DecodePair(const std::string& ffmpeg, const std::string& ffprobe, int width
 int RunGeometry(int width, int height, const std::string& device_name, const std::string& ffmpeg, const std::string& ffprobe) {
     const bool want_ffmpeg = (width == 1920 && height == 1080) || (width == 3840 && height == 2160);
     try {
-        detail::ResetCudaSpatialDispatchCount();
         Session session({width, height, 0});
         RequireDeviceIsCuda(session, device_name);
         const auto input = MakeInput(width, height, 0, 0x4c315445u);
@@ -431,8 +471,6 @@ int RunGeometry(int width, int height, const std::string& device_name, const std
 int RunSequence(const std::string& device_name) {
     constexpr int width = 1920, height = 1080, frames = 16;
     try {
-        detail::ResetCudaSpatialDispatchCount();
-        detail::ArmCudaMidframeFailureAfter(0);
         Session session({width, height, 0});
         RequireDeviceIsCuda(session, device_name);
         std::vector<std::vector<std::uint8_t>> saved;
@@ -458,7 +496,7 @@ int RunSequence(const std::string& device_name) {
                       << " packet_fnv64=" << Hex64(Fnv64(compared.cpu.sample))
                       << " hashes=30/30 " << HashList(compared.cpu) << "\n";
         }
-        const auto launches = detail::CudaSpatialDispatchCount();
+        const auto launches = detail::CudaSpatialDispatchCount(*session.gpu_frontend);
         Require(launches == static_cast<std::uint64_t>(frames) * 12u, "sequence launch count " + std::to_string(launches));
         Require(limiter_moved, "rate limiter never left 4; sequence did not exercise rate state");
         const auto after = session.gpu.state();
@@ -517,8 +555,7 @@ void RunOneSession(int frames, std::uint32_t salt, const std::string& device_nam
 
 int RunParallel(const std::string& device_name) {
     try {
-        detail::ArmCudaMidframeFailureAfter(0);
-        const auto before = detail::CudaSpatialDispatchCount();
+        const auto before = detail::ProcessCudaSpatialDispatchTotal();
         ParallelResult first, second;
         std::thread a(RunOneSession, 4, 0xA11u, device_name, std::ref(first));
         std::thread b(RunOneSession, 4, 0xB22u, device_name, std::ref(second));
@@ -529,7 +566,7 @@ int RunParallel(const std::string& device_name) {
         Require(first.packets.size() == 4 && second.packets.size() == 4, "parallel frame count");
         Require(first.packets != second.packets, "parallel sessions produced the same packets");
         Require(first.end.frame_index == 4 && second.end.frame_index == 4, "parallel frame counters crossed");
-        const auto launches = detail::CudaSpatialDispatchCount() - before;
+        const auto launches = detail::ProcessCudaSpatialDispatchTotal() - before;
         Require(launches == 48, "parallel launch count " + std::to_string(launches));
         std::cout << "ROW parallel_sessions=2 frames=4 geometry=1920x1080 parity=PASS packet=PASS"
                   << " isolated=PASS cuda_launches=" << launches << "\n";
@@ -542,18 +579,16 @@ int RunParallel(const std::string& device_name) {
 
 int RunMidframe(const std::string& device_name) {
     constexpr int width = 1920, height = 1080;
-    detail::ArmCudaMidframeFailureAfter(0);
     try {
-        detail::ResetCudaSpatialDispatchCount();
         Session session({width, height, 0});
         RequireDeviceIsCuda(session, device_name);
         const auto first_input = MakeInput(width, height, 0, 0x45525231u);
         const auto first = EncodePair(session, first_input, width, height, false);
         Require(first.cpu.sample == first.gpu.sample, "pre-failure packet");
         const auto committed = session.gpu.state();
-        const auto launches_after_first = detail::CudaSpatialDispatchCount();
+        const auto launches_after_first = detail::CudaSpatialDispatchCount(*session.gpu_frontend);
         Require(launches_after_first == 6, "first frame launches");
-        detail::ArmCudaMidframeFailureAfter(launches_after_first + 2);
+        detail::ArmCudaMidframeFailureAfter(*session.gpu_frontend, launches_after_first + 2);
         const auto second_input = MakeInput(width, height, 1, 0x45525231u);
         bool threw = false;
         std::string what;
@@ -563,13 +598,13 @@ int RunMidframe(const std::string& device_name) {
             threw = true;
             what = error.what();
         }
-        detail::ArmCudaMidframeFailureAfter(0);
+        detail::ArmCudaMidframeFailureAfter(*session.gpu_frontend, 0);
         Require(threw, "mid-frame CUDA error did not fail the encode");
         Require(what.find("CUDA FilmScan3 mid-frame failure:") != std::string::npos, what);
         Require(what.find("code=2") != std::string::npos, "expected cudaErrorMemoryAllocation code=2, got: " + what);
         Require(SameState(session.gpu.state(), committed), "failed frame committed encoder state");
         Require(cudaPeekAtLastError() == cudaSuccess, "CUDA last-error leaked past the failed frame");
-        const auto launches_after_fail = detail::CudaSpatialDispatchCount();
+        const auto launches_after_fail = detail::CudaSpatialDispatchCount(*session.gpu_frontend);
         Require(launches_after_fail == launches_after_first + 2, "failure was not mid-frame");
         const auto cpu_second = session.cpu.Encode(second_input.data(), second_input.size(), static_cast<std::size_t>(width) * 4u);
         const auto gpu_second = session.gpu.Encode(second_input.data(), second_input.size(), static_cast<std::size_t>(width) * 4u);
@@ -581,7 +616,6 @@ int RunMidframe(const std::string& device_name) {
         std::cout << "NEGATIVE midframe-cuda-error=FIRED\n";
         return 0;
     } catch (const std::exception& error) {
-        detail::ArmCudaMidframeFailureAfter(0);
         std::cout << "ROW midframe=FAIL detail=\"" << error.what() << "\"\n";
         std::cout << "NEGATIVE midframe-cuda-error=DID_NOT_FIRE\n";
         return 1;
@@ -591,8 +625,6 @@ int RunMidframe(const std::string& device_name) {
 int RunNegative(const char* name, detail::CudaTestMode mode, bool expect_launches) {
     constexpr int width = 256, height = 256;
     try {
-        detail::ArmCudaMidframeFailureAfter(0);
-        detail::ResetCudaSpatialDispatchCount();
         Session session({width, height, 0}, mode);
         const auto input = MakeInput(width, height, 0, 0x4e454731u);
         const auto compared = EncodePair(session, input, width, height, true);
@@ -623,7 +655,6 @@ int RunNegative(const char* name, detail::CudaTestMode mode, bool expect_launche
 int RunPrequantNegative() {
     constexpr int width = 256, height = 256;
     try {
-        detail::ResetCudaSpatialDispatchCount();
         Session session({width, height, 0});
         const auto input = MakeInput(width, height, 3, 0x50524551u);
         const auto* bytes = input.data();

@@ -12,8 +12,10 @@
 #include <utility>
 
 namespace hypercine { namespace standalone { namespace detail {
-std::atomic<std::uint64_t> g_cuda_spatial_dispatches{0};
-std::atomic<std::uint64_t> g_cuda_fail_after{0};
+// Accounting only: a monotonic total of successful spatial launches across every
+// session in this process. It is never read to decide whether a launch should fail,
+// so it cannot make one session observe another session's state.
+std::atomic<std::uint64_t> g_cuda_spatial_dispatches_total{0};
 namespace {
 
 [[noreturn]] void ThrowCuda(cudaError_t error, const char* operation) {
@@ -65,6 +67,25 @@ public:
         CheckCuda(cudaGetDeviceProperties(&properties_, 0), "cudaGetDeviceProperties");
     }
     FilmScan3Geometry Geometry() const noexcept override { return geometry_; }
+    // Test seam accessors; see filmscan3_cuda_stats.h. Instance-scoped by design.
+    // Public only because the free seam functions reach them; this class is an
+    // internal implementation detail of the CUDA frontend, not a public API.
+    std::uint64_t DispatchCount() const noexcept {
+        return dispatches_.load(std::memory_order_relaxed);
+    }
+    void ArmFailureAfter(std::uint64_t value) noexcept {
+        fail_after_.store(value, std::memory_order_relaxed);
+    }
+    // `fail_after_ == 0` means disarmed. Reads only this session's counters.
+    bool ShouldFailThisSession() const noexcept {
+        const std::uint64_t fail_after = fail_after_.load(std::memory_order_relaxed);
+        if (!fail_after) return false;
+        return dispatches_.load(std::memory_order_relaxed) >= fail_after;
+    }
+    void NoteDispatch() noexcept {
+        dispatches_.fetch_add(1, std::memory_order_relaxed);
+        g_cuda_spatial_dispatches_total.fetch_add(1, std::memory_order_relaxed);
+    }
 private:
     Planes Convert(const uint8_t* data, std::size_t bytes, int width, int height,
                    std::size_t stride) override {
@@ -99,7 +120,7 @@ private:
                       stream),"CUDA FilmScan3 poison");
 
         if (mode_ != CudaTestMode::SkipKernel) {
-            if (CudaSpatialLaunchShouldFail()) {
+            if (ShouldFailThisSession()) {
                 // Real, deterministic CUDA failure (allocation of size_t max).
                 // Measured on this driver: the next cudaMalloc still succeeds,
                 // but cudaPeekAtLastError stays at out-of-memory until cleared.
@@ -123,7 +144,7 @@ private:
                 lh.get(),output.bands[1].stride,
                 hl.get(),output.bands[2].stride,
                 hh.get(),output.bands[3].stride,stream),"CUDA FilmScan3 spatial wavelet");
-            NoteCudaSpatialDispatch();
+            NoteDispatch();
         }
 
         int16_t* device_bands[]={ll.get(),lh.get(),hl.get(),hh.get()};
@@ -144,25 +165,41 @@ private:
     FilmScan3Geometry geometry_;
     CudaTestMode mode_;
     cudaDeviceProp properties_{};
+    // Fault injection is per session, not per process. A test that arms one session
+    // must not be able to trip a concurrent unrelated session's launch, which is
+    // exactly what a shared counter did.
+    mutable std::atomic<std::uint64_t> dispatches_{0};
+    mutable std::atomic<std::uint64_t> fail_after_{0};
 };
 } // namespace
 
-std::uint64_t CudaSpatialDispatchCount() noexcept {
-    return g_cuda_spatial_dispatches.load(std::memory_order_relaxed);
+namespace {
+// The test-facing functions below are documented in filmscan3_cuda_stats.h. They
+// reach the per-session state through the concrete type, so the public Frontend
+// interface stays free of test seams.
+Cuda* AsCuda(const Frontend& frontend) {
+    return dynamic_cast<Cuda*>(const_cast<Frontend*>(&frontend));
 }
-void ResetCudaSpatialDispatchCount() noexcept {
-    g_cuda_spatial_dispatches.store(0, std::memory_order_relaxed);
+const Cuda* AsCudaConst(const Frontend& frontend) {
+    return dynamic_cast<const Cuda*>(&frontend);
 }
-void ArmCudaMidframeFailureAfter(std::uint64_t successful_dispatches) noexcept {
-    g_cuda_fail_after.store(successful_dispatches, std::memory_order_relaxed);
+}  // namespace
+
+std::uint64_t CudaSpatialDispatchCount(const Frontend& frontend) noexcept {
+    const Cuda* cuda = AsCudaConst(frontend);
+    return cuda ? cuda->DispatchCount() : 0;
 }
-bool CudaSpatialLaunchShouldFail() noexcept {
-    const std::uint64_t fail_after = g_cuda_fail_after.load(std::memory_order_relaxed);
-    if (!fail_after) return false;
-    return g_cuda_spatial_dispatches.load(std::memory_order_relaxed) >= fail_after;
+std::uint64_t ProcessCudaSpatialDispatchTotal() noexcept {
+    return g_cuda_spatial_dispatches_total.load(std::memory_order_relaxed);
 }
-void NoteCudaSpatialDispatch() noexcept {
-    g_cuda_spatial_dispatches.fetch_add(1, std::memory_order_relaxed);
+void ArmCudaMidframeFailureAfter(Frontend& frontend, std::uint64_t successful_dispatches) {
+    Cuda* cuda = AsCuda(frontend);
+    if (!cuda) throw std::invalid_argument("mid-frame injection requires a CUDA frontend");
+    cuda->ArmFailureAfter(successful_dispatches);
+}
+bool CudaSpatialLaunchShouldFail(const Frontend& frontend) noexcept {
+    const Cuda* cuda = AsCudaConst(frontend);
+    return cuda ? cuda->ShouldFailThisSession() : false;
 }
 
 std::shared_ptr<Frontend> CudaFrontend(FilmScan3Geometry geometry, CudaTestMode mode) {
