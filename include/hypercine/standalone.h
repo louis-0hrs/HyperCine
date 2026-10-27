@@ -50,11 +50,11 @@ Planes ConvertBgra(const uint8_t* data, std::size_t bytes, int width, int height
 Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride);
 // Per-session wavelet ISA policy (issue #70).
 //
-// `Auto` is the only value that consults the process-global NEON switch, and a
-// session resolves it exactly once at construction. A session that asked for a
-// concrete ISA therefore keeps that kernel for its whole lifetime, even while
-// another thread changes the global default. The two kernels are bit-exact, so
-// the choice never changes a packet byte -- only which code ran.
+// Explicit `Scalar` or `Neon` requests are fixed for the lifetime of a CPU
+// encoder session, even when another thread changes the process-global default.
+// `Auto` is intentionally different: for compatibility, it follows that global
+// switch again on later dispatches, including within an existing session.
+// The kernels are bit-exact, so this selection does not change packet bytes.
 //
 // `Neon` on a target where NEON is not built in throws instead of silently
 // degrading, matching how an explicitly requested Metal backend behaves.
@@ -68,9 +68,11 @@ enum class WaveletIsa { Auto, Scalar, Neon };
 WaveletLevel ForwardLevel(const Plane& input, int prescale);
 WaveletLevel ForwardLevel(const Plane& input, int prescale, WaveletIsa isa);
 namespace detail {
-// Resolve a session policy to a concrete kernel choice exactly once. `Auto`
-// consults the process-global default at that moment; `Neon` throws when NEON is
-// not compiled into this build rather than silently degrading to scalar.
+// Resolve the requested ISA at the time of this call. For explicit Scalar/Neon,
+// an encoder calls this at construction and retains the resulting choice.
+// `Auto` returns a snapshot of the process-global default, not a lifetime
+// guarantee: the legacy/Auto frontend re-reads that default on future dispatches.
+// An explicit `Neon` throws if its kernel is absent rather than falling back.
 WaveletIsa ResolveWaveletIsa(WaveletIsa requested);
 // Which kernel a resolved policy actually runs (issue #70).
 //
