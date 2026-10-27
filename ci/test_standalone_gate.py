@@ -14,6 +14,32 @@ from run_standalone import (REQUIRED, registered_tests, completed_tests,
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_metal_cache_truth_matches_cmake(self):
+        # CMake's variable truth rules also apply to BOOL cache entries.
+        values = ('ON', 'TRUE', 'YES', 'Y', '1', '2', '0.0', 'custom',
+                  'on', 'true', 'yes', '', '0', 'OFF', 'NO', 'FALSE',
+                  'N', 'IGNORE', 'NOTFOUND', 'device-NOTFOUND', 'off',
+                  'false', 'device-notfound')
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / 'truth.cmake'
+            script.write_text('if(HYPERCINE_ENABLE_METAL)\n'
+                              'message(STATUS "METAL_ENABLED")\n'
+                              'else()\nmessage(STATUS "METAL_DISABLED")\nendif()\n')
+            for value in values:
+                with self.subTest(value=value):
+                    result = subprocess.run(['cmake',
+                        '-DHYPERCINE_ENABLE_METAL:BOOL=' + value, '-P', str(script)],
+                        check=True, capture_output=True, text=True)
+                    enabled = 'METAL_ENABLED' in result.stdout
+                    required = required_tests({'HYPERCINE_ENABLE_METAL': value})
+                    self.assertEqual('filmscan3_metal_required' in required, enabled)
+                    inventory = {'tests': [{'name': name} for name in REQUIRED]}
+                    if enabled:
+                        with self.assertRaises(ValueError):
+                            registered_tests(inventory, required)
+                    else:
+                        self.assertEqual(registered_tests(inventory, required), REQUIRED)
+
     def test_every_baseline_registration_is_binding(self):
         for omitted in REQUIRED:
             with self.subTest(omitted=omitted), self.assertRaises(ValueError):

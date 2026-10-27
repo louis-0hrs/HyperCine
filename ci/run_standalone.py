@@ -26,13 +26,21 @@ REQUIRED |= {'standalone_external_' + size for size in
              ('256x256', '1920x1080', '128x24', '384x40', '4096x24', '128x4096', '2048x1024')}
 
 
+def cmake_enabled(value):
+    # Match if(<variable>): false constants are case-insensitive, but the
+    # -NOTFOUND suffix is case-sensitive. Cache BOOL values need not be ON/OFF.
+    return (value.upper() not in {'', '0', 'OFF', 'NO', 'FALSE', 'N',
+                                 'IGNORE', 'NOTFOUND'}
+            and not value.endswith('-NOTFOUND'))
+
+
 def required_tests(cache):
     required = set(REQUIRED)
     if cache.get('HYPERCINE_REFERENCE_CORPUS_ROOT'):
         required |= {'windows_reference_binaries', 'filmscan3_actual_tier_a'}
     if cache.get('HYPERCINE_FS3_SEQUENCE_ROOT'):
         required.add('filmscan3_actual_sequence')
-    if cache.get('HYPERCINE_ENABLE_METAL') == 'ON':
+    if cmake_enabled(cache.get('HYPERCINE_ENABLE_METAL', '')):
         required.add('filmscan3_metal_required')
         for gate in ('autonomous_manifest', 'sequence_manifest', 'external_decode',
                      'actual_tier_a', 'actual_sequence'):
