@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "protocol": {
+    "id": "topology-affinity-ab-1080-bgra-full-20261018",
+    "version": 1,
+    "preregistered": true,
+    "derivative_of": "matched-sha-1080-bgra-full-20261018 (#138)",
+    "frozen_138_source_commit": "97c34500324b550da5f6444fe9d28c8729dea8d2",
+    "geometry": [
+      1920,
+      1080
+    ],
+    "requested_format": "BGRA",
+    "decoded_resolution": "CFHD_DECODED_RESOLUTION_FULL",
+    "decoding_flags": "CFHD_DECODING_FLAGS_NONE",
+    "active_metadata": true,
+    "processing_flags": 65535,
+    "processes_per_arm": 9,
+    "primary_processes": 3,
+    "extension_processes": 6,
+    "opens_per_process": 5,
+    "child_timeout_seconds": 20,
+    "run_order": [
+      "D",
+      "D",
+      "D",
+      "D",
+      "D",
+      "D",
+      "D",
+      "D",
+      "D"
+    ],
+    "baseline_probe_slots": [
+      0,
+      9
+    ],
+    "criteria": "affinity not applied, timeout, decode error or invalid geometry => INVALID; more than one pixel hash in an arm => NONDETERMINISTIC; single stable hash per arm with matching modal => NO_EFFECT_DETECTED in this sample only; release remains blocked"
+  },
+  "sources": {
+    "source_sha256": {
+      "tests/reference_decode/topology_ab.py": "62508d3c2198e96204d9dcdf0e8f7ee41e5afbbf6b615c78b5f59b2a8dcfd0ad",
+      "tests/reference_decode/affinity_launcher.cpp": "0fd8d26c5890bbfbc909a18335d1c4a87ba1881c00e3e9cf76485673d972adf7",
+      "tests/reference_decode/worker.cpp": "1d5ba8a9a5058542b9c77d72b12cd38a429d862799ff33f2b86b6b9fba66ac6a",
+      "tests/reference_decode/cross_host_1080.py": "d1876b5912a33ccee461af3176436274d9c853255b4c913c68d5484130c41248",
+      "tests/reference_decode/contract.py": "736709d7f5265efdca4cf83af2a939cb0e9604cfd69d11131e84ebc9deba0f62",
+      "tests/reference_decode/measure.py": "03bf059a509d61f6451dc5d1b33bbf7c8d66de6f1fe840c0a3637c08bfc2ac1e",
+      "tests/reference_decode/bgra_ab.py": "327d1b9d11aa16de6bad93f4189cc03e8d4bd27997eea4ad680e97358aed8ae3",
+      "docs/validation/TOPOLOGY_AFFINITY_AB_PROTOCOL.md": "2e3965e558b4cdf24d1b20fcbf4c9895650cae1506b0b0fd60415178023003ce",
+      "include/hypercine/canonical.h": "cc5db57aff20e3877d3d8e744c4e09f829506dba3e473a26859b400793543caa",
+      "upstream/Codec/config.h": "53d038c2850b878cf579ffbb4db3b76d83bb74964bbd0d4a358d579550fc477f",
+      "upstream/Codec/codec.h": "aad8911c49ada10fb962fd061aaf841a434e0e023d265e8aa777e2f8cb1dd19f",
+      "upstream/DecoderSDK/SampleDecoder.cpp": "8589453e548645b5563269a64cb00bc25be2b684dc92457f1ea59b0d1b20acf8",
+      "upstream/Codec/decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+      "upstream/Codec/InvertHorizontalStrip16s.c": "723eb8a1b7cf027c4b8efecd79c915c7885544aeb2eda4329168ba1edaf0a9ac"
+    },
+    "source_commit": "a16237536a9602cbb6f42d49c5139766facb842d"
+  },
+  "host": {
+    "system": "Windows",
+    "machine": "AMD64",
+    "python": "3.10.9",
+    "model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+    "cores": 8,
+    "logical_processors": 16,
+    "processor_groups": 1,
+    "active_logical_processors": 16,
+    "core_count": 8,
+    "smt_core_count": 8,
+    "system_affinity_mask": "0xffff",
+    "process_affinity_mask": "0xffff"
+  },
+  "topology": {
+    "schema_version": 1,
+    "topology_available": true,
+    "processor_groups": 1,
+    "active_logical_processors": 16,
+    "system_affinity_mask": "0xffff",
+    "process_affinity_mask": "0xffff",
+    "core_count": 8,
+    "smt_core_count": 8,
+    "packages": 1,
+    "topology_source": "GetLogicalProcessorInformation",
+    "cpu_brand": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics",
+    "cores": [
+      {
+        "group": 0,
+        "mask": "0x3",
+        "smt": true,
+        "efficiency_class": 0
+      },
+      {
+        "group": 0,
+        "mask": "0xc",
+        "smt": true,
+        "efficiency_class": 0
+      },
+      {
+        "group": 0,
+        "mask": "0x30",
+        "smt": true,
+        "efficiency_class": 0
+      },
+      {
+        "group": 0,
+        "mask": "0xc0",
+        "smt": true,
+        "efficiency_class": 0
+      },
+      {
+        "group": 0,
+        "mask": "0x300",
+        "smt": true,
+        "efficiency_class": 0
+      },
+      {
+        "group": 0,
+        "mask": "0xc00",
+        "smt": true,
+        "efficiency_class": 0
+      },
+      {
+        "group": 0,
+        "mask": "0x3000",
+        "smt": true,
+        "efficiency_class": 0
+      },
+      {
+        "group": 0,
+        "mask": "0xc000",
+        "smt": true,
+        "efficiency_class": 0
+      }
+    ]
+  },
+  "build": {
+    "worker_sha256": "246b71c16a1b3cb442e946f9c0cbdad38b8957e0b92fe07994f357ffff85241e",
+    "launcher_sha256": "717ccf82909ec1df5c56869475143c577704771af44d6ac1697c981e7cad829b",
+    "worker": {
+      "compiler_id": "MSVC",
+      "compiler_version": "19.44.35229.0",
+      "release_flags": "/O2 /Ob2 /DNDEBUG",
+      "crt_link_mode": "dynamic (/MD)",
+      "crt_imports": [
+        "MSVCP140.dll",
+        "VCRUNTIME140.dll",
+        "VCRUNTIME140_1.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll"
+      ],
+      "cuda_linked": false
+    },
+    "launcher": {
+      "compiler_id": "MSVC",
+      "compiler_version": "19.44.35229.0",
+      "release_flags": "/O2 /Ob2 /DNDEBUG",
+      "crt_link_mode": "dynamic (/MD)",
+      "crt_imports": [
+        "MSVCP140.dll",
+        "VCRUNTIME140.dll",
+        "VCRUNTIME140_1.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll"
+      ],
+      "cuda_linked": false
+    },
+    "threading": {
+      "threaded_decoder": "1",
+      "entropy_threads": "(_THREADED_DECODER)",
+      "interlaced_worker_threads": "(_THREADED_DECODER) on Windows",
+      "threads_in_last_wavelet": "4"
+    }
+  },
+  "arms": {
+    "D": {
+      "requested": "0x55",
+      "mask": 85,
+      "blocked_reason": null
+    }
+  },
+  "generated_utc": "2026-10-18T16:44:20.350101+00:00"
+}
