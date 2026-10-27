@@ -12,6 +12,13 @@ from run_standalone import REQUIRED, registered_tests, completed_tests
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_each_simd_registration_is_mandatory(self):
+        for missing in ('wavelet_simd_exact', 'wavelet_simd_packets'):
+            self.assertIn(missing, REQUIRED)
+            with self.subTest(missing=missing), self.assertRaisesRegex(ValueError, missing):
+                registered_tests({'tests': [{'name': name} for name in REQUIRED
+                                            if name != missing]})
+
     def test_windows_qualification_contracts_are_required(self):
         for name in ('qualification_report_contract', 'cuda_output_dir_platform_contract',
                      'windows_reference_process_contract'):

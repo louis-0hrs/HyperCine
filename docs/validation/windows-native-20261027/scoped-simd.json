@@ -1,0 +1,46 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "scope": "Scoped SIMD memory and disabled-build contracts; no production activation",
+  "records": [
+    {
+      "configuration": "MSVC_ASAN",
+      "status": "PASS",
+      "tests": 2,
+      "coefficient_cases": 6522,
+      "ordered_fs3_frames": 16,
+      "native_avx2": true,
+      "native_avx512": true,
+      "executable_sha256": {
+        "test_wavelet_simd": "1b55ebd3083dc2e41f677a8605441c8edac123be606ead57005618bf6f104fe6",
+        "test_wavelet_simd_packets": "8302824ddc3210217ddcd437264b8b93329e9d4f0b2c173369a81ebcbf3b697d"
+      }
+    },
+    {
+      "configuration": "X86_SIMD_DISABLED",
+      "status": "PASS",
+      "tests": 2,
+      "native_avx2": false,
+      "native_avx512": false,
+      "unsupported_requests_rejected": true,
+      "executable_sha256": {
+        "test_wavelet_simd": "ee35edab4f4b71dca8a27e560f8e2cb47317df196650ae8720eeda8fa21017de",
+        "test_wavelet_simd_packets": "72f2b1cbdd0c0c7fb61417c4f580b1f80b65e94844e95b04e66e941747855e7e"
+      }
+    }
+  ],
+  "source_revision": "e39076e2be0aba740da03a13f01078dfdf9cefb4",
+  "pr77_head": "3f612a83a286815a7969d1759b33753bb2f821a3",
+  "release_native": {
+    "scalar_cases": 2174,
+    "avx2_cases": 2174,
+    "avx512_cases": 2174,
+    "ordered_frames": 16,
+    "frozen_first_packet": "UNCHANGED",
+    "production_auto": "Scalar",
+    "executable_sha256": {
+      "test_wavelet_simd": "f001e60c3e92951b21f85a1f122078a3e501b93fb99557914f2fd61b3c448d56",
+      "test_wavelet_simd_packets": "4a19b207c3307f4b08ebacb14a489d3ec80a5b9e59c2b2dca48b600d92b2a3aa"
+    }
+  }
+}

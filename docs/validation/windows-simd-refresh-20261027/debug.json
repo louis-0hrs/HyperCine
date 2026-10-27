@@ -1,0 +1,48 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "schema_version": 1,
+  "status": "PASS",
+  "ctest_exit": 0,
+  "scope": "CTest contract execution only; no production or pixel qualification",
+  "counts": {
+    "PASS": 3,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "INCONCLUSIVE": 0
+  },
+  "tests": [
+    {
+      "name": "cpu_isa_selection",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "wavelet_simd_exact",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "wavelet_simd_packets",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    }
+  ],
+  "tested_source_tree": "0359f0ffbc281b1856bbd82ad35397bf08e58764",
+  "main_base": "45700478cbf088b6768c45d93a91ba87a082a014",
+  "duration_seconds": 91.0,
+  "native_diagnostics": [
+    "Native capabilities: avx2_hw=1 avx512f_hw=1 avx512bw_hw=1 avx512vl_hw=1 avx_os=1 avx512_os=1 neon=0; Auto=Scalar",
+    "PASS: 4096 x86 probes, 1024 selection configurations, native probe",
+    "PASS ISA=1 cases=2174",
+    "PASS ISA=2 cases=2174",
+    "PASS ISA=3 cases=2174",
+    "PASS: 6522 deterministic cases; all coefficients, guards and repeated calls",
+    "PASS: 16 ordered full FS3 frames; frozen first packet; AVX2=1 AVX512=1"
+  ],
+  "binary_sha256": {
+    "test_wavelet_simd": "d627566f742752166c2a55ea79cec9f80ab9ce8384302d7595fae4030d6f88b1",
+    "test_wavelet_simd_packets": "6ea572c3211546030b0467be3bd56dece77acae0c7e9d02c40090887b615ab36",
+    "test_cpu_isa": "ae491ba92cca77c9c3b0f90e74a4a4d7575240e678e3c0f9b429727e5015c42d"
+  }
+}
