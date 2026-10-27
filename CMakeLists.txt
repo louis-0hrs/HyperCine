@@ -157,6 +157,9 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
     target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
     add_test(NAME quality_state_unit COMMAND test_quality_state)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME quality_state_probe_arguments COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_quality_state_probe.py"
+        $<TARGET_FILE:quality_state_probe>)
     add_test(NAME quality_cmake_mode_contract COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/ci/test_quality_cmake_mode.py")
     if(HYPERCINE_QUALITY_ORACLE_ROOT)
