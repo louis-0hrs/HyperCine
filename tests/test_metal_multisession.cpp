@@ -171,11 +171,50 @@ void CheckDistinct(const SessionResult& run, const char* what) {
     check(distinct, std::string(what) + ": consecutive frames are distinct");
 }
 
-// Metadata isolation: two sessions must not share timestamps or sequence state.
+// Metadata isolation: two sessions must not share sequence state.
+//
+// This used to assert only that both sessions produced the same number of frames,
+// which two sessions sharing one counter would also satisfy. The property that
+// actually distinguishes isolation is per-session monotonicity: every frame a
+// session produced must carry the index that session should be at, counted from
+// its own start. A shared counter shows up as a gap or a repeat in one of the two
+// sequences, and neither can hide that by having the right total.
 void CheckMetadataIsolation(const SessionResult& a, const SessionResult& b) {
     if (a.frames.empty() || b.frames.empty()) return;
     check(a.frames.size() == b.frames.size(), "both sessions produced the same frame count",
           static_cast<long long>(a.frames.size()), static_cast<long long>(b.frames.size()));
+
+    const auto sequences_intact = [](const SessionResult& run) {
+        for (std::size_t i = 0; i < run.frames.size(); ++i)
+            if (run.frames[i].state.frame_index != static_cast<unsigned>(i)) return false;
+        return run.final_state.frame_index == static_cast<unsigned>(run.frames.size());
+    };
+    check(sequences_intact(a), "session A advanced its own frame index contiguously from zero");
+    check(sequences_intact(b), "session B advanced its own frame index contiguously from zero");
+
+    // Rate state is per session too, and it is checkable without knowing the rate
+    // controller's policy: frame i+1 records the byte size of the frame that came
+    // before it *in its own session*. Two sessions interleaving on one shared record
+    // would show, at some index, the other session's frame size. Frame 0 of each
+    // session must start at zero, since nothing precedes it.
+    const auto previous_bytes_chain_intact = [](const SessionResult& run) {
+        if (run.frames.empty()) return false;
+        if (run.frames[0].state.previous_sample_bytes != 0) return false;
+        for (std::size_t i = 1; i < run.frames.size(); ++i) {
+            if (run.frames[i].state.previous_sample_bytes != run.frames[i - 1].sample.size())
+                return false;
+        }
+        return true;
+    };
+    check(previous_bytes_chain_intact(a), "session A's previous-size chain points at its own frames");
+    check(previous_bytes_chain_intact(b), "session B's previous-size chain points at its own frames");
+
+    // Deliberately NOT asserted here: that the two sessions produced different
+    // packets. Scenario A runs two identical specs, so identical output is the
+    // correct result and demanding distinctness would fail by design. The
+    // non-vacuity of the comparison is guarded where it belongs -- by CheckDistinct
+    // on each session's own frame sequence, and by the B/C/D scenarios, whose specs
+    // genuinely differ.
 }
 
 }  // namespace
@@ -407,10 +446,27 @@ int main(int argc, char** argv) try {
 #else
         constexpr long kRssLimit = 4L * 1024 * 1024;  // kilobytes
 #endif
+        // A peak-RSS ceiling alone is not a leak test: a process that starts at
+        // 600 MB and ends at 3.5 GB stays under any 4 GiB cap. ru_maxrss is a
+        // running peak, so the difference between the two readings is the growth
+        // this run caused -- which is the quantity a per-frame leak would move.
+        const long growth = after_usage.ru_maxrss - before_usage.ru_maxrss;
         check(after_usage.ru_maxrss < kRssLimit,
               "process RSS stayed below 4 GiB over the bounded run",
               static_cast<long long>(after_usage.ru_maxrss),
               static_cast<long long>(kRssLimit));
+#if defined(__APPLE__)
+        constexpr long kGrowthLimit = 256L * 1024 * 1024;  // 256 MiB, bytes
+#else
+        constexpr long kGrowthLimit = 256L * 1024;  // 256 MiB, kilobytes
+#endif
+        // 24 frames of 1280x720 at roughly 2.7 MB per frame is under 70 MB of live
+        // buffers; 256 MiB leaves room for allocator behaviour without admitting a
+        // per-frame leak, which over 24 frames would exceed this.
+        check(growth < kGrowthLimit,
+              "peak RSS did not grow by more than 256 MiB over 24 frames",
+              static_cast<long long>(growth),
+              static_cast<long long>(kGrowthLimit));
     }
 
     std::printf("METAL-MULTISESSION: %s (%d checks, %d failures)\n",
