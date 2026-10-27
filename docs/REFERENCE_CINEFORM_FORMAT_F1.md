@@ -82,7 +82,8 @@ build/tests/Release/format_corpus_export.exe --verify "$env:HYPERCINE_GOLDEN_DIR
 ```
 
 `--family`, `--source`, `--pattern`, `--quality`, `--width`, `--height` and `--list` select or
-preview the matrix. Raw corpora stay outside Git; only the tool, schema, tests and sanitized reports
+preview the matrix. `--tier f1|f2` labels the corpus tier (default `f1`); the 4K F2 stage is
+documented in [REFERENCE_CINEFORM_FORMAT_F2.md](REFERENCE_CINEFORM_FORMAT_F2.md). Raw corpora stay outside Git; only the tool, schema, tests and sanitized reports
 are published.
 
 ## 4. Metadata normalization and reproducibility
@@ -201,4 +202,6 @@ thresholds for HyperCine's own codec.
 - BAYER hashes are not reproducible across runs (section 4).
 - CFA pattern variants and the pre-quantization stage oracle remain
   `PENDING_SDK_CFA_METADATA` / `PENDING_SDK_INTERNAL_STAGE`; no synthetic substitute is claimed.
-- F2 work (4K/8K, stereo, interlace/GOP2, KEYING, uncompressed) is untouched.
+- The 4K F2 stage is recorded separately in
+  [REFERENCE_CINEFORM_FORMAT_F2.md](REFERENCE_CINEFORM_FORMAT_F2.md). 8K, stereo, interlace/GOP2,
+  KEYING and uncompressed remain untouched.

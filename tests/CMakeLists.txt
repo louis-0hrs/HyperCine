@@ -190,6 +190,18 @@ if(WIN32 AND TARGET CFHDCodecStatic)
         PASS_REGULAR_EXPRESSION "Verified [1-9][0-9]* manifest artifacts"
         DEPENDS format_corpus_export_smoke
         TIMEOUT 120)
+    # Tier labels are metadata only; these checks never allocate a frame.
+    add_test(NAME format_corpus_export_tier_list COMMAND format_corpus_export
+        --list --tier f2 --width 3840 --height 2160
+        --family RGB_444 --source RG48 --pattern asymmetric --quality filmscan3)
+    set_tests_properties(format_corpus_export_tier_list PROPERTIES
+        PASS_REGULAR_EXPRESSION "RGB_444/f2/RG48/filmscan3/asymmetric/3840x2160"
+        TIMEOUT 60)
+    add_test(NAME format_corpus_export_tier_invalid COMMAND format_corpus_export
+        --out "${CMAKE_CURRENT_BINARY_DIR}/tier-invalid" --tier f3)
+    set_tests_properties(format_corpus_export_tier_invalid PROPERTIES
+        WILL_FAIL TRUE
+        TIMEOUT 60)
 endif()
 
 # Actual GoPro decode of packets produced by the independent SDK-free encoder.

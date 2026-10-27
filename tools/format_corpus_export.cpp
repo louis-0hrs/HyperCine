@@ -869,7 +869,8 @@ struct ArtifactLog {
 
 bool WriteCase(const std::filesystem::path& root, const FamilyDef& family, const SourceSpec& source,
                const QualityEntry& quality, const std::string& pattern, int width, int height,
-               int bayer_format, uint32_t seed, ArtifactLog* log, CaseRecord* record) {
+               int bayer_format, uint32_t seed, const std::string& tier, ArtifactLog* log,
+               CaseRecord* record) {
     const int32_t source_pitch = [&]() {
         int32_t pitch = 0;
         if (CFHD_GetImagePitch(static_cast<uint32_t>(width), source.format, &pitch) != CFHD_ERROR_OKAY) {
@@ -903,8 +904,8 @@ bool WriteCase(const std::filesystem::path& root, const FamilyDef& family, const
     record->source_sha256 = hf::Sha256Hex(pixels.data(), pixels.size());
 
     std::ostringstream dir;
-    dir << family.name << "/f1/" << width << 'x' << height << '/' << source.label << '/' << quality.name
-        << '/' << pattern;
+    dir << family.name << '/' << tier << '/' << width << 'x' << height << '/' << source.label << '/'
+        << quality.name << '/' << pattern;
     if (family.kind == FamilyKind::Bayer && bayer_format >= 0) dir << "/bfmt" << bayer_format;
     const std::string base = dir.str();
 
@@ -1087,7 +1088,9 @@ bool SaveTransferManifest(const std::filesystem::path& root, const ArtifactLog& 
 
 bool WriteManifest(const std::filesystem::path& root, const std::vector<CaseRecord>& cases,
                    const ArtifactLog& log, const Artifact& transfer, int width, int height,
-                   const std::string& quality_selection, const std::string& source_selection) {
+                   const std::string& quality_selection, const std::string& source_selection,
+                   const std::string& tier) {
+    const std::string stage = tier == "f2" ? "F2" : "F1";
     int exported = 0;
     int encode_failed = 0;
     int decode_failed = 0;
@@ -1099,7 +1102,7 @@ bool WriteManifest(const std::filesystem::path& root, const std::vector<CaseReco
         else ++write_failed;
     }
     std::ostringstream j;
-    j << "{\n\"schema\":\"hypercine.format_corpus/1\",\n\"issue\":36,\n\"stage\":\"F1\",\n"
+    j << "{\n\"schema\":\"hypercine.format_corpus/1\",\n\"issue\":36,\n\"stage\":\"" << stage << "\",\n"
       << "\"description\":\"Real pristine-SDK golden corpora for the compressed CineForm families the F0 matrix qualified. Raw corpora live outside Git; this manifest is the published index.\",\n"
       << "\"sdk\":{\"frozen_upstream_commit\":\"" << kFrozenUpstreamCommit
       << "\",\"usage\":\"pristine GoPro CineForm SDK, no upstream modification\"},\n"
@@ -1111,7 +1114,8 @@ bool WriteManifest(const std::filesystem::path& root, const std::vector<CaseReco
       << "\"selection\":{\"width\":" << width << ",\"height\":" << height << ",\"qualities\":\""
       << hf::EscapeJson(quality_selection) << "\",\"sources\":\"" << hf::EscapeJson(source_selection)
       << "\"},\n"
-      << "\"layout\":\"<family>/f1/<width>x<height>/<source>/<quality>/<pattern>/source.bin|sdk.cfhd|sdk.normalized.cfhd|decoded.bin\",\n"
+      << "\"layout\":\"<family>/" << tier
+      << "/<width>x<height>/<source>/<quality>/<pattern>/source.bin|sdk.cfhd|sdk.normalized.cfhd|decoded.bin\",\n"
       << "\"normalization\":{\"tags\":[\"GUID\",\"DATE\",\"TIME\",\"TIMC\"],\"method\":\"zero only the parsed tag payload bytes; the packet length and every other byte stay unchanged\"},\n"
       << "\"limits\":[\"No claim that HyperCine's own encoder or decoder implements these modes.\","
          "\"No visual or production fidelity claim; PSNR is reported only when the decoded output layout equals the source layout.\","
@@ -1141,7 +1145,7 @@ bool WriteManifest(const std::filesystem::path& root, const std::vector<CaseReco
     std::ofstream out(root / "manifest.json", std::ios::binary | std::ios::trunc);
     if (!out || !out.write(j.str().data(), static_cast<std::streamsize>(j.str().size()))) return false;
 
-    std::cout << "F1 corpus summary: cases=" << cases.size() << " exported=" << exported
+    std::cout << stage << " corpus summary: cases=" << cases.size() << " exported=" << exported
               << " encode_failed=" << encode_failed << " decode_failed=" << decode_failed
               << " write_failed=" << write_failed << '\n';
     return true;
@@ -1235,6 +1239,10 @@ bool VerifyDirectory(const std::filesystem::path& root) {
     return true;
 }
 
+bool ParseTier(const std::string& name) {
+    return name == "f1" || name == "f2";
+}
+
 bool ParseQuality(const std::string& name, CFHD_EncodingQuality* quality) {
     for (const QualityEntry& entry : kQualities) {
         if (name == entry.name) {
@@ -1247,6 +1255,7 @@ bool ParseQuality(const std::string& name, CFHD_EncodingQuality* quality) {
 
 void Usage() {
     std::cout << "format_corpus_export --out DIR [options]\n"
+                 "  --tier f1|f2                corpus tier label (default f1; f2 = 4K stage)\n"
                  "  --width N --height N        geometry (default 1920x1080)\n"
                  "  --quality NAME|all          low|medium|high|filmscan1|filmscan2|filmscan3|all\n"
                  "                              (default filmscan1,filmscan3)\n"
@@ -1268,11 +1277,13 @@ int main(int argc, char** argv) {
     std::string only_source;
     std::string only_pattern;
     std::string quality_selection = "filmscan1,filmscan3";
+    std::string tier = "f1";
     bool list_only = false;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
-        if (arg == "--width" && i + 1 < argc) width = std::atoi(argv[++i]);
+        if (arg == "--tier" && i + 1 < argc) tier = argv[++i];
+        else if (arg == "--width" && i + 1 < argc) width = std::atoi(argv[++i]);
         else if (arg == "--height" && i + 1 < argc) height = std::atoi(argv[++i]);
         else if (arg == "--out" && i + 1 < argc) out_path = argv[++i];
         else if (arg == "--quality" && i + 1 < argc) quality_selection = argv[++i];
@@ -1287,6 +1298,10 @@ int main(int argc, char** argv) {
     if (!verify_path.empty()) {
         if (argc != 3) { Usage(); return 2; }
         return VerifyDirectory(verify_path) ? 0 : 1;
+    }
+    if (!ParseTier(tier)) {
+        std::cerr << "unsupported tier: " << tier << '\n';
+        return 2;
     }
     if (width <= 0 || height <= 0) { Usage(); return 2; }
     if (out_path.empty() && !list_only) { Usage(); return 2; }
@@ -1336,8 +1351,9 @@ int main(int argc, char** argv) {
                 }
                 for (const QualityEntry& quality : qualities) {
                     if (list_only) {
-                        std::cout << family.name << '/' << source.label << '/' << quality.name << '/'
-                                  << pattern << '/' << width << 'x' << height << '\n';
+                        std::cout << family.name << '/' << tier << '/' << source.label << '/'
+                                  << quality.name << '/' << pattern << '/' << width << 'x' << height
+                                  << '\n';
                         ++listed;
                         continue;
                     }
@@ -1345,7 +1361,7 @@ int main(int argc, char** argv) {
                     std::cout << "case " << family.name << ' ' << source.label << ' ' << quality.name << ' '
                               << pattern << ' ' << width << 'x' << height << std::endl;
                     WriteCase(out_path, family, source, quality, pattern, width, height, -1, kSourceSeed,
-                              &log, &record);
+                              tier, &log, &record);
                     std::cout << "  -> " << record.status << " sample=" << record.sample_bytes
                               << " decoded=" << record.decoded_bytes << " out=" << record.actual_output
                               << '\n';
@@ -1369,7 +1385,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     if (!WriteManifest(out_path, cases, log, transfer, width, height, quality_selection,
-                       only_source.empty() ? "all implemented" : only_source)) {
+                       only_source.empty() ? "all implemented" : only_source, tier)) {
         std::cerr << "failed to write manifest.json\n";
         return 1;
     }
