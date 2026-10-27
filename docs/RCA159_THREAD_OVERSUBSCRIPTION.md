@@ -43,7 +43,21 @@ CPUs available to an unchanged 36-thread decode**. That is a different experimen
 the one they were described as running, and it is the experiment that turns out to
 matter.
 
-## What was measured
+## Evidence tiers
+
+This document separates three claims that are easy to read into each other, and
+each section below is labelled with the tier it belongs to:
+
+| Tier | Meaning | Where |
+| --- | --- | --- |
+| **OBSERVED** | directly measured on the recorded hardware and tools, with run counts | [What was measured](#what-was-measured-observed), [Ratio sweep](#ratio-sweep--where-the-transition-actually-is-observed-and-correlated), [Hash domain](#hash-domain-observed) |
+| **CORRELATED** | a statistical association with the test that supports it, stated as association only | [Ratio sweep](#ratio-sweep--where-the-transition-actually-is-observed-and-correlated) (Fisher tests) |
+| **PROVEN CAUSE** | a mechanism shown to produce the defect | none — see [What is *not* claimed](#what-is-not-claimed) |
+
+Nothing in the third tier exists for this defect. The gate stays
+`REFERENCE_DECODER_NONDETERMINISTIC / UNRESOLVED`.
+
+## What was measured (OBSERVED)
 
 Two quantities are varied independently and both are recorded per call:
 
@@ -100,7 +114,7 @@ contradicts the split, and all 36 cells share one modal digest.
 > cell between ratio 1.0 and ratio 2.0, so the transition was never sampled. It is a
 > gradient, not a step — see [Ratio sweep](#ratio-sweep--where-the-transition-actually-is).
 
-## Ratio sweep — where the transition actually is
+## Ratio sweep — where the transition actually is (OBSERVED and CORRELATED)
 
 **Evidence:** [`docs/validation/rca159_ratio_boundary_2026-10-18.json`](validation/rca159_ratio_boundary_2026-10-18.json).
 **Sweeps:** `ci/rca159_ratio_sweep.sh`, `ci/rca159_interleaved.sh`,
@@ -182,7 +196,7 @@ round** — all cells back to back, several times — before any comparison was 
 The `interleaved` and `cliff` sweeps are that design. Single-cell numbers from a
 sequential pass should not be quoted on their own.
 
-## Hash domain
+## Hash domain (OBSERVED)
 
 `modal_frame_sha256` in both evidence files is the probe digest
 `sha(out.data(), out.size())`. The buffer is allocated as `pitch * height + 64`
@@ -231,6 +245,8 @@ Windows parity or release claim. The gate stays
    size". Where the pool size was not recorded, the arm cannot be reconstructed.
 
 ## What is *not* claimed
+
+### PROVEN CAUSE: empty
 
 - **No causal mechanism is named here.** Oversubscription is established as a
   necessary condition in these runs; which specific interleaving corrupts the frame
