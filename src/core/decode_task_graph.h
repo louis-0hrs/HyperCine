@@ -363,9 +363,11 @@ public:
     // construction, so it is readable at any time without the graph lock.
     std::size_t uncontracted_tasks() const noexcept;
     bool requires_published_output() const noexcept { return require_published_output_; }
-    // Bytes retained by successful publish_plane() calls. A rejection adds
-    // nothing. cancel() does not release them. The graph destructor does,
-    // and it is only safe after run() has joined every worker.
+    // Bytes retained by owned publications, typed and untyped alike -- the ceiling
+    // covers both. A rejection adds nothing. A stopped generation releases every
+    // non-completed node's storage when run() returns, so this drops to the
+    // completed nodes' total. The graph destructor releases whatever remains, and
+    // that is only safe after run() has joined every worker.
     std::size_t owned_publication_bytes() const;
     // Number of Pending -> Ready transitions since construction, including the
     // initial roots. A generation that failed its first error must not gain a
@@ -403,9 +405,17 @@ private:
     bool publish(std::size_t node, const void* data, std::size_t bytes) noexcept;
     bool publish_plane(std::size_t node, const void* data, std::size_t bytes,
                        std::uint32_t width, std::uint32_t height, std::size_t pitch) noexcept;
-    // mutex_ must be held. Writes the owned copy and release-stores version.
-    // Does not check extent or budget; callers do that before this store.
+    // mutex_ must be held. Writes the owned copy, charges the budget and
+    // release-stores version. It performs the budget decision itself so that no
+    // publication path can reach the copy without paying for it; extent and
+    // geometry remain the caller's decision.
     bool commit_copy_locked(Node& target, const void* data, std::size_t bytes) noexcept;
+    // mutex_ must be held, and every worker must already be joined. Drops owned
+    // storage for nodes that did not complete, after clearing their payload record
+    // and version, and refunds the budget. Only valid once scheduling has stopped:
+    // a stopped generation has released no dependent (fail_locked marks them
+    // Failed), so nothing it frees was ever handed to a consumer.
+    void release_abandoned_locked() noexcept;
     PlaneView input_plane(std::size_t node, std::size_t input, const PlaneIdentity& expected) const;
     // True only for a readable owned BufferVersion of this generation.
     // version == 0 is rejected on its own. A non-zero version that is not a

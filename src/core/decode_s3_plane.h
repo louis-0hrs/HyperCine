@@ -44,11 +44,11 @@ struct SignedPlaneDesc {
 
 // Research-unit extents already pinned for the first spatial consumer:
 // width 16..480 and a multiple of 8, height 4..270. Not a frame size.
-// `require_data_align` is false only for a BufferVersion that already passed
-// S2 admission. The graph copy is allocated at kOwnedBufferAlign, but this
-// helper does not assume an arbitrary BufferVersion came from that allocator.
-// Pitch alignment and the byte extent still apply. InverseWavelet5To4 keeps
-// its own 32-byte pointer check and is not invoked on an unaligned address.
+// `require_data_align` defaults to true and admission no longer relaxes it. A
+// graph-owned copy always satisfies it because OwnedBufferAllocator allocates at
+// kOwnedBufferAlign; a caller-supplied descriptor that does not is rejected here
+// rather than at the consuming kernel. Pitch alignment and the byte extent apply
+// in every case. InverseWavelet5To4 keeps its own 32-byte pointer check.
 inline PlaneStatus check_signed_plane(const SignedPlaneDesc& plane,
                                       bool require_data_align = true) noexcept {
     if (plane.data == nullptr) return PlaneStatus::Null;
@@ -126,8 +126,15 @@ inline AdmittedPlane admit_owned_plane(const BufferVersion& view, const PlaneEdg
     edge.generation = view.generation;
     edge.plane.data = static_cast<const std::int16_t*>(view.data);
     edge.plane.bytes = view.bytes;
-    // The graph copy is readable without being 32-byte aligned. See above.
-    if (match_plane_edge(edge, key, graph, /*require_data_align=*/false) != EdgeStatus::Match)
+    // Guard (S3-ALIGN-ADMIT): require the alignment, do not assume it.
+    //
+    // Every graph-owned copy is allocated by OwnedBufferAllocator at
+    // kOwnedBufferAlign, so a genuine publication is always 32-byte aligned and this
+    // check costs a real publication nothing. Trusting the caller instead meant a
+    // hand-built BufferVersion could name an unaligned address and be admitted into
+    // a view the SIMD consumer would later reject -- or worse, read misaligned. The
+    // check now rejects it at admission, where the failure is still local.
+    if (match_plane_edge(edge, key, graph, /*require_data_align=*/true) != EdgeStatus::Match)
         return out;
     out.plane = edge.plane;
     out.ok = true;
