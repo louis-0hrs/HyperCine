@@ -298,6 +298,14 @@ python3 ci/build_rca159_ratio_evidence.py evidence.json \
   coarse=<dir> one-step=<dir> interleaved=<dir> smt=<dir> cliff=<dir>
 ```
 
+Exit 0 means those five labels were all supplied, each directory existed, and
+each contributed at least one cell. A missing directory is recorded in
+`sweeps_missing` and the process exits 3 (or 1 when no cell was read). It does
+not skip the gap and still report success. `environment.logical_cpus` is
+`os.cpu_count()` of the builder process, labelled as the builder host. Sweep
+records do not contain the measurement host's logical CPU count; a previous
+revision stamped the integer 48 anyway.
+
 ## Suggested next step
 
 The ratio walk requested by the previous pass is done, and it replaced the "sharp at
