@@ -22,6 +22,7 @@ REQUIRED = {
     'test_reference_release_inventory', 'test_compare_sdk_oracle',
     'test_rca159_witness_contract',
     'qualification_report_contract', 'cuda_output_dir_platform_contract',
+    'windows_reference_process_contract',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
     'windows_reference_sdk_coefficients', 'filmscan3_autonomous_manifest',

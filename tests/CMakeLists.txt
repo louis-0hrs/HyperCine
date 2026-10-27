@@ -55,6 +55,12 @@ macro(hypercine_test_needs_sdk)
     list(APPEND HYPERCINE_SDK_TESTS_OMITTED ${ARGN})
 endmacro()
 
+# Bounded Windows original-SDK process probe (not a pixel-correctness oracle).
+if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
+    add_executable(windows_reference_process windows_reference_process.cpp)
+    target_link_libraries(windows_reference_process PRIVATE CFHDCodecStatic)
+endif()
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)

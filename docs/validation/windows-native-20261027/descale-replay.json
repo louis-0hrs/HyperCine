@@ -1,0 +1,18 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "pr": 220,
+  "source_commit": "94ce0c97d0041d5dc36276259da97beafaaa96a2",
+  "status": "BLOCKED_GOLDEN_CORPUS_UNREACHABLE",
+  "golden_environment_bound": true,
+  "golden_root_reachable": false,
+  "metadata_audit": "PASS",
+  "cases": 6,
+  "artifact_bindings": 30,
+  "prepared_source_sha256": "241d2dd1591f63793e74428e40e4e4448b52af289a61f47d69f976dae743a8dd",
+  "harness_regression_tests_passed": 9,
+  "private_authentication": "NOT_COMPLETED",
+  "original_numeric_comparisons_run": 0,
+  "archived_windows_build_signoff": "SEPARATE_OWNER_GATE",
+  "synthetic_replacements_used": false
+}

@@ -1,0 +1,260 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "source": "current integration candidate, source revision bound in report",
+  "comparator_sha256": "ef86f4c0de23fa074c55c20290ac0cb290068fdbb5ce18353f655129cf7eccca",
+  "ffmpeg_sha256": "daeea959fd6a400eec29bf1ede560962e92546ec31fe5f60ccdc076a4c3db3fa",
+  "scope": "Own CPU/CUDA parity and independent decodability; original SDK equivalence unmeasured",
+  "comparisons": [
+    {
+      "geometry": [
+        1280,
+        720
+      ],
+      "frames": 3,
+      "exit_code": 0,
+      "status": "PASS",
+      "packets": [
+        {
+          "frame": 0,
+          "bytes": 1707164,
+          "cpu_sha256": "3912a22391ffc13a6a50449af0dfe8b9158c1d1fbb9b54103eed58e8528f3fad",
+          "cuda_sha256": "3912a22391ffc13a6a50449af0dfe8b9158c1d1fbb9b54103eed58e8528f3fad",
+          "ffmpeg_cpu_sha256": "27a02564d00b91b7b34c55ec7afff8940714f688fefd6898e7edfe8db191cfc8",
+          "ffmpeg_cuda_sha256": "27a02564d00b91b7b34c55ec7afff8940714f688fefd6898e7edfe8db191cfc8"
+        },
+        {
+          "frame": 1,
+          "bytes": 1576892,
+          "cpu_sha256": "4e77ae8ee5688cb05b2a4ddd5d2e7788713f0b5add252e47d01bafae3ecef29d",
+          "cuda_sha256": "4e77ae8ee5688cb05b2a4ddd5d2e7788713f0b5add252e47d01bafae3ecef29d",
+          "ffmpeg_cpu_sha256": "458e62dbdd9a34ab097799b33055ae4e9a04dce7d42b28723c8138eb6cd87787",
+          "ffmpeg_cuda_sha256": "458e62dbdd9a34ab097799b33055ae4e9a04dce7d42b28723c8138eb6cd87787"
+        },
+        {
+          "frame": 2,
+          "bytes": 1423692,
+          "cpu_sha256": "3a3ab6beecf8019998440371235e71ed9b932c256ec8e5ea0ae9f11e1e8ce0e4",
+          "cuda_sha256": "3a3ab6beecf8019998440371235e71ed9b932c256ec8e5ea0ae9f11e1e8ce0e4",
+          "ffmpeg_cpu_sha256": "d08fe9715005041d2566b273dacb4e2c4e977d220eae1a61bc424186a1bbf1c1",
+          "ffmpeg_cuda_sha256": "d08fe9715005041d2566b273dacb4e2c4e977d220eae1a61bc424186a1bbf1c1"
+        }
+      ]
+    },
+    {
+      "geometry": [
+        1920,
+        1080
+      ],
+      "frames": 16,
+      "exit_code": 0,
+      "status": "PASS",
+      "packets": [
+        {
+          "frame": 0,
+          "bytes": 3833564,
+          "cpu_sha256": "0269c2d7c2bba738a7f139eb9ac0344307793df8fd2dd1a3284d7761f7124337",
+          "cuda_sha256": "0269c2d7c2bba738a7f139eb9ac0344307793df8fd2dd1a3284d7761f7124337",
+          "ffmpeg_cpu_sha256": "6fbc6b590d385077276ebecf112c1f37acf1a745e86e528ce9333d0cd80f7017",
+          "ffmpeg_cuda_sha256": "6fbc6b590d385077276ebecf112c1f37acf1a745e86e528ce9333d0cd80f7017"
+        },
+        {
+          "frame": 1,
+          "bytes": 3543324,
+          "cpu_sha256": "71dc09b3003992cb7a627012e08b19aaeeb17b2768c2a9010091cdaa549ccba8",
+          "cuda_sha256": "71dc09b3003992cb7a627012e08b19aaeeb17b2768c2a9010091cdaa549ccba8",
+          "ffmpeg_cpu_sha256": "362fac935d0a293de598da05fd006e1b040ff1f6b64f00adafb702a05cc88f4d",
+          "ffmpeg_cuda_sha256": "362fac935d0a293de598da05fd006e1b040ff1f6b64f00adafb702a05cc88f4d"
+        },
+        {
+          "frame": 2,
+          "bytes": 3195852,
+          "cpu_sha256": "65db9e7fc70f4d3e57382b48e1e4a1e9f790af2b414caac3a70b1d2eedbeff6e",
+          "cuda_sha256": "65db9e7fc70f4d3e57382b48e1e4a1e9f790af2b414caac3a70b1d2eedbeff6e",
+          "ffmpeg_cpu_sha256": "684c9739680b764be3b580415cc7f3ce616572d20607eac641c6dc31b4159d29",
+          "ffmpeg_cuda_sha256": "684c9739680b764be3b580415cc7f3ce616572d20607eac641c6dc31b4159d29"
+        },
+        {
+          "frame": 3,
+          "bytes": 3112788,
+          "cpu_sha256": "d03de34b2970341316b6d7609da61e61beaf6b6a71ecb0f16e5cf6e38b6a2b4a",
+          "cuda_sha256": "d03de34b2970341316b6d7609da61e61beaf6b6a71ecb0f16e5cf6e38b6a2b4a",
+          "ffmpeg_cpu_sha256": "0dd41d91c623e193674d7ab0faed04881640722f59bc763b16447c40a78ff9a0",
+          "ffmpeg_cuda_sha256": "0dd41d91c623e193674d7ab0faed04881640722f59bc763b16447c40a78ff9a0"
+        },
+        {
+          "frame": 4,
+          "bytes": 3115152,
+          "cpu_sha256": "32a72facd29ea476ce758cb0290af01deb8af275555178e69eb9ac9dcfea7229",
+          "cuda_sha256": "32a72facd29ea476ce758cb0290af01deb8af275555178e69eb9ac9dcfea7229",
+          "ffmpeg_cpu_sha256": "c2a8f72858a6a983d4dda9e05d0b853768ea4da9c385dde9b2e815b1fb887087",
+          "ffmpeg_cuda_sha256": "c2a8f72858a6a983d4dda9e05d0b853768ea4da9c385dde9b2e815b1fb887087"
+        },
+        {
+          "frame": 5,
+          "bytes": 3114612,
+          "cpu_sha256": "b09b3ee3e23d000348ba76ca5456f5526ae66be2d4089c4872ecb79bc3a35a93",
+          "cuda_sha256": "b09b3ee3e23d000348ba76ca5456f5526ae66be2d4089c4872ecb79bc3a35a93",
+          "ffmpeg_cpu_sha256": "14a48cc3efa1c312097e6036e13202b0e74efb96cc2320eded1c4da78f9f54bf",
+          "ffmpeg_cuda_sha256": "14a48cc3efa1c312097e6036e13202b0e74efb96cc2320eded1c4da78f9f54bf"
+        },
+        {
+          "frame": 6,
+          "bytes": 3112372,
+          "cpu_sha256": "d84448d8d1aa609ff5368ea069d51ef3d0b5e9e77402436d90b5d8c1eb9867f4",
+          "cuda_sha256": "d84448d8d1aa609ff5368ea069d51ef3d0b5e9e77402436d90b5d8c1eb9867f4",
+          "ffmpeg_cpu_sha256": "8910f932e050d8e8d1777d150353432a88bac93856e872abf70636b013aa6c34",
+          "ffmpeg_cuda_sha256": "8910f932e050d8e8d1777d150353432a88bac93856e872abf70636b013aa6c34"
+        },
+        {
+          "frame": 7,
+          "bytes": 3114212,
+          "cpu_sha256": "7b1c0f017c3f402c84d3c9485a422c7b88584f0c4e56d3a0039c1b8bdeea3fd4",
+          "cuda_sha256": "7b1c0f017c3f402c84d3c9485a422c7b88584f0c4e56d3a0039c1b8bdeea3fd4",
+          "ffmpeg_cpu_sha256": "214414562d742e7aa2fb1d6dcc6c9c6911a0177589f455b1d3f0df72217c1791",
+          "ffmpeg_cuda_sha256": "214414562d742e7aa2fb1d6dcc6c9c6911a0177589f455b1d3f0df72217c1791"
+        },
+        {
+          "frame": 8,
+          "bytes": 3111112,
+          "cpu_sha256": "82ba128b68c172bfd8b924463f70e83e24a568f9485190b7be68a2012e631a9d",
+          "cuda_sha256": "82ba128b68c172bfd8b924463f70e83e24a568f9485190b7be68a2012e631a9d",
+          "ffmpeg_cpu_sha256": "f2cca6fd941a94258696cacab982e1c3b09194349c4caa6c8a44d0abd012c2c0",
+          "ffmpeg_cuda_sha256": "f2cca6fd941a94258696cacab982e1c3b09194349c4caa6c8a44d0abd012c2c0"
+        },
+        {
+          "frame": 9,
+          "bytes": 3113956,
+          "cpu_sha256": "6e9764de65c8d18c468ba311aa940b080ace4d288550106e890f0d7fe14e6e71",
+          "cuda_sha256": "6e9764de65c8d18c468ba311aa940b080ace4d288550106e890f0d7fe14e6e71",
+          "ffmpeg_cpu_sha256": "15cc76854d804c1c29f81db410b3de71a4291691bbe82f71376b4307a8d34661",
+          "ffmpeg_cuda_sha256": "15cc76854d804c1c29f81db410b3de71a4291691bbe82f71376b4307a8d34661"
+        },
+        {
+          "frame": 10,
+          "bytes": 3111428,
+          "cpu_sha256": "4a36716f9f66b17ca2ea04361fad7fd11d9a74cdc5faafafd892b3ded21e390c",
+          "cuda_sha256": "4a36716f9f66b17ca2ea04361fad7fd11d9a74cdc5faafafd892b3ded21e390c",
+          "ffmpeg_cpu_sha256": "db12f165f65c574e901a5dfd634a66cca809290c5d281e8b0c9f4f638b6ce447",
+          "ffmpeg_cuda_sha256": "db12f165f65c574e901a5dfd634a66cca809290c5d281e8b0c9f4f638b6ce447"
+        },
+        {
+          "frame": 11,
+          "bytes": 3113876,
+          "cpu_sha256": "de2b18b07d23fe4d0a40763ec80d8d0fad2b5ec6f9213e748da3bf52afaf4782",
+          "cuda_sha256": "de2b18b07d23fe4d0a40763ec80d8d0fad2b5ec6f9213e748da3bf52afaf4782",
+          "ffmpeg_cpu_sha256": "a43ef069715fcf6cac2621e8f5bc0af23baef3d71cee1574db85e2e5e6a22ca0",
+          "ffmpeg_cuda_sha256": "a43ef069715fcf6cac2621e8f5bc0af23baef3d71cee1574db85e2e5e6a22ca0"
+        },
+        {
+          "frame": 12,
+          "bytes": 3112480,
+          "cpu_sha256": "f7fff8917090120d740566ea430e5dcbadd9be1eb284fdcbb89bd9b3f36a542a",
+          "cuda_sha256": "f7fff8917090120d740566ea430e5dcbadd9be1eb284fdcbb89bd9b3f36a542a",
+          "ffmpeg_cpu_sha256": "ba6e7e01c88ce7aeedbbf89ca5148793c3b7675d97900c456d1f6ed239af642a",
+          "ffmpeg_cuda_sha256": "ba6e7e01c88ce7aeedbbf89ca5148793c3b7675d97900c456d1f6ed239af642a"
+        },
+        {
+          "frame": 13,
+          "bytes": 3113684,
+          "cpu_sha256": "e568a76fcf22d7f896de92dacabb253fd98e3ebce4cdfa4bbcf1e3b4989b5005",
+          "cuda_sha256": "e568a76fcf22d7f896de92dacabb253fd98e3ebce4cdfa4bbcf1e3b4989b5005",
+          "ffmpeg_cpu_sha256": "42fda780425beb9a081031d38f23b25a3927dc5a5dcdbc873535c53eb8bceb12",
+          "ffmpeg_cuda_sha256": "42fda780425beb9a081031d38f23b25a3927dc5a5dcdbc873535c53eb8bceb12"
+        },
+        {
+          "frame": 14,
+          "bytes": 3113680,
+          "cpu_sha256": "23abe9b384783aec3b73b3282ffb587da1a8490115aeab1065cd6287e7f5501a",
+          "cuda_sha256": "23abe9b384783aec3b73b3282ffb587da1a8490115aeab1065cd6287e7f5501a",
+          "ffmpeg_cpu_sha256": "a1110aa23c185e3e90064043612d05384718656735184ef8412a53386107da26",
+          "ffmpeg_cuda_sha256": "a1110aa23c185e3e90064043612d05384718656735184ef8412a53386107da26"
+        },
+        {
+          "frame": 15,
+          "bytes": 3113708,
+          "cpu_sha256": "094997d5d2fc45810d34b943b8d97c8fe9e96a36475a74b57fb54f41edc57ba7",
+          "cuda_sha256": "094997d5d2fc45810d34b943b8d97c8fe9e96a36475a74b57fb54f41edc57ba7",
+          "ffmpeg_cpu_sha256": "5621a1c4d831540985856c42e7a1c5710798c92ac656dfe52856769660d2a73f",
+          "ffmpeg_cuda_sha256": "5621a1c4d831540985856c42e7a1c5710798c92ac656dfe52856769660d2a73f"
+        }
+      ]
+    },
+    {
+      "geometry": [
+        2048,
+        1080
+      ],
+      "frames": 3,
+      "exit_code": 0,
+      "status": "PASS",
+      "packets": [
+        {
+          "frame": 0,
+          "bytes": 4089468,
+          "cpu_sha256": "51bf0507ec77d32a18a175c0b3c315c4a75e12987d6829907d460c50afdb073b",
+          "cuda_sha256": "51bf0507ec77d32a18a175c0b3c315c4a75e12987d6829907d460c50afdb073b",
+          "ffmpeg_cpu_sha256": "b24ad68689ef9c17e1e7276a9507b26123577447e25501a1d1f8f3ea85332d6c",
+          "ffmpeg_cuda_sha256": "b24ad68689ef9c17e1e7276a9507b26123577447e25501a1d1f8f3ea85332d6c"
+        },
+        {
+          "frame": 1,
+          "bytes": 3776868,
+          "cpu_sha256": "866a91631f2bd8624b451ab69e7bb5c9296b6f5a5cf9db91eb83286456d23362",
+          "cuda_sha256": "866a91631f2bd8624b451ab69e7bb5c9296b6f5a5cf9db91eb83286456d23362",
+          "ffmpeg_cpu_sha256": "4fc6343273dda27ab8eec594b2e88d710a05b815408e414a2c3d30b1cc105d33",
+          "ffmpeg_cuda_sha256": "4fc6343273dda27ab8eec594b2e88d710a05b815408e414a2c3d30b1cc105d33"
+        },
+        {
+          "frame": 2,
+          "bytes": 3408216,
+          "cpu_sha256": "f4e46b20e560db637485acdd2e8b88dad3b9766da5d56a82ae0e1bad6c867233",
+          "cuda_sha256": "f4e46b20e560db637485acdd2e8b88dad3b9766da5d56a82ae0e1bad6c867233",
+          "ffmpeg_cpu_sha256": "8b58179147cf46b63eb220955b8a8d07dc2ab7bc9b1df8ef96847c61cae2876b",
+          "ffmpeg_cuda_sha256": "8b58179147cf46b63eb220955b8a8d07dc2ab7bc9b1df8ef96847c61cae2876b"
+        }
+      ]
+    },
+    {
+      "geometry": [
+        3840,
+        2160
+      ],
+      "frames": 3,
+      "exit_code": 0,
+      "status": "PASS",
+      "packets": [
+        {
+          "frame": 0,
+          "bytes": 15325284,
+          "cpu_sha256": "4a3234fb17f610d9b678db758ba951aa6c8a2035b746b7f6d4ed23493ea446c1",
+          "cuda_sha256": "4a3234fb17f610d9b678db758ba951aa6c8a2035b746b7f6d4ed23493ea446c1",
+          "ffmpeg_cpu_sha256": "c67fd5f19db9d24fda8b2e991c8dc90428a2e332af0911473c14286b7f252bb2",
+          "ffmpeg_cuda_sha256": "c67fd5f19db9d24fda8b2e991c8dc90428a2e332af0911473c14286b7f252bb2"
+        },
+        {
+          "frame": 1,
+          "bytes": 14146288,
+          "cpu_sha256": "ae7b635ccdae6f84b3b43452b3625e89d8b628aee9c85ed552d09266f23b3301",
+          "cuda_sha256": "ae7b635ccdae6f84b3b43452b3625e89d8b628aee9c85ed552d09266f23b3301",
+          "ffmpeg_cpu_sha256": "650bddfa518b001e80a71735602d5b95bbe060e013208d1690030ad7bd4c23af",
+          "ffmpeg_cuda_sha256": "650bddfa518b001e80a71735602d5b95bbe060e013208d1690030ad7bd4c23af"
+        },
+        {
+          "frame": 2,
+          "bytes": 12766764,
+          "cpu_sha256": "b6075ee5020077f9df186325d8c751e905277aac51af52a54fb5afa29ce02846",
+          "cuda_sha256": "b6075ee5020077f9df186325d8c751e905277aac51af52a54fb5afa29ce02846",
+          "ffmpeg_cpu_sha256": "fd19d6aee697d465838b1be3e7aec765c48cdb178550e839663a5673e8c4655d",
+          "ffmpeg_cuda_sha256": "fd19d6aee697d465838b1be3e7aec765c48cdb178550e839663a5673e8c4655d"
+        }
+      ]
+    }
+  ],
+  "integration_base": "a267db4f1d9f41955c59675f2bd3690c30f7acb5",
+  "pr276_head": "cedb892917797f86212e95d311111cd772806b59",
+  "packet_pairs": 25,
+  "independent_ffmpeg_processes": 50,
+  "status": "PASS",
+  "source_revision": "37e6bcfcecc65bcf4945b96e99cbc2c6a0a5d5c3"
+}

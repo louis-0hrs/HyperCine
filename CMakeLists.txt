@@ -82,6 +82,9 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME qualification_report_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_summarize_qualification.py")
     set_tests_properties(qualification_report_contract PROPERTIES LABELS "validation;reference-oracle")
+    add_test(NAME windows_reference_process_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_windows_reference_process.py")
+    set_tests_properties(windows_reference_process_contract PROPERTIES LABELS "validation;reference-oracle")
     add_test(NAME cuda_output_dir_platform_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_cuda_output_dir_platform.py")
     add_test(NAME test_reference_release_inventory

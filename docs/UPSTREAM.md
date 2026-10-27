@@ -184,3 +184,12 @@ qualification. This is a source-model limit, not a claim that 12K or 17K
 CineForm samples encode, decode, or fit on Metal/GPU. See
 [C0 feasibility audit](EXTREME_RESOLUTION_17K_FEASIBILITY.md)
 for exact limits, the build-dependent SDK geometry gate and pending tests.
+
+## Windows fresh-process reference repeatability
+
+The bounded Windows protocol and its limits are documented in
+[WINDOWS_REFERENCE_PROCESS_PROTOCOL.md](validation/WINDOWS_REFERENCE_PROCESS_PROTOCOL.md).
+Original-SDK API success and repeated pixel hashes are separate evidence.
+Do not treat `TAG_CPU_MAX` as measured decoder worker telemetry or promote an
+unstable reference into an encoder correctness gate. The frozen SDK remains
+unchanged; the observation harness lives in `tests/`.
