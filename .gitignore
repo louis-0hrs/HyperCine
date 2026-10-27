@@ -57,6 +57,10 @@ tmpxft_*
 *.hdmp
 core.*
 
+# Python test cache artifacts (must not enter public PRs)
+__pycache__/
+*.py[cod]
+
 # Temporary and local test outputs
 *.ppm
 OUT-*.ppm

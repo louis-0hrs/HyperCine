@@ -13,8 +13,10 @@
 //   T4-STALE     a read named for another generation is empty -> T4-stale
 //   T4-IDENTITY  V is not U, and band 1 is not band 0         -> T4-identity
 //   T4-GEOMETRY  a wider claim is not this plane              -> T4-geometry
+//   T4-OWNED-ALIGN the retained plane copy is 32-byte aligned -> T4-owned-align
 
 #include "decode_task_graph.h"
+#include "decode_s3_plane.h"
 
 #include <atomic>
 #include <chrono>
@@ -737,6 +739,48 @@ void rule_cancel_stale(std::size_t workers) {
 
 // Several generations, each destroyed after drain. The retained copies must
 // not outlive the graph; AddressSanitizer is the leak check.
+// Guard (T4-OWNED-ALIGN): publish_plane copies into graph storage. That
+// address is what input_plane() returns. Sixteen frames, one legal plane
+// each, so a single accidentally aligned allocation cannot pass.
+void rule_owned_alignment(std::size_t workers) {
+    constexpr std::uint32_t kFrames = 16;
+    std::atomic<int> bad{0};
+    std::atomic<int> seen{0};
+    std::vector<TaskSpec> tasks;
+    tasks.reserve(kFrames * 2);
+    for (std::uint32_t frame = 0; frame < kFrames; ++frame) {
+        tasks.push_back(TaskSpec{
+            plane_key(0, 5, 0, frame), {},
+            [frame, &bad](const TaskContext& context) {
+                HeapPlane plane;
+                plane.fill(0);
+                if (!context.publish_plane(plane.data, kBytes, kWidth, kHeight, kPitch))
+                    bad.fetch_add(1);
+            }});
+        tasks.push_back(TaskSpec{
+            plane_key(0, 4, 0, frame), {plane_key(0, 5, 0, frame)},
+            [frame, &bad, &seen](const TaskContext& context) {
+                const PlaneView view = context.input_plane(0, identity(0, 5, 0, frame));
+                seen.fetch_add(1);
+                const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+                if (!view.valid() || view.bytes != kBytes || (address % 32) != 0)
+                    bad.fetch_add(1);
+            }});
+    }
+    GraphLimits limits;
+    limits.require_published_output = false;
+    DecodeTaskGraph graph(kGen, GraphProfile::Synthetic, std::move(tasks), limits);
+    const bool ran = graph.run(workers);
+    const bool ok = ran && graph.error() == GraphError::None &&
+                    seen.load() == static_cast<int>(kFrames) && bad.load() == 0;
+    char detail[160];
+    std::snprintf(detail, sizeof detail, "run=%d error=%d seen=%d bad=%d",
+                  ran ? 1 : 0, static_cast<int>(graph.error()), seen.load(), bad.load());
+    required("T4-owned-align", ok,
+             ok ? "sixteen graph-owned plane copies were 32-byte aligned"
+                : std::string(detail));
+}
+
 void rule_release(std::size_t workers) {
     bool ok = true;
     for (std::uint64_t value = 1; value <= 4; ++value) {
@@ -757,6 +801,121 @@ void rule_release(std::size_t workers) {
     }
     required("T4-release", ok, ok ? "four generations retained one plane each and were destroyed after drain"
                                   : "a generation leaked its charge or failed to publish");
+}
+
+// BUDGET-ALL: the ceiling covers untyped publication too. Before this rule the
+// budget was charged only by publish_plane(), so a plain publish() could retain
+// storage that no counter accounted for -- the graph could hold unbounded bytes
+// while owned_publication_bytes() reported zero.
+void rule_budget_all_paths(std::size_t workers) {
+    GraphLimits limits;
+    limits.generation_budget_bytes = kBytes;
+    limits.require_published_output = false;
+    std::atomic<int> accepted{0};
+    std::atomic<int> refused{0};
+    DecodeTaskGraph graph(kGen, GraphProfile::Synthetic,
+                          {TaskSpec{plane_key(0, 5, 0), {}, [&](const TaskContext& context) {
+                               HeapPlane plane;
+                               plane.fill(0);
+                               if (context.publish(plane.data, kBytes)) accepted.fetch_add(1);
+                               else refused.fetch_add(1);
+                           }},
+                           TaskSpec{plane_key(0, 5, 1), {}, [&](const TaskContext& context) {
+                               HeapPlane plane;
+                               plane.fill(1);
+                               if (context.publish(plane.data, kBytes)) accepted.fetch_add(1);
+                               else refused.fetch_add(1);
+                           }}},
+                          limits);
+    const bool ran = graph.run(workers);
+    // The first untyped publication fits the ceiling, the second does not.
+    const std::size_t owned = graph.owned_publication_bytes();
+    const bool ok = ran && accepted.load() == 1 && refused.load() == 1 && owned == kBytes;
+    char detail[192];
+    std::snprintf(detail, sizeof detail, "run=%d accepted=%d refused=%d owned=%zu budget=%zu",
+                  ran ? 1 : 0, accepted.load(), refused.load(), owned, kBytes);
+    required("T4-budget-all", ok,
+             ok ? "the second untyped publication was refused by the same ceiling; owned bytes match"
+                : std::string(detail));
+}
+
+// RELEASE-ABANDONED: a stopped generation retains nothing. A node that published
+// and then failed never completed, so fail_locked() marked its dependents Failed and
+// no consumer was ever handed the storage. After run() joins its workers the bytes
+// are released and the charge is refunded, instead of living until destruction.
+void rule_release_abandoned(std::size_t workers) {
+    GraphLimits limits;
+    limits.require_published_output = false;
+    std::atomic<int> published{0};
+    DecodeTaskGraph graph(
+        kGen, GraphProfile::Synthetic,
+        {TaskSpec{plane_key(0, 5, 0), {}, [&](const TaskContext& context) {
+             HeapPlane plane;
+             plane.fill(0);
+             if (context.publish_plane(plane.data, kBytes, kWidth, kHeight, kPitch))
+                 published.fetch_add(1);
+             // A publisher that dies after publishing: its output exists but the
+             // node never completes, so nothing may consume it.
+             throw std::runtime_error("synthetic post-publication failure");
+         }},
+         TaskSpec{plane_key(0, 4, 0), {plane_key(0, 5, 0)}, [&](const TaskContext&) {
+             throw std::runtime_error("consumer must never run");
+         }}},
+        limits);
+    const bool ran = graph.run(workers);
+    const std::size_t owned = graph.owned_publication_bytes();
+    const bool consumer_held = graph.state(1) != TaskState::Completed;
+    const bool ok = !ran && published.load() == 1 && consumer_held && owned == 0 &&
+                    graph.error() != GraphError::None;
+    char detail[192];
+    std::snprintf(detail, sizeof detail, "run=%d published=%d owned=%zu error=%d consumer_state=%d",
+                  ran ? 1 : 0, published.load(), owned, static_cast<int>(graph.error()),
+                  static_cast<int>(graph.state(1)));
+    required("T4-release-abandoned", ok,
+             ok ? "a completed-then-failed publication was released and its charge refunded"
+                : std::string(detail));
+}
+
+// S3-ALIGN-ADMIT: typed admission requires the alignment instead of assuming it.
+// A hand-built BufferVersion naming an unaligned address is rejected at admission,
+// not admitted into a view the consumer would later refuse to read.
+void rule_admission_alignment() {
+    HeapPlane storage;
+    storage.fill(0);
+    PlaneEdge claimed;
+    claimed.generation = kGen;
+    claimed.channel = 0;
+    claimed.wavelet = 5;
+    claimed.band = 0;
+    claimed.plane.data = storage.data;
+    claimed.plane.width = kWidth;
+    claimed.plane.height = kHeight;
+    claimed.plane.pitch = kPitch;
+    claimed.plane.bytes = kBytes;
+
+    BufferVersion aligned;
+    aligned.generation = kGen;
+    aligned.version = 1;
+    aligned.data = storage.data;
+    aligned.bytes = kBytes;
+    const AdmittedPlane accepted = admit_owned_plane(aligned, claimed, plane_key(0, 5, 0), kGen);
+
+    BufferVersion shifted;
+    shifted.generation = kGen;
+    shifted.version = 1;
+    // One sample off: still inside the buffer, no longer 32-byte aligned.
+    shifted.data = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(storage.data) +
+                                                 sizeof(std::int16_t));
+    shifted.bytes = kBytes;
+    const AdmittedPlane rejected = admit_owned_plane(shifted, claimed, plane_key(0, 5, 0), kGen);
+
+    const bool ok = accepted.ok && !rejected.ok && rejected.plane.data == nullptr;
+    char detail[160];
+    std::snprintf(detail, sizeof detail, "aligned_ok=%d unaligned_ok=%d",
+                  accepted.ok ? 1 : 0, rejected.ok ? 1 : 0);
+    required("S3-align-admit", ok,
+             ok ? "an aligned owned span is admitted; an unaligned one is rejected"
+                : std::string(detail));
 }
 
 }  // namespace
@@ -784,7 +943,11 @@ int main(int argc, char** argv) {
     rule_abort(workers);
     rule_cancel(workers);
     rule_cancel_stale(workers);
+    rule_owned_alignment(workers);
     rule_release(workers);
+    rule_budget_all_paths(workers);
+    rule_release_abandoned(workers);
+    rule_admission_alignment();
     if (failures != 0) {
         std::printf("SCHEDULER-T4 FAIL workers=%zu holds=%d failures=%d\n", workers, holds, failures);
         return 1;
