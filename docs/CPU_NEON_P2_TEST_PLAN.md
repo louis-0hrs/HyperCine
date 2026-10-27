@@ -1,7 +1,44 @@
 <!-- Copyright (c) 2026 HyperCine Contributors.
 Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE. -->
 
-# ARM64 NEON 2-6 wavelet qualification plan
+# ARM64 NEON 2-6 wavelet qualification plan — historical 2026-10-16 snapshot
+
+## Current-status ledger (2026-10-27; not part of the original audit)
+
+**Historical test-design artifact, not the active implementation start gate.** The
+unmodified arithmetic formulas, negative cases, capacity cautions and recorded
+31-test baseline below document what was known at the pinned 2026-10-16 SHA.
+References below to an empty NEON registry, "currently scalar", unimplemented
+kernels, `BLOCKED_BY_P4`, "after P4 acceptance", and the final "Next action"
+apply **only to that source snapshot**. They must not be copied into current
+issue status, feature matrices or release notes.
+
+Subsequent separately reviewed integrations supersede those status assumptions:
+
+- P4 dimensioned FilmScan3 geometry and 4K CPU/Metal work were accepted after
+  this snapshot. These do **not** imply arbitrary 8K/12K/17K bitstream support.
+- [#255](https://github.com/louis-0hrs/HyperCine/pull/255) integrated a real
+  ARM64 NEON 2–6 forward wavelet path into main at `44827e84`, with native
+  coefficient/packet parity evidence. The prescale-2 horizontal special
+  rounding path still uses scalar processing; it is **not** a NEON speedup claim.
+- [#269](https://github.com/louis-0hrs/HyperCine/pull/269), containing the
+  concurrent session tests from [#272](https://github.com/louis-0hrs/HyperCine/pull/272),
+  reached main at `74f8952`. Explicit `WaveletIsa::Scalar` / `Neon` is
+  session-pinned and an unavailable explicit vector request fails closed.
+  Legacy/`Auto` remains dynamically tied to the process-global preference,
+  with `wavelet_isa()` reporting a query-time snapshot.
+- The original GoPro 4K packet oracle, multi-backend capability architecture
+  [#259](https://github.com/louis-0hrs/HyperCine/issues/259), extreme-resolution
+  feasibility, and production decoder qualification remain independent gates.
+  Neither the old scalar baseline below nor a green hosted x86 CI substitutes
+  for native ARM64 ISA execution, original-reference parity or new-hardware
+  performance evidence.
+
+For **present-day** completion criteria, read the current [#70](https://github.com/louis-0hrs/HyperCine/issues/70),
+[#259](https://github.com/louis-0hrs/HyperCine/issues/259) and
+[dispatch #62](https://github.com/louis-0hrs/HyperCine/issues/62), and test
+the exact current commit. Preserve the historical recipes below as design
+references, not as current implementation facts.
 
 Preparation for [#70](https://github.com/louis-0hrs/HyperCine/issues/70),
 parent [#65](https://github.com/louis-0hrs/HyperCine/issues/65).
