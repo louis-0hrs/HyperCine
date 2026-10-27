@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "license": "MIT OR Apache-2.0",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "date": "2026-10-18",
+  "base_commit": "e094682266b75151ab1a6f3ed2741ca3088c627e",
+  "scope": "Independent review of five pending validation fixes; parent features remain gated",
+  "environment": {
+    "architecture": "arm64",
+    "os": "macOS 26.5.2",
+    "compiler": "AppleClang 21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "ffmpeg": "n8.0",
+    "python_optimization": true
+  },
+  "reviews": [
+    {
+      "issue": 23,
+      "pr": 151,
+      "commit": "6e6fe42734f8f2dd9900aa89ce7a1ff8e4448b4c",
+      "review": "NO_NEW_BLOCKING_FINDING_IN_SCOPED_FIX",
+      "ctest": {
+        "passed": 30,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_wall_seconds": 79.64
+      },
+      "files": [
+        {
+          "path": "tests/validate_filmscan3.py",
+          "sha256": "b577a4182608fedf87c45d253b7aee1221c82fa6b046e75f7ef7290d2b9679fe"
+        },
+        {
+          "path": "tests/test_trace_contract.py",
+          "sha256": "79b91631101012e36c6e7f70a9b88e0cd864b8ee4b3685a56a3c7aad34225a34"
+        }
+      ]
+    },
+    {
+      "issue": 44,
+      "pr": 152,
+      "commit": "070359edee1ba748614bcb821139120e4f7312ec",
+      "review": "NO_NEW_BLOCKING_FINDING_IN_SCOPED_FIX",
+      "ctest": {
+        "passed": 31,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_wall_seconds": 202.45
+      },
+      "files": [
+        {
+          "path": "tests/validate_filmscan3_geometry.py",
+          "sha256": "b91bff0a77436315fe9817aeb3fe6223edd65fe98ce4cb04e8987b688e1767ab"
+        },
+        {
+          "path": "tests/test_geometry_reference_p10.py",
+          "sha256": "ab7e54d1e5e46bb47b7abedf0c74ca0ba122b71b01523b6d837caad155b63176"
+        }
+      ]
+    },
+    {
+      "issue": 45,
+      "pr": 148,
+      "commit": "89ddd8a221d487852dd50ffe8ca54bcb406f07a6",
+      "review": "NO_NEW_BLOCKING_FINDING_IN_SCOPED_FIX",
+      "ctest": {
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_wall_seconds": 0.63
+      },
+      "files": [
+        {
+          "path": "tests/macos_contracts/metal_budget.py",
+          "sha256": "e35179bf27a1325e5176780863549c5da8979c4a060885760f40643549ab8a2e"
+        },
+        {
+          "path": "tests/macos_contracts/test_metal_model.py",
+          "sha256": "060e66b37369dedce5c7553db2366f46529f940bc06f00c4d86abc6ef5568589"
+        }
+      ]
+    },
+    {
+      "issue": 46,
+      "pr": 149,
+      "commit": "a1d6e77f0be39603df9c0171760beb95250be3fe",
+      "review": "NO_NEW_BLOCKING_FINDING_IN_SCOPED_FIX",
+      "ctest": {
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_wall_seconds": 2.36
+      },
+      "files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "88f6a0ba847de4bea92ba57570fbbb6caa363b7a200a6831c50238c8801258bc"
+        },
+        {
+          "path": "ci/test_quality_cmake_mode.py",
+          "sha256": "848c0ea05458d1c1f5b11963a30ae6ffab6fd2ba46728d89d36f2ced6a7cd34b"
+        }
+      ]
+    },
+    {
+      "issue": 47,
+      "pr": 150,
+      "commit": "77b8715fd702043bc04863c9bbf975540aa95cf2",
+      "review": "NO_NEW_BLOCKING_FINDING_IN_SCOPED_FIX",
+      "ctest": {
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "elapsed_wall_seconds": 2.61
+      },
+      "files": [
+        {
+          "path": "tests/macos_decode_portability/baseline.py",
+          "sha256": "92ecbbf3955ff149d5d044a939ff5d1df75de7d30af3602301ef47973ac2fce5"
+        },
+        {
+          "path": "tests/macos_decode_portability/test_baseline.py",
+          "sha256": "460a68e0acfbeaffeef88876cfb30f2b254f7dd28dc34e48c6e0d97e8b4fb797"
+        }
+      ]
+    }
+  ],
+  "four_k": {
+    "frames": 19,
+    "sequence_frames": 16,
+    "minimum_psnr_db": 52.32134949615484,
+    "decoded_sequence_sha256": [
+      "f7da47a0a9a1819be465f595767c73a490ac550db2fcec979ebbfaff7bf74b59",
+      "af4014c35fad1ec51b277a2b33c121c4792a4755179c2c8490b9c1ba2354d0b3",
+      "b11eabc8b1f186068b50387e387cf0c73fa67257aa1496a54d45f72ec8aa5341",
+      "47d0416f6b796b38127f6d168bc60d28a33e74a066b273120e12bcd56b3405c7",
+      "2503a4f7e5faaa824fa1d41591d87e126375046d9cb7bced7a04acd0ea4bb09d",
+      "749d3f96164cf20bde5d64c5f26c66697bb541d357b64812bff47ee7e64b4ca3",
+      "c2bf0ea751b0bb8d1138881ba503bc5de5e12f5c75e8b27d3bddd7f22f613f29",
+      "ab500d2d3509b1b2861ca4e17910afd7a5a21297c49fba10c19f9e16b2091e60",
+      "9dcd0aed72cc16e7e75c37d0cfe11d550f05efba625bd11dc8814d805d2a3a55",
+      "7eb644dcc7341ade3ba56e795f4af8278eaf1a488ec68333a5ef8dd6544d4605",
+      "1efee646c933a1b03a381ba4318bcf3e4d84aff8da77dba6363d1f94f158203c",
+      "44d7b64c5ba35ab4d55263d9c2ef7d2daf701f9fe9fde0617277eef59ca432c1",
+      "ea41e55a9f3abeff7893e745d21c27bcd7a09898a3af3543d7a8968ca5201d8e",
+      "f0a52caed706d266e966c5b7d1bac77eda11abcc726619b1caafc5b859bcc31a",
+      "0148985b5162cd5a5637ff82299171e8fa95b04c44c06fbfcdf92aa552f88fa8",
+      "081558b4be26b0a666c0b8d138e0a6b81a019d715d364cf5db1efa3cfb3d0304"
+    ],
+    "original_sdk_packet_parity": "REFERENCE_BLOCKED"
+  },
+  "independent_probes": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "python_optimization": true
+  },
+  "total_registered_ctest_cases": 78,
+  "limits": [
+    "Overlapping suites; not 78 distinct codec algorithms",
+    "Private SDK corpus not configured",
+    "No new ASan/UBSan or GPU execution",
+    "No Windows/CUDA/Vulkan execution",
+    "No feature gate cleared, merge, release or parent issue closure"
+  ]
+}
