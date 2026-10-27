@@ -9,6 +9,7 @@
 #include <cuda_runtime.h>
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -19,6 +20,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <system_error>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -390,42 +392,60 @@ std::vector<std::uint8_t> ReadFile(const fs::path& path) {
     return std::vector<std::uint8_t>(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>());
 }
 
+// Directory this call created. create_directory is atomic: an existing path is
+// skipped and never deleted. Ownership is that successful create, not the
+// candidate string. A clock tick, a process-local counter and the attempt index
+// only spread names. Concurrent processes and leftovers from an earlier failed
+// run stay untouched.
+fs::path OwnedGeometryDirectory(int width, int height) {
+    static std::atomic<unsigned> sequence{0};
+    const auto base = fs::temp_directory_path();
+    for (unsigned attempt = 0; attempt < 128; ++attempt) {
+        const auto tick = std::chrono::steady_clock::now().time_since_epoch().count();
+        const auto candidate = base / ("hypercine-cuda-geometry-" + std::to_string(tick) + "-" +
+                                       std::to_string(++sequence) + "-" + std::to_string(attempt) + "-" +
+                                       std::to_string(width) + "x" + std::to_string(height));
+        std::error_code ec;
+        if (fs::create_directory(candidate, ec))
+            return candidate;
+        if (!ec || ec == std::errc::file_exists)
+            continue;
+        throw fs::filesystem_error("cannot create isolated CUDA geometry directory", candidate, ec);
+    }
+    throw std::runtime_error("could not create exclusive CUDA geometry directory");
+}
+
 // Independent FFmpeg decode. Checks container-reported codec, dimensions and
 // pix_fmt, then the raw yuv422p10le byte count and CPU/CUDA pixel equality.
 void DecodePair(const std::string& ffmpeg, const std::string& ffprobe, int width, int height,
                 const std::vector<std::uint8_t>& cpu, const std::vector<std::uint8_t>& gpu) {
-    // Portable unique directory: no mkdtemp, no hardcoded /tmp. A process id plus a
-    // monotonic counter keeps concurrent runs of this test from sharing a directory.
-    static std::atomic<unsigned> sequence{0};
-    const auto root = fs::temp_directory_path() /
-        ("hypercine-cuda-geometry-" + std::to_string(++sequence) + "-" + std::to_string(width) + "x" + std::to_string(height));
-    std::error_code ignored;
-    fs::remove_all(root, ignored);
-    fs::create_directories(root);
+    const fs::path owned = OwnedGeometryDirectory(width, height);
     try {
-        WriteFile(root / "cpu.avi", Avi(cpu, width, height));
-        WriteFile(root / "gpu.avi", Avi(gpu, width, height));
+        WriteFile(owned / "cpu.avi", Avi(cpu, width, height));
+        WriteFile(owned / "gpu.avi", Avi(gpu, width, height));
         for (const char* side : {"cpu", "gpu"}) {
             const auto probe = Capture({ffprobe, "-v", "error", "-select_streams", "v:0",
                                         "-show_entries", "stream=codec_name,width,height,pix_fmt",
-                                        "-of", "default=noprint_wrappers=1", (root / (std::string(side) + ".avi")).string()},
-                                       root / (std::string(side) + ".probe.txt"));
+                                        "-of", "default=noprint_wrappers=1", (owned / (std::string(side) + ".avi")).string()},
+                                       owned / (std::string(side) + ".probe.txt"));
             Require(Field(probe, "codec_name") == "cfhd", side + probe);
             Require(Field(probe, "width") == std::to_string(width), side + probe);
             Require(Field(probe, "height") == std::to_string(height), side + probe);
             Require(Field(probe, "pix_fmt") == "yuv422p10le", side + probe);
-            Capture({ffmpeg, "-v", "error", "-xerror", "-y", "-i", (root / (std::string(side) + ".avi")).string(),
+            Capture({ffmpeg, "-v", "error", "-xerror", "-y", "-i", (owned / (std::string(side) + ".avi")).string(),
                      "-frames:v", "1", "-pix_fmt", "yuv422p10le", "-f", "rawvideo",
-                     (root / (std::string(side) + ".yuv")).string()},
-                    root / (std::string(side) + ".decode.txt"));
+                     (owned / (std::string(side) + ".yuv")).string()},
+                    owned / (std::string(side) + ".decode.txt"));
         }
-        const auto cpu_raw = ReadFile(root / "cpu.yuv");
-        const auto gpu_raw = ReadFile(root / "gpu.yuv");
+        const auto cpu_raw = ReadFile(owned / "cpu.yuv");
+        const auto gpu_raw = ReadFile(owned / "gpu.yuv");
         const auto expected = static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u;
         Require(cpu_raw.size() == expected && gpu_raw.size() == expected, "decoded byte count");
         Require(cpu_raw == gpu_raw, "CPU and CUDA FFmpeg decodes differ");
+        // Success path only. `owned` is the directory this call created; a failed
+        // decode leaves it in place, and nothing else is removed.
         std::error_code cleanup_ignored;
-        fs::remove_all(root, cleanup_ignored);
+        fs::remove_all(owned, cleanup_ignored);
     } catch (...) {
         std::cerr << "FFMPEG artifacts left in the temporary directory\n";
         throw;
