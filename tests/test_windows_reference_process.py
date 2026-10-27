@@ -75,7 +75,7 @@ class ProcessContract(unittest.TestCase):
         cell = dict(threads=2, affinity='3')
         good = dict(status='PASS', requested_threads=2, process_affinity='3', pixel_format='YU64',
                     width=1920, height=1080, pitch=7680, observed_decoder_threads=None,
-                    thread_observation='INCONCLUSIVE: request only', sdk_api_header_version='header label',
+                    thread_observation=v.THREAD_LABEL, sdk_api_header_version=v.HEADER_LABEL,
                     sdk_source_baseline='11574d0295771edccadd17af14af74a539f924c7',
                     decoder_sdk_version_packed=0x10000, decoder_sdk_version_query_status=0)
         self.assertTrue(v.valid_observation(good, cell))
@@ -102,6 +102,59 @@ class ProcessContract(unittest.TestCase):
             self.assertEqual(len(result['records']), 18)
             self.assertTrue(all(r['timed_out'] for r in result['records']))
             self.assertNotIn('private-path', json.dumps(result))
+
+    def test_valid_json_canaries_never_enter_exports(self):
+        canaries = [r'C:\private\secret.cfhd', 'private-host.example.invalid', 'access_token=fake-credential-canary']
+        for canary in canaries:
+            with self.subTest(canary=canary), tempfile.TemporaryDirectory() as directory:
+                sample = Path(directory) / 'sample'; sample.write_bytes(b'immutable')
+                probe = Path(directory) / 'probe'; probe.write_bytes(b'probe')
+                raw = dict(status='PASS', process_affinity='1', cpu_isa={'sse2': canary, canary: True},
+                           topology_status=canary, processor_groups=canary,
+                           physical_cores=[dict(logical_mask=canary, smt=canary)], extra=canary)
+                inventory = v.subprocess.CompletedProcess([], 0, json.dumps(raw))
+                forged = {key: canary for key in ('error_stage', 'thread_observation',
+                          'sdk_api_header_version', 'sdk_source_baseline', 'requested_threads',
+                          'observed_decoder_threads', 'process_affinity', 'pixel_format', 'width',
+                          'height', 'pitch', 'sdk_error', 'decoder_sdk_version_packed',
+                          'decoder_sdk_version_query_status')}
+                for status in ('PASS', 'FAIL', canary):
+                    child = v.subprocess.CompletedProcess([], 1, json.dumps(dict(forged, status=status)))
+                    with patch.object(v.subprocess, 'run', side_effect=[inventory]+[child]*15):
+                        result = v.run(probe, sample, v.sha(sample))
+                    self.assertEqual(result['status'], 'FAIL')
+                    self.assertNotIn(canary, json.dumps(result))
+                    self.assertEqual(result['topology']['cpu_isa'], {})
+                    self.assertTrue(all(r['error_stage'] == 'probe_contract' for r in result['records']))
+
+    def test_native_labels_and_output_can_still_pass_complete_plan(self):
+        inventory = dict(status='PASS', process_affinity='1', cpu_isa={})
+        def child(args, **kwargs):
+            if args[-1] == '--inventory':
+                return v.subprocess.CompletedProcess(args, 0, json.dumps(inventory))
+            Path(args[2]).write_bytes(b'x' * (7680 * 1080))
+            observation = dict(status='PASS', requested_threads=int(args[3]), process_affinity=args[4],
+                               pixel_format='YU64', width=1920, height=1080, pitch=7680,
+                               observed_decoder_threads=None, thread_observation=v.THREAD_LABEL,
+                               sdk_api_header_version=v.HEADER_LABEL, sdk_source_baseline=v.BASELINE,
+                               decoder_sdk_version_packed=65536, decoder_sdk_version_query_status=0)
+            return v.subprocess.CompletedProcess(args, 0, json.dumps(observation))
+        with tempfile.TemporaryDirectory() as directory:
+            sample = Path(directory) / 'sample'; sample.write_bytes(b'immutable')
+            probe = Path(directory) / 'probe'; probe.write_bytes(b'probe')
+            with patch.object(v.subprocess, 'run', side_effect=child):
+                result = v.run(probe, sample, v.sha(sample))
+            self.assertEqual(result['status'], 'REPEATABLE_OBSERVATION_ONLY')
+            self.assertEqual(len(result['records']), 15)
+
+    def test_inventory_typed_allowlist_preserves_native_evidence(self):
+        raw = dict(status='PASS', process_affinity='f', processor_groups=1, topology_status='PASS',
+                   cpu_isa=dict(sse2=True, avx2_os_enabled=False, avx512f_os_enabled=False),
+                   physical_cores=[dict(logical_mask='3', smt=True), dict(logical_mask='c', smt=True)])
+        self.assertEqual(v.sanitize_inventory(raw), raw)
+        for value in ('private-host', [], True, '0', 'f'*17):
+            with self.assertRaises(ValueError):
+                v.sanitize_inventory(dict(raw, process_affinity=value))
 
     def test_malformed_probe_does_not_publish_raw_output(self):
         inventory = v.subprocess.CompletedProcess([], 0, json.dumps(dict(status='PASS', cpu_isa={}, process_affinity='1')))

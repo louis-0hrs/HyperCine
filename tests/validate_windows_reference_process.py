@@ -5,6 +5,7 @@
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -69,6 +70,62 @@ def classify(records, cells=None):
     return 'REPEATABLE_OBSERVATION_ONLY'
 
 
+BASELINE = '11574d0295771edccadd17af14af74a539f924c7'
+THREAD_LABEL = 'INCONCLUSIVE: public metadata request is not worker-count telemetry'
+HEADER_LABEL = 'CFHDDecoder.h @version 1.0.0 (header label only)'
+STAGES = {'arguments', 'affinity', 'input', 'open', 'prepare', 'metadata', 'decode', 'save',
+          'malformed_probe_json'}
+
+
+def mask(value):
+    return (isinstance(value, str) and re.fullmatch(r'[0-9a-f]{1,16}', value) is not None
+            and int(value, 16) > 0)
+
+
+def sanitize_inventory(raw):
+    if (not isinstance(raw, dict) or raw.get('status') != 'PASS'
+            or not mask(raw.get('process_affinity')) or not isinstance(raw.get('cpu_isa'), dict)):
+        raise ValueError('invalid native platform inventory')
+    result = dict(status='PASS', process_affinity=format(int(raw['process_affinity'], 16), 'x'),
+                  cpu_isa={key: raw['cpu_isa'][key] for key in
+                           ('sse2', 'avx2_os_enabled', 'avx512f_os_enabled')
+                           if type(raw['cpu_isa'].get(key)) is bool},
+                  topology_status='INCONCLUSIVE', physical_cores=[])
+    groups = raw.get('processor_groups')
+    if type(groups) is int and 1 <= groups <= 64:
+        result['processor_groups'] = groups
+    cores = raw.get('physical_cores', [])
+    if (isinstance(cores, list) and len(cores) <= 64
+            and all(isinstance(c, dict) and mask(c.get('logical_mask'))
+                    and type(c.get('smt')) is bool for c in cores)):
+        result['physical_cores'] = [dict(logical_mask=format(int(c['logical_mask'], 16), 'x'),
+                                         smt=c['smt']) for c in cores]
+        if raw.get('topology_status') == 'PASS' and result.get('processor_groups') == 1:
+            result['topology_status'] = 'PASS'
+    return result
+
+
+def sanitize_observation(raw):
+    # No free-form subprocess strings or nested values cross the export boundary.
+    result = {}
+    for key, expected in (('thread_observation', THREAD_LABEL), ('sdk_api_header_version', HEADER_LABEL),
+                          ('sdk_source_baseline', BASELINE), ('pixel_format', 'YU64')):
+        if raw.get(key) == expected:
+            result[key] = expected
+    for key in ('requested_threads', 'width', 'height', 'pitch', 'sdk_error',
+                'decoder_sdk_version_packed', 'decoder_sdk_version_query_status'):
+        value = raw.get(key)
+        if type(value) is int and -(2**31) <= value < 2**32:
+            result[key] = value
+    if 'observed_decoder_threads' in raw and raw['observed_decoder_threads'] is None:
+        result['observed_decoder_threads'] = None
+    if mask(raw.get('process_affinity')):
+        result['process_affinity'] = raw['process_affinity']
+    if isinstance(raw.get('error_stage'), str) and raw['error_stage'] in STAGES:
+        result['error_stage'] = raw['error_stage']
+    return result
+
+
 def valid_observation(observation, cell):
     return (isinstance(observation, dict) and observation.get('status') == 'PASS'
             and type(observation.get('requested_threads')) is int
@@ -79,12 +136,11 @@ def valid_observation(observation, cell):
             and observation.get('pitch') == 7680
             and 'observed_decoder_threads' in observation
             and observation['observed_decoder_threads'] is None
-            and isinstance(observation.get('thread_observation'), str)
-            and observation['thread_observation'].startswith('INCONCLUSIVE:')
-            and observation.get('sdk_source_baseline') == '11574d0295771edccadd17af14af74a539f924c7'
-            and isinstance(observation.get('sdk_api_header_version'), str)
+            and observation.get('thread_observation') == THREAD_LABEL
+            and observation.get('sdk_source_baseline') == BASELINE
+            and observation.get('sdk_api_header_version') == HEADER_LABEL
             and type(observation.get('decoder_sdk_version_packed')) is int
-            and observation['decoder_sdk_version_packed'] > 0
+            and 0 < observation['decoder_sdk_version_packed'] < 2**31
             and type(observation.get('decoder_sdk_version_query_status')) is int
             and observation['decoder_sdk_version_query_status'] == 0)
 
@@ -97,10 +153,8 @@ def run(probe, sample, expected_sha, timeout=30):
                                     text=True, timeout=timeout)
     if inventory_call.returncode != 0:
         raise ValueError('native platform inventory failed')
-    inventory = json.loads(inventory_call.stdout)
+    inventory = sanitize_inventory(json.loads(inventory_call.stdout))
     available = int(inventory['process_affinity'], 16)
-    if inventory.get('status') != 'PASS' or not isinstance(inventory.get('cpu_isa'), dict):
-        raise ValueError('missing native platform inventory evidence')
     qualified_topology = inventory.get('topology_status') == 'PASS' and inventory.get('processor_groups') == 1
     cells = matrix(available, inventory.get('physical_cores', []) if qualified_topology else ())
     records = []
@@ -124,11 +178,7 @@ def run(probe, sample, expected_sha, timeout=30):
                     if not isinstance(observation, dict):
                         observation = dict(status='FAIL', error_stage='malformed_probe_json')
                     # Only known fields: never publish paths/raw process output.
-                    fields = ('requested_threads', 'observed_decoder_threads', 'thread_observation',
-                              'process_affinity', 'pixel_format', 'width', 'height', 'pitch',
-                              'sdk_api_header_version', 'sdk_source_baseline', 'error_stage', 'sdk_error',
-                              'decoder_sdk_version_packed', 'decoder_sdk_version_query_status')
-                    row.update({key: observation[key] for key in fields if key in observation})
+                    row.update(sanitize_observation(observation))
                     valid = (child.returncode == 0 and valid_observation(observation, cell) and output.is_file()
                              and output.stat().st_size == 7680 * 1080)
                     if valid:

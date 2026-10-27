@@ -173,3 +173,24 @@ requirements pass. Preserve
 original-SDK pixel qualification as BLOCKED and stage FS2/RG48 work behind the
 explicit reference contracts. No automatic merge, release, upstream edit,
 reference regeneration or private-media publication was performed.
+
+
+## PR #276 privacy-contract follow-up
+
+The process runner now exports only fixed native stage, source and header labels,
+bounded integer fields, validated affinity masks and a typed inventory allowlist.
+Unknown strings, nested values and inventory keys are omitted even when the
+subprocess returns syntactically valid JSON with FAIL. Invalid optional topology
+remains INCONCLUSIVE. Synthetic absolute-path, hostname and credential-like
+canaries exercise the entire exported result; a complete successful synthetic
+probe plan still yields REPEATABLE_OBSERVATION_ONLY.
+
+Validation of this follow-up: 16 process contract tests PASS. The existing CUDA
+standalone Release build completed all 79 CTest registrations: 78 PASS, one
+platform-required SKIP, zero failures (547.39 seconds; per-test timeout 180
+seconds). TEMP/TMP pointed to a local build directory for this run; the initial
+restricted run encountered temporary-directory access errors and was abandoned.
+The final process contracts were rerun after the last validation tightening.
+These checks do not requalify the integrated main branch or replace the original
+baseline 44827e8 measurements, original-SDK BLOCKED conclusions or benchmark
+INCONCLUSIVE status above. No new pixel oracle or RCA claim is made.
