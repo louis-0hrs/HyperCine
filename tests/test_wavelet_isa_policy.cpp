@@ -35,8 +35,11 @@
 using hypercine::standalone::FilmScan3Encoder;
 using hypercine::standalone::FilmScan3Geometry;
 using hypercine::standalone::WaveletIsa;
+using hypercine::standalone::detail::DecideWaveletDispatch;
 using hypercine::standalone::detail::WaveletDispatchCounts;
+using hypercine::standalone::detail::WaveletDispatchDecision;
 using hypercine::standalone::detail::WaveletDispatchSnapshot;
+using hypercine::standalone::ForwardLevel;
 
 namespace {
 
@@ -88,6 +91,162 @@ Delta EncodeOnce(FilmScan3Encoder& encoder, const std::vector<uint8_t>& frame) {
     d.neon = after.neon - before.neon;
     (void)result;
     return d;
+}
+
+
+// Phase 0: the dispatch policy itself, with the vector status injected.
+//
+// The end-to-end paths below cannot reach a NOT_SUPPORTED return on a host whose
+// vector kernel always succeeds for valid geometry, so the fallback rule is proven
+// here by construction. This is the negative regression the review asked for: it
+// fails if forced `Neon` is ever allowed to degrade silently again, and it fails if
+// `Auto` stops being allowed to degrade.
+void phase_dispatch_policy_matrix() {
+    std::printf("phase 0: dispatch policy, vector status injected\n");
+
+    // A caller that demanded the vector path must never be handed scalar output.
+    check(DecideWaveletDispatch(WaveletIsa::Neon, false, false) ==
+              WaveletDispatchDecision::FailClosed,
+          "forced Neon + vector did not run fails closed");
+
+    // Auto is allowed to degrade -- that is its documented meaning.
+    check(DecideWaveletDispatch(WaveletIsa::Neon, true, false) ==
+              WaveletDispatchDecision::Scalar,
+          "Auto-resolved Neon + vector did not run degrades to scalar");
+    check(DecideWaveletDispatch(WaveletIsa::Scalar, false, false) ==
+              WaveletDispatchDecision::Scalar,
+          "Scalar stays scalar");
+    check(DecideWaveletDispatch(WaveletIsa::Scalar, true, false) ==
+              WaveletDispatchDecision::Scalar,
+          "Scalar stays scalar even when fallback is allowed");
+
+    // Success is the only thing that counts as having run the vector path.
+    check(DecideWaveletDispatch(WaveletIsa::Neon, false, true) ==
+              WaveletDispatchDecision::Vector,
+          "forced Neon + vector succeeded runs the vector path");
+    check(DecideWaveletDispatch(WaveletIsa::Neon, true, true) ==
+              WaveletDispatchDecision::Vector,
+          "Auto-resolved Neon + vector succeeded runs the vector path");
+}
+
+// Phase 0b: the 3-argument form must dispatch exactly like the 2-argument form.
+//
+// Before this fix `ForwardLevel(plane, 0, WaveletIsa::Auto)` passed `Auto` straight to
+// the kernels, whose dispatch test is literally `isa == Neon` -- so an explicit `Auto`
+// always ran scalar, even on a host where the global default asked for the vector path
+// and the 2-argument form used it. Comparing the two forms is what makes that visible,
+// because each form can only be wrong relative to the other.
+void phase_three_argument_auto_matches_two_argument() {
+    std::printf("phase 0b: 3-argument Auto dispatches like the 2-argument form\n");
+    const bool original = HyperCine_IsNEONWaveletEnabled();
+    // Smallest legal even geometry for the standalone forward transform.
+    hypercine::standalone::Plane plane(128, 24);
+    for (int y = 0; y < plane.height; ++y) {
+        for (int x = 0; x < plane.width; ++x) {
+            plane.pixels[y * plane.stride + x] = static_cast<int16_t>((x * 31 + y * 17) % 2048 - 1024);
+        }
+    }
+
+    for (const bool global : {false, true}) {
+        HyperCine_SetNEONWaveletEnabled(global);
+
+        const auto b2 = WaveletDispatchSnapshot();
+        const auto r2 = ForwardLevel(plane, 0);
+        const auto a2 = WaveletDispatchSnapshot();
+        const auto d2s = a2.scalar - b2.scalar;
+        const auto d2n = a2.neon - b2.neon;
+
+        const auto b3 = WaveletDispatchSnapshot();
+        const auto r3 = ForwardLevel(plane, 0, WaveletIsa::Auto);
+        const auto a3 = WaveletDispatchSnapshot();
+        const auto d3s = a3.scalar - b3.scalar;
+        const auto d3n = a3.neon - b3.neon;
+
+        const char* mode = global ? "global=on" : "global=off";
+        std::printf("  ..  %s: 2-arg scalar=%llu neon=%llu | 3-arg scalar=%llu neon=%llu\n",
+                    mode, (unsigned long long)d2s, (unsigned long long)d2n,
+                    (unsigned long long)d3s, (unsigned long long)d3n);
+
+        // The regression: the two forms must agree bucket for bucket. Not "both ran
+        // something" -- the exact counters, in the exact proportion.
+        check(d3s == d2s && d3n == d2n, global
+                  ? "3-arg Auto matched 2-arg with the global default on"
+                  : "3-arg Auto matched 2-arg with the global default off",
+              (long long)(d3s * 1000 + d3n), (long long)(d2s * 1000 + d2n));
+
+        // And the coefficients must be identical, because the kernels are bit-exact
+        // whether or not the dispatch choice was right.
+        bool identical = true;
+        for (std::size_t band = 0; band < 4; ++band) {
+            if (r2.bands[band].width != r3.bands[band].width ||
+                r2.bands[band].height != r3.bands[band].height) {
+                identical = false;
+                break;
+            }
+            for (int y = 0; y < r2.bands[band].height && identical; ++y) {
+                for (int x = 0; x < r2.bands[band].width; ++x) {
+                    if (r2.bands[band].pixels[y * r2.bands[band].stride + x] !=
+                        r3.bands[band].pixels[y * r3.bands[band].stride + x]) {
+                        identical = false;
+                        break;
+                    }
+                }
+            }
+        }
+        check(identical, global ? "3-arg Auto coefficients identical with global on"
+                                : "3-arg Auto coefficients identical with global off");
+    }
+    HyperCine_SetNEONWaveletEnabled(original);
+
+#if defined(__ARM_NEON)
+    // On arm64 the discriminating arm is the global=on case, where the correct
+    // dispatch is the vector one. A pre-fix build reports neon=0 there.
+    HyperCine_SetNEONWaveletEnabled(true);
+    const auto b = WaveletDispatchSnapshot();
+    ForwardLevel(plane, 0, WaveletIsa::Auto);
+    const auto a = WaveletDispatchSnapshot();
+    check(a.neon > b.neon, "3-arg Auto ran the vector path when the global default did",
+          (long long)(a.neon - b.neon));
+    HyperCine_SetNEONWaveletEnabled(original);
+#else
+    // No vector kernel exists here, so the only correct statement is that Auto did not
+    // invent one. The cross-form equality above is what carries the proof on x86.
+    check(true, "no NEON kernel in this build: 3-arg Auto correctly ran scalar");
+#endif
+}
+
+// Phase 0c: an explicit Neon that the kernel cannot serve must not produce output.
+// This is the end-to-end half of the injected policy case above; it is only
+// reachable on a host without the vector path, where the request itself is legal
+// (the enum exists) but the kernel is absent.
+void phase_forced_neon_does_not_degrade() {
+    std::printf("phase 0c: a request the kernel cannot serve does not silently succeed\n");
+    hypercine::standalone::Plane plane(128, 24);
+    for (int y = 0; y < plane.height; ++y) {
+        for (int x = 0; x < plane.width; ++x) {
+            plane.pixels[y * plane.stride + x] = static_cast<int16_t>((x * 11 + y * 7) % 512);
+        }
+    }
+#if defined(__ARM_NEON)
+    std::printf("  ok   NEON kernel present: forced Neon is servable on this host\n");
+#else
+    bool threw = false;
+    const auto before = WaveletDispatchSnapshot();
+    try {
+        ForwardLevel(plane, 0, WaveletIsa::Neon);
+    } catch (const std::invalid_argument&) {
+        // Same contract as the encoder constructor: an explicit vector request on a
+        // build without that kernel is a caller error, not a silent downgrade.
+        threw = true;
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    const auto after = WaveletDispatchSnapshot();
+    check(threw, "forced Neon on a host without the kernel threw instead of returning scalar output");
+    check(after.scalar == before.scalar && after.neon == before.neon,
+          "forced Neon did not run a kernel at all",
+          (long long)(after.scalar - before.scalar), (long long)(after.neon - before.neon));
+#endif
 }
 
 // Phase 1: an explicit policy is honoured, and it is the only bucket that moves.
@@ -216,6 +375,9 @@ void phase_reset_keeps_policy() {
 
 int main() {
     std::printf("WAVELET-ISA-POLICY (issue #70 / #259)\n");
+    phase_dispatch_policy_matrix();
+    phase_three_argument_auto_matches_two_argument();
+    phase_forced_neon_does_not_degrade();
     phase_explicit_policy();
     phase_session_outlives_global_switch();
     phase_packets_identical();

@@ -61,6 +61,10 @@ Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride
 enum class WaveletIsa { Auto, Scalar, Neon };
 // Prescale 0 or 2. The two-argument form keeps the historical behaviour: `Auto`
 // resolved per call against the process-global switch.
+//
+// Both forms agree: `Auto` follows the process-global default once per call and may
+// degrade to scalar on a host without the vector path. Only an explicit `Scalar` or
+// `Neon` is a demand, and a demand that cannot be met fails instead of degrading.
 WaveletLevel ForwardLevel(const Plane& input, int prescale);
 WaveletLevel ForwardLevel(const Plane& input, int prescale, WaveletIsa isa);
 namespace detail {
@@ -68,6 +72,21 @@ namespace detail {
 // consults the process-global default at that moment; `Neon` throws when NEON is
 // not compiled into this build rather than silently degrading to scalar.
 WaveletIsa ResolveWaveletIsa(WaveletIsa requested);
+// Which kernel a resolved policy actually runs (issue #70).
+//
+// This exists because "the vector entry point returned NOT_SUPPORTED" and "the
+// caller asked for the vector path" are different statements. A graceful `Auto`
+// call may fall back to scalar -- that is its documented meaning -- but a caller
+// that explicitly asked for `Neon` must be told it did not get it rather than
+// silently receiving scalar output under a NeON label.
+//
+// `vector_succeeded` is true only when the vector entry point reported success. It is
+// false both when the kernel refused the call and when it was never called at all.
+// This header stays free of `wavelet.h` on purpose: the public standalone interface
+// must not pull in the C status enum for one dispatch predicate.
+enum class WaveletDispatchDecision { Vector, Scalar, FailClosed };
+WaveletDispatchDecision DecideWaveletDispatch(WaveletIsa resolved, bool allow_fallback,
+                                             bool vector_succeeded);
 // Deterministic dispatch witness for tests (issue #70).
 //
 // A packet cannot reveal which kernel ran, because the two are bit-exact -- that is
