@@ -337,7 +337,7 @@ int main(int argc, char** argv) try {
         // The diagnostic switch must not change a single packet byte -- it is a side
         // channel. And the hashing-off session must actually report DiagnosticOff
         // rather than an all-zero array that could be mistaken for a fingerprint.
-        if (!run_on.frames.empty() && !run_off.frames.empty()) {
+        if (run_on.frames.size() == 8 && run_off.frames.size() == 8) {
             check(run_on.frames[0].coefficient_hash == FilmScan3CoefficientHash::Full,
                   "D/hashing-on session reports Full");
             check(run_off.frames[0].coefficient_hash == FilmScan3CoefficientHash::DiagnosticOff,
@@ -354,6 +354,8 @@ int main(int argc, char** argv) try {
             // are distinguishable rather than carrying one repeated fingerprint.
             check(run_off.frames[1].coefficient_fnv64 != run_off.frames[0].coefficient_fnv64,
                   "D/tombstone serial advances within a session");
+        } else {
+            check(false, "D/diagnostic sessions each need all eight frames before indexing");
         }
     }
 
