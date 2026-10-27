@@ -367,6 +367,10 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)
+        # Separate current wavelet shape from the bounded FilmScan3 pixel budget.
+        add_executable(test_filmscan3_geometry_budget tests/test_filmscan3_geometry_budget.cpp)
+        target_link_libraries(test_filmscan3_geometry_budget PRIVATE hypercine_standalone)
+        add_test(NAME filmscan3_geometry_budget COMMAND test_filmscan3_geometry_budget)
 
         add_test(NAME filmscan3_fixture_integrity COMMAND "${CMAKE_COMMAND}"
             "-DROOT=${CMAKE_SOURCE_DIR}" -P "${CMAKE_SOURCE_DIR}/tests/verify_filmscan3_fixtures.cmake")

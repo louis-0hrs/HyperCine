@@ -72,13 +72,15 @@ they are not a process-global switch.
 and logs. Those hashes are not written into the sample. `FilmScan3Tables` are
 not diagnostic: the writer stores quant and scale in the sample. Requesting
 hashes embedded in the sample is refused, because that would change bytes.
-The current writer always fills `coefficient_fnv64` as a side result; this
-prototype does not add a switch inside the writer.
+The current writer fills `coefficient_fnv64` by default. Since #261, an explicit
+per-session option can skip hashing and returns `DiagnosticOff`, which must
+never be treated as a successful coefficient-equality proof.
 
 Frame rate is session metadata. The current writer does not put the rational
 into the sample; the no-metadata encode path still stamps timecode as 30 fps.
-A non-30 positive rational is accepted as session data and is **not** a claim
-that the bitstream carries it.
+This internal contract **rejects requested non-30/1 positive frame rates**
+as `ValidButNotImplemented` until the writer's automatic TIMC supports a
+rational timebase. Passing an explicit `FilmScan3Metadata` is separate.
 
 ## Capability query
 
@@ -86,8 +88,9 @@ that the bitstream carries it.
 (`src/core/encoder_session_config.h`). It is fail-closed and does not allocate
 a frame, plane, wavelet scratch buffer, or sample. It calls
 `ValidateFilmScan3Geometry` for FilmScan3 integer dimensions and maps that
-result. It does not reimplement the 4096 envelope or the 8,294,400-pixel
-budget.
+result. The 4096 qualification envelope is tracked independently of the
+validator's shape/exception result; the 8,294,400-pixel budget remains in
+the validator and is also reported as an independent memory-budget axis.
 
 The wavelet alignment rule (width multiple of 128, height multiple of 8,
 width at least 128, height at least 24) is the shared 3-level 4:2:2 shape
@@ -101,7 +104,7 @@ Axes, kept separate:
 | Format mathematically invalid | Non-positive size, `uint64` product or stride overflow, bad rational, wavelet shape, or a bound input that cannot hold the frame |
 | Valid but not implemented | Known FilmScan3-adjacent request this writer does not implement, including per-session CPU SIMD |
 | Backend not present | The requested backend is not in the caller-supplied device. A observed CUDA card is not presence |
-| Backend not qualified for this geometry | Outside the validator's dimension envelope, a GPU backend, or a CPU geometry with no evidence record. Includes 4096×2024, which is inside the pixel budget |
+| Backend not qualified for this geometry | Outside this implementation's conservative 4096 qualification envelope, a GPU backend, or a CPU geometry with no evidence record. Includes 4096×2024, which is inside the pixel budget |
 | Memory budget exceeded | Pixel budget, sample ceiling, sample floor below the raw lowpass, or the caller's CPU/GPU ceiling below the static planning ceiling |
 | Reference missing | No original-SDK oracle is linked. Always true here. Blocks only if `require_reference_oracle` is set |
 | Experimentally supported | CPU scalar, validator passed, geometry is on the evidence list, and no axis above blocks. Allocation may start. This is not `CODEC_PASS` and not a reference pass |
@@ -125,19 +128,22 @@ not become qualified by passing the structural guard.
 4096×2024 is 8,290,304 pixels, at or under `kMaxPlaneElements` (8,294,400),
 and is not on the list. 4096×2160 fails the pixel budget. 7680×4320 is
 wavelet-aligned and outside the qualified dimension envelope; the pixel budget
-fails as well and is reported separately. The primary reason for 8K stays
-"not qualified", matching the validator, which rejects the dimension before
-the pixel check.
+fails as well and is reported separately. The primary reason for 8K remains
+"backend not qualified" because the separate qualification axis is checked
+independently; the revised validator classifies the current implementation's
+wavelet-aligned 8K shape as a **pixel-budget failure (`length_error`)**. Neither
+classification permits allocation or claims original GoPro 8K compatibility.
 
 ## What this revision does not do
 
 - No change to the sample writer, quantizer, wavelet, or public constructors.
-- No CUDA, Metal, or Vulkan runtime work. Draft #249 and #255 stay separate.
+- No new CUDA, Metal, NEON, or Vulkan runtime work in this capability/geometry
+  contract; the existing experimental compute backends stay independently qualified.
 - No 8K, 12K, or 17K claim, and no silent crop, downscale, or tile codec.
 - No second CFHD writer.
-- Root `CMakeLists.txt` is not edited. The test target lives in
-  `tests/encoder_capability/CMakeLists.txt` and is not in the default CTest
-  inventory until that file is added from the standalone section.
+- Root `CMakeLists.txt` now registers the SDK-free capability contract when the
+  FFmpeg/ffprobe prerequisites are present. Absence of tools must not be
+  mistaken for a passing codec-quality qualification.
 
 ## Host evidence from this change
 
