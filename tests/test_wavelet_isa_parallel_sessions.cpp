@@ -186,15 +186,59 @@ void phase_parallel_scalar_neon() {
     CompareSessions(scalar, neon, "parallel scalar vs neon", W, H);
     CheckOrdered(scalar, "parallel scalar vs neon");
 #else
-    // An explicit Neon request must throw on a build without the vector path, and
-    // must not be silently downgraded to scalar while claiming Neon.
-    std::printf("  ok   no NEON build: explicit Neon session is rejected\n");
+    // Two separate claims on a build without the vector path, and they used to be
+    // mixed into one.
+    //
+    // First, the contract: an explicit Neon request must throw rather than silently
+    // degrading while claiming Neon.
     check(!neon.error.empty(), "explicit Neon session threw instead of degrading");
     check(neon.error.find("not available") != std::string::npos,
           "rejection names the missing backend", 0, 0);
+
+    // Second, isolation -- which the old branch did not test at all. It checked only
+    // that one session threw, so "two sessions ran at the same time without sharing
+    // state" was unverified on this architecture. A Neon pair cannot run here, but a
+    // Scalar session and an Auto session are both legal, both execute concurrently,
+    // and their dispatch counters, packets and frame sequences can still be compared.
+    // If a shared counter or shared buffer existed, this pair would expose it exactly
+    // as the Neon pair would.
     check(scalar.error.empty(), "scalar session still ran normally");
-    check(scalar.dispatched.neon == 0, "scalar session ran no neon kernels",
+    check(scalar.dispatched.neon == 0, "scalar session ran no vector kernels",
           static_cast<long long>(scalar.dispatched.neon));
+
+    SessionRun auto_run, scalar_two;
+    std::thread c([&] { auto_run = RunSession(W, H, WaveletIsa::Auto, kFrames); });
+    std::thread d([&] { scalar_two = RunSession(W, H, WaveletIsa::Scalar, kFrames); });
+    c.join();
+    d.join();
+
+    check(auto_run.error.empty() && scalar_two.error.empty(),
+          "Auto and Scalar sessions both completed concurrently");
+    // Each thread reads only its own thread-local counters. A non-zero vector count
+    // here would be state that leaked from another session, and an equal-and-nonzero
+    // scalar count across both would be one shared counter serving two sessions.
+    check(auto_run.dispatched.neon == 0, "concurrent Auto session entered no vector dispatch",
+          static_cast<long long>(auto_run.dispatched.neon));
+    check(scalar_two.dispatched.neon == 0, "concurrent Scalar session entered no vector dispatch",
+          static_cast<long long>(scalar_two.dispatched.neon));
+    check(auto_run.dispatched.scalar > 0 && scalar_two.dispatched.scalar > 0,
+          "both concurrent sessions ran real kernels",
+          static_cast<long long>(auto_run.dispatched.scalar),
+          static_cast<long long>(scalar_two.dispatched.scalar));
+    // Independent per-thread counters: the totals must be the sum of two separate
+    // runs, not one run counted twice.
+    const auto sequential_only = RunSession(W, H, WaveletIsa::Scalar, kFrames);
+    check(auto_run.dispatched.scalar == sequential_only.dispatched.scalar &&
+              scalar_two.dispatched.scalar == sequential_only.dispatched.scalar,
+          "each concurrent session counted exactly its own dispatches",
+          static_cast<long long>(auto_run.dispatched.scalar),
+          static_cast<long long>(sequential_only.dispatched.scalar));
+    // And the bytes: two concurrent sessions must each reproduce the sequential
+    // result for the same policy, which a shared workspace would corrupt.
+    CompareSessions(auto_run, sequential_only, "concurrent Auto vs sequential Scalar", W, H);
+    CompareSessions(scalar_two, sequential_only, "concurrent Scalar vs sequential Scalar", W, H);
+    CheckOrdered(auto_run, "concurrent Auto");
+    CheckOrdered(scalar_two, "concurrent Scalar");
 #endif
 }
 
