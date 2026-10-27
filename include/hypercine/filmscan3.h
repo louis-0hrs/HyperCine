@@ -81,7 +81,17 @@ public:
     // not allowed to fall back to CPU; only MetalOrCpu may, and only during
     // initialization, in which case the CPU fallback keeps this geometry.
     FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry);
+    // CPU session with an ISA policy. Explicit Scalar/Neon requests are resolved
+    // once at construction and remain pinned for this session, independently of
+    // changes to the process-wide default. Auto intentionally keeps the historical
+    // dynamic behaviour: each later forward dispatch reads the global preference.
+    // Explicit Neon throws if this build has no NEON kernel.
+    FilmScan3Encoder(FilmScan3Geometry geometry, WaveletIsa isa);
     FilmScan3Geometry geometry() const noexcept;
+    // Effective CPU ISA when queried. For explicit Scalar/Neon sessions this is
+    // fixed; for Auto it is a snapshot of the current global preference, not a
+    // guarantee that a subsequent encode uses the same kernel if the flag changes.
+    WaveletIsa wavelet_isa() const noexcept;
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
                          const FilmScan3Metadata& metadata);

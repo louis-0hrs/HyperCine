@@ -110,8 +110,15 @@ uint32_t MintHashSession() {
 }
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::SelectFrontend(backend)) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry) : frontend_(detail::CpuFrontend(geometry)) {}
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry, WaveletIsa isa)
+    : frontend_(detail::CpuFrontend(geometry, isa)) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry)
     : frontend_(detail::SelectFrontend(backend, geometry)) {}
+WaveletIsa FilmScan3Encoder::wavelet_isa() const noexcept {
+    // The default-constructed encoder lazily takes the shared CPU frontend, which is
+    // Auto-resolved at first use; report what that frontend will actually run.
+    return frontend_ ? frontend_->Isa() : WaveletIsa::Auto;
+}
 void FilmScan3Encoder::SetCoefficientHashing(bool enabled) noexcept { coefficient_hashing_=enabled; }
 void FilmScan3Encoder::StampDiagnosticOff(FilmScan3Frame& result) {
     // 0xD1 in the top byte, slot in the next, then session and serial. A skipped
