@@ -129,3 +129,29 @@ remain unchanged. The test-only negative regression preserves this oracle
 limitation and checks prefix independence at larger tested widths, without
 granting new full-frame parity claims. See [diagnosis and reproduction](SMALL_CHROMA_ORACLE.md).
 
+## Windows reference-decoder diagnostic follow-up (#120)
+
+The bounded CPU-only immutable-packet YUY2 diagnostic and measured repetition
+evidence are documented in
+[`validation/REFERENCE_DECODE_WINDOWS.md`](validation/REFERENCE_DECODE_WINDOWS.md).
+API success alone does not establish repeatable pixels. Decoder nondeterminism
+is an unresolved release gate; it must not mask encoder packet mismatch, API
+errors or stable quality failure. Threaded CRT rounding is a hypothesis, not a
+complete explanation of large pixel differences. No frozen source is changed.
+
+The subsequent [temporal diagnostic](validation/TEMPORAL_LOWPASS_DEPENDENCY.md)
+demonstrates that the original `BANDS_ALL_VALID` equality is true for
+`valid=started=0x0e` although lowpass bit0 is absent. An isolated call-boundary
+observer records premature dependent inverse reconstruction at 128px; a 256px
+unmodified-decoder control also varies. The downstream validity guard is present
+but uses that same predicate. This is not yet an exact-packet reproduction of
+the original #116 1080p failure, and no frozen/production codec fix is applied.
+
+The subsequent [controlled dependency A/B](validation/LOWPASS_DEPENDENCY_AB.md)
+uses only an isolated manual target: queue-local readiness plus per-channel
+producer release/acquire publication. Across 15 opens per arm at 128/256px,
+missing-lowpass starts fall to zero and the experimental output is stable,
+while the unmodified SDK still varies on those exact packets. This is bounded
+causal diagnostic evidence, not production remediation, memory-safety clearance
+or confirmation of the unavailable original M4 packet. Release remains blocked.
+
