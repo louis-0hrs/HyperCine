@@ -20,7 +20,8 @@ class StandaloneGateTests(unittest.TestCase):
                                             if name != missing]})
 
     def test_windows_qualification_contracts_are_required(self):
-        for name in ('qualification_report_contract', 'cuda_output_dir_platform_contract'):
+        for name in ('qualification_report_contract', 'cuda_output_dir_platform_contract',
+                     'windows_reference_process_contract'):
             self.assertIn(name, REQUIRED)
             with self.assertRaises(ValueError):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})

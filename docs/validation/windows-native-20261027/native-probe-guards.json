@@ -1,0 +1,33 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "status": "PASS",
+  "input_sha256": "5e8ea4785c00dd6406e85be7ddee426dd093e1007aca7effa9e1aff4f95aa1ca",
+  "records": [
+    {
+      "name": "invalid-thread",
+      "expected_rejection": "arguments",
+      "exit_code": 1,
+      "status": "PASS"
+    },
+    {
+      "name": "invalid-packet",
+      "expected_rejection": "prepare",
+      "exit_code": 1,
+      "status": "PASS"
+    },
+    {
+      "name": "existing-output",
+      "expected_rejection": "save",
+      "exit_code": 1,
+      "status": "PASS"
+    },
+    {
+      "name": "input-output-collision",
+      "expected_rejection": "save",
+      "exit_code": 1,
+      "status": "PASS"
+    }
+  ],
+  "source_revision": "37e6bcfcecc65bcf4945b96e99cbc2c6a0a5d5c3"
+}

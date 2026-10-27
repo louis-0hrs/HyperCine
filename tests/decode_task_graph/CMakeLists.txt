@@ -96,4 +96,21 @@ if(HYPERCINE_BUILD_TESTS)
             TIMEOUT 120
             PASS_REGULAR_EXPRESSION "SCHEDULER-T4 PASS")
     endforeach()
+
+    # T5 publication-after-decision (issue #144, after #275). The existing gates
+    # prove a published buffer is unreadable after stop/error; none measures
+    # whether the producer may still install a publication after that decision.
+    # Guards: T5-A cancel, T5-B recorded error, T5-C plane form, T5-D empty record.
+    # Removing the stop_/error_ admission from publish() must fail T5-A..C.
+    add_executable(test_scheduler_t5_publish_after_stop_144
+        test_scheduler_t5_publish_after_stop_144.cpp)
+    target_link_libraries(test_scheduler_t5_publish_after_stop_144
+        PRIVATE hypercine_decode_task_graph)
+    foreach(workers 1 2 4 16)
+        add_test(NAME scheduler_t5_publish_after_stop_144_workers_${workers}
+                 COMMAND test_scheduler_t5_publish_after_stop_144 ${workers})
+        set_tests_properties(scheduler_t5_publish_after_stop_144_workers_${workers} PROPERTIES
+            TIMEOUT 120
+            PASS_REGULAR_EXPRESSION "SCHEDULER-T5 PASS")
+    endforeach()
 endif()

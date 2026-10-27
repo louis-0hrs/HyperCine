@@ -1,0 +1,136 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "schema_version": 1,
+  "status": "PASS",
+  "ctest_exit": 0,
+  "scope": "CTest contract execution only; no production or pixel qualification",
+  "counts": {
+    "PASS": 24,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "INCONCLUSIVE": 0
+  },
+  "tests": [
+    {
+      "name": "cpu_isa_selection",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "quality_state_unit",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "quality_cmake_mode_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_s3_plane",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_8",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    }
+  ]
+}

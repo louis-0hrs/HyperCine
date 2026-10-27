@@ -1,0 +1,155 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "observed_date": "2026-10-27",
+  "branches": [
+    {
+      "branch": "codex/archive-status-sanitized",
+      "sha": "f648fab06c7689b659d8145a11ecdc4b26238a79"
+    },
+    {
+      "branch": "codex/decoder-pixel-diff",
+      "sha": "f7b4641ccee9016357fa02e37847947a73ff3642"
+    },
+    {
+      "branch": "codex/diagnostic-schema",
+      "sha": "b33617cd7856b134b44d8fe337146e480905bd7c"
+    },
+    {
+      "branch": "codex/extreme-geometry-17k-audit",
+      "sha": "6775799b26402f6131ae6e1fc240c530bd4adc3b"
+    },
+    {
+      "branch": "codex/extreme-geometry-windows-review",
+      "sha": "123592e55967a8d0164ae7a63c1b9cf42d7a74c2"
+    },
+    {
+      "branch": "codex/geometry-audit-reconciled",
+      "sha": "224709afaeed4e8ae1c3d90c923279a7acb883e7"
+    },
+    {
+      "branch": "codex/integrate36-reviewed",
+      "sha": "4fba41a597f585b91903cdd6e1bae4d8295ac427"
+    },
+    {
+      "branch": "codex/integrate48-reviewed",
+      "sha": "224709afaeed4e8ae1c3d90c923279a7acb883e7"
+    },
+    {
+      "branch": "codex/integrate99-reviewed",
+      "sha": "459aacd865bca2b4bd9780de61253041d0895324"
+    },
+    {
+      "branch": "codex/issue120-187-release-gate",
+      "sha": "a66e69425745b7533bca117fb5705deada22c3c2"
+    },
+    {
+      "branch": "codex/issue120-triangulation-review",
+      "sha": "d5de8d9ae9e045b96111dbdb36eea435bdeb3d5d"
+    },
+    {
+      "branch": "codex/issue120-windows-evidence",
+      "sha": "97c34500324b550da5f6444fe9d28c8729dea8d2"
+    },
+    {
+      "branch": "codex/issue14-performance-20261016",
+      "sha": "97681beee5de00835375ac43fc77c18764557705"
+    },
+    {
+      "branch": "codex/issue144-wavelet-design",
+      "sha": "19e768f7e7096a4b02afbb2c75964950bc775bdd"
+    },
+    {
+      "branch": "codex/issue147-decode-task-graph",
+      "sha": "a96a07bca7b3146e6d681ea5cb9b1a68bfa51e0f"
+    },
+    {
+      "branch": "codex/issue157-affinity-topology",
+      "sha": "9746cb24a82272d1d151e999c1fb07148459420a"
+    },
+    {
+      "branch": "codex/issue189-sdk-goldens",
+      "sha": "4bba30eeba106bdc9e96042d02694c026351a624"
+    },
+    {
+      "branch": "codex/issue189-windows-acceptance",
+      "sha": "8988b49109bced51f9e314894881112c7e435e35"
+    },
+    {
+      "branch": "codex/issue21-small-chroma-oracle",
+      "sha": "4731d2aa856c207a848f92d356df3275a3bd5910"
+    },
+    {
+      "branch": "codex/issue34-architecture-review",
+      "sha": "0aefd7b6d20e61e5282c9d84414e5d9e8f9d8d54"
+    },
+    {
+      "branch": "codex/issue36-f1-corpus",
+      "sha": "f17355f2f391410fc2cf27065e54dcffe1ae45e7"
+    },
+    {
+      "branch": "codex/issue36-probe-safety",
+      "sha": "4fba41a597f585b91903cdd6e1bae4d8295ac427"
+    },
+    {
+      "branch": "codex/issue37-windows-qualification",
+      "sha": "535fdeaf2df1e04a30322331bb1ad2462235fd3e"
+    },
+    {
+      "branch": "codex/issue69-x86-wavelet",
+      "sha": "3f612a83a286815a7969d1759b33753bb2f821a3"
+    },
+    {
+      "branch": "codex/issue96-windows-hook-tests",
+      "sha": "7b17c0409ce8046355a88b524caa2af10ad6ad94"
+    },
+    {
+      "branch": "codex/issue99-ffmpeg",
+      "sha": "e87ef0258ba37f5c78f1557c59d9c7331df5521c"
+    },
+    {
+      "branch": "codex/issue99-windows-retry",
+      "sha": "459aacd865bca2b4bd9780de61253041d0895324"
+    },
+    {
+      "branch": "codex/quality-state-safe-p1",
+      "sha": "322e61592917e65d6cf857c060eedf522e45207b"
+    },
+    {
+      "branch": "codex/quality-state-sdkfree-p1",
+      "sha": "a39db556f8c5a694fecfe432998425801bf91be3"
+    },
+    {
+      "branch": "codex/reference-stack-integration",
+      "sha": "77acadbd497a490c034440709390807087147d64"
+    },
+    {
+      "branch": "codex/security-publication-audit-issue54",
+      "sha": "ae64f5f48a21844662215892ddc8cc957de4a20f"
+    },
+    {
+      "branch": "codex/windows-all-formats-golden",
+      "sha": "18ea29bd42a3896fccfad7f327eb4d940b9a13df"
+    },
+    {
+      "branch": "codex/windows-qualification-20261026",
+      "sha": "6b69df809aac795e77e0dd1fa0fda32742d68e7c"
+    },
+    {
+      "branch": "codex/windows-qualification-20261027",
+      "sha": "44827e84f1658d67a506ecdd41d8d1c7ba7379c8"
+    },
+    {
+      "branch": "codex/windows-quality-profiles",
+      "sha": "8e19f2d70ec34268e926bdb0200af9b1a531560e"
+    },
+    {
+      "branch": "codex/windows-ref-tag-qualification",
+      "sha": "c7e4aa1905f544d542e504a1ded80b8e94470ee6"
+    },
+    {
+      "branch": "codex/windows-reference-corpus",
+      "sha": "addd8f46ca78a968b9c235baf3f7e3d53d8238f7"
+    }
+  ]
+}
