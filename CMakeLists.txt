@@ -122,6 +122,7 @@ add_library(hypercine_cpu_isa STATIC src/cpu/cpu_isa.cpp)
 target_include_directories(hypercine_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 if(HYPERCINE_BUILD_TESTS)
     enable_testing()
+    add_subdirectory(tests/geometry_extreme)
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
         add_test(NAME diagnostic_summary_contract COMMAND "${Python3_EXECUTABLE}"
