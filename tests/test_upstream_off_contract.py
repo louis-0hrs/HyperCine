@@ -73,7 +73,10 @@ def _configure(build_dir, **defines):
     for name in list(env):
         if name.startswith('HYPERCINE_'):
             del env[name]
-    completed = subprocess.run(args, capture_output=True, text=True, env=env)
+    # CMake diagnostics use UTF-8; a Windows ANSI code page can reject them
+    # in the subprocess reader before the actual configure result is checked.
+    completed = subprocess.run(args, capture_output=True, text=True,
+                               encoding='utf-8', errors='replace', env=env)
     log = completed.stdout + completed.stderr
     return completed.returncode, log
 
@@ -97,7 +100,7 @@ def _tool_is_built(build_dir, name):
 def _registered_tests(build_dir):
     completed = subprocess.run(
         ['ctest', '--test-dir', str(build_dir), '-N'],
-        capture_output=True, text=True)
+        capture_output=True, text=True, encoding='utf-8', errors='replace')
     if completed.returncode != 0:
         raise AssertionError(
             'ctest -N failed in {}:\n{}{}'.format(

@@ -164,3 +164,12 @@ least four input rows. Three rows would make the original LL endpoint read
 before row zero. An independent synthetic ramp and pinned original replay
 cover this behavior; frozen upstream remains unchanged. See
 [the numerical diagnosis](validation/SCALAR_INVERSE_RESEARCH_144.md).
+
+## Windows fresh-process reference repeatability
+
+The bounded Windows protocol and its limits are documented in
+[WINDOWS_REFERENCE_PROCESS_PROTOCOL.md](validation/WINDOWS_REFERENCE_PROCESS_PROTOCOL.md).
+Original-SDK API success and repeated pixel hashes are separate evidence.
+Do not treat `TAG_CPU_MAX` as measured decoder worker telemetry or promote an
+unstable reference into an encoder correctness gate. The frozen SDK remains
+unchanged; the observation harness lives in `tests/`.
