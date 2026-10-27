@@ -1,0 +1,243 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "schema_version": 1,
+  "status": "FAIL",
+  "ctest_exit": 8,
+  "scope": "CTest contract execution only; no production or pixel qualification",
+  "counts": {
+    "PASS": 42,
+    "FAIL": 1,
+    "BLOCKED": 2,
+    "INCONCLUSIVE": 0
+  },
+  "tests": [
+    {
+      "name": "diagnostic_summary_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "cpu_isa_selection",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_s3_plane",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_8",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_reference_oracle",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "qualification_report_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "windows_reference_process_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "cuda_output_dir_platform_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_reference_release_inventory",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_compare_sdk_oracle",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_rca159_witness_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "small_chroma_upstream_oracle",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_transform_wavelet",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_codec_roundtrip",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_yuy2_stability",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_avi_sample",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_fixture_integrity",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_filmscan3_windows_decoder",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_oracle_fixture_hashes",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_sdk_decode_3_packets",
+      "status": "BLOCKED",
+      "reason": "reference gate skipped; no qualified oracle result"
+    },
+    {
+      "name": "gop2_reference_inventory_integrity",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "upstream_off_configure_contract",
+      "status": "FAIL",
+      "reason": "CTest reported failure/error"
+    },
+    {
+      "name": "gop2_original_stage_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "ffmpeg_oracle_qualification",
+      "status": "BLOCKED",
+      "reason": "reference gate skipped; no qualified oracle result"
+    },
+    {
+      "name": "ffmpeg_oracle_qualification_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "benchmark_artifact_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    }
+  ],
+  "integration_base": "a267db4f1d9f41955c59675f2bd3690c30f7acb5",
+  "source_revision": "37e6bcfcecc65bcf4945b96e99cbc2c6a0a5d5c3"
+}

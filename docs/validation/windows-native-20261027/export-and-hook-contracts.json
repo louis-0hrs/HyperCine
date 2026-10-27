@@ -1,0 +1,19 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "process_export_contract_cases": 19,
+  "forged_valid_json_canaries": "PASS",
+  "typed_integer_boundaries": "PASS",
+  "duplicate_json_and_nonfinite_rejection": "PASS",
+  "cli_failure_redaction": "PASS",
+  "installed_hook_smoke": {
+    "passed": 2,
+    "failed": 0,
+    "cases": [
+      "neutral_agent_real_commit_and_push",
+      "reject_missing_explicit_identity_configuration"
+    ]
+  },
+  "full_installed_hook_regression": "NOT_COMPLETED; stopped after no observable progress, no PASS inferred",
+  "source_revision": "37e6bcfcecc65bcf4945b96e99cbc2c6a0a5d5c3"
+}
