@@ -277,6 +277,12 @@ ChildOutput RunTool(const std::vector<std::string>& args, const fs::path& captur
     }
     // Merge stderr so a failing tool's diagnosis is not lost on one platform only.
     command += " > " + ShellQuote(capture_path.string()) + " 2>&1";
+#ifdef _WIN32
+    // cmd.exe strips the first/last quotes of a command beginning with a
+    // quoted executable. With a redirect, the whole command needs another
+    // pair of quotes; otherwise even ffprobe -version fails to launch.
+    command = "\"" + command + "\"";
+#endif
     const int status = std::system(command.c_str());
     ChildOutput out;
     out.exit_code = SystemStatusToExitCode(status);
@@ -376,7 +382,10 @@ std::string Field(const std::string& text, const std::string& key) {
     Require(at != std::string::npos, "ffprobe missing " + key + " in: " + text);
     const auto start = at + key.size() + 1;
     const auto end = text.find('\n', start);
-    return text.substr(start, end == std::string::npos ? std::string::npos : end - start);
+    std::string value = text.substr(start, end == std::string::npos ? std::string::npos : end - start);
+    // ffprobe prints CRLF on Windows; a raw CR is not part of the field value.
+    if (!value.empty() && value.back() == '\r') value.pop_back();
+    return value;
 }
 
 void WriteFile(const fs::path& path, const std::vector<std::uint8_t>& bytes) {
@@ -413,6 +422,51 @@ fs::path OwnedGeometryDirectory(int width, int height) {
         throw fs::filesystem_error("cannot create isolated CUDA geometry directory", candidate, ec);
     }
     throw std::runtime_error("could not create exclusive CUDA geometry directory");
+}
+
+
+// No CUDA device or FFmpeg installation is required for this subprocess/line
+// ending contract. On Windows the command script and capture file both have
+// spaces in their paths: this reproduces the native cmd.exe quoting failure.
+int RunToolContract() {
+    try {
+        Require(Field("codec_name=cfhd\r\nwidth=1920\r\npix_fmt=yuv422p10le\r\n", "codec_name") == "cfhd",
+                "CRLF codec field");
+        Require(Field("codec_name=cfhd\r\nwidth=1920\r\npix_fmt=yuv422p10le\r\n", "width") == "1920",
+                "CRLF width field");
+        Require(Field("codec_name=cfhd\r\nwidth=1920\r\npix_fmt=yuv422p10le\r\n", "pix_fmt") == "yuv422p10le",
+                "CRLF pixel-format field");
+        Require(Field("width=1920\n", "width") == "1920", "LF field");
+
+        const fs::path owned = OwnedGeometryDirectory(0, 0);
+        const fs::path folder = owned / "path with spaces";
+        fs::create_directory(folder);
+        const fs::path capture = folder / "capture with spaces.txt";
+        std::string executable;
+#ifdef _WIN32
+        const fs::path script = folder / "mock ffprobe.cmd";
+        std::ofstream stub(script, std::ios::binary);
+        Require(static_cast<bool>(stub), "cannot create subprocess fixture");
+        stub << "@echo off\r\necho ffprobe version mock\r\n";
+        stub.close();
+        Require(static_cast<bool>(stub), "cannot write subprocess fixture");
+        executable = script.string();
+#else
+        // The POSIX contract also covers an argument and capture path with
+        // spaces. The Windows-specific executable-path case is above.
+        executable = "/bin/echo";
+#endif
+        const auto output = Capture({executable, "ffprobe version mock"}, capture);
+        Require(output.find("ffprobe version mock") != std::string::npos,
+                "quoted subprocess did not return the expected output");
+        std::error_code cleanup_ignored;
+        fs::remove_all(owned, cleanup_ignored);
+        std::cout << "PASS cuda subprocess/CRLF contract\n";
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << "FAIL cuda subprocess/CRLF contract: " << error.what() << "\n";
+        return 1;
+    }
 }
 
 // Independent FFmpeg decode. Checks container-reported codec, dimensions and
@@ -711,13 +765,20 @@ int RunPrequantNegative() {
 
 int main(int argc, char** argv) {
     bool gpu_required = false;
+    bool tool_contract = false;
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--gpu-required") == 0) gpu_required = true;
+        else if (std::strcmp(argv[i], "--tool-contract") == 0) tool_contract = true;
         else {
-            std::cerr << "usage: test_cuda_multigeometry [--gpu-required]\n";
+            std::cerr << "usage: test_cuda_multigeometry [--gpu-required | --tool-contract]\n";
             return 2;
         }
     }
+    if (gpu_required && tool_contract) {
+        std::cerr << "--gpu-required and --tool-contract cannot be combined\n";
+        return 2;
+    }
+    if (tool_contract) return RunToolContract();
     int device_count = 0;
     const auto count_status = cudaGetDeviceCount(&device_count);
     if (count_status != cudaSuccess || device_count < 1) {
