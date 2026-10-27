@@ -237,8 +237,9 @@ std::string Tool(const char* env, const char* fallback) {
 // temporary file, read back with the standard library.
 //
 // The arguments are quoted and the shell metacharacters that matter for a redirect
-// cannot appear unquoted. The tool is still a trusted local path from
-// HYPERCINE_FFMPEG_EXECUTABLE/HYPERCINE_FFPROBE_EXECUTABLE, never remote input.
+// cannot appear unquoted. The tool path is the environment variable when that
+// variable is set and non-empty; otherwise Tool() uses its fallback argument if
+// that file exists. The path is never taken from remote input.
 std::string ShellQuote(const std::string& value) {
     std::string quoted = "\"";
     for (const char c : value) {
@@ -728,6 +729,8 @@ int main(int argc, char** argv) {
               << "GPU_REQUIRED: enforced device=\"" << device.name << "\" launches_must_be_nonzero=1"
               << " cpu_fallback=excluded\n";
 
+    // Reachable fallbacks, not absent paths: used only when the matching variable
+    // is unset or empty and the file exists. "/usr/bin/ffmpeg" and "/usr/bin/ffprobe".
     const auto ffmpeg = Tool("HYPERCINE_FFMPEG_EXECUTABLE", "/usr/bin/ffmpeg");
     const auto ffprobe = Tool("HYPERCINE_FFPROBE_EXECUTABLE", "/usr/bin/ffprobe");
     const std::string device_name = device.name;
