@@ -4,8 +4,7 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """Test actual autonomous CPU FilmScan3 samples; no manifest tables enter encoder."""
 import argparse
-from validation_support import portable_command
-import array
+from validation_support import portable_command, p10_samples, require, integer, hex_digest
 import math
 import struct
 import hashlib
@@ -20,6 +19,69 @@ import tempfile
 import reference_sample as sample
 import validate_windows_reference as gate
 from validate_standalone import avi
+
+
+def decoded_psnr(actual, reference, width=1920, height=1080):
+    pixels = p10_samples(actual, width, height)
+    expected = p10_samples(reference, width, height)
+    square = sum((int(a)-int(b))**2 for a, b in zip(pixels, expected))
+    psnr = 10*math.log10(1023.0**2*len(pixels)/square) if square else None
+    if psnr is not None and psnr <= 35:
+        raise ValueError('FS3 decoded p10 PSNR does not exceed 35 dB: '+str(psnr))
+    return psnr
+
+
+def load_trace(text):
+    """Read the encoder's unambiguous trace envelope before validating rows."""
+    def unique_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError('duplicate trace key')
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError('nonstandard trace constant')
+
+    try:
+        result = json.loads(text, object_pairs_hook=unique_pairs,
+                            parse_constant=reject_constant)
+        require(type(result) is dict and set(result) == {'profile', 'frames'} and
+                result['profile'] == 'FilmScan3' and type(result['frames']) is list,
+                'invalid trace envelope')
+    except (ValueError, TypeError, RecursionError):
+        raise ValueError('invalid encoder trace JSON') from None
+    return result['frames']
+
+
+def validate_trace(trace, expected):
+    require(type(trace) is list and type(expected) is list and bool(expected),
+            'empty or invalid encoder trace inventory')
+    keys = {'frame_index', 'fs_rate_limiter', 'previous_sample_bytes',
+            'sample_bytes', 'quant', 'scale', 'coefficient_fnv64'}
+    for row in trace:
+        require(type(row) is dict and set(row) == keys, 'invalid encoder trace fields')
+        for key in ('frame_index', 'fs_rate_limiter', 'previous_sample_bytes'):
+            integer(row[key])
+        integer(row['sample_bytes'], 1)
+        for key in ('quant', 'scale'):
+            require(type(row[key]) is list and len(row[key]) == 36, 'invalid trace table')
+            for value in row[key]:
+                integer(value, 1, 32768)
+        require(type(row['coefficient_fnv64']) is list and len(row['coefficient_fnv64']) == 30,
+                'invalid trace coefficient inventory')
+        for value in row['coefficient_fnv64']:
+            hex_digest(value, 16)
+    if len(trace) != len(expected):
+        raise ValueError('missing encoder trace frames')
+    for frame, actual in zip(expected, trace):
+        index = frame['frame_index']
+        for key in ['frame_index', 'fs_rate_limiter', 'previous_sample_bytes', 'quant', 'scale']:
+            if actual[key] != frame[key]:
+                raise ValueError('frame %d autonomous state/table mismatch: %s; actual=%s expected=%s' % (index, key, actual[key], frame[key]))
+        if actual['coefficient_fnv64'] != [b['sdk_coeff_fnv64'] for b in frame['bands']]:
+            raise ValueError('frame %d production coefficient mismatch' % index)
 
 
 def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None):
@@ -49,24 +111,20 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
     cpu_options = arguments[1:]
     output = directory/'samples';arguments += [str(output)] + inputs
     subprocess.run(arguments, check=True)
-    trace = json.loads((output/'trace.json').read_text())['frames']
+    trace = load_trace((output/'trace.json').read_text(encoding='utf-8'))
     cpu_output = directory/'cpu-samples'
     if cpu_encoder:
         # Identical input paths and explicit metadata; compare raw full packets,
         # independently from SDK-normalized hashes and the mandatory stage audit.
         subprocess.run([str(cpu_encoder)] + cpu_options + [str(cpu_output)] + inputs, check=True)
-        if json.loads((cpu_output/'trace.json').read_text())['frames'] != trace:
+        cpu_trace = load_trace((cpu_output/'trace.json').read_text(encoding='utf-8'))
+        validate_trace(cpu_trace, expected)
+        if cpu_trace != trace:
             raise ValueError('same-input comparison encoder state/tables/30 bands differ')
-    if len(trace) != len(expected):
-        raise ValueError('missing encoder trace frames')
+    validate_trace(trace, expected)
     results = []
     for frame, actual in zip(expected, trace):
         index = frame['frame_index']
-        for key in ['frame_index', 'fs_rate_limiter', 'previous_sample_bytes', 'quant', 'scale']:
-            if actual[key] != frame[key]:
-                raise ValueError('frame %d autonomous state/table mismatch: %s; actual=%s expected=%s' % (index, key, actual[key], frame[key]))
-        if actual['coefficient_fnv64'] != [b['sdk_coeff_fnv64'] for b in frame['bands']]:
-            raise ValueError('frame %d production coefficient mismatch' % index)
         raw = (output/('frame_%04d.cfhd' % index)).read_bytes()
         if cpu_encoder:
             cpu_raw = (cpu_output/('frame_%04d.cfhd' % index)).read_bytes()
@@ -107,17 +165,8 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
             packet = output/('frame_%04d.avi' % index);packet.write_bytes(avi(raw, 1920, 1080))
             decoded = output/('frame_%04d.yuv' % index)
             subprocess.run([str(ffmpeg), '-v', 'error', '-xerror', '-y', '-i', str(packet), '-frames:v', '1', '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', str(decoded)], check=True)
-            if decoded.stat().st_size != 1920*1080*4:
-                raise ValueError('FFmpeg output storage mismatch')
-            actual_pixels=array.array('H', decoded.read_bytes());reference_pixels=array.array('H', (output/('frame_%04d.reference.yuv' % index)).read_bytes())
-            if sys.byteorder != 'little':
-                actual_pixels.byteswap();reference_pixels.byteswap()
-            if len(actual_pixels) != len(reference_pixels):
-                raise ValueError('reference plane length mismatch')
-            square=sum((int(a)-int(b))**2 for a,b in zip(actual_pixels, reference_pixels))
-            psnr=10*math.log10(1023.0**2*len(actual_pixels)/square) if square else None
-            if psnr is not None and psnr <= 35:
-                raise ValueError('FS3 decoded p10 PSNR does not exceed 35 dB: '+str(psnr))
+            psnr = decoded_psnr(decoded.read_bytes(),
+                                (output/('frame_%04d.reference.yuv' % index)).read_bytes())
             row['external_ffmpeg'] = 'PASS';row['decoded_sha256'] = gate.sha(decoded.read_bytes())
             row['yuv_p10_psnr_db'] = psnr
 

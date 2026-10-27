@@ -23,6 +23,13 @@ class StandaloneGateTests(unittest.TestCase):
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
+    def test_trace_contract_must_be_registered(self):
+        # Strict JSON regressions must run in the normal standalone job.
+        self.assertIn('filmscan3_trace_contract', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'filmscan3_trace_contract']})
+
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.xml'
