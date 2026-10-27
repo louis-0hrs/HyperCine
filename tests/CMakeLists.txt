@@ -12,6 +12,26 @@ include_directories(
 )
 
 # 1. Transform-level test
+if(WIN32 AND TARGET CFHDCodecStatic)
+    add_executable(test_decoder_sdk_lifetime decoder_differential/test_sdk_lifetime.cpp)
+    add_test(NAME decoder_differential_sdk_lifetime COMMAND test_decoder_sdk_lifetime
+        "${CMAKE_CURRENT_BINARY_DIR}/sdk-lifetime")
+    set_tests_properties(decoder_differential_sdk_lifetime PROPERTIES LABELS "synthetic;reference-decoder-contract")
+    add_executable(decoder_sdk_dump decoder_differential/sdk_dump.cpp)
+    target_link_libraries(decoder_sdk_dump PRIVATE CFHDCodecStatic)
+    add_test(NAME decoder_differential_yu64_unpack COMMAND decoder_sdk_dump --self-test)
+endif()
+
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME decoder_differential_compare
+        COMMAND "${Python3_EXECUTABLE}" -B
+                "${CMAKE_CURRENT_SOURCE_DIR}/decoder_differential/test_compare.py")
+    add_test(NAME decoder_differential_registered_gate
+        COMMAND "${Python3_EXECUTABLE}" -B
+                "${CMAKE_CURRENT_SOURCE_DIR}/decoder_differential/test_registered_packet.py")
+endif()
+
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
     target_link_libraries(test_small_chroma_oracle PRIVATE CFHDCodecStatic)
