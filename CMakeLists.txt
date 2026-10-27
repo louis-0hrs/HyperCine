@@ -319,6 +319,13 @@ if(HYPERCINE_BUILD_STANDALONE)
             set_tests_properties(filmscan3_metal_required PROPERTIES LABELS "metal;gpu-required")
             # #45: a complete 4K CFHD encoder on Metal. A GPU-wavelet PASS alone is
             # not sufficient, so this compares whole samples and every hash.
+            # #45 / #259, M3: several independent sessions at once. A single-session
+            # test cannot catch a shared workspace, frame counter or hash state.
+            add_executable(test_metal_multisession tests/test_metal_multisession.cpp)
+            target_link_libraries(test_metal_multisession PRIVATE hypercine_standalone Threads::Threads)
+            add_test(NAME filmscan3_metal_multisession COMMAND test_metal_multisession)
+            set_tests_properties(filmscan3_metal_multisession PROPERTIES
+                LABELS "metal;gpu-required;concurrency" TIMEOUT 3600)
             # #45 / #259: geometry independence across the qualified shape range.
             # A 1080p+4K pair does not prove the encoder is resolution-agnostic.
             add_executable(test_metal_filmscan3_geometry_matrix tests/test_metal_filmscan3_geometry_matrix.cpp)
