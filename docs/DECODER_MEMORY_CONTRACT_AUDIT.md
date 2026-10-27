@@ -17,8 +17,9 @@ as if they had always been right.
 This is synthetic scheduler infrastructure only. It is not a PASS for #144,
 #195, or decoder readiness, and it makes no claim about the original SDK.
 `upstream/` was not modified. The FilmScan3 encoder, frontend and backend
-were not touched. This correction does not change codec source; two header
-comments that still describe the old hole are named below and left in place.
+were not touched. The two header comments that continued to describe the old budget hole after
+`26730a2` have since been updated in `bf0ead99` to match the code; their
+historical wording and the correction are recorded below.
 
 Scope is the synthetic decoder scheduler and the one spatial consumer already
 attached in front of it:
@@ -52,13 +53,14 @@ to be there. It does not describe the comment or the counter on this tree.
 The previous revision marked that **verified, not refuted**, and gave two
 citations as the evidence:
 
-- `GraphLimits::generation_budget_bytes` "Untyped `publish()` does not spend
-  this budget." (`decode_task_graph.h:316-321`)
+- The older `GraphLimits::generation_budget_bytes` comment said "Untyped
+  `publish()` does not spend this budget" (`decode_task_graph.h`, before `bf0ead99`).
 - `publish()` (`decode_task_graph.cpp:166-180`) never reads
   `generation_budget_` or `owned_budget_`.
 
-Both citations are still those lines, and both were then used to conclude
-that an untyped publication is free. That conclusion is false.
+The older audit treated those citations as evidence that an untyped
+publication was free. That conclusion is false on this tree, and the header
+comments were corrected after the earlier audit.
 
 `publish()` is still `decode_task_graph.cpp:166-180`. It still refuses a
 stopped generation, a second version, a null pointer and a zero length, and
@@ -84,23 +86,25 @@ so the geometry fields are not written for a copy that cannot be paid for,
 then calls `commit_copy_locked()` (`252`). A failed commit zeroes the geometry
 it had staged (`253-256`) and does not leave a charge behind.
 
-## Stale comments that still describe the hole
+## Historical stale header comments — now corrected
 
-These two comments were not updated by `26730a2`. They contradict
-`commit_copy_locked()`. They are not the contract:
+Commit `26730a2` fixed the shared budget accounting, but at that revision two
+header comments still described the former hole. They were **stale at that
+intermediate revision**, not on the current PR head `bf0ead99`:
 
-- `decode_task_graph.h:316-321` still says the ceiling is "Bytes of
-  graph-owned plane copies charged by `publish_plane()`" and "Untyped
-  `publish()` does not spend this budget." The sentence "zero admits no
-  plane" is also too narrow: a zero `generation_budget_` refuses every
-  positive `bytes` in `commit_copy_locked()`, so it admits no owned
-  publication, typed or untyped.
-- `decode_task_graph.h:448-450` still says the effective ceiling is "Spent
-  only by `publish_plane()`, under `mutex_`." The spend is under `mutex_`,
-  but it is in `commit_copy_locked()`, which both publication paths call.
+- `GraphLimits::generation_budget_bytes` described only typed plane copies
+  and said untyped `publish()` did not spend the ceiling. That was false after
+  `26730a2`. Its current comment explicitly covers typed and untyped owned
+  publications and correctly says a zero budget admits no owned publication.
+- The `generation_budget_` member comment said it was spent only by
+  `publish_plane()`. Its current comment names `commit_copy_locked()` as the
+  charge point and `release_abandoned_locked()` as the stopped-generation
+  refund point.
 
-The comment that agrees with the code is `decode_task_graph.h:366-371` and
-the `BUDGET-ALL` comment at `decode_task_graph.cpp:187-191`.
+The `owned_publication_bytes()` accessor comment and `BUDGET-ALL` in
+`decode_task_graph.cpp` also agree with the implementation. Preserve this
+history to explain the audit correction without presenting superseded wording
+as current source evidence.
 
 ## Speicherpfad × budgetiert
 
