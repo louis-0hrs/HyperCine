@@ -156,10 +156,11 @@ used as a cross-run gate.
 
 ## 7. Next steps
 
-1. **F1**: 1080p RGB444, RGBA4444 and Bayer corpora with source bytes, the pristine SDK packet and a real
-   SDK-native decode, per the source lists this matrix confirms (`RG24`/`RG48`/`RG30`/`AB10`/`AR10`/`r210`/`DPX0`
-   for RGB444; `BGRA`/`BGRa`/`b64a`/`RG64` for RGBA4444; `BYR4` for Bayer), plus the metadata normalization that
-   makes raw sample hashes reproducible.
+1. **F1**: implemented in [`REFERENCE_CINEFORM_FORMAT_F1.md`](REFERENCE_CINEFORM_FORMAT_F1.md) and
+   `tools/format_corpus_export.cpp`: 128 px and 1920×1080 corpora for the qualified source layouts
+   (`RG48`/`RG24`, `RG64`/`BGRA`, `BYR4`), with source bytes, the pristine SDK packet, a normalized packet and a
+   real SDK-native decode. That document also records the measured limits: BAYER packets are run-dependent,
+   `TAG_BAYER_FORMAT` attachment is blocked, and an RG24 high-entropy 1080p encoder crash is excluded.
 2. Do **not** plan F1 corpora for `YUVA_4444`, `BYR5`, `b48r`, `WP13`, `W13A`, `BYR2` or `yuyv`: measured
    `SDK_UNSUPPORTED` / `DECODE_FAILED` at this geometry.
 3. Re-run this probe on Linux A2 and macOS ARM64 before any cross-platform claim; this evidence is Windows x64
