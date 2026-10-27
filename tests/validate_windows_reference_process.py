@@ -11,6 +11,19 @@ import subprocess
 import tempfile
 
 
+def native_json(text):
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError('duplicate native JSON key')
+            result[key] = value
+        return result
+    def reject_constant(value):
+        raise ValueError('non-finite native JSON number')
+    return json.loads(text, object_pairs_hook=unique, parse_constant=reject_constant)
+
+
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -75,6 +88,12 @@ THREAD_LABEL = 'INCONCLUSIVE: public metadata request is not worker-count teleme
 HEADER_LABEL = 'CFHDDecoder.h @version 1.0.0 (header label only)'
 STAGES = {'arguments', 'affinity', 'input', 'open', 'prepare', 'metadata', 'decode', 'save',
           'malformed_probe_json'}
+INTEGER_BOUNDS = {
+    'requested_threads': (1, 64), 'width': (1, 65536), 'height': (1, 65536),
+    'pitch': (1, 2**31 - 1), 'sdk_error': (-(2**31), 2**31 - 1),
+    'decoder_sdk_version_packed': (1, 2**31 - 1),
+    'decoder_sdk_version_query_status': (-(2**31), 2**31 - 1),
+}
 
 
 def mask(value):
@@ -112,10 +131,9 @@ def sanitize_observation(raw):
                           ('sdk_source_baseline', BASELINE), ('pixel_format', 'YU64')):
         if raw.get(key) == expected:
             result[key] = expected
-    for key in ('requested_threads', 'width', 'height', 'pitch', 'sdk_error',
-                'decoder_sdk_version_packed', 'decoder_sdk_version_query_status'):
+    for key, (lower, upper) in INTEGER_BOUNDS.items():
         value = raw.get(key)
-        if type(value) is int and -(2**31) <= value < 2**32:
+        if type(value) is int and lower <= value <= upper:
             result[key] = value
     if 'observed_decoder_threads' in raw and raw['observed_decoder_threads'] is None:
         result['observed_decoder_threads'] = None
@@ -128,6 +146,9 @@ def sanitize_observation(raw):
 
 def valid_observation(observation, cell):
     return (isinstance(observation, dict) and observation.get('status') == 'PASS'
+            and all(type(observation.get(key)) is int for key in
+                    ('requested_threads', 'width', 'height', 'pitch',
+                     'decoder_sdk_version_packed', 'decoder_sdk_version_query_status'))
             and type(observation.get('requested_threads')) is int
             and observation['requested_threads'] == cell['threads']
             and observation.get('process_affinity') == cell['affinity']
@@ -153,7 +174,7 @@ def run(probe, sample, expected_sha, timeout=30):
                                     text=True, timeout=timeout)
     if inventory_call.returncode != 0:
         raise ValueError('native platform inventory failed')
-    inventory = sanitize_inventory(json.loads(inventory_call.stdout))
+    inventory = sanitize_inventory(native_json(inventory_call.stdout))
     available = int(inventory['process_affinity'], 16)
     qualified_topology = inventory.get('topology_status') == 'PASS' and inventory.get('processor_groups') == 1
     cells = matrix(available, inventory.get('physical_cores', []) if qualified_topology else ())
@@ -172,7 +193,7 @@ def run(probe, sample, expected_sha, timeout=30):
                                            capture_output=True, text=True, timeout=timeout)
                     row['exit_code'] = child.returncode
                     try:
-                        observation = json.loads(child.stdout)
+                        observation = native_json(child.stdout)
                     except (ValueError, TypeError):
                         observation = dict(status='FAIL', error_stage='malformed_probe_json')
                     if not isinstance(observation, dict):
@@ -211,7 +232,13 @@ def main():
     args = parser.parse_args()
     if args.timeout <= 0 or args.timeout > 120:
         parser.error('timeout must be in (0,120] seconds')
-    result = run(args.probe.resolve(), args.sample.resolve(), args.input_sha256, args.timeout)
+    try:
+        result = run(args.probe.resolve(), args.sample.resolve(), args.input_sha256, args.timeout)
+    except (OSError, ValueError, TypeError, subprocess.SubprocessError):
+        # Inventory failures, raw process text and exception paths are private.
+        result = dict(copyright='Copyright (c) 2026 HyperCine Contributors.',
+                      license='MIT OR Apache-2.0', schema_version=1, status='FAIL',
+                      error_stage='input_inventory_or_process_contract', records=[])
     with args.output.open('x', encoding='utf-8') as stream:
         json.dump(result, stream, indent=2)
         stream.write('\n')

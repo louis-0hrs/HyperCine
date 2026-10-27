@@ -125,6 +125,12 @@ add_library(hypercine_cpu_isa STATIC src/cpu/cpu_isa.cpp)
 target_include_directories(hypercine_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 if(HYPERCINE_BUILD_TESTS)
     enable_testing()
+    add_subdirectory(tests/geometry_extreme)
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME diagnostic_summary_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diagnostic_summary.py")
+    endif()
     add_executable(test_cpu_isa tests/test_cpu_isa.cpp)
     target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
@@ -306,6 +312,25 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME neon_concurrency_contract COMMAND test_neon_concurrency)
         set_tests_properties(neon_concurrency_contract PROPERTIES
             LABELS "cpu;neon;concurrency" TIMEOUT 900)
+
+        # Issue #70 / #259: a session owns its ISA policy. The two kernels are
+        # bit-exact, so neither the packet nor a timestamp can show which one ran;
+        # the test asserts the dispatch decision itself. Registered in the SDK-free
+        # block so it runs in the configuration CI actually uses.
+        add_executable(test_wavelet_isa_policy tests/test_wavelet_isa_policy.cpp)
+        target_link_libraries(test_wavelet_isa_policy PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME wavelet_isa_session_policy COMMAND test_wavelet_isa_policy)
+        set_tests_properties(wavelet_isa_session_policy PROPERTIES
+            LABELS "cpu;neon;concurrency" TIMEOUT 600)
+        # Issue #70 / #259, M1 task C: the scenario is not "one session keeps its
+        # kernel" but "two complete encoders run at the same time with different
+        # ISAs". A per-call decision over shared state can pass the single-session
+        # test in some interleavings; it cannot pass this one.
+        add_executable(test_wavelet_isa_parallel_sessions tests/test_wavelet_isa_parallel_sessions.cpp)
+        target_link_libraries(test_wavelet_isa_parallel_sessions PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME wavelet_isa_parallel_sessions COMMAND test_wavelet_isa_parallel_sessions)
+        set_tests_properties(wavelet_isa_parallel_sessions PROPERTIES
+            LABELS "cpu;neon;concurrency" TIMEOUT 900)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
@@ -316,6 +341,20 @@ if(HYPERCINE_BUILD_STANDALONE)
             set_tests_properties(filmscan3_metal_required PROPERTIES LABELS "metal;gpu-required")
             # #45: a complete 4K CFHD encoder on Metal. A GPU-wavelet PASS alone is
             # not sufficient, so this compares whole samples and every hash.
+            # #45 / #259, M3: several independent sessions at once. A single-session
+            # test cannot catch a shared workspace, frame counter or hash state.
+            add_executable(test_metal_multisession tests/test_metal_multisession.cpp)
+            target_link_libraries(test_metal_multisession PRIVATE hypercine_standalone Threads::Threads)
+            add_test(NAME filmscan3_metal_multisession COMMAND test_metal_multisession)
+            set_tests_properties(filmscan3_metal_multisession PROPERTIES
+                LABELS "metal;gpu-required;concurrency" TIMEOUT 3600)
+            # #45 / #259: geometry independence across the qualified shape range.
+            # A 1080p+4K pair does not prove the encoder is resolution-agnostic.
+            add_executable(test_metal_filmscan3_geometry_matrix tests/test_metal_filmscan3_geometry_matrix.cpp)
+            target_link_libraries(test_metal_filmscan3_geometry_matrix PRIVATE hypercine_standalone)
+            add_test(NAME filmscan3_metal_geometry_matrix COMMAND test_metal_filmscan3_geometry_matrix)
+            set_tests_properties(filmscan3_metal_geometry_matrix PROPERTIES
+                LABELS "metal;gpu-required" TIMEOUT 3600)
             add_executable(test_metal_filmscan3_4k tests/test_metal_filmscan3_4k.cpp)
             target_link_libraries(test_metal_filmscan3_4k PRIVATE hypercine_standalone)
             add_test(NAME filmscan3_metal_4k_encoder COMMAND test_metal_filmscan3_4k)
@@ -370,6 +409,10 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)
+        # Separate current wavelet shape from the bounded FilmScan3 pixel budget.
+        add_executable(test_filmscan3_geometry_budget tests/test_filmscan3_geometry_budget.cpp)
+        target_link_libraries(test_filmscan3_geometry_budget PRIVATE hypercine_standalone)
+        add_test(NAME filmscan3_geometry_budget COMMAND test_filmscan3_geometry_budget)
 
         add_test(NAME filmscan3_fixture_integrity COMMAND "${CMAKE_COMMAND}"
             "-DROOT=${CMAKE_SOURCE_DIR}" -P "${CMAKE_SOURCE_DIR}/tests/verify_filmscan3_fixtures.cmake")
@@ -447,6 +490,20 @@ if(HYPERCINE_BUILD_STANDALONE)
                     --output-dir "${CMAKE_CURRENT_BINARY_DIR}/cuda-filmscan3-ffmpeg")
                 set_tests_properties(cuda_filmscan3_ffmpeg_decode PROPERTIES
                     LABELS "cuda;gpu-required;external-decode" SKIP_RETURN_CODE 77 TIMEOUT 300)
+                # The single-frame gate above cannot speak for a sequence: it decodes
+                # one packet per side, and the comparator writes per-frame files only
+                # when --frames > 1. A recorded "3 ordered frames" run therefore had
+                # no independent decode behind it at all. This registers the same
+                # validator with three ordered frames, so every frame of the session
+                # is decoded separately and its 30 stage hashes are read back.
+                add_test(NAME cuda_filmscan3_sequence_ffmpeg_decode COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3.py"
+                    --compare $<TARGET_FILE:hypercine_cuda_frontend_compare>
+                    --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                    --output-dir "${CMAKE_CURRENT_BINARY_DIR}/cuda-filmscan3-sequence-ffmpeg"
+                    --frames 3)
+                set_tests_properties(cuda_filmscan3_sequence_ffmpeg_decode PROPERTIES
+                    LABELS "cuda;gpu-required;external-decode" SKIP_RETURN_CODE 77 TIMEOUT 600)
             endif()
             # #249 review: prove the validator never disturbs a caller's output
             # directory. Needs no GPU and no CUDA build, so it is registered

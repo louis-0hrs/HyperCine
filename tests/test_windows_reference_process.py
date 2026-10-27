@@ -3,6 +3,7 @@
 # Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
 import tempfile
 import json
+import sys
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -155,6 +156,42 @@ class ProcessContract(unittest.TestCase):
         for value in ('private-host', [], True, '0', 'f'*17):
             with self.assertRaises(ValueError):
                 v.sanitize_inventory(dict(raw, process_affinity=value))
+
+    def test_numbers_have_field_specific_bounds_and_reject_boolean_or_float(self):
+        for field, (lower, upper) in v.INTEGER_BOUNDS.items():
+            for value in (True, False, 1.0, '1', lower-1, upper+1, {}, []):
+                self.assertNotIn(field, v.sanitize_observation({field: value}), (field, value))
+            for value in (lower, upper):
+                self.assertEqual(v.sanitize_observation({field: value})[field], value)
+        cell = dict(threads=2, affinity='3')
+        good = dict(status='PASS', requested_threads=2, process_affinity='3', pixel_format='YU64',
+                    width=1920, height=1080, pitch=7680, observed_decoder_threads=None,
+                    thread_observation=v.THREAD_LABEL, sdk_api_header_version=v.HEADER_LABEL,
+                    sdk_source_baseline=v.BASELINE, decoder_sdk_version_packed=65536,
+                    decoder_sdk_version_query_status=0)
+        for field in ('requested_threads', 'width', 'height', 'pitch',
+                      'decoder_sdk_version_packed', 'decoder_sdk_version_query_status'):
+            self.assertFalse(v.valid_observation(dict(good, **{field: float(good[field])}), cell))
+
+    def test_duplicate_keys_and_nonfinite_numbers_are_not_native_json(self):
+        for raw in ('{"status":"FAIL","status":"PASS"}', '{"n":NaN}',
+                    '{"n":Infinity}', '{"n":-Infinity}', '{"n":{"a":1,"a":2}}'):
+            with self.assertRaises(ValueError):
+                v.native_json(raw)
+
+    def test_cli_inventory_exceptions_export_only_fixed_failure(self):
+        canary = 'CONFIDENTIAL_SYNTHETIC_PROCESS_MARKER'
+        for failure in (ValueError(canary), OSError(canary),
+                        v.subprocess.TimeoutExpired(canary, 1, output=canary)):
+            with tempfile.TemporaryDirectory() as directory:
+                output = Path(directory)/'result.json'
+                args = ['probe-runner', '--probe', canary, '--sample', canary,
+                        '--input-sha256', '0'*64, '--output', str(output)]
+                with patch.object(sys, 'argv', args), patch.object(v, 'run', side_effect=failure):
+                    self.assertEqual(v.main(), 1)
+                result = output.read_text()
+                self.assertNotIn(canary, result)
+                self.assertEqual(json.loads(result)['status'], 'FAIL')
 
     def test_malformed_probe_does_not_publish_raw_output(self):
         inventory = v.subprocess.CompletedProcess([], 0, json.dumps(dict(status='PASS', cpu_isa={}, process_affinity='1')))

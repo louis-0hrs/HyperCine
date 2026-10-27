@@ -12,6 +12,8 @@
 namespace hypercine::detail {
 namespace {
 constexpr std::size_t no_node = std::numeric_limits<std::size_t>::max();
+static_assert(kOwnedBufferAlign == kS3PlaneAlign,
+              "graph-owned copies must satisfy the signed-plane alignment");
 #ifdef HYPERCINE_DECODE_TASK_GRAPH_TEST_HOOK
 std::atomic<void (*)()> publish_seam{nullptr};
 #endif
@@ -182,8 +184,14 @@ bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t by
 // allocation leaves version at 0 and does not notify.
 bool DecodeTaskGraph::commit_copy_locked(Node& target, const void* data,
                                         std::size_t bytes) noexcept {
+    // Guard (BUDGET-ALL): the ceiling covers every owned publication, typed or not.
+    // It is charged here rather than in publish_plane() so that no future caller can
+    // reach the copy without paying for it -- an uncharged untyped publish() was
+    // exactly the hole this closes. A refusal happens before the copy, so a rejected
+    // publication retains nothing.
+    if (bytes > generation_budget_ || owned_budget_ > generation_budget_ - bytes) return false;
     const auto* source = static_cast<const unsigned char*>(data);
-    std::vector<unsigned char> copy;
+    OwnedBytes copy;
     try {
         copy.assign(source, source + bytes);
     } catch (...) {
@@ -191,6 +199,7 @@ bool DecodeTaskGraph::commit_copy_locked(Node& target, const void* data,
         return false;
     }
     target.owned_bytes.swap(copy);
+    owned_budget_ += target.owned_bytes.size();
     target.published_generation = generation_;
     target.payload.store(target.owned_bytes.data(), std::memory_order_relaxed);
     target.payload_bytes.store(target.owned_bytes.size(), std::memory_order_relaxed);
@@ -233,8 +242,9 @@ bool DecodeTaskGraph::publish_plane(std::size_t node, const void* data, std::siz
     // Guard (T4-EXTENT): alignment, geometry, stride and the pitched byte count
     // are one decision. A short span does not become a version.
     if (check_signed_plane(claimed) != PlaneStatus::Ok) return false;
-    // Guard (T4-BUDGET): the generation pays for the copy up front. Over budget
-    // is not a publication. Checked before the copy so a refusal retains nothing.
+    // The budget is decided and charged inside commit_copy_locked(), which every
+    // publication path goes through. Checked here only as a fast refusal so the
+    // geometry fields are not written for a copy that cannot be paid for.
     if (bytes > generation_budget_ || owned_budget_ > generation_budget_ - bytes) return false;
     target.plane_width = width;
     target.plane_height = height;
@@ -245,7 +255,6 @@ bool DecodeTaskGraph::publish_plane(std::size_t node, const void* data, std::siz
         target.plane_pitch = 0;
         return false;
     }
-    owned_budget_ += bytes;
     return true;
 }
 PlaneView DecodeTaskGraph::input_plane(std::size_t node, std::size_t input,
@@ -508,6 +517,29 @@ bool DecodeTaskGraph::run(std::size_t workers) {
     for (auto& thread : threads) thread.join();
     std::lock_guard<std::mutex> lock(mutex_);
     drained_ = true;
+    // Guard (RELEASE-ABANDONED): a stopped generation retains nothing. Safe here and
+    // only here: every worker has been joined, so no callback frame is live, and
+    // fail_locked() already marked every dependent Failed, so no node whose storage
+    // is released was ever handed to a consumer.
+    if (error_ != GraphError::None) release_abandoned_locked();
     return error_ == GraphError::None && completed_ == nodes_.size();
+}
+void DecodeTaskGraph::release_abandoned_locked() noexcept {
+    for (auto& node : nodes_) {
+        if (node.state == TaskState::Completed) continue;
+        if (node.owned_bytes.empty()) continue;
+        const std::size_t released = node.owned_bytes.size();
+        // Drop the payload record and the version before the bytes go away, so a
+        // stale reader observes "nothing published" rather than a dangling address.
+        node.payload.store(nullptr, std::memory_order_relaxed);
+        node.payload_bytes.store(0, std::memory_order_relaxed);
+        node.version.store(0, std::memory_order_relaxed);
+        OwnedBytes empty;
+        node.owned_bytes.swap(empty);
+        node.plane_width = 0;
+        node.plane_height = 0;
+        node.plane_pitch = 0;
+        owned_budget_ = owned_budget_ > released ? owned_budget_ - released : 0;
+    }
 }
 } // namespace hypercine::detail

@@ -37,9 +37,9 @@
   },
   "archive": {
     "status": "AUTHORIZED_BUT_UNREACHABLE",
-    "requested_root": "$HYPERCINE_GOLDEN_DIR\\HyperCine\\golden\\windows\\qualities",
+    "requested_root": "$HYPERCINE_GOLDEN_DIR",
     "local_corpora_retained": true,
-    "reason": "User authorized upload, but the external NAS host was unreachable during this session (net view $HYPERCINE_GOLDEN_DIR returned system error 53; all UNC path probes failed). No NAS files were written.",
+    "reason": "User authorized upload, but the destination was unreachable during the 2026-10-15 attempt (system error 53). No NAS files were written. This historical result is not a fresh connectivity check; configure HYPERCINE_GOLDEN_DIR privately as the complete destination directory.",
     "user_authorized": true
   },
   "profiles": [

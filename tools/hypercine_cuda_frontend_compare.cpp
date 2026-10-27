@@ -301,6 +301,13 @@ int Run(const Options& options) {
                 std::ostringstream other;
                 other<<"gpu.f"<<std::setw(3)<<std::setfill('0')<<frame<<".cfhd";
                 WriteFile(options.output_dir/other.str(),gpu_frame.sample);
+                // Per-frame trace, so a multi-frame run can be audited against the
+                // encoder's own coefficient hashes instead of only this tool's
+                // stdout. Without it a validator could confirm the packets decode
+                // but would have no independent view of the 30 stage hashes.
+                std::ostringstream trace_name;
+                trace_name<<"trace.f"<<std::setw(3)<<std::setfill('0')<<frame<<".json";
+                WriteTrace(options.output_dir/trace_name.str(),cpu_frame,gpu_frame);
             }
         }
     }
