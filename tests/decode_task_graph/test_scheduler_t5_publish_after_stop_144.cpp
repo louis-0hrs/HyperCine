@@ -17,12 +17,19 @@
 //
 // The contract under test:
 //
-//   T5-A  publish() after cancel()              is refused, retains nothing
-//   T5-B  publish() after a recorded error      is refused, retains nothing
-//   T5-C  publish_plane() after cancel()        is refused, retains nothing
-//   T5-D  positive control: the same call on the same key with no decision is
-//         ACCEPTED and retains bytes -- so a refusal above cannot be explained
-//         by an invalid key, geometry or budget
+//   T5-A  publish()       after cancel()         refused, retains nothing
+//   T5-B  publish()       after a recorded error refused, retains nothing
+//   T5-C  publish_plane() after cancel()         refused, retains nothing
+//   T5-D  positive control for the plane path:   ACCEPTED, bytes retained
+//   T5-E  positive control for the untyped path: ACCEPTED, bytes retained
+//
+// The controls are not decoration. Each one uses the SAME producer key and the
+// SAME payload shape as its rule, so a refusal there cannot be explained by an
+// illegal key, an illegal extent or a broken fixture. Without them a refusal
+// test is satisfied by a fixture that can never publish at all -- which is the
+// exact failure this file was revised to fix: the first version published its
+// plane form on a level-0 key, which publish_plane() rejects for the key alone,
+// so the "refusal" proved nothing about the stop decision.
 //
 // Every rule measures the return value, the retained-byte counter, the version
 // word and the stored-output predicate. A refusal that returned false but kept
@@ -31,9 +38,9 @@
 //
 // Negative control (mutation), verified by hand on this branch:
 //   remove `stop_ || error_ != GraphError::None` from DecodeTaskGraph::publish()
-//   and publish_plane() -> T5-A, T5-B, T5-C report BROKEN and the exit code is 1.
-//   T5-D stays green, which is the point: it is the control that proves the
-//   refusal measured above came from the decision and not from the fixture.
+//   and publish_plane() -> T5-A, T5-B and T5-C report BROKEN independently and
+//   the exit code is 1. T5-D and T5-E stay green, which is the point: they are
+//   the controls proving each refusal came from the decision.
 //
 // Synthetic only. No SDK, no upstream/, no decoder, no bitstream.
 #include "decode_task_graph.h"
@@ -76,14 +83,40 @@ using namespace hypercine::detail;
 
 const Generation kGeneration{7, 3, 41};
 constexpr std::size_t kPayload = 128;
+
 // A legal S3 plane extent: width 16..480 in steps of 8, height 4..270, pitch a
-// multiple of 32 (kS3PlaneAlign) and at least width*2. Using a *valid* extent is
-// what makes T5-A..C attributable to the stop/error decision rather than to the
-// fixture, and T5-D is the control that proves this extent is accepted.
+// multiple of 32 (kS3PlaneAlign) and at least width*2.
 constexpr std::uint32_t kWidth = 16;
 constexpr std::uint32_t kHeight = 4;
 constexpr std::size_t kPitch = 32;
 constexpr std::size_t kPlaneBytes = kPitch * kHeight;
+
+// Two producer keys, one per publication form.
+//
+//   untyped_producer: never constrained by publish(), so it is the key for the
+//                    untyped path. Level 0 band 1 is deliberately *not* a plane
+//                    key, which is what keeps T5-A honest: the only reason its
+//                    publish() may be refused in that rule is the stop decision.
+//   plane_producer:   wavelet5 band 0, admitted by publish_plane()'s key guard
+//                    (level 4 band 0, or level 5 bands 0..3). T5-C and T5-D use
+//                    the same key, so an accepted control and a refused rule are
+//                    directly comparable.
+TaskKey untyped_producer() { return TaskKey{0, /*transform=*/0, /*level=*/0, /*frame=*/0, /*band=*/1}; }
+TaskKey plane_producer() { return TaskKey{0, /*transform=*/0, /*level=*/5, /*frame=*/0, /*band=*/0}; }
+TaskKey consumer_key() { return TaskKey{0, /*transform=*/0, /*level=*/4, /*frame=*/0, /*band=*/0}; }
+
+int failures = 0;
+int holds = 0;
+
+void required(const char* rule, bool holds_now, const std::string& detail) {
+    if (holds_now) {
+        ++holds;
+        std::printf("RULE %s HOLDS %s\n", rule, detail.c_str());
+        return;
+    }
+    ++failures;
+    std::printf("RULE %s BROKEN %s\n", rule, detail.c_str());
+}
 
 // The graph rejects an unaligned caller buffer (PlaneStatus::Misaligned), and
 // MSVC has no posix_memalign, so the platform difference lives in one helper.
@@ -117,26 +150,6 @@ struct PlaneBuffer {
     ~PlaneBuffer() { FreeAligned(data); }
 };
 
-// A wavelet5 band-0 producer key: the plane form is admitted for
-// level 4 (lowpass) or level 5 bands 0..3 only. Using a valid key is what makes
-// the refusals in T5-A..C attributable to the stop/error decision.
-TaskKey plane_producer() { return TaskKey{0, /*transform=*/0, /*level=*/5, /*frame=*/0, /*band=*/0}; }
-TaskKey untyped_producer() { return TaskKey{0, /*transform=*/0, /*level=*/0, /*frame=*/0, /*band=*/1}; }
-TaskKey consumer_key() { return TaskKey{0, /*transform=*/0, /*level=*/4, /*frame=*/0, /*band=*/0}; }
-
-int failures = 0;
-int holds = 0;
-
-void required(const char* rule, bool holds_now, const std::string& detail) {
-    if (holds_now) {
-        ++holds;
-        std::printf("RULE %s HOLDS %s\n", rule, detail.c_str());
-        return;
-    }
-    ++failures;
-    std::printf("RULE %s BROKEN %s\n", rule, detail.c_str());
-}
-
 // A producer that blocks inside its callback until released, so the decision is
 // recorded by another thread while this frame is still live. That is the only
 // ordering in which "publish after stop" is a real event and not a scheduling
@@ -159,31 +172,25 @@ struct Gate {
 };
 
 // ---------------------------------------------------------------------------
-// T5-A (untyped) and T5-C (plane): cancel() while the producer frame is live.
+// T5-A: untyped publish() after cancel(), on a key that publish() never
+// constrains. One publication attempt, one refusal, nothing retained.
 // ---------------------------------------------------------------------------
-void rule_cancel_refuses_late_publication(std::size_t workers) {
+void rule_cancel_refuses_late_publish_untyped(std::size_t workers) {
     const std::size_t width = workers < 2 ? 2 : workers;
     Gate gate;
-    std::atomic<int> untyped_accepted{0}, untyped_refused{0};
-    std::atomic<int> typed_accepted{0}, typed_refused{0};
+    std::atomic<int> accepted{0}, refused{0};
     std::atomic<std::size_t> owned_after_cancel{0};
     std::atomic<int> consumer_runs{0};
     std::vector<unsigned char> payload(kPayload, 0x5A);
-    PlaneBuffer plane;
 
     DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic,
                           {{untyped_producer(), {},
                             [&](const TaskContext& context) {
                                 gate.hold();
                                 if (context.publish(payload.data(), payload.size()))
-                                    ++untyped_accepted;
+                                    ++accepted;
                                 else
-                                    ++untyped_refused;
-                                if (context.publish_plane(plane.data, kPlaneBytes, kWidth, kHeight,
-                                                          kPitch))
-                                    ++typed_accepted;
-                                else
-                                    ++typed_refused;
+                                    ++refused;
                             },
                             {[] { return true; }}},
                            {consumer_key(), {untyped_producer()},
@@ -200,23 +207,19 @@ void rule_cancel_refuses_late_publication(std::size_t workers) {
     const auto version = DecodeTaskGraphTestAccess::version(graph, 0);
     char detail[512];
     std::snprintf(detail, sizeof detail,
-                  "width=%zu entered=%d canceled=%d untyped=%d/%d typed=%d/%d "
+                  "width=%zu entered=%d canceled=%d accepted=%d refused=%d "
                   "owned_after_cancel=%zu owned_final=%zu version=%llu published=%d "
                   "error=%d consumer=%d",
-                  width, static_cast<int>(saw), static_cast<int>(canceled),
-                  untyped_accepted.load(), untyped_refused.load(), typed_accepted.load(),
-                  typed_refused.load(), owned_after_cancel.load(),
-                  graph.owned_publication_bytes(), version,
+                  width, static_cast<int>(saw), static_cast<int>(canceled), accepted.load(),
+                  refused.load(), owned_after_cancel.load(), graph.owned_publication_bytes(), version,
                   static_cast<int>(!not_published), static_cast<int>(graph.error()),
                   consumer_runs.load());
-    const bool untyped_ok = untyped_accepted.load() == 0 && untyped_refused.load() == 1;
-    const bool typed_ok = typed_accepted.load() == 0 && typed_refused.load() == 1;
-    const bool ok = saw && canceled && untyped_ok && typed_ok && not_published && version == 0 &&
-                    owned_after_cancel.load() == 0 && graph.owned_publication_bytes() == 0 &&
+    const bool ok = saw && canceled && accepted.load() == 0 && refused.load() == 1 &&
+                    not_published && version == 0 && owned_after_cancel.load() == 0 &&
+                    graph.owned_publication_bytes() == 0 &&
                     graph.error() == GraphError::Canceled && consumer_runs.load() == 0 &&
                     graph.quiescent();
     required("T5-A-cancel-refuses-late-publish-untyped", ok, detail);
-    required("T5-C-cancel-refuses-late-publish-plane", ok, detail);
 }
 
 // ---------------------------------------------------------------------------
@@ -278,12 +281,61 @@ void rule_error_refuses_late_publication(std::size_t workers) {
 }
 
 // ---------------------------------------------------------------------------
-// T5-D: positive control. Same producer key, same plane geometry, same payload,
-// NO cancel and NO error. The plane publication must be ACCEPTED and the bytes
-// retained. Without this rule a refusal in T5-A..C could be produced by a bad
-// fixture and the gate would be measuring nothing.
+// T5-C: publish_plane() after cancel(), on the *legal* plane key. This is the
+// rule that was misattributed in the first revision: it used the untyped key, so
+// publish_plane() refused it for the key alone and the assertion could only pass
+// by borrowing T5-A's verdict. It now has its own key, its own counters and its
+// own verdict.
 // ---------------------------------------------------------------------------
-void rule_valid_publication_is_accepted(std::size_t workers) {
+void rule_cancel_refuses_late_publish_plane(std::size_t workers) {
+    const std::size_t width = workers < 2 ? 2 : workers;
+    Gate gate;
+    std::atomic<int> accepted{0}, refused{0};
+    std::atomic<std::size_t> owned_after_cancel{0};
+    PlaneBuffer plane;
+
+    DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic,
+                          {{plane_producer(), {},
+                            [&](const TaskContext& context) {
+                                gate.hold();
+                                if (context.publish_plane(plane.data, kPlaneBytes, kWidth, kHeight,
+                                                          kPitch))
+                                    ++accepted;
+                                else
+                                    ++refused;
+                            },
+                            {[] { return true; }}},
+                           {consumer_key(), {plane_producer()},
+                            [&](const TaskContext&) {}, {[] { return true; }}}});
+
+    std::thread runner([&] { graph.run(width); });
+    const bool saw = gate.await_entry();
+    const bool canceled = saw && graph.cancel(kGeneration);
+    owned_after_cancel.store(graph.owned_publication_bytes());
+    gate.release.store(true);
+    runner.join();
+
+    const bool not_published = !DecodeTaskGraphTestAccess::published_output(graph, 0);
+    const auto version = DecodeTaskGraphTestAccess::version(graph, 0);
+    char detail[512];
+    std::snprintf(detail, sizeof detail,
+                  "width=%zu entered=%d canceled=%d plane_accepted=%d plane_refused=%d "
+                  "owned_after_cancel=%zu owned_final=%zu version=%llu published=%d error=%d",
+                  width, static_cast<int>(saw), static_cast<int>(canceled), accepted.load(),
+                  refused.load(), owned_after_cancel.load(), graph.owned_publication_bytes(), version,
+                  static_cast<int>(!not_published), static_cast<int>(graph.error()));
+    const bool ok = saw && canceled && accepted.load() == 0 && refused.load() == 1 &&
+                    not_published && version == 0 && owned_after_cancel.load() == 0 &&
+                    graph.owned_publication_bytes() == 0 &&
+                    graph.error() == GraphError::Canceled && graph.quiescent();
+    required("T5-C-cancel-refuses-late-publish-plane", ok, detail);
+}
+
+// ---------------------------------------------------------------------------
+// T5-D: positive control for the plane path. Same key as T5-C, same extent,
+// same payload, no decision. Must be ACCEPTED and the bytes retained.
+// ---------------------------------------------------------------------------
+void rule_plane_publication_is_accepted(std::size_t workers) {
     std::atomic<int> accepted{0}, refused{0};
     std::atomic<int> consumer_view_bad{0};
     std::atomic<int> consumer_published{0};
@@ -316,9 +368,9 @@ void rule_valid_publication_is_accepted(std::size_t workers) {
                                 if (!live.valid() || live.width != kWidth || live.height != kHeight ||
                                     live.pitch != kPitch || live.bytes < kPlaneBytes)
                                     ++consumer_view_bad;
-                                // The lowpass is the consumer's own output: level 4, band 0.
-                                // Publishing it keeps the graph profile satisfied; the rule is
-                                // still about the producer's plane being admitted.
+                                // The lowpass is the consumer's own output; publishing it
+                                // keeps the graph profile satisfied without changing what
+                                // this rule asserts about the producer's plane.
                                 if (context.publish_plane(lowpass.data, kPlaneBytes, kWidth, kHeight,
                                                           kPitch))
                                     ++consumer_published;
@@ -326,19 +378,68 @@ void rule_valid_publication_is_accepted(std::size_t workers) {
                             {[] { return true; }}}});
 
     const bool ran = graph.run(workers);
-    const bool not_unpublished = DecodeTaskGraphTestAccess::published_output(graph, 0);
+    const bool stored = DecodeTaskGraphTestAccess::published_output(graph, 0);
     char detail[384];
     std::snprintf(detail, sizeof detail,
                   "run=%d error=%d accepted=%d refused=%d consumer_published=%d owned=%zu "
-                  "retained=%d consumer_bad=%d",
+                  "stored=%d consumer_bad=%d",
                   static_cast<int>(ran), static_cast<int>(graph.error()), accepted.load(),
                   refused.load(), consumer_published.load(), graph.owned_publication_bytes(),
-                  static_cast<int>(not_unpublished), consumer_view_bad.load());
+                  static_cast<int>(stored), consumer_view_bad.load());
     const bool ok = ran && graph.error() == GraphError::None && accepted.load() == 1 &&
                     refused.load() == 0 && consumer_published.load() == 1 &&
-                    graph.owned_publication_bytes() == 2 * kPlaneBytes && not_unpublished &&
+                    graph.owned_publication_bytes() == 2 * kPlaneBytes && stored &&
                     consumer_view_bad.load() == 0 && graph.quiescent();
-    required("T5-D-valid-publication-is-accepted", ok, detail);
+    required("T5-D-plane-publication-is-accepted", ok, detail);
+}
+
+// ---------------------------------------------------------------------------
+// T5-E: positive control for the untyped path. Same key as T5-A, same payload,
+// no decision. Must be ACCEPTED and the bytes retained. Without this, T5-A could
+// be green because publish() never succeeds for that fixture at all.
+// ---------------------------------------------------------------------------
+void rule_untyped_publication_is_accepted(std::size_t workers) {
+    std::atomic<int> accepted{0}, refused{0};
+    std::atomic<int> consumer_view_bad{0};
+    std::vector<unsigned char> payload(kPayload, 0x77);
+
+    DecodeTaskGraph graph(kGeneration, GraphProfile::Synthetic,
+                          {{untyped_producer(), {},
+                            [&](const TaskContext& context) {
+                                if (context.publish(payload.data(), payload.size()))
+                                    ++accepted;
+                                else
+                                    ++refused;
+                            },
+                            {[] { return true; }}},
+                           {consumer_key(), {untyped_producer()},
+                            [&](const TaskContext& context) {
+                                const BufferVersion view = context.input(0);
+                                if (!view.valid() || view.bytes != kPayload ||
+                                    !(view.generation == kGeneration))
+                                    ++consumer_view_bad;
+                                // The consumer must publish its own output too: the synthetic
+                                // profile requires a stored result per task, and a missing one
+                                // would end the run as OutputNotPublished before this rule
+                                // could say anything about the producer path.
+                                static constexpr unsigned char token = 1;
+                                if (!context.publish(&token, sizeof(token))) ++consumer_view_bad;
+                            },
+                            {[] { return true; }}}});
+
+    const bool ran = graph.run(workers);
+    const bool stored = DecodeTaskGraphTestAccess::published_output(graph, 0);
+    char detail[384];
+    std::snprintf(detail, sizeof detail,
+                  "run=%d error=%d accepted=%d refused=%d owned=%zu stored=%d consumer_bad=%d",
+                  static_cast<int>(ran), static_cast<int>(graph.error()), accepted.load(),
+                  refused.load(), graph.owned_publication_bytes(), static_cast<int>(stored),
+                  consumer_view_bad.load());
+    const bool ok = ran && graph.error() == GraphError::None && accepted.load() == 1 &&
+                    refused.load() == 0 &&
+                    graph.owned_publication_bytes() == kPayload + sizeof(unsigned char) && stored &&
+                    consumer_view_bad.load() == 0 && graph.quiescent();
+    required("T5-E-untyped-publication-is-accepted", ok, detail);
 }
 
 } // namespace
@@ -351,9 +452,11 @@ int main(int argc, char** argv) {
         return 2;
     }
     std::printf("INFO workers=%zu synthetic T5 publication-after-decision only\n", workers);
-    rule_cancel_refuses_late_publication(workers);
+    rule_cancel_refuses_late_publish_untyped(workers);
     rule_error_refuses_late_publication(workers);
-    rule_valid_publication_is_accepted(workers);
+    rule_cancel_refuses_late_publish_plane(workers);
+    rule_plane_publication_is_accepted(workers);
+    rule_untyped_publication_is_accepted(workers);
     std::printf("SUMMARY %d rule(s) hold, %d broken\n", holds, failures);
     if (failures) {
         std::printf("SCHEDULER-T5 FAIL\n");
