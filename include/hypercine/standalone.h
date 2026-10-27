@@ -87,6 +87,17 @@ WaveletIsa ResolveWaveletIsa(WaveletIsa requested);
 enum class WaveletDispatchDecision { Vector, Scalar, FailClosed };
 WaveletDispatchDecision DecideWaveletDispatch(WaveletIsa resolved, bool allow_fallback,
                                              bool vector_succeeded);
+// Test seam: make the vector entry point report "not supported" without calling it.
+//
+// Without this the fail-closed arm is unreachable on every architecture: on a host
+// with the kernel, a legal geometry always succeeds, and on a host without it,
+// `ResolveWaveletIsa` throws before any wrapper runs. A branch that no input can
+// enter is a comment, not a guard.
+//
+// Thread-local and false by default, so it cannot affect another thread or a
+// production encode.
+void SetWaveletVectorForcedUnsupported(bool forced) noexcept;
+bool WaveletVectorForcedUnsupported() noexcept;
 // Deterministic dispatch witness for tests (issue #70).
 //
 // A packet cannot reveal which kernel ran, because the two are bit-exact -- that is

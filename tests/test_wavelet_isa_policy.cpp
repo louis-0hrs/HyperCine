@@ -209,9 +209,20 @@ void phase_three_argument_auto_matches_two_argument() {
           (long long)(a.neon - b.neon));
     HyperCine_SetNEONWaveletEnabled(original);
 #else
-    // No vector kernel exists here, so the only correct statement is that Auto did not
-    // invent one. The cross-form equality above is what carries the proof on x86.
-    check(true, "no NEON kernel in this build: 3-arg Auto correctly ran scalar");
+    // No vector kernel exists here. This was `check(true, ...)` until a review pointed
+    // out that an assertion no input can falsify is a comment with a counter next to
+    // it. It now asserts the property the sentence claims.
+    HyperCine_SetNEONWaveletEnabled(true);
+    const auto before_nk = WaveletDispatchSnapshot();
+    ForwardLevel(plane, 0, WaveletIsa::Auto);
+    const auto after_nk = WaveletDispatchSnapshot();
+    check(after_nk.neon == before_nk.neon,
+          "no NEON kernel in this build: Auto entered no vector dispatch",
+          (long long)(after_nk.neon - before_nk.neon));
+    check(after_nk.scalar > before_nk.scalar,
+          "no NEON kernel in this build: Auto still ran the scalar kernel",
+          (long long)(after_nk.scalar - before_nk.scalar));
+    HyperCine_SetNEONWaveletEnabled(original);
 #endif
 }
 
@@ -228,7 +239,36 @@ void phase_forced_neon_does_not_degrade() {
         }
     }
 #if defined(__ARM_NEON)
-    std::printf("  ok   NEON kernel present: forced Neon is servable on this host\n");
+    // A legal geometry always succeeds here, so the fail-closed arm is unreachable by
+    // construction. Forcing the vector entry point to report NOT_SUPPORTED is the only
+    // way in -- and an arm no input can enter is a comment. This used to print "ok"
+    // without calling check at all.
+    {
+        hypercine::standalone::detail::SetWaveletVectorForcedUnsupported(true);
+        const auto before = WaveletDispatchSnapshot();
+        bool threw = false;
+        try {
+            ForwardLevel(plane, 0, WaveletIsa::Neon);
+        } catch (const std::exception&) {
+            threw = true;
+        }
+        const auto after = WaveletDispatchSnapshot();
+        check(threw, "forced Neon whose kernel refuses the geometry fails instead of returning");
+        check(after.scalar == before.scalar,
+              "forced Neon did not silently run the scalar kernel",
+              (long long)(after.scalar - before.scalar));
+        check(after.neon == before.neon,
+              "forced Neon did not count a vector dispatch it never made",
+              (long long)(after.neon - before.neon));
+        hypercine::standalone::detail::SetWaveletVectorForcedUnsupported(false);
+    }
+    {
+        const auto result = ForwardLevel(plane, 0, WaveletIsa::Neon);
+        bool filled = true;
+        for (std::size_t band = 0; band < 4; ++band)
+            if (result.bands[band].pixels.empty()) filled = false;
+        check(filled, "the same forced-Neon geometry succeeds when the kernel is available");
+    }
 #else
     bool threw = false;
     const auto before = WaveletDispatchSnapshot();
