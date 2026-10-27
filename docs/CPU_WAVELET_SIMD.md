@@ -2,6 +2,10 @@
 
 Copyright (c) 2026 HyperCine Contributors. Dual-licensed under MIT OR Apache-2.0.
 
+Current integration qualification (main `a267db4`, 2026-10-27):
+[native Windows SIMD report](validation/WINDOWS_SIMD_INTEGRATION_20261027.md).
+The earlier measurements below retain their original source/platform scope.
+
 This change adds explicit AVX2 and AVX-512 implementations of the existing
 signed 16-bit horizontal and vertical forward 2-6 filters. It leaves the
 public codec API, scalar implementation, production frontend selection and

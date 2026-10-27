@@ -11,6 +11,7 @@
 #define _ALLOCATOR 1
 #endif
 
+#include <cstddef>
 #include "CFHDEncoder.h"
 
 extern "C" {
@@ -50,6 +51,7 @@ extern "C" {
 #include <string>
 #include <thread>
 #include <vector>
+#include "bench_host.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -115,11 +117,11 @@ struct UtilProbe {
         active = true;
         worker = std::thread([this] {
             while (active.load()) {
-                FILE* pipe = _popen("nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits", "r");
+                FILE* pipe = hypercine::bench::OpenReadPipe("nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits");
                 if (!pipe) break;
                 int value = -1;
                 if (std::fscanf(pipe, "%d", &value) == 1 && value > peak_util.load()) peak_util = value;
-                _pclose(pipe);
+                hypercine::bench::CloseReadPipe(pipe);
 #ifdef _WIN32
                 Sleep(120);
 #else
@@ -536,14 +538,11 @@ int main(int argc, char** argv) {
     }
     json << "\n  ]\n}\n";
     const std::filesystem::path out_path(path);
-    std::ofstream out(out_path, std::ios::binary | std::ios::trunc);
-    if (!out) {
+    const std::string body = json.str();
+    if (!hypercine::bench::WriteCompleteFile(out_path, body)) {
         std::cerr << "failed to write " << out_path.string() << "\n";
         return 1;
     }
-    const std::string body = json.str();
-    out.write(body.data(), static_cast<std::streamsize>(body.size()));
-    out.close();
     std::cout << "wrote " << std::filesystem::absolute(out_path).string()
               << " bytes " << body.size()
               << " stages_ok " << stages_ok << " encoders_ok " << encoders_ok << "\n";

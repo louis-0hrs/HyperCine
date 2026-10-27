@@ -120,7 +120,7 @@ void Lowpass(Sample& s, const Plane& p) {
 }
 std::vector<uint8_t> PackHighpass(const Plane& p, std::size_t capacity) {
     if (p.width<1 || p.width>kMaxDimension || p.width%8 || p.height<1 || p.height>kMaxDimension || p.stride<p.width || p.stride%8 ||
-        static_cast<std::size_t>(p.stride)*p.height>kMaxPixels ||
+        !PlaneStorageFits(p.stride,p.height) ||
         p.pixels.size()<static_cast<std::size_t>(p.stride)*p.height)
         throw std::invalid_argument("invalid entropy plane");
     // <=26 bits per signed coefficient plus the 26-bit end marker and word

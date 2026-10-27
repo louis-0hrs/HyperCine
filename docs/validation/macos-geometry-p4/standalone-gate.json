@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "registered_tests": 32,
+  "passed_tests": 32,
+  "system": "Darwin",
+  "architecture": "arm64",
+  "windows_binaries": "NOT REQUIRED: versioned manifests/fixtures; optional NAS corpus is separate"
+}

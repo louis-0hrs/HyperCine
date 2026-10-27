@@ -1,0 +1,498 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "observed_date": "2026-10-27",
+  "repository": "louis-0hrs/HyperCine",
+  "pull_requests": [
+    {
+      "number": 275,
+      "title": "fix(decoder): audit memory budget and 32-byte-align owned copies",
+      "sha": "a3036306843d653b1798c873f681bcf5b24af944",
+      "branch": "codex/issue144-memory-contract-audit-20261026",
+      "draft": true
+    },
+    {
+      "number": 274,
+      "title": "test(cuda): qualify A2 multigeometry and one CUDA session",
+      "sha": "c52392e159ea7252d63a63d2f6f47fadd80662fa",
+      "branch": "codex/issue33-multigeometry-20261026",
+      "draft": true
+    },
+    {
+      "number": 273,
+      "title": "test(macos): prove Metal sessions are isolated from each other (#45, #259)",
+      "sha": "1aecb0b703f995e7cf2ef4341892ea970b465bd9",
+      "branch": "codex/issue45-metal-multisession-20261026",
+      "draft": true
+    },
+    {
+      "number": 272,
+      "title": "test(cpu): run scalar and neon encoder sessions at the same time (#70, #259)",
+      "sha": "f793a2272e4311ac92dbc6d4f2f3da108af8f2b2",
+      "branch": "codex/issue70-parallel-isa-sessions-20261026",
+      "draft": true
+    },
+    {
+      "number": 271,
+      "title": "test(macos): prove Metal geometry independence, not just 1080p and 4K (#45, #259)",
+      "sha": "8db7aa07376eab25578e6f5d9a452dc63d8255fb",
+      "branch": "codex/issue45-metal-geometry-matrix-20261026",
+      "draft": true
+    },
+    {
+      "number": 270,
+      "title": "test(cuda): decode every frame of a CUDA sequence, not just the first",
+      "sha": "207f13c7e43066249152c268bfa8a557a9d09410",
+      "branch": "codex/issue33-a2-sequence-decode-20261026",
+      "draft": true
+    },
+    {
+      "number": 269,
+      "title": "feat(cpu): per-session wavelet ISA policy for FilmScan3 sessions (#70)",
+      "sha": "cf72af61751441d9f65cf6baa2e21a07c975cdfa",
+      "branch": "codex/issue70-per-session-isa",
+      "draft": true
+    },
+    {
+      "number": 266,
+      "title": "refactor(geometry): separate format legality from the resource budget (#259)",
+      "sha": "d67bb90338c9130620f887656392c7061d075928",
+      "branch": "codex/issue259-geometry-budget-separation-20261026",
+      "draft": true
+    },
+    {
+      "number": 220,
+      "title": "test(cpu): prepare original Descale SIMD reference-buffer replay",
+      "sha": "94ce0c97d0041d5dc36276259da97beafaaa96a2",
+      "branch": "codex/next-inverse-provenance",
+      "draft": true
+    },
+    {
+      "number": 198,
+      "title": "test(decoder): add isolated RGB444 p12 structural probe (#17)",
+      "sha": "be105632ddc3a7c11a349305f4e78a0c477434b8",
+      "branch": "codex/issue17-rgb444-research",
+      "draft": true
+    },
+    {
+      "number": 197,
+      "title": "test(decoder): derive the RCA-195 band-0 publication contract from source",
+      "sha": "e2d3b07a925e7bff1d7334f14884a8bc2b6a21fa",
+      "branch": "codex/issue195-band0-contract",
+      "draft": true
+    },
+    {
+      "number": 192,
+      "title": "test(decoder): Windows cross-host RCA-160 band-0 confirmation (#158)",
+      "sha": "b09faef265c0531826c7291ce9daaccd30f6449d",
+      "branch": "codex/issue158-phaseb-band0",
+      "draft": true
+    },
+    {
+      "number": 188,
+      "title": "test(decoder): harden registered triangulation evidence",
+      "sha": "d5de8d9ae9e045b96111dbdb36eea435bdeb3d5d",
+      "branch": "codex/issue120-triangulation-review",
+      "draft": true
+    },
+    {
+      "number": 185,
+      "title": "test(ci): run P7 audit in standalone gate",
+      "sha": "75859a950461d7d768bbfd2460ee9cb3d7e93955",
+      "branch": "codex/macos-review-177",
+      "draft": true
+    },
+    {
+      "number": 184,
+      "title": "fix(ci): require FilmScan3 trace contract test",
+      "sha": "7136777994c5ba435e0fe5c241de3d84181f112a",
+      "branch": "codex/macos-review-175",
+      "draft": true
+    },
+    {
+      "number": 180,
+      "title": "test(rca160): classify the corrupt decoder output as a per-row DC offset (#160)",
+      "sha": "e45b26cf2943d1e8e9f9975d4baea35c63b5e03b",
+      "branch": "codex/issue160-output-domain",
+      "draft": true
+    },
+    {
+      "number": 178,
+      "title": "fix(validation): strictly verify recorded C0 geometry reports",
+      "sha": "f941cf504fabe80e305be6d1a80b43c34d4c2d14",
+      "branch": "codex/macos-geometry-report-contracts",
+      "draft": true
+    },
+    {
+      "number": 177,
+      "title": "fix(tests): sanitize deeply nested P7 baseline JSON",
+      "sha": "3a7e964a82a20e4714f842725f9e0614a3086e45",
+      "branch": "codex/macos-p7-verifier-contracts",
+      "draft": true
+    },
+    {
+      "number": 176,
+      "title": "test(rgb444): run aligned allocation failures in standalone CI",
+      "sha": "82e9498b869ac2ade434d0d9cfa7de4195b887fe",
+      "branch": "codex/macos-rgb-allocation-ci",
+      "draft": true
+    },
+    {
+      "number": 175,
+      "title": "fix(validation): reject ambiguous FilmScan3 trace JSON",
+      "sha": "6ff4aafe48cf34d888a3eb7020580f70d24be335",
+      "branch": "codex/macos-trace-manifest-contracts",
+      "draft": true
+    },
+    {
+      "number": 172,
+      "title": "test(macos): consolidate reviewed P7 decoder audit and verifier fixes",
+      "sha": "131fcc5c23cd4cd8c6556e38857c458ff898a6e4",
+      "branch": "codex/p7-audit-consolidation",
+      "draft": true
+    },
+    {
+      "number": 170,
+      "title": "test(decoder): triangulate registered packet with pinned FFmpeg",
+      "sha": "3e369f7a10857062c8d007737cf6338808129d5b",
+      "branch": "claude/issue120-registered-triangulation",
+      "draft": true
+    },
+    {
+      "number": 169,
+      "title": "test(rca): separate decoder thread count from CPU affinity in #159 evidence",
+      "sha": "bce06770764aab7f9a948fc1b839591c631c6ade",
+      "branch": "codex/issue159-thread-oversub",
+      "draft": true
+    },
+    {
+      "number": 168,
+      "title": "test(diagnostics): add bounded GPU diagnostic collector (#115)",
+      "sha": "5ba4209dc43dd469b7f5def574160c86e5672f70",
+      "branch": "codex/issue115-m4-diagnostic-collector",
+      "draft": true
+    },
+    {
+      "number": 167,
+      "title": "test(rgb444): qualify allocation failures on native Windows",
+      "sha": "535fdeaf2df1e04a30322331bb1ad2462235fd3e",
+      "branch": "codex/issue37-windows-qualification",
+      "draft": true
+    },
+    {
+      "number": 166,
+      "title": "test(macos): independently qualify five pending validation fixes",
+      "sha": "824ec2b783b942c50d8bfe725cf0bc15ec609dbd",
+      "branch": "codex/macos-five-native-qualification",
+      "draft": true
+    },
+    {
+      "number": 165,
+      "title": "feat(tools): add F2 4K golden corpus tier label and measurements (#36)",
+      "sha": "44961880e40e95a241191ae8b8a87472d3cd4992",
+      "branch": "codex/issue36-f2-4k",
+      "draft": true
+    },
+    {
+      "number": 164,
+      "title": "test(decoder): add affinity and SMT topology A/B/C/D evidence",
+      "sha": "9746cb24a82272d1d151e999c1fb07148459420a",
+      "branch": "codex/issue157-affinity-topology",
+      "draft": true
+    },
+    {
+      "number": 163,
+      "title": "docs(rca): pre-registered A/B falsifies both candidate mechanisms for low-LP divergence (#160)",
+      "sha": "87910aebb9c914aec054fee64475a07d10dc706e",
+      "branch": "codex/issue160-synthetic-ab",
+      "draft": true
+    },
+    {
+      "number": 162,
+      "title": "test(decoder): add EPYC VM affinity protocol and evidence (#158)",
+      "sha": "dc57d3a8c47285c22f410552414b525837e923e8",
+      "branch": "codex/issue158-epyc-affinity-topology",
+      "draft": true
+    },
+    {
+      "number": 156,
+      "title": "feat(tools): real SDK F1 golden corpora for RGB, RGBA and Bayer (#36)",
+      "sha": "f17355f2f391410fc2cf27065e54dcffe1ae45e7",
+      "branch": "codex/issue36-f1-corpus",
+      "draft": true
+    },
+    {
+      "number": 151,
+      "title": "fix(tests): validate FilmScan3 encoder trace types",
+      "sha": "6e6fe42734f8f2dd9900aa89ce7a1ff8e4448b4c",
+      "branch": "codex/macos-five-evidence-boundaries",
+      "draft": true
+    },
+    {
+      "number": 150,
+      "title": "fix(tests): reject boolean and noninteger P7 frame geometry",
+      "sha": "77b8715fd702043bc04863c9bbf975540aa95cf2",
+      "branch": "codex/p7-frame-geometry-types",
+      "draft": true
+    },
+    {
+      "number": 148,
+      "title": "fix(tests): keep Metal memory-model checks active under Python -O",
+      "sha": "89ddd8a221d487852dd50ffe8ca54bcb406f07a6",
+      "branch": "codex/metal-model-optimized-checks",
+      "draft": true
+    },
+    {
+      "number": 146,
+      "title": "fix(tests): sanitize oversized decoder evidence measurements",
+      "sha": "ebce91589c2e4906c5d1836f800cf08ab5a974b4",
+      "branch": "codex/macos-review-evidence-final",
+      "draft": true
+    },
+    {
+      "number": 143,
+      "title": "fix(validation): reject out-of-range p10 comparison samples",
+      "sha": "2d0b396ba323eacd40dfefbd7665339f95c4d73b",
+      "branch": "codex/macos-five-validation-hardening",
+      "draft": true
+    },
+    {
+      "number": 142,
+      "title": "feat(rgb444): add bounded p12 frame and RG48 source importer",
+      "sha": "f1396e18df2433ae0b59d164393f5007a5f1e7a4",
+      "branch": "codex/rgb444-encoder-p0",
+      "draft": true
+    },
+    {
+      "number": 141,
+      "title": "fix(ci): honor enabled CMake Metal values in validation gates",
+      "sha": "28762285953d79d860d0fb3fa14cbff7db64a8e3",
+      "branch": "codex/metal-cmake-bool-gate",
+      "draft": true
+    },
+    {
+      "number": 140,
+      "title": "fix(ci): enforce five macOS validation prerequisites",
+      "sha": "1755796abc0dd007de27eb936c2dfae5ed6d3548",
+      "branch": "codex/macos-five-validation-gates",
+      "draft": true
+    },
+    {
+      "number": 139,
+      "title": "fix(validation): harden five macOS input and evidence gates",
+      "sha": "f295160d0b94bb71d3b17eab02da14613cc07be8",
+      "branch": "codex/macos-five-input-contracts",
+      "draft": true
+    },
+    {
+      "number": 138,
+      "title": "test(decoder): demonstrate bounded lowpass dependency A/B effect",
+      "sha": "97c34500324b550da5f6444fe9d28c8729dea8d2",
+      "branch": "codex/issue120-windows-evidence",
+      "draft": true
+    },
+    {
+      "number": 137,
+      "title": "docs(macos): review five platform prerequisites independently",
+      "sha": "6af34d01e42d68717c00482d079d67b4ac016afd",
+      "branch": "codex/macos-five-review",
+      "draft": true
+    },
+    {
+      "number": 136,
+      "title": "fix(tests): reject ambiguous P7 baseline JSON",
+      "sha": "8f547c6719f4ec7a529764d0b0525b5ee9f9afcf",
+      "branch": "codex/p7-json-review",
+      "draft": true
+    },
+    {
+      "number": 135,
+      "title": "test(macos): cover five prerequisite contracts and Metal workspace budgets",
+      "sha": "59da896391137d50ba147df617c763e40f51ddfb",
+      "branch": "codex/macos-five-followup",
+      "draft": true
+    },
+    {
+      "number": 134,
+      "title": "test(macos): qualify five queue prerequisites on native arm64",
+      "sha": "a0913c1a9d01ebec96567637920da76a07e1a6d5",
+      "branch": "codex/macos-five-readiness",
+      "draft": true
+    },
+    {
+      "number": 133,
+      "title": "fix(tests): reject malformed quality oracle probe integers",
+      "sha": "be0d01ddad0b9a6c8700efe56b75f06a470081ac",
+      "branch": "codex/macos-quality-probe-inputs",
+      "draft": true
+    },
+    {
+      "number": 132,
+      "title": "fix(diagnostics): require balanced NVML lifecycle",
+      "sha": "417738c774a992bb6d9aaaa035c2b994e3b6b7c4",
+      "branch": "codex/telemetry-nvml-lifetime",
+      "draft": true
+    },
+    {
+      "number": 129,
+      "title": "fix(tests): validate integer geometry model inputs",
+      "sha": "813e2c8f2f4ce6f0c1489ef9eaac157830a7e66e",
+      "branch": "codex/geometry-integer-domain",
+      "draft": true
+    },
+    {
+      "number": 128,
+      "title": "fix(tests): reject ambiguous decoder evidence JSON",
+      "sha": "ae39cce531a2cfa5f14036f4c08fd595992b6b79",
+      "branch": "codex/decoder-evidence-json",
+      "draft": true
+    },
+    {
+      "number": 127,
+      "title": "test(decoder): distinguish reference instability from encoder failures",
+      "sha": "9a1f9e5e3103e71b279c1df3453e255b4c5f95eb",
+      "branch": "codex/reference-decode-contract",
+      "draft": true
+    },
+    {
+      "number": 126,
+      "title": "test(compat): reconcile C0 geometry audit with current main",
+      "sha": "96148c043fa5051f2cd9f501c7a44a01857a897a",
+      "branch": "codex/geometry-c0-current-main",
+      "draft": false
+    },
+    {
+      "number": 124,
+      "title": "fix(diagnostics): separate signed measured VRAM deltas from estimates",
+      "sha": "17d60ca241a6fb2ed97e72f2e891812923136832",
+      "branch": "codex/telemetry-vram-origin",
+      "draft": true
+    },
+    {
+      "number": 121,
+      "title": "fix(diagnostics): bound NVML sampling and preserve unavailable counters",
+      "sha": "07f2b8fcf7420881aa841cfaded1568d47bb43a8",
+      "branch": "codex/telemetry-bounds-115",
+      "draft": true
+    },
+    {
+      "number": 119,
+      "title": "fix(diagnostics): redact rejected CLI arguments",
+      "sha": "12cbd10c40b89f3b5852819416dcfdf55c2c8284",
+      "branch": "codex/review115-telemetry",
+      "draft": true
+    },
+    {
+      "number": 118,
+      "title": "docs(diagnostics): audit telemetry measurement gaps (#115)",
+      "sha": "8b2a45482eb92c4c6dc093c0b1cecef0ed1e8fab",
+      "branch": "codex/telemetry-gap-audit",
+      "draft": false
+    },
+    {
+      "number": 117,
+      "title": "feat(diagnostics): add bounded CPU telemetry summary adapter",
+      "sha": "b33617cd7856b134b44d8fe337146e480905bd7c",
+      "branch": "codex/diagnostic-schema",
+      "draft": false
+    },
+    {
+      "number": 113,
+      "title": "docs(agents): clarify issue claims and approval boundaries",
+      "sha": "9e634519a2f6b99784fe0748c8da2217a005ad0c",
+      "branch": "codex/agent-claim-clarification",
+      "draft": false
+    },
+    {
+      "number": 108,
+      "title": "docs(privacy): sanitize archival destination contract",
+      "sha": "b3d8ca57cff56b05880dc7cdf9866ea90b2b37fe",
+      "branch": "codex/archive-status-sanitized",
+      "draft": false
+    },
+    {
+      "number": 101,
+      "title": "docs(p4): qualify merged parent on native macOS arm64",
+      "sha": "be18113aa11c66b70226ef7212d8f5197aece297",
+      "branch": "codex/p4-independent-qualification",
+      "draft": true
+    },
+    {
+      "number": 86,
+      "title": "test(decoder): quantify GoPro versus FFmpeg pixel deltas (#11)",
+      "sha": "af825fe0c3e9373f503c46aa7890a39d1c231037",
+      "branch": "codex/decoder-pixel-diff",
+      "draft": true
+    },
+    {
+      "number": 84,
+      "title": "docs(architecture): reconcile media engine and CUDA frontend contracts",
+      "sha": "0aefd7b6d20e61e5282c9d84414e5d9e8f9d8d54",
+      "branch": "codex/issue34-architecture-review",
+      "draft": true
+    },
+    {
+      "number": 83,
+      "title": "docs(decoder): audit macOS readiness and freeze public FFmpeg baseline (#47)",
+      "sha": "fd844fd058e0d79d4eabd39769e453c65ea78ba3",
+      "branch": "codex/macos-decoder-compat-audit-p7",
+      "draft": true
+    },
+    {
+      "number": 82,
+      "title": "feat(tools): real SDK capability probe for all CineForm families (#36)",
+      "sha": "4fba41a597f585b91903cdd6e1bae4d8295ac427",
+      "branch": "codex/windows-all-formats-golden",
+      "draft": true
+    },
+    {
+      "number": 77,
+      "title": "feat(cpu): add bit-exact AVX2 and AVX-512 forward wavelet kernels",
+      "sha": "3f612a83a286815a7969d1759b33753bb2f821a3",
+      "branch": "codex/issue69-x86-wavelet",
+      "draft": false
+    },
+    {
+      "number": 76,
+      "title": "docs(cpu): prepare NEON wavelet qualification gates (#70)",
+      "sha": "6522bc2e85d8346c9119f53b3b8b9c0f406a6289",
+      "branch": "codex/neon-p2-test-plan",
+      "draft": false
+    },
+    {
+      "number": 58,
+      "title": "docs(architecture): propose shared media engine and capability gates",
+      "sha": "f4b9747b643cc4e7645e3c5cc4a34db634545874",
+      "branch": "codex/media-backend-architecture",
+      "draft": true
+    },
+    {
+      "number": 52,
+      "title": "fix(linux): build and sanitizer-qualify the FIELDPLUS decoder on the A2 (#38)",
+      "sha": "1c34eabeda584ac88ab0624d60d3828600bbf080",
+      "branch": "codex/linux-decoder-sanitizer-p0",
+      "draft": true
+    },
+    {
+      "number": 51,
+      "title": "docs(compat): audit 12K/17K CineForm geometry, chunks and memory (C0)",
+      "sha": "224709afaeed4e8ae1c3d90c923279a7acb883e7",
+      "branch": "codex/extreme-geometry-17k-audit",
+      "draft": true
+    },
+    {
+      "number": 35,
+      "title": "build(linux-cuda): Linux/A2 CUDA build, bit-exactness and sanitizer validation (#33)",
+      "sha": "ab49505ace1a7ac23b413ddc70d5604f98267933",
+      "branch": "codex/linux-cuda-port-p1",
+      "draft": true
+    },
+    {
+      "number": 12,
+      "title": "Decode Phase 3B-2A: FIELDPLUS GOP-2 qualification",
+      "sha": "b11b3da4c6be4cc7005cf634162e3bd1b662f387",
+      "branch": "decode-phase3b2a",
+      "draft": true
+    }
+  ]
+}

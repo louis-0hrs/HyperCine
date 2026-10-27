@@ -1,0 +1,109 @@
+{
+  "schema": "hypercine.scalar_endpoint_correction/1",
+  "baseline_head": "a085c43fd1ba63d555997abbef16e1de9f52040b",
+  "scope": "isolated GOP2-derived arithmetic research only",
+  "platform": "macOS ARM64 / AppleClang 21",
+  "originals": {
+    "authenticated_artifacts": 30,
+    "baseline_exact_cases": 5,
+    "baseline_total_cases": 6,
+    "corrected_exact_cases": 6,
+    "immutable_originals_unchanged": true
+  },
+  "baseline_mismatch": {
+    "geometry": [
+      1920,
+      1080
+    ],
+    "sdk_channel": 2,
+    "rows": [
+      {
+        "y": 266,
+        "count": 0
+      },
+      {
+        "y": 267,
+        "count": 0
+      },
+      {
+        "y": 268,
+        "count": 240,
+        "x_range": [
+          0,
+          239
+        ],
+        "candidate_minus_original": -1
+      },
+      {
+        "y": 269,
+        "count": 240,
+        "x_range": [
+          0,
+          239
+        ],
+        "candidate_minus_original": 1
+      }
+    ]
+  },
+  "cause": "Original scalar LL pointer stops at n-2; LH ring reaches n-1. Final highpass rows remain n-1.",
+  "minimum_supported_input_height": 4,
+  "source_files": [
+    {
+      "id": "src/cpu/decode_spatial_scalar.cpp",
+      "byte_length": 9129,
+      "sha256": "9c435223eb7cb5edff314b985e11c3ff3345435d07cc0fc373e11e7e436267d4"
+    },
+    {
+      "id": "src/cpu/decode_spatial_scalar.h",
+      "byte_length": 2593,
+      "sha256": "61e1ddb8ea29cee28fd8e6cc92ccb0a12217f2d59066d023b44f0775e6ec88eb"
+    },
+    {
+      "id": "tests/test_decode_spatial_scalar.cpp",
+      "byte_length": 16397,
+      "sha256": "b9bcd4ccd6ae5a0023f266ae4c78ed992e98685a7a9831648096077a6b896f29"
+    },
+    {
+      "id": "tests/reference_scalar_inverse/generate_vectors.py",
+      "byte_length": 4876,
+      "sha256": "11bf359f5fc05c872417eaeb58fc0a0c5d17421827db913419e4263eeac21a5e"
+    },
+    {
+      "id": "tests/reference_scalar_inverse/synthetic_vectors.h",
+      "byte_length": 8905,
+      "sha256": "37bd93da27183e8bed4a93d2cd66d04e524f121e615f6c269378c4d2966640ca"
+    }
+  ],
+  "limits": [
+    "Archived original compiler/ISA signoff is a separate owner gate.",
+    "No production decoder, GPU, performance or bitstream acceptance claim."
+  ],
+  "license": "MIT OR Apache-2.0",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "validation": {
+    "release_full": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 76.94,
+      "required_external_decode": true
+    },
+    "asan_ubsan_full": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 136.15,
+      "leak_detection": false,
+      "python_ffmpeg_instrumented": false
+    },
+    "tsan_scoped_graph": {
+      "passed": 4,
+      "failed": 0,
+      "seconds": 1.68
+    },
+    "numerical_mutations_rejected": 11,
+    "warnings_as_errors": "PASS",
+    "vector_regeneration": "PASS",
+    "hosted_current_correction": "PENDING"
+  }
+}

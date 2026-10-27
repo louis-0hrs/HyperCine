@@ -283,6 +283,50 @@ HyperCineStatus HyperCine_InverseHorizontal26_CUDA(
 );
 
 /**
+ * @brief Whether an ARM64 NEON wavelet path is compiled into this build.
+ *
+ * NEON is baseline on arm64, so this is true there and false elsewhere. A false
+ * result means the NEON entry points return HYPERCINE_STATUS_NOT_SUPPORTED; it
+ * never means "silently use the scalar path instead".
+ */
+bool HyperCine_IsNEONWaveletAvailable(void);
+
+/**
+ * @brief Enable or disable the NEON dispatch. Defaults to enabled.
+ *
+ * Exists so a test can prove both paths produce identical output, and so a
+ * caller can force the scalar path on a machine where NEON misbehaves.
+ */
+void HyperCine_SetNEONWaveletEnabled(bool enabled);
+
+/** @brief Current NEON dispatch state. */
+bool HyperCine_IsNEONWaveletEnabled(void);
+
+/**
+ * @brief ARM64 NEON 1-level 2-6 forward horizontal wavelet.
+ *
+ * Contract is identical to HyperCine_ForwardHorizontal26_CPU, including every
+ * border tap and the rounding rule. Verified bit-exact against the scalar
+ * kernel; returns HYPERCINE_STATUS_NOT_SUPPORTED when NEON is not compiled in.
+ */
+HyperCineStatus HyperCine_ForwardHorizontal26_NEON(
+    const int16_t* src, int width, int height, int src_stride,
+    int16_t* lowpass, int low_stride,
+    int16_t* highpass, int high_stride
+);
+
+/**
+ * @brief ARM64 NEON 1-level 2-6 forward vertical wavelet.
+ *
+ * Same contract as HyperCine_ForwardVertical26_CPU, verified bit-exact.
+ */
+HyperCineStatus HyperCine_ForwardVertical26_NEON(
+    const int16_t* src, int width, int height, int src_stride,
+    int16_t* lowpass, int low_stride,
+    int16_t* highpass, int high_stride
+);
+
+/**
  * @brief CUDA 2D 1-Level 2-6 Spatial Inverse Wavelet Transform.
  */
 HyperCineStatus HyperCine_InverseSpatial2D_CUDA(

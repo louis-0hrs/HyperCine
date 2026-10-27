@@ -8,14 +8,17 @@ Usage:
   python ci/privacy_guard.py --staged
   python ci/privacy_guard.py --commit <sha>
   python ci/privacy_guard.py --commits <base>..HEAD
+  python ci/privacy_guard.py --push-remote <name>  # pre-push stdin records
 
 Only reports filename, line and rule; never prints matching sensitive data.
-It also scans commit messages and repository path names. Sensitive path names are
-redacted in diagnostics. It does not validate binary blobs, issue text, GitHub
-artifacts or old history.
+It also scans commit messages, author/committer identities and repository paths.
+Staged scans check effective Git identities, including environment overrides.
+Sensitive path names are redacted in diagnostics. It does not validate binary
+blobs, issue text, GitHub artifacts or old history.
 """
 import argparse
 import ipaddress
+import os
 import re
 import subprocess
 import sys
@@ -25,8 +28,10 @@ IP_CANDIDATE = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")
 def is_private_network_address(address):
     a, b, _, _ = address.packed
     return a == 10 or (a == 172 and 16 <= b <= 31) or (a == 192 and b == 168)
-UNIX_HOME = re.compile(r"(?<![\w/])/(?:Users|home|root)/[^/\s\"'<>]+")
-WINDOWS_HOME = re.compile(r"\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>]+")
+UNIX_HOME = re.compile(r"(?<![\w/])/(?:Users|home|root)/[^/\s\"'<>]+", re.IGNORECASE)
+WINDOWS_HOME = re.compile(r"\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>]+", re.IGNORECASE)
+# Git Bash/MSYS mounts Windows drives with POSIX-like home paths.
+MSYS_HOME = re.compile(r"(?<![\w/])/[a-z]/" r"Users/[^/\s\"'<>]+", re.IGNORECASE)
 TILDE_HOME = re.compile(r"(?<![\w/])~/(?=[A-Za-z._])[^\s\"'<>]+")
 WINDOWS_UNC = re.compile(r"(?<![A-Za-z0-9])\\{2,}[A-Za-z0-9._-]+\\+[A-Za-z0-9.$_-]+")
 POSIX_SHARE = re.compile(r"(?<![A-Za-z0-9:/])//[A-Za-z0-9._-]+/[A-Za-z0-9.$_-]+")
@@ -55,7 +60,8 @@ def rules_for(line):
             continue
         if is_private_network_address(address):
             result.add("PRIVATE_IPV4")
-    if UNIX_HOME.search(line) or WINDOWS_HOME.search(line) or TILDE_HOME.search(line):
+    if (UNIX_HOME.search(line) or WINDOWS_HOME.search(line) or
+            MSYS_HOME.search(line) or TILDE_HOME.search(line)):
         result.add("PERSONAL_ABSOLUTE_PATH")
     if WINDOWS_UNC.search(line) or POSIX_SHARE.search(line) or NETWORK_URI.search(line):
         result.add("NETWORK_SHARE")
@@ -69,30 +75,137 @@ def rules_for(line):
     return sorted(result)
 
 
+# Public dynamic/reverse-DNS patterns are heuristics only: the original
+# multi-label public hostname disclosure did NOT end in .local/.internal.
+HOST_DERIVED_DNS = re.compile(
+    r"(?:^|[.-])(?:dip[0-9]+|dyn(?:dns|host|amic)?[0-9]*|dhcp[0-9]*|"
+    r"pppoe[0-9]*|cpe[0-9]*|rev(?:erse)?dns|ip-[0-9]+)(?:$|[.-])",
+    re.IGNORECASE)
+AGENT_NAME = re.compile(r"\b(?:agent|openclaw|codex|automation)\b", re.IGNORECASE)
+APPROVED_AGENT_DOMAINS = frozenset(("example.invalid", "users.noreply.github.com"))
+
+
+def identity_findings(role, name, email):
+    """Inspect real Git envelope identities without exposing their values."""
+    rules = set(rules_for(name)) | set(rules_for(email))
+    domain = email.rpartition("@")[2].lower()
+    if not domain or "." not in domain or domain.endswith(".(none)"):
+        rules.add("HOST_DERIVED_IDENTITY")
+    if HOST_DERIVED_DNS.search(domain):
+        rules.add("HOST_DERIVED_IDENTITY")
+    if AGENT_NAME.search(name) and domain not in APPROVED_AGENT_DOMAINS:
+        rules.add("UNAPPROVED_AGENT_IDENTITY")
+    return [("[" + role + "]", 0, rule) for rule in sorted(rules)]
+
+
+def configured_identity_field(field):
+    """Read explicit Git configuration rather than git-var host inference."""
+    proc = subprocess.run(["git", "config", "--get", field],
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          text=True, encoding="utf-8", errors="replace")
+    if proc.returncode not in (0, 1):
+        raise RuntimeError("Unable to read explicit Git identity configuration")
+    return proc.stdout.strip() if proc.returncode == 0 else ""
+
+
+def staged_identity_findings():
+    # Missing explicit identity lets Git infer name/email from host and DNS.
+    name = configured_identity_field("user.name")
+    email = configured_identity_field("user.email")
+    if not name or not email:
+        return [("[AUTHOR]", 0, "UNCONFIGURED_IDENTITY"),
+                ("[COMMITTER]", 0, "UNCONFIGURED_IDENTITY")]
+    findings = []
+    if AGENT_NAME.search(name) and configured_identity_field(
+            "user.useConfigOnly").lower() not in ("true", "yes", "on", "1"):
+        findings.append(("[AUTHOR]", 0, "AGENT_USE_CONFIG_ONLY_REQUIRED"))
+    for role in ("AUTHOR", "COMMITTER"):
+        identity = git("var", "GIT_" + role + "_IDENT").rstrip("\n")
+        match = re.fullmatch(r"(.*) <([^<>]*)> \d+ [+-]\d{4}", identity)
+        if not match:
+            raise RuntimeError("Unable to parse effective Git identity")
+        findings.extend(identity_findings(role, *match.groups()))
+    return findings
+
+
+def commit_identity_findings(sha):
+    # Lowercase format codes return actual object fields, without mailmap.
+    fields = git("show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce",
+                 sha).rstrip("\n").split("\0")
+    if len(fields) != 4:
+        raise RuntimeError("Unable to parse committed Git identity")
+    return (identity_findings("AUTHOR", *fields[:2]) +
+            identity_findings("COMMITTER", *fields[2:]))
+
+
+def decode_patch_path(value):
+    """Decode Git's C-quoted byte paths without evaluating arbitrary text."""
+    if not value.startswith('"'):
+        return value.split("\t", 1)[0]
+    escaped = {"a": 7, "b": 8, "t": 9, "n": 10, "v": 11,
+               "f": 12, "r": 13, "\\": 92, '"': 34}
+    data = bytearray()
+    index = 1
+    while index < len(value):
+        char = value[index]
+        index += 1
+        if char == '"':
+            if value[index:] not in ("", "\t"):
+                raise RuntimeError("Invalid Git patch path")
+            return data.decode("utf-8", errors="replace")
+        if char != "\\":
+            data.extend(char.encode("utf-8"))
+            continue
+        if index >= len(value):
+            break
+        char = value[index]
+        index += 1
+        if char in escaped:
+            data.append(escaped[char])
+        elif char in "0123" and re.fullmatch(r"[0-7]{2}", value[index:index + 2]):
+            data.append(int(char + value[index:index + 2], 8))
+            index += 2
+        else:
+            raise RuntimeError("Invalid Git patch path escape")
+    raise RuntimeError("Unterminated Git patch path")
+
+
+def display_path(path):
+    # Control characters in valid filenames must not forge diagnostic lines.
+    return path.encode("unicode_escape").decode("ascii")
+
+
 def scan_patch(patch):
-    """Inspect added lines only; return (path, new_line, rule)."""
+    """Scan added lines, including +++-prefixed content inside a hunk."""
     findings = []
     path = None
     line_number = None
     for entry in patch.splitlines():
-        if entry.startswith("+++ b/"):
-            path = entry[6:]
-            line_number = None
-            for rule in rules_for(path):
-                findings.append(("[SENSITIVE_PATH]", 0, "PATH_" + rule))
-        elif entry.startswith("+++ /dev/null"):
+        if entry.startswith("diff --git "):
             path = None
             line_number = None
+        elif line_number is None and (
+                entry.startswith("+++ b/") or entry.startswith('+++ "b/')):
+            decoded = decode_patch_path(entry[4:])
+            if not decoded.startswith("b/"):
+                raise RuntimeError("Invalid patch destination header")
+            path = decoded[2:]
+            for rule in rules_for(path):
+                findings.append(("[SENSITIVE_PATH]", 0, "PATH_" + rule))
+        elif line_number is None and entry.startswith("+++ /dev/null"):
+            path = None
         elif entry.startswith("@@ "):
             match = HUNK.match(entry)
-            line_number = int(match.group(1)) if match else None
-        elif entry.startswith("+") and not entry.startswith("+++"):
-            if path is not None and line_number is not None:
-                for rule in rules_for(entry[1:]):
-                    findings.append(("[SENSITIVE_PATH]" if rules_for(path)
-                                     else path, line_number, rule))
-                line_number += 1
-        elif entry.startswith(" ") and line_number is not None:
+            if not match or path is None:
+                raise RuntimeError("Unrecognized patch hunk")
+            line_number = int(match.group(1))
+        elif line_number is not None and entry.startswith("+"):
+            # In a hunk, +++ b/whatever is source content, never a header.
+            for rule in rules_for(entry[1:]):
+                findings.append(("[SENSITIVE_PATH]" if rules_for(path)
+                                 else display_path(path), line_number, rule))
+            line_number += 1
+        elif line_number is not None and entry.startswith(" "):
             line_number += 1
     return findings
 
@@ -107,18 +220,157 @@ def git(*args):
     return proc.stdout
 
 
+def ref_findings(role, ref):
+    # Ref prefixes are not filesystem boundaries. Check each component as
+    # a possible home-path start, including nested and remote-tracking names.
+    # Three components suffice for the existing home rules (drive/Users/name);
+    # bounded windows avoid repeatedly scanning an arbitrarily long suffix.
+    candidates = [ref]
+    parts = ref.split("/")
+    if len(parts) >= 3 and parts[0] == "refs":
+        for index in range(2, len(parts)):
+            window = "/".join(parts[index:index + 3])
+            candidates.extend((window, "/" + window))
+    rules = {rule for candidate in candidates for rule in rules_for(candidate)}
+    return [("[" + role + "]", 0, rule) for rule in sorted(rules)]
+
+
+def tag_chain_findings(oid):
+    """Inspect every tag object before peeling; accept only commit targets."""
+    findings = []
+    seen = set()
+    for _ in range(128):
+        if oid in seen:
+            raise RuntimeError("Cyclic tag chain")
+        seen.add(oid)
+        kind = git("cat-file", "-t", oid).strip()
+        if kind == "commit":
+            return findings, oid
+        if kind != "tag":
+            findings.append(("[PUSH_OBJECT]", 0, "UNSUPPORTED_OBJECT_TYPE"))
+            return findings, None
+        # Strict decoding is required: replacements could conceal metadata.
+        proc = subprocess.run(["git", "cat-file", "tag", oid],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if proc.returncode:
+            raise RuntimeError("Unable to inspect tag object")
+        raw = proc.stdout.decode("utf-8")
+        for rule in rules_for(raw):
+            findings.append(("[TAG_METADATA]", 0, rule))
+        header, sep, _ = raw.partition("\n\n")
+        lines = header.splitlines()
+        if (not sep or len(lines) != 4 or
+                not lines[0].startswith("object ") or
+                not lines[1].startswith("type ") or
+                not lines[2].startswith("tag ") or
+                not lines[3].startswith("tagger ")):
+            raise RuntimeError("Unsupported tag header")
+        target = lines[0][7:]
+        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", target):
+            raise RuntimeError("Invalid tag target")
+        if git("cat-file", "-t", target).strip() != lines[1][5:]:
+            raise RuntimeError("Tag target type mismatch")
+        identity = re.fullmatch(r"tagger (.*) <([^<>]*)> -?\d+ [+-]\d{4}", lines[3])
+        if not identity:
+            raise RuntimeError("Unsupported tagger identity")
+        findings.extend(identity_findings("TAGGER", *identity.groups()))
+        findings.extend(ref_findings("TAG_NAME", "refs/tags/" + lines[2][4:]))
+        oid = target
+    raise RuntimeError("Tag nesting exceeds inspection limit")
+
+
+def fetch_mapping_findings(remotes):
+    """Require canonical ownership of every configured tracking namespace."""
+    for remote in remotes:
+        proc = subprocess.run(
+            ["git", "config", "--null", "--get-all", "remote." + remote + ".fetch"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if proc.returncode == 1:
+            continue  # A push-only remote need not configure a fetch mapping.
+        if proc.returncode != 0:
+            raise RuntimeError("Unable to inspect remote fetch mappings")
+        # NUL records preserve embedded newlines; no config value is echoed.
+        mappings = proc.stdout.decode("utf-8").split("\0")
+        canonical = "refs/heads/*:refs/remotes/" + remote + "/*"
+        if (mappings[-1] != "" or
+                any(mapping not in (canonical, "+" + canonical)
+                    for mapping in mappings[:-1])):
+            return [("[PUSH_REMOTE]", 0, "UNSUPPORTED_FETCH_REFSPEC")]
+    return []
+
+
+def push_findings(remote, records):
+    """Validate pre-push records and collect commits from this destination only."""
+    # Inspect actual stored objects, never local replacement objects.
+    os.environ["GIT_NO_REPLACE_OBJECTS"] = "1"
+    remotes = git("remote").splitlines()
+    if remote not in remotes:
+        raise RuntimeError("Push requires a configured remote name")
+    # --remotes=<name> includes every ref below refs/remotes/<name>/.
+    # Another configured remote can own a nested part of that namespace;
+    # its private commits are not proof of publication to this destination.
+    if any(other != remote and
+           (other.startswith(remote + "/") or remote.startswith(other + "/"))
+           for other in remotes):
+        return [("[PUSH_REMOTE]", 0, "OVERLAPPING_REMOTE_NAMESPACES")], []
+    # Non-overlapping names alone are insufficient: a custom fetch mapping
+    # can write private history into another remote's tracking namespace.
+    findings = fetch_mapping_findings(remotes)
+    if findings:
+        return findings, []
+    commits = set()
+    for record in records:
+        fields = record.split()
+        if len(fields) != 4:
+            raise RuntimeError("Malformed pre-push record")
+        local_ref, local_oid, remote_ref, remote_oid = fields
+        for oid in (local_oid, remote_oid):
+            if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", oid):
+                raise RuntimeError("Invalid push object ID")
+        findings.extend(ref_findings("LOCAL_REF", local_ref))
+        findings.extend(ref_findings("REMOTE_REF", remote_ref))
+        if set(local_oid) == {"0"}:
+            continue  # deletion has no outgoing object, but names were checked
+        tag_findings, target = tag_chain_findings(local_oid)
+        findings.extend(tag_findings)
+        if target is None:
+            continue
+        if set(remote_oid) == {"0"}:
+            outgoing = git("rev-list", "--reverse", target, "--not",
+                           "--remotes=" + remote)
+        else:
+            # A replaced tag may previously have targeted a blob or tree.
+            # Exclusion works for any existing object; no tag metadata is trusted.
+            outgoing = git("rev-list", "--reverse", target, "^" + remote_oid)
+        commits.update(outgoing.splitlines())
+    return findings, sorted(commits)
+
+
 def main(argv=None):
+    # Direct/CI scans and range selection must inspect original published objects.
+    os.environ["GIT_NO_REPLACE_OBJECTS"] = "1"
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--staged", action="store_true")
     group.add_argument("--commit", metavar="SHA")
     group.add_argument("--commits", metavar="BASE..HEAD")
+    group.add_argument("--push-remote", metavar="NAME")
     args = parser.parse_args(argv)
-    common = ("--no-ext-diff", "--no-color", "--unified=0", "--diff-filter=ACMRT")
+    # Enforce stable diff prefixes and bypass any textconv redaction.
+    common = ("--no-ext-diff", "--no-textconv", "--no-color",
+              "--src-prefix=a/", "--dst-prefix=b/", "--unified=0",
+              "--diff-filter=ACMRT")
     patches = []
+    paths = []
     commits = []
-    if args.staged:
+    findings = []
+    if args.push_remote:
+        findings, commits = push_findings(args.push_remote, sys.stdin)
+    elif args.staged:
+        findings.extend(staged_identity_findings())
         patches.append(git("diff", "--cached", *common))
+        paths.extend(git("diff", "--cached", "--name-only", "-z",
+                         "--no-renames", "--diff-filter=ACMRT").split("\0"))
     elif args.commit:
         commits = [args.commit]
     else:
@@ -126,9 +378,18 @@ def main(argv=None):
         # Empty ranges are allowed (e.g. synchronized branches with no new commits).
     for sha in commits:
         patches.append(git("show", "--format=", "--first-parent", *common, sha))
-    findings = [finding for patch in patches for finding in scan_patch(patch)]
+        paths.extend(git("show", "--format=", "--first-parent", "--name-only",
+                         "-z", "--no-renames", "--diff-filter=ACMRT", sha).split("\0"))
+    findings.extend(finding for patch in patches for finding in scan_patch(patch))
+    # Binary, empty or rename-only changes have no textual +++ destination.
+    for path in sorted(set(paths) - {""}):
+        for rule in rules_for(path):
+            item = ("[SENSITIVE_PATH]", 0, "PATH_" + rule)
+            if item not in findings:
+                findings.append(item)
     # A secret in a commit subject/body is public even when the patch is clean.
     for sha in commits:
+        findings.extend(commit_identity_findings(sha))
         message = git("show", "-s", "--format=%B", sha)
         for rule in rules_for(message):
             findings.append(("[COMMIT_MESSAGE]", 0, rule))

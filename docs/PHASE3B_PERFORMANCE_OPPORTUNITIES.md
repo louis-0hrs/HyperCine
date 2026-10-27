@@ -1,5 +1,8 @@
 # Phase 3B performance opportunities
 
+> [!NOTE]
+> **Historical optimization study.** These observations were collected during Phase 3A.1; suggestions are not implementation or release commitments. Use the [Phase 3A.2c dataset](../benchmarks/phase3a2c_release_candidate.json) for current README headline throughput and the [benchmark guide](../benchmarks/results/README.md) for canonical-versus-archive distinctions.
+
 These are observations from the Phase 3A.1 measurement pass. None of them were implemented. The Phase 3A.1 numbers in `docs/PHASE3A1_BENCHMARK_HARDENING.md` are the baseline.
 
 ## 1. The default slot count is not the measured throughput peak

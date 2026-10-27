@@ -57,6 +57,10 @@ tmpxft_*
 *.hdmp
 core.*
 
+# Python test cache artifacts (must not enter public PRs)
+__pycache__/
+*.py[cod]
+
 # Temporary and local test outputs
 *.ppm
 OUT-*.ppm
@@ -92,3 +96,6 @@ Makefile
 # Source fixture verifier (not a generated CMake artifact)
 !tests/verify_filmscan3_fixtures.cmake
 !cmake/wavelet_simd.cmake
+!tests/verify_oracle_fixtures.cmake
+!tests/verify_benchmark_artifact_contract.cmake
+!tests/verify_benchmark_fail_closed.cmake

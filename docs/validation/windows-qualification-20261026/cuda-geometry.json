@@ -1,0 +1,61 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "source": "81d8a94",
+  "cuda_target": "89",
+  "comparisons": [
+    {
+      "geometry": "1280x720",
+      "frames": 3,
+      "status": "PASS",
+      "evidence": [
+        "FRAME 0: bytes=1707164 limiter=4 index=0 PASS",
+        "FRAME 1: bytes=1576892 limiter=9 index=1 PASS",
+        "FRAME 2: bytes=1423692 limiter=14 index=2 PASS",
+        "MULTIFRAME: PASS (3 ordered frames, 4707748 bytes total, rate state and frame counter identical)",
+        "PASS: complete 1280x720 x 3 frames FilmScan3 CPU/A2 CUDA sample"
+      ]
+    },
+    {
+      "geometry": "2048x1080",
+      "frames": 3,
+      "status": "PASS",
+      "evidence": [
+        "FRAME 0: bytes=4089468 limiter=4 index=0 PASS",
+        "FRAME 1: bytes=3776868 limiter=9 index=1 PASS",
+        "FRAME 2: bytes=3408216 limiter=14 index=2 PASS",
+        "MULTIFRAME: PASS (3 ordered frames, 11274552 bytes total, rate state and frame counter identical)",
+        "PASS: complete 2048x1080 x 3 frames FilmScan3 CPU/A2 CUDA sample"
+      ]
+    },
+    {
+      "geometry": "3840x2160",
+      "frames": 3,
+      "status": "PASS",
+      "evidence": [
+        "FRAME 0: bytes=15325284 limiter=4 index=0 PASS",
+        "FRAME 1: bytes=14146288 limiter=9 index=1 PASS",
+        "FRAME 2: bytes=12766764 limiter=14 index=2 PASS",
+        "MULTIFRAME: PASS (3 ordered frames, 42238336 bytes total, rate state and frame counter identical)",
+        "PASS: complete 3840x2160 x 3 frames FilmScan3 CPU/A2 CUDA sample"
+      ]
+    }
+  ],
+  "rejections": [
+    {
+      "geometry": "1920x1081",
+      "exit_code": 1,
+      "evidence": "FAIL: FilmScan3 geometry requires width %128, height %8, width [128,4096], height [24,4096]; 8K unqualified"
+    },
+    {
+      "geometry": "4096x2160",
+      "exit_code": 1,
+      "evidence": "FAIL: FilmScan3 exceeds 8294400-pixel CPU session budget"
+    },
+    {
+      "geometry": "7680x4320",
+      "exit_code": 1,
+      "evidence": "FAIL: FilmScan3 geometry requires width %128, height %8, width [128,4096], height [24,4096]; 8K unqualified"
+    }
+  ]
+}

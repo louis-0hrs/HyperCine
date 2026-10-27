@@ -1,0 +1,405 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "ctest_exit": 0,
+  "scope": "CTest contract execution only; no production or pixel qualification",
+  "counts": {
+    "PASS": 76,
+    "FAIL": 0,
+    "BLOCKED": 1,
+    "INCONCLUSIVE": 0
+  },
+  "tests": [
+    {
+      "name": "diagnostic_summary_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "cpu_isa_selection",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "wavelet_simd_exact",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "wavelet_simd_packets",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "qualification_report_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "cuda_output_dir_platform_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_reference_release_inventory",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_compare_sdk_oracle",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "test_rca159_witness_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "neon_wavelet_bitexact",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "neon_concurrency_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_backend_selection",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_api",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_geometry",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_geometry_budget",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_fixture_integrity",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "entropy_bitexact",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_color",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_wavelet",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_quantization",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_entropy",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_sample",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_geometry",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_oracle_fixtures",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_geometry_reference_p10",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_geometry_validation",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "gop2_original_stage_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "gop2_reference_inventory_integrity",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "windows_reference_inputs",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "windows_reference_guardrails",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "windows_reference_parser",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "windows_reference_sdk_coefficients",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_autonomous_manifest",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_sequence_manifest",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "cuda_filmscan3_output_dir_negative",
+      "status": "BLOCKED",
+      "reason": "required platform prerequisite unavailable"
+    },
+    {
+      "name": "encoder_capability_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_geometry_external_decode",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_external_decode",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "filmscan3_geometry_negative_gate",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_decode",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_256x256",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_1920x1080",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_128x24",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_384x40",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_4096x24",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_128x4096",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_external_2048x1024",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "standalone_windows_oracle_replay",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_task_graph_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_contract_195_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "decode_s3_plane",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_8",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_arithmetic",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_rejection",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_graph_workers_1",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_graph_workers_2",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_graph_workers_4",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_graph_workers_16",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_vectors",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    },
+    {
+      "name": "scalar_inverse_replay_contract",
+      "status": "PASS",
+      "reason": "registered test completed successfully"
+    }
+  ],
+  "integration_base": "a267db4f1d9f41955c59675f2bd3690c30f7acb5",
+  "source_revision": "e39076e2be0aba740da03a13f01078dfdf9cefb4",
+  "pr77_head": "3f612a83a286815a7969d1759b33753bb2f821a3",
+  "ctest_wall_seconds": 1050.0
+}

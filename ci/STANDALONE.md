@@ -62,6 +62,25 @@ No performance or acceleration improvement is claimed.
 
 ## Local reproduction
 
+### Windows dependency installation (Issue #99)
+
+The Windows install step first runs `python ci/test_windows_ffmpeg.py`, then
+`python ci/install_windows_ffmpeg.py`. The installer requires Chocolatey exit
+success **and** functional `ffmpeg -version` / `ffprobe -version` commands with
+the expected version banner. Missing executables, broken shims and misleading
+zero installer exits fail this step before CMake. Both tools are checked after
+each attempt. Only recognized HTTP 429/5xx or transport failures permit retries:
+at most three attempts, five seconds apart, with a ten-minute installer timeout
+and twenty-second timeout per tool. Other failures stop immediately.
+
+Diagnostics contain only attempt counts, exit/status codes and binary readiness;
+raw installer output, exception details and executable paths are not printed.
+Regression tests reproduce the zero-exit HTTP 503 case without network access.
+Hosted Windows validation must additionally pass the unchanged required external
+FFmpeg decode gate on the exact PR head. Linux/macOS dependency steps are unchanged.
+
+### Codec suite
+
 Use CMake 3.25+, C++17, Python 3 and FFmpeg/ffprobe in PATH. On macOS add
 `-DCMAKE_OSX_ARCHITECTURES=arm64`; on Windows run in an MSVC x64 developer shell
 and select Ninja (`-G Ninja -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl`).

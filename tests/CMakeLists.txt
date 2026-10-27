@@ -11,6 +11,56 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+# 0. SDK-free fail-closed reference-oracle contract.
+# Runs on every platform and does not require the original GoPro SDK.
+add_executable(test_reference_oracle test_reference_oracle.cpp)
+add_test(NAME test_reference_oracle COMMAND test_reference_oracle)
+set_tests_properties(test_reference_oracle PROPERTIES LABELS "reference-oracle")
+
+# Optional validation tooling only; the codec has no Python dependency.
+find_package(Python3 QUIET COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    # Shared with the standalone build, which never reaches this file.
+    hypercine_register_sdk_free_contracts()
+    # The runner must use the CTest that configured this build. CMAKE_CTEST_COMMAND
+    # is only set by include(CTest); this project calls enable_testing() directly.
+    if(CMAKE_CTEST_COMMAND)
+        set(HYPERCINE_CTEST_COMMAND "${CMAKE_CTEST_COMMAND}")
+    else()
+        find_program(HYPERCINE_CTEST_COMMAND NAMES ctest HINTS "${CMAKE_ROOT}/bin")
+    endif()
+    if(NOT HYPERCINE_CTEST_COMMAND)
+        message(FATAL_ERROR "ctest executable not found for reference_release_gate")
+    endif()
+    # Explicit qualification entrypoint: unlike ordinary CTest, a skipped or
+    # missing Phase 2 reference test makes this target fail (runner exit 77).
+    add_custom_target(reference_release_gate
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_reference_release.py"
+            --build "${CMAKE_BINARY_DIR}" --config "$<CONFIG>"
+            --ctest "${HYPERCINE_CTEST_COMMAND}"
+            --output "${CMAKE_BINARY_DIR}/reference-release.json"
+        DEPENDS test_reference_oracle
+        USES_TERMINAL VERBATIM)
+endif()
+
+# Issue #253: every target below links the frozen `CFHDCodecStatic` archive,
+# which only the upstream build defines. With -DHYPERCINE_BUILD_UPSTREAM=OFF an
+# unguarded link reached the linker as `cannot find -lCFHDCodecStatic` instead
+# of a truthful configuration, and the only tested configuration was the one
+# (standalone) that returns before this file. The SDK-free contracts above keep
+# building; the SDK-backed targets are guarded on the target and the omission is
+# reported at configure time instead of being silently unregistered.
+set(HYPERCINE_SDK_TESTS_OMITTED "")
+macro(hypercine_test_needs_sdk)
+    list(APPEND HYPERCINE_SDK_TESTS_OMITTED ${ARGN})
+endmacro()
+
+# Bounded Windows original-SDK process probe (not a pixel-correctness oracle).
+if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
+    add_executable(windows_reference_process windows_reference_process.cpp)
+    target_link_libraries(windows_reference_process PRIVATE CFHDCodecStatic)
+endif()
+
 # 1. Transform-level test
 if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(test_small_chroma_oracle test_small_chroma_oracle.cpp)
@@ -29,6 +79,8 @@ if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
         target_link_options(test_small_chroma_oracle_asan PRIVATE /INCREMENTAL:NO /DEBUG)
         target_link_libraries(test_small_chroma_oracle_asan PRIVATE CFHDCodecStatic)
     endif()
+elseif(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+    hypercine_test_needs_sdk(test_small_chroma_oracle)
 endif()
 
 add_executable(test_transform_wavelet
@@ -38,29 +90,36 @@ add_executable(test_transform_wavelet
 add_test(NAME test_transform_wavelet COMMAND test_transform_wavelet)
 
 # 2. Codec-level roundtrip test
-add_executable(test_codec_roundtrip
-    test_codec_roundtrip.cpp
-)
-target_link_libraries(test_codec_roundtrip PRIVATE CFHDCodecStatic)
-add_test(NAME test_codec_roundtrip COMMAND test_codec_roundtrip)
+if(TARGET CFHDCodecStatic)
+    add_executable(test_codec_roundtrip
+        test_codec_roundtrip.cpp
+    )
+    target_link_libraries(test_codec_roundtrip PRIVATE CFHDCodecStatic)
+    add_test(NAME test_codec_roundtrip COMMAND test_codec_roundtrip)
 
-add_executable(test_yuy2_stability
-    test_yuy2_stability.cpp
-)
-target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
-add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
+    add_executable(test_yuy2_stability
+        test_yuy2_stability.cpp
+    )
+    target_link_libraries(test_yuy2_stability PRIVATE CFHDCodecStatic)
+    add_test(NAME test_yuy2_stability COMMAND test_yuy2_stability)
 
-# 3. Upstream sample AVI decode test
-add_executable(test_avi_sample
-    test_avi_sample.cpp
-    ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
-    ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp
-    ${CMAKE_SOURCE_DIR}/upstream/Example/fileio.cpp
-)
-target_link_libraries(test_avi_sample PRIVATE CFHDCodecStatic)
-add_test(NAME test_avi_sample
-    COMMAND test_avi_sample "${CMAKE_SOURCE_DIR}/upstream/Example/videos/CFHDsample422.AVI"
-)
+    # 3. Upstream sample AVI decode test
+    add_executable(test_avi_sample
+        test_avi_sample.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/readavi.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/mp4reader.cpp
+        ${CMAKE_SOURCE_DIR}/upstream/Example/fileio.cpp
+    )
+    target_link_libraries(test_avi_sample PRIVATE CFHDCodecStatic)
+    add_test(NAME test_avi_sample
+        COMMAND test_avi_sample "${CMAKE_SOURCE_DIR}/upstream/Example/videos/CFHDsample422.AVI"
+    )
+else()
+    # test_transform_wavelet above deliberately stays: it compiles the frozen
+    # WaveletDemo helper sources but links no SDK archive.
+    hypercine_test_needs_sdk(
+        test_codec_roundtrip test_yuy2_stability test_avi_sample)
+endif()
 
 # 4. Phase 1A CUDA wavelet transform test
 if(HYPERCINE_ENABLE_CUDA)
@@ -72,7 +131,7 @@ if(HYPERCINE_ENABLE_CUDA)
 endif()
 
 
-if(HYPERCINE_ENABLE_CUDA)
+if(HYPERCINE_ENABLE_CUDA AND TARGET CFHDCodecStatic)
     add_executable(test_cuda_pyramid test_cuda_pyramid.cpp)
     target_link_libraries(test_cuda_pyramid PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_cuda_pyramid COMMAND test_cuda_pyramid)
@@ -88,21 +147,43 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2a test_phase2a.cpp)
     target_link_libraries(test_phase2a PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2a COMMAND test_phase2a)
+    add_test(NAME test_diagnostic_geometry_guard COMMAND test_phase2a --self-test-geometry-guard)
+    # Exit 77 means the strict encoder gates passed but the original-SDK pixel
+    # gate is BLOCKED_ORACLE. CTest reports it as skipped, never as passed.
+    set_tests_properties(test_phase2a PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2b test_phase2b.cpp)
     target_link_libraries(test_phase2b PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2b COMMAND test_phase2b)
+    set_tests_properties(test_phase2b PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2c test_phase2c.cpp)
     target_link_libraries(test_phase2c PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2c COMMAND test_phase2c)
+    set_tests_properties(test_phase2c PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 
     add_executable(test_phase2d test_phase2d.cpp)
     target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2d COMMAND test_phase2d)
+    set_tests_properties(test_phase2d PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
+    if(TARGET reference_release_gate)
+        add_dependencies(reference_release_gate test_phase2a test_phase2b test_phase2c test_phase2d)
+    endif()
 
     add_executable(test_entropy_capacity test_entropy_capacity.cpp)
-    target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic)
+    target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic Threads::Threads)
     if(WIN32)
         target_link_libraries(test_entropy_capacity PRIVATE psapi)
     endif()
@@ -114,6 +195,14 @@ if(HYPERCINE_ENABLE_CUDA)
         target_link_libraries(test_phase3a PRIVATE psapi)
     endif()
     add_test(NAME test_phase3a COMMAND test_phase3a)
+elseif(HYPERCINE_ENABLE_CUDA)
+    # CUDA is on but the frozen SDK is not built, so every CUDA test below would
+    # only fail at link time. Keep test_cuda_wavelet (hypercine_core only) and
+    # report the archive-dependent ones explicitly.
+    hypercine_test_needs_sdk(
+        test_cuda_pyramid test_entropy_parallel test_hybrid_roundtrip
+        test_phase2a test_phase2b test_phase2c test_phase2d
+        test_entropy_capacity test_phase3a)
 endif()
 
 # Decode actual native Mac-produced 1080p FS3 fixtures with pristine GoPro SDK.
@@ -126,7 +215,14 @@ if(WIN32 AND TARGET CFHDCodecStatic)
     add_test(NAME test_filmscan3_windows_decoder COMMAND test_filmscan3_windows_decoder
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/macos-filmscan3/flat.cfhd"
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/macos-filmscan3/gradient.cfhd")
-    set_tests_properties(test_filmscan3_windows_decoder PROPERTIES DEPENDS filmscan3_fixture_integrity)
+    # Exit 77 means every strict signal (fixture bytes, decode status,
+    # geometry, pitch, non-zero output) passed but repeated decodes of the same
+    # packet disagreed. That is the unknown reference state, not a failure.
+    set_tests_properties(test_filmscan3_windows_decoder PROPERTIES
+        DEPENDS filmscan3_fixture_integrity
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+    )
 endif()
 
 if(HYPERCINE_ENABLE_CUDA AND WIN32)
@@ -148,10 +244,16 @@ if(WIN32 AND TARGET CFHDCodecStatic)
         "-DFIXTURES=${oracle_fixtures}" -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_oracle_fixtures.cmake")
     add_test(NAME standalone_sdk_decode_3_packets COMMAND test_standalone_sdk_oracle
         "${oracle_fixtures}" "${CMAKE_CURRENT_BINARY_DIR}/oracle-ctest")
+    # Exit 77 means every strict storage/decoder/encoder/geometry/pitch/non-zero
+    # signal passed, but the decoded-pixel comparison against the pinned reference
+    # is BLOCKED_ORACLE (reference not independently qualified) or independent
+    # decodes of the same immutable packet disagreed. Neither is a pixel-accuracy
+    # pass, so there is no PASS output line to match any more.
     set_tests_properties(standalone_sdk_decode_3_packets PROPERTIES
         DEPENDS standalone_oracle_fixture_hashes TIMEOUT 120
-        PASS_REGULAR_EXPRESSION "SDK decode PASS: all three standalone packets"
-        FAIL_REGULAR_EXPRESSION "SDK decode FAIL;control FAIL;Oracle harness error")
+        SKIP_RETURN_CODE 77
+        LABELS "reference-oracle"
+        FAIL_REGULAR_EXPRESSION "STRICT_FAILURE;Oracle harness error")
     # Existing CI prints only failed CTest output and uploads no artifacts.
     # Emit an additional diagnostic report (including binary evidence) into its
     # build log. The CTest above independently repeats and gates real decoding.
@@ -164,4 +266,61 @@ if(WIN32 AND TARGET CFHDCodecStatic)
                 "${CMAKE_CURRENT_BINARY_DIR}/oracle-build" --report
             DEPENDS test_standalone_sdk_oracle VERBATIM)
     endif()
+endif()
+
+# Issue #189: isolated original-SDK reference collector; no CUDA linkage.
+if(WIN32 AND MSVC AND TARGET CFHDCodecStatic)
+    add_executable(gop2_reference_export ../tools/gop2_reference_export.cpp)
+    target_include_directories(gop2_reference_export PRIVATE "${CMAKE_SOURCE_DIR}/upstream/DecoderSDK")
+    target_compile_definitions(gop2_reference_export PRIVATE _ALLOCATOR=1 WARPSTUFF=1
+        HYPERCINE_SOURCE_COMMIT="${HYPERCINE_SOURCE_COMMIT}")
+    target_compile_options(gop2_reference_export PRIVATE /EHs)
+    target_link_libraries(gop2_reference_export PRIVATE CFHDCodecStatic)
+endif()
+
+if(HYPERCINE_SDK_TESTS_OMITTED)
+    list(REMOVE_DUPLICATES HYPERCINE_SDK_TESTS_OMITTED)
+    list(LENGTH HYPERCINE_SDK_TESTS_OMITTED HYPERCINE_SDK_TESTS_OMITTED_COUNT)
+    message(STATUS
+        "HYPERCINE_BUILD_UPSTREAM=OFF: ${HYPERCINE_SDK_TESTS_OMITTED_COUNT} SDK-backed "
+        "test target(s) are unavailable and were not registered (they link the "
+        "frozen CFHDCodecStatic archive): ${HYPERCINE_SDK_TESTS_OMITTED}")
+endif()
+
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME gop2_reference_inventory_integrity
+        COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_reference_inventory.py")
+endif()
+
+# Issue #253 contract: BUILD_UPSTREAM=OFF configures and reports its omission
+# instead of failing at link time. Configure-only; runs a fresh child configure
+# in both directions so a vacuous guard fails too.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME upstream_off_configure_contract
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_upstream_off_contract.py")
+    set_tests_properties(upstream_off_configure_contract PROPERTIES
+        LABELS "build-contract" TIMEOUT 900)
+endif()
+
+# Phase-B oracle contract: missing stages/neutrality evidence never pass.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME gop2_original_stage_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/test_gop2_stage_contract.py")
+endif()
+
+# Candidate independent pixel oracle: external FFmpeg, explicitly version-bound.
+# A missing tool or an unmeasured build exits 77 and never reports qualified.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME ffmpeg_oracle_qualification
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/qualify_ffmpeg_oracle.py")
+    set_tests_properties(ffmpeg_oracle_qualification PROPERTIES
+        LABELS "reference-oracle" SKIP_RETURN_CODE 77 TIMEOUT 180)
+    add_test(NAME ffmpeg_oracle_qualification_contract
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_ffmpeg_oracle_qualification.py")
+    set_tests_properties(ffmpeg_oracle_qualification_contract PROPERTIES
+        LABELS "reference-oracle")
 endif()

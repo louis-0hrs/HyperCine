@@ -19,6 +19,7 @@ std::runtime_error Error(const char* context,NSError* error=nil) {
 struct ColorArgs { uint32_t width,height,stride,ys,cs; };
 struct WaveArgs { uint32_t width,height,src_stride,dst_stride,prescale; };
 class Metal final : public Frontend {
+    FilmScan3Geometry geometry_;
     id<MTLDevice> device_;
     id<MTLCommandQueue> queue_;
     id<MTLComputePipelineState> color_,horizontal_,vertical_;
@@ -99,7 +100,10 @@ class Metal final : public Frontend {
         else {timing_.wavelet_gpu_ms+=gpu;timing_.wavelet_dispatches+=3;}
     }
 public:
-    Metal() {
+    // Geometry is carried by the frontend, because Encode() derives the frame
+    // geometry from frontend->Geometry(). Without this the Metal path could only
+    // ever produce the 1080p default (#45).
+    explicit Metal(FilmScan3Geometry geometry = {}) : geometry_(geometry) {
         @autoreleasepool {
             device_=MTLCreateSystemDefaultDevice();if(!device_)throw Error("No Metal device");
             queue_=[device_ newCommandQueue];if(!queue_)throw Error("No Metal command queue");
@@ -118,6 +122,7 @@ public:
             color_=pipeline(@"color709");horizontal_=pipeline(@"horizontal26");vertical_=pipeline(@"vertical26");
         }
     }
+    FilmScan3Geometry Geometry() const noexcept override { return geometry_; }
     std::string DeviceName() const override { return [device_.name UTF8String]; }
     MetalTiming Timing() const { return timing_; }
     bool ProfileHost() const override { return true; }
@@ -245,6 +250,10 @@ public:
 };
 }
 std::shared_ptr<Frontend> MetalFrontend() { return std::make_shared<Metal>(); }
+std::shared_ptr<Frontend> MetalFrontend(FilmScan3Geometry geometry) {
+    ValidateFilmScan3Geometry(geometry);
+    return std::make_shared<Metal>(geometry);
+}
 void FailNextMetalCompletion(Frontend& frontend) {
     auto* metal=dynamic_cast<Metal*>(&frontend);
     if(!metal)throw std::invalid_argument("frontend is not Metal");metal->FailNextCompletion();

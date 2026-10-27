@@ -1,0 +1,17 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "records": [
+    {
+      "removed_registration": "wavelet_simd_exact",
+      "status": "PASS",
+      "reason": "required inventory rejected actual reconfigured CTest inventory"
+    },
+    {
+      "removed_registration": "wavelet_simd_packets",
+      "status": "PASS",
+      "reason": "required inventory rejected actual reconfigured CTest inventory"
+    }
+  ],
+  "restored_inventory": "PASS"
+}

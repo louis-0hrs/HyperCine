@@ -1,28 +1,34 @@
 # Contributing to HyperCine
 
-Thank you for your interest in contributing to **HyperCine**. To keep the repository reproducible, auditable, and strictly compatible with the CineForm (`CFHD` / SMPTE VC-5) specification, all contributions must follow these core engineering rules.
+HyperCine is an experimental CineForm (`CFHD` / SMPTE VC-5) engineering project. Contributions are welcome, but each platform and format has its **own verification scope**. Start with the [documentation index](docs/README.md), [architecture](docs/ARCHITECTURE.md), [compatibility matrix](docs/COMPATIBILITY.md), and [open work queue](https://github.com/louis-0hrs/HyperCine/issues/62).
 
----
+> [!IMPORTANT]
+> The GoPro SDK under [`upstream/`](upstream/) is a **frozen reference**. Do not patch, refactor, reformat or update any file there. Handle integration quirks outside that directory; document reference behavior in [`docs/UPSTREAM.md`](docs/UPSTREAM.md).
 
-## 1. Preserve Upstream Immutability
-- The entire [`upstream/`](upstream/) directory contains the pristine GoPro CineForm SDK reference baseline (`11574d0295771edccadd17af14af74a539f924c7`).
-- **Never** modify, reformat, patch, or modernize any file under `upstream/`.
-- `git status --porcelain upstream/` must always be empty.
-- Handle any upstream build or runtime quirks in the root `CMakeLists.txt` or HyperCine wrapper layers, and document them in [`docs/UPSTREAM.md`](docs/UPSTREAM.md).
+## Before you start
 
-## 2. Correctness Before Optimization
-- Every encoder, wavelet, quantization, or entropy change must pass the full CTest verification suite (`ctest --test-dir build -C Release --output-on-failure`) before any performance claim is considered.
-- Do not trade away bitstream validity, deterministic rate-control behavior, or capacity safety bounds for higher FPS.
-- All new source files must carry the standard MIT / Apache-2.0 dual-license header.
+Read [`AGENTS.md`](AGENTS.md) for mandatory repo-wide rules, including agent claims, independent worktrees, branch ownership, pre-publication privacy gates and handoffs. Use a focused issue and an isolated branch; coordinate against [issue #62](https://github.com/louis-0hrs/HyperCine/issues/62) before editing files an agent already owns. Do not autonomously merge or release.
 
-## 3. New Codec Paths Require Bitstream Compatibility Tests
-- Any new pixel format conversion, wavelet path, quantization mode, or entropy kernel must include deterministic tests under `tests/` verifying:
-  - Coefficient and subband payload equivalence against the upstream reference (or documented mathematical bounds where applicable).
-  - Successful decode verification using the pristine upstream decoder (`CFHD_DecodeSample`).
-- Both CPU-only (`-DHYPERCINE_ENABLE_CUDA=OFF`) and CUDA-enabled (`-DHYPERCINE_ENABLE_CUDA=ON`) builds must remain green.
+New HyperCine source files require the repository's dual **MIT OR Apache-2.0** copyright/license header. Keep core codec dependencies within the project's published C++17/platform-native SDK constraints.
 
-## 4. Benchmark Changes Require Methodology Disclosure
-- Public throughput claims must use the canonical `ProductionEndToEnd` contract (`HostPageableEndToEnd` as the primary desktop headline) with at least 5 trials and median FPS as the headline metric.
-- Always disclose the exact baseline being compared against (e.g., pristine single-threaded `CFHD_EncodeSample` with `_THREADED_ENCODER=0`), hardware/clock telemetry, slot count, and input residency mode (`HostPageable`, `HostPinned`, or `DeviceInput`).
-- Never present `DeviceInput` (GPU-resident input) as conventional file-transcode throughput.
-- Canonical benchmark JSON artifacts must be generated from a clean git working tree without `--allow-dirty`.
+## Show correctness before speed
+
+Changes to format conversion, wavelet math, rate control, bitstream assembly or entropy paths require deterministic test vectors. Where valid, compare **actual compressed bytes and state** with the frozen upstream encoder. Record precisely which metadata is normalized. Pixel quality and round-trip decoding supplement, but do not replace, bitstream equality.
+
+**The upstream GoPro decoder can produce different pixels for identical packets under some worker configurations.** Its successful return code is not sufficient evidence of correct pixels. Keep failures classified as encoder discrepancy, decoder error, or decoder reproducibility; do not weaken release gates or silently skip failing tests. See [#120](https://github.com/louis-0hrs/HyperCine/issues/120) and [`docs/UPSTREAM.md`](docs/UPSTREAM.md).
+
+Run all **applicable** build and CTest gates for the touched implementation. Identify platform and test command; do not call an unrun/unsupported build a pass. For cross-platform changes, report verified platforms individually and explicitly record outstanding native verification. [CPU reference CI](.github/workflows/ci-cpu.yml) and [SDK-free standalone CI](.github/workflows/ci-standalone.yml) are different contracts.
+
+## Publish measurements responsibly
+
+The historical Phase 3A.2c CUDA headline uses `ProductionEndToEnd_v2`, five-trial median FPS, an explicitly identified **single-threaded** upstream CPU baseline, aligned warmup/state equivalence, and a clean worktree. `HostPageableEndToEnd` is the ordinary host-to-host benchmark. `HostPinnedApi` changes the memory contract. `DeviceInput` begins in VRAM and **must never be described as file-transcoding throughput**.
+
+Report source commit, benchmark JSON, platform, input residency, CUDA architecture, resolution, slot policy, clocks and representative latency. Label exploratory or modified-tree runs as noncanonical. See the [canonical JSON](benchmarks/phase3a2c_release_candidate.json) and [benchmark guide](benchmarks/results/README.md).
+
+## Privacy and pull-request checklist
+
+Public branches, draft PRs, issue comments, logs and artifacts are **public before merge**. Do not upload credentials, personal machine/user paths, private network or NAS locations, internal DNS, or raw environment logs.
+
+Before every commit, review the staged diff and run `python ci/privacy_guard.py --staged`. Before pushing, use the configured pre-push guard to scan **every outgoing commit** and review any generated evidence. A hosted CI check is not a pre-publication substitute. Follow [`docs/PRIVACY.md`](docs/PRIVACY.md) for hook/worktree setup and incident handling; never bypass a failing guard just to publish.
+
+Open a **Draft PR** linking its issue. Include the actual test commands, OS/compiler/GPU and driver versions where relevant, sample/commit hashes without private paths, PASS/FAIL/SKIP/BLOCKED classifications, scope boundaries, and unresolved risks. The [pull-request template](.github/pull_request_template.md) provides the final checklist. Leave protected-main integration to the maintainer's explicit review process.

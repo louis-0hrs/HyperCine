@@ -27,9 +27,36 @@ template<class T> using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 
 // Experimental fixed-quant progressive YUV422 p10, GOP1. Throws on invalid
 // bounds/profile/capacity. No SDK or GPU types are part of this interface.
-// Conservative allocation budget, independent of the 16-bit wire dimensions.
+// These are limits of our CURRENT implementations, not a verified global
+// CineForm/GoPro format specification. Keep three concerns distinct:
+// (1) FilmScan3 YUV422 3-level wavelet implementation shape; its present
+//     output fields use 16-bit geometry tags, but original SDK support for
+//     alternative families/packing/padding is not established.
+// (2) Resource budgets for each implementation/session; a wavelet-aligned
+//     geometry that cannot fit memory is not necessarily illegal CineForm.
+// (3) Native backend and independent decoder/reference qualification.
+// Legacy Fixed-Q2 deliberately retains its established 4096 limit and
+// invalid_argument semantics for compatibility; do not unify error paths
+// just because both use the same width/height types.
+inline constexpr int kMaxWireDimension = 65535; // current FilmScan3 16-bit geometry field
+//
+// Current resource budget -- what one session may allocate on this build.
+// Passing the implementation shape check does not imply sufficient memory.
+inline constexpr std::size_t kMaxPixels = 2097152; // legacy frame/sample budget, unchanged
+// Separate bounded storage budget for CPU FilmScan3 4K, not wire geometry.
+inline constexpr std::size_t kMaxPlaneElements = 3840u * 2160u;
+//
+// Backend qualification is tracked per backend/session, not represented
+// by any global wire-format or allocation constant.
+//
+// The legacy <=4096 dimension gate is retained for existing Fixed-Q2
+// callers and Plane allocations; the newer FilmScan3 validator classifies
+// its own shape and pixel allocation budget separately.
 inline constexpr int kMaxDimension = 4096;
-inline constexpr std::size_t kMaxPixels = 2097152;
+inline bool PlaneStorageFits(int stride, int height) noexcept {
+    return stride > 0 && height > 0 &&
+        static_cast<std::size_t>(stride) <= kMaxPlaneElements / static_cast<std::size_t>(height);
+}
 // Width: multiple of 128 (deepest chroma band multiple of 8).
 // Height: multiple of 8, >=24 (six-tap input, final LL height >=3).
 void ValidateGeometry(int width, int height);
@@ -42,7 +69,71 @@ struct WaveletLevel { std::array<Plane, 4> bands; }; // LL, LH, HL, HH
 using Planes = std::array<Plane, 3>; // Y, Cr, Cb (CFHD channel order)
 Planes ConvertBgra(const uint8_t* data, std::size_t bytes, int width, int height, std::size_t stride);
 Planes ConvertBgra128(const uint8_t* data, std::size_t bytes, std::size_t stride);
-WaveletLevel ForwardLevel(const Plane& input, int prescale); // 0 or 2
+// Per-session wavelet ISA policy (issue #70).
+//
+// Explicit `Scalar` or `Neon` requests are fixed for the lifetime of a CPU
+// encoder session, even when another thread changes the process-global default.
+// `Auto` is intentionally different: for compatibility, it follows that global
+// switch again on later dispatches, including within an existing session.
+// The kernels are bit-exact, so this selection does not change packet bytes.
+//
+// `Neon` on a target where NEON is not built in throws instead of silently
+// degrading, matching how an explicitly requested Metal backend behaves.
+enum class WaveletIsa { Auto, Scalar, Neon };
+// Prescale 0 or 2. The two-argument form keeps the historical behaviour: `Auto`
+// resolved per call against the process-global switch.
+//
+// Both forms agree: `Auto` follows the process-global default once per call and may
+// degrade to scalar on a host without the vector path. Only an explicit `Scalar` or
+// `Neon` is a demand, and a demand that cannot be met fails instead of degrading.
+WaveletLevel ForwardLevel(const Plane& input, int prescale);
+WaveletLevel ForwardLevel(const Plane& input, int prescale, WaveletIsa isa);
+namespace detail {
+// Resolve the requested ISA at the time of this call. For explicit Scalar/Neon,
+// an encoder calls this at construction and retains the resulting choice.
+// `Auto` returns a snapshot of the process-global default, not a lifetime
+// guarantee: the legacy/Auto frontend re-reads that default on future dispatches.
+// An explicit `Neon` throws if its kernel is absent rather than falling back.
+WaveletIsa ResolveWaveletIsa(WaveletIsa requested);
+// Which kernel a resolved policy actually runs (issue #70).
+//
+// This exists because "the vector entry point returned NOT_SUPPORTED" and "the
+// caller asked for the vector path" are different statements. A graceful `Auto`
+// call may fall back to scalar -- that is its documented meaning -- but a caller
+// that explicitly asked for `Neon` must be told it did not get it rather than
+// silently receiving scalar output under a NeON label.
+//
+// `vector_succeeded` is true only when the vector entry point reported success. It is
+// false both when the kernel refused the call and when it was never called at all.
+// This header stays free of `wavelet.h` on purpose: the public standalone interface
+// must not pull in the C status enum for one dispatch predicate.
+enum class WaveletDispatchDecision { Vector, Scalar, FailClosed };
+WaveletDispatchDecision DecideWaveletDispatch(WaveletIsa resolved, bool allow_fallback,
+                                             bool vector_succeeded);
+// Test seam: make the vector entry point report "not supported" without calling it.
+//
+// Without this the fail-closed arm is unreachable on every architecture: on a host
+// with the kernel, a legal geometry always succeeds, and on a host without it,
+// `ResolveWaveletIsa` throws before any wrapper runs. A branch that no input can
+// enter is a comment, not a guard.
+//
+// Thread-local and false by default, so it cannot affect another thread or a
+// production encode.
+void SetWaveletVectorForcedUnsupported(bool forced) noexcept;
+bool WaveletVectorForcedUnsupported() noexcept;
+// Deterministic dispatch witness for tests (issue #70).
+//
+// A packet cannot reveal which kernel ran, because the two are bit-exact -- that is
+// the whole reason the bit-exactness test exists. Timing cannot reveal it either
+// once a second thread flips the global default. So count the dispatch decisions
+// themselves, per thread, and let a test assert which kernel its own session
+// actually entered. Counts are thread-local so a concurrent test cannot blur them.
+struct WaveletDispatchCounts {
+    std::uint64_t scalar = 0;
+    std::uint64_t neon = 0;
+};
+WaveletDispatchCounts WaveletDispatchSnapshot() noexcept;
+}
 int16_t Quantize(int16_t value, unsigned divisor);
 // Table17, cubic companding, MSB first, end code and zero pad to 32 bits.
 // Width must be a multiple of 8 (the fixed profile has no virtual row gaps).
