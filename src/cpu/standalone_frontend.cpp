@@ -98,6 +98,9 @@ inline bool UseNeon() {
 // a test can assert its own session's path without perturbing another session's numbers.
 thread_local std::uint64_t t_scalar_dispatches = 0;
 thread_local std::uint64_t t_neon_dispatches = 0;
+// Test seam; see the declaration in standalone.h. Thread-local so a test cannot
+// perturb a concurrent encode, and false by default.
+thread_local bool t_vector_forced_unsupported = false;
 // Dispatch against an already-resolved choice. `Scalar` never touches the global
 // switch, which is the whole point: a Neon session keeps Neon while another thread
 // flips the process-wide default.
@@ -107,7 +110,7 @@ inline HyperCineStatus ForwardHorizontal26(const int16_t* src, int width, int he
                                           int16_t* highpass, int high_stride,
                                           WaveletIsa isa, bool allow_fallback) {
     HyperCineStatus vector_status = HYPERCINE_STATUS_NOT_SUPPORTED;
-    if (UseNeon(isa)) {
+    if (UseNeon(isa) && !t_vector_forced_unsupported) {
         vector_status = HyperCine_ForwardHorizontal26_NEON(src, width, height, src_stride,
                                                           lowpass, low_stride,
                                                           highpass, high_stride);
@@ -134,7 +137,7 @@ inline HyperCineStatus ForwardVertical26(const int16_t* src, int width, int heig
                                         int16_t* highpass, int high_stride,
                                         WaveletIsa isa, bool allow_fallback) {
     HyperCineStatus vector_status = HYPERCINE_STATUS_NOT_SUPPORTED;
-    if (UseNeon(isa)) {
+    if (UseNeon(isa) && !t_vector_forced_unsupported) {
         vector_status = HyperCine_ForwardVertical26_NEON(src, width, height, src_stride,
                                                         lowpass, low_stride,
                                                         highpass, high_stride);
@@ -154,6 +157,13 @@ inline HyperCineStatus ForwardVertical26(const int16_t* src, int width, int heig
                                            lowpass, low_stride, highpass, high_stride);
 }
 } // namespace
+
+void detail::SetWaveletVectorForcedUnsupported(bool forced) noexcept {
+    t_vector_forced_unsupported = forced;
+}
+bool detail::WaveletVectorForcedUnsupported() noexcept {
+    return t_vector_forced_unsupported;
+}
 
 detail::WaveletDispatchCounts detail::WaveletDispatchSnapshot() noexcept {
     WaveletDispatchCounts counts;
