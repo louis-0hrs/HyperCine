@@ -91,7 +91,9 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          choco install ffmpeg --no-progress -y
+          python ci/test_windows_ffmpeg.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python ci/install_windows_ffmpeg.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Configure MSVC environment (Windows)
         if: runner.os == 'Windows'

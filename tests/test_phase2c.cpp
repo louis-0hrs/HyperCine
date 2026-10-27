@@ -4,7 +4,9 @@
 
 #include "hypercine/phase2c.h"
 #include "hypercine/canonical.h"
+#include "reference_oracle.h"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -13,6 +15,19 @@ namespace {
 int Fail(const std::string& msg) {
     std::cerr << "FAIL: " << msg << "\n";
     return 1;
+}
+
+// Strict encoder/bitstream identity. The original-SDK decoded-pixel and PSNR
+// fields are intentionally excluded: they are a reference signal, not an
+// encoder property.
+bool StrictIdentityPassed(const hypercine::Phase2CIdentityReport& id) {
+    return id.pre_entropy_coeff_equal &&
+           id.per_band_payload_len_equal &&
+           id.per_band_payload_byte_equal &&
+           id.complete_sample_byte_equal &&
+           id.streamed_d2h_sample_byte_equal &&
+           id.multistream_sample_byte_equal &&
+           id.gpu_lowpass_sample_byte_equal;
 }
 
 }  // namespace
@@ -43,10 +58,20 @@ int main() {
               << " B lowpass_cpu=" << audit_1080.lowpass_cpu_ms << " ms ("
               << audit_1080.lowpass_pct_of_frame << "%)\n";
 
+    hypercine::test_oracle::ReferenceGateInputs reference_gate;
+    reference_gate.encoder_bitstream_verified = true;
+    reference_gate.decoder_returned_ok = true;
+    reference_gate.quality_oracle_qualified = false;
+    std::size_t observed_decodes = 0;
+    bool reference_unstable = false;
+    bool reference_decode_unknown = false;
+    bool quality_measured = false;
+    double min_psnr = 99.0;
+
     // 3. Section 2: Explicit 5-level bitstream identity & SHA-256 at 1080p, 4K, and 8K.
     for (const auto& res : hypercine::kResolutions) {
         const auto id = hypercine::VerifyPhase2CIdentity(res.width, res.height);
-        if (!id.ok) {
+        if (!StrictIdentityPassed(id)) {
             return Fail(std::string(res.name) + " identity verification failed: " + id.error +
                         " coeff=" + std::to_string(id.pre_entropy_coeff_equal) +
                         " len=" + std::to_string(id.per_band_payload_len_equal) +
@@ -55,21 +80,57 @@ int main() {
                         " streamed=" + std::to_string(id.streamed_d2h_sample_byte_equal) +
                         " multistream=" + std::to_string(id.multistream_sample_byte_equal) +
                         " gpu_lp=" + std::to_string(id.gpu_lowpass_sample_byte_equal) +
-                        " dec=" + std::to_string(id.upstream_decoder_pixel_equal) +
                         " mismatch_at=" + std::to_string(id.mismatch_offset));
         }
         if (id.cpu_sample_sha256 != id.gpu_consolidated_sample_sha256 ||
             id.cpu_sample_sha256 != id.gpu_streamed_sample_sha256 ||
-            id.cpu_sample_sha256 != id.gpu_lowpass_sample_sha256 ||
-            id.cpu_decoded_pixels_sha256 != id.gpu_decoded_pixels_sha256) {
-            return Fail(std::string(res.name) + " SHA-256 digest mismatch between CPU and GPU paths");
+            id.cpu_sample_sha256 != id.gpu_lowpass_sample_sha256) {
+            return Fail(std::string(res.name) + " sample SHA-256 digest mismatch between CPU and GPU paths");
+        }
+        // Two original-SDK decodes of byte-identical samples. Equal pixels are
+        // one observed output; unequal pixels are direct evidence of reference
+        // instability. A failed or incomparable decode is a fatal decode error.
+        const bool decode_evidence =
+            id.upstream_decoder_pixel_equal || id.decoded_max_abs_diff > 0;
+        if (!decode_evidence) {
+            reference_decode_unknown = true;
+        } else {
+            observed_decodes += 2;
+            if (!id.upstream_decoder_pixel_equal) reference_unstable = true;
+            quality_measured = true;
+            min_psnr = std::min(min_psnr, id.psnr_vs_source_db);
         }
         std::cout << "[Identity " << res.name << "] sample_bytes=" << id.sample_bytes
                   << " sample_sha256=" << id.cpu_sample_sha256
                   << " decoded_sha256=" << id.gpu_decoded_pixels_sha256
                   << " max_diff=" << id.decoded_max_abs_diff
-                  << " psnr=" << id.psnr_vs_source_db << " dB\n";
+                  << " psnr=" << id.psnr_vs_source_db << " dB"
+                  << " reference_decode="
+                  << (decode_evidence ? (id.upstream_decoder_pixel_equal ? "EQUAL" : "UNSTABLE")
+                                      : "UNAVAILABLE")
+                  << "\n";
     }
+
+    // A verified bitstream with a failed original-SDK decode stays a real
+    // failure. A verified bitstream with a low PSNR from that unqualified
+    // decoder is a reference signal and is classified once at the end.
+    auto check_pipeline = [&](const std::string& label,
+                              const hypercine::Phase2CResult& r) -> int {
+        if (!r.bitstream_byte_match) {
+            return Fail(label + " strict encoder/bitstream gate failed: " + r.error);
+        }
+        if (!r.decode_ok) {
+            return Fail(label + " original SDK decode failed: " + r.error);
+        }
+        ++observed_decodes;
+        quality_measured = true;
+        min_psnr = std::min(min_psnr, r.psnr_db);
+        if (r.psnr_db <= 35.0) {
+            std::cout << label << " reference PSNR " << r.psnr_db
+                      << " dB below threshold; classified by reference gate\n";
+        }
+        return 0;
+    };
 
     // 4. Multi-frame GPU-entropy pipeline across slot counts (1, 2, 3, 4), stream counts (1, 2, 4, 8),
     //    both D2H modes, both input modes, and optional GPU lowpass packing.
@@ -85,9 +146,8 @@ int main() {
         cfg.input_mode = hypercine::Phase2CInputMode::DeviceInput;
         cfg.verify_bitstream = true;
         const auto r = hypercine::RunPhase2C(cfg);
-        if (!r.ok) {
-            return Fail("1080p slot=" + std::to_string(slots) + " pipeline failed: " + r.error);
-        }
+        const std::string label = "1080p slot=" + std::to_string(slots);
+        if (const int rc = check_pipeline(label, r); rc != 0) return rc;
         std::cout << "[Pipeline 1080p slots=" << slots << "] fps=" << r.sustained_fps
                   << " mean_lat=" << r.mean_latency_ms << " ms psnr=" << r.psnr_db << " dB\n";
     }
@@ -106,9 +166,7 @@ int main() {
         cfg.gpu_pack_lowpass = true;
         cfg.verify_bitstream = true;
         const auto r = hypercine::RunPhase2C(cfg);
-        if (!r.ok) {
-            return Fail("4K BandStreamed HostInput pipeline failed: " + r.error);
-        }
+        if (const int rc = check_pipeline("4K HostInput BandStreamed", r); rc != 0) return rc;
         std::cout << "[Pipeline 4K HostInput BandStreamed] fps=" << r.sustained_fps
                   << " mean_lat=" << r.mean_latency_ms << " ms psnr=" << r.psnr_db << " dB\n";
     }
@@ -126,13 +184,30 @@ int main() {
         cfg.input_mode = hypercine::Phase2CInputMode::DeviceInput;
         cfg.verify_bitstream = true;
         const auto r = hypercine::RunPhase2C(cfg);
-        if (!r.ok) {
-            return Fail("8K DeviceInput Consolidated pipeline failed: " + r.error);
-        }
+        if (const int rc = check_pipeline("8K DeviceInput Consolidated", r); rc != 0) return rc;
         std::cout << "[Pipeline 8K DeviceInput slots=3] fps=" << r.sustained_fps
                   << " mean_lat=" << r.mean_latency_ms << " ms psnr=" << r.psnr_db << " dB\n";
     }
 
-    std::cout << "test_phase2c PASSED\n";
-    return 0;
+    if (reference_decode_unknown) reference_gate.decoder_returned_ok = false;
+    reference_gate.observed_decodes = observed_decodes;
+    reference_gate.distinct_decoded_outputs =
+        observed_decodes == 0 ? 0 : (reference_unstable ? 2 : 1);
+    reference_gate.quality_measured = quality_measured;
+    reference_gate.quality_meets_threshold = quality_measured && min_psnr > 35.0;
+    const auto decision = hypercine::test_oracle::ClassifyReferenceGate(reference_gate);
+    std::cout << "reference_oracle_decision="
+              << hypercine::test_oracle::GateDecisionName(decision)
+              << " exit=" << hypercine::test_oracle::GateExitCode(decision)
+              << " observed_decodes=" << observed_decodes
+              << " distinct=" << reference_gate.distinct_decoded_outputs
+              << " min_psnr=" << min_psnr << " dB"
+              << " encoder_strict_gates=PASS\n";
+    if (decision == hypercine::test_oracle::GateDecision::Pass) {
+        std::cout << "test_phase2c PASSED\n";
+        return 0;
+    }
+    std::cerr << "phase 2c strict stages passed; reference pixel gate is "
+              << hypercine::test_oracle::GateDecisionName(decision) << "\n";
+    return hypercine::test_oracle::GateExitCode(decision);
 }

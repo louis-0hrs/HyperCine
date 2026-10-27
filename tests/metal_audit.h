@@ -28,8 +28,14 @@ inline void EqualPacket(const std::vector<uint8_t>& cpu,const std::vector<uint8_
 }
 class Audit final : public detail::Frontend {
     unsigned wave_=0;
+    FilmScan3Geometry geometry_;
 public:
-    std::shared_ptr<detail::Frontend> gpu=detail::MetalFrontend();
+    // Carries the geometry like the real frontend: Encode() reads it from here,
+    // so a 4K audit run must not silently report the 1080p default (#45).
+    std::shared_ptr<detail::Frontend> gpu;
+    explicit Audit(FilmScan3Geometry geometry = {})
+        : geometry_(geometry), gpu(detail::MetalFrontend(geometry)) {}
+    FilmScan3Geometry Geometry() const noexcept override { return geometry_; }
     unsigned frames=0,levels=0;
     detail::FrontendFrame Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool=false) override {
         auto cpu=detail::CpuFrontend()->Transform(p,n,w,h,s,true);

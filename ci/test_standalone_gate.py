@@ -12,6 +12,12 @@ from run_standalone import REQUIRED, registered_tests, completed_tests
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_windows_qualification_contracts_are_required(self):
+        for name in ('qualification_report_contract', 'cuda_output_dir_platform_contract'):
+            self.assertIn(name, REQUIRED)
+            with self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_unit_only_inventory_fails(self):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': 'standalone_color'}]})
@@ -20,8 +26,41 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': n} for n in REQUIRED if n != 'standalone_external_decode']})
 
+    def test_missing_gop2_integrity_fails(self):
+        self.assertIn('gop2_reference_inventory_integrity', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'gop2_reference_inventory_integrity']})
+
+    def test_missing_gop2_stage_contract_fails(self):
+        self.assertIn('gop2_original_stage_contract', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'gop2_original_stage_contract']})
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
+
+    def test_merged_scalar_and_gop2_inventory_is_mandatory(self):
+        # A merge that drops either lane must fail even if its other tests pass.
+        merged = {'gop2_original_stage_contract', 'gop2_reference_inventory_integrity',
+                  'scalar_inverse_arithmetic', 'scalar_inverse_rejection',
+                  'scalar_inverse_vectors', 'scalar_inverse_replay_contract'}
+        merged |= {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
+        self.assertTrue(merged <= REQUIRED)
+        for missing in sorted(merged):
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
+
+    def test_each_shared_contract_registration_is_mandatory(self):
+        # These four are registered through hypercine_register_sdk_free_contracts()
+        # or the merged P4 geometry block; dropping any single registration must
+        # fail the gate, not shrink it back to the old green inventory.
+        for missing in ('test_reference_release_inventory', 'test_compare_sdk_oracle',
+                        'test_rca159_witness_contract',
+                        'filmscan3_geometry_reference_p10'):
+            self.assertIn(missing, REQUIRED)
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
 
     def check_xml(self, xml, names, expect_error):
         with tempfile.TemporaryDirectory() as directory:

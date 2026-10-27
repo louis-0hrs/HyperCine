@@ -171,6 +171,25 @@ Every agent operating in this repository must strictly adhere to these rules.
   owns the same task/files or shared GPU test window, coordinate instead of
   duplicating work. One agent may own multiple queued issues but must not
   start a blocked dependency.
+- **Claim is not a permission request:** for an unclaimed `READY` issue within
+  the agent's assigned lane and existing tool permissions, post `IN_PROGRESS`
+  and begin work immediately. Do not request maintainer approval to claim,
+  create an isolated branch/worktree, run tests or open a privacy-checked
+  Draft PR. After claiming, re-check other comments for races; never duplicate
+  another active owner. If simultaneous claims conflict, stop overlapping
+  work and coordinate ownership before proceeding. Continue an existing
+  own claim and update its Draft PR instead of re-claiming or creating
+  duplicates. Existing claims and blocked dependencies remain binding; a
+  claim grants no tool permissions.
+- **Approval boundary:** approval is required for merges into branches owned
+  by others (especially protected `main`), releases/tags/deployments,
+  force-push/history rewrites, destructive/external service changes, and any
+  special gate in the task. App/tool permission prompts are not bypassable
+  by this document; if rights are missing, report `BLOCKED_TOOL_PERMISSION`
+  with the needed permission rather than inventing a maintainer-approval
+  requirement. All publication privacy checks in section 12 still apply
+  before pushing a branch or opening/updating a Draft PR; verify
+  pseudonymous Git author and committer identities before committing.
 - Respect issue states `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`,
   `DONE`. A green historical check is not a substitute for testing the
   current commit or correct hardware. Explicitly distinguish CPU-only,

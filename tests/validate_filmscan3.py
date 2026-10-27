@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import platform
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -21,12 +22,12 @@ import validate_windows_reference as gate
 from validate_standalone import avi
 
 
-def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None):
+def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None, geometry=(1920, 1080)):
     directory.mkdir(parents=True, exist_ok=True)
     inputs, metadata, expected = [], bytearray(), []
     run_name = 'tier-a-1080' if any('tier-a-1080/' in a['path'] for a in manifest['artifacts']) else 'sequence-1920x1080'
     for frame in manifest['frames']:
-        if (frame['width'], frame['height']) != (1920, 1080):
+        if (frame['width'], frame['height']) != geometry:
             continue
         path = directory/('input_%04d.bgra' % frame['frame_index'])
         gate.checked_input(probe, frame, path)
@@ -39,7 +40,15 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
             records = {v['tag']: raw[v['offset']:v['offset']+v['length']] for v in parsed['metadata_mask_ranges']}
             for key, size in [('TAG_CLIP_GUID', 16), ('TAG_ENCODE_DATE', 10), ('TAG_ENCODE_TIME', 8), ('TAG_TIMECODE', 11)]:
                 metadata.extend(records[key][:size])
+    if not expected:
+        # A requested geometry with no matching manifest frames is an UNCHECKED
+        # corpus, never a pass. Reporting success here would claim 4K coverage
+        # that was never exercised.
+        raise ValueError('no manifest frames match the requested geometry %dx%d; '
+                         'this geometry is NOT validated' % geometry)
     arguments = [str(encoder)]
+    if geometry != (1920, 1080):
+        arguments += ['--geometry', '%dx%d' % geometry]
     if ffmpeg:
         arguments += ['--reference-yuv']
     if inject:
@@ -103,11 +112,18 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
                 row['raw_sample_with_explicit_variable_metadata'] = 'PASS'
         sample.verify_sample(raw, frame, 'sdk')
         if ffmpeg and index in (0, 3, 6, 13):
-            packet = output/('frame_%04d.avi' % index);packet.write_bytes(avi(raw, 1920, 1080))
+            # 422 10-bit stores 4 bytes per pixel: 2 Y + 1 Cb + 1 Cr per pair? No --
+            # yuv422p10le is 2 samples Y per 2 pixels plus 1 Cb + 1 Cr per pair,
+            # which is exactly 2 samples (4 bytes) per pixel. Derive from the
+            # geometry actually requested; hard-coding 1920x1080 here silently
+            # checked a 4K frame against a 1080p size.
+            packet = output/('frame_%04d.avi' % index);packet.write_bytes(avi(raw, geometry[0], geometry[1]))
             decoded = output/('frame_%04d.yuv' % index)
             subprocess.run([str(ffmpeg), '-v', 'error', '-xerror', '-y', '-i', str(packet), '-frames:v', '1', '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', str(decoded)], check=True)
-            if decoded.stat().st_size != 1920*1080*4:
-                raise ValueError('FFmpeg output storage mismatch')
+            expected_bytes = geometry[0] * geometry[1] * 4
+            if decoded.stat().st_size != expected_bytes:
+                raise ValueError('FFmpeg output storage mismatch: %d bytes for %dx%d, expected %d'
+                                 % (decoded.stat().st_size, geometry[0], geometry[1], expected_bytes))
             actual_pixels=array.array('H', decoded.read_bytes());reference_pixels=array.array('H', (output/('frame_%04d.reference.yuv' % index)).read_bytes())
             if sys.byteorder != 'little':
                 actual_pixels.byteswap();reference_pixels.byteswap()
@@ -146,7 +162,17 @@ def main():
     parser.add_argument('--inject-metadata', action='store_true')
     parser.add_argument('--output-dir', type=Path)
     parser.add_argument('--report', type=Path)
+    parser.add_argument('--geometry', metavar='WIDTHxHEIGHT', default='1920x1080',
+                        help='Frame geometry to validate (default 1920x1080)')
     args = parser.parse_args()
+    # Strict parse: std::stoi-style prefix parsing would accept "3840x2160junk".
+    match = re.fullmatch(r'([0-9]+)x([0-9]+)', args.geometry)
+    if not match:
+        parser.error('--geometry expects exactly WIDTHxHEIGHT in decimal digits')
+    args.geometry = (int(match.group(1)), int(match.group(2)))
+    # Digits alone are not enough: 0x2160 matches the shape but is not a geometry.
+    if args.geometry[0] <= 0 or args.geometry[1] <= 0:
+        parser.error('--geometry width and height must be positive')
     if args.inject_metadata and not args.corpus_root:
         parser.error('explicit metadata injection requires verified actual originals')
     name = 'phase3a_1080p_120_manifest.json' if args.sequence else 'manifest.json'
@@ -159,7 +185,7 @@ def main():
         inventory = {'status': 'PENDING', 'meaning': 'manifest hashes only; no actual Windows bytes supplied'}
     with tempfile.TemporaryDirectory(prefix='hypercine-fs3-production-') as tmp:
         directory = args.output_dir or Path(tmp)
-        result = compare_run(args.probe, args.encoder, manifest, args.corpus_root, directory, args.ffmpeg, args.inject_metadata, args.cpu_encoder)
+        result = compare_run(args.probe, args.encoder, manifest, args.corpus_root, directory, args.ffmpeg, args.inject_metadata, args.cpu_encoder, args.geometry)
     result.update({'copyright': 'Copyright (c) 2026 HyperCine Contributors.', 'license': 'MIT OR Apache-2.0',
                    'manifest': name, 'inventory': inventory, 'machine': platform.platform(), 'architecture': platform.machine(),
                    'encoder_sha256': gate.sha(args.encoder.read_bytes()),

@@ -1,0 +1,191 @@
+{
+  "schema": "hypercine.rca159_band0_witness/1",
+  "license": "MIT OR Apache-2.0",
+  "issue": 234,
+  "date": "2026-10-25",
+  "status": "WITNESS_CORRESPONDENCE_MEASURED_MECHANISM_UNRESOLVED",
+  "executed_by_this_record": false,
+  "provenance": {
+    "platform_class": "linux_x86_64_cpu_only",
+    "source_issue": 159,
+    "source_pull_request": 169,
+    "instrumentation": "private_instrumented_copy_outside_tracked_git",
+    "tracked_upstream_modified": false,
+    "private_bytes_included": false,
+    "host_identity_published": false,
+    "packet_identity_published": false,
+    "retained_output_rehash_performed_here": false
+  },
+  "mechanism": {
+    "summary": "The original reader can be released into the inverse while band 0 was never started or validated, because the all-valid gate compares valid == started and the all-started predicate excludes bit 0.",
+    "observed_gate_state": {
+      "band_valid_flags": "0x0E",
+      "band_started_flags": "0x0E",
+      "band0_valid": false,
+      "band0_started": false,
+      "gate_all_valid_returned": true,
+      "inverse_executed": true
+    },
+    "reader_calls_per_decode": 6,
+    "producer_write_publish_ordering": "not established by this witness; a set flag alone is not proof the buffer was published",
+    "source_loci": [
+      "upstream/Codec/image.h:227-231",
+      "upstream/Codec/decoder.c:12106-12148",
+      "upstream/Codec/entropy_threading.c:269-305"
+    ]
+  },
+  "witness": {
+    "population": {
+      "fresh_processes": 60,
+      "decoder_worker_cap": 8,
+      "affinity": "single CPU, taskset -c 0",
+      "reader_calls_per_process": 6,
+      "instrumentation": "buffered in-memory recorder dumped once at exit"
+    },
+    "contingency": {
+      "rows": ["divergent", "modal"],
+      "columns": ["band0_valid_zero_observed", "band0_valid_zero_never_observed"],
+      "counts": [[4, 0], [0, 56]],
+      "published_p_two_sided": 2.1e-06,
+      "file_sets_identical_between_arms": true,
+      "test": "Fisher exact, two-sided, recomputed by tools/rca159_witness_contract.py"
+    }
+  },
+  "rate_arms": {
+    "note": "Traced arms perturb incidence. Only the uninstrumented arm estimates the defect rate.",
+    "arms": [
+      {
+        "id": "uninstrumented",
+        "divergent": 27,
+        "modal": 93,
+        "processes": 120,
+        "batches_pooled": 3,
+        "worker_to_cpu_ratio": "12:1",
+        "quotable_as_rate": true
+      },
+      {
+        "id": "fprintf_recorder",
+        "divergent": 0,
+        "modal": 30,
+        "processes": 30,
+        "worker_to_cpu_ratio": "8 workers on one CPU",
+        "quotable_as_rate": false
+      },
+      {
+        "id": "buffered_recorder",
+        "divergent": 4,
+        "modal": 56,
+        "processes": 60,
+        "worker_to_cpu_ratio": "8 workers on one CPU",
+        "quotable_as_rate": false
+      }
+    ],
+    "traced_vs_uninstrumented": {
+      "rows": ["buffered_recorder", "uninstrumented"],
+      "columns": ["divergent", "modal"],
+      "counts": [[4, 56], [27, 93]],
+      "published_p_two_sided": 0.007
+    },
+    "ratio_control": {
+      "worker_to_cpu_ratio_at_or_below_one": "0/60 divergent",
+      "observed_rate_at_ratio_12_to_1": "19-23 percent"
+    }
+  },
+  "withdrawn_hypotheses": [
+    {
+      "claim": "The number of early-reader events observed in a decode predicts how many chroma channels lose their own race.",
+      "withdrawn_because": "Reader-call counters are per invocation inside the decode loop, not per channel; the same event count maps to different plane sets and one plane set arises from two different counts.",
+      "contradicting_observations": {
+        "frames": [
+          {
+            "id": "p09",
+            "early_accept_events": 2,
+            "channel_changed_percent": {"B": 100.0, "G": 99.9, "R": 100.0},
+            "planes_moved": ["B", "G", "R"]
+          },
+          {
+            "id": "p21",
+            "early_accept_events": 1,
+            "channel_changed_percent": {"B": 0.0, "G": 99.4, "R": 100.0},
+            "planes_moved": ["G", "R"]
+          },
+          {
+            "id": "p25",
+            "early_accept_events": 1,
+            "channel_changed_percent": {"B": 100.0, "G": 100.0, "R": 100.0},
+            "planes_moved": ["B", "G", "R"]
+          },
+          {
+            "id": "p27",
+            "early_accept_events": 1,
+            "channel_changed_percent": {"B": 0.0, "G": 99.4, "R": 100.0},
+            "planes_moved": ["G", "R"]
+          }
+        ],
+        "byte_identical_frame_pairs": [["p21", "p27"]],
+        "comparison_basis": "full-frame channel comparison against the modal reference, no sampling"
+      }
+    }
+  ],
+  "buffer_origin_control": {
+    "method": "sentinel-fill of the probe buffer before decode",
+    "sentinel_value": 32639,
+    "sentinel_value_hex": "0x7F7F",
+    "effect": "unread-prefix pixels follow the allocation contents, flipping from near 0x00 to near 0xFF, while the modal output digest is unchanged",
+    "conclusion": "the consumed prefix was never written by the producer"
+  },
+  "hash_domains": {
+    "recomputed_here": false,
+    "note": "Hashes are transcribed from the recorded #159 evidence. This record does not own the private output and does not rehash it.",
+    "entries": [
+      {
+        "id": "image_only",
+        "geometry": [1920, 1080],
+        "pitch": 7680,
+        "bytes": 8294400,
+        "bytes_per_pixel": 4,
+        "sha256": "c5e0e052be84a807a899d0501fa73f93bbe9d67e0f1c9e5cfdef97a3ffee54a0"
+      },
+      {
+        "id": "image_plus_64_sentinel_bytes",
+        "geometry": [1920, 1080],
+        "pitch": 7680,
+        "bytes": 8294464,
+        "sentinel_bytes": 64,
+        "sentinel_byte_value": 205,
+        "sha256": "12ed7b2b8d1b06d87fa693db6ac72474ece13632c2d8ffe6981a52f52e1480fd"
+      }
+    ],
+    "recorded_field_mapping": {
+      "field": "modal_frame_sha256",
+      "domain": "image_plus_64_sentinel_bytes",
+      "correction": "The #159 field referred to the sentinel-extended domain, not the image-only region."
+    }
+  },
+  "non_claims": {
+    "production_decoder_repaired": false,
+    "guard_implemented_or_proven": false,
+    "scheduling_interleaving_identified": false,
+    "traced_rate_is_defect_frequency": false,
+    "pixel_oracle_qualified": false,
+    "release_gate_changed": false,
+    "cross_host_reproduction": false
+  },
+  "remaining_blocked_work": [
+    {
+      "step": 2,
+      "work": "minimum observable causal patch requiring band-0 validity and publication before inverse admission, in a disposable private source copy",
+      "blocker": "BLOCKED_HARDWARE_AND_PRIVATE_CORPUS"
+    },
+    {
+      "step": 4,
+      "work": "fail-closed controls, first-error precedence and negative mutation recovering the observed symptom",
+      "blocker": "BLOCKED_HARDWARE_AND_PRIVATE_CORPUS"
+    },
+    {
+      "step": 5,
+      "work": "bounded A/B execution and the cure-versus-INCONCLUSIVE_TIMING verdict",
+      "blocker": "BLOCKED_HARDWARE_AND_PRIVATE_CORPUS"
+    }
+  ]
+}

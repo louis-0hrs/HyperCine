@@ -15,7 +15,9 @@ int main(int argc,char** argv){try{
     auto audit=std::make_shared<metal_test::Audit>(); // mandatory GPU; never skip/fallback
     std::cout<<"Required Metal device: "<<audit->DeviceName()<<'\n';
     using namespace reference_fixture;
-    for(auto geometry : {std::array<int,2>{128,24},{384,40},{1920,1080}}) {
+    // 4K is the P5 target (#45): the CPU session budget and Metal maxBufferLength
+    // both admit 3840x2160, so the geometry must be exercised, not assumed.
+    for(auto geometry : {std::array<int,2>{128,24},{384,40},{1920,1080},{3840,2160}}) {
         const int w=geometry[0],h=geometry[1],stride=w*4+16;
         AlignedVector<uint8_t> pixels(static_cast<std::size_t>(stride)*h,0xcd);
         for(int pattern=0;pattern<13;++pattern) {
@@ -62,7 +64,9 @@ int main(int argc,char** argv){try{
         start=Clock::now();auto b=metal.Encode(input.data(),input.size(),7680);double m=Ms(start);
         const auto after=detail::ReadMetalTiming(*timed);
         metal_test::EqualPacket(a.sample,b.sample);
-        if(a.coefficient_fnv64!=b.coefficient_fnv64)throw std::runtime_error("quantized coefficient hashes differ");
+        if(!FilmScan3FullCoefficientHashesEqual(a,b))
+            throw std::runtime_error(a.coefficient_hash!=FilmScan3CoefficientHash::Full || b.coefficient_hash!=FilmScan3CoefficientHash::Full
+                ? "bit-exact gate requires full coefficient hashing" : "quantized coefficient hashes differ");
         if(i){ct.push_back(c);mt.push_back(m);host+=m-(after.upload_ms-before.upload_ms)-(after.readback_ms-before.readback_ms)-(after.submit_ms-before.submit_ms)-(after.wait_ms-before.wait_ms);}
         if(i==0 && argc==2){std::ofstream f(argv[1],std::ios::binary);f.write(reinterpret_cast<const char*>(b.sample.data()),b.sample.size());if(!f)throw std::runtime_error("sample write failed");}
     }

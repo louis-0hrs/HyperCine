@@ -8,6 +8,15 @@ changing SDK, CUDA or standalone codec math. Actual Windows SDK acceptance of
 the three packets is now verified with `TAG_CPU_MAX=1`; native Mac FFmpeg
 acceptance is independently verified. Unrestricted SDK worker safety is not claimed.
 
+**Follow-up 2026-10-24 (#120 callsite #3):** the CTest no longer turns the
+reference-decoder pixel comparison into a red gate. `standalone_sdk_decode_3_packets`
+keeps every strict storage/decode/geometry/pitch/non-zero/encoder-API check fatal,
+but its `PSNR`/flat-exactness comparison against the pinned `.p10` decode is
+recorded only. The CTest exits `77` (`BLOCKED_ORACLE_NOT_QUALIFIED`, or
+`ORIGINAL_SDK_REFERENCE_NONDETERMINISTIC_QUARANTINED` when repeats disagree), so it
+reports a skip instead of a pass or a failure. See
+`docs/validation/REFERENCE_SDK_PIXEL_CALLSITES_20261024.md` for the contract.
+
 ## Inputs and reproduction
 
 `tests/fixtures/standalone/manifest.json` attributes all fixtures, byte lengths

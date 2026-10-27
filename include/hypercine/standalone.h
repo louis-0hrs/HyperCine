@@ -27,9 +27,36 @@ template<class T> using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 
 // Experimental fixed-quant progressive YUV422 p10, GOP1. Throws on invalid
 // bounds/profile/capacity. No SDK or GPU types are part of this interface.
-// Conservative allocation budget, independent of the 16-bit wire dimensions.
+// These are limits of our CURRENT implementations, not a verified global
+// CineForm/GoPro format specification. Keep three concerns distinct:
+// (1) FilmScan3 YUV422 3-level wavelet implementation shape; its present
+//     output fields use 16-bit geometry tags, but original SDK support for
+//     alternative families/packing/padding is not established.
+// (2) Resource budgets for each implementation/session; a wavelet-aligned
+//     geometry that cannot fit memory is not necessarily illegal CineForm.
+// (3) Native backend and independent decoder/reference qualification.
+// Legacy Fixed-Q2 deliberately retains its established 4096 limit and
+// invalid_argument semantics for compatibility; do not unify error paths
+// just because both use the same width/height types.
+inline constexpr int kMaxWireDimension = 65535; // current FilmScan3 16-bit geometry field
+//
+// Current resource budget -- what one session may allocate on this build.
+// Passing the implementation shape check does not imply sufficient memory.
+inline constexpr std::size_t kMaxPixels = 2097152; // legacy frame/sample budget, unchanged
+// Separate bounded storage budget for CPU FilmScan3 4K, not wire geometry.
+inline constexpr std::size_t kMaxPlaneElements = 3840u * 2160u;
+//
+// Backend qualification is tracked per backend/session, not represented
+// by any global wire-format or allocation constant.
+//
+// The legacy <=4096 dimension gate is retained for existing Fixed-Q2
+// callers and Plane allocations; the newer FilmScan3 validator classifies
+// its own shape and pixel allocation budget separately.
 inline constexpr int kMaxDimension = 4096;
-inline constexpr std::size_t kMaxPixels = 2097152;
+inline bool PlaneStorageFits(int stride, int height) noexcept {
+    return stride > 0 && height > 0 &&
+        static_cast<std::size_t>(stride) <= kMaxPlaneElements / static_cast<std::size_t>(height);
+}
 // Width: multiple of 128 (deepest chroma band multiple of 8).
 // Height: multiple of 8, >=24 (six-tap input, final LL height >=3).
 void ValidateGeometry(int width, int height);
