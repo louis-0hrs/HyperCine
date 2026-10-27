@@ -12,6 +12,8 @@
 namespace hypercine::detail {
 namespace {
 constexpr std::size_t no_node = std::numeric_limits<std::size_t>::max();
+static_assert(kOwnedBufferAlign == kS3PlaneAlign,
+              "graph-owned copies must satisfy the signed-plane alignment");
 #ifdef HYPERCINE_DECODE_TASK_GRAPH_TEST_HOOK
 std::atomic<void (*)()> publish_seam{nullptr};
 #endif
@@ -183,7 +185,7 @@ bool DecodeTaskGraph::publish(std::size_t node, const void* data, std::size_t by
 bool DecodeTaskGraph::commit_copy_locked(Node& target, const void* data,
                                         std::size_t bytes) noexcept {
     const auto* source = static_cast<const unsigned char*>(data);
-    std::vector<unsigned char> copy;
+    OwnedBytes copy;
     try {
         copy.assign(source, source + bytes);
     } catch (...) {

@@ -45,9 +45,10 @@ struct SignedPlaneDesc {
 // Research-unit extents already pinned for the first spatial consumer:
 // width 16..480 and a multiple of 8, height 4..270. Not a frame size.
 // `require_data_align` is false only for a BufferVersion that already passed
-// S2 admission. publish() stores that copy in std::vector<unsigned char>,
-// which is not a 32-byte allocation. Pitch alignment and the byte extent
-// still apply. The wavelet primitive is not called on that pointer.
+// S2 admission. The graph copy is allocated at kOwnedBufferAlign, but this
+// helper does not assume an arbitrary BufferVersion came from that allocator.
+// Pitch alignment and the byte extent still apply. InverseWavelet5To4 keeps
+// its own 32-byte pointer check and is not invoked on an unaligned address.
 inline PlaneStatus check_signed_plane(const SignedPlaneDesc& plane,
                                       bool require_data_align = true) noexcept {
     if (plane.data == nullptr) return PlaneStatus::Null;

@@ -13,6 +13,7 @@
 //   T4-STALE     a read named for another generation is empty -> T4-stale
 //   T4-IDENTITY  V is not U, and band 1 is not band 0         -> T4-identity
 //   T4-GEOMETRY  a wider claim is not this plane              -> T4-geometry
+//   T4-OWNED-ALIGN the retained plane copy is 32-byte aligned -> T4-owned-align
 
 #include "decode_task_graph.h"
 
@@ -737,6 +738,48 @@ void rule_cancel_stale(std::size_t workers) {
 
 // Several generations, each destroyed after drain. The retained copies must
 // not outlive the graph; AddressSanitizer is the leak check.
+// Guard (T4-OWNED-ALIGN): publish_plane copies into graph storage. That
+// address is what input_plane() returns. Sixteen frames, one legal plane
+// each, so a single accidentally aligned allocation cannot pass.
+void rule_owned_alignment(std::size_t workers) {
+    constexpr std::uint32_t kFrames = 16;
+    std::atomic<int> bad{0};
+    std::atomic<int> seen{0};
+    std::vector<TaskSpec> tasks;
+    tasks.reserve(kFrames * 2);
+    for (std::uint32_t frame = 0; frame < kFrames; ++frame) {
+        tasks.push_back(TaskSpec{
+            plane_key(0, 5, 0, frame), {},
+            [frame, &bad](const TaskContext& context) {
+                HeapPlane plane;
+                plane.fill(0);
+                if (!context.publish_plane(plane.data, kBytes, kWidth, kHeight, kPitch))
+                    bad.fetch_add(1);
+            }});
+        tasks.push_back(TaskSpec{
+            plane_key(0, 4, 0, frame), {plane_key(0, 5, 0, frame)},
+            [frame, &bad, &seen](const TaskContext& context) {
+                const PlaneView view = context.input_plane(0, identity(0, 5, 0, frame));
+                seen.fetch_add(1);
+                const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+                if (!view.valid() || view.bytes != kBytes || (address % 32) != 0)
+                    bad.fetch_add(1);
+            }});
+    }
+    GraphLimits limits;
+    limits.require_published_output = false;
+    DecodeTaskGraph graph(kGen, GraphProfile::Synthetic, std::move(tasks), limits);
+    const bool ran = graph.run(workers);
+    const bool ok = ran && graph.error() == GraphError::None &&
+                    seen.load() == static_cast<int>(kFrames) && bad.load() == 0;
+    char detail[160];
+    std::snprintf(detail, sizeof detail, "run=%d error=%d seen=%d bad=%d",
+                  ran ? 1 : 0, static_cast<int>(graph.error()), seen.load(), bad.load());
+    required("T4-owned-align", ok,
+             ok ? "sixteen graph-owned plane copies were 32-byte aligned"
+                : std::string(detail));
+}
+
 void rule_release(std::size_t workers) {
     bool ok = true;
     for (std::uint64_t value = 1; value <= 4; ++value) {
@@ -784,6 +827,7 @@ int main(int argc, char** argv) {
     rule_abort(workers);
     rule_cancel(workers);
     rule_cancel_stale(workers);
+    rule_owned_alignment(workers);
     rule_release(workers);
     if (failures != 0) {
         std::printf("SCHEDULER-T4 FAIL workers=%zu holds=%d failures=%d\n", workers, holds, failures);

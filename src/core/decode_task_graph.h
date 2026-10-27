@@ -11,7 +11,10 @@
 #include <deque>
 #include <exception>
 #include <functional>
+#include <limits>
 #include <mutex>
+#include <new>
+#include <type_traits>
 #include <vector>
 
 namespace hypercine::detail {
@@ -262,6 +265,42 @@ struct TaskSpec {
 inline constexpr std::size_t kPlaneGenerationBudget =
     (24u * 1024u * 1024u) + (2u * 1024u * 1024u);
 
+// Graph-owned copies are read by later SIMD consumers that require 32-byte
+// data alignment (kS3PlaneAlign). std::vector<unsigned char> does not promise
+// that. This allocator is the publication buffer's only alignment contract.
+inline constexpr std::size_t kOwnedBufferAlign = 32;
+
+template <class T>
+struct OwnedBufferAllocator {
+    using value_type = T;
+    using is_always_equal = std::true_type;
+    OwnedBufferAllocator() noexcept = default;
+    template <class U>
+    OwnedBufferAllocator(const OwnedBufferAllocator<U>&) noexcept {}
+    template <class U>
+    struct rebind {
+        using other = OwnedBufferAllocator<U>;
+    };
+    T* allocate(std::size_t n) {
+        if (n == 0 || n > std::numeric_limits<std::size_t>::max() / sizeof(T))
+            throw std::bad_alloc();
+        return static_cast<T*>(::operator new(n * sizeof(T), std::align_val_t{kOwnedBufferAlign}));
+    }
+    void deallocate(T* p, std::size_t) noexcept {
+        ::operator delete(p, std::align_val_t{kOwnedBufferAlign});
+    }
+};
+template <class T, class U>
+bool operator==(const OwnedBufferAllocator<T>&, const OwnedBufferAllocator<U>&) noexcept {
+    return true;
+}
+template <class T, class U>
+bool operator!=(const OwnedBufferAllocator<T>&, const OwnedBufferAllocator<U>&) noexcept {
+    return false;
+}
+using OwnedBytes = std::vector<unsigned char, OwnedBufferAllocator<unsigned char>>;
+
+
 struct GraphLimits {
     std::size_t nodes = 4096, edges = 65536;
     // S2 completion rule. Default ON: a task becomes Completed only with a valid
@@ -353,7 +392,8 @@ private:
         std::atomic<const void*> payload{nullptr};
         std::atomic<std::size_t> payload_bytes{0};
         Generation published_generation{};
-        std::vector<unsigned char> owned_bytes;
+        // 32-byte aligned. A default std::vector<unsigned char> is not.
+        OwnedBytes owned_bytes;
         // Set before the version release, only by publish_plane(). Zero on an
         // untyped publish(), so input_plane() cannot treat a token as a plane.
         std::uint32_t plane_width = 0;
