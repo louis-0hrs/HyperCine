@@ -486,6 +486,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_windows_reference.py")
         add_test(NAME windows_reference_parser COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py")
+        add_test(NAME rgb444_packet_probe COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_formats/test_rgb444_probe.py")
         add_test(NAME windows_reference_sdk_coefficients COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
             --probe $<TARGET_FILE:hypercine_reference_probe>)
