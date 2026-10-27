@@ -14,6 +14,14 @@ limit, not proof that every legal CineForm sample must be smaller than 64 MiB,
 nor proof that every 17K image would exceed it. No extreme-resolution frame was
 allocated, encoded or decoded in this C0 audit. No production code changes.
 
+## Current-main reconciliation (2026-10-27; outside the frozen C0 model)
+
+**This C0 report and `docs/validation/extreme-geometry-c0.json` are historical source-and-arithmetic evidence, not a live backend support matrix.** The JSON key `hypercine_main` and its `UNSUPPORTED_GEOMETRY` statuses describe the pinned 2026-10-16 snapshot, not `main` on 2026-10-27. Do not use them for current capability discovery.
+
+Since that snapshot, [PR #50](https://github.com/louis-0hrs/HyperCine/pull/50) landed a bounded, dimensioned **CPU FilmScan3 3840×2160 experimental encoding path**; [PR #271](https://github.com/louis-0hrs/HyperCine/pull/271) added native Metal GPU evidence for several geometries including 3840×2160; and [PR #266](https://github.com/louis-0hrs/HyperCine/pull/266) separated valid wire/shape geometry from session allocation budgets. The current FilmScan3 geometry gate allows legal shapes only within its **8,294,400-pixel session budget**. In that path 7680×4320 and 12288×8040 are **legal shapes rejected by the resource budget**, not universally invalid CineForm formats. The requested 17520×8040 is **not a legal current three-level shape** because 17520 is not divisible by 128; it must not be silently rounded. This note does not qualify 8K, 12K, 17K, original GoPro 4K packet identity or other encoders/backends.
+
+The 67,108,860-byte sized-chunk maximum remains a mathematical bound for the audited writer representation; it is **not** a measured universal CineForm format limit. The source and memory estimates below remain pinned to the original audit rather than being retroactively relabelled as present-day runtime results.
+
 ## Geometry and format matrix
 
 ### Reconciliation against the newer main snapshot
@@ -28,11 +36,12 @@ source comparison, not new runtime qualification of either commit.
 
 Keep this report's more detailed format matrix, build-dependent SDK limit,
 independent-decoder evidence and reproducible arithmetic model. In particular,
-4K hits the generic pixel allocation budget even though both dimensions fit
-4096; 8K and larger also exceed the dimension limit, while 17K additionally
-violates the current active-width entropy contract. The fixed 1080p public
-FilmScan3 API remains a separate restriction. No constant increase establishes
-a dimensioned encoder, and unmerged P4/P5 evidence does not qualify main.
+in the original 2026-10-16 snapshot, 4K exceeded the generic pixel budget and
+8K+ exceeded the then-current dimension cap; 17K additionally violated the
+active-width entropy contract. Those were historical implementation limits,
+not current-main backend results. The subsequently merged dimensioned FilmScan3
+CPU/Metal path and geometry-budget split are described in the reconciliation
+above. No constant increase alone qualifies 8K/12K/17K.
 
 The independent audit's approximate 15.25 bytes per pixel Metal workspace
 estimate agrees with the row-padded model below. That estimate excludes host
@@ -57,18 +66,19 @@ not packed 10-/12-bit data, compressed sizes, or supported encoder inputs.
 | 12288×8040 | 98,795,520 | 376.88 | 376.88 | 565.31 | 753.75 |
 | 17520×8040 | 140,860,800 | 537.34 | 537.34 | 806.01 | 1074.68 |
 
-| Geometry | Current main BGRA8 → YUV422 p10 FS3 | Direct YUV422p10 input | RGB/RGBA p12 output | Original SDK encode/decode | Identical-packet FFmpeg decode |
+| Geometry | Frozen 2026-10-16 main BGRA8 → YUV422 p10 FS3 | Direct YUV422p10 input | RGB/RGBA p12 output | Original SDK encode/decode | Identical-packet FFmpeg decode |
 | --- | --- | --- | --- | --- | --- |
 | 3840×2160 | UNSUPPORTED_GEOMETRY | Not implemented | Not implemented | SDK_ORACLE_PENDING | REFERENCE_PENDING |
 | 7680×4320 | UNSUPPORTED_GEOMETRY | Not implemented | Not implemented | SDK_ORACLE_PENDING | REFERENCE_PENDING |
 | 12288×8040 | UNSUPPORTED_GEOMETRY | Not implemented | Not implemented | SDK_ORACLE_PENDING | REFERENCE_PENDING |
 | 17520×8040 | UNSUPPORTED_GEOMETRY | Not implemented | Not implemented | SDK_ORACLE_PENDING | REFERENCE_PENDING |
 
-These are the **audited main snapshot's** statuses. PR #50 is separate,
-unmerged CPU 4K qualification; its results are not silently applied here.
-`FilmScan3Encoder::Encode` fixes its transform and wire tags to 1920×1080
-([writer](../src/core/filmscan3_encoder.cpp)). The generic fixed-quant encoder
-also rejects these workloads: `ValidateGeometry` requires width divisible by
+These are **only the frozen source snapshot's** statuses, intentionally
+preserved alongside the source-pinned JSON report. PR #50 has since been merged;
+consult the current-main reconciliation above before describing 4K capability.
+At the pinned audit commit, `FilmScan3Encoder::Encode` fixed its transform and wire tags to 1920×1080
+([writer](../src/core/filmscan3_encoder.cpp)). At that same pinned commit, the legacy generic fixed-quant encoder
+also rejected these workloads: `ValidateGeometry` required width divisible by
 128, dimensions ≤4096 and ≤2,097,152 pixels
 ([frontend](../src/cpu/standalone_frontend.cpp),
 [public bounds](../include/hypercine/standalone.h)). This is an implementation
