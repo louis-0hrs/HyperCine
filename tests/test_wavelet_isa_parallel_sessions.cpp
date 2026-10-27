@@ -284,7 +284,7 @@ void phase_parallel_create_destroy() {
     std::atomic<int> ok{0}, threw{0}, wrong{0};
     std::vector<std::thread> threads;
     for (int t = 0; t < kThreads; ++t) {
-        threads.emplace_back([t, &ok, &threw, &wrong] {
+        threads.emplace_back([t, &ok, &threw, &wrong, W, H] {
             for (int round = 0; round < 8; ++round) {
                 try {
                     const auto isa = (t % 2 == 0) ? WaveletIsa::Scalar : WaveletIsa::Neon;
