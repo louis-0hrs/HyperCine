@@ -1,0 +1,513 @@
+{
+ "schema": "rca160_windows_coverage_correction_v2",
+ "issue": 158,
+ "pr": 192,
+ "diagnostic_only": true,
+ "source_ledger_sha256": "460bf8c2cb537d48cddf08395f034dee42f1a94820a2bbad3d03a237ef2cc3a2",
+ "worker_sha256": "e889fbd198f1b06d3615b2e712c12231097aa8950ed0721fa9a977773f2edfa6",
+ "source_head": null,
+ "provenance_note": "worker_sha256 is the diagnostic worker binary digest recorded by the ledger; the ledger records no source commit, so source_head is null",
+ "artifacts": {
+  "calls": 360,
+  "output_files_checked": 360,
+  "probe_logs_checked": 360,
+  "problems": []
+ },
+ "registered_rule": {
+  "expected_publishes_band0_per_call": 6,
+  "derivation_error": "the count covered only the spatial lowpass sites; it omitted entropy lowpass and frame-wavelet publishers and assumed one publisher call per site",
+  "publish_call_counts": {
+   "O": {
+    "9": 5,
+    "10": 37,
+    "11": 69,
+    "12": 9
+   },
+   "B": {
+    "9": 8,
+    "10": 19,
+    "11": 50,
+    "12": 43
+   },
+   "AP": {
+    "9": 9,
+    "10": 34,
+    "11": 65,
+    "12": 12
+   }
+  },
+  "verdict": "INCONCLUSIVE",
+  "reasons": [
+   "registered rule expected 6 band-0 publications per call in arm O; observed [9, 10, 11, 12]",
+   "registered rule expected 6 band-0 publications per call in arm B; observed [9, 10, 11, 12]",
+   "registered rule expected 6 band-0 publications per call in arm AP; observed [9, 10, 11, 12]"
+  ]
+ },
+ "corrected_rule": {
+  "invariants": [
+   "exactly 9 gate entries per call",
+   "every real wait matched to a same-IMAGE band-0 invalid->valid transition inside the wait window",
+   "no gate timeout",
+   "no missing per-call probe log"
+  ],
+  "publication_count_is_descriptive": true,
+  "verdict": "CROSS_HOST_CONFIRMATION_PASS",
+  "reasons": []
+ },
+ "topology": {
+  "gate_entries_per_call": {
+   "O": {
+    "9": 120
+   },
+   "B": {
+    "9": 120
+   },
+   "AP": {
+    "9": 120
+   }
+  },
+  "publish_call_counts": {
+   "O": {
+    "9": 5,
+    "10": 37,
+    "11": 69,
+    "12": 9
+   },
+   "B": {
+    "9": 8,
+    "10": 19,
+    "11": 50,
+    "12": 43
+   },
+   "AP": {
+    "9": 9,
+    "10": 34,
+    "11": 65,
+    "12": 12
+   }
+  },
+  "transition_counts": {
+   "O": {
+    "9": 79,
+    "10": 33,
+    "11": 8
+   },
+   "B": {
+    "9": 61,
+    "10": 45,
+    "11": 9,
+    "12": 5
+   },
+   "AP": {
+    "9": 77,
+    "10": 38,
+    "11": 5
+   }
+  },
+  "transition_pointer_counts": {
+   "O": {
+    "9": 120
+   },
+   "B": {
+    "9": 120
+   },
+   "AP": {
+    "9": 120
+   }
+  },
+  "entropy_transitions_band0": {
+   "O": 360,
+   "B": 360,
+   "AP": 360
+  },
+  "waits": {
+   "O": 0,
+   "B": 60,
+   "AP": 0
+  },
+  "waits_matched": {
+   "O": 0,
+   "B": 60,
+   "AP": 0
+  },
+  "gate_timeouts": {
+   "O": 0,
+   "B": 0,
+   "AP": 0
+  },
+  "premature_entries_by_channel_idx": {
+   "O": {
+    "ch0/idx1": 29,
+    "ch2/idx1": 2
+   },
+   "B": {
+    "ch0/idx1": 55,
+    "ch2/idx1": 5
+   },
+   "AP": {
+    "ch0/idx1": 35,
+    "ch2/idx1": 7
+   }
+  }
+ },
+ "channel_identity": {
+  "status": "CHANNEL_IDENTITY_UNAVAILABLE",
+  "reason": "retained artifacts are converted BGRA outputs and probe events; no internal ch0/ch1/ch2 lowpass coefficient-plane files were retained, so codec channel identity cannot be reconstructed exactly from the converted output",
+  "premature_entry_channels_by_corrupt_call": {
+   "ch0/idx1": 5,
+   "ch2/idx1": 1
+  },
+  "linux_characterized_states": {
+   "ch1": {
+    "unchanged_output_lane": "B",
+    "max_abs_by_lane": {
+     "B": 0,
+     "G": 79,
+     "R": 134
+    }
+   },
+   "ch2": {
+    "unchanged_output_lane": "R",
+    "max_abs_by_lane": {
+     "B": 237,
+     "G": 49,
+     "R": 0
+    }
+   }
+  },
+  "reconciliation": "all five Windows corrupt outputs change B, G and R and leave A identical; no color lane is unchanged, so neither characterized Linux chroma state matches. Every corrupt call had a premature ch0/index1 entry (AP/37 also ch2/index1). The cross-host statement remains the same admission window, not the same corruption state."
+ },
+ "corrupt_calls": [
+  {
+   "arm": "O",
+   "call": 94,
+   "premature_entries": [
+    {
+     "ch": 0,
+     "idx": 1,
+     "valid": "0x0000000e",
+     "started": "0x0000000e"
+    }
+   ],
+   "image_sha256": "9e9da216fd90be4c01516419cd03897b541bd8abb0dc8ee1b79e4bdc439f1c65",
+   "lane_domain": {
+    "name": "BGRA",
+    "bytes_per_lane": 518400,
+    "width": 960,
+    "height": 540,
+    "note": "post-conversion interleaved BGRA byte lanes; not internal codec channel planes"
+   },
+   "lane_sha256": {
+    "B": "c875d1a2f47ef56e6f59c75bcf3c8afb99fe13126d334ccb14250e0ff1685a37",
+    "G": "c10306574cd36e2c425ccb06eee2d2daae1af554b7da3a0523fe4ce33f4c08e2",
+    "R": "686f4fcb28aa22fad873936130530ba088bbdd3d0a2461d6ce77c5b4d7a210cb",
+    "A": "d015983d12b84bdec9127812df800368bb7914ddc7dafc0d044d759dea19ed59"
+   },
+   "diff_vs_modal": {
+    "B": {
+     "identical": false,
+     "diff_bytes": 84456,
+     "max_abs": 228,
+     "mean_abs": 109.92,
+     "rows_touched": 90,
+     "row_first": 376,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.990649
+    },
+    "G": {
+     "identical": false,
+     "diff_bytes": 85124,
+     "max_abs": 228,
+     "mean_abs": 178.256,
+     "rows_touched": 90,
+     "row_first": 376,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.986896
+    },
+    "R": {
+     "identical": false,
+     "diff_bytes": 85124,
+     "max_abs": 134,
+     "mean_abs": 85.488,
+     "rows_touched": 90,
+     "row_first": 376,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.986183
+    },
+    "A": {
+     "identical": true,
+     "diff_bytes": 0,
+     "max_abs": 0,
+     "rows_touched": 0,
+     "rank1_energy_fraction": 0.0
+    }
+   }
+  },
+  {
+   "arm": "O",
+   "call": 103,
+   "premature_entries": [
+    {
+     "ch": 0,
+     "idx": 1,
+     "valid": "0x0000000e",
+     "started": "0x0000000e"
+    }
+   ],
+   "image_sha256": "f10077b40ea0cfa541a72d8b1cb9533162b0abcbd4c74a9a3c69a4218bdc3546",
+   "lane_domain": {
+    "name": "BGRA",
+    "bytes_per_lane": 518400,
+    "width": 960,
+    "height": 540,
+    "note": "post-conversion interleaved BGRA byte lanes; not internal codec channel planes"
+   },
+   "lane_sha256": {
+    "B": "8a3502a299f84a772acfe1d4526918cdc581d1d92684307556a4b518435102e4",
+    "G": "80502b425f3e1d8f7285db88af885645b22b57eccd7cd0066105ef4349d1117c",
+    "R": "0a3c9f6b034761987b49727852d35cea63566c33f37999b0a9fa11b0d13dfd39",
+    "A": "d015983d12b84bdec9127812df800368bb7914ddc7dafc0d044d759dea19ed59"
+   },
+   "diff_vs_modal": {
+    "B": {
+     "identical": false,
+     "diff_bytes": 7610,
+     "max_abs": 228,
+     "mean_abs": 95.343,
+     "rows_touched": 8,
+     "row_first": 532,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.992004
+    },
+    "G": {
+     "identical": false,
+     "diff_bytes": 7680,
+     "max_abs": 228,
+     "mean_abs": 176.602,
+     "rows_touched": 8,
+     "row_first": 532,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.942991
+    },
+    "R": {
+     "identical": false,
+     "diff_bytes": 7680,
+     "max_abs": 134,
+     "mean_abs": 82.501,
+     "rows_touched": 8,
+     "row_first": 532,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.955873
+    },
+    "A": {
+     "identical": true,
+     "diff_bytes": 0,
+     "max_abs": 0,
+     "rows_touched": 0,
+     "rank1_energy_fraction": 0.0
+    }
+   }
+  },
+  {
+   "arm": "O",
+   "call": 108,
+   "premature_entries": [
+    {
+     "ch": 0,
+     "idx": 1,
+     "valid": "0x0000000e",
+     "started": "0x0000000e"
+    }
+   ],
+   "image_sha256": "1e7d83c4ea20198cf83f56a8c75e128d947eb87d27d55d97dd0785c55fe974fa",
+   "lane_domain": {
+    "name": "BGRA",
+    "bytes_per_lane": 518400,
+    "width": 960,
+    "height": 540,
+    "note": "post-conversion interleaved BGRA byte lanes; not internal codec channel planes"
+   },
+   "lane_sha256": {
+    "B": "83c5530498f62418a319533237145abc29a76cf5d557c0966f19ba83c9b21408",
+    "G": "95c399ee88e557cf5be4c6a6fa90c5b78ee55007d1ff0c236f6cae8ce698559c",
+    "R": "41c31bcd0b637040da7d90d8baaeae2b4313912298b8ce54d149eb3bf75ff0fd",
+    "A": "d015983d12b84bdec9127812df800368bb7914ddc7dafc0d044d759dea19ed59"
+   },
+   "diff_vs_modal": {
+    "B": {
+     "identical": false,
+     "diff_bytes": 30478,
+     "max_abs": 228,
+     "mean_abs": 117.255,
+     "rows_touched": 32,
+     "row_first": 508,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.999658
+    },
+    "G": {
+     "identical": false,
+     "diff_bytes": 30720,
+     "max_abs": 228,
+     "mean_abs": 205.94,
+     "rows_touched": 32,
+     "row_first": 508,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.999417
+    },
+    "R": {
+     "identical": false,
+     "diff_bytes": 30720,
+     "max_abs": 134,
+     "mean_abs": 95.162,
+     "rows_touched": 32,
+     "row_first": 508,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.998888
+    },
+    "A": {
+     "identical": true,
+     "diff_bytes": 0,
+     "max_abs": 0,
+     "rows_touched": 0,
+     "rank1_energy_fraction": 0.0
+    }
+   }
+  },
+  {
+   "arm": "O",
+   "call": 112,
+   "premature_entries": [
+    {
+     "ch": 0,
+     "idx": 1,
+     "valid": "0x0000000e",
+     "started": "0x0000000e"
+    }
+   ],
+   "image_sha256": "36ad6c3d05b432cdfea9ad7b4330de08c5fd0b439eb735befddb8f7f73e3ee63",
+   "lane_domain": {
+    "name": "BGRA",
+    "bytes_per_lane": 518400,
+    "width": 960,
+    "height": 540,
+    "note": "post-conversion interleaved BGRA byte lanes; not internal codec channel planes"
+   },
+   "lane_sha256": {
+    "B": "219936e8b73bfb6d784da683545b9d2f0cccc89269eaeecb4e2156bfe7f34730",
+    "G": "c896b6dc47aaae33867d9f61d1dbc030d409ba41e0dce3041578e9bc22940af3",
+    "R": "6ea744e53f27ab05743d2169aa4f68855aa39f4d783b7ec5b02d60aebd2ff31d",
+    "A": "d015983d12b84bdec9127812df800368bb7914ddc7dafc0d044d759dea19ed59"
+   },
+   "diff_vs_modal": {
+    "B": {
+     "identical": false,
+     "diff_bytes": 26680,
+     "max_abs": 228,
+     "mean_abs": 117.179,
+     "rows_touched": 28,
+     "row_first": 512,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.99689
+    },
+    "G": {
+     "identical": false,
+     "diff_bytes": 26880,
+     "max_abs": 228,
+     "mean_abs": 206.211,
+     "rows_touched": 28,
+     "row_first": 512,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.997495
+    },
+    "R": {
+     "identical": false,
+     "diff_bytes": 26880,
+     "max_abs": 134,
+     "mean_abs": 95.382,
+     "rows_touched": 28,
+     "row_first": 512,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.994549
+    },
+    "A": {
+     "identical": true,
+     "diff_bytes": 0,
+     "max_abs": 0,
+     "rows_touched": 0,
+     "rank1_energy_fraction": 0.0
+    }
+   }
+  },
+  {
+   "arm": "AP",
+   "call": 37,
+   "premature_entries": [
+    {
+     "ch": 0,
+     "idx": 1,
+     "valid": "0x0000000e",
+     "started": "0x0000000e"
+    },
+    {
+     "ch": 2,
+     "idx": 1,
+     "valid": "0x0000000e",
+     "started": "0x0000000e"
+    }
+   ],
+   "image_sha256": "2fd83a36ab4bd126d593a2f39f5660b728b76fc3f5c9b33e49dca222149733fe",
+   "lane_domain": {
+    "name": "BGRA",
+    "bytes_per_lane": 518400,
+    "width": 960,
+    "height": 540,
+    "note": "post-conversion interleaved BGRA byte lanes; not internal codec channel planes"
+   },
+   "lane_sha256": {
+    "B": "95ee7908afb5d61b04dec40c5f74c715d0895befbaea549ac0aab4ea12418cb6",
+    "G": "81979986afaf0ca7504c1b0b6e955223671014b0e30aee245be3c4de4f22ecc7",
+    "R": "af0b1a093767de1a71cf191c105b63e18ffda6f39c154aa2dd56f5834af97b6c",
+    "A": "d015983d12b84bdec9127812df800368bb7914ddc7dafc0d044d759dea19ed59"
+   },
+   "diff_vs_modal": {
+    "B": {
+     "identical": false,
+     "diff_bytes": 45221,
+     "max_abs": 228,
+     "mean_abs": 113.595,
+     "rows_touched": 50,
+     "row_first": 480,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.995103
+    },
+    "G": {
+     "identical": false,
+     "diff_bytes": 45574,
+     "max_abs": 228,
+     "mean_abs": 194.803,
+     "rows_touched": 50,
+     "row_first": 480,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.990957
+    },
+    "R": {
+     "identical": false,
+     "diff_bytes": 45574,
+     "max_abs": 134,
+     "mean_abs": 91.369,
+     "rows_touched": 50,
+     "row_first": 480,
+     "row_last": 539,
+     "rank1_energy_fraction": 0.989286
+    },
+    "A": {
+     "identical": true,
+     "diff_bytes": 0,
+     "max_abs": 0,
+     "rows_touched": 0,
+     "rank1_energy_fraction": 0.0
+    }
+   }
+  }
+ ]
+}

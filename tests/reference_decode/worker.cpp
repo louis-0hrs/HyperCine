@@ -2,12 +2,16 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include <vector>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <chrono>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "test_vectors.h"
 #include "CFHDEncoder.h"
 #include "CFHDDecoder.h"
@@ -38,6 +42,37 @@ Buffer Read(const std::string& path) {
 }
 void Check(CFHD_Error status) { if (status != CFHD_ERROR_OKAY) throw std::runtime_error("encoder API error"); }
 
+int EnvInt(const char* name, int fallback) {
+    const char* value = std::getenv(name);
+    if (!value || !*value) return fallback;
+    char* end = nullptr;
+    const long parsed = std::strtol(value, &end, 10);
+    if (end == value || *end || parsed < 0) throw std::runtime_error("invalid environment value");
+    return static_cast<int>(parsed);
+}
+
+// Test-only diagnostic: apply and verify process affinity before any SDK object
+// is created. Failure is fatal so an unrestricted arm can never look restricted.
+struct AffinityState { bool requested; unsigned long long requested_mask, effective_mask, system_mask; };
+AffinityState ApplyAffinity(bool requested, unsigned long long mask) {
+    AffinityState state{requested, requested ? mask : 0, 0, 0};
+#if defined(_WIN32)
+    if (requested && (!mask || !SetProcessAffinityMask(GetCurrentProcess(),
+                                                       static_cast<DWORD_PTR>(mask))))
+        throw std::runtime_error("affinity set failed");
+    DWORD_PTR process_mask = 0, system_mask = 0;
+    if (!GetProcessAffinityMask(GetCurrentProcess(), &process_mask, &system_mask))
+        throw std::runtime_error("affinity query failed");
+    state.effective_mask = static_cast<unsigned long long>(process_mask);
+    state.system_mask = static_cast<unsigned long long>(system_mask);
+    if (requested && state.effective_mask != state.requested_mask)
+        throw std::runtime_error("affinity verification failed");
+#else
+    if (requested) throw std::runtime_error("affinity unsupported");
+#endif
+    return state;
+}
+
 #ifdef HYPERCINE_REFERENCE_TRACE
 #include "trace_snapshot.h"
 #endif
@@ -48,7 +83,16 @@ void Check(CFHD_Error status) { if (status != CFHD_ERROR_OKAY) throw std::runtim
 int main(int argc, char** argv) {
     try {
         // Fixed bounded geometries; no unbounded allocations or GPU linkage.
-        if (argc != 5) throw std::runtime_error("arguments");
+        if (argc != 5 && argc != 6) throw std::runtime_error("arguments");
+        const bool affinity_requested = argc == 6;
+        unsigned long long affinity_mask = 0;
+        if (affinity_requested) {
+            char* end = nullptr;
+            affinity_mask = std::strtoull(argv[5], &end, 0);
+            if (end == argv[5] || *end || !affinity_mask) throw std::runtime_error("affinity mask");
+        }
+        // Must precede every encoder/decoder/metadata creation below.
+        const AffinityState affinity = ApplyAffinity(affinity_requested, affinity_mask);
         const std::string geometry=argv[2];
         const int width = geometry=="128"?128:geometry=="256"?256:geometry=="1080"?1920:0;
         const int height = width==1920?1080:width;
@@ -56,6 +100,14 @@ int main(int argc, char** argv) {
         const std::string mode = argv[1], packet_path = argv[3], output = argv[4];
         const bool bgra = mode == "generate-bgra" || mode == "decode-bgra-off" || mode == "decode-bgra-on";
         const bool active = mode == "decode-bgra-on";
+        // Optional bounded diagnostics; defaults preserve the existing protocol.
+        const int opens = EnvInt("HYPERCINE_OPENS", 5);
+        if (opens < 1 || opens > 16) throw std::runtime_error("opens");
+        const std::string resolution = std::getenv("HYPERCINE_RESOLUTION") ? std::getenv("HYPERCINE_RESOLUTION") : "FULL";
+        const CFHD_DecodedResolution decoded_resolution =
+            resolution == "HALF" ? CFHD_DECODED_RESOLUTION_HALF : CFHD_DECODED_RESOLUTION_FULL;
+        if (resolution != "FULL" && resolution != "HALF") throw std::runtime_error("resolution");
+        const int cpu_max = EnvInt("HYPERCINE_CPU_MAX", 0);
         if (mode == "generate" || mode == "generate-bgra") {
             Buffer source(static_cast<size_t>(width)*height*2);
             uint32_t seed = 0x1337BEEF;
@@ -84,18 +136,21 @@ int main(int argc, char** argv) {
         if (mode != "decode" && mode != "decode-bgra-off" && mode != "decode-bgra-on") throw std::runtime_error("mode");
         const auto requested = bgra?CFHD_PIXEL_FORMAT_BGRA:CFHD_PIXEL_FORMAT_YUY2;
         const Buffer immutable = Read(packet_path);
+        const int expected_width = decoded_resolution == CFHD_DECODED_RESOLUTION_HALF ? width / 2 : width;
+        const int expected_height = decoded_resolution == CFHD_DECODED_RESOLUTION_HALF ? height / 2 : height;
         // Reopen the original decoder each call, retaining original CRT/process state.
-        for (int ordinal=1; ordinal<=5; ++ordinal) {
+        for (int ordinal=1; ordinal<=opens; ++ordinal) {
             Buffer sample=immutable; // protect immutable input from API writes
             Buffer pixels; // Both sample and output outlive decoder teardown.
             CFHD_DecoderRef raw=nullptr;
             CFHD_Error status=CFHD_OpenDecoder(&raw,nullptr); Decoder decoder(raw);
             int w=0,h=0; int32_t pitch=0; CFHD_PixelFormat format=CFHD_PIXEL_FORMAT_UNKNOWN;
             if (status==CFHD_ERROR_OKAY) status=CFHD_PrepareToDecode(raw,0,0,requested,
-                CFHD_DECODED_RESOLUTION_FULL,CFHD_DECODING_FLAGS_NONE,sample.data(),sample.size(),&w,&h,&format);
+                decoded_resolution,CFHD_DECODING_FLAGS_NONE,sample.data(),sample.size(),&w,&h,&format);
             if (status==CFHD_ERROR_OKAY) status=CFHD_GetImagePitch(w,format,&pitch);
-            bool valid=status==CFHD_ERROR_OKAY && w==width && h==height && format==requested && pitch==width*(bgra?4:2) && pitch%16==0;
-            int metadata_open=-1, metadata_init=-1, metadata_set=-1;
+            bool valid=status==CFHD_ERROR_OKAY && w==expected_width && h==expected_height && format==requested &&
+                pitch==expected_width*(bgra?4:2) && pitch%16==0;
+            int metadata_open=-1, metadata_init=-1, metadata_cpu=-1, metadata_set=-1;
             Metadata metadata;
             long long decode_ns=0;
             unsigned int processflags = PROCESSING_ALL_ON;
@@ -105,6 +160,11 @@ int main(int argc, char** argv) {
                 if (status==CFHD_ERROR_OKAY) {
                     status=CFHD_InitSampleMetadata(ref,METADATATYPE_ORIGINAL,sample.data(),static_cast<uint32_t>(sample.size()));
                     metadata_init=status;
+                }
+                if (status==CFHD_ERROR_OKAY && cpu_max > 0) {
+                    unsigned int limit = static_cast<unsigned int>(cpu_max);
+                    status=CFHD_SetActiveMetadata(raw,ref,TAG_CPU_MAX,METADATATYPE_UINT32,&limit,sizeof(limit));
+                    metadata_cpu=status;
                 }
                 if (status==CFHD_ERROR_OKAY) {
                     status=CFHD_SetActiveMetadata(raw,ref,TAG_PROCESS_PATH,METADATATYPE_UINT32,&processflags,sizeof(processflags));
@@ -139,7 +199,13 @@ int main(int argc, char** argv) {
                 << ",\"actual_format_code\":" << static_cast<uint32_t>(format)
                 << ",\"requested_format\":\"" << (bgra?"BGRA":"YUY2") << "\",\"active_metadata\":" << (active?"true":"false")
                 << ",\"metadata_open_status\":" << metadata_open << ",\"metadata_init_status\":" << metadata_init
-                << ",\"metadata_set_status\":" << metadata_set << ",\"processing_flags\":" << (active?processflags:0) << "}\n";
+                << ",\"metadata_cpu_status\":" << metadata_cpu << ",\"metadata_set_status\":" << metadata_set
+                << ",\"processing_flags\":" << (active?processflags:0)
+                << ",\"cpu_max\":" << cpu_max << ",\"resolution\":\"" << resolution << "\""
+                << ",\"affinity_requested\":" << (affinity.requested?"true":"false")
+                << ",\"affinity_requested_mask\":" << affinity.requested_mask
+                << ",\"affinity_effective_mask\":" << affinity.effective_mask
+                << ",\"affinity_system_mask\":" << affinity.system_mask << "}\n";
         }
         return 0;
     } catch (...) { std::cerr << "bounded reference worker error\n"; return 2; }
