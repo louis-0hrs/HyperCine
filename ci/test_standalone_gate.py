@@ -45,6 +45,13 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             registered_tests({'tests': [{'name': n} for n in REQUIRED
                                        if n != 'gop2_original_stage_contract']})
+    def test_rgb444_probe_is_mandatory(self):
+        # A green full suite must never silently omit the structural RGB444 gate.
+        name = 'rgb444_packet_probe'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, name):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 

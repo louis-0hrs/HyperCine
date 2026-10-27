@@ -12,6 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    'rgb444_packet_probe',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
