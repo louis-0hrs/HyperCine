@@ -148,22 +148,33 @@ class DecodeContract(unittest.TestCase):
         stream.
         """
         sentinel = 'CANARY-SENTINEL-7f3a9d'
-        malformed = [
-            ['--' + sentinel],                       # unknown option
-            ['/nonexistent/' + sentinel],           # unexpected path -> INVALID_EVIDENCE
-            ['--evidence=' + sentinel],              # option that does not exist
-            ['one.json', sentinel],                  # extra positional
+        # Each case names the path it must exercise. A canary that drifts onto a
+        # different path stops testing the thing it is named after, which is what
+        # happened here: `['/nonexistent/<sentinel>']` is a *legal positional*, so
+        # argparse never errors on it and the run reaches the evidence handler
+        # instead. It still passes the "no echo" assertion, but for a reason that
+        # has nothing to do with argument redaction. Pinning the expected
+        # classification makes that drift a failure rather than a silent pass.
+        cases = [
+            (['--' + sentinel], 'INVALID_CLI'),            # unknown option
+            (['--evidence=' + sentinel], 'INVALID_CLI'),  # option that does not exist
+            (['one.json', sentinel], 'INVALID_CLI'),      # extra positional
+            ([], 'INVALID_CLI'),                          # required positional absent
+            # Distinct path on purpose: argparse accepts this positional and the
+            # failure happens while reading evidence. It is kept because it is a
+            # real invocation shape, but it is labelled for what it is.
+            (['/nonexistent/' + sentinel], 'INVALID_EVIDENCE'),
         ]
-        for argv in malformed:
+        for argv, expected in cases:
             run = subprocess.run([sys.executable, str(Path(contract.__file__))] + argv,
                                  capture_output=True, text=True)
-            with self.subTest(argv=argv):
+            with self.subTest(argv=argv, expected=expected):
                 self.assertNotEqual(run.returncode, 0)
                 self.assertNotIn(sentinel, run.stdout)
                 self.assertNotIn(sentinel, run.stderr)
                 payload = json.loads(run.stdout)
                 self.assertTrue(payload['release_blocked'])
-                self.assertIn(payload['classification'], ('INVALID_CLI', 'INVALID_EVIDENCE'))
+                self.assertEqual(payload['classification'], expected)
 
     def test_cli_help_is_not_redacted_and_succeeds(self):
         """Redaction must not swallow --help; status 0 keeps its normal output."""
