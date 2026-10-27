@@ -362,8 +362,15 @@ int main() {
 
         auto eight = Check("7680x4320", Film(7680, 4320), host, CapabilityReason::BackendNotQualifiedForGeometry);
         Require(eight.outside_qualified_dimension_envelope && !eight.pixel_budget_ok, "8K axes");
+        Require(eight.geometry_validator_invoked && !eight.geometry_validator_passed,
+                "8K validator must fail closed despite wavelet-aligned shape");
+        Require(!eight.allocation_permitted, "8K may not allocate");
         Require(eight.reasons.memory_budget_exceeded && eight.reasons.backend_not_qualified_for_geometry, "8K separate flags");
-        Require(!eight.reasons.format_mathematically_invalid, "8K is wavelet-aligned");
+        Require(!eight.reasons.format_mathematically_invalid, "8K is wavelet-aligned in our current pipeline");
+        auto twelve = Check("12288x8040", Film(12288, 8040), host, CapabilityReason::BackendNotQualifiedForGeometry);
+        Require(twelve.outside_qualified_dimension_envelope && twelve.reasons.memory_budget_exceeded &&
+                !twelve.geometry_validator_passed && !twelve.allocation_permitted,
+                "12K is structurally aligned but outside current budget/qualification");
 
         Check("zero-width", Film(0, 1080), host, CapabilityReason::FormatMathematicallyInvalid);
         Check("negative-width", Film(-1920, 1080), host, CapabilityReason::FormatMathematicallyInvalid);

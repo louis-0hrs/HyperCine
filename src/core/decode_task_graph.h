@@ -11,7 +11,10 @@
 #include <deque>
 #include <exception>
 #include <functional>
+#include <limits>
 #include <mutex>
+#include <new>
+#include <type_traits>
 #include <vector>
 
 namespace hypercine::detail {
@@ -262,6 +265,42 @@ struct TaskSpec {
 inline constexpr std::size_t kPlaneGenerationBudget =
     (24u * 1024u * 1024u) + (2u * 1024u * 1024u);
 
+// Graph-owned copies are read by later SIMD consumers that require 32-byte
+// data alignment (kS3PlaneAlign). std::vector<unsigned char> does not promise
+// that. This allocator is the publication buffer's only alignment contract.
+inline constexpr std::size_t kOwnedBufferAlign = 32;
+
+template <class T>
+struct OwnedBufferAllocator {
+    using value_type = T;
+    using is_always_equal = std::true_type;
+    OwnedBufferAllocator() noexcept = default;
+    template <class U>
+    OwnedBufferAllocator(const OwnedBufferAllocator<U>&) noexcept {}
+    template <class U>
+    struct rebind {
+        using other = OwnedBufferAllocator<U>;
+    };
+    T* allocate(std::size_t n) {
+        if (n == 0 || n > std::numeric_limits<std::size_t>::max() / sizeof(T))
+            throw std::bad_alloc();
+        return static_cast<T*>(::operator new(n * sizeof(T), std::align_val_t{kOwnedBufferAlign}));
+    }
+    void deallocate(T* p, std::size_t) noexcept {
+        ::operator delete(p, std::align_val_t{kOwnedBufferAlign});
+    }
+};
+template <class T, class U>
+bool operator==(const OwnedBufferAllocator<T>&, const OwnedBufferAllocator<U>&) noexcept {
+    return true;
+}
+template <class T, class U>
+bool operator!=(const OwnedBufferAllocator<T>&, const OwnedBufferAllocator<U>&) noexcept {
+    return false;
+}
+using OwnedBytes = std::vector<unsigned char, OwnedBufferAllocator<unsigned char>>;
+
+
 struct GraphLimits {
     std::size_t nodes = 4096, edges = 65536;
     // S2 completion rule. Default ON: a task becomes Completed only with a valid
@@ -274,11 +313,15 @@ struct GraphLimits {
     // uncontracted_tasks() == nodes, so the omission stays observable. It is NOT a
     // way to make a decoder graph lax -- a graph that publishes keeps the rule.
     bool require_published_output = true;
-    // T4. Bytes of graph-owned plane copies charged by publish_plane(). The
-    // absolute ceiling is kPlaneGenerationBudget. A smaller value is a tighter
-    // cap; a larger value is clamped down to the ceiling; zero admits no plane.
-    // Untyped publish() does not spend this budget. Appended last so existing
-    // positional GraphLimits braces keep their meaning.
+    // T4. Ceiling for graph-owned publication, typed and untyped alike. The
+    // absolute maximum is kPlaneGenerationBudget; a smaller value is a tighter
+    // cap; a larger value is clamped down to it; zero admits no owned publication
+    // of any kind. The decision and the charge both live in
+    // commit_copy_locked(), which every publication path calls, so a plain
+    // publish() pays exactly like publish_plane(). This comment previously said
+    // untyped publish() did not spend the budget -- true before BUDGET-ALL, false
+    // after it, and the kind of drift that lets a reader certify a closed hole.
+    // Appended last so existing positional GraphLimits braces keep their meaning.
     std::size_t generation_budget_bytes = kPlaneGenerationBudget;
 };
 
@@ -324,9 +367,11 @@ public:
     // construction, so it is readable at any time without the graph lock.
     std::size_t uncontracted_tasks() const noexcept;
     bool requires_published_output() const noexcept { return require_published_output_; }
-    // Bytes retained by successful publish_plane() calls. A rejection adds
-    // nothing. cancel() does not release them. The graph destructor does,
-    // and it is only safe after run() has joined every worker.
+    // Bytes retained by owned publications, typed and untyped alike -- the ceiling
+    // covers both. A rejection adds nothing. A stopped generation releases every
+    // non-completed node's storage when run() returns, so this drops to the
+    // completed nodes' total. The graph destructor releases whatever remains, and
+    // that is only safe after run() has joined every worker.
     std::size_t owned_publication_bytes() const;
     // Number of Pending -> Ready transitions since construction, including the
     // initial roots. A generation that failed its first error must not gain a
@@ -353,7 +398,8 @@ private:
         std::atomic<const void*> payload{nullptr};
         std::atomic<std::size_t> payload_bytes{0};
         Generation published_generation{};
-        std::vector<unsigned char> owned_bytes;
+        // 32-byte aligned. A default std::vector<unsigned char> is not.
+        OwnedBytes owned_bytes;
         // Set before the version release, only by publish_plane(). Zero on an
         // untyped publish(), so input_plane() cannot treat a token as a plane.
         std::uint32_t plane_width = 0;
@@ -363,9 +409,17 @@ private:
     bool publish(std::size_t node, const void* data, std::size_t bytes) noexcept;
     bool publish_plane(std::size_t node, const void* data, std::size_t bytes,
                        std::uint32_t width, std::uint32_t height, std::size_t pitch) noexcept;
-    // mutex_ must be held. Writes the owned copy and release-stores version.
-    // Does not check extent or budget; callers do that before this store.
+    // mutex_ must be held. Writes the owned copy, charges the budget and
+    // release-stores version. It performs the budget decision itself so that no
+    // publication path can reach the copy without paying for it; extent and
+    // geometry remain the caller's decision.
     bool commit_copy_locked(Node& target, const void* data, std::size_t bytes) noexcept;
+    // mutex_ must be held, and every worker must already be joined. Drops owned
+    // storage for nodes that did not complete, after clearing their payload record
+    // and version, and refunds the budget. Only valid once scheduling has stopped:
+    // a stopped generation has released no dependent (fail_locked marks them
+    // Failed), so nothing it frees was ever handed to a consumer.
+    void release_abandoned_locked() noexcept;
     PlaneView input_plane(std::size_t node, std::size_t input, const PlaneIdentity& expected) const;
     // True only for a readable owned BufferVersion of this generation.
     // version == 0 is rejected on its own. A non-zero version that is not a
@@ -395,8 +449,10 @@ private:
     std::size_t uncontracted_ = 0;
     // Graph-wide S2 completion rule, captured at construction. Default true.
     bool require_published_output_ = true;
-    // Effective T4 ceiling, clamped in the constructor. Spent only by
-    // publish_plane(), under mutex_.
+    // Effective T4 ceiling, clamped in the constructor. Spent by
+    // commit_copy_locked(), under mutex_, for both publication paths -- not by
+    // publish_plane() alone. Refunded by release_abandoned_locked() when a
+    // stopped generation drops storage it will never hand to a consumer.
     std::size_t generation_budget_ = kPlaneGenerationBudget;
     std::size_t owned_budget_ = 0;
     GraphError error_ = GraphError::None;
