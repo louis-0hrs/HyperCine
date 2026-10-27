@@ -5,12 +5,35 @@ import math
 import struct
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 from collections import Counter
 from pathlib import Path
-from compare import compare, summarize, unpack, verified_packet, digest
+from compare import audit_case, compare, summarize, unpack, verified_packet, digest
 
 
 class MetricsTest(unittest.TestCase):
+    def test_missing_repeat_output_cannot_reuse_previous_pixels(self):
+        # Simulate a tool that exits zero but stops producing output after call 1.
+        # A repeated hash must describe a new output, never a previous file.
+        with tempfile.TemporaryDirectory() as directory:
+            args = SimpleNamespace(work=directory, ffprobe='probe',
+                                   sdk_dump='sdk', ffmpeg='ffmpeg')
+            counts = Counter()
+
+            def fake_run(command):
+                if command[0] == 'probe':
+                    return '{"streams":[{"codec_name":"cfhd","width":16,"height":16,"pix_fmt":"yuv422p10le"}]}'
+                counts[command[0]] += 1
+                if counts[command[0]] == 1:
+                    output = command[2] if command[0] == 'sdk' else command[-1]
+                    Path(output).write_bytes(bytes(16*16*4))
+                return ''
+
+            with patch('compare.run', side_effect=fake_run):
+                with self.assertRaises(OSError):
+                    audit_case(b'packet', 16, 16, 'missing-repeat', args)
+
     def test_packet_provenance_rejects_changed_bytes(self):
         frame = dict(width=32, height=16, frame_index=3, sdk_sha256=digest(b'original'))
         relative = 'frames/low-sequence-32x16/frame_0003/sdk.cfhd'

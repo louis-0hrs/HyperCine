@@ -53,6 +53,8 @@ int main(int argc, char** argv) {
         Bytes packet(static_cast<size_t>(size)); f.seekg(0);
         f.read(reinterpret_cast<char*>(packet.data()), size);
         if (!f) throw std::runtime_error("Packet read failed");
+        // Input and output survive decoder teardown on every exit path.
+        Bytes yu64;
         CFHD_DecoderRef dr=nullptr; const auto opened=CFHD_OpenDecoder(&dr,nullptr);
         std::unique_ptr<void,DecoderDelete> decoder(dr); Check(opened);
         int w=0,h=0; CFHD_PixelFormat format=CFHD_PIXEL_FORMAT_UNKNOWN;
@@ -70,8 +72,11 @@ int main(int argc, char** argv) {
         Check(CFHD_SetActiveMetadata(decoder.get(),metadata.get(),TAG_COLORSPACE_FTR,METADATATYPE_UINT32,&filter,sizeof(filter)));
         int32_t pitch=0; Check(CFHD_GetImagePitch(w,format,&pitch));
         if (pitch < w*4 || pitch%16) throw std::runtime_error("Invalid SDK pitch");
-        Bytes yu64(size_t(pitch)*h,0);
+        yu64.assign(size_t(pitch)*h,0);
         Check(CFHD_DecodeSample(decoder.get(),packet.data(),packet.size(),yu64.data(),pitch));
+        Check(CFHD_CloseMetadata(metadata.release()));
+        Check(CFHD_CloseDecoder(decoder.release()));
+        // Match #138: inspect/publish pixels only after the SDK is closed.
         // YU64 is top-down LE Y0/Cr/Y1/Cb, p16; p10 = unsigned value >> 6.
         const auto out=Planar(yu64,w,h,pitch);
         std::ofstream file(argv[2],std::ios::binary);
