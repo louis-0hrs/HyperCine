@@ -149,3 +149,14 @@ normalization or bypass was added to the validators. A guardrail test performs
 a real `git -c core.autocrlf=true checkout-index` into a temporary directory
 and requires all three original hashes to survive checkout. Hosted Windows
 success still requires a new passing matrix run.
+
+### Configured CI prerequisites (reconciled from macOS validation #140)
+
+Standalone gate requires the already-registered quality-state unit, backend-selection,
+exact entropy and standalone runner regression tests. The required inventory expands
+when Metal is enabled or original reference/sequence corpora are configured, and
+macOS CMake target architecture must match the declared runner architecture.
+Before any preflight each gate invocation invalidates stale PASS summaries, CTest
+inventory and JUnit evidence while retaining unrelated diagnostic artifacts.
+Without configured private corpora these rules do **not** imply SDK bitstream parity.
+Historical macOS qualification evidence remains pinned to its tested source.
