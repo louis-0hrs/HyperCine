@@ -378,6 +378,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_quality_state tests/test_quality_state.cpp)
         target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
         add_test(NAME quality_state_unit COMMAND test_quality_state)
+        # Independent original RGB444 PlaneView bad_alloc rollback/recovery contract.
+        add_subdirectory(tests/rgb444_boundary)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)

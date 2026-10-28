@@ -18,6 +18,7 @@ REQUIRED = {
     'rgb444_frame_storage', 'rgb444_frame_rejection',
     'rgb444_rg48_import', 'rgb444_rg48_rejection',
     'rgb444_rg48_replay_contract', 'rgb444_rg48_allocation_failure',
+    'rgb444_allocation_failure',
     'rgb444_packet_probe',
     'reference_decode_contract',
     'quality_state_unit', 'standalone_gate_guardrails',
