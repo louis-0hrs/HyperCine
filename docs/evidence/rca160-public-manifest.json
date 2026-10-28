@@ -1,0 +1,18 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "files": {
+    "sdk-rca-2026-10-28/calls.json": "367b6d91f3580073ac55bc1a06012a1a6408952782ebb50a05b9218846368723",
+    "sdk-rca-2026-10-28/plan.json": "2764cea503478a67955a1e734388e40e268b90bae7ba61275f35f70f59f87227",
+    "sdk-rca-2026-10-28/provenance.json": "b62a899caf7709f28c3ef54ac71081de29f1b72fae6fb8ad95423ac12ca552f8",
+    "sdk-rca-2026-10-28/summary.json": "d9ea088759090a9616eb2f18c2ebd90ddc674fb84b495f57a67f40cea5918156",
+    "sdk-rca-2026-10-28/validation.json": "43bb4958ead35eb04d9785d26bb6fb53461ca6ec6f23c0f1b9a10746ec51baf6",
+    "sdk-rca-2026-10-28/verification.json": "d378d196eb1f9fe0250b57f08b3f0a25c334de2872745e2aa69f867b22367903",
+    "sdk-rca-all-channels-2026-10-28/calls.json": "fadee70e6360186efc76fa99e5d083afcc69645b5e9e3ea1a6944c403b6988b1",
+    "sdk-rca-all-channels-2026-10-28/plan.json": "7bcde0897670e3aa8ace2dcce0b540fcfcf98b9055b134ec600e6504ff026928",
+    "sdk-rca-all-channels-2026-10-28/provenance.json": "b859b0da9933596f7eab8597fa45183cf97829b3bcf70850c54e974e1711551d",
+    "sdk-rca-all-channels-2026-10-28/summary.json": "786a4d468f23754c2fc68d9002742f072fa3c6c547598e24835311052f84adbc",
+    "sdk-rca-all-channels-2026-10-28/verification.json": "f68e73fcca8cb02adc00a05d8e94db364fcd29bd725b7ee9ba6cd700f778b843"
+  },
+  "scope": "Original JSON measurement records only; no SDK, binaries or media; offline ledger audit is not decoder replay."
+}

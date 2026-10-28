@@ -1,0 +1,293 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "full_command": "ctest --test-dir build -C Release --output-on-failure",
+  "full_seconds": 1883.24,
+  "full_inventory": [
+    {
+      "id": 1,
+      "name": "test_reference_oracle",
+      "result": "Passed"
+    },
+    {
+      "id": 2,
+      "name": "test_reference_release_gate",
+      "result": "Failed"
+    },
+    {
+      "id": 3,
+      "name": "test_version_header",
+      "result": "Passed"
+    },
+    {
+      "id": 4,
+      "name": "test_decode_phase3b2a_parser",
+      "result": "Passed"
+    },
+    {
+      "id": 5,
+      "name": "test_decode_phase3b2a_api",
+      "result": "Passed"
+    },
+    {
+      "id": 6,
+      "name": "test_decode_phase3b2a_reconstruction",
+      "result": "Passed"
+    },
+    {
+      "id": 7,
+      "name": "test_decode_phase3b2a_temporal",
+      "result": "Passed"
+    },
+    {
+      "id": 8,
+      "name": "test_decode_phase3b2a_upstream_temporal",
+      "result": "Passed"
+    },
+    {
+      "id": 9,
+      "name": "test_decode_phase3ae",
+      "result": "Passed"
+    },
+    {
+      "id": 10,
+      "name": "test_decode_phase3a_rc",
+      "result": "Passed"
+    },
+    {
+      "id": 11,
+      "name": "test_transform_wavelet",
+      "result": "Passed"
+    },
+    {
+      "id": 12,
+      "name": "test_codec_roundtrip",
+      "result": "Passed"
+    },
+    {
+      "id": 13,
+      "name": "test_yuy2_stability",
+      "result": "Passed"
+    },
+    {
+      "id": 14,
+      "name": "test_decode_phase0",
+      "result": "Passed"
+    },
+    {
+      "id": 15,
+      "name": "test_avi_sample",
+      "result": "Passed"
+    },
+    {
+      "id": 16,
+      "name": "test_decoder",
+      "result": "Passed"
+    },
+    {
+      "id": 17,
+      "name": "test_decode_phase3b0",
+      "result": "Passed"
+    },
+    {
+      "id": 18,
+      "name": "test_decode_phase3b1",
+      "result": "Passed"
+    },
+    {
+      "id": 19,
+      "name": "test_decode_phase3b1_acceptance",
+      "result": "Passed"
+    },
+    {
+      "id": 20,
+      "name": "test_decode_phase3b2a_mixed_stress",
+      "result": "Passed"
+    },
+    {
+      "id": 21,
+      "name": "test_decode_phase3b2r_math",
+      "result": "Passed"
+    },
+    {
+      "id": 22,
+      "name": "test_decode_phase3b2r_reference",
+      "result": "Passed"
+    },
+    {
+      "id": 23,
+      "name": "test_decode_phase2fa",
+      "result": "Passed"
+    },
+    {
+      "id": 24,
+      "name": "test_decode_gpu_index",
+      "result": "Passed"
+    },
+    {
+      "id": 25,
+      "name": "test_cuda_wavelet",
+      "result": "Passed"
+    },
+    {
+      "id": 26,
+      "name": "test_cuda_pyramid",
+      "result": "Passed"
+    },
+    {
+      "id": 27,
+      "name": "test_entropy_parallel",
+      "result": "Passed"
+    },
+    {
+      "id": 28,
+      "name": "test_hybrid_roundtrip",
+      "result": "Passed"
+    },
+    {
+      "id": 29,
+      "name": "test_phase2a",
+      "result": "Skipped"
+    },
+    {
+      "id": 30,
+      "name": "test_phase2b",
+      "result": "Skipped"
+    },
+    {
+      "id": 31,
+      "name": "test_phase2c",
+      "result": "Passed"
+    },
+    {
+      "id": 32,
+      "name": "test_phase2d",
+      "result": "Passed"
+    },
+    {
+      "id": 33,
+      "name": "test_entropy_capacity",
+      "result": "Passed"
+    },
+    {
+      "id": 34,
+      "name": "test_phase3a",
+      "result": "Passed"
+    },
+    {
+      "id": 35,
+      "name": "test_decode_inverse_wavelet_cuda",
+      "result": "Passed"
+    },
+    {
+      "id": 36,
+      "name": "test_decode_phase1",
+      "result": "Passed"
+    },
+    {
+      "id": 37,
+      "name": "test_color_conversion_cuda",
+      "result": "Passed"
+    },
+    {
+      "id": 38,
+      "name": "test_decode_phase2a",
+      "result": "Passed"
+    },
+    {
+      "id": 39,
+      "name": "test_decode_entropy_cuda",
+      "result": "Passed"
+    },
+    {
+      "id": 40,
+      "name": "test_decode_phase2b",
+      "result": "Passed"
+    },
+    {
+      "id": 41,
+      "name": "test_decode_entropy_phase2c",
+      "result": "Passed"
+    },
+    {
+      "id": 42,
+      "name": "test_decode_phase2c",
+      "result": "Passed"
+    },
+    {
+      "id": 43,
+      "name": "test_decode_phase2d",
+      "result": "Passed"
+    },
+    {
+      "id": 44,
+      "name": "test_decode_phase2e",
+      "result": "Passed"
+    },
+    {
+      "id": 45,
+      "name": "test_decode_phase2fc",
+      "result": "Passed"
+    },
+    {
+      "id": 46,
+      "name": "test_decode_phase2fc_audit",
+      "result": "Passed"
+    },
+    {
+      "id": 47,
+      "name": "test_decode_phase2fb",
+      "result": "Passed"
+    }
+  ],
+  "full_limitation": "Phase2C/D used stale objects because copied source timestamps preceded existing objects; their PASS is superseded by final focused verification.",
+  "final_focused_command": "ctest --test-dir build -C Release --output-on-failure -R '^(test_phase2[a-d]|test_reference_oracle|test_reference_release_gate)$'",
+  "focused_seconds": 33.22,
+  "focused_inventory": [
+    {
+      "id": 1,
+      "name": "test_reference_oracle",
+      "result": "Passed"
+    },
+    {
+      "id": 2,
+      "name": "test_reference_release_gate",
+      "result": "Failed"
+    },
+    {
+      "id": 29,
+      "name": "test_phase2a",
+      "result": "Skipped"
+    },
+    {
+      "id": 30,
+      "name": "test_phase2b",
+      "result": "Skipped"
+    },
+    {
+      "id": 31,
+      "name": "test_phase2c",
+      "result": "Skipped"
+    },
+    {
+      "id": 32,
+      "name": "test_phase2d",
+      "result": "Skipped"
+    }
+  ],
+  "release_qualified": false,
+  "final_executables": {
+    "test_reference_oracle": "83b2bffe26e49d06b9642c84404e143a7337bdd45fc61b5b3bd289735968cb33",
+    "test_phase2a": "ff704f8ee91e5473092102cee69ecf02b306ecca8bb67d9c08adfd22ce813a8f",
+    "test_phase2b": "0cf8813a963fe95bd8a99a1f79cd8642cc734f64eb1c205a4614d1e58f925f1b",
+    "test_phase2c": "842d3e8e9475f401887b4d6147c7a3827868ae1ec5e3a15340e51e38c2d37abe",
+    "test_phase2d": "08d756c96a3448d8b779fe286aac649fff5dcf6cfff3c2b939650aaffa0842e6"
+  },
+  "source_sha256": {
+    "test_reference_oracle": "58dc3acc7b18a2aeb9c2a8aef92751fc0fa7757c8bf5d5c845b569501d40c437",
+    "test_phase2a": "523e9c65c01e41748c64b0734274f243e8d0607886592d90674a96366cdf433f",
+    "test_phase2b": "9f7ded7ef9ec16b886210127e0f5d0c4ee2a1230608e16c2d4c47fc252e83439",
+    "test_phase2c": "adb49902a100cb1a97e0b1bce31ed7a12eea82c27833bf43b17b78832f5fe5ce",
+    "test_phase2d": "362f8c210f96628f8b82b1b6191c17a986a9ebe48b57d3abb00ef2fe85b4a09d"
+  }
+}

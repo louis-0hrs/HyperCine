@@ -1,0 +1,28 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "repository_head": "aec37c1f990a4b3dda3e3103154ec2b4e3bdfa2b",
+  "capture_worktree_head": "a66e69425745b7533bca117fb5705deada22c3c2",
+  "capture_origin": "retained #207/#213 Phase2A guard-smoke capture; historical #206 SHA identity not established",
+  "windows": "Windows-10-10.0.26200-SP0",
+  "cpu": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD",
+  "logical_processors": "16",
+  "host_sha256": "fc046231223e537bb221524b2d6f9c0d9f24a71ea23f79deb140f44f7bd063c8",
+  "device_sha256": "6c9d54cca51919b30b3ad09c62e57f99d8207201c8fd099f2d9d9588e161992f",
+  "size": [
+    900396,
+    900396
+  ],
+  "differences": [
+    {
+      "offset": 71,
+      "host": 11,
+      "device": 14
+    }
+  ],
+  "rejected_exploration": [
+    "matrix-v1: probe attempted an uninitialized entropy lock in single-CPU mode; fixed before final evidence",
+    "matrix-v2: allocation matching selected last rather than first producer completion when HALF repeated a transform; final observer selects first"
+  ],
+  "scope": "96 final fresh-process CPU decodes; no RNG/math/packet mutations; event scheduling only in generated diagnostic TU"
+}
