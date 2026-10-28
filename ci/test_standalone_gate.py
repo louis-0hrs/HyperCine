@@ -9,7 +9,8 @@ import json
 import subprocess
 import unittest
 from unittest.mock import patch
-from run_standalone import REQUIRED, registered_tests, completed_tests
+from run_standalone import (REQUIRED, registered_tests, completed_tests,
+                            required_tests, validate_architecture, invalidate_results, main)
 
 
 class StandaloneGateTests(unittest.TestCase):
