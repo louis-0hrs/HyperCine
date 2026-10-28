@@ -128,6 +128,10 @@ if(HYPERCINE_BUILD_TESTS)
     add_subdirectory(tests/geometry_extreme)
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
+        # Strict test-only decoder evidence classifier, no original SDK needed.
+        add_test(NAME reference_decode_contract COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_decode/test_contract.py")
+        set_tests_properties(reference_decode_contract PROPERTIES LABELS "synthetic;reference-decoder-contract")
         add_test(NAME diagnostic_summary_contract COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diagnostic_summary.py")
         add_test(NAME decoder_differential_metrics COMMAND "${Python3_EXECUTABLE}"
@@ -369,6 +373,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_compile_features(test_rgb444_rg48_allocation PRIVATE cxx_std_17)
         add_test(NAME rgb444_rg48_allocation_failure COMMAND test_rgb444_rg48_allocation)
         set_tests_properties(rgb444_rg48_allocation_failure PROPERTIES TIMEOUT 20)
+        # The Quality-only mode returns before this block; require the same
+        # shared arithmetic unit suite in normal SDK-free Standalone builds.
+        add_executable(test_quality_state tests/test_quality_state.cpp)
+        target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
+        add_test(NAME quality_state_unit COMMAND test_quality_state)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
