@@ -1,0 +1,66 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 37,
+  "existing_pr": 142,
+  "base_commit": "eb9fe2ed101f7e470022b8632abd155df90e99e0",
+  "status": "SOURCE_IMPORT_PASS",
+  "internal_stage_oracle": "PENDING_SDK_INTERNAL_STAGE",
+  "rgb444_bitstream_equality": "NOT_RUN",
+  "platform": {
+    "os": "macOS 26.5.2",
+    "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+    "cmake": "cmake version 3.31.5"
+  },
+  "architecture": "arm64",
+  "tested_sources_sha256": {
+    "include/hypercine/rgb444.h": "709ab355ccc96664c8c59d5a014e703dad231cee0b2ac12c0c278d070c5fe54b",
+    "src/cpu/rgb444_frontend.cpp": "04575b46adf087fa900313f4133df77cbaf79b9e8fd1072aabe81acfb8bae3b4",
+    "tests/test_rgb444_rg48.cpp": "21fd231575730c65c3f534135f47bf5c032c27a70b351e066b038729dbe77442",
+    "tests/test_rgb444_rg48_replay.py": "6e18b1ed9b8033a3098a5e234b3a1696ee5dbf9997ceba24a983facc47ef8bb9",
+    "tests/validate_rgb444_rg48.py": "e8fb92d85b152ce6684596a596c69f8b126f1cddb779d0307571adaa3d99e4dc",
+    "tests/reference_rgb444/rg48_f1_pins.json": "09e53f16d5dbb060087065d733316c60e9753315f20abf6a5c8545b16d9e464c",
+    "CMakeLists.txt": "c3e5c75a24e6fc726d7278874862128d85a50bde25319cf02c2c9cf68bc54029",
+    "ci/run_standalone.py": "c3ba60f0f17739adb2084bed3cfce720fdd2cbf9c2339e16e1bfe747fcdffe29",
+    "ci/test_standalone_gate.py": "24fdc921633d1426ca699eef32a474aba53c25be51266cb66e34f8658eed3d3f"
+  },
+  "native": {
+    "release": {
+      "status": "PASS",
+      "registered": 34,
+      "passed": 34,
+      "skipped": 0,
+      "seconds": 117.07,
+      "f1_replay": "PASS"
+    },
+    "asan": {
+      "status": "PASS",
+      "registered": 34,
+      "passed": 34,
+      "skipped": 0,
+      "seconds": 171.62,
+      "f1_replay": "PASS"
+    }
+  },
+  "rg48_import_checks": 25518276,
+  "rg48_rejection_checks": 21,
+  "replay_contract_methods": 6,
+  "ci_python_methods": 20,
+  "f1": {
+    "status": "SOURCE_IMPORT_PASS",
+    "artifacts_verified": 130,
+    "samples_compared": 100319232,
+    "sdk_decode_execution": "NOT_RUN; retained original output verified only",
+    "internal_stage_oracle": "PENDING_SDK_INTERNAL_STAGE",
+    "rgb444_bitstream_equality": "NOT_RUN; no RGB encoder packet emitted",
+    "cases": 32
+  },
+  "limitations": [
+    "No original SDK decode invoked; retained outputs size/SHA verified only",
+    "No signed internal stage, packet, quality-state or framing implemented",
+    "No new native Windows/Linux or GPU execution",
+    "No performance or Adobe/Resolve claim",
+    "Leak detection disabled; Python and external FFmpeg not sanitized",
+    "Allocation-failure injection on CopyRg48 not run; existing child stack remains separate"
+  ]
+}

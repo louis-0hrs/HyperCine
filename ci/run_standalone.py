@@ -12,6 +12,10 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    # P0 RGB444 frame and RG48 importer must never disappear from standalone CI.
+    'rgb444_frame_storage', 'rgb444_frame_rejection',
+    'rgb444_rg48_import', 'rgb444_rg48_rejection',
+    'rgb444_rg48_replay_contract', 'rgb444_rg48_allocation_failure',
     'rgb444_packet_probe',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
