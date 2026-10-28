@@ -70,11 +70,32 @@ class StandaloneGateTests(unittest.TestCase):
             with self.subTest(omitted=omitted), self.assertRaises(ValueError):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED - {omitted}]})
 
+    def test_encoder_capability_and_isa_gates_are_mandatory(self):
+        gates = ('encoder_capability_contract', 'filmscan3_geometry_budget',
+                 'wavelet_isa_session_policy', 'wavelet_isa_parallel_sessions',
+                 'neon_wavelet_bitexact', 'neon_concurrency_contract')
+        for missing in gates:
+            self.assertIn(missing, REQUIRED)
+            with self.subTest(missing=missing), self.assertRaisesRegex(ValueError, missing):
+                registered_tests({'tests': [{'name': name} for name in REQUIRED
+                                            if name != missing]})
+
+    def test_metal_4k_gate_invokes_mandatory_metal_binary(self):
+        # Reviewable source guard: otherwise a green FFmpeg 4K decode could be CPU-only.
+        cmake = (Path(__file__).resolve().parent.parent / 'CMakeLists.txt').read_text()
+        gate = cmake.split('add_test(NAME filmscan3_metal_4k_ffmpeg_gate', 1)[1]
+        gate = gate.split('set_tests_properties(filmscan3_metal_4k_ffmpeg_gate', 1)[0]
+        self.assertIn('--encoder $<TARGET_FILE:hypercine_encode_filmscan3_metal>', gate)
+        self.assertNotIn('--encoder $<TARGET_FILE:hypercine_encode_filmscan3>', gate)
+        self.assertIn('HYPERCINE_METAL_AUDIT=1', cmake)
+
     def test_metal_enabled_requires_all_existing_metal_gates(self):
         cache = {'HYPERCINE_ENABLE_METAL': 'ON'}
         required = required_tests(cache)
         metal = {'filmscan3_metal_required', 'filmscan3_metal_autonomous_manifest',
-                 'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode'}
+                 'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode',
+                 'filmscan3_metal_4k_ffmpeg_gate', 'filmscan3_metal_4k_encoder',
+                 'filmscan3_metal_multisession', 'filmscan3_metal_geometry_matrix'}
         self.assertEqual(required - REQUIRED, metal)
         for omitted in metal:
             with self.subTest(omitted=omitted), self.assertRaises(ValueError):
