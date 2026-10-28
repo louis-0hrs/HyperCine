@@ -9,21 +9,22 @@ On Linux x86_64 with NVIDIA A2 present, the *SDK-free CPU* `hypercine_encode_fil
 | Request | Observed result | Scope |
 | --- | --- | --- |
 | 3840×2160 (UHD 4K) | Encode succeeded; CFHD output 6,156,376 bytes | One synthetic CPU-encoded sample; native CPU/Metal packet parity and separate independent 4K FFmpeg decode were established in merged #248 |
-| 7680×4320 (UHD 8K) | Rejected before any output: width [128,4096], height [24,4096], 8K unqualified | Current geometry gate, **not** a CFHD format/decoder limit |
-| 4104×2160 | Rejected by current validation | Width exceeds 4096 and is not a multiple of 128 |
+| 7680×4320 (UHD 8K) | Historical trial rejected before output under the former [128,4096] dimension guard | On current main (#266), the 16-bit shape field permits these axes, but the 8,294,400-pixel **implementation budget** rejects 8K; neither verdict proves a CFHD format limit |
+| 4104×2160 | Rejected by validation | Width is not a multiple of 128; the historical 4096 dimension bound no longer applies to FilmScan3 |
 
 No complete >4K sample was created. No >4K independent FFmpeg/GoPro SDK decode was run. The A2's presence in the host does **not** make the CPU CLI trial a CUDA encode.
 
-### 1. First current implementation gate: geometry and buffer budget
+### 1. Current implementation gates: wavelet shape and separate pixel budget
 
 `src/cpu/filmscan3_frontend.cpp::ValidateFilmScan3Geometry`, based on `include/hypercine/standalone.h`:
 
-- Width: **128–4096**, divisible by **128**.
-- Height: **24–4096**, divisible by **8**.
+- FilmScan3 width: **128–65535**, divisible by **128**.
+- FilmScan3 height: **24–65535**, divisible by **8**.
+- These upper bounds reflect the 16-bit wire dimension field, not a claim that every such geometry is supported by the encoder.
 - `width * height <= 8,294,400` pixels (`kMaxPlaneElements = 3840*2160`).
 - `sample_capacity_bytes` can only reduce the default geometric bound, not enlarge it.
 
-These are explicit current implementation guards, not a proof that CineForm as a format only supports UHD 4K. They already reject 4096×2160 (8,847,360 pixels), although that width passes the width limit; 4096×2024 (8,290,304 pixels) passes the *basic arithmetic and divisibility* gate, but has **not** been independently qualified as a full packet. URSA 17K's 17520 width is also not divisible by 128, independently of the 4096 cap. DCI 4K, 8K and all greater geometries need new actual tests, not only a raised constant.
+The axes are subject to a separate 8,294,400-pixel storage budget; none of this proves a CineForm format limit or support for large frames. The current validator rejects 4096×2160 (8,847,360 pixels) **because of the pixel budget**, not an axis limit. 4096×2024 (8,290,304 pixels) passes the basic shape and budget arithmetic but is **not** independently qualified as a full packet. URSA 17K's 17520-wide geometry is not divisible by 128 and also exceeds the pixel budget. 8K/12K and other large geometries need new output and decoder evidence rather than a constant change.
 
 The legacy fixed-Q2 `EncodeBgra` path has a separate `kMaxPixels = 2,097,152` budget; do not silently conflate that path with the newer geometry-bearing `FilmScan3Encoder` session.
 
@@ -66,9 +67,9 @@ BGRA8 input alone requires approximately 31.6 MiB at UHD 4K, 126.6 MiB at UHD 8K
 | Geometry | Current implementation | Native output/decoder evidence | Format-size status |
 | --- | --- | --- | --- |
 | UHD 4K 3840×2160 | **EXPERIMENTAL_SDK_FREE_CPU_AND_METAL_TESTED** | CPU sample measured here; complete CPU/Metal packet parity and independent FFmpeg 4K p10 decoder gate from #248; original GoPro 4K encoder parity **REFERENCE_PENDING** | Measured samples within current writer bounds; other input patterns still require bounded tests |
-| UHD 8K 7680×4320 | **CURRENT_IMPLEMENTATION_GEOMETRY_BLOCKED** | No sample or decode; rejection measured | Current sample cap may or may not bind for any specific content; **UNMEASURED** |
-| URSA Cine 12K 12288×8040 | **CURRENT_IMPLEMENTATION_GEOMETRY_BLOCKED** | No sample or decode | Conditional >64MiB risk; **UNMEASURED / REFERENCE_PENDING**, not a proven intrinsic format prohibition |
-| URSA Cine 17K 17520×8040 | **CURRENT_IMPLEMENTATION_GEOMETRY_BLOCKED**; also fails width%128 | No sample or decode | Conditional >64MiB risk; **UNMEASURED / REFERENCE_PENDING**, not a proven intrinsic format prohibition |
+| UHD 8K 7680×4320 | **CURRENT_IMPLEMENTATION_PIXEL_BUDGET_BLOCKED** | Historical rejection; no full sample or decode | Current sample cap may or may not bind for any specific content; **UNMEASURED** |
+| URSA Cine 12K 12288×8040 | **CURRENT_IMPLEMENTATION_PIXEL_BUDGET_BLOCKED** | No sample or decode | Conditional >64MiB risk; **UNMEASURED / REFERENCE_PENDING**, not a proven intrinsic format prohibition |
+| URSA Cine 17K 17520×8040 | **CURRENT_IMPLEMENTATION_SHAPE_AND_PIXEL_BUDGET_BLOCKED**; fails width%128 | No sample or decode | Conditional >64MiB risk; **UNMEASURED / REFERENCE_PENDING**, not a proven intrinsic format prohibition |
 
 Other valid intermediate geometries are **structurally parameterizable**, not automatically native codec-qualified. Actual CPU/Metal/CUDA packet and FFmpeg results must be tracked per geometry.
 
@@ -80,7 +81,7 @@ Other valid intermediate geometries are **structurally parameterizable**, not au
 
 ## Next steps (separate PRs; no unbounded full-frame experiment)
 
-1. #259: introduce a **fail-closed encoder capability query and per-session geometry/backend/budget contract**, with noncanonical-size CPU tests and negative checks. Preserve existing FilmScan3/legacy packet hashes.
+1. #259: connect the **existing internal fail-closed capability prototype** to actual per-session geometry/backend/budget selection with positive and negative tests. Preserve existing FilmScan3/legacy packet hashes.
 2. #48: inspect actual original GoPro SDK supported sample container and independent decoder semantics; determine whether legal large-sample representation exists. Keep `upstream/` unchanged.
 3. Only after explicit resource and format gates: bounded **opt-in** 8K encoder prototype, real output and FFmpeg/GoPro decoder evidence, then per-backend GPU qualification.
 4. 12K/17K format/allocator feasibility only after 8K and original wire-contract research. Do not silently crop/downscale or pack independent tiles as if they were one native full-resolution CFHD sample.

@@ -86,11 +86,14 @@ Two findings worth separating from PR prose:
    real frontends do override it (CPU `filmscan3_backend.cpp:36`, CUDA
    `src/cuda/filmscan3_cuda_frontend.cpp:69`, Metal `src/metal/filmscan3_metal.mm:125`),
    so this is a **latent** contract hole, not a live mis-encode.
-2. **Stale public docs.** `docs/CAPABILITY_8K_17K_AUDIT.md:12` and
-   `docs/MACOS_STANDALONE_ENCODER.md:228` still state the width bound as `[128,4096]`.
-   After #266 the validator uses `kMaxWireDimension = 65535` and refuses on the *pixel
-   budget* instead (`git log -S kMaxWireDimension` → `cbeab83`). The docs must be
-   corrected; the code is right.
+2. **Stale FilmScan3 size audit, not the legacy documentation.** The historical
+   `docs/CAPABILITY_8K_17K_AUDIT.md:12` describes the old `[128,4096]` FilmScan3
+   axis limit without distinguishing the post-#266 pixel budget. Current FilmScan3
+   uses `kMaxWireDimension = 65535` and refuses oversized frames on the *pixel
+   budget* instead (`git log -S kMaxWireDimension` → `cbeab83`). By contrast,
+   `docs/MACOS_STANDALONE_ENCODER.md:228` explicitly documents legacy fixed-Q2
+   `EncodeBgra` with `kMaxPixels = 2,097,152` and `kMaxDimension = 4096`;
+   that legacy limit is intentional and must **not** be changed by #259.
 
 ## 5. Profile and format separation
 
@@ -266,7 +269,8 @@ case is added only once #249's geometry/evidence gate is expressed in the capabi
 Follow-up commits, each separately reviewable: (a) route the public
 `FilmScan3Encoder(backend, geometry)` constructor through `SelectBackend` with an
 `EncoderDevice` built from the caller; (b) make `Frontend::Geometry()` non-defaulting or
-assert it was validated; (c) correct the stale `[128,4096]` docs of §4.
+assert it was validated; (c) correct the stale **FilmScan3** size-audit claim of §4,
+without changing the intentional `[128,4096]` legacy fixed-Q2 contract.
 
 ## 11. What this inventory does not prove
 
