@@ -29,6 +29,7 @@ REQUIRED = {
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'filmscan3_geometry', 'filmscan3_geometry_external_decode',
     'filmscan3_geometry_validation', 'filmscan3_geometry_reference_p10',
+    'filmscan3_4k_gate_contract',
     # #259: loss of the capability/budget/ISA gates must fail the CI inventory.
     'encoder_capability_contract', 'filmscan3_geometry_budget',
     'wavelet_isa_session_policy', 'wavelet_isa_parallel_sessions',
