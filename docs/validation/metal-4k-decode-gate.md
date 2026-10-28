@@ -35,6 +35,21 @@ substitution, and execute the actual CMake registration in a minimal project.
 The required standalone CI inventory now includes both native 4K gates and
 the portable contract suite. Deleting a gate cannot silently preserve green CI.
 
+## Measured validation (2026-10-28)
+
+Exact tested code: `ad67d0050815cd1b2060671544bf8ef65c8e9174`. Native Mac source blobs were independently matched to this commit; upstream stayed unchanged. [Machine-readable results](metal-4k-decode-results.json) preserve the source fingerprints and evidence boundaries.
+
+| Execution | Result |
+| --- | --- |
+| Linux x86_64 GCC 14.2 full Release CTest | 106/106 PASS, zero skips |
+| Native M2 Pro ARM64 full Metal Release CTest | 114/114 PASS, zero skips; eight GPU-required tests |
+| Native M2 Pro Debug ASan/UBSan, Metal API+GPU validation | Targeted 4K encoder, portable contract, new 16-frame decode/parity gate: 3/3 PASS, zero skips |
+| Native Windows x64 optimized Python | New contracts 13/13 and CI helpers 24/24 PASS |
+| Native Windows x64 4K CPU smoke | One actual 3840x2160 yuv422p10le decode, 33,177,600 bytes: PASS |
+| Native Windows x64 complete CTest | INCOMPLETE: gateway node invoke timeout at 1,200 seconds; no completed JUnit, no full-suite PASS claim or blind rerun |
+
+The native M2 Pro corrected gate took 27.61 seconds in Release and decoded 16 CPU plus 16 Metal packets after exact packet/state/table/band comparisons. Debug sanitizer scope was three tests (521.76 seconds), not the full Debug suite. Metal API and GPU validation were confirmed enabled in actual test output. Leak detection was disabled; no leak-qualification claim. External Python and FFmpeg were not instrumented. Four actual CMake-registration mutations were rejected. No new performance benchmark was run.
+
 ## Resource scope
 
 Four input files use 132,710,400 bytes total. Encoders run sequentially, with
