@@ -18,7 +18,7 @@ Issue #259, parts A–E. Evidence-only inventory at a single exact commit.
 | #262 | 30 fps metadata split and 65535-frame stop | No other timebase |
 | #269 | Per-session CPU ISA policy (`WaveletIsa` pinned per session) | CPU only; no GPU ISA policy |
 | #271 | Metal geometry matrix | macOS only, synthetic input |
-| #272 | Concurrent scalar+NEON sessions | CPU only |
+| #269 (contains #272) | Concurrent scalar+NEON sessions, per-session ISA | CPU only; `21afbf08` (#272) is not an ancestor of main — its content arrived via #269's squash `74f8952` |
 | #273 | Metal session isolation | macOS only |
 
 So parts A/B exist **as an internal prototype**, part C is half-done (CPU), part D is
@@ -175,8 +175,65 @@ Hosted CI families at this SHA (`.github/workflows/`): `ci-cpu.yml` (windows-lat
 `ci-standalone.yml` (matrix), `ci-cuda-build.yml` (ubuntu-24.04 build + registered-test
 inventory gate), `quality-state.yml`, `privacy-guard.yml`.
 
-> Measured on-host results (Linux x86_64, CPU + A2) are appended in §8a when the native
-> run for this branch completes; they are not inferred from CI status.
+### 8a. Measured on-host results (Linux x86_64, NVIDIA A2)
+
+Run at `f1591d246512f41b8bba1fbad2455ef1a764491a` in an isolated worktree built outside
+the Git tree. `git status --porcelain upstream/` was empty before and after. Both builds
+required `HYPERCINE_BUILD_UPSTREAM=OFF`, because `CMakeLists.txt:195` rejects
+`HYPERCINE_BUILD_STANDALONE=ON` together with `BUILD_UPSTREAM=ON`; that is a build-flag
+contract, not a code defect.
+
+| Build | Configure | Result |
+| --- | --- | --- |
+| CPU standalone, Release, Ninja | `-DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON` | 93/93 objects, success |
+| CUDA standalone, Release, Ninja | same, plus `-DHYPERCINE_ENABLE_CUDA=ON` | 105/105 objects, success |
+
+| CTest selection | PASS | FAIL | SKIP | Wall |
+| --- | --- | --- | --- | --- |
+| Full CPU suite | 105 | 0 | 0 | 142.41 s |
+| `-L cuda` | 9 | 0 | 0 | 34.66 s |
+
+No test returned `SKIP_RETURN_CODE 77`, so the CUDA numbers are real executions, not skips.
+`cuda_filmscan3_multigeometry_sequence` ran resident on the A2: six geometries with packet
+parity over 12 CUDA launches; FFmpeg decode covered 1920x1080 and 3840x2160 only.
+
+One transient failure is recorded rather than hidden: `filmscan3_geometry_external_decode`
+failed once with `ENOSPC` on a tmpfs scratch **after** the encoder had already printed its
+4K pass (143.82 s); re-run against a large scratch directory it passed in 140.69 s. A full
+scratch filesystem must not be read as a codec failure.
+
+The geometries that encode and decode end-to-end on this host are exactly the six in
+`kCpuExperimentalEvidence` (`src/core/encoder_capability.cpp:23-29`). That is still not
+original-SDK qualification.
+
+No `filmscan3_*4k*` test is registered on Linux: those names are Metal-gated
+(`CMakeLists.txt:614`).
+
+### 8b. Three evidence traps found while measuring
+
+**The "Metal 4K FFmpeg gate" does not run Metal.** `CMakeLists.txt:615-619` registers
+`filmscan3_metal_4k_ffmpeg_gate` inside `if(HYPERCINE_ENABLE_METAL)`, but passes
+`--encoder $<TARGET_FILE:hypercine_encode_filmscan3>` — the plain CLI. The Metal-aware
+binary is a different target, `hypercine_encode_filmscan3_metal` (`CMakeLists.txt:412`),
+compiled with `HYPERCINE_METAL_AUDIT=1`, which is the only thing that installs the Metal
+audit frontend through `FrontendAccess::Use` (`tools/hypercine_encode_filmscan3.cpp:72-76`).
+Without that macro the CLI calls `FilmScan3Encoder(geometry)`, the CPU constructor
+(`src/core/filmscan3_encoder.cpp:112`). **A green `filmscan3_metal_4k_ffmpeg_gate` is
+therefore not Metal evidence today.** This is a test-selection defect, not a codec defect,
+and it bears directly on the #45/#23 parity claim.
+
+**No workflow enables Metal.** `HYPERCINE_ENABLE_METAL` occurs in `.github/workflows/`
+only as `=OFF` (`ci-cuda-build.yml:117`). Metal evidence remains owner-host evidence.
+
+**CI binding is partial, not absent.** `ci/run_standalone.py:REQUIRED` does contain
+`filmscan3_backend_selection`, `filmscan3_geometry`, `filmscan3_geometry_external_decode`,
+`filmscan3_geometry_validation`, `filmscan3_api`, `cpu_isa_selection` and the four
+`rgb444_*` tests. It does **not** contain `encoder_capability_contract`,
+`filmscan3_geometry_budget`, `wavelet_isa_session_policy`,
+`wavelet_isa_parallel_sessions`, `neon_wavelet_bitexact` or `neon_concurrency_contract`.
+The capability contract and the per-session ISA proofs can therefore be deleted from the
+inventory without turning CI red. That is the concrete, narrow CI gap — not "nothing of
+#259 is bound".
 
 ## 9. Reconciliation map — no per-resolution or per-backend forks
 
