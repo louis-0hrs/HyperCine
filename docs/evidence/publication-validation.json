@@ -1,0 +1,22 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "scope": "Offline audit of recorded measurements only; no decoder replay or new experiment",
+  "base_commit": "736dd0d3fc8a0d3a35f4465228104c6c3382374a",
+  "normal_python_unittests": 6,
+  "optimized_python_unittests": 6,
+  "ctest_configuration": "SDK-free graph-only project",
+  "ctest_passed": 26,
+  "ctest_seconds": 5.24,
+  "private_sdk_files_included": false,
+  "test_media_included": false,
+  "excluded": [
+    "private SDK and generated translation units",
+    "setup/worker/probe implementation snapshots",
+    "binaries and libraries",
+    "raw coefficient planes and decoded pixels",
+    "raw process logs and private paths"
+  ],
+  "measurement_json_files": 11,
+  "published_measurement_calls": 124
+}
