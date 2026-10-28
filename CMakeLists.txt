@@ -190,6 +190,10 @@ if(HYPERCINE_BUILD_STANDALONE)
     if(HYPERCINE_BUILD_UPSTREAM)
         message(FATAL_ERROR "Standalone requires HYPERCINE_BUILD_UPSTREAM=OFF")
     endif()
+    # Issue #37: SDK-free RGB444 source storage only, no CFHD RGB encoder.
+    add_library(hypercine_rgb444_frame STATIC src/cpu/rgb444_frontend.cpp)
+    target_include_directories(hypercine_rgb444_frame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    target_compile_features(hypercine_rgb444_frame PUBLIC cxx_std_17)
     add_library(hypercine_standalone STATIC
         src/cpu/wavelet_cpu.cpp
         src/cpu/standalone_frontend.cpp
@@ -350,6 +354,21 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME wavelet_isa_parallel_sessions COMMAND test_wavelet_isa_parallel_sessions)
         set_tests_properties(wavelet_isa_parallel_sessions PROPERTIES
             LABELS "cpu;neon;concurrency" TIMEOUT 900)
+        add_executable(test_rgb444_frame tests/test_rgb444_frame.cpp)
+        target_link_libraries(test_rgb444_frame PRIVATE hypercine_rgb444_frame)
+        add_test(NAME rgb444_frame_storage COMMAND test_rgb444_frame storage)
+        add_test(NAME rgb444_frame_rejection COMMAND test_rgb444_frame rejection)
+        add_executable(test_rgb444_rg48 tests/test_rgb444_rg48.cpp)
+        target_link_libraries(test_rgb444_rg48 PRIVATE hypercine_rgb444_frame)
+        add_test(NAME rgb444_rg48_import COMMAND test_rgb444_rg48 import)
+        add_test(NAME rgb444_rg48_rejection COMMAND test_rgb444_rg48 rejection)
+        # Keep allocation failure injection isolated to the exact importer.
+        add_executable(test_rgb444_rg48_allocation tests/test_rgb444_rg48_allocation.cpp
+            src/cpu/rgb444_frontend.cpp)
+        target_include_directories(test_rgb444_rg48_allocation PRIVATE include)
+        target_compile_features(test_rgb444_rg48_allocation PRIVATE cxx_std_17)
+        add_test(NAME rgb444_rg48_allocation_failure COMMAND test_rgb444_rg48_allocation)
+        set_tests_properties(rgb444_rg48_allocation_failure PROPERTIES TIMEOUT 20)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
@@ -479,6 +498,18 @@ if(HYPERCINE_BUILD_STANDALONE)
             -O "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_geometry_reference_p10.py")
         add_test(NAME filmscan3_geometry_validation COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_geometry_validation.py")
+        # Optional private F1 original-artifact replay. Not a default pixel-oracle claim.
+        add_test(NAME rgb444_rg48_replay_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_rgb444_rg48_replay.py"
+            --probe $<TARGET_FILE:test_rgb444_rg48>)
+        set(HYPERCINE_RGB444_F1_ROOT "" CACHE PATH "Optional existing F1 root with 128 and 1080p-RGB_444 directories")
+        if(HYPERCINE_RGB444_F1_ROOT)
+            add_test(NAME rgb444_rg48_f1_sources COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_rgb444_rg48.py"
+                --f1-root "${HYPERCINE_RGB444_F1_ROOT}" --probe $<TARGET_FILE:test_rgb444_rg48>
+                --report "${CMAKE_CURRENT_BINARY_DIR}/rgb444-rg48-f1-report.json")
+            set_tests_properties(rgb444_rg48_f1_sources PROPERTIES TIMEOUT 300)
+        endif()
         add_subdirectory(tests/scalar_inverse_research)
         add_test(NAME original_descale_review_contract
             COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_original_descale_review.py")

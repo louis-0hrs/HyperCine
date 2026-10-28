@@ -1,0 +1,67 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "schema": "hypercine.rgb444.source-frame-p0.v1",
+  "issue": 37,
+  "base_commit": "e87ef0258ba37f5c78f1557c59d9c7331df5521c",
+  "scope": "API/source storage P0 only; no RGB CFHD packet emitted",
+  "encoder_status": "BITEXACT_PENDING",
+  "reference_status": "PENDING_REFERENCE: original Windows F1 RGB source/sample/native-decoded corpus (#36)",
+  "environment": {
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "compiler": "AppleClang 21.0.0",
+    "cmake": "3.31.5",
+    "python": "3.9.6",
+    "git": "Apple Git 2.50.1",
+    "ffmpeg": "n8.0"
+  },
+  "ctest": {
+    "release": {
+      "status": "PASS",
+      "registered": 30,
+      "passed": 30,
+      "skipped": 0,
+      "seconds": 74.88,
+      "rgb444_outputs": {
+        "rgb444_frame_storage": "PASS RGB444 storage: 12562712 checks",
+        "rgb444_frame_rejection": "PASS RGB444 rejection: 50 checks"
+      }
+    },
+    "asan": {
+      "status": "PASS",
+      "registered": 30,
+      "passed": 30,
+      "skipped": 0,
+      "seconds": 160.79,
+      "rgb444_outputs": {
+        "rgb444_frame_storage": "PASS RGB444 storage: 12562712 checks",
+        "rgb444_frame_rejection": "PASS RGB444 rejection: 50 checks"
+      }
+    }
+  },
+  "ci_python": {
+    "passed": 19,
+    "skipped": 0
+  },
+  "missing_rgb_registration_checks": {
+    "rejected": 2
+  },
+  "cpp_warnings": "PASS: -Wall -Wextra -Werror syntax checks on new source/test",
+  "sanitizer_scope": "C++ ASan/UBSan; Python/FFmpeg not instrumented; detect_leaks=0; allocation failure not injected",
+  "not_run": [
+    "native Windows/Linux",
+    "RGB CFHD encode/decode/SDK parity",
+    "CUDA/Metal/Vulkan",
+    "benchmark/performance",
+    "private SDK binary corpora"
+  ],
+  "source_sha256": {
+    "include/hypercine/rgb444.h": "c5a75230baace2651c70ed7d6e84298d9b6001d6414dce37179b1e947569d89a",
+    "src/cpu/rgb444_frontend.cpp": "fe2747e0db30ae66fce1609165a9bab19379b6857b5527c1dfb4a52b7910cc89",
+    "tests/test_rgb444_frame.cpp": "e0911ebb89125d24ac6fa922d126f6d8681e05393080e3307d86c070d7017150",
+    "CMakeLists.txt": "6850e9af8dd07310c346514f49ec4addf41b74dad2e97f57117ab55d2ac7d513",
+    "ci/run_standalone.py": "7def7b4deb952509856779cfaa73bda980a76e3a37d417e51b1df0d31ddf7ba9"
+  },
+  "upstream_changed": false
+}
