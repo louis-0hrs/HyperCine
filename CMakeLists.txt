@@ -480,6 +480,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME filmscan3_geometry_validation COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_geometry_validation.py")
         add_subdirectory(tests/scalar_inverse_research)
+        add_test(NAME original_descale_review_contract
+            COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_original_descale_review.py")
         add_test(NAME gop2_original_stage_contract
             COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_stage_contract.py")
         add_test(NAME gop2_reference_inventory_integrity
