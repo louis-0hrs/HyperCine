@@ -1,0 +1,91 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "scope": "SDK-free synthetic scheduler plus one spatial consumer; no frame decoder, parser, GPU or original-SDK change",
+  "platform": "Linux x86_64 (AMD EPYC 7601) / GCC 14.2.0 / CMake 3.31.6",
+  "head_commit": "0199aa6188244737611d80de31471d510ff4ffcf",
+  "pr": "https://github.com/louis-0hrs/HyperCine/pull/298",
+  "base_commit_main_at_measurement": "11e17a24dd127e09716fae4d2096d4a2f047a482",
+  "reconciliation": "tests/decode_task_graph/CMakeLists.txt was the only conflict; both the #292 attachment block and main's rca160_public_evidence block were kept",
+  "cmake_options": {
+    "HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY": "ON",
+    "HYPERCINE_BUILD_UPSTREAM": "OFF",
+    "HYPERCINE_BUILD_BENCHMARKS": "OFF"
+  },
+  "workers": [
+    1,
+    2,
+    4,
+    16
+  ],
+  "upstream_modified": false,
+  "scalar_arithmetic_modified": false,
+  "source_sha256": {
+    "src/core/decode_s3_attachment.cpp": "5fb909ab062652ca871c685e8b9095d187808992779fa341cc0629aefbc32ba0",
+    "src/core/decode_s3_attachment.h": "8400182e2c96de5f44e15cdb52e6cafc3bc01a0908e602db4f6066ca731b0479",
+    "src/core/decode_s3_consumer.cpp": "eccc185128f3b2245183c3dce57964b34903063dd9379423d628d8d4aed77c3a",
+    "src/core/decode_s3_plane.h": "c0b8db530e59ef0dc6c86bc69e4dacc53f61470aa001c6102ebcf530b160f79e",
+    "src/core/decode_task_graph.cpp": "2600c5ef8eb437e6ff7ccc5a7ca71d5d916194d540dc2e9acf17a1679b6e5ada",
+    "src/core/decode_task_graph.h": "c53d65727eda76be288110cdbdb78dd6ae9ca08dedab9d87481fbdd0d7a79207",
+    "src/cpu/decode_spatial_scalar.cpp": "9c435223eb7cb5edff314b985e11c3ff3345435d07cc0fc373e11e7e436267d4",
+    "tests/decode_task_graph/test_decoder_attachment_292.cpp": "a5ab195a2997af4b8cb696926d76fb4665de1bc5fef111995c30bf3130d49272",
+    "tests/decode_task_graph/mutate_attachment_292.py": "fc8aeda64c1808f3fe8971ad967f627a64e099a4b3e1625c11bd1f51ac24849d"
+  },
+  "configurations": [
+    {
+      "config": "Linux x64 GCC Release",
+      "build": "builds/i298-rel",
+      "registered_tests": 30,
+      "result": "30/30 pass",
+      "attachment_tests": "4/4 pass (workers 1,2,4,16)",
+      "wall_s": 3.05
+    },
+    {
+      "config": "Linux x64 GCC ASan+UBSan",
+      "build": "builds/i298-asan",
+      "sanitizer_flags": "-fsanitize=address,undefined -fno-sanitize-recover=undefined",
+      "registered_tests": 30,
+      "result": "30/30 pass",
+      "attachment_tests": "4/4 pass",
+      "wall_s": 9.51
+    },
+    {
+      "config": "Linux x64 GCC TSan",
+      "build": "builds/i298-tsan",
+      "sanitizer_flags": "-fsanitize=thread -O1",
+      "registered_tests": 30,
+      "result": "30/30 pass",
+      "tsan_warnings": 0,
+      "attachment_tests": "4/4 pass",
+      "wall_s": 10.34
+    }
+  ],
+  "mutants": [
+    {
+      "mutant": "identity",
+      "exit": 1,
+      "first_predicate": "DECODER-ATTACHMENT-292 BROKEN first_predicate=wrong output band admitted"
+    },
+    {
+      "mutant": "channel",
+      "exit": 1,
+      "first_predicate": "DECODER-ATTACHMENT-292 BROKEN first_predicate=mutant reached spatial output consumer"
+    },
+    {
+      "mutant": "budget",
+      "exit": 1,
+      "first_predicate": "RULE T4-budget BROKEN ... published=2 refused=0 consumer=1"
+    },
+    {
+      "mutant": "extent",
+      "exit": 1,
+      "first_predicate": "DECODER-ATTACHMENT-292 BROKEN first_predicate=short-span admitted"
+    }
+  ],
+  "limitations": [
+    "Windows native MSVC numbers are the owner's and were not re-measured here.",
+    "No macOS arm64 measurement from this host; hosted macOS jobs are cited by URL only.",
+    "Attachment scratch and the primitive workspace are additional to the graph-owned publication budget; the 24 MiB figure describes graph-owned input bytes only.",
+    "The published predicate of the attachment task is a constant true; the completion gate is DecodeTaskGraph::published_output() (version != 0), verified by a probe that fails the node with GraphError::OutputNotPublished when nothing was published."
+  ]
+}

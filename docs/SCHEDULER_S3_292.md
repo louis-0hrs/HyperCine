@@ -100,9 +100,28 @@ that the spatial consumer is still Pending immediately before LL publication,
 including the one-worker case. This requires no sleeping/blocking worker.
 
 Native MSVC Release and MSVC AddressSanitizer each pass all 29 registered
-tests in this project slice. The ASan run needs the installed MSVC ASan runtime
-on the local process PATH; the initial missing-runtime launch errors are not
-counted as executions. No TSan or Linux qualification is claimed.
+tests in this project slice at `eedbe519`. The ASan run needs the installed MSVC
+ASan runtime on the local process PATH; the initial missing-runtime launch
+errors are not counted as executions.
+
+After the reconciliation with main (`11e17a24`) at head `0199aa61`, the same
+SDK-free slice was qualified on Linux x86_64 / GCC 14.2.0. All three
+configurations register 30 tests here, not 29, because main added
+`rca160_public_evidence` to `tests/decode_task_graph/CMakeLists.txt`; the four
+`decoder_attachment_292_workers_{1,2,4,16}` entries are registered and executed
+in each of them.
+
+| Configuration | Registered | Result |
+| --- | --- | --- |
+| Linux x64 GCC Release | 30 | 30/30 pass, attachment 4/4 |
+| Linux x64 GCC ASan+UBSan (`-fno-sanitize-recover=undefined`) | 30 | 30/30 pass, attachment 4/4 |
+| Linux x64 GCC TSan (`-O1`, `halt_on_error=0`) | 30 | 30/30 pass, attachment 4/4, zero ThreadSanitizer warnings |
+
+This is an independent Linux graph-only result, not a re-run of the Windows
+figures above: it was produced on a different host with a different toolchain,
+and the Windows numbers remain the owner's. macOS arm64 is still not measured
+from this host; the hosted workflows are cited by job URL only, and a cancelled
+job is not a passing one.
 
 The mutation driver builds four private copies, removing identity, channel-only, generation-budget
 or short-extent guards. Each must exit nonzero and print the first BROKEN
