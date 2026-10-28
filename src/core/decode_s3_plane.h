@@ -48,8 +48,15 @@ struct SignedPlaneDesc {
 // graph-owned copy always satisfies it because OwnedBufferAllocator allocates at
 // kOwnedBufferAlign; a caller-supplied descriptor that does not is rejected here
 // rather than at the consuming kernel. Pitch alignment and the byte extent apply
-// in every case. lowpass_output admits the doubled upper bounds (960x540);
-// the consumer separately requires its exact doubled input dimensions.
+// in every case. lowpass_output admits the doubled UPPER BOUNDS (960x540);
+// it does not prove that a plane is doubled. The predicate is `wavelet == 4`
+// (or `key.level == 4`), which is an eligibility tag, so a level-4 task may
+// legally publish a non-doubled plane such as 480x270. Exact doubling is
+// enforced downstream by consume_wavelet5_lowpass(), which requires
+// output.width == band.width * 2 and the same for height, and the scalar
+// primitive repeats that check. Do not read this bound as a doubling
+// assertion; a graph-level doubling rule would need the producer's declared
+// input extent, which publish_plane() does not carry.
 // Legacy small synthetic lowpass records keep their existing lower bounds.
 // InverseWavelet5To4 keeps its own 32-byte pointer check.
 inline PlaneStatus check_signed_plane(const SignedPlaneDesc& plane,

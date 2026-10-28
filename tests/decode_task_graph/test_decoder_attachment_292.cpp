@@ -37,7 +37,11 @@ void exercise(unsigned workers, unsigned channel, unsigned w, unsigned h,
     const auto input=planes[0].view();
     auto consumer=MakeSpatialLowpassTask(gen,channel,w,h,input.pitch);
     if(mutant==Mutant::WrongBand) std::swap(consumer.inputs[0],consumer.inputs[1]);
-    const unsigned source_channel=mutant==Mutant::WrongChannel?3-channel:channel;
+    // A LEGAL foreign channel, so the refusal must come from the consumer's
+    // identity check and not from publish_plane's channel>2 key guard. The
+    // earlier 3-channel mapping made the ch==0 case unexercisable (3 is not a
+    // channel), which left a zero-only skip undetected.
+    const unsigned source_channel=mutant==Mutant::WrongChannel?(channel+1)%3:channel;
     if(mutant==Mutant::WrongChannel)
         for(auto& key:consumer.inputs) key.channel=source_channel;
     DecodeTaskGraph* running=nullptr;
@@ -111,7 +115,9 @@ int main(int argc,char** argv) {
                 exercise(workers,ch,extent[0],extent[1],nullptr,Mutant::None);
             for(auto mutant:{Mutant::WrongBand,Mutant::Untyped,Mutant::Cancel})
                 exercise(workers,ch,16,4,nullptr,mutant);
-            if(ch!=0) exercise(workers,ch,16,4,nullptr,Mutant::WrongChannel);
+            // Every channel, including Y=0, is crossed with a legal foreign
+            // channel. Removing this for ch==0 let a zero-only skip survive.
+            exercise(workers,ch,16,4,nullptr,Mutant::WrongChannel);
         }
         std::printf("DECODER-ATTACHMENT-292 PASS workers=%u\n",workers);
         return 0;
