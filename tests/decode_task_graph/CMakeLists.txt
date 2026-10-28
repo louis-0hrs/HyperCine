@@ -29,6 +29,12 @@ if(HYPERCINE_BUILD_TESTS)
         set_tests_properties(decoder_attachment_292_workers_${workers}
             PROPERTIES TIMEOUT 30 LABELS "scheduler;s3")
     endforeach()
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME rca160_public_evidence
+            COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tests/rca160/test_evidence.py")
+        set_tests_properties(rca160_public_evidence PROPERTIES TIMEOUT 30 LABELS "validation;rca160")
+    endif()
     add_executable(test_decode_task_graph ../test_decode_task_graph.cpp)
     target_link_libraries(test_decode_task_graph PRIVATE hypercine_decode_task_graph)
     foreach(workers 1 2 4 16)

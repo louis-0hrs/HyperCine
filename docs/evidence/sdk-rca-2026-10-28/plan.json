@@ -1,0 +1,63 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "repetitions": 8,
+  "resolutions": [
+    "full",
+    "half"
+  ],
+  "arms": [
+    [
+      "stock",
+      "1",
+      "0"
+    ],
+    [
+      "stock",
+      "8",
+      "0"
+    ],
+    [
+      "probe",
+      "1",
+      "0"
+    ],
+    [
+      "probe",
+      "8",
+      "0"
+    ],
+    [
+      "probe",
+      "8",
+      "1"
+    ],
+    [
+      "probe",
+      "8",
+      "2"
+    ]
+  ],
+  "fills": [
+    0,
+    165
+  ],
+  "seed": "0x1337BEEF",
+  "packet_sha256": "fc046231223e537bb221524b2d6f9c0d9f24a71ea23f79deb140f44f7bd063c8",
+  "packet_size": 900396,
+  "scope": "synthetic Phase2A capture; no production fix or spontaneous-rate inference from injection",
+  "binaries": {
+    "stock": "a55c9f569cb1365057decae060bea116b168745584d46f0375b5207607f618f8",
+    "probe": "97e65e42f5da91236d7439b99bc97b1300ddfd811677b2e26338eb54c63960ec"
+  },
+  "sources": {
+    "upstream/Codec/decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+    "upstream/Codec/entropy_threading.c": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+    "upstream/Codec/image.h": "93ed2e580030274dda46257eaf08ac90717f2a526ccc11fb5b471dcdb3bf1d52",
+    "upstream/Codec/spatial.c": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+    "tests/sdk_rca/run.py": "1e11b345eabcb1784e02bd11f4f4b5e99468341067dda8c734497e071e105c2a",
+    "tests/sdk_rca/worker.cpp": "c9197e098fd418cf51c2f7ab9df7ddef3d380a5b035ab2633e5303ddeccc9692",
+    "tests/sdk_rca/probe.h": "2330e7f981ba187c2b5289021565bb9feb1a14cef42feab3eb736c1a5a5d4034",
+    "tests/sdk_rca/instrument.py": "3c887b497c3e644382f24abcda37d1aa882b14f9010312a2fc4715c7619e4210"
+  }
+}

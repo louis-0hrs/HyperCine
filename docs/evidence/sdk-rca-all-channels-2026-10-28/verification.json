@@ -1,0 +1,6 @@
+{
+  "verdict": "ROOT_CAUSE_CONFIRMED",
+  "calls": 28,
+  "negative_controls_rejected": 4,
+  "scope": "fixed 1080p spatial Phase2A capture, FULL/HALF, Y/V/U"
+}

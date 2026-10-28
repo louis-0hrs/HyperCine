@@ -1,0 +1,57 @@
+{
+  "packet_sha256": "fc046231223e537bb221524b2d6f9c0d9f24a71ea23f79deb140f44f7bd063c8",
+  "packet_size": 900396,
+  "arms": [
+    [
+      "serial",
+      1,
+      0,
+      0
+    ],
+    [
+      "induceY",
+      8,
+      1,
+      1
+    ],
+    [
+      "induceV",
+      8,
+      1,
+      2
+    ],
+    [
+      "induceU",
+      8,
+      1,
+      4
+    ],
+    [
+      "induceAll",
+      8,
+      1,
+      7
+    ],
+    [
+      "publishAll",
+      8,
+      2,
+      7
+    ],
+    [
+      "reinduceAll",
+      8,
+      1,
+      7
+    ]
+  ],
+  "repetitions": 2,
+  "source_sha256": {
+    "probe.h": "6c77356f4e99c098c89cffebcd486f0aa3d43beb81773e23e12e9488e17b9339",
+    "worker.cpp": "1cac4abc4ab00558978cc341597f217eba0b5bc21993966791e9bb63df004c57",
+    "decoder_private.c": "0bccfe7f275154e29f29fee83e3ed51c6717af50073091fcb3233c52ef8f700e",
+    "setup.py": "1d5ae7037504274e01cd861d7a21d5b4fafcf498e38da0e65e5c61c24fa1ecc8",
+    "run.py": "22bf11df41226a2394a957ecbcc9ea35cd259c5ba31a6f0b2e66c4a6ccfac851"
+  },
+  "binary_sha256": "fce86845ddbb1619734fba9c8b484ba0a11899dcbe7c419044716562c22f8816"
+}

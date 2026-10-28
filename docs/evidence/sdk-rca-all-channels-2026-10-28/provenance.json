@@ -1,0 +1,17 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "repository_head": "aec37c1f990a4b3dda3e3103154ec2b4e3bdfa2b",
+  "source_and_archive_sha256": {
+    "upstream/Codec/decoder.c": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+    "upstream/Codec/image.h": "93ed2e580030274dda46257eaf08ac90717f2a526ccc11fb5b471dcdb3bf1d52",
+    "upstream/Codec/wavelet.c": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd",
+    "upstream/Codec/spatial.c": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+    "upstream/Codec/entropy_threading.c": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+    "build-rca/upstream/Release/CFHDCodecStatic.lib": "0a14863ce3332e0d94f660c0d6776e13189f0d833cf97c355fe0ec15ff0b271f",
+    "tests/test_vectors.h": "87b2d493ac99e506a6acbee96e17e7b4af9c8ff6e7e8cfa4e215dc33fb795e62"
+  },
+  "private_only": true,
+  "production_fix": false,
+  "merge": false
+}

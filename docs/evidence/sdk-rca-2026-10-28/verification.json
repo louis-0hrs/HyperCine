@@ -1,0 +1,67 @@
+{
+  "status": "BOUNDED_CHANNEL1_CAUSAL_WITNESS",
+  "production_fix": false,
+  "checker_negative_controls": 4,
+  "results": [
+    {
+      "resolution": "full",
+      "mode": "0",
+      "bad_lowpass_planes": {
+        "0": 1,
+        "1": 0,
+        "2": 1
+      },
+      "differing_pixels": 1
+    },
+    {
+      "resolution": "full",
+      "mode": "1",
+      "bad_lowpass_planes": {
+        "0": 1,
+        "1": 8,
+        "2": 0
+      },
+      "differing_pixels": 8
+    },
+    {
+      "resolution": "full",
+      "mode": "2",
+      "bad_lowpass_planes": {
+        "0": 0,
+        "1": 0,
+        "2": 2
+      },
+      "differing_pixels": 2
+    },
+    {
+      "resolution": "half",
+      "mode": "0",
+      "bad_lowpass_planes": {
+        "0": 0,
+        "1": 0,
+        "2": 0
+      },
+      "differing_pixels": 0
+    },
+    {
+      "resolution": "half",
+      "mode": "1",
+      "bad_lowpass_planes": {
+        "0": 0,
+        "1": 8,
+        "2": 1
+      },
+      "differing_pixels": 8
+    },
+    {
+      "resolution": "half",
+      "mode": "2",
+      "bad_lowpass_planes": {
+        "0": 0,
+        "1": 0,
+        "2": 0
+      },
+      "differing_pixels": 0
+    }
+  ]
+}
