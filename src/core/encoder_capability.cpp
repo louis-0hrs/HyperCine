@@ -199,11 +199,18 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         }
     }
 
+    switch (config.backend) {
+    case SessionBackend::CpuScalar: case SessionBackend::CpuSimd:
+    case SessionBackend::Metal: case SessionBackend::Cuda: case SessionBackend::Vulkan: break;
+    default:
+        result.reasons.format_mathematically_invalid = true;
+        format_detail = "unknown session backend";
+    }
     result.requested_backend_present = BackendPresent(device, config.backend);
     if (!result.requested_backend_present) result.reasons.backend_not_present = true;
     SessionBackend effective = config.backend;
     const bool simd_request = config.backend == SessionBackend::CpuSimd;
-    if (simd_request && !config.allow_cpu_scalar_fallback) {
+    if (simd_request && (!config.allow_cpu_scalar_fallback || result.requested_backend_present)) {
         result.reasons.valid_but_not_implemented = true;
         unimplemented_detail = "per-session CPU SIMD selection is not implemented";
     }

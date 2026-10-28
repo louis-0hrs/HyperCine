@@ -216,7 +216,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/cpu/filmscan3_frontend.cpp
         src/core/filmscan3_encoder.cpp
         src/core/filmscan3_backend.cpp
-        src/core/encoder_capability.cpp)
+        src/core/encoder_capability.cpp
+        src/core/encoder_backend_selection.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     if(HYPERCINE_BUILD_BENCHMARKS)
         find_package(Threads REQUIRED)
@@ -394,6 +395,12 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)
+        add_executable(test_encoder_backend_selection tests/test_encoder_backend_selection.cpp)
+        target_link_libraries(test_encoder_backend_selection PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME encoder_backend_selection_contract COMMAND test_encoder_backend_selection contract)
+        add_test(NAME encoder_backend_session_packets COMMAND test_encoder_backend_selection packets)
+        set_tests_properties(encoder_backend_selection_contract encoder_backend_session_packets PROPERTIES
+            LABELS "cpu;encoder;session" TIMEOUT 180)
         if(HYPERCINE_ENABLE_METAL)
             add_executable(test_metal_filmscan3 tests/test_metal_filmscan3.cpp)
             target_link_libraries(test_metal_filmscan3 PRIVATE hypercine_standalone)

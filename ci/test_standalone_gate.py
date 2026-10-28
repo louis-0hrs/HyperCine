@@ -14,6 +14,12 @@ from run_standalone import (REQUIRED, registered_tests, completed_tests,
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_internal_backend_session_gates_are_binding(self):
+        for name in ('encoder_backend_selection_contract', 'encoder_backend_session_packets'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_missing_optimized_acceptance_fails(self):
         name = 'optimized_standalone_acceptance'
         self.assertIn(name, REQUIRED)

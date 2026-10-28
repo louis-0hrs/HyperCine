@@ -24,6 +24,7 @@ REQUIRED = {
     'quality_state_unit', 'standalone_gate_guardrails',
     'optimized_standalone_acceptance',
     'filmscan3_backend_selection', 'entropy_bitexact',
+    'encoder_backend_selection_contract', 'encoder_backend_session_packets',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
