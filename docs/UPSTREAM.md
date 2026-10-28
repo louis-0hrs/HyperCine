@@ -193,3 +193,52 @@ Original-SDK API success and repeated pixel hashes are separate evidence.
 Do not treat `TAG_CPU_MAX` as measured decoder worker telemetry or promote an
 unstable reference into an encoder correctness gate. The frozen SDK remains
 unchanged; the observation harness lives in `tests/`.
+
+### 14. `CFHD_GetImagePitch` / `CFHD_GetImageSize` throw out of `extern "C"`
+
+`upstream/DecoderSDK/SampleDecoder.cpp` reaches `default: throw CFHD_ERROR_BADFORMAT;` in `GetPixelSize` for any pixel format its switch does not list. That path is reachable from the public helpers `CFHD_GetImagePitch` and `CFHD_GetImageSize`, which `upstream/Common/CFHDDecoder.h` declares `extern "C"`.
+
+MSVC's `/EHsc` — the CMake default, and the model the upstream library is built with — tells the compiler that `extern "C"` functions never throw. A caller compiled with `/EHsc` leaves out the unwind information for that call, so the throw is undefined behaviour rather than a catchable exception. Measured with MSVC 19.44 on Windows x64 Release: a caller that merely wraps the call in `try { ... } catch (CFHD_Error) { ... }` reproducibly terminates the process without entering the handler. The outcome is codegen-sensitive — in `tools/format_corpus_probe.cpp` an unrelated extra logging statement near the call was enough to change whether the same source survived.
+
+- *Mitigation:* `tools/format_corpus_probe.cpp` is compiled with `/EHs`, which drops the `extern "C"`-never-throws assumption; the identical catch then works and the probe completes its full case matrix. MSVC reports D9025 because `/EHs` overrides the inherited `/EHsc`. Callers that never pass an unlisted pixel format are unaffected. `upstream/` is untouched.
+
+### 15. Encoder `rand()` state is seeded from volatile metadata; Bayer payloads are run-dependent
+
+`upstream/Codec/encoder.c` derives an uncompressed-frame decision seed from the first frame bytes
+plus the CRCs of the global and local metadata blocks, then calls `srand(seed)` before testing
+`rand()`. Because every encoded packet carries a fresh `GUID` and wall-clock `DATE`/`TIME`/`TIMC`
+metadata (quirk 8), that seed changes between runs. The Bayer conversion path uses `rand()` for
+7-bit dithering in `upstream/Codec/bayer.c` (`ConvertBayerToRGBA` and related helpers), so those
+dither values — and therefore the compressed Bayer payload bytes — differ between runs.
+
+Measured with `tools/format_corpus_export.cpp` on MSVC 19.44 Windows x64 at 128×128, FilmScan 1:
+
+- `RGB_444` and `RGBA_4444`: the raw packet hash differs between runs (metadata), but the
+  GUID/DATE/TIME/TIMC-normalized hash and the decoded-output hash reproduce.
+- `BAYER` (`BYR4`): the normalized hash and the decoded-output hash also differ between runs.
+  Both a flat frame and a high-detail frame differed in the final measurement.
+  `OMP_NUM_THREADS=1` did not remove the difference.
+
+- *Mitigation:* F1 Bayer hashes are recorded as per-run evidence, not as a cross-run byte gate.
+  The export tool keeps the raw and normalized packets exactly as measured. Upstream remains
+  untouched; a future deterministic corpus must either seed the CRT explicitly inside a wrapper
+  harness or record the seed-to-payload relationship instead of assuming byte equality.
+
+### 16. 8-bit `RG24` and `BGRA` sources are read bottom-up; `RG24` bytes are B,G,R
+
+The public pixel-format comments call both formats "inverted", and the encoder path confirms it in
+memory rather than in the four-character name. Measured with `tools/format_corpus_export.cpp` at
+128×128 FilmScan 1 by encoding a known asymmetric scene and comparing the decoded `RG48`/`b64a`
+output:
+
+- `CFHD_PIXEL_FORMAT_RG24` (`COLOR_FORMAT_RGB24`): the SDK reads the row buffer bottom-up and
+  interprets the three bytes as **B,G,R**. A top-down R,G,B buffer decodes with G at ~0 dB PSNR and
+  the red/blue channels swapped; flipping the rows and writing B,G,R raises the same case to
+  ~42–51 dB.
+- `CFHD_PIXEL_FORMAT_BGRA` (`COLOR_FORMAT_BGRA`): the SDK reads the buffer bottom-up, with the
+  expected B,G,R,A byte order. A top-down buffer decodes vertically flipped; flipping the rows
+  raises the measured PSNR from ~5–11 dB to ~53 dB.
+
+- *Mitigation:* the F1 exporter stores `RG24` and `BGRA` sources in the orientation and byte order
+  the SDK expects, records that orientation in the manifest, and flips only those source rows in
+  the same-layout comparison. `RG48`, `RG64` and `BYR4` are top-down. Upstream remains untouched.
