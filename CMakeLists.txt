@@ -104,6 +104,11 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME test_rca160_all_channel_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_rca160_all_channel_contract.py")
     set_tests_properties(test_rca160_all_channel_contract PROPERTIES LABELS "validation")
+    # #160: independent arithmetic recomputation of the now-committed public
+    # 28-call and 96-call ledgers. Missing files are an explicit CTest FAIL.
+    add_test(NAME test_rca160_ledger_audit
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_rca160_ledger_audit.py")
+    set_tests_properties(test_rca160_ledger_audit PROPERTIES LABELS "validation;recorded-ledger")
 endfunction()
 
 # Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
