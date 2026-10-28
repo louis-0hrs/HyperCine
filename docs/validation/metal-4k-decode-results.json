@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "date": "2026-10-28",
+  "tested_source": "ad67d0050815cd1b2060671544bf8ef65c8e9174",
+  "base": "f1591d246512f41b8bba1fbad2455ef1a764491a",
+  "source_blobs": {
+    "CMakeLists.txt": "b45f126e9e23bcfcd8f40a6e20c74be601e13aac",
+    "ci/run_standalone.py": "97b1cfd9b14dd0ab2ec157c67f458363327a9fbd",
+    "ci/test_standalone_gate.py": "0d236193303e932d94c46709f44e724138dd9d0d",
+    "tests/validate_filmscan3_4k_ffmpeg.py": "77e4e18165652005fb222acd06506f769b116562",
+    "tests/test_filmscan3_4k_gate.py": "6b5410f65bbdb2fefcca3c53614bdbb439a164ac"
+  },
+  "linux": {
+    "platform": "Linux x86_64",
+    "compiler": "GCC 14.2.0",
+    "python": "3.13.5",
+    "ffmpeg": "7.1.5",
+    "configuration": "Release standalone, upstream OFF, external decode required",
+    "ctest": {
+      "passed": 106,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 179.38
+    },
+    "cpu_only_harness": {
+      "comparisons": 16,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "ffmpeg_decodes": 32,
+      "gpu_qualification": false
+    }
+  },
+  "macos": {
+    "platform": "macOS 26.5.2 arm64",
+    "hardware": "Apple M2 Pro, 16 GPU cores",
+    "compiler": "AppleClang 21.0.0",
+    "python": "3.9.6",
+    "ffmpeg": "7.0",
+    "configuration": "Release standalone, upstream OFF, Metal ON, external decode required",
+    "source_check": "All five modified source/test blobs matched tested_source; upstream unchanged",
+    "ctest": {
+      "passed": 114,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 293.33,
+      "gpu_required_tests": 8
+    },
+    "metal_4k_encoder": {
+      "status": "PASS",
+      "seconds": 7.47616,
+      "first_packet_bytes": 19829252,
+      "padded_stride": 15424,
+      "gpu_completion_failure_rollback": "PASS",
+      "warm_buffer_allocations": 0
+    },
+    "metal_4k_ffmpeg_gate": {
+      "status": "PASS",
+      "seconds": 27.6114,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "sequence": "Four fixtures in flat/ramp/edge/detail order, repeated four times, no Reset",
+      "full_raw_packet_comparisons": 16,
+      "coefficient_hashes_per_frame": 30,
+      "quant_entries_per_frame": 36,
+      "scale_entries_per_frame": 36,
+      "complete_trace_state_equal": true,
+      "ffmpeg_decodes": 32,
+      "decoded_pixel_format": "yuv422p10le",
+      "decoded_bytes_per_frame": 33177600,
+      "mandatory_stage_audit": true
+    },
+    "debug_sanitizers": {
+      "status": "PASS",
+      "configuration": "Debug, ASan+UBSan, Metal API/GPU validation",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 521.76,
+      "tests": [
+        "filmscan3_metal_4k_encoder",
+        "filmscan3_4k_gate_contract",
+        "filmscan3_metal_4k_ffmpeg_gate"
+      ],
+      "compiler_flags": [
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-fno-sanitize-recover=all"
+      ],
+      "metal_api_validation": "Enabled, confirmed in test output",
+      "metal_gpu_validation": "Enabled, confirmed in test output",
+      "leak_detection": false,
+      "scope": "Three targeted tests, not the full Debug suite. External Python/FFmpeg are not instrumented."
+    }
+  },
+  "windows": {
+    "platform": "Windows 11 x86_64",
+    "configuration": "Native MSVC Release standalone from vcvars64 shell, upstream OFF",
+    "source": "ad67d0050815cd1b2060671544bf8ef65c8e9174",
+    "python": "3.12.10",
+    "optimized_python_methods": {
+      "passed": 13,
+      "failed": 0
+    },
+    "ci_helper_methods": {
+      "passed": 24,
+      "failed": 0
+    },
+    "cpu_4k_smoke": {
+      "status": "PASS",
+      "frames": 1,
+      "geometry": [
+        3840,
+        2160
+      ],
+      "pixel_format": "yuv422p10le",
+      "decoded_bytes": 33177600,
+      "gpu_qualification": false
+    },
+    "full_ctest": {
+      "status": "INCOMPLETE_GATEWAY_TIMEOUT",
+      "invoke_timeout_seconds": 1200,
+      "junit_completed": false,
+      "reason": "Node invoke timed out; partial local LastTest log retained; no complete native Windows suite PASS claimed",
+      "retry": "No full rerun performed"
+    },
+    "cpu_16_frame_replay": "NOT_RUN: chained after the incomplete full suite; bounded one-frame smoke run separately"
+  },
+  "portable_controls": {
+    "optimized_python_methods": 13,
+    "ci_helper_methods": 24,
+    "registration_mutations_rejected": 4,
+    "independent_review": "Two Windows contract-test portability findings corrected"
+  },
+  "boundaries": {
+    "original_sdk_4k_parity": "NOT_RUN",
+    "original_signed_stage_oracle": "NOT_RUN",
+    "qualified_8k_or_larger": false,
+    "performance_benchmark": false,
+    "merge": false,
+    "release": false
+  }
+}

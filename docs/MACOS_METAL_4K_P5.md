@@ -131,7 +131,9 @@ Peak RSS is a **process-wide maximum across sequential benchmark scenarios**, no
 
 ## External decoder
 
-The hosted `filmscan3_metal_4k_ffmpeg_gate` invokes the **CPU** `hypercine_encode_filmscan3` tool and verifies a 3840×2160 `yuv422p10le` FFmpeg decode and geometry rejection. It is *not*, by itself, a GPU-required Metal decode gate. Independent native M2 Pro CPU/Metal full-packet equality and FFmpeg decodes were reported separately for merged #248. Preserve that distinction.
+The **historical** `filmscan3_metal_4k_ffmpeg_gate` invoked the **CPU** `hypercine_encode_filmscan3` tool and verified a 3840×2160 `yuv422p10le` FFmpeg decode. Those historical results are *not* GPU-required Metal decode evidence. Independent native M2 Pro CPU/Metal full-packet equality and FFmpeg decodes were reported separately for merged #248. Preserve that distinction.
+
+The [mandatory Metal decode-gate correction](validation/metal-4k-decode-gate.md) replaces that CPU-only registration with audited Metal output, independent CPU full-packet/state comparison, and 16 actual 4K FFmpeg decodes per backend. Historical timings and test counts above are not retroactively attributed to the corrected gate.
 
 ## Known limits
 
