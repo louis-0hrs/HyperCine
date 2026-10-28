@@ -130,6 +130,8 @@ if(HYPERCINE_BUILD_TESTS)
     if(Python3_Interpreter_FOUND)
         add_test(NAME diagnostic_summary_contract COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diagnostic_summary.py")
+        add_test(NAME decoder_differential_metrics COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/decoder_differential/test_compare.py")
     endif()
     add_executable(test_cpu_isa tests/test_cpu_isa.cpp)
     target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
