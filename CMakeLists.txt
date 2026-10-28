@@ -535,6 +535,8 @@ if(HYPERCINE_BUILD_STANDALONE)
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_windows_reference.py")
         add_test(NAME windows_reference_parser COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py")
+        add_test(NAME optimized_standalone_acceptance COMMAND "${Python3_EXECUTABLE}" -O
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_optimized_standalone_acceptance.py")
         add_test(NAME standalone_gate_guardrails COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/ci/test_standalone_gate.py")
         add_test(NAME rgb444_packet_probe COMMAND "${Python3_EXECUTABLE}"

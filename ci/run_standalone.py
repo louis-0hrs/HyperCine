@@ -22,6 +22,7 @@ REQUIRED = {
     'rgb444_packet_probe',
     'reference_decode_contract',
     'quality_state_unit', 'standalone_gate_guardrails',
+    'optimized_standalone_acceptance',
     'filmscan3_backend_selection', 'entropy_bitexact',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
