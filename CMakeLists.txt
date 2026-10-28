@@ -98,6 +98,12 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME test_rca159_witness_contract
         COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_rca159_witness.py")
     set_tests_properties(test_rca159_witness_contract PROPERTIES LABELS "validation")
+    # RCA-160 recorded ledgers. Recomputes the published counts and the
+    # per-channel matrix from the per-call records; skips with a reason when the
+    # evidence files are not present, rather than passing on an empty audit.
+    add_test(NAME test_rca160_ledger_audit
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_rca160_ledger_audit.py")
+    set_tests_properties(test_rca160_ledger_audit PROPERTIES LABELS "validation;reference-oracle")
 endfunction()
 
 # Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
