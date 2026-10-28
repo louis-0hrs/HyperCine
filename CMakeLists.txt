@@ -373,6 +373,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_compile_features(test_rgb444_rg48_allocation PRIVATE cxx_std_17)
         add_test(NAME rgb444_rg48_allocation_failure COMMAND test_rgb444_rg48_allocation)
         set_tests_properties(rgb444_rg48_allocation_failure PROPERTIES TIMEOUT 20)
+        # Test-only RGB444 PlaneView copy: injected failures must preserve old frame.
+        add_subdirectory(tests/rgb444_boundary)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
         target_link_libraries(test_filmscan3_backend PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_backend_selection COMMAND test_filmscan3_backend)

@@ -12,6 +12,12 @@ from run_standalone import REQUIRED, registered_tests, completed_tests
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_allocation_failure_must_be_registered(self):
+        name = 'rgb444_allocation_failure'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, name):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_missing_reference_decode_contract_fails(self):
         self.assertIn('reference_decode_contract', REQUIRED)
         with self.assertRaises(ValueError):
