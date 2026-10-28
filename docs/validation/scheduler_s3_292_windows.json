@@ -1,0 +1,133 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "base_commit": "736dd0d3fc8a0d3a35f4465228104c6c3382374a",
+  "scope": "SDK-free synthetic scheduler plus one spatial consumer; no frame decoder or profile qualification",
+  "platform": "Windows x64 / MSVC 19.44",
+  "workers": [
+    1,
+    2,
+    4,
+    16
+  ],
+  "upstream_modified": false,
+  "scalar_arithmetic_modified": false,
+  "source_sha256": {
+    "src/core/decode_s3_attachment.cpp": "5fb909ab062652ca871c685e8b9095d187808992779fa341cc0629aefbc32ba0",
+    "src/core/decode_s3_attachment.h": "8400182e2c96de5f44e15cdb52e6cafc3bc01a0908e602db4f6066ca731b0479",
+    "src/core/decode_s3_consumer.cpp": "2e90c3e06ff4713acec44102b8134c38e7daec379d7725d2f7dd633b21946f87",
+    "src/core/decode_s3_plane.h": "2f78b8457be9517fc085a3bcfda47a228b3d42077af0177a2644853fef8c1d4d",
+    "src/core/decode_task_graph.cpp": "6d973cb3d0a3d573d599d25732cfca7ee0e351e2ed33b38017474a15efda07b7",
+    "src/core/decode_task_graph.h": "4774a6eda4e1353431aa9c817e260b1319d1f09cb5f1cbfd9da434a9ea2b9a8f",
+    "src/cpu/decode_spatial_scalar.cpp": "25dfb9a4a21c7be770452a3eb9833fa83cae4b9e42131d0624b196280ab2efda",
+    "tests/decode_task_graph/test_decoder_attachment_292.cpp": "a5ab195a2997af4b8cb696926d76fb4665de1bc5fef111995c30bf3130d49272",
+    "tests/decode_task_graph/mutate_attachment_292.py": "fc8aeda64c1808f3fe8971ad967f627a64e099a4b3e1625c11bd1f51ac24849d",
+    "tests/reference_scalar_inverse/synthetic_vectors.h": "69a01ea2c84aa710634a6407268ff8ed927b27deaa09b5e9f02a52b08ab6ca6f",
+    "tests/decode_task_graph/CMakeLists.txt": "0a390a422bdcea32fe23909368220a0fd7399ee07fadf27552bb8269ccf2c1ee"
+  },
+  "mutants": [
+    {
+      "mutant": "identity",
+      "exit": 1,
+      "first_predicate": "DECODER-ATTACHMENT-292 BROKEN first_predicate=wrong output band admitted"
+    },
+    {
+      "mutant": "channel",
+      "exit": 1,
+      "first_predicate": "DECODER-ATTACHMENT-292 BROKEN first_predicate=mutant reached spatial output consumer"
+    },
+    {
+      "mutant": "budget",
+      "exit": 1,
+      "first_predicate": "RULE T4-budget BROKEN run=0 error=6 published=2 refused=0 consumer=1 owned=256 expected_owned=256 producer_states=3,3 publication_matches=1 ready 2->3 state=4"
+    },
+    {
+      "mutant": "extent",
+      "exit": 1,
+      "first_predicate": "DECODER-ATTACHMENT-292 BROKEN first_predicate=short-span admitted"
+    }
+  ],
+  "runs": [
+    {
+      "configuration": "build",
+      "tests_passed": 29,
+      "tests": [
+        "decoder_attachment_292_workers_1",
+        "decoder_attachment_292_workers_2",
+        "decoder_attachment_292_workers_4",
+        "decoder_attachment_292_workers_16",
+        "decode_task_graph_workers_1",
+        "decode_task_graph_workers_2",
+        "decode_task_graph_workers_4",
+        "decode_task_graph_workers_16",
+        "scheduler_contract_195_workers_1",
+        "scheduler_contract_195_workers_2",
+        "scheduler_contract_195_workers_4",
+        "scheduler_contract_195_workers_16",
+        "scheduler_t1_t2_144_workers_1",
+        "scheduler_t1_t2_144_workers_2",
+        "scheduler_t1_t2_144_workers_4",
+        "scheduler_t1_t2_144_workers_16",
+        "scheduler_s2_output_144_workers_1",
+        "scheduler_s2_output_144_workers_2",
+        "scheduler_s2_output_144_workers_4",
+        "scheduler_s2_output_144_workers_16",
+        "decode_s3_plane",
+        "scheduler_t4_plane_144_workers_1",
+        "scheduler_t4_plane_144_workers_2",
+        "scheduler_t4_plane_144_workers_4",
+        "scheduler_t4_plane_144_workers_8",
+        "scheduler_t5_publish_after_stop_144_workers_1",
+        "scheduler_t5_publish_after_stop_144_workers_2",
+        "scheduler_t5_publish_after_stop_144_workers_4",
+        "scheduler_t5_publish_after_stop_144_workers_16"
+      ],
+      "seconds": 3.43,
+      "binary_sha256": "f3af60e9d9f860bf21cce0a097bb1b0a9e957085146d67491f1dcde65f0bd48f"
+    },
+    {
+      "configuration": "build-asan",
+      "tests_passed": 29,
+      "tests": [
+        "decoder_attachment_292_workers_1",
+        "decoder_attachment_292_workers_2",
+        "decoder_attachment_292_workers_4",
+        "decoder_attachment_292_workers_16",
+        "decode_task_graph_workers_1",
+        "decode_task_graph_workers_2",
+        "decode_task_graph_workers_4",
+        "decode_task_graph_workers_16",
+        "scheduler_contract_195_workers_1",
+        "scheduler_contract_195_workers_2",
+        "scheduler_contract_195_workers_4",
+        "scheduler_contract_195_workers_16",
+        "scheduler_t1_t2_144_workers_1",
+        "scheduler_t1_t2_144_workers_2",
+        "scheduler_t1_t2_144_workers_4",
+        "scheduler_t1_t2_144_workers_16",
+        "scheduler_s2_output_144_workers_1",
+        "scheduler_s2_output_144_workers_2",
+        "scheduler_s2_output_144_workers_4",
+        "scheduler_s2_output_144_workers_16",
+        "decode_s3_plane",
+        "scheduler_t4_plane_144_workers_1",
+        "scheduler_t4_plane_144_workers_2",
+        "scheduler_t4_plane_144_workers_4",
+        "scheduler_t4_plane_144_workers_8",
+        "scheduler_t5_publish_after_stop_144_workers_1",
+        "scheduler_t5_publish_after_stop_144_workers_2",
+        "scheduler_t5_publish_after_stop_144_workers_4",
+        "scheduler_t5_publish_after_stop_144_workers_16"
+      ],
+      "seconds": 6.56,
+      "binary_sha256": "af7703db08aa79287355dc2e99be2948e323b569443f14d7052a8f61d42f613b"
+    }
+  ],
+  "limitations": [
+    "No Linux or TSan evidence",
+    "No parser/entropy/temporal/GPU/public decoder API",
+    "No general SDK repair or universal liveness claim",
+    "Only the graph-only project configuration was built and tested",
+    "Initial ASan launches lacked the runtime DLL and are excluded; final runs used installed MSVC runtime on process PATH"
+  ]
+}

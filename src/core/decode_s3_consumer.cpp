@@ -47,7 +47,8 @@ ConsumeStatus consume_wavelet5_lowpass(const std::array<PlaneEdge, 4>& bands, Ou
         output.plane.width != first.plane.width * 2 ||
         output.plane.height != first.plane.height * 2)
         return ConsumeStatus::Rejected;
-    if (check_signed_plane(output.plane) != PlaneStatus::Ok) return ConsumeStatus::Rejected;
+    if (check_signed_plane(output.plane, true, true) != PlaneStatus::Ok)
+        return ConsumeStatus::Rejected;
     for (const PlaneEdge& band : bands)
         if (band.plane.data == output.plane.data) return ConsumeStatus::Rejected;
 

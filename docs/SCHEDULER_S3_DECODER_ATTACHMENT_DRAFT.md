@@ -2,12 +2,14 @@
      Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE. -->
 # S3 decoder attachment — draft
 
-**Status: draft only. Nothing in this note is implemented, and nothing here
-attaches a decoder.** No GoPro/CFHD bitstream parser, no CUDA or Metal consumer,
+**Status: the bounded synthetic S3 attachment is implemented; see
+[S3 qualification](SCHEDULER_S3_292.md). This is not a frame decoder.**
+The original design requirements below are retained for traceability.
+No GoPro/CFHD bitstream parser, no CUDA or Metal consumer,
 no change to `upstream/`, and no change to the arithmetic of
 `InverseWavelet5To4`. The synthetic graph in `src/core/decode_task_graph.*`
-stays synthetic. A productive callback must not be wired in until the gates
-below are implemented and qualified on their own.
+stays synthetic. The attachment calls the existing scalar research primitive;
+no production codec profile is qualified by these gates.
 
 The first attachment is one spatial consumer of an already dequantized
 wavelet5 plane, the same shape the research unit already describes. It is not

@@ -109,6 +109,7 @@ struct PlaneIdentity {
 // Empty unless input_plane() admitted generation, identity, extent and the
 // graph-owned bytes together. valid() is false for a stale generation, a
 // foreign channel or band, a short span, or a generation that has stopped.
+enum class PlaneSample { Unknown, Signed16LittleEndian };
 struct PlaneView {
     Generation generation{};
     std::uint32_t channel = 0;
@@ -119,7 +120,12 @@ struct PlaneView {
     std::size_t pitch = 0;
     const void* data = nullptr;
     std::size_t bytes = 0;
-    bool valid() const noexcept { return data != nullptr && bytes != 0 && width != 0; }
+    std::uint64_t version = 0;
+    PlaneSample sample = PlaneSample::Unknown;
+    bool valid() const noexcept {
+        return data != nullptr && bytes != 0 && width != 0 && height != 0 &&
+               version != 0 && sample == PlaneSample::Signed16LittleEndian;
+    }
 };
 
 // Thrown by TaskContext::wait_for_input() when the deadline expires, the graph

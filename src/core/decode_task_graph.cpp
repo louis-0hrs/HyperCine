@@ -241,7 +241,7 @@ bool DecodeTaskGraph::publish_plane(std::size_t node, const void* data, std::siz
     claimed.bytes = bytes;
     // Guard (T4-EXTENT): alignment, geometry, stride and the pitched byte count
     // are one decision. A short span does not become a version.
-    if (check_signed_plane(claimed) != PlaneStatus::Ok) return false;
+    if (check_signed_plane(claimed, true, key.level == 4) != PlaneStatus::Ok) return false;
     // The budget is decided and charged inside commit_copy_locked(), which every
     // publication path goes through. Checked here only as a fast refusal so the
     // geometry fields are not written for a copy that cannot be paid for.
@@ -296,6 +296,8 @@ PlaneView DecodeTaskGraph::input_plane(std::size_t node, std::size_t input,
     out.pitch = source.plane_pitch;
     out.data = view.data;
     out.bytes = view.bytes;
+    out.version = view.version;
+    out.sample = PlaneSample::Signed16LittleEndian;
     return out;
 }
 bool DecodeTaskGraph::published_output(std::size_t index) const {
