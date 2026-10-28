@@ -98,6 +98,12 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME test_rca159_witness_contract
         COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_rca159_witness.py")
     set_tests_properties(test_rca159_witness_contract PROPERTIES LABELS "validation")
+    # RCA-160 all-channel readiness contract. Re-derives the source facts the
+    # 2026-10-28 report rests on from the frozen tree; mutates scratch copies to
+    # prove each claim can fail. No decode, no packet, no GPU.
+    add_test(NAME test_rca160_all_channel_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_rca160_all_channel_contract.py")
+    set_tests_properties(test_rca160_all_channel_contract PROPERTIES LABELS "validation")
 endfunction()
 
 # Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
