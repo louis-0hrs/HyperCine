@@ -128,6 +128,10 @@ if(HYPERCINE_BUILD_TESTS)
     add_subdirectory(tests/geometry_extreme)
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
+        # Strict test-only decoder evidence classifier, no original SDK needed.
+        add_test(NAME reference_decode_contract COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_decode/test_contract.py")
+        set_tests_properties(reference_decode_contract PROPERTIES LABELS "synthetic;reference-decoder-contract")
         add_test(NAME diagnostic_summary_contract COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_diagnostic_summary.py")
         add_test(NAME decoder_differential_metrics COMMAND "${Python3_EXECUTABLE}"
