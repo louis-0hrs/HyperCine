@@ -614,10 +614,11 @@ if(HYPERCINE_BUILD_STANDALONE)
             if(HYPERCINE_ENABLE_METAL)
                 add_test(NAME filmscan3_metal_4k_ffmpeg_gate COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_4k_ffmpeg.py"
-                    --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                    --encoder $<TARGET_FILE:hypercine_encode_filmscan3_metal>
                     --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
                     --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}")
-                set_tests_properties(filmscan3_metal_4k_ffmpeg_gate PROPERTIES TIMEOUT 1800)
+                set_tests_properties(filmscan3_metal_4k_ffmpeg_gate PROPERTIES
+                    LABELS "metal;gpu-required;external-decode" TIMEOUT 1800)
             endif()
             # #259 capability contract: refuses before allocating, then encodes a
             # geometry matrix and decodes each packet with FFmpeg. Registered here
