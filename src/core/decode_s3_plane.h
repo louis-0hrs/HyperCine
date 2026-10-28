@@ -48,15 +48,21 @@ struct SignedPlaneDesc {
 // graph-owned copy always satisfies it because OwnedBufferAllocator allocates at
 // kOwnedBufferAlign; a caller-supplied descriptor that does not is rejected here
 // rather than at the consuming kernel. Pitch alignment and the byte extent apply
-// in every case. InverseWavelet5To4 keeps its own 32-byte pointer check.
+// in every case. lowpass_output admits the doubled upper bounds (960x540);
+// the consumer separately requires its exact doubled input dimensions.
+// Legacy small synthetic lowpass records keep their existing lower bounds.
+// InverseWavelet5To4 keeps its own 32-byte pointer check.
 inline PlaneStatus check_signed_plane(const SignedPlaneDesc& plane,
-                                      bool require_data_align = true) noexcept {
+                                      bool require_data_align = true,
+                                      bool lowpass_output = false) noexcept {
     if (plane.data == nullptr) return PlaneStatus::Null;
     if (require_data_align &&
         reinterpret_cast<std::uintptr_t>(plane.data) % kS3PlaneAlign != 0)
         return PlaneStatus::Misaligned;
-    if (plane.width < 16 || plane.width > 480 || (plane.width % 8) != 0 ||
-        plane.height < 4 || plane.height > 270)
+    const std::uint32_t factor = lowpass_output ? 2 : 1;
+    if (plane.width < 16 || plane.width > 480 * factor ||
+        (plane.width % 8) != 0 ||
+        plane.height < 4 || plane.height > 270 * factor)
         return PlaneStatus::BadGeometry;
     const std::size_t packed = std::size_t(plane.width) * sizeof(std::int16_t);
     if (plane.pitch < packed || (plane.pitch % kS3PlaneAlign) != 0)
@@ -98,7 +104,7 @@ struct PlaneEdge {
 
 inline EdgeStatus match_plane_edge(const PlaneEdge& edge, const TaskKey& key, Generation graph,
                                    bool require_data_align = true) noexcept {
-    if (check_signed_plane(edge.plane, require_data_align) != PlaneStatus::Ok)
+    if (check_signed_plane(edge.plane, require_data_align, edge.wavelet == 4) != PlaneStatus::Ok)
         return EdgeStatus::Plane;
     if (!(edge.generation == graph)) return EdgeStatus::Generation;
     if (edge.channel > 2 || edge.channel != key.channel) return EdgeStatus::Channel;

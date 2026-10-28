@@ -5,6 +5,13 @@ target_compile_features(hypercine_decode_task_graph PUBLIC cxx_std_17)
 set_target_properties(hypercine_decode_task_graph PROPERTIES CXX_EXTENSIONS OFF)
 target_include_directories(hypercine_decode_task_graph PUBLIC ../../src/core)
 target_link_libraries(hypercine_decode_task_graph PUBLIC Threads::Threads)
+add_library(hypercine_decode_spatial_attachment STATIC
+    ../../src/core/decode_s3_attachment.cpp
+    ../../src/core/decode_s3_consumer.cpp
+    ../../src/cpu/decode_spatial_scalar.cpp)
+target_include_directories(hypercine_decode_spatial_attachment PRIVATE ../../src/cpu)
+target_link_libraries(hypercine_decode_spatial_attachment PUBLIC hypercine_decode_task_graph)
+target_compile_features(hypercine_decode_spatial_attachment PUBLIC cxx_std_17)
 # Fault-injection seam used only by the T1/T2 gate below (see decode_task_graph.h).
 # It is a compile-time switch: a build without this definition has no seam.
 if(HYPERCINE_BUILD_TESTS)
@@ -13,6 +20,15 @@ if(HYPERCINE_BUILD_TESTS)
 endif()
 if(HYPERCINE_BUILD_TESTS)
     enable_testing()
+    add_executable(test_decoder_attachment_292 test_decoder_attachment_292.cpp)
+    target_include_directories(test_decoder_attachment_292 PRIVATE ../../src/cpu)
+    target_link_libraries(test_decoder_attachment_292 PRIVATE hypercine_decode_spatial_attachment)
+    foreach(workers 1 2 4 16)
+        add_test(NAME decoder_attachment_292_workers_${workers}
+            COMMAND test_decoder_attachment_292 ${workers})
+        set_tests_properties(decoder_attachment_292_workers_${workers}
+            PROPERTIES TIMEOUT 30 LABELS "scheduler;s3")
+    endforeach()
     add_executable(test_decode_task_graph ../test_decode_task_graph.cpp)
     target_link_libraries(test_decode_task_graph PRIVATE hypercine_decode_task_graph)
     foreach(workers 1 2 4 16)
