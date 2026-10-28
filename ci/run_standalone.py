@@ -29,6 +29,7 @@ REQUIRED = {
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'filmscan3_geometry', 'filmscan3_geometry_external_decode',
     'filmscan3_geometry_validation', 'filmscan3_geometry_reference_p10',
+    'filmscan3_4k_gate_contract',
     # SDK-free Python contracts shared with the regular test tree; they are
     # registered by hypercine_register_sdk_free_contracts(), so their absence
     # from this inventory would let a dropped registration stay green.
@@ -65,7 +66,8 @@ def required_tests(cache):
     if cache.get('HYPERCINE_FS3_SEQUENCE_ROOT'):
         required.add('filmscan3_actual_sequence')
     if cmake_enabled(cache.get('HYPERCINE_ENABLE_METAL', '')):
-        required.add('filmscan3_metal_required')
+        required |= {'filmscan3_metal_required', 'filmscan3_metal_4k_encoder',
+                     'filmscan3_metal_4k_ffmpeg_gate'}
         for gate in ('autonomous_manifest', 'sequence_manifest', 'external_decode',
                      'actual_tier_a', 'actual_sequence'):
             if 'filmscan3_' + gate in required:

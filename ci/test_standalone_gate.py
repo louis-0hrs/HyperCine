@@ -74,7 +74,8 @@ class StandaloneGateTests(unittest.TestCase):
         cache = {'HYPERCINE_ENABLE_METAL': 'ON'}
         required = required_tests(cache)
         metal = {'filmscan3_metal_required', 'filmscan3_metal_autonomous_manifest',
-                 'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode'}
+                 'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode',
+                 'filmscan3_metal_4k_encoder', 'filmscan3_metal_4k_ffmpeg_gate'}
         self.assertEqual(required - REQUIRED, metal)
         for omitted in metal:
             with self.subTest(omitted=omitted), self.assertRaises(ValueError):
