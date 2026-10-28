@@ -3,6 +3,7 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """Boundary checks for the C0 report; no claim of codec compatibility."""
 import json
+import copy
 from pathlib import Path
 import unittest
 import audit
@@ -46,13 +47,62 @@ class ArithmeticAudit(unittest.TestCase):
             with self.assertRaises(ValueError):
                 audit.geometry(*invalid)
 
+    def test_size_domain_rejects_non_integer_and_negative_alignment(self):
+        for value in (-1, True, 1.5, '16', None):
+            for fn, args in ((audit.align, (value, 16)),
+                             (audit.align, (16, value)),
+                             (audit.surface, (value, 24)),
+                             (audit.surface, (128, value)),
+                             (audit.geometry, (value, 24)),
+                             (audit.geometry, (128, value)),
+                             (audit.chunk_header, (0x2200, value))):
+                with self.subTest(function=fn.__name__, value=value, args=args):
+                    with self.assertRaises((ValueError, OverflowError)):
+                        fn(*args)
+        for fn in (audit.add, audit.mul):
+            for args in ((True, 1), (1, 2.0), (1, 1, False), (1, 1, -1)):
+                with self.assertRaises((ValueError, OverflowError)):
+                    fn(*args)
+        self.assertEqual(audit.align(0, 16), 0)
+        self.assertEqual(audit.align(audit.U64_MAX - 15, 16), audit.U64_MAX - 15)
+
     def test_recorded_report(self):
         root = Path(__file__).resolve().parents[2]
-        recorded = json.loads((root / 'docs/validation/extreme-geometry-c0.json').read_text())
-        self.assertEqual(audit.report(), recorded)
+        text = (root / 'docs/validation/extreme-geometry-c0.json').read_text()
+        audit.verify_report(text)
+        recorded = json.loads(text)
         for row in recorded['geometries']:
             self.assertEqual(row['sdk'], 'SDK_ORACLE_PENDING')
             self.assertEqual(row['ffmpeg'], 'REFERENCE_PENDING')
+
+    def test_recorded_report_types_and_keys_are_binding(self):
+        report = audit.report()
+        audit.verify_report(json.dumps(report))
+        for field in ('width', 'pixels', 'bgra8_bytes', 'l3_chroma_stride_samples',
+                      'sample_content_limit_bytes'):
+            changed = copy.deepcopy(report)
+            changed['geometries'][0][field] = float(changed['geometries'][0][field])
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                audit.verify_report(json.dumps(changed))
+        changed = copy.deepcopy(report)
+        changed['geometries'][0]['width_mod_128'] = False
+        with self.assertRaises(ValueError):
+            audit.verify_report(json.dumps(changed))
+        raw = json.dumps(report)
+        for changed in [raw.replace('"pixels":', '"pixels": 0, "pixels":', 1),
+                        raw[:-1] + ', "ignored": NaN}', '[]', 'null']:
+            with self.subTest(raw=changed[:80]), self.assertRaises(ValueError):
+                audit.verify_report(changed)
+
+    def test_recorded_report_preserves_order_and_pending_status(self):
+        report = audit.report()
+        report['geometries'].reverse()
+        with self.assertRaises(ValueError):
+            audit.verify_report(json.dumps(report))
+        report = audit.report()
+        report['geometries'][0]['sdk'] = 'PASS'
+        with self.assertRaises(ValueError):
+            audit.verify_report(json.dumps(report))
 
 
 if __name__ == '__main__':
