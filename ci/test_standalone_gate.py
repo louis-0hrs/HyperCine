@@ -52,6 +52,12 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, name):
             registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
+    def test_both_geometry_checks_must_be_registered(self):
+        for name in ('extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 

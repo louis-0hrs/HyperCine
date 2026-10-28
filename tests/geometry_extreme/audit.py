@@ -4,19 +4,28 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """C0 arithmetic model only: allocates no frames and invokes no codec/GPU."""
 import json
+import argparse
+from pathlib import Path
 
 U64_MAX = (1 << 64) - 1
 CHUNK_MAX = ((1 << 24) - 1) * 4
 GEOMETRIES = ((3840, 2160), (7680, 4320), (12288, 8040), (17520, 8040))
 
 
+def size_integer(*values):
+    if any(type(value) is not int for value in values):
+        raise ValueError('integer size required')
+
+
 def add(a, b, limit=U64_MAX):
+    size_integer(a, b, limit)
     if min(a, b) < 0 or a > limit or b > limit - a:
         raise OverflowError('size addition')
     return a + b
 
 
 def mul(a, b, limit=U64_MAX):
+    size_integer(a, b, limit)
     if min(a, b) < 0 or a > limit or (a and b > limit // a):
         raise OverflowError('size multiplication')
     if b > limit:
@@ -25,6 +34,9 @@ def mul(a, b, limit=U64_MAX):
 
 
 def align(n, alignment):
+    size_integer(n, alignment)
+    if n < 0:
+        raise ValueError('negative size')
     if alignment < 1 or alignment & (alignment - 1):
         raise ValueError('power-of-two alignment required')
     return add(n, alignment - 1) & -alignment
@@ -32,6 +44,7 @@ def align(n, alignment):
 
 def chunk_header(key, payload_bytes):
     """Model Writer::End, without allocating a payload or emitting a sample."""
+    size_integer(key, payload_bytes)
     if key not in (0x2000, 0x2100, 0x2200):
         raise ValueError('unsupported audit chunk')
     if payload_bytes < 0 or payload_bytes % 4 or payload_bytes > CHUNK_MAX:
@@ -41,10 +54,14 @@ def chunk_header(key, payload_bytes):
 
 
 def surface(w, h):
+    size_integer(w, h)
+    if min(w, h) < 0:
+        raise ValueError('negative surface dimension')
     return mul(mul(align(w, 8), h), 2)
 
 
 def geometry(w, h):
+    size_integer(w, h)
     if w < 128 or h < 24 or w % 16 or h % 8 or max(w, h) > 65535:
         raise ValueError('outside C0 geometry domain')
     pixels = mul(w, h)
@@ -87,5 +104,40 @@ def report():
                 geometries=[geometry(w, h) for w, h in GEOMETRIES])
 
 
+def verify_report(text):
+    """Check the recorded C0 evidence without Python's numeric type aliases."""
+    def unique_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError('duplicate report key')
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError('nonstandard report constant')
+
+    try:
+        recorded = json.loads(text, object_pairs_hook=unique_pairs,
+                              parse_constant=reject_constant)
+        # Canonical JSON preserves integer/float/bool types and list order,
+        # while allowing inconsequential object-key order and whitespace.
+        if (json.dumps(recorded, sort_keys=True, allow_nan=False) !=
+                json.dumps(report(), sort_keys=True, allow_nan=False)):
+            raise ValueError('recorded report mismatch')
+    except (ValueError, TypeError, RecursionError):
+        raise ValueError('invalid recorded C0 report') from None
+
+
 if __name__ == '__main__':
-    print(json.dumps(report(), indent=2, sort_keys=True))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--verify', type=Path)
+    args = parser.parse_args()
+    if args.verify:
+        try:
+            verify_report(args.verify.read_text(encoding='utf-8'))
+        except (ValueError, OSError):
+            parser.exit(1, 'FAIL: invalid or unavailable recorded C0 report\n')
+        print('PASS: recorded C0 geometry report matches the arithmetic model')
+    else:
+        print(json.dumps(report(), indent=2, sort_keys=True))
