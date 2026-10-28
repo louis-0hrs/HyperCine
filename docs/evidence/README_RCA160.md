@@ -67,6 +67,11 @@ Bind reference media through `HYPERCINE_GOLDEN_DIR` locally; never publish its
 value or silently substitute another packet. Media replay and public ledger
 audit are separate acceptance steps.
 
+The exact private replay assets have now been preserved in the bound Golden
+store, including raw planes, packets, harnesses, binaries and source/build
+context. See [the preservation record](GOLDEN_RCA160_PRESERVATION.md) for its
+relative location, inventory, verification hashes and replay precautions.
+
 ## Historical interpretation and exclusions
 
 The 96-call matrix orders channel V only: its remaining FULL deviations in other

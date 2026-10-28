@@ -1,0 +1,21 @@
+{
+  "status": "COMPLETE_SHA256_VERIFIED",
+  "directory": "rca160-2026-10-28-preservation-01",
+  "files": 2034,
+  "bytes": 1713257925,
+  "primary_manifest_sha256": "4cda2e52379014b3ba6c70c6d3de5aee06a037d6147c88e664b06d41f25b9dcd",
+  "supplemental_manifest_sha256": "4036b7ba9d226508262d2b6f2398ba2398331b8ba758af4a4cc7928192aee089",
+  "historical_hash_checks": {
+    "coefficient_snapshots": 600,
+    "all_channel_bgra": 28,
+    "legacy_bgra": 96
+  },
+  "harness_binary_and_sdk_identity_checks": "MATCH",
+  "preserved_public_audit": "RECORDED_LEDGER_AUDIT_PASS",
+  "original_golden_files_overwritten": false,
+  "preservation_index_sha256": "c9a686881f445d87d90e3c5eb3ea3232f36c4d9bf7f73e6471922788856c6eee",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "scope": "Artifact preservation and hash verification, not a new decoder experiment or independent numerical replay",
+  "private_sdk_and_media_publicly_uploaded": false
+}
