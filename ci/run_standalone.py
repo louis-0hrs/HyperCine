@@ -20,6 +20,8 @@ REQUIRED = {
     'rgb444_rg48_replay_contract', 'rgb444_rg48_allocation_failure',
     'rgb444_packet_probe',
     'reference_decode_contract',
+    'quality_state_unit', 'standalone_gate_guardrails',
+    'filmscan3_backend_selection', 'entropy_bitexact',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
@@ -46,9 +48,45 @@ REQUIRED |= {'scalar_inverse_arithmetic', 'scalar_inverse_rejection', 'scalar_in
              'scalar_inverse_replay_contract', 'original_descale_review_contract'} | {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
 
 
-def registered_tests(document):
+def cmake_enabled(value):
+    # Match if(<variable>): false constants are case-insensitive, but the
+    # -NOTFOUND suffix is case-sensitive. Cache BOOL values need not be ON/OFF.
+    return (value.upper() not in {'', '0', 'OFF', 'NO', 'FALSE', 'N',
+                                 'IGNORE', 'NOTFOUND'}
+            and not value.endswith('-NOTFOUND'))
+
+
+def required_tests(cache):
+    required = set(REQUIRED)
+    if cache.get('HYPERCINE_REFERENCE_CORPUS_ROOT'):
+        required |= {'windows_reference_binaries', 'filmscan3_actual_tier_a'}
+    if cache.get('HYPERCINE_FS3_SEQUENCE_ROOT'):
+        required.add('filmscan3_actual_sequence')
+    if cmake_enabled(cache.get('HYPERCINE_ENABLE_METAL', '')):
+        required.add('filmscan3_metal_required')
+        for gate in ('autonomous_manifest', 'sequence_manifest', 'external_decode',
+                     'actual_tier_a', 'actual_sequence'):
+            if 'filmscan3_' + gate in required:
+                required.add('filmscan3_metal_' + gate)
+    return required
+
+
+def validate_architecture(cache, system, machine):
+    # The interpreter architecture alone says nothing about the CMake target.
+    # Require one explicit native Apple target; universal builds are a separate gate.
+    if system == 'Darwin' and cache.get('CMAKE_OSX_ARCHITECTURES') != machine:
+        raise ValueError('CMake Apple target architecture differs from the declared job')
+
+
+def invalidate_results(build):
+    # A failed preflight must never leave an earlier PASS available to upload.
+    for name in ('standalone-gate.json', 'standalone-results.xml', 'registered-tests.json'):
+        (build / name).unlink(missing_ok=True)
+
+
+def registered_tests(document, required=None):
     names = [test['name'] for test in document['tests']]
-    missing = REQUIRED - set(names)
+    missing = (REQUIRED if required is None else required) - set(names)
     if missing or len(names) != len(set(names)):
         raise ValueError('missing/duplicate CTest registrations: ' + str(sorted(missing)))
     return set(names)
@@ -73,12 +111,13 @@ def main():
     parser.add_argument('--system', choices=['Darwin', 'Windows', 'Linux'], required=True)
     parser.add_argument('--machine', choices=['arm64', 'x86_64'], required=True)
     args = parser.parse_args()
+    build = args.build_dir.resolve()
+    invalidate_results(build)
     machine = {'aarch64': 'arm64', 'amd64': 'x86_64'}.get(platform.machine().lower(), platform.machine().lower())
     print(json.dumps({'system': platform.system(), 'platform': platform.platform(),
                       'architecture': machine, 'python': sys.version}), flush=True)
     if (platform.system(), machine) != (args.system, args.machine):
         raise ValueError('runner OS/architecture does not match the declared job')
-    build = args.build_dir.resolve()
     cache = {}
     for line in (build / 'CMakeCache.txt').read_text().splitlines():
         if line and not line.startswith(('#', '//')) and '=' in line:
@@ -89,6 +128,7 @@ def main():
                           'HYPERCINE_REQUIRE_EXTERNAL_DECODE': 'ON'}.items():
         if cache.get(key) != expected:
             raise ValueError('invalid standalone gate configuration: ' + key)
+    validate_architecture(cache, args.system, args.machine)
     commands = json.loads((build / 'compile_commands.json').read_text())
     if not commands:
         raise ValueError('empty compile database')
@@ -104,7 +144,7 @@ def main():
         raise ValueError('upstream working tree is modified')
     ctest = ['ctest', '--test-dir', str(build), '-C', 'Release']
     document = json.loads(subprocess.check_output(ctest + ['--show-only=json-v1'], text=True))
-    registered = registered_tests(document)
+    registered = registered_tests(document, required_tests(cache))
     if cache.get('HYPERCINE_SCALAR_ORACLE_ROOT') and 'scalar_inverse_original_six_pairs' not in registered:
         raise ValueError('requested original scalar replay not registered')
     (build / 'registered-tests.json').write_text(json.dumps(document, indent=2) + '\n')
