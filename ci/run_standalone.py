@@ -19,6 +19,7 @@ REQUIRED = {
     'rgb444_rg48_import', 'rgb444_rg48_rejection',
     'rgb444_rg48_replay_contract', 'rgb444_rg48_allocation_failure',
     'rgb444_packet_probe',
+    'reference_decode_contract',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',

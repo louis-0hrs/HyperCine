@@ -12,6 +12,12 @@ from run_standalone import REQUIRED, registered_tests, completed_tests
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_missing_reference_decode_contract_fails(self):
+        self.assertIn('reference_decode_contract', REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED
+                                       if n != 'reference_decode_contract']})
+
     def test_each_simd_registration_is_mandatory(self):
         for missing in ('wavelet_simd_exact', 'wavelet_simd_packets'):
             self.assertIn(missing, REQUIRED)
