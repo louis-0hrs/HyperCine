@@ -21,8 +21,10 @@ Research lane; it does not gate #259, #120, #144, #160 or #161.
 - That the reference codec does not build from the pinned snapshot on a current
   POSIX toolchain without local out-of-tree workarounds, and which workarounds
   are required (§5).
-- That a **normative prescription in ST 2073-1:2017 contradicts the reference
-  implementation and every reference bitstream** on one header field (§4.1).
+- That **ST 2073-1:2017 §B.1.10/Table B.1 and the reference implementation pack
+  `PrescaleShift` differently**, and that every reference bitstream measured is
+  read two incompatible ways as a result (§4.1). Not claimed: that either side
+  is out of range, or that the standard is defective.
 - That a VC-5/ST 2073-1 elementary bitstream and a legacy GoPro CineForm
   bitstream are distinguishable at byte 0, and which shape HyperCine's
   SDK-free standalone encoder emits (§4).
@@ -46,29 +48,64 @@ Research lane; it does not gate #259, #120, #144, #160 or #161.
 Fetched over HTTPS from `pub.smpte.org` on 2026-10-28; sizes and hashes computed
 locally over the received bytes.
 
-| Document | Path under `https://pub.smpte.org/latest/` | Bytes | SHA-256 (first 16) |
+Full 64-hex SHA-256 digests, not truncations. Each digest was recomputed from a
+second independent HTTPS fetch on 2026-10-29 and matched byte-for-byte, so these
+pins are reproducible from the URL and are **not** marked `NOT_VERIFIED`.
+
+| Document | Path under `https://pub.smpte.org/latest/` | Bytes | SHA-256 (full) |
 | --- | --- | --- | --- |
-| RP 2073-2:2022 (Conformance) | `rp2073-2/rp2073-2-2022.pdf` | 748,625 | `9e5d7beb0fa54ef1` |
-| ST 2073-1:2017 (Elementary Bitstream) | `st2073-1/st2073-1-2017.pdf` | 986,432 | `6fe18da50e84264b` |
-| ST 2073-3:2015 (Image Formats) | `st2073-3/st2073-3-2015.pdf` | 943,694 | `4a694a3f41f7ff28` |
-| ST 2073-4:2015 (Subsampled Colour) | `st2073-4/st2073-4-2015.pdf` | 626,666 | `d1be8f58c2202f45` |
-| ST 2073-5:2015 (Layers) | `st2073-5/st2073-5-2015.pdf` | 224,324 | `a5fac1dac52ec1cc` |
-| ST 2073-6:2015 (Sections) | `st2073-6/st2073-6-2015.pdf` | 226,238 | `c7c39a7120c4bc59` |
-| ST 2073-7:2022 (Metadata) | `st2073-7/st2073-7-2022.pdf` | 646,384 | `d43c97b3af6e353f` |
+| RP 2073-2:2022 (Conformance) | `rp2073-2/rp2073-2-2022.pdf` | 748,625 | `9e5d7beb0fa54ef14ae302e78e8ad11c8ce89cf13f909c79e37dd79e5845c7a4` |
+| ST 2073-1:2017 (Elementary Bitstream) | `st2073-1/st2073-1-2017.pdf` | 986,432 | `6fe18da50e84264b90514b37d82fbf416244abb4e606650acf8c685b3d2ec817` |
+| ST 2073-3:2015 (Image Formats) | `st2073-3/st2073-3-2015.pdf` | 943,694 | `4a694a3f41f7ff2899a455d51710c42adebb370fce2565a86800f36290eff0d1` |
+| ST 2073-4:2015 (Subsampled Colour) | `st2073-4/st2073-4-2015.pdf` | 626,666 | `d1be8f58c2202f45df0f098fabc0891d15728d379d98cb5a191a2d0423755ec3` |
+| ST 2073-5:2015 (Layers) | `st2073-5/st2073-5-2015.pdf` | 224,324 | `a5fac1dac52ec1cce3ad87f484c6beed7837c81371caea30587ad80f4c1af815` |
+| ST 2073-6:2015 (Sections) | `st2073-6/st2073-6-2015.pdf` | 226,238 | `c7c39a7120c4bc599c141c9735928d46b15f6dc7b53fee8951cc78981ee51973` |
+| ST 2073-7:2022 (Metadata) | `st2073-7/st2073-7-2022.pdf` | 646,384 | `d43c97b3af6e353f8bbf15fb1bbade476f8aedcfb0b3e3547955192ade130408` |
 
 RP 2073-2:2022 is a revision of RP 2073-2:2017, approved 2022-02-08, 71 pages.
-The SMPTE ST 2073 landing page lists exactly the six parts above as current
-(checked 2026-10-28); `st2073-1-2020`, `-2022`, `-2023` all return `403`, i.e.
-they do not exist. So ST 2073-1:2017 is the current edition, which matters for
-§4.1.
+
+**Edition status is established from the SMPTE catalog, not from HTTP status
+codes.** The landing page `https://www.smpte.org/standards/st2073-landing-page`
+(read 2026-10-29) lists these documents verbatim: `OV 2073-0:2023`,
+`ST 2073-1:2017`, `RP 2073-2:2022`, `ST 2073-3:2015`, `ST 2073-4:2015`,
+`ST 2073-5:2015`, `ST 2073-6:2015`, `ST 2073-7:2022`, `ST 2073-10:2017`. That
+listing is the evidence that ST 2073-1:2017 is the current edition of part 1,
+which matters for §4.1.
+
+The page also lists two documents that this audit did **not** fetch or pin:
+`OV 2073-0:2023` (Overview) and `ST 2073-10:2017` (MXF Wrapper). An earlier
+draft of this document described the landing page as listing "exactly the six
+parts above". That was wrong: it lists nine documents, and the omission of the
+Overview and the MXF wrapper is recorded here rather than silently carried.
+Both stay out of scope — ST 2073-10 is a container mapping and OV 2073-0 is
+informative — but the omission is now explicit rather than an implied claim of
+completeness.
+
+**Probe results are recorded as `ACCESS_DENIED`, not as absence.** On
+2026-10-29 these requests returned HTTP 403: `st2073-1/st2073-1-2020.pdf`,
+`-2022.pdf`, `-2023.pdf`, and `rp2073-2/rp2073-2-2017.pdf`. A 403 means access
+to that path was denied by the server; it is *not* evidence that the edition
+does not exist, and it must not be cited as such. Only the catalog listing above
+is used as edition evidence. See §9 for the exact commands and status codes.
+
+Every other probed path returned 200 with the byte count in the table, so the
+403 family is a per-path authorisation result, not an outage.
 
 **There is no "VC-5 Part 2" codec part.** RP 2073-2 Table 1: enabling part 2
 "has no effect as there is no code associated with the conformance
 specification". Part 2 is the RP. Do not write "Part 2 decoder".
 
-**Not verified:** errata, and whether `pub.smpte.org/latest/` serves the same
-bytes as the purchasable edition. `latest` is a moving alias; the hashes above
-pin what was served on 2026-10-28 and nothing more.
+**Not verified: errata.** No errata page, errata notice or corrigendum is
+linked from the landing page read on 2026-10-29, and nothing in this audit
+establishes that the errata set is empty. Absence of a linked errata page is not
+evidence of "no errata" — a purchased or member-accessible edition, or a
+standards-store record, could carry corrections that are invisible here.
+Accordingly this document never asserts that no errata exists, and §4.1 does not
+argue from that premise.
+
+**Not verified:** whether `pub.smpte.org/latest/` serves the same bytes as the
+purchasable edition. `latest` is a moving alias; the hashes above pin what was
+served on 2026-10-28 and again on 2026-10-29, and nothing more.
 
 ---
 
@@ -138,18 +175,27 @@ Walking the pinned tree:
 - Part 1 release alone: 76 pointers, 71,081,260 bytes.
 - The other 327 `media/` files are text: `README.md` and per-test `.log` files.
 
-LFS payload access tested **anonymously** (no credentials) on five release
-artefacts; every downloaded byte stream hashed to the OID in its pointer:
+LFS payload access tested **anonymously** (no credentials); every downloaded byte
+stream hashed to the OID in its pointer. The files listed below are the ones
+actually obtained, so the table doubles as the measured set for §4.1. Where a
+single OID is reachable under more than one tree path, both are shown:
 
 | Artefact (repo-relative, `media/…/release/`) | Bytes | SHA-256 == OID |
 | --- | --- | --- |
-| `solid/…/part1/…/solid-48x48-0000-part1-48x48-rg48.vc5` | 740 | yes |
-| `solid/…/part1/…/solid-48x48-0000-part1-48x48-b64a.vc5` | 960 | yes |
-| `solid/…/part1/…/solid-97x97-0000-part1-97x97-byr4.vc5` | 1,288 | yes |
-| `solid/…/part3/…/solid-96x96-0000-part3-96x96-byr4.vc5` | 960 | yes |
-| `boxes/…/part3/…/boxes-640x480-0000-part3-640x480-rg48.vc5` | 72,984 | yes |
-| `boxes/…/part4/…/boxes-640x480-0000-part4-640x480-nv12.vc5` | 42,432 | yes |
-| `boxes/…/part6/…/boxes-640x480-0000-part6-640x480-rg48.vc5` | 73,804 | yes |
+| `solid/master/part1|part3/…/solid-48x48-0000-part1-48x48-rg48.vc5` | 740 | yes |
+| `solid/master/part1|part3/…/solid-48x48-0000-part1-48x48-b64a.vc5` | 960 | yes |
+| `solid/master/part1|part3/…/solid-97x97-0000-part1-97x97-byr4.vc5` | 1,288 | yes |
+| `solid/master/part1|part3/…/solid-96x96-0000-part1-96x96-byr4.vc5` | 960 | yes |
+| `gradient/master/part1|part3/…/gradient-640x480-0000-part1-640x480-b64a.vc5` | 45,072 | yes |
+| `boxes/master/part1|part3/…/boxes-640x480-0000-part1-640x480-rg48.vc5` | 72,984 | yes |
+| `boxes/master/part4/…/boxes-640x480-0000-part4-640x480-nv12.vc5` | 42,432 | yes |
+| `boxes/master/part6/…/boxes-640x480-0000-part6-640x480-rg48.vc5` | 73,804 | yes |
+
+The `part1|part3` entries are one OID each, published under two names — verified
+by hashing the downloaded bytes against the pointer OIDs, not assumed from the
+filename. This matters for §4.1: eight measured bitstreams are eight distinct
+byte-strings, but only the `part4` and `part6` artefacts are unique to their
+part. Nothing here establishes part-5, part-7 or part-10 behaviour.
 
 **Finding A-3.** Availability is **AVAILABLE**, not **BLOCKED**. The AWS S3
 path in `notes/install.md` and `scripts/getmedia.py` is legacy and was not used;
@@ -191,7 +237,7 @@ Argtable2 (LGPL-2) is used only by the CLI utilities.
 
 ## 4. Format contract: legacy CFHD vs ST 2073-1 vs HyperCine standalone
 
-### 4.1 A normative contradiction in ST 2073-1:2017 Table B.1
+### 4.1 A packing conflict in ST 2073-1:2017 Table B.1
 
 This was not the expected result of the audit and it is the most consequential
 item here, so the evidence is spelled out.
@@ -236,40 +282,75 @@ and `common/src/codec.c` decodes it symmetrically:
 int prescale_value = (value >> (14 - wavelet_index * 2)) & 0x03;
 ```
 
-That is **2-bit fields at bits 14, 12, 10** (the `assert` even caps values at
-2 bits, contradicting the standard's stated range `[0,15]`).
+That is **2-bit fields at bits 14, 12, 10**. Two separate facts follow, and they
+must not be merged:
 
-Every reference bitstream measured carries `PrescaleShift = 10240 = 0x2800`:
+1. The **layout** differs from Table B.1: 2-bit fields at 14/12/10 versus 4-bit
+   fields at 0/4/8. This is the packing conflict.
+2. The `assert` additionally **restricts** the encoder to values 0..3, while
+   §B.1.10 permits `[0,15]`. That is a narrower range in the code than in the
+   text — a restriction the reference encoder imposes on itself, not evidence
+   that any bitstream carries an out-of-range value. The measured bitstreams do
+   not violate the printed range (§4.1 continues below).
 
-| Bitstream (part) | `PrescaleShift` |
-| --- | --- |
-| `solid-48x48-0000-part1-48x48-rg48` (1) | `0x2800` |
-| `solid-48x48-0000-part1-48x48-b64a` (1) | `0x2800` |
-| `solid-97x97-0000-part1-97x97-byr4` (1) | `0x2800` |
-| `solid-96x96-0000-part3-96x96-byr4` (3) | `0x2800` |
-| `boxes-640x480-0000-part4-640x480-nv12` (4) | `0x2800` |
-| `boxes-640x480-0000-part6-640x480-rg48` (6) | `0x2800` |
+Eight reference bitstreams were measured (the ones obtainable as real bytes; see
+below). Every one carries `PrescaleShift = 10240 = 0x2800`:
+
+| Bitstream (tree path) | SHA-256 (first 16) | Bytes | `PrescaleShift` |
+| --- | --- | --- | --- |
+| `solid/master/part1|part3/release/solid-48x48-0000-part1-48x48-rg48` | `caf2a78e47c6c8aa` | 740 | `0x2800` |
+| `solid/master/part1|part3/release/solid-48x48-0000-part1-48x48-b64a` | `34c107c0a9d6fac8` | 960 | `0x2800` |
+| `solid/master/part1|part3/release/solid-97x97-0000-part1-97x97-byr4` | `4277e15a7a5f5c88` | 1,288 | `0x2800` |
+| `solid/master/part1|part3/release/solid-96x96-0000-part1-96x96-byr4` | `4e5bdefb2e704400` | 960 | `0x2800` |
+| `gradient/master/part1|part3/release/gradient-640x480-0000-part1-640x480-b64a` | `b89e9429cf9b4517` | 45,072 | `0x2800` |
+| `boxes/master/part1|part3/release/boxes-640x480-0000-part1-640x480-rg48` | `c7a1933784b6e756` | 72,984 | `0x2800` |
+| `boxes/master/part4/release/boxes-640x480-0000-part4-640x480-nv12` | `b27e3ab264668fb8` | 42,432 | `0x2800` |
+| `boxes/master/part6/release/boxes-640x480-0000-part6-640x480-rg48` | `315d85d43d027df9` | 73,804 | `0x2800` |
+
+**Coverage limit, stated explicitly.** The first six of those eight are
+published byte-identically under **both** a `part1/` and a `part3/` path — the
+Git LFS OID is the same object for both names, verified by hashing the
+downloaded bytes and matching them against the pointer OIDs in the tree. So
+they are six distinct byte-strings, not six part-independent samples. Only the
+`part4` (`nv12` subsampled-colour) and `part6` (sections) artefacts are unique
+to their part directory. The finding therefore rests on eight distinct
+bitstreams, of which two exercise parts 4 and 6 specifically; it is **not**
+evidence about part 5 (layers), part 7 (metadata), or part 10.
 
 Decoding `0x2800` both ways:
 
 | Interpretation | PrescaleShift[0..2] |
 | --- | --- |
-| ST 2073-1 Table B.1 (4-bit @ 0,4,8) | `[0, 0, 8]` — **invalid**, 8 exceeds any sane shift |
+| ST 2073-1 Table B.1 (4-bit @ 0,4,8) | `[0, 0, 8]` — *different* shift vector |
 | reference code (2-bit @ 14,12,10) | `[0, 2, 2]` — matches `SetTransformPrescale` for 10/12-bit |
 
-`common/src/wavelet.c` sets `{0, 2, 2, …}` for precision 10 and 12 specifically
-to prevent wavelet overflow, and `{0,2,0}` appears nowhere. So the intent is
-unambiguous: `[0,2,2]`.
+`8` is **inside** the normative range `[0,15]` quoted above, so the Table B.1
+reading is *legal* under its own clause. It is not a range violation and must
+not be described as one. What the two readings disagree about is **which bits
+carry which shift**, i.e. the packing layout — not whether a value is
+permitted.
 
-**Finding A-5 (normative contradiction).** For a 10- or 12-bit stream, a
-decoder that implements ST 2073-1:2017 Table B.1 literally reads
-`PrescaleShift = [0,0,8]` from an official reference bitstream — outside the
-standard's own `[0,15]`-per-shift intent, and in an arithmetic-right-shift
-context that is nonsensical. The reference decoder and sample encoder share the
-2-bit packing and therefore agree with each other while disagreeing with the
-published table. This is a defect in one of the two, and it is not resolvable
-from the public materials: the text and the code contradict each other, and no
-errata or newer edition exists (§1).
+`common/src/wavelet.c` sets `{0, 2, 2, …}` for precision 10 and 12 specifically
+to prevent wavelet overflow, and `{0,2,0}` appears nowhere. That makes `[0,2,2]`
+the intent of the code that produced the bitstreams.
+
+**Finding A-5 (packing mismatch between the normative table and the reference
+code).** A decoder that implements ST 2073-1:2017 Table B.1 literally reads
+`PrescaleShift = [0,0,8]` from an official reference bitstream, where the
+reference decoder reads `[0,2,2]`. Both values are in range; the layouts
+disagree. Under the Table B.1 reading the encoder would left-shift the level-2
+lowpass output by 8 instead of 2 — a different image, not an illegal header.
+So the correct characterisation is **implementation incompatibility with a
+normative table**, demonstrated end-to-end and reproducible from public bytes,
+and *not* a demonstrated standards defect.
+
+The reference decoder and sample encoder share the 2-bit packing and therefore
+agree with each other while disagreeing with the published table. Which of the
+two is authoritative is not resolvable from the public materials: the text and
+the code contradict each other. **Errata status is `NOT_VERIFIED`** — §1 records
+that no errata notice is reachable, which is not the same as a statement that
+none exists, and this document does not argue that the editions in §1 are
+uncorrected.
 
 Consequences, all of which constrain Phase B:
 
@@ -278,12 +359,15 @@ Consequences, all of which constrain Phase B:
 2. Any HyperCine VC-5 framing work must pick a side **explicitly** and record
    it; silently following the code reproduces a deviation from the normative
    table.
-3. This is the one item here that is a plausible SMPTE errata report, because a
+3. This is the one item here that could justify a narrow SMPTE report, because a
    minimal reproducer is trivial: quote §B.1.10 + Table B.1, quote the two
    functions, and show `0x2800` in a published reference bitstream. It is
    reported here as a *finding*, not as a claim of a standard defect — the
    alternative reading (the table is authoritative and the reference codec is
-   wrong) is equally consistent with the evidence.
+   wrong) is equally consistent with the evidence, and both readings yield an
+   in-range value. **No report is made or drafted here.** Per §8.3 that needs a
+   separate decision, and the errata status that would inform it is
+   `NOT_VERIFIED` (§1).
 
 Explicitly **not** claimed: that HyperCine's own `PRESCALE_TABLE` value is
 wrong. See §4.3 item 4.
@@ -574,7 +658,7 @@ the same lowpass/highpass/band/zerotree state machine, and the same
 `SPECIAL_MARKER_BAND_END` special codeword. Only the tag numbering differs — the
 documented CineForm-vs-VC-5 divergence, not evidence of independent derivation.
 And §4.1 shows both sides of *that* code base agreeing on a prescale packing
-that contradicts the standard.
+whose layout differs from Table B.1.
 
 **Classification:** SHARED_CODE for entropy coder, wavelet, codebook and file
 layout; SIMILAR_ALGORITHM or IDENTICAL for the transform mathematics; UNKNOWN
@@ -605,8 +689,8 @@ Design only. **Not authorized by this issue.**
    required set present (§8.7). Must *not* treat `0x60..0x6F` as chunks in this
    region (§4.2).
 3. **Prescale readout** — print the `PrescaleShift` value decoded both ways
-   (§4.1) and its `[0..2]` vector. Cheap, and it makes the contradiction visible
-   per artefact instead of per audit.
+   (§4.1) and its `[0..2]` vector. Cheap, and it makes the packing conflict
+   visible per artefact instead of per audit.
 4. **Reference-decoder run** — per RP 2073-2 §9.2/§9.3, on a licence-permitted
    local checkout of the pinned commit, release configuration: decode each
    reference bitstream, compare output images byte-for-byte. Blocked on
@@ -679,10 +763,22 @@ licence.
 All measurements used public read paths and local hashing only.
 
 ```bash
-# 1. Publications (sizes + SHA-256 pinned in section 1)
+# 1. Publications (full SHA-256 pinned in section 1)
 curl -sSL -o rp2073-2-2022.pdf https://pub.smpte.org/latest/rp2073-2/rp2073-2-2022.pdf
 sha256sum rp2073-2-2022.pdf
-# 403 for st2073-1-2020/-2022/-2023 confirms 2017 is the current edition
+# expect 9e5d7beb0fa54ef14ae302e78e8ad11c8ce89cf13f909c79e37dd79e5845c7a4
+
+# 1b. Edition status comes from the catalog, NOT from status codes.
+curl -sSL https://www.smpte.org/standards/st2073-landing-page | grep -oE '(OV|RP|ST) 2073-[0-9]+:[0-9]{4}' | sort -u
+# expect OV 2073-0:2023, ST 2073-1:2017, RP 2073-2:2022, ST 2073-3..7, ST 2073-10:2017
+
+# 1c. Probe results, recorded as ACCESS_DENIED rather than as absence.
+for u in st2073-1/st2073-1-2020.pdf st2073-1/st2073-1-2022.pdf \
+         st2073-1/st2073-1-2023.pdf rp2073-2/rp2073-2-2017.pdf; do
+  printf '%s  %s\n' "$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 25 \
+    https://pub.smpte.org/latest/$u)" "$u"
+done
+# 403 for each; a 403 is a denial of access, not proof the edition is absent
 
 # 2. Repository pin, and the missing tag
 git ls-remote https://github.com/SMPTE/rp2073-2-a.git             # one ref, no tags
@@ -711,21 +807,43 @@ PY
 printf 'vc5    : '; od -An -tx1 -N4 solid-48x48-0000-part1-48x48-rg48.vc5   # 56 43 2d 35
 printf 'legacy : '; od -An -tx1 -N4 sample_canon_422.cfhd                 # 00 01 00 09
 
-# 6. PrescaleShift across reference bitstreams (expect 0x2800 = 10240 everywhere)
+# 6. PrescaleShift across downloaded reference bitstreams (expect 0x2800 everywhere).
+#    Run in the directory holding the LFS-pulled files. Also print the OID match so
+#    the provenance is not inferred from a filename.
 python3 - <<'PY'
-import glob
-for p in sorted(glob.glob("media/**/release/*.vc5", recursive=True))[:6]:
+import glob, hashlib
+for p in sorted(glob.glob("*.vc5")):
     d = open(p, "rb").read()
-    pos = 4
-    while pos + 4 <= min(len(d), 600):
+    pos, value = 4, None
+    while pos + 4 <= min(len(d), 4000):
         t = int.from_bytes(d[pos:pos+2], "big", signed=True)
         v = int.from_bytes(d[pos+2:pos+4], "big")
         if abs(t) == 109:
-            print(p.split("/")[-1], hex(v), "ref-pack", [(v >> (14-i*2)) & 3 for i in range(3)],
-                  "st-B.1", [(v >> (4*i)) & 0xF for i in range(3)])
+            value = v
+            break
+        if abs(t) >= 0x4000:
             break
         pos += 4
-        if abs(t) >= 0x4000: break
+    print(p, d[:4], hex(value) if value is not None else "-",
+          [(value >> (14-i*2)) & 3 for i in range(3)] if value else "-",
+          [(value >> (4*i)) & 0xF for i in range(3)] if value else "-",
+          hashlib.sha256(d).hexdigest()[:16])
+PY
+# expect b'VC-5', 0x2800, [0, 2, 2], [0, 0, 8] for all eight
+
+# 6b. Why eight and not more: every *.vc5 under media/ in a plain clone is a
+#     Git LFS pointer, not a bitstream. Count them instead of assuming.
+python3 - <<'PY'
+import os, re
+ptr = real = 0
+for root, _, files in os.walk("media"):
+    for f in files:
+        if not f.endswith(".vc5"):
+            continue
+        head = open(os.path.join(root, f), "rb").read(200)
+        if re.search(rb"oid sha256:", head): ptr += 1
+        elif head[:4] == b"VC-5": real += 1
+print("pointers", ptr, "genuine", real)   # 425 pointers, 0 genuine before pull
 PY
 
 # 7. Reference-decoder compile probe (decoder side, part 7 off, local workarounds)
