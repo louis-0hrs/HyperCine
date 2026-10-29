@@ -126,8 +126,45 @@ const char* CapabilityReasonName(CapabilityReason reason) noexcept {
     case CapabilityReason::MemoryBudgetExceeded: return "MemoryBudgetExceeded";
     case CapabilityReason::ReferenceMissing: return "ReferenceMissing";
     case CapabilityReason::ExperimentallySupported: return "ExperimentallySupported";
+    case CapabilityReason::ProfileNotQualifiedForBackend: return "ProfileNotQualifiedForBackend";
     }
     return "Unclassified";
+}
+
+// Profile x backend admission matrix for this contract revision (issue #259,
+// implementation-order step 3). This is a session-contract admission, not a
+// product qualification and never an original-SDK reference.
+//
+// CPU scalar: the six regular profiles share one writer, one rate-state
+// calculator and one quality stamp. #318 pinned 16-frame 1080p packets for all
+// six profiles, one 4K frame zero for all six, and 120-frame FilmScan2 /
+// FilmScan3 sequences against the original SDK, so all six are admitted here.
+//
+// Metal and CUDA: this tree holds native session packet evidence for FilmScan3
+// only. Admitting another profile there would emit unqualified bytes behind a
+// GPU claim, so it is refused until that pair has its own packet oracle.
+bool ProfileAdmitted(SessionBackend backend, hypercine::EncodingQuality quality) noexcept {
+    if (!hypercine::IsValidEncodingQuality(quality)) return false;
+    switch (backend) {
+    case SessionBackend::CpuScalar:
+        return true;
+    case SessionBackend::Metal:
+    case SessionBackend::Cuda:
+        return quality == hypercine::EncodingQuality::FilmScan3;
+    default:
+        return false;
+    }
+}
+
+const char* ProfileAdmissionNote(SessionBackend backend, hypercine::EncodingQuality quality) noexcept {
+    if (!hypercine::IsValidEncodingQuality(quality))
+        return "quality profile is not one of the six regular profiles";
+    if (ProfileAdmitted(backend, quality)) {
+        if (backend == SessionBackend::CpuScalar)
+            return "six-profile shared writer admitted; experimental CPU attempt only";
+        return "FilmScan3-only session packet evidence on this backend; experimental attempt only";
+    }
+    return "this backend has session packet evidence for the FilmScan3 profile only";
 }
 
 EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& config,
@@ -139,8 +176,11 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     const char* unimplemented_detail = "not implemented";
     const char* memory_detail = "memory budget exceeded";
 
-    const bool filmscan3 = config.codec == CodecFamily::FilmScan3 &&
-                           config.quality == EncodingQuality::FilmScan3;
+    // The codec family, not the profile, decides whether the FilmScan3 wire and
+    // geometry contract applies: all six regular profiles share this writer and
+    // therefore this validator. Profile admissibility is a separate axis that
+    // depends on the effective backend, so it is checked further below.
+    const bool filmscan3 = config.codec == CodecFamily::FilmScan3;
     if (config.codec != CodecFamily::FilmScan3 && config.codec != CodecFamily::LegacyFixedQ2 &&
         config.codec != CodecFamily::Rgb444) {
         result.reasons.format_mathematically_invalid = true;
@@ -149,9 +189,9 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         result.reasons.valid_but_not_implemented = true;
         unimplemented_detail = "codec family is outside the FilmScan3 session writer";
     }
-    if (config.codec == CodecFamily::FilmScan3 && config.quality != EncodingQuality::FilmScan3) {
-        result.reasons.valid_but_not_implemented = true;
-        unimplemented_detail = "only the FilmScan3 quality profile is implemented";
+    if (config.codec == CodecFamily::FilmScan3 && !hypercine::IsValidEncodingQuality(config.quality)) {
+        result.reasons.format_mathematically_invalid = true;
+        format_detail = "quality profile is not one of the six regular profiles";
     }
     if (config.pixel_format != SourcePixelFormat::Bgra8) {
         if (config.pixel_format == SourcePixelFormat::Yuy2 || config.pixel_format == SourcePixelFormat::Rgb48)
@@ -253,6 +293,27 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     }
     result.effective_backend = effective;
 
+    // Profile admission is evaluated against the backend that will actually
+    // run, so an explicitly permitted scalar fallback does not inherit a GPU's
+    // narrower profile matrix. This axis never repairs a format, memory or
+    // reference failure; those keep their own primary reason. An enum outside the
+    // six regular profiles is a format error, not an evidence gap, so it never
+    // sets the profile axis.
+    //
+    // Only backends with an actual profile matrix take part. CPU SIMD and Vulkan
+    // have no admitted session at all in this revision, so they must not borrow
+    // the "profile has no evidence here" wording: their own axis already says
+    // why they are closed.
+    const bool profile_matrix_backend = effective == SessionBackend::CpuScalar ||
+                                        effective == SessionBackend::Metal ||
+                                        effective == SessionBackend::Cuda;
+    if (filmscan3 && hypercine::IsValidEncodingQuality(config.quality) && profile_matrix_backend) {
+        result.profile_note = ProfileAdmissionNote(effective, config.quality);
+        result.profile_admitted = ProfileAdmitted(effective, config.quality);
+        if (!result.profile_admitted) {
+            result.reasons.profile_not_qualified_for_backend = true;
+        }
+    }
     const bool geometry_is_filmscan3 = filmscan3 && FitsInt(config.width) && FitsInt(config.height);
     if (geometry_is_filmscan3) {
         // Qualification is a distinct axis from the geometry validator's
@@ -379,7 +440,8 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     const bool blocked = result.reasons.format_mathematically_invalid ||
                          result.reasons.valid_but_not_implemented || backend_blocks ||
                          result.reasons.memory_budget_exceeded ||
-                         result.reasons.backend_not_qualified_for_geometry || reference_blocks;
+                         result.reasons.backend_not_qualified_for_geometry ||
+                         result.reasons.profile_not_qualified_for_backend || reference_blocks;
     if (!blocked && (cpu_attempt || gpu_attempt) && result.evidence_record && result.geometry_validator_passed) {
         result.reasons.experimentally_supported = true;
         result.allocation_permitted = true;
@@ -409,8 +471,14 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
             ? "backend has no geometry qualification record in this contract revision"
             : "geometry is inside the pixel budget but has no CPU qualification record";
     } else if (reference_blocks) {
+        // A missing required oracle outranks the profile-evidence gap: an
+        // operator who demanded a reference must be told the reference is what
+        // is missing, not that the profile is unproven on this backend.
         result.primary = CapabilityReason::ReferenceMissing;
         result.detail = "original-SDK reference oracle is not available";
+    } else if (result.reasons.profile_not_qualified_for_backend) {
+        result.primary = CapabilityReason::ProfileNotQualifiedForBackend;
+        result.detail = result.profile_note;
     } else if (result.reasons.experimentally_supported) {
         result.primary = CapabilityReason::ExperimentallySupported;
         result.detail = result.fell_back_to_cpu_scalar

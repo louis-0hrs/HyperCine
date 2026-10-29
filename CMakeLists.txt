@@ -418,6 +418,15 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME encoder_backend_session_packets COMMAND test_encoder_backend_selection packets)
         set_tests_properties(encoder_backend_selection_contract encoder_backend_session_packets PROPERTIES
             LABELS "cpu;encoder;session" TIMEOUT 180)
+        # Issue #259 step 3: quality profiles are admitted per backend inside the
+        # same capability/session contract. CPU scalar admits the six profiles
+        # pinned by #318; Metal/CUDA keep their FilmScan3-only packet evidence and
+        # refuse the rest with a dedicated typed reason before any factory call.
+        add_executable(test_encoder_profile_sessions tests/test_encoder_profile_sessions.cpp)
+        target_link_libraries(test_encoder_profile_sessions PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME encoder_profile_session_matrix COMMAND test_encoder_profile_sessions)
+        set_tests_properties(encoder_profile_session_matrix PROPERTIES
+            LABELS "cpu;encoder;session;profile" TIMEOUT 300)
         if(HYPERCINE_ENABLE_CUDA)
             # Issue #259 step 2: the same capability-gated session, now with the
             # existing internal CUDA frontend. GPU-required, no skip exit: a host
