@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #pragma once
 #include "hypercine/standalone.h"
+#include "hypercine/quality_state.h"
 #include <memory>
 
 namespace hypercine { namespace standalone {
@@ -95,6 +96,12 @@ public:
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
                          const FilmScan3Metadata& metadata);
+    // Session quality profile. Only FilmScan3 is qualified on this writer today;
+    // the other five regular profiles throw std::invalid_argument instead of
+    // being emitted with FilmScan3 tables under a different label. The profile is
+    // fixed for the session, including across Reset().
+    void SetSessionQuality(EncodingQuality quality);
+    EncodingQuality session_quality() const noexcept { return quality_; }
     const FilmScan3State& state() const noexcept { return state_; }
     void Reset() noexcept { state_ = FilmScan3State{}; }
     // Per session, not process-global. Default is full hashing so existing
@@ -108,6 +115,7 @@ public:
 private:
     void StampDiagnosticOff(FilmScan3Frame& result);
     bool coefficient_hashing_ = true;
+    EncodingQuality quality_ = EncodingQuality::FilmScan3;
     uint32_t hash_session_ = 0;
     uint32_t diagnostic_serial_ = 1;
 };

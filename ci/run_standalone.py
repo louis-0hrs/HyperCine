@@ -28,6 +28,7 @@ REQUIRED = {
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
+    'profile_enter_contract',
     'filmscan3_geometry', 'filmscan3_geometry_external_decode',
     'filmscan3_geometry_validation', 'filmscan3_geometry_reference_p10',
     'filmscan3_4k_gate_contract',

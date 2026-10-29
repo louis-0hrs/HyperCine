@@ -216,9 +216,13 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/cpu/filmscan3_frontend.cpp
         src/core/filmscan3_encoder.cpp
         src/core/filmscan3_backend.cpp
+        src/core/quality_profile_bridge.cpp
         src/core/encoder_capability.cpp
         src/core/encoder_backend_selection.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    # The six-profile quality mathematics lives in one shared SDK-free library
+    # (#29). The encoder consumes it instead of keeping a second table set.
+    target_link_libraries(hypercine_standalone PRIVATE hypercine_quality_state)
     if(HYPERCINE_BUILD_BENCHMARKS)
         find_package(Threads REQUIRED)
         add_executable(benchmark_wavelet_simd benchmarks/benchmark_wavelet_simd.cpp)
@@ -504,6 +508,15 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_filmscan3 tests/test_filmscan3.cpp)
         target_link_libraries(test_filmscan3 PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_api COMMAND test_filmscan3)
+        # Issue #46: the shared six-profile quality mathematics (#29) is the only
+        # table producer the encoder consumes. This pins the seam and the
+        # fail-closed boundary for the five unqualified profiles.
+        add_executable(test_profile_enter_contract tests/test_profile_enter_contract.cpp)
+        target_include_directories(test_profile_enter_contract PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/core")
+        target_link_libraries(test_profile_enter_contract PRIVATE
+            hypercine_standalone hypercine_quality_state)
+        add_test(NAME profile_enter_contract COMMAND test_profile_enter_contract)
         add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)

@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/filmscan3.h"
 #include "filmscan3_backend.h"
+#include "quality_profile_bridge.h"
 #include <algorithm>
 #include <atomic>
 #include <stdexcept>
@@ -120,6 +121,11 @@ WaveletIsa FilmScan3Encoder::wavelet_isa() const noexcept {
     return frontend_ ? frontend_->Isa() : WaveletIsa::Auto;
 }
 void FilmScan3Encoder::SetCoefficientHashing(bool enabled) noexcept { coefficient_hashing_=enabled; }
+void FilmScan3Encoder::SetSessionQuality(EncodingQuality quality) {
+    const char* refusal=SessionProfileRefusalReason(quality);
+    if(*refusal)throw std::invalid_argument(refusal);
+    quality_=quality;
+}
 void FilmScan3Encoder::StampDiagnosticOff(FilmScan3Frame& result) {
     // 0xD1 in the top byte, slot in the next, then session and serial. A skipped
     // frame is never all zeros, and two skipped frames do not share a fingerprint
@@ -155,8 +161,22 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     auto elapsed=[&](Clock::time_point start){return profile ? std::chrono::duration<double,std::milli>(Clock::now()-start).count() : 0.0;};
     detail::HostTiming timing;
     const auto host_start=stamp();
-    FilmScan3Frame result;result.state=state_;result.state.fs_rate_limiter=NextLimiter(state_,pixels);
-    result.tables=ComputeFilmScan3Tables(result.state.fs_rate_limiter);
+    FilmScan3Frame result;result.state=state_;
+    // The frame limiter and its 36 quant/scale entries come from the single
+    // shared SDK-free calculator (#29), not from a second local table. The
+    // frozen FilmScan3 rate formula stays as an independent cross-check so a
+    // drift between the two fails loudly instead of changing bytes silently.
+    ProfileTableRequest request;
+    request.quality=quality_;
+    request.frame_index=state_.frame_index;
+    request.fs_rate_limiter=state_.fs_rate_limiter;
+    request.previous_completed_sample_bytes=state_.previous_sample_bytes;
+    request.width=g.width;request.height=g.height;
+    const auto session=ComputeProfileTables(request);
+    if(session.fs_rate_limiter!=NextLimiter(state_,pixels))
+        throw std::logic_error("shared quality state and frozen FilmScan3 rate feedback disagree");
+    result.state.fs_rate_limiter=session.fs_rate_limiter;
+    result.tables=session.tables;
     Writer s(g.sample_capacity_bytes ? g.sample_capacity_bytes : 8*pixels+16384);
     s.Tag(1,9);s.Tag(2,3);const auto index=s.bytes.size();for(int c=0;c<3;++c)s.Tag(0,0);
     s.Tag(10,0);s.Tag(11,1);s.Tag(12,3);s.Tag(-71,32);s.Tag(84,1);s.Tag(-91,2);

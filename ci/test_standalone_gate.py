@@ -32,6 +32,14 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, name):
             registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
+    def test_profile_enter_contract_is_mandatory(self):
+        # #46: the shared six-profile calculator is the encoder's only table
+        # producer; dropping the registration must not stay green.
+        name = 'profile_enter_contract'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, name):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_missing_reference_decode_contract_fails(self):
         self.assertIn('reference_decode_contract', REQUIRED)
         with self.assertRaises(ValueError):
