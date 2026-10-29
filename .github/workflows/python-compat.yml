@@ -1,0 +1,48 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+name: RCA160 Python compatibility
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - tools/rca160_all_channel_contract.py
+      - tools/rca160_all_channel_selftest.py
+      - tests/test_rca160_all_channel_contract.py
+      - upstream/**
+      - CMakeLists.txt
+      - .github/workflows/python-compat.yml
+  pull_request:
+    paths:
+      - tools/rca160_all_channel_contract.py
+      - tools/rca160_all_channel_selftest.py
+      - tests/test_rca160_all_channel_contract.py
+      - upstream/**
+      - CMakeLists.txt
+      - .github/workflows/python-compat.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rca160-python:
+    name: RCA160 Python ${{ matrix.python }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Contract, compatibility regression and twelve effective mutations
+        run: python tests/test_rca160_all_channel_contract.py
+      - name: Same fail-closed checks with optimized Python
+        run: python -O tests/test_rca160_all_channel_contract.py
