@@ -572,18 +572,46 @@ if(HYPERCINE_BUILD_STANDALONE)
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
         add_test(NAME p6_sdk_gap_negative_controls COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_gate.py")
+        add_test(NAME p6_sdk_gap_historical_pre325 COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_gate.py"
+            GapGateControls.test_historical_expected_to_fail_before_325)
+        set_tests_properties(p6_sdk_gap_historical_pre325 PROPERTIES LABELS "historical;negative-control")
+        set(HYPERCINE_WINDOWS_SDK_ROOT "" CACHE PATH "Read-only Windows issue321 groups A/B/C")
+        add_test(NAME p6_windows_sdk_gate_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_windows_sdk_gate.py")
+        if(HYPERCINE_WINDOWS_SDK_ROOT)
+            if(NOT HYPERCINE_SDK_GAP_CORPUS_ROOT)
+                message(FATAL_ERROR "Windows input provenance requires the independently pinned gap corpus")
+            endif()
+            foreach(group group-a-sequences group-b-hysteresis group-c-sdk-state)
+                add_test(NAME p6_windows_sdk_${group} COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_windows_sdk_gate.py"
+                    --corpus "${HYPERCINE_WINDOWS_SDK_ROOT}"
+                    --gap-corpus "${HYPERCINE_SDK_GAP_CORPUS_ROOT}" --group ${group}
+                    --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                    --work "${CMAKE_CURRENT_BINARY_DIR}/windows-sdk-work"
+                    --report "${CMAKE_CURRENT_BINARY_DIR}/windows-sdk-${group}.json")
+                set_tests_properties(p6_windows_sdk_${group} PROPERTIES
+                    LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
+            endforeach()
+            add_test(NAME p6_windows_sdk_comparison_negatives COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_windows_sdk_integration.py"
+                --corpus "${HYPERCINE_WINDOWS_SDK_ROOT}")
+            set_tests_properties(p6_windows_sdk_comparison_negatives PROPERTIES
+                LABELS "reference-oracle;negative-control" TIMEOUT 600)
+        endif()
         if(HYPERCINE_SDK_GAP_CORPUS_ROOT)
             string(LENGTH "${HYPERCINE_SDK_GAP_INDEX_SHA256}" sdk_gap_pin_length)
             if(NOT sdk_gap_pin_length EQUAL 64 OR NOT HYPERCINE_SDK_GAP_INDEX_SHA256 MATCHES "^[0-9a-f]+$")
                 message(FATAL_ERROR "A pinned SDK gap corpus transfer SHA256 is required")
             endif()
-            add_test(NAME p6_sdk_gap_packets COMMAND "${Python3_EXECUTABLE}"
+            add_test(NAME p6_sdk_gap_negative_ramp COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_sdk_gap_gate.py"
                 --corpus "${HYPERCINE_SDK_GAP_CORPUS_ROOT}"
                 --index-sha256 "${HYPERCINE_SDK_GAP_INDEX_SHA256}"
                 --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
                 --work "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-work"
-                --report "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-report.json" --require-hold)
+                --report "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-report.json" --expect-negative-ramp)
             add_test(NAME p6_sdk_gap_comparison_negatives COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_integration.py"
                 --corpus "${HYPERCINE_SDK_GAP_CORPUS_ROOT}")
@@ -598,8 +626,8 @@ if(HYPERCINE_BUILD_STANDALONE)
                 --report "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-sequence-report.json" --sequences-only)
             set_tests_properties(p6_sdk_gap_sequences PROPERTIES
                 LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
-            set_tests_properties(p6_sdk_gap_packets PROPERTIES
-                LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
+            set_tests_properties(p6_sdk_gap_negative_ramp PROPERTIES
+                LABELS "reference-oracle;negative-control;non-qualifying" TIMEOUT 7200)
         endif()
         # Issue #46: the only admissible proof that the writer emits another
         # profile is the original Windows packet itself. Registered only when a

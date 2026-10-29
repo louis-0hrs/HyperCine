@@ -1,5 +1,11 @@
 # Original SDK missing-coverage packet experiment (#46)
 
+**Historical snapshot at #322 initial head `da58ed4`, before #325.**
+The original failures and negative experiment below are intentionally preserved.
+See [the forward refresh](SDK_GOLDENS_REFRESH_46.md) for separately measured
+current-main and corrected-source results, independent Windows A/B/C gates,
+and the explicit non-qualifying negative-ramp contract.
+
 This experiment is evidence, not production qualification or certification.
 The old Windows corpus is read-only. A separate dated corpus contains new original
 SDK packets for Low/Medium/High/FilmScan1 at 1920x1080, 120 consecutive frames,

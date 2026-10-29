@@ -103,12 +103,28 @@ def measure(root, index, encoder, work, profile, kind, count):
             'hold_witness_pairs':witness,'frames':rows}
 
 
+def reject_negative_ramp(out):
+    """PASS means rejection of this fixed NON-QUALIFYING experiment, never admission."""
+    if set(out) != {p+'/hold-ramp' for p in PROFILES[:3]}:
+        raise ValueError('negative ramp coverage mismatch')
+    for result in out.values():
+        trace_contract(result['frames'], 40)
+        if result['status'] != 'PASS':
+            raise ValueError('negative ramp packet parity failed')
+        if result['hold_witness_pairs'] or any(r['in_hold_band'] for r in result['frames']):
+            raise ValueError('fixed negative ramp unexpectedly became a hold witness')
+    return 'NON_QUALIFYING_NO_HOLD'
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--corpus',type=Path,required=True);p.add_argument('--index-sha256',required=True)
     p.add_argument('--encoder',type=Path,required=True);p.add_argument('--work',type=Path,required=True)
     p.add_argument('--report',type=Path,required=True);p.add_argument('--require-hold',action='store_true');p.add_argument('--sequences-only',action='store_true')
+    p.add_argument('--expect-negative-ramp',action='store_true')
     a=p.parse_args();root=a.corpus.resolve()
+    if a.expect_negative_ramp and (a.require_hold or a.sequences_only):
+        p.error('negative ramp is separate from positive qualification')
     if sha_file(root/'TRANSFER_SHA256.tsv')!=a.index_sha256: raise ValueError('transfer index pin mismatch')
     index=load_transfer_index(root)
     # Verify every indexed artifact, including manifests and original capture traces.
@@ -131,9 +147,13 @@ def main():
     for profile in PROFILES:
         for kind,count in [('sequence-120f',120),('hold-ramp',40)]:
             if kind=='hold-ramp' and (profile=='filmscan1' or a.sequences_only):continue
+            if a.expect_negative_ramp and kind!='hold-ramp':continue
             out[profile+'/'+kind]=measure(root,index,a.encoder.resolve(),run,profile,kind,count)
             print(profile+'/'+kind+' '+out[profile+'/'+kind]['status']+' '+str(out[profile+'/'+kind]['matched'])+'/'+str(count),flush=True)
     a.report.parent.mkdir(parents=True,exist_ok=True);a.report.write_text(json.dumps(out,indent=1)+'\n')
+    if a.expect_negative_ramp:
+        print('Expected rejection:',reject_negative_ramp(out))
+        return 0
     failed=any(r['status']!='PASS' for r in out.values())
     missing_hold=[p for p in PROFILES[:3] if not out.get(p+'/hold-ramp',{}).get('hold_witness_pairs')]
     print(json.dumps({k:{x:v[x] for x in ('status','matched','requested','hold_witness_pairs')} for k,v in out.items()}))

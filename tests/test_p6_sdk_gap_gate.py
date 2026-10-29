@@ -28,14 +28,23 @@ class GapGateControls(unittest.TestCase):
             self.assertEqual(p.stat().st_size,len(data))
             with self.assertRaisesRegex(SystemExit,'hash mismatch'):gate.verified(root,'sdk.cfhd',index)
 
-    def test_recorded_parity(self):
+    def test_historical_expected_to_fail_before_325(self):
+        """Historical 78/120 stays FAIL; this checks preservation, not qualification."""
         import json
-        record=json.loads((Path(__file__).resolve().parents[1]/'docs/SDK_GAP_PARITY_46.json').read_text())
+        path=Path(__file__).resolve().parents[1]/'docs/SDK_GAP_PARITY_46.json'
+        self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(),
+                         '24ae84d6221e602f96d851a7a75874bc2ecd6caa89dcb8c481651dc4c797882c')
+        record=json.loads(path.read_text())
         for profile,result in record['profiles'].items():
             self.assertEqual(len(result['frames']),120)
             self.assertEqual([r['frame_index'] for r in result['frames']],list(range(120)))
             matched=sum(r['equal'] for r in result['frames'])
             self.assertEqual(matched,result['matched'])
+            self.assertEqual(matched,78 if profile in ('medium','high') else 120)
+            if profile in ('medium','high'):
+                self.assertEqual(result['status'],'FAIL')
+                self.assertEqual([r['frame_index'] for r in result['frames'] if not r['equal']],
+                                 [start+j for start in (17,33,49,65,81,97,113) for j in range(6)])
             self.assertEqual(result['status'],'PASS' if matched==120 else 'FAIL')
             for row in result['frames']:
                 if row['equal']:
@@ -48,7 +57,10 @@ class GapGateControls(unittest.TestCase):
 
     def test_recorded_negative_trajectory(self):
         import json
-        record=json.loads((Path(__file__).resolve().parents[1]/'docs/SDK_GAP_TRAJECTORY_46.json').read_text())
+        path=Path(__file__).resolve().parents[1]/'docs/SDK_GAP_TRAJECTORY_46.json'
+        self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(),
+                         '1b79278947c259fa010d4c5d33d9dafcb8fc30d412c45c0229501b70a1494a10')
+        record=json.loads(path.read_text())
         for name,profile in record['profiles'].items():
             rows=profile['frames']
             self.assertEqual([r['frame'] for r in rows],list(range(40)))
@@ -62,6 +74,19 @@ class GapGateControls(unittest.TestCase):
                 self.assertFalse(in_band)
                 self.assertEqual(len(row['packet_quant_tags']),36)
                 self.assertEqual(len(row['packet_scale_tags']),36)
+
+    def test_negative_ramp_rejects_pseudo_pass(self):
+        rows=[dict(frame_index=i,in_hold_band=False) for i in range(40)]
+        result=dict(status='PASS',frames=rows,hold_witness_pairs=[])
+        out={p+'/hold-ramp':copy.deepcopy(result) for p in gate.PROFILES[:3]}
+        self.assertEqual(gate.reject_negative_ramp(out),'NON_QUALIFYING_NO_HOLD')
+        for mutation in ('band','witness','packet','coverage'):
+            bad=copy.deepcopy(out)
+            if mutation=='band':bad['low/hold-ramp']['frames'][3]['in_hold_band']=True
+            if mutation=='witness':bad['medium/hold-ramp']['hold_witness_pairs']=[[3,4]]
+            if mutation=='packet':bad['high/hold-ramp']['status']='FAIL'
+            if mutation=='coverage':bad.pop('low/hold-ramp')
+            with self.assertRaises(ValueError):gate.reject_negative_ramp(bad)
 
     def test_missing_and_stale_manifest(self):
         m={'schema_version':1,'profile':'low','kind':'sequence-120f','geometry':[1920,1080],

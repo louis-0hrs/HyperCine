@@ -1,3 +1,34 @@
+# Issue 46 — SDK golden refresh (Draft #322)
+
+Status: REVIEW / local implementation and validation complete.
+Publication receipt and exact final head are recorded in the Draft #322 / #46 handoff.
+Main `9909bfc` forward-merged as `68e4dd5`; no conflicts, no tests removed.
+The exact #325 dependency `0be5bef` is locally integrated into this branch only;
+no protected/main or GitHub PR merge. Corpus remains read-only.
+
+Checklist:
+- [x] Read current coordination, activate local privacy hooks, verify identities.
+- [x] Independently verify all four corpus inventories (1,594 indexed artifacts).
+- [x] Preserve historical 78/120 FAIL records and explicitly test their preservation.
+- [x] Separate rejection of the original negative 40-frame ramp from positive gates.
+- [x] Add independent Windows A/B/C packet/state gates and adversarial controls.
+- [x] Required regular Release build/full suite: 55 PASS, 1 SKIP, 0 FAIL / 56.
+- [x] Main-only SDK baseline retains real failures; corrected private full suite 125/125 PASS, 0 skipped, 432.69 s.
+- [x] Corrected public standalone full suite 118/118 PASS, 0 skipped, 199.18 s.
+- [x] Source-bound sanitized result report and manually reviewed staged privacy scan.
+- [ ] Maintainer acceptance of dependency/test scope and exact-head hosted CI.
+
+Open acceptance gates: #325 dependency review/landing; independent review of the
+new tests; exact-head hosted CI; original Windows build/ISA, original seed and
+explicit SDK FRMR qualification. GPU/4K/8K not tested in this lane.
+Next action: maintainer reviews the existing Draft #322 and #325 dependency,
+checks exact-head hosted CI and decides integration; no autonomous merge. See docs/SDK_GOLDENS_REFRESH_46.md
+and its source-bound JSON; original historical records remain unchanged.
+
+---
+
+## Historical initial #322 handoff (unchanged below)
+
 # Issue 46 — missing original SDK packet oracles
 
 Status: REVIEW / BLOCKED_QUALIFICATION; hold-band experiment negative.
