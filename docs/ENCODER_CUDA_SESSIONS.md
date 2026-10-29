@@ -78,9 +78,16 @@ path, so `-lstdc++` resolves to the host compiler's older release. GCC 14 emits
 `ci/test_cuda_host_compiler.py` proves the refusal fires in the real project and
 tests the boundaries that must *not* refuse.
 
-    cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+One measured caveat about the remedy: on CMake 3.31.6 with nvcc 12.4.131,
+`-DCMAKE_CUDA_HOST_COMPILER` is accepted and cached but never forwarded to nvcc —
+even a nonexistent path in it configures successfully, and the CUDA
+identification still reports the toolkit's default host compiler. Name the host
+compiler with `CUDAHOSTCXX` instead, which CMake reads while enabling the CUDA
+language. The guard prints that form, and a contract case asserts it does not
+fall back to the ineffective flag.
+
+    CUDAHOSTCXX=g++-13 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_C_COMPILER=gcc-13 \
-      -DCMAKE_CUDA_HOST_COMPILER=g++-13 \
       -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF \
       -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_ENABLE_CUDA=ON \
       -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON -DCMAKE_CUDA_ARCHITECTURES=80

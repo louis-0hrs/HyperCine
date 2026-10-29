@@ -56,6 +56,13 @@ class GuardFunction(unittest.TestCase):
         # The remedy has to name the compiler the guard measured, or the message
         # sends the reader to a version that is not installed.
         self.assertIn('CMAKE_CXX_COMPILER=g++-13', result.stderr)
+        # The remedy must not name a flag that has no effect on this pair: a
+        # configure that reports success while nvcc keeps its own host compiler
+        # is the same silent-pass shape the guard exists to remove. Measured on
+        # CMake 3.31.6 / nvcc 12.4.131, `-DCMAKE_CUDA_HOST_COMPILER` is cached and
+        # never forwarded, so the message points at CUDAHOSTCXX instead.
+        self.assertIn('CUDAHOSTCXX=g++-13', result.stderr)
+        self.assertNotIn('-DCMAKE_CUDA_HOST_COMPILER=g++-13', result.stderr)
 
     def test_matching_versions_are_accepted(self):
         result = call_guard('GNU', '13.3.0', 'GNU', '13.3.0')

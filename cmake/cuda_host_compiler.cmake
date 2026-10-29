@@ -52,7 +52,15 @@ function(hypercine_require_consistent_cuda_host_compiler
             "repository.\n"
             "Configure with one consistent host compiler, for example:\n"
             "  -DCMAKE_C_COMPILER=gcc-${host_major} "
-            "-DCMAKE_CXX_COMPILER=g++-${host_major} "
-            "-DCMAKE_CUDA_HOST_COMPILER=g++-${host_major}")
+            "-DCMAKE_CXX_COMPILER=g++-${host_major}\n"
+            "and, when nvcc's own default host compiler is not that version, "
+            "name it through the environment variable CMake reads during "
+            "CUDA language enablement:\n"
+            "  CUDAHOSTCXX=g++-${host_major} cmake ...\n"
+            "Note that -DCMAKE_CUDA_HOST_COMPILER does NOT do this here: it is "
+            "recorded in the cache but never reaches nvcc, so the reported "
+            "host compiler stays whatever the toolkit defaults to. Measured "
+            "on CMake 3.31.6 with nvcc 12.4.131, where even a nonexistent path "
+            "in that variable configures successfully. Use CUDAHOSTCXX.")
     endif()
 endfunction()
