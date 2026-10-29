@@ -213,12 +213,10 @@ int main() try {
         Require(ProfileAdmitted(SessionBackend::CpuScalar, quality), "CPU scalar dropped a regular profile");
         Require(ProfileAdmitted(SessionBackend::Cuda, quality), "CUDA matrix profile is not admitted");
     }
-    for (const auto quality : {EncodingQuality::Low, EncodingQuality::Medium, EncodingQuality::High,
-                               EncodingQuality::FilmScan1, EncodingQuality::FilmScan2}) {
-        Require(!ProfileAdmitted(SessionBackend::Metal, quality),
-                "Metal admitted a profile with no native measurement");
+    for (const auto quality : profiles) {
+        Require(ProfileAdmitted(SessionBackend::Metal, quality),
+                "Metal matrix profile is not admitted");
     }
-    Require(ProfileAdmitted(SessionBackend::Metal, EncodingQuality::FilmScan3), "Metal FilmScan3 row missing");
     Require(!ProfileAdmitted(SessionBackend::Cuda, static_cast<EncodingQuality>(0)), "CUDA admitted quality 0");
     Require(!ProfileAdmitted(SessionBackend::Cuda, static_cast<EncodingQuality>(7)), "CUDA admitted quality 7");
     Require(!ProfileAdmitted(SessionBackend::Metal, static_cast<EncodingQuality>(7)), "Metal admitted quality 7");

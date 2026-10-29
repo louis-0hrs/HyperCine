@@ -287,9 +287,14 @@ void MetalContract() {
             "absent Metal inherited GPU requirements or reached Metal factory");
     for (const auto quality : {hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
                                hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
-                               hypercine::EncodingQuality::FilmScan2}) {
-        c = config; c.quality = quality;
-        refused(c, device, CapabilityReason::ProfileNotQualifiedForBackend);
+                               hypercine::EncodingQuality::FilmScan2, hypercine::EncodingQuality::FilmScan3}) {
+        c = config; c.quality = quality; c.allow_cpu_scalar_fallback = false;
+        calls = metal_calls = 0;
+        const auto admitted = SelectBackend(c, device, factories);
+        Require(static_cast<bool>(admitted) && calls == 0 && metal_calls == 1 &&
+                admitted.effective.effective_backend == SessionBackend::Metal &&
+                admitted.frontend->Backend() == FrontendBackend::Metal,
+                "measured Metal profile did not bind the Metal factory");
     }
     std::cout << "PASS fake Metal binding/refusal/identity/init falsifiers (no GPU execution)\n";
 }

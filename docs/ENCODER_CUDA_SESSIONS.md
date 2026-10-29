@@ -54,11 +54,10 @@ session and a CUDA session for low, medium, high, filmscan1, filmscan2 and
 filmscan3. Each frame compares the full packet, all 36 quant/scale entries,
 `fs_rate_limiter`, `fs_overbitrate`, `previous_sample_bytes`, the exact frame
 index, tag -80 and all 30 coefficient hashes. The six frame-0 quant tables must
-be distinct. `ProfileAdmitted()` lists a CUDA profile only when that comparison
-holds. Metal is unchanged unless the same measurement exists there: the five
-non-FilmScan3 profiles stay `ProfileNotQualifiedForBackend`. This is internal
-packet parity, not a product qualification and not an original-SDK or
-SMPTE/VC-5 conformance claim. The test is GPU-required, serial, and has no
+be distinct. `ProfileAdmitted()` lists a CUDA or Metal profile only when that comparison
+holds. The Metal binary is `encoder_metal_profile_matrix` at the same geometry
+and frame indexes. This is internal packet parity, not a product qualification
+and not an original-SDK or SMPTE/VC-5 conformance claim. The test is GPU-required, serial, and has no
 skip exit. `ci/run_standalone.py` still rejects a CUDA-on tree, so the
 registration is enforced by `ci/test_standalone_gate.py` instead of the CPU
 inventory.

@@ -524,15 +524,14 @@ int main() {
             Require(cuda_admitted.allocation_permitted && cuda_admitted.effective_backend == SessionBackend::Cuda &&
                     !cuda_admitted.fell_back_to_cpu_scalar && ProfileAdmitted(SessionBackend::Cuda, quality),
                     "measured CUDA profile was not admitted on CUDA");
-            if (quality == hypercine::EncodingQuality::FilmScan3) continue;
             auto metal_profile = cuda_profile;
             metal_profile.backend = SessionBackend::Metal;
             const std::string metal_name = std::string("metal-") + hypercine::EncodingQualityName(quality);
-            const auto metal_refused = Check(metal_name.c_str(), metal_profile,
-                                             metal_profiles, CapabilityReason::ProfileNotQualifiedForBackend);
-            Require(metal_refused.reasons.profile_not_qualified_for_backend && !metal_refused.fell_back_to_cpu_scalar &&
-                    !ProfileAdmitted(SessionBackend::Metal, quality),
-                    "unmeasured Metal profile was admitted or fell back");
+            const auto metal_admitted = Check(metal_name.c_str(), metal_profile,
+                                             metal_profiles, CapabilityReason::ExperimentallySupported);
+            Require(metal_admitted.allocation_permitted && metal_admitted.effective_backend == SessionBackend::Metal &&
+                    !metal_admitted.fell_back_to_cpu_scalar && ProfileAdmitted(SessionBackend::Metal, quality),
+                    "measured Metal profile was not admitted on Metal");
         }
         auto yuy2 = Film(1920, 1080);
         yuy2.pixel_format = SourcePixelFormat::Yuy2;

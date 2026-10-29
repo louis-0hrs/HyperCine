@@ -137,7 +137,7 @@ class StandaloneGateTests(unittest.TestCase):
                  'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode',
                  'filmscan3_metal_4k_ffmpeg_gate', 'filmscan3_metal_4k_encoder',
                  'filmscan3_metal_multisession', 'filmscan3_metal_geometry_matrix',
-                 'encoder_metal_session_packets'}
+                 'encoder_metal_session_packets', 'encoder_metal_profile_matrix'}
         self.assertEqual(required - REQUIRED, metal)
         for omitted in metal:
             with self.subTest(omitted=omitted), self.assertRaises(ValueError):

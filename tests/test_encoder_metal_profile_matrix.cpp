@@ -2,10 +2,9 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 //
-// Issue #46 Metal half: same 1920x1080 frames 0..3 as the CUDA profile matrix.
-// Compares an explicit Metal encoder with an explicit CPU scalar encoder.
-// This measures packets. It does not admit a profile; ProfileAdmitted stays
-// fail-closed until a green run of this binary is recorded.
+// Issue #46 Metal half: CPU scalar session vs Metal session, 1920x1080,
+// frames 0..3, all six regular profiles. Full packet, 36 quant/scale entries,
+// rate state, exact frame index, tag -80 and 30 coefficient hashes.
 // Not a product qualification and not an original-SDK or SMPTE claim.
 #include "../src/core/encoder_backend_selection.h"
 
@@ -82,6 +81,29 @@ unsigned HeaderQualityStamp(const std::vector<std::uint8_t>& sample) {
     throw std::runtime_error("emitted packet carries no quality stamp");
 }
 
+EncoderSessionConfig MakeConfig(EncodingQuality quality, SessionBackend backend) {
+    EncoderSessionConfig config;
+    config.quality = quality;
+    config.backend = backend;
+    config.width = kWidth;
+    config.height = kHeight;
+    config.input_stride_bytes = static_cast<std::uint64_t>(kWidth) * 4u + 64u;
+    config.input_bytes = config.input_stride_bytes * static_cast<std::uint64_t>(kHeight);
+    config.max_sample_bytes = 8u * static_cast<std::uint64_t>(kWidth) * static_cast<std::uint64_t>(kHeight) + 16384u;
+    config.diagnostic = DiagnosticMode::CoefficientFnv64;
+    return config;
+}
+
+void Fill(AlignedVector<std::uint8_t>& input, std::uint64_t stride, unsigned frame) {
+    for (int y = 0; y < kHeight; ++y) for (int x = 0; x < kWidth; ++x) {
+        auto* pixel = input.data() + static_cast<std::size_t>(y) * stride + 4u * static_cast<unsigned>(x);
+        pixel[0] = static_cast<std::uint8_t>(x + frame * 17);
+        pixel[1] = static_cast<std::uint8_t>(y + frame * 31);
+        pixel[2] = static_cast<std::uint8_t>((x ^ y) + frame * 7);
+        pixel[3] = 255;
+    }
+}
+
 void CompareFrame(const FilmScan3Frame& cpu, const FilmScan3Frame& metal, unsigned frame,
                    std::size_t carried, EncodingQuality quality) {
     const auto name = std::string(EncodingQualityName(quality)) + " frame " + std::to_string(frame);
@@ -105,34 +127,34 @@ void CompareFrame(const FilmScan3Frame& cpu, const FilmScan3Frame& metal, unsign
                 name + " coefficient hash " + std::to_string(slot));
 }
 
-void RunProfile(EncodingQuality quality, std::vector<std::array<unsigned, 36>>& quants) {
-    const FilmScan3Geometry geometry{kWidth, kHeight, 8u * static_cast<std::size_t>(kWidth) * kHeight + 16384u};
-    FilmScan3Encoder cpu(geometry, WaveletIsa::Scalar);
-    FilmScan3Encoder metal(FilmScan3Backend::Metal, geometry);
-    cpu.SetSessionQuality(quality);
-    metal.SetSessionQuality(quality);
-    cpu.SetCoefficientHashing(true);
-    metal.SetCoefficientHashing(true);
-    Require(cpu.wavelet_isa() == WaveletIsa::Scalar, "CPU side was not scalar");
-    Require(metal.wavelet_isa() == WaveletIsa::Auto, "Metal side did not keep the GPU ISA convention");
-    const std::size_t stride = static_cast<std::size_t>(kWidth) * 4u + 64u;
-    const std::size_t bytes = stride * static_cast<std::size_t>(kHeight);
-    AlignedVector<std::uint8_t> input(bytes, 0xa5);
+void RunProfile(EncodingQuality quality, const EncoderDevice& metal_device,
+                std::vector<std::array<unsigned, 36>>& quants) {
+    const auto cpu_config = MakeConfig(quality, SessionBackend::CpuScalar);
+    const auto metal_config = MakeConfig(quality, SessionBackend::Metal);
+    EncoderSession cpu(cpu_config, EncoderDevice{});
+    EncoderSession metal(metal_config, metal_device);
+    Require(cpu.selection().effective.effective_backend == SessionBackend::CpuScalar &&
+            cpu.wavelet_isa() == WaveletIsa::Scalar, "CPU session was not scalar");
+    Require(metal.selection().effective.effective_backend == SessionBackend::Metal &&
+            metal.selection().fallback == ScalarFallbackReason::None &&
+            metal.selection().frontend->Backend() == FrontendBackend::Metal,
+            "Metal session fell back or lost its frontend");
+    AlignedVector<std::uint8_t> input(static_cast<std::size_t>(cpu_config.input_bytes), 0xa5);
     std::size_t carried = 0;
     std::cout << "PROFILE name=" << EncodingQualityName(quality)
               << " id=" << static_cast<int>(quality)
               << " geometry=" << kWidth << 'x' << kHeight
               << " frames=" << kFrames << " indices=0,1,2,3\n";
     for (unsigned frame = 0; frame < kFrames; ++frame) {
-        for (int y = 0; y < kHeight; ++y) for (int x = 0; x < kWidth; ++x) {
-            auto* pixel = input.data() + static_cast<std::size_t>(y) * stride + 4u * static_cast<unsigned>(x);
-            pixel[0] = static_cast<std::uint8_t>(x + frame * 17);
-            pixel[1] = static_cast<std::uint8_t>(y + frame * 31);
-            pixel[2] = static_cast<std::uint8_t>((x ^ y) + frame * 7);
-            pixel[3] = 255;
-        }
-        const auto cpu_frame = cpu.Encode(input.data(), input.size(), stride);
-        const auto metal_frame = metal.Encode(input.data(), input.size(), stride);
+        Fill(input, cpu_config.input_stride_bytes, frame);
+        const auto before = ReadMetalTiming(*metal.selection().frontend);
+        const auto cpu_frame = cpu.Encode(input.data(), input.size(), cpu_config.input_stride_bytes);
+        const auto metal_frame = metal.Encode(input.data(), input.size(), metal_config.input_stride_bytes);
+        const auto after = ReadMetalTiming(*metal.selection().frontend);
+        Require(after.color_dispatches > before.color_dispatches &&
+                after.wavelet_dispatches > before.wavelet_dispatches &&
+                after.command_buffers > before.command_buffers && after.waits > before.waits,
+                std::string(EncodingQualityName(quality)) + " did not execute real Metal work");
         CompareFrame(cpu_frame, metal_frame, frame, carried, quality);
         carried = cpu_frame.sample.size();
         if (frame == 0) quants.push_back(cpu_frame.tables.quant);
@@ -143,6 +165,7 @@ void RunProfile(EncodingQuality quality, std::vector<std::array<unsigned, 36>>& 
                   << " overbitrate=" << cpu_frame.state.fs_overbitrate
                   << " previous_sample_bytes=" << cpu_frame.state.previous_sample_bytes
                   << " stamp=" << HeaderQualityStamp(cpu_frame.sample)
+                  << " metal_wavelet_dispatches=" << (after.wavelet_dispatches - before.wavelet_dispatches)
                   << " equal=cpu_metal\n"
                   << "QUANT profile=" << EncodingQualityName(quality) << " index=" << frame
                   << " values=" << Join(cpu_frame.tables.quant) << '\n'
@@ -155,23 +178,23 @@ void RunProfile(EncodingQuality quality, std::vector<std::array<unsigned, 36>>& 
 }  // namespace
 
 int main() try {
+    const EncodingQuality profiles[] = {
+        EncodingQuality::Low, EncodingQuality::Medium, EncodingQuality::High,
+        EncodingQuality::FilmScan1, EncodingQuality::FilmScan2, EncodingQuality::FilmScan3};
+    for (const auto quality : profiles) {
+        Require(ProfileAdmitted(SessionBackend::CpuScalar, quality), "CPU scalar dropped a regular profile");
+        Require(ProfileAdmitted(SessionBackend::Metal, quality), "Metal matrix profile is not admitted");
+    }
+    Require(!ProfileAdmitted(SessionBackend::Metal, static_cast<EncodingQuality>(0)), "Metal admitted quality 0");
+    Require(!ProfileAdmitted(SessionBackend::Metal, static_cast<EncodingQuality>(7)), "Metal admitted quality 7");
     const auto device = ProbeMetalEncoderDevice();
     Require(device.metal_available && device.metal_max_buffer_length_bytes != 0 &&
             device.metal_recommended_working_set_bytes != 0,
             "real Metal device facts unavailable");
-    // Admission is intentionally not opened by this binary. A green log is the
-    // measurement; ProfileAdmitted changes only in a later reviewed commit.
-    for (const auto quality : {EncodingQuality::Low, EncodingQuality::Medium, EncodingQuality::High,
-                               EncodingQuality::FilmScan1, EncodingQuality::FilmScan2})
-        Require(!ProfileAdmitted(SessionBackend::Metal, quality),
-                "Metal admission moved without a separate reviewed commit");
-    Require(ProfileAdmitted(SessionBackend::Metal, EncodingQuality::FilmScan3), "FilmScan3 Metal row missing");
     std::cout << "PROFILE_MATRIX backend=metal geometry=" << kWidth << 'x' << kHeight
               << " frames=" << kFrames << " indices=0,1,2,3\n";
     std::vector<std::array<unsigned, 36>> quants;
-    for (const auto quality : {EncodingQuality::Low, EncodingQuality::Medium, EncodingQuality::High,
-                               EncodingQuality::FilmScan1, EncodingQuality::FilmScan2, EncodingQuality::FilmScan3})
-        RunProfile(quality, quants);
+    for (const auto quality : profiles) RunProfile(quality, device, quants);
     Require(quants.size() == 6, "profile matrix did not run six profiles");
     std::set<std::array<unsigned, 36>> distinct(quants.begin(), quants.end());
     Require(distinct.size() == 6, "six profiles did not produce six distinct quant tables");

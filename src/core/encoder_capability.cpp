@@ -138,9 +138,18 @@ bool ProfileAdmitted(SessionBackend backend, EncodingQuality quality) noexcept {
         // #318 measured SDK-free writer packets for every regular profile.
         return true;
     case SessionBackend::Metal:
-        // No per-profile Metal packet measurement in this revision.
-        // FilmScan3 remains the only Metal row with a bounded session record.
-        return quality == EncodingQuality::FilmScan3;
+        // encoder_metal_profile_matrix, 1920x1080, frames 0..3. Same packet,
+        // quant/scale, rate-state, frame-index and 30-hash comparison as CUDA.
+        switch (quality) {
+        case EncodingQuality::Low:
+        case EncodingQuality::Medium:
+        case EncodingQuality::High:
+        case EncodingQuality::FilmScan1:
+        case EncodingQuality::FilmScan2:
+        case EncodingQuality::FilmScan3:
+            return true;
+        }
+        return false;
     case SessionBackend::Cuda:
         // encoder_cuda_profile_matrix, 1920x1080, frames 0..3. A row is listed
         // only after that gate matched packet bytes, all 36 quant/scale entries,
