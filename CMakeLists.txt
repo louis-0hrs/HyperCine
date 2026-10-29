@@ -158,6 +158,8 @@ option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 fro
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
 # This path intentionally returns before any SDK include directory or target.
 set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quality-profile corpus root")
+set(HYPERCINE_ISSUE46_GROUP_A_CORPUS "" CACHE PATH
+    "Optional 120-frame Windows sequence corpus (group-a-sequences) for the #46 packet-table replay")
 add_library(hypercine_quality_state STATIC src/core/quality_state.cpp)
 target_include_directories(hypercine_quality_state PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_features(hypercine_quality_state PUBLIC cxx_std_17)
@@ -193,6 +195,19 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
         set_tests_properties(quality_state_windows_oracle PROPERTIES
             ENVIRONMENT "HYPERCINE_TEST_COMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
             TIMEOUT 3600)
+    endif()
+    # Issue #46: the four 120-frame Windows sequences, compared frame by frame
+    # against the band tables parsed out of each packet. Separate from the
+    # manifest replay above because it answers a different question: that one
+    # checks a pinned derivation, this one checks the observable packet tables.
+    if(HYPERCINE_ISSUE46_GROUP_A_CORPUS)
+        find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME issue46_group_a_packet_tables COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/verify_issue46_group_a.py"
+            --probe $<TARGET_FILE:quality_state_probe>
+            --corpus "${HYPERCINE_ISSUE46_GROUP_A_CORPUS}")
+        set_tests_properties(issue46_group_a_packet_tables PROPERTIES
+            LABELS "quality;windows-oracle" TIMEOUT 3600)
     endif()
     return()
 endif()
