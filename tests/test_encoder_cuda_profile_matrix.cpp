@@ -2,23 +2,32 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 //
-// Issue #46: per-profile CPU scalar session vs CUDA session on one input.
-// Compares full packet bytes, all 36 quant/scale entries, rate state
-// (fs_rate_limiter, fs_overbitrate, previous_sample_bytes), the exact frame
-// index and all 30 coefficient hashes. Frame indices are the requested
-// sequence 0..kFrames-1, not a zip of a shorter trace.
+// Issue #324: per-profile CPU scalar session vs CUDA session on one input.
+// Twenty consecutive frames (indices 0..19, not a zip of a shorter trace).
+// Each frame is compared field by field: full packet bytes, all 36 quant
+// entries, all 36 scale entries, fs_rate_limiter, fs_overbitrate (the overrate
+// selection is the quant table those counters choose), previous_sample_bytes,
+// the exact frame index and all 30 coefficient hashes.
+// Frames 8 and 17 are named coverage points. Low/Medium/High must also reach
+// a frame whose overbitrate counter is greater than 1; that frame is compared
+// with the same fields, not summarized away.
 //
-// This is an internal packet-parity gate. It is not a product qualification,
-// not an original-SDK stage claim and not a SMPTE/VC-5 conformance claim.
+// The original SDK is not linked by this binary and no source-bound SDK packet
+// fixture is compiled in. That axis is reported as not compared and is not a
+// PASS. This is not a product qualification and not a SMPTE/VC-5 claim.
 #include "../src/core/encoder_backend_selection.h"
 #include "../src/cuda/filmscan3_cuda_stats.h"
 
+#include <cuda_runtime.h>
+
 #include <array>
+#include <climits>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -29,7 +38,8 @@ using namespace hypercine::standalone::detail;
 namespace {
 constexpr int kWidth = 1920;
 constexpr int kHeight = 1080;
-constexpr unsigned kFrames = 4;  // indices 0, 1, 2, 3 exactly
+constexpr unsigned kFrames = 20;  // indices 0..19 exactly
+constexpr unsigned kSpatialLaunchesPerFrame = 6;
 
 void Require(bool value, const std::string& message) {
     if (!value) throw std::runtime_error(message);
@@ -59,6 +69,20 @@ std::string JoinHashes(const std::array<std::uint64_t, 30>& hashes) {
     return out.str();
 }
 
+std::string JoinInts(const std::vector<int>& values) {
+    std::ostringstream out;
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        if (i) out << ',';
+        out << values[i];
+    }
+    return out.str();
+}
+
+bool UsesOverbitrateCounter(EncodingQuality quality) {
+    return quality == EncodingQuality::Low || quality == EncodingQuality::Medium ||
+           quality == EncodingQuality::High;
+}
+
 EncoderSessionConfig MakeConfig(EncodingQuality quality, SessionBackend backend) {
     EncoderSessionConfig config;
     config.quality = quality;
@@ -72,16 +96,40 @@ EncoderSessionConfig MakeConfig(EncodingQuality quality, SessionBackend backend)
     return config;
 }
 
-void Fill(AlignedVector<std::uint8_t>& input, const EncoderSessionConfig& config, unsigned frame) {
+void Fill(AlignedVector<std::uint8_t>& input, const EncoderSessionConfig& config, unsigned frame, bool noise) {
+    // Noise is the deterministic LCG from seed 0x1337BEEF. The gradient alone
+    // never pushes Medium or High through the 120% bitrate step, so it cannot
+    // demand an overbitrate counter above 1.
+    std::uint32_t state = 0x1337BEEFu ^ (frame * 0x9E3779B9u);
     for (int y = 0; y < config.height; ++y) {
         for (int x = 0; x < config.width; ++x) {
             auto* pixel = input.data() + static_cast<std::size_t>(y) * config.input_stride_bytes + 4u * static_cast<unsigned>(x);
-            pixel[0] = static_cast<std::uint8_t>(x + frame * 17);
-            pixel[1] = static_cast<std::uint8_t>(y + frame * 31);
-            pixel[2] = static_cast<std::uint8_t>((x ^ y) + frame * 7);
+            if (noise) {
+                state = state * 1664525u + 1013904223u;
+                pixel[0] = static_cast<std::uint8_t>(state);
+                pixel[1] = static_cast<std::uint8_t>(state >> 8);
+                pixel[2] = static_cast<std::uint8_t>(state >> 16);
+            } else {
+                pixel[0] = static_cast<std::uint8_t>(x + frame * 17);
+                pixel[1] = static_cast<std::uint8_t>(y + frame * 31);
+                pixel[2] = static_cast<std::uint8_t>((x ^ y) + frame * 7);
+            }
             pixel[3] = 255;
         }
     }
+}
+
+// True when the previous packet is above 120% of the profile ceiling at 30 fps.
+// The arithmetic follows the encoder: bit count via int32, times the frame rate
+// in float, then the integer 12/10 step. This is the band where a counter that
+// is already positive must move above 1. It is not an original-SDK oracle.
+bool PreviousAbove120(EncodingQuality quality, std::size_t previous_bytes) {
+    if (previous_bytes == 0 || !UsesOverbitrateCounter(quality)) return false;
+    const std::int64_t upper = 130000000LL + (static_cast<std::int64_t>(static_cast<int>(quality)) - 2) * 20000000LL;
+    const std::int64_t bits = static_cast<std::int64_t>(previous_bytes) * 8;
+    if (bits > INT_MAX) return true;
+    const int current = static_cast<int>(static_cast<float>(static_cast<std::int32_t>(bits)) * 30.0f);
+    return static_cast<std::int64_t>(current) > upper * 12 / 10;
 }
 
 // Tag -80 is the session quality enum. A writer that ignores the profile and
@@ -143,12 +191,27 @@ void CompareFrame(const FilmScan3Frame& cpu, const FilmScan3Frame& cuda, unsigne
 }
 
 struct ProfileRecord {
-    EncodingQuality quality;
+    const char* pattern = "gradient";
+    EncodingQuality quality = EncodingQuality::Low;
     std::array<unsigned, 36> quant{};
     std::array<unsigned, 36> scale{};
+    bool frame8_compared = false;
+    bool frame17_compared = false;
+    unsigned overbitrate_gt1_frames = 0;
+    unsigned frames_above_120 = 0;
+    int max_overbitrate = 0;
+    std::size_t max_packet_bytes = 0;
+    std::vector<int> over_trace;
+    std::vector<int> limiter_trace;
+    std::vector<unsigned> band_violations;
 };
 
-void RunProfile(EncodingQuality quality, const EncoderDevice& cuda_device, std::vector<ProfileRecord>& records) {
+void ReportSdkNotCompared();
+
+// records == nullptr runs the pass for parity only; the recorded pass is the one
+// that has to reach overbitrate > 1, so the profile total stays six.
+void RunProfile(const char* pattern, bool noise, EncodingQuality quality, const EncoderDevice& cuda_device,
+                std::vector<ProfileRecord>* records_out, std::uint64_t& spatial_dispatches) {
     const auto cpu_config = MakeConfig(quality, SessionBackend::CpuScalar);
     const auto cuda_config = MakeConfig(quality, SessionBackend::Cuda);
     EncoderDevice cpu_device;
@@ -166,24 +229,42 @@ void RunProfile(EncodingQuality quality, const EncoderDevice& cuda_device, std::
     AlignedVector<std::uint8_t> input(static_cast<std::size_t>(cpu_config.input_bytes), 0xa5);
     std::size_t carried = 0;
     ProfileRecord record;
+    record.pattern = pattern;
     record.quality = quality;
-    std::cout << "PROFILE name=" << EncodingQualityName(quality)
+    std::cout << "PROFILE pattern=" << pattern
+              << " name=" << EncodingQualityName(quality)
               << " id=" << static_cast<int>(quality)
               << " geometry=" << kWidth << 'x' << kHeight
-              << " frames=" << kFrames << " indices=0,1,2,3\n";
+              << " frames=" << kFrames << " indices=0..19\n";
     for (unsigned frame = 0; frame < kFrames; ++frame) {
-        Fill(input, cpu_config, frame);
+        Fill(input, cpu_config, frame, noise);
+        const bool above_120 = PreviousAbove120(quality, carried);
         const auto before = CudaSpatialDispatchCount(*cuda.selection().frontend);
         const auto cpu_frame = cpu.Encode(input.data(), input.size(), cpu_config.input_stride_bytes);
         const auto cuda_frame = cuda.Encode(input.data(), input.size(), cuda_config.input_stride_bytes);
         const auto after = CudaSpatialDispatchCount(*cuda.selection().frontend);
-        Require(after - before == 6u, std::string(EncodingQualityName(quality)) + " CUDA spatial launch count");
+        const auto launches = after - before;
+        Require(launches == kSpatialLaunchesPerFrame,
+                std::string(EncodingQualityName(quality)) + " CUDA spatial launch count frame " + std::to_string(frame));
+        spatial_dispatches += launches;
         CompareFrame(cpu_frame, cuda_frame, frame, carried, quality);
         carried = cpu_frame.sample.size();
         if (frame == 0) {
             record.quant = cpu_frame.tables.quant;
             record.scale = cpu_frame.tables.scale;
         }
+        record.over_trace.push_back(cpu_frame.state.fs_overbitrate);
+        record.limiter_trace.push_back(cpu_frame.state.fs_rate_limiter);
+        if (cpu_frame.state.fs_overbitrate > record.max_overbitrate)
+            record.max_overbitrate = cpu_frame.state.fs_overbitrate;
+        if (cpu_frame.sample.size() > record.max_packet_bytes)
+            record.max_packet_bytes = cpu_frame.sample.size();
+        if (frame == 8) record.frame8_compared = true;
+        if (frame == 17) record.frame17_compared = true;
+        const bool over_gt1 = cpu_frame.state.fs_overbitrate > 1;
+        if (over_gt1) ++record.overbitrate_gt1_frames;
+        if (above_120) ++record.frames_above_120;
+        if (above_120 && !over_gt1) record.band_violations.push_back(frame);
         std::cout << "FRAME profile=" << EncodingQualityName(quality)
                   << " index=" << frame
                   << " packet_bytes=" << cpu_frame.sample.size()
@@ -191,17 +272,55 @@ void RunProfile(EncodingQuality quality, const EncoderDevice& cuda_device, std::
                   << " overbitrate=" << cpu_frame.state.fs_overbitrate
                   << " previous_sample_bytes=" << cpu_frame.state.previous_sample_bytes
                   << " stamp=" << HeaderQualityStamp(cpu_frame.sample)
-                  << " dispatch=6 equal=cpu_cuda\n"
+                  << " dispatch=" << launches
+                  << " above_120=" << (above_120 ? 1 : 0)
+                  << " packet_equal=1 quant_equal=1 scale_equal=1 limiter_equal=1"
+                  << " overbitrate_equal=1 index_equal=1 hash_equal=1 equal=cpu_cuda\n"
                   << "QUANT profile=" << EncodingQualityName(quality) << " index=" << frame
                   << " values=" << JoinQuant(cpu_frame.tables.quant) << '\n'
                   << "SCALE profile=" << EncodingQualityName(quality) << " index=" << frame
                   << " values=" << JoinQuant(cpu_frame.tables.scale) << '\n'
                   << "HASHES profile=" << EncodingQualityName(quality) << " index=" << frame
                   << " count=30 values=" << JoinHashes(cpu_frame.coefficient_fnv64) << '\n';
+        if (frame == 8 || frame == 17 || over_gt1 || above_120) {
+            std::cout << "CHECKED pattern=" << pattern
+                      << " profile=" << EncodingQualityName(quality)
+                      << " index=" << frame
+                      << " frame8=" << (frame == 8 ? 1 : 0)
+                      << " frame17=" << (frame == 17 ? 1 : 0)
+                      << " overbitrate_gt1=" << (over_gt1 ? 1 : 0)
+                      << " above_120=" << (above_120 ? 1 : 0)
+                      << " packet_bytes=" << cpu_frame.sample.size()
+                      << " limiter=" << cpu_frame.state.fs_rate_limiter
+                      << " overbitrate=" << cpu_frame.state.fs_overbitrate
+                      << " previous_sample_bytes=" << cpu_frame.state.previous_sample_bytes
+                      << " quant_slot1=" << cpu_frame.tables.quant[1]
+                      << " scale_slot1=" << cpu_frame.tables.scale[1]
+                      << " fields=packet,quant36,scale36,limiter,overbitrate,index,hash30"
+                      << " equal=cpu_cuda\n";
+        }
     }
-    records.push_back(record);
-    std::cout << "PASS profile=" << EncodingQualityName(quality)
-              << " cpu_cuda_frames=" << kFrames << " full-packet/36quant/36scale/rate/index/30hash\n";
+    Require(record.over_trace.size() == kFrames, std::string(EncodingQualityName(quality)) + " did not compare 20 frames");
+    Require(record.frame8_compared, std::string(EncodingQualityName(quality)) + " frame 8 was not compared");
+    Require(record.frame17_compared, std::string(EncodingQualityName(quality)) + " frame 17 was not compared");
+    std::cout << "PARITY pattern=" << pattern
+              << " profile=" << EncodingQualityName(quality)
+              << " cpu_cuda_frames=" << kFrames
+              << " status=match fields=packet,quant36,scale36,limiter,overbitrate,overrate_quant,index,hash30"
+              << " frame8=compared frame17=compared"
+              << " overbitrate_gt1_frames=" << record.overbitrate_gt1_frames
+              << " frames_above_120=" << record.frames_above_120
+              << " max_overbitrate=" << record.max_overbitrate
+              << " over_trace=" << JoinInts(record.over_trace)
+              << " limiter_trace=" << JoinInts(record.limiter_trace) << '\n';
+    if (records_out != nullptr) records_out->push_back(record);
+}
+
+void ReportSdkNotCompared() {
+    std::cout << "SDK_COMPARE status=not_compared"
+              << " reason=sdk_free_standalone_encoder_is_linked_original_sdk_is_not"
+              << " and_no_source_bound_original_sdk_packet_fixture_is_compiled_in"
+              << " counted_as_pass=no\n";
 }
 }  // namespace
 
@@ -224,19 +343,86 @@ int main() try {
     const auto device = ProbeCudaEncoderDevice();
     Require(device.cuda_available && device.cuda_hardware_observed && device.cuda_total_global_memory_bytes != 0,
             "real CUDA device facts unavailable");
+    cudaDeviceProp properties{};
+    Require(cudaGetDeviceProperties(&properties, 0) == cudaSuccess, "cudaGetDeviceProperties failed");
+    Require(properties.totalGlobalMem == device.cuda_total_global_memory_bytes,
+            "probe memory does not match cudaGetDeviceProperties");
+    std::cout << "DEVICE name=" << properties.name
+              << " compute=" << properties.major << '.' << properties.minor
+              << " memory_bytes=" << properties.totalGlobalMem
+              << " multiprocessors=" << properties.multiProcessorCount << '\n';
     std::cout << "PROFILE_MATRIX geometry=" << kWidth << 'x' << kHeight
-              << " frames=" << kFrames << " indices=0,1,2,3"
+              << " frames=" << kFrames << " indices=0..19"
+              << " device=" << properties.name
               << " device_memory_bytes=" << device.cuda_total_global_memory_bytes << '\n';
 
     std::vector<ProfileRecord> records;
-    for (const auto quality : profiles) RunProfile(quality, device, records);
+    std::uint64_t spatial_dispatches = 0;
+    // Two passes per profile: the plain gradient proves parity on the pattern the
+    // older four-frame test used, the seeded noise pass is the one that drives
+    // the rate counter past 1 and is the pass that is recorded.
+    std::uint64_t passes = 0;
+    for (const auto quality : profiles) {
+        RunProfile("gradient", false, quality, device, nullptr, spatial_dispatches);
+        ++passes;
+        RunProfile("noise", true, quality, device, &records, spatial_dispatches);
+        ++passes;
+    }
     Require(records.size() == 6, "profile matrix did not run six profiles");
+    const std::uint64_t expected_dispatches =
+        passes * kFrames * kSpatialLaunchesPerFrame;
+    Require(spatial_dispatches == expected_dispatches, "spatial dispatch total does not match executed frames");
+    std::cout << "GPU_EXECUTION device=" << properties.name
+              << " compute=" << properties.major << '.' << properties.minor
+              << " spatial_dispatches=" << spatial_dispatches
+              << " frames_executed=" << (passes * kFrames)
+              << " launches_per_frame=" << kSpatialLaunchesPerFrame << '\n';
+
     std::set<std::array<unsigned, 36>> distinct;
     for (const auto& record : records) distinct.insert(record.quant);
     Require(distinct.size() == 6, "six profiles did not produce six distinct quant tables");
     std::cout << "DISCRIMINATOR distinct_frame0_quant_tables=" << distinct.size()
               << " profiles=6 geometry=" << kWidth << 'x' << kHeight << " frame_index=0\n";
-    std::cout << "PASS cuda profile matrix 6/6 cpu-vs-cuda full packet parity\n";
+
+    ReportSdkNotCompared();
+
+    std::ostringstream coverage_gap;
+    bool coverage_ok = true;
+    for (const auto& record : records) {
+        const bool needs_over = UsesOverbitrateCounter(record.quality);
+        std::cout << "COVERAGE profile=" << EncodingQualityName(record.quality)
+                  << " frames=" << kFrames
+                  << " frame8=" << (record.frame8_compared ? "compared" : "missing")
+                  << " frame17=" << (record.frame17_compared ? "compared" : "missing")
+                  << " overbitrate_gt1_frames=" << record.overbitrate_gt1_frames
+                  << " max_overbitrate=" << record.max_overbitrate
+                  << " max_packet_bytes=" << record.max_packet_bytes
+                  << " over_trace=" << JoinInts(record.over_trace) << '\n';
+        if (!needs_over) {
+            std::cout << "COVERAGE profile=" << EncodingQualityName(record.quality)
+                      << " overbitrate_counter=not_used_quality_above_high status=reported_not_required\n";
+            continue;
+        }
+        if (record.overbitrate_gt1_frames == 0 || record.max_overbitrate <= 1) {
+            coverage_ok = false;
+            coverage_gap << EncodingQualityName(record.quality)
+                         << " max_overbitrate=" << record.max_overbitrate
+                         << " trace=" << JoinInts(record.over_trace)
+                         << " max_packet_bytes=" << record.max_packet_bytes << "; ";
+            std::cout << "COVERAGE_FAIL profile=" << EncodingQualityName(record.quality)
+                      << " required_state=overbitrate_gt1 observed=no\n";
+        } else {
+            std::cout << "COVERAGE_OK profile=" << EncodingQualityName(record.quality)
+                      << " required_state=overbitrate_gt1 frames=" << record.overbitrate_gt1_frames
+                      << " max_overbitrate=" << record.max_overbitrate << '\n';
+        }
+    }
+    if (!coverage_ok) {
+        throw std::runtime_error(
+            "required overbitrate>1 state was not observed on low/medium/high; " + coverage_gap.str());
+    }
+    std::cout << "PASS cuda profile matrix 6/6 cpu-vs-cuda frames=" << kFrames
+              << " sdk=not_compared\n";
     return 0;
 } catch (const std::exception& error) {
     std::cerr << "FAIL " << error.what() << '\n';

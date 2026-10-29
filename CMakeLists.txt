@@ -484,6 +484,18 @@ if(HYPERCINE_BUILD_STANDALONE)
             target_compile_definitions(hypercine_encode_filmscan3_metal PRIVATE HYPERCINE_METAL_AUDIT=1)
             target_link_libraries(hypercine_encode_filmscan3_metal PRIVATE hypercine_standalone)
         endif()
+        if(NOT APPLE)
+            # Issue #324: same 20-frame Metal matrix source. Non-Darwin cannot
+            # execute it. The binary prints the reason and returns 77. CTest must
+            # show Skipped. A missing test, or exit 0, would hide that as a pass.
+            add_executable(test_encoder_metal_profile_matrix tests/test_encoder_metal_profile_matrix.cpp)
+            target_link_libraries(test_encoder_metal_profile_matrix PRIVATE hypercine_standalone Threads::Threads)
+            add_test(NAME encoder_metal_profile_matrix COMMAND test_encoder_metal_profile_matrix)
+            set_tests_properties(encoder_metal_profile_matrix PROPERTIES
+                SKIP_RETURN_CODE 77
+                LABELS "metal;encoder;session"
+                TIMEOUT 60)
+        endif()
         if(HYPERCINE_ENABLE_VULKAN)
             # CPU<->Vulkan parity. GPU-required run fails closed when no Vulkan
             # compute device is usable; the same binary is a skip when not required.
