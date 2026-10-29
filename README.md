@@ -41,6 +41,43 @@ HyperCine is an independent C++17 / NVIDIA CUDA engineering and research project
 
 **Experimental Apple Silicon work.** A separate SDK-free CPU encoder supports fixed FS3-Q2 and an experimental stateful FilmScan 3 profile. It is **not** part of the CUDA performance comparison. See the [standalone encoder report](docs/MACOS_STANDALONE_ENCODER.md) and [FilmScan 3 validation](docs/MACOS_FILMSCAN3_CPU.md).
 
+## Current SDK-free encoder qualification (October 2026)
+
+The **SDK-free standalone encoder** is a separate, evolving implementation from the
+Phase 3A.2c CUDA benchmark path above. Its internal YUV422 p10 GOP1 writer now
+supports the six quality settings **Low, Medium, High, FilmScan1, FilmScan2 and
+FilmScan3**. This does **not** imply that all six are qualified for every
+geometry, frame sequence, CPU/GPU backend or production application. Do not
+extrapolate the legacy CUDA benchmark numbers to this standalone writer.
+
+The original GoPro SDK remains the reference oracle. The six-quality writer's
+rate-control counter was corrected to match the original SDK's overbitrate
+enter/hold/leave transitions; an original-SDK 7-frame hysteresis regression is
+checked in. Independently indexed private Windows/Linux golden corpora have
+been hash-verified, with 480 normalized original-SDK packet comparisons reported
+equal across hosts. These checks are **not** a full SMPTE VC-5 conformance
+certification. Source-build provenance limitations, additional geometry and
+timebase qualification, and independent GPU-required evidence remain open.
+Private golden packets are deliberately **not** included in this repository or
+the public hosted CI.
+
+- [#46 — SDK oracle and quality qualification](https://github.com/louis-0hrs/HyperCine/issues/46)
+  and [#321 — Windows reference corpus](https://github.com/louis-0hrs/HyperCine/issues/321)
+  track remaining source-bound validation and provenance.
+- [#259 — internal encoder sessions and backends](https://github.com/louis-0hrs/HyperCine/issues/259)
+  tracks per-profile CPU/CUDA/Metal admission. A CPU packet match is not
+  proof of GPU execution, and GPU/CPU self-consistency is not an SDK oracle.
+- [#37 — RGB444 p12](https://github.com/louis-0hrs/HyperCine/issues/37)
+  tracks the separate signed pre-quant intermediate reference still needed
+  before RGB444 packet bit-identity can be claimed.
+- [Internal CUDA session scope and native test instructions](docs/ENCODER_CUDA_SESSIONS.md)
+  document experimental backend limits; the existing Phase 3A.2c
+  performance figures above remain a **different** pipeline.
+
+For SDK-free tests, use the standalone CMake configuration below. A hosted
+GPU-free green workflow does not certify native CUDA/Metal kernels or replay
+the private original-SDK golden corpus.
+
 ## Architecture
 
 ### Frozen upstream, separate implementation
@@ -175,7 +212,7 @@ The decoder reproducibility and release-gating investigations are tracked separa
 
 **Performance:** [Canonical results in detail](docs/BENCHMARK_DETAILS.md) · [Benchmark methodology and historical comparison](docs/PHASE3A1_BENCHMARK_HARDENING.md) · [Benchmark results guide](benchmarks/results/README.md) · [Optimization opportunities](docs/PHASE3B_PERFORMANCE_OPPORTUNITIES.md)
 
-**Implementation and correctness:** [Sequence correctness](docs/PHASE3A_SEQUENCE_CORRECTNESS.md) · [Entropy](docs/ENTROPY.md) · [CUDA Phase 2D](docs/CUDA_PHASE2D.md)
+**Implementation and correctness:** [Sequence correctness](docs/PHASE3A_SEQUENCE_CORRECTNESS.md) · [Entropy](docs/ENTROPY.md) · [CUDA Phase 2D](docs/CUDA_PHASE2D.md) · [Internal CUDA sessions](docs/ENCODER_CUDA_SESSIONS.md) · [Quality/oracle qualification issue #46](https://github.com/louis-0hrs/HyperCine/issues/46)
 
 **Contributing:** [Contribution guide](CONTRIBUTING.md) · [Security policy](SECURITY.md)
 
