@@ -568,6 +568,11 @@ if(HYPERCINE_BUILD_STANDALONE)
             "${CMAKE_CURRENT_SOURCE_DIR}/ci/test_standalone_gate.py")
         add_test(NAME rgb444_packet_probe COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_formats/test_rgb444_probe.py")
+        # Issue #37: the measured band contract of original RGB444 packets. This
+        # is a read-only measurement of declared geometry and quant/scale values;
+        # it is not an encoder, transform or decode claim.
+        add_test(NAME rgb444_band_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_formats/test_rgb444_band_contract.py")
         add_test(NAME windows_reference_sdk_coefficients COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
             --probe $<TARGET_FILE:hypercine_reference_probe>)
