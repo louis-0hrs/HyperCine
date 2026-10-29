@@ -22,6 +22,10 @@ REQUIRED = {
     'rgb444_packet_probe',
     # #37: the measured p12 band table must never disappear from the gate.
     'rgb444_p12_quality_table', 'rgb444_p12_quality_pin',
+    # #37: neither may the p12 transformation stage. It is the level the family
+    # was missing; losing its registration would silently return the family to a
+    # p10-shaped transform with a p12 table on top.
+    'rgb444_p12_transform_contract',
     'reference_decode_contract',
     'quality_state_unit', 'standalone_gate_guardrails',
     'optimized_standalone_acceptance',

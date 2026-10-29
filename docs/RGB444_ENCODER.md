@@ -119,6 +119,17 @@ source/packet/decoded files do not contain those planes. Only then add a genuine
 `Encode`/metadata/quality interface and CLI. The
 existing p10 writer/36-entry tables must not be assumed valid for RGB p12.
 
+One part of that list is no longer open: the **prescale** shape of the p12
+spatial transform is measured from the original bitstream rather than inferred.
+All 24 packets of the frozen RGB444 sample declare `CODEC_TAG_PRESCALE_TABLE`
+`[0, 2, 2, 0, …]` at precision 12, against `[0, 2, 0, …]` for the 10-bit table in
+`upstream/Codec/wavelet.c`. The stage that applies it is in
+[RGB444_P12_TRANSFORM.md](RGB444_P12_TRANSFORM.md), together with the level
+binding and its four mutants. The remaining semantics — transform, channel
+mapping beyond the source-derived G/R/B order, band, quant and framing — are
+still `PENDING_SDK_INTERNAL_STAGE`, so the signed-stage oracle is still the gate
+before a packet writer.
+
 ## Tests and integration
 
 The separate `hypercine_rgb444_frame` target is built in SDK-free standalone
