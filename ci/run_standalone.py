@@ -20,6 +20,8 @@ REQUIRED = {
     'rgb444_rg48_replay_contract', 'rgb444_rg48_allocation_failure',
     'rgb444_allocation_failure',
     'rgb444_packet_probe',
+    # #37: the measured p12 band table must never disappear from the gate.
+    'rgb444_p12_quality_table', 'rgb444_p12_quality_pin',
     'reference_decode_contract',
     'quality_state_unit', 'standalone_gate_guardrails',
     'optimized_standalone_acceptance',

@@ -161,6 +161,12 @@ set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quali
 add_library(hypercine_quality_state STATIC src/core/quality_state.cpp)
 target_include_directories(hypercine_quality_state PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_features(hypercine_quality_state PUBLIC cxx_std_17)
+# Issue #37: format-specific RGB444 p12 band tables. Deliberately a separate
+# target from hypercine_quality_state, which models the p10 YUV 4:2:2 path and
+# rejects 12-bit input by construction.
+add_library(hypercine_rgb444_quality STATIC src/core/rgb444_quality.cpp)
+target_include_directories(hypercine_rgb444_quality PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_compile_features(hypercine_rgb444_quality PUBLIC cxx_std_17)
 # The incompatibility guard for quality-state-only moved to the top of the file so
 # it runs before CUDA compiler detection; this block only builds that mode.
 if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
@@ -394,6 +400,13 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_quality_state tests/test_quality_state.cpp)
         target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
         add_test(NAME quality_state_unit COMMAND test_quality_state)
+        # Issue #37: the measured RGB444 p12 band table, pinned from 112 original
+        # packets, plus proof that the p10 YUV calculator cannot produce it.
+        add_executable(test_rgb444_p12_quality tests/test_rgb444_quality.cpp)
+        target_link_libraries(test_rgb444_p12_quality PRIVATE
+            hypercine_rgb444_quality hypercine_quality_state)
+        add_test(NAME rgb444_p12_quality_table COMMAND test_rgb444_p12_quality)
+        set_tests_properties(rgb444_p12_quality_table PROPERTIES TIMEOUT 30)
         # Independent original RGB444 PlaneView bad_alloc rollback/recovery contract.
         add_subdirectory(tests/rgb444_boundary)
         add_executable(test_filmscan3_backend tests/test_filmscan3_backend.cpp)
@@ -586,6 +599,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         # it is not an encoder, transform or decode claim.
         add_test(NAME rgb444_band_contract COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_formats/test_rgb444_band_contract.py")
+        # Issue #37: the format-specific p12 band table pinned from the corpus.
+        # Synthetic cases always run; the corpus comparison runs when the private
+        # F1 root is configured through HYPERCINE_RGB444_F1_ROOT.
+        add_test(NAME rgb444_p12_quality_pin COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_formats/test_rgb444_p12_quality.py")
         add_test(NAME windows_reference_sdk_coefficients COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reference_sample.py"
             --probe $<TARGET_FILE:hypercine_reference_probe>)

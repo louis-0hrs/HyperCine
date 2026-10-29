@@ -1,0 +1,410 @@
+{
+  "corpus_verification": [
+    {
+      "entries": 64,
+      "index": "1080p-RGB_444/TRANSFER_SHA256.tsv",
+      "problems": 0,
+      "verified": 64
+    },
+    {
+      "entries": 888,
+      "index": "128/TRANSFER_SHA256.tsv",
+      "problems": 0,
+      "verified": 888
+    }
+  ],
+  "distinct_tables": 6,
+  "findings": {
+    "band_total": "3 planes x (1 lowpass + 9 highpass) = 30 bands per frame",
+    "correction_1": "level-1 chroma is 2x green, not the 3x recorded in the merged #316 report",
+    "correction_2": "levels 2 and 3 carry identical values in all three planes; there is no luma/chroma split above level 1",
+    "scale": "identical for all six profiles and all three planes: 32/32/16, 8/8/4, 2/2/1",
+    "separation": "CalculateQualityState() rejects precision 12, and at p10 its luma table differs from every measured RGB444 profile"
+  },
+  "issue": 37,
+  "limiter_note": "Only the initial-limiter values are measured; the corpus holds first frames only. Other limiter values come from the transcribed upstream formula, not from data.",
+  "not_claimed": [
+    "signed pre-quant stage (PENDING_SDK_INTERNAL_STAGE)",
+    "transform and prescale arithmetic",
+    "band framing and payload/entropy writer",
+    "encoder packet equality",
+    "decoder pixel parity"
+  ],
+  "packets_measured": 112,
+  "profiles": {
+    "filmscan1": {
+      "chroma_relation": {
+        "level1": "red == blue == 2 * green",
+        "levels2_3": "red == blue == green"
+      },
+      "initial_fs_rate_limiter": 0,
+      "lowpass_quantization": 1,
+      "packets_measured": 24,
+      "planes": {
+        "blue": {
+          "quant": {
+            "L1HH": 288,
+            "L1HL": 192,
+            "L1LH": 192,
+            "L2HH": 12,
+            "L2HL": 24,
+            "L2LH": 24,
+            "L3HH": 12,
+            "L3HL": 24,
+            "L3LH": 24
+          }
+        },
+        "green": {
+          "quant": {
+            "L1HH": 144,
+            "L1HL": 96,
+            "L1LH": 96,
+            "L2HH": 12,
+            "L2HL": 24,
+            "L2LH": 24,
+            "L3HH": 12,
+            "L3HL": 24,
+            "L3LH": 24
+          }
+        },
+        "red": {
+          "quant": {
+            "L1HH": 288,
+            "L1HL": 192,
+            "L1LH": 192,
+            "L2HH": 12,
+            "L2HL": 24,
+            "L2LH": 24,
+            "L3HH": 12,
+            "L3HL": 24,
+            "L3LH": 24
+          }
+        }
+      },
+      "quality_l": 4,
+      "scale": {
+        "L1HH": 1,
+        "L1HL": 2,
+        "L1LH": 2,
+        "L2HH": 4,
+        "L2HL": 8,
+        "L2LH": 8,
+        "L3HH": 16,
+        "L3HL": 32,
+        "L3LH": 32
+      }
+    },
+    "filmscan2": {
+      "chroma_relation": {
+        "level1": "red == blue == 2 * green",
+        "levels2_3": "red == blue == green"
+      },
+      "initial_fs_rate_limiter": 8,
+      "lowpass_quantization": 1,
+      "packets_measured": 16,
+      "planes": {
+        "blue": {
+          "quant": {
+            "L1HH": 96,
+            "L1HL": 64,
+            "L1LH": 64,
+            "L2HH": 8,
+            "L2HL": 16,
+            "L2LH": 16,
+            "L3HH": 8,
+            "L3HL": 16,
+            "L3LH": 16
+          }
+        },
+        "green": {
+          "quant": {
+            "L1HH": 48,
+            "L1HL": 32,
+            "L1LH": 32,
+            "L2HH": 8,
+            "L2HL": 16,
+            "L2LH": 16,
+            "L3HH": 8,
+            "L3HL": 16,
+            "L3LH": 16
+          }
+        },
+        "red": {
+          "quant": {
+            "L1HH": 96,
+            "L1HL": 64,
+            "L1LH": 64,
+            "L2HH": 8,
+            "L2HL": 16,
+            "L2LH": 16,
+            "L3HH": 8,
+            "L3HL": 16,
+            "L3LH": 16
+          }
+        }
+      },
+      "quality_l": 5,
+      "scale": {
+        "L1HH": 1,
+        "L1HL": 2,
+        "L1LH": 2,
+        "L2HH": 4,
+        "L2HL": 8,
+        "L2LH": 8,
+        "L3HH": 16,
+        "L3HL": 32,
+        "L3LH": 32
+      }
+    },
+    "filmscan3": {
+      "chroma_relation": {
+        "level1": "red == blue == 2 * green",
+        "levels2_3": "red == blue == green"
+      },
+      "initial_fs_rate_limiter": 4,
+      "lowpass_quantization": 1,
+      "packets_measured": 24,
+      "planes": {
+        "blue": {
+          "quant": {
+            "L1HH": 72,
+            "L1HL": 48,
+            "L1LH": 48,
+            "L2HH": 8,
+            "L2HL": 16,
+            "L2LH": 16,
+            "L3HH": 8,
+            "L3HL": 16,
+            "L3LH": 16
+          }
+        },
+        "green": {
+          "quant": {
+            "L1HH": 36,
+            "L1HL": 24,
+            "L1LH": 24,
+            "L2HH": 8,
+            "L2HL": 16,
+            "L2LH": 16,
+            "L3HH": 8,
+            "L3HL": 16,
+            "L3LH": 16
+          }
+        },
+        "red": {
+          "quant": {
+            "L1HH": 72,
+            "L1HL": 48,
+            "L1LH": 48,
+            "L2HH": 8,
+            "L2HL": 16,
+            "L2LH": 16,
+            "L3HH": 8,
+            "L3HL": 16,
+            "L3LH": 16
+          }
+        }
+      },
+      "quality_l": 6,
+      "scale": {
+        "L1HH": 1,
+        "L1HL": 2,
+        "L1LH": 2,
+        "L2HH": 4,
+        "L2HL": 8,
+        "L2LH": 8,
+        "L3HH": 16,
+        "L3HL": 32,
+        "L3LH": 32
+      }
+    },
+    "high": {
+      "chroma_relation": {
+        "level1": "red == blue == 2 * green",
+        "levels2_3": "red == blue == green"
+      },
+      "initial_fs_rate_limiter": 0,
+      "lowpass_quantization": 1,
+      "packets_measured": 16,
+      "planes": {
+        "blue": {
+          "quant": {
+            "L1HH": 384,
+            "L1HL": 256,
+            "L1LH": 256,
+            "L2HH": 24,
+            "L2HL": 32,
+            "L2LH": 32,
+            "L3HH": 24,
+            "L3HL": 32,
+            "L3LH": 32
+          }
+        },
+        "green": {
+          "quant": {
+            "L1HH": 192,
+            "L1HL": 128,
+            "L1LH": 128,
+            "L2HH": 24,
+            "L2HL": 32,
+            "L2LH": 32,
+            "L3HH": 24,
+            "L3HL": 32,
+            "L3LH": 32
+          }
+        },
+        "red": {
+          "quant": {
+            "L1HH": 384,
+            "L1HL": 256,
+            "L1LH": 256,
+            "L2HH": 24,
+            "L2HL": 32,
+            "L2LH": 32,
+            "L3HH": 24,
+            "L3HL": 32,
+            "L3LH": 32
+          }
+        }
+      },
+      "quality_l": 3,
+      "scale": {
+        "L1HH": 1,
+        "L1HL": 2,
+        "L1LH": 2,
+        "L2HH": 4,
+        "L2HL": 8,
+        "L2LH": 8,
+        "L3HH": 16,
+        "L3HL": 32,
+        "L3LH": 32
+      }
+    },
+    "low": {
+      "chroma_relation": {
+        "level1": "red == blue == 2 * green",
+        "levels2_3": "red == blue == green"
+      },
+      "initial_fs_rate_limiter": 0,
+      "lowpass_quantization": 1,
+      "packets_measured": 16,
+      "planes": {
+        "blue": {
+          "quant": {
+            "L1HH": 1536,
+            "L1HL": 1024,
+            "L1LH": 1024,
+            "L2HH": 48,
+            "L2HL": 64,
+            "L2LH": 64,
+            "L3HH": 48,
+            "L3HL": 64,
+            "L3LH": 64
+          }
+        },
+        "green": {
+          "quant": {
+            "L1HH": 768,
+            "L1HL": 512,
+            "L1LH": 512,
+            "L2HH": 48,
+            "L2HL": 64,
+            "L2LH": 64,
+            "L3HH": 48,
+            "L3HL": 64,
+            "L3LH": 64
+          }
+        },
+        "red": {
+          "quant": {
+            "L1HH": 1536,
+            "L1HL": 1024,
+            "L1LH": 1024,
+            "L2HH": 48,
+            "L2HL": 64,
+            "L2LH": 64,
+            "L3HH": 48,
+            "L3HL": 64,
+            "L3LH": 64
+          }
+        }
+      },
+      "quality_l": 1,
+      "scale": {
+        "L1HH": 1,
+        "L1HL": 2,
+        "L1LH": 2,
+        "L2HH": 4,
+        "L2HL": 8,
+        "L2LH": 8,
+        "L3HH": 16,
+        "L3HL": 32,
+        "L3LH": 32
+      }
+    },
+    "medium": {
+      "chroma_relation": {
+        "level1": "red == blue == 2 * green",
+        "levels2_3": "red == blue == green"
+      },
+      "initial_fs_rate_limiter": 0,
+      "lowpass_quantization": 1,
+      "packets_measured": 16,
+      "planes": {
+        "blue": {
+          "quant": {
+            "L1HH": 768,
+            "L1HL": 512,
+            "L1LH": 512,
+            "L2HH": 32,
+            "L2HL": 48,
+            "L2LH": 48,
+            "L3HH": 32,
+            "L3HL": 48,
+            "L3LH": 48
+          }
+        },
+        "green": {
+          "quant": {
+            "L1HH": 384,
+            "L1HL": 256,
+            "L1LH": 256,
+            "L2HH": 32,
+            "L2HL": 48,
+            "L2LH": 48,
+            "L3HH": 32,
+            "L3HL": 48,
+            "L3LH": 48
+          }
+        },
+        "red": {
+          "quant": {
+            "L1HH": 768,
+            "L1HL": 512,
+            "L1LH": 512,
+            "L2HH": 32,
+            "L2HL": 48,
+            "L2LH": 48,
+            "L3HH": 32,
+            "L3HL": 48,
+            "L3LH": 48
+          }
+        }
+      },
+      "quality_l": 2,
+      "scale": {
+        "L1HH": 1,
+        "L1HL": 2,
+        "L1LH": 2,
+        "L2HH": 4,
+        "L2HL": 8,
+        "L2LH": 8,
+        "L3HH": 16,
+        "L3HL": 32,
+        "L3LH": 32
+      }
+    }
+  },
+  "schema": "hypercine.rgb444.p12_quality.v1",
+  "scope": "declared band quantization and scale of the six regular RGB444 p12 profiles at the SDK's initial rate limiter; no transform, entropy or pixel claim"
+}
