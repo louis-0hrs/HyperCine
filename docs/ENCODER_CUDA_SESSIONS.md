@@ -64,6 +64,20 @@ CUDA enabled. The build must use one consistent host compiler: on this host the
 default GCC 14.2 front end combined with the toolkit's GCC 13 library path fails
 to link `__cxa_call_terminate`, independently of any repository change.
 
+That mismatch is now refused at configure time instead of surfacing as a link
+error after the whole tree compiled. `cmake/cuda_host_compiler.cmake` compares
+`CMAKE_CXX_COMPILER` with the host compiler nvcc reports, and a newer C++ front
+end than nvcc's host compiler is a `FATAL_ERROR` naming the consistent configure
+line. The rule is narrow by design: it judges only the GNU/GNU pair and only the
+measured direction (a newer nvcc host compiler is rejected by nvcc itself), and
+it stays silent when a version is unknown rather than guessing. The reason the
+mismatch cannot be fixed here is the link order — CMake places
+`CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES` ahead of the C++ driver's library search
+path, so `-lstdc++` resolves to the host compiler's older release. GCC 14 emits
+`__cxa_call_terminate` (CXXABI_1.3.15); GCC 13's libstdc++ does not export it.
+`ci/test_cuda_host_compiler.py` proves the refusal fires in the real project and
+tests the boundaries that must *not* refuse.
+
     cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_C_COMPILER=gcc-13 \
       -DCMAKE_CUDA_HOST_COMPILER=g++-13 \
