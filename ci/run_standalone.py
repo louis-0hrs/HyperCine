@@ -81,7 +81,8 @@ def required_tests(cache):
     if cmake_enabled(cache.get('HYPERCINE_ENABLE_METAL', '')):
         required |= {'filmscan3_metal_required', 'filmscan3_metal_4k_ffmpeg_gate',
                      'filmscan3_metal_4k_encoder', 'filmscan3_metal_multisession',
-                     'filmscan3_metal_geometry_matrix', 'encoder_metal_session_packets'}
+                     'filmscan3_metal_geometry_matrix', 'encoder_metal_session_packets',
+                     'encoder_metal_profile_matrix'}
         for gate in ('autonomous_manifest', 'sequence_manifest', 'external_decode',
                      'actual_tier_a', 'actual_sequence'):
             if 'filmscan3_' + gate in required:
