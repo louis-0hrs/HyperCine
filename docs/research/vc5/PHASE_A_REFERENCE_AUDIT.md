@@ -1,7 +1,12 @@
 # VC-5 reference and conformance audit — Phase A (docs-only)
 
-Status: **Phase A inventory only. No conformance claim. No code, build, test or
-`upstream/` change.** Phase B is explicitly *not* authorized by this document.
+Status: **Phase A inventory only. No conformance claim. No change to code, the
+build system, the test suite or `upstream/`.** What *was* performed is limited
+and read-only: one local SDK-free GCC Release encode of a 128×128 canonical
+frame (§4.3), and syntax-only/translation-unit compilation probes against the
+reference tree (§5). Those are compile and encode probes, **not** RP 2073-2
+conformance tests, and no reference decoder binary was built or run. Phase B is
+explicitly *not* authorized by this document.
 
 Scope owner: issue [#303](https://github.com/louis-0hrs/HyperCine/issues/303).
 Research lane; it does not gate #259, #120, #144, #160 or #161.
@@ -363,8 +368,12 @@ reference decoder reads `[0,2,2]`. Both values are in range; the layouts
 disagree. Under the Table B.1 reading the encoder would left-shift the level-2
 lowpass output by 8 instead of 2 — a different image, not an illegal header.
 So the correct characterisation is **implementation incompatibility with a
-normative table**, demonstrated end-to-end and reproducible from public bytes,
-and *not* a demonstrated standards defect.
+normative table**, demonstrated at the bitstream-field and source-interpretation
+level and reproducible from public bytes, and *not* a demonstrated standards
+defect. The end-to-end **pixel** consequence — that the two readings yield
+different decoded images — is an inference from the normative left-shift text,
+not a measurement: no reference decoder was built or run and no image or
+coefficient comparison was performed anywhere in this audit (§0, §5).
 
 The reference decoder and sample encoder share the 2-bit packing and therefore
 agree with each other while disagreeing with the published table. Which of the
