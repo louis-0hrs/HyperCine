@@ -86,7 +86,18 @@ tests the boundaries that must *not* refuse.
       -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON -DCMAKE_CUDA_ARCHITECTURES=80
     cmake --build build --parallel
     ctest --test-dir build -C Release --output-on-failure
-    python3 ci/run_standalone.py --build-dir build --system Linux --machine x86_64
+
+The above **CUDA-on** tree runs the native CUDA-required CTests. Do **not** run
+`ci/run_standalone.py` against this tree: that strict inventory intentionally
+rejects CUDA-enabled builds. Run its SDK-free CPU-only inventory in a separate
+build directory instead:
+
+    cmake -S . -B build-cpu-standalone -G Ninja -DCMAKE_BUILD_TYPE=Release \
+      -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF \
+      -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_ENABLE_CUDA=OFF \
+      -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON
+    cmake --build build-cpu-standalone --parallel
+    python3 ci/run_standalone.py --build-dir build-cpu-standalone --system Linux --machine x86_64
 
 `ci/run_standalone.py` requires the CPU-only standalone configuration and
 rejects a CUDA-on tree, so the CUDA session gate is listed for CUDA builds while

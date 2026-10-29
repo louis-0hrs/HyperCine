@@ -93,6 +93,9 @@ function(hypercine_register_sdk_free_contracts)
         return()
     endif()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME windows_sdk_corpus_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_windows_sdk_corpus.py")
+    set_tests_properties(windows_sdk_corpus_contract PROPERTIES LABELS "validation;reference-oracle")
     add_test(NAME qualification_report_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_summarize_qualification.py")
     set_tests_properties(qualification_report_contract PROPERTIES LABELS "validation;reference-oracle")
@@ -443,6 +446,17 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME rgb444_p12_transform_contract COMMAND test_rgb444_transform)
         set_tests_properties(rgb444_p12_transform_contract PROPERTIES
             LABELS "cpu;rgb444;transform" TIMEOUT 300)
+        # Issue #37: the prescale mapping itself, audited against the frozen source
+        # and against the table the frozen encoder actually emits. It reads the
+        # repo's own PrescaleSequenceForPrecision so a silent edit there fails here
+        # instead of redefining the expectation it is checked against.
+        if(Python3_Interpreter_FOUND)
+            add_test(NAME rgb444_p12_prescale_audit
+                COMMAND "${Python3_EXECUTABLE}" -B
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/rgb444_p12_prescale_audit.py")
+            set_tests_properties(rgb444_p12_prescale_audit PROPERTIES
+                LABELS "rgb444;prescale" TIMEOUT 120)
+        endif()
         # The Quality-only mode returns before this block; require the same
         # shared arithmetic unit suite in normal SDK-free Standalone builds.
         add_executable(test_quality_state tests/test_quality_state.cpp)
