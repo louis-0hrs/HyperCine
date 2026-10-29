@@ -70,11 +70,17 @@ This is the finding that matters for #37's encoder work. Measured green-plane
 | L2 LH / HL / HH | 24 / 24 / 12 | 16 / 16 / 8 |
 | L1 LH / HL / HH | 96 / 96 / 144 | 24 / 24 / 36 |
 
-The Chroma planes (R, B) at level 1 carry three times the green value in both
-profiles (filmScan1: 192/192/288; filmScan3: 48/48/72). So the RGB444 quality
-mathematics is its own table, not the YUV 36-entry table with a different
-channel mapping. Reusing the p10 YUV quantizers for RGB p12 would be wrong at
-every level.
+The Chroma planes (R, B) at level 1 carry **twice** the green value in both
+profiles (filmScan1: 192/192/288; filmScan3: 48/48/72). At levels 2 and 3 all
+three planes carry identical values. So the RGB444 quality mathematics is its own
+table, not the YUV 36-entry table with a different channel mapping. Reusing the
+p10 YUV quantizers for RGB p12 would be wrong at every level.
+
+> **Correction (2026-10-29).** An earlier revision of this section said the
+> level-1 chroma value was *three times* green. It is twice. The tag values in
+> `report.json` were always right; only this prose was wrong. The per-profile
+> table of that ratio, and the full six-profile measurement, are in
+> [`../rgb444-p12-quality/`](../rgb444-p12-quality/README.md).
 
 ### 5. The two families present are exactly the two that were pinned
 

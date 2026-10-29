@@ -182,6 +182,14 @@ class StandaloneGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, name):
             registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
+    def test_rgb444_p12_quality_registrations_are_mandatory(self):
+        # #37: losing the measured p12 table would let the encoder fall back to
+        # the p10 YUV quantizers without any failing test.
+        for name in ('rgb444_p12_quality_table', 'rgb444_p12_quality_pin'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_both_geometry_checks_must_be_registered(self):
         for name in ('extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report'):
             self.assertIn(name, REQUIRED)

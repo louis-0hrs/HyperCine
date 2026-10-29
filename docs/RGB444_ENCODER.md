@@ -156,3 +156,27 @@ RG48 continuation evidence is in `docs/validation/rgb444-rg48-source/`.
 The later RG48 allocation-failure qualification is recorded in
 `docs/validation/RGB444_RG48_ALLOCATION.md`; the earlier evidence directories
 retain their original dated scope and counts.
+
+## p12 band table (measured, #37)
+
+`include/hypercine/rgb444_quality.h` and `src/core/rgb444_quality.cpp` supply the
+format-specific 12-bit band table. It is a table/report surface only: no
+transform, no coefficient quantization, no packet writer.
+
+The table is pinned from 112 original packets covering all six regular profiles
+(16 each at 128x128 plus 8 each of filmscan1/filmscan3 at 1920x1080). Each
+profile yields exactly one table, identical across the three planes at levels 2
+and 3, with level-1 chroma at twice green. The shared p10 YUV calculator cannot
+produce these values: it rejects `encoded_precision = 12` outright, and at its
+own precision its luma table differs from every measured RGB444 profile. A test
+asserts both facts so the separation cannot silently collapse.
+
+Only the initial-limiter tables are measured. Other limiter values come from a
+transcription of `upstream/Codec/quantize.c::QuantizationSetQuality()` and are
+labelled as transcribed, not measured, because the corpus holds first frames
+only. Measurement, corrections to the earlier band-contract prose and the
+mutation probes are in `docs/validation/rgb444-p12-quality/`.
+
+`PENDING_SDK_INTERNAL_STAGE` is unchanged: the signed pre-quant stage still has
+no qualified dumps, so this table removes a blocker for the encoder math without
+supplying any of it.
