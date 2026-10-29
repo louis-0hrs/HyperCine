@@ -4,6 +4,7 @@
 #pragma once
 #include "hypercine/filmscan3.h"
 #include "hypercine/quality_state.h"
+#include <array>
 #include <cstdint>
 
 namespace hypercine { namespace standalone {
@@ -38,6 +39,16 @@ struct ProfileTables {
 // profile whose bitstream is not qualified on this path and std::logic_error
 // if the shared calculator and the frozen FilmScan3 tables ever disagree.
 ProfileTables ComputeProfileTables(const ProfileTableRequest& request);
+
+// Cross-checks a shared-calculator table pair against the frozen FilmScan3
+// helper (the pre-#46 producer). The helper is an oracle here, never the source
+// of the writer's bytes: this throws std::logic_error naming the first slot that
+// disagrees, or that a shared entry is negative or does not fit the writer's
+// unsigned table type. Exposed so the contract suite can prove the guard fires
+// on a deliberately drifted pair.
+void RequireTablesMatchFrozen(const std::array<int, 36>& quant,
+                              const std::array<int, 36>& scale,
+                              int fs_rate_limiter);
 
 // True only for profiles whose emitted packet is qualified on this writer.
 bool IsQualifiedSessionProfile(EncodingQuality quality) noexcept;

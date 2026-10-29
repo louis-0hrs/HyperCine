@@ -3,7 +3,9 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "quality_profile_bridge.h"
 #include <algorithm>
+#include <limits>
 #include <stdexcept>
+#include <string>
 
 namespace hypercine { namespace standalone {
 namespace {
@@ -13,16 +15,6 @@ namespace {
 // docs/RGB444_ENCODER.md for the families that are explicitly not qualified).
 bool IsFilmScan3(EncodingQuality quality) noexcept {
     return quality == EncodingQuality::FilmScan3;
-}
-
-int InitialLimiter(EncodingQuality quality) noexcept {
-    // Frame 0 has no prior sample, so the shared calculator keeps the seed the
-    // profile starts from: FS2 = 8, FS3 = 4. Both are upstream constants.
-    switch (quality) {
-    case EncodingQuality::FilmScan2: return 8;
-    case EncodingQuality::FilmScan3: return 4;
-    default: return 0;
-    }
 }
 
 }  // namespace
@@ -39,15 +31,43 @@ const char* SessionProfileRefusalReason(EncodingQuality quality) noexcept {
            "(issue #46) and are refused rather than encoded with FilmScan3 bytes";
 }
 
+void RequireTablesMatchFrozen(const std::array<int, 36>& quant,
+                              const std::array<int, 36>& scale,
+                              int fs_rate_limiter) {
+    // Independent oracle, kept from the pre-#46 writer, is only compared
+    // against. It must never be the value the writer receives.
+    const FilmScan3Tables frozen = ComputeFilmScan3Tables(fs_rate_limiter);
+    for (unsigned i = 0; i < 36; ++i) {
+        if (quant[i] < 0 || scale[i] < 0)
+            throw std::logic_error(
+                "shared quality state produced a negative table entry at slot "
+                + std::to_string(i));
+        if (static_cast<unsigned long long>(quant[i]) >
+                std::numeric_limits<unsigned>::max() ||
+            static_cast<unsigned long long>(scale[i]) >
+                std::numeric_limits<unsigned>::max()) {
+            throw std::logic_error(
+                "shared quality state entry does not fit the writer's table type at slot "
+                + std::to_string(i));
+        }
+        if (static_cast<unsigned>(quant[i]) != frozen.quant[i] ||
+            static_cast<unsigned>(scale[i]) != frozen.scale[i]) {
+            throw std::logic_error(
+                "shared quality state and frozen FilmScan3 table disagree at slot "
+                + std::to_string(i));
+        }
+    }
+}
+
 ProfileTables ComputeProfileTables(const ProfileTableRequest& request) {
     const char* refusal = SessionProfileRefusalReason(request.quality);
     if (*refusal) throw std::invalid_argument(refusal);
     if (request.fs_rate_limiter < 0 || request.fs_rate_limiter > 20)
         throw std::invalid_argument("invalid FilmScan3 limiter");
 
-    // The shared calculator owns the profile mathematics. Feed it exactly the
-    // state the session holds, so the limiter it returns is the one the frozen
-    // FilmScan3 tables are then built from.
+    // The shared calculator owns the profile mathematics and is the single
+    // producer of the frame tables: the 36 quant/scale entries below are copied
+    // out of its state, never rebuilt from a second local table set.
     QualityStateInput input;
     input.quality = request.quality;
     input.coding_width = request.width;
@@ -66,20 +86,17 @@ ProfileTables ComputeProfileTables(const ProfileTableRequest& request) {
     const QualityState state = CalculateQualityState(input);
     if (!state.ok) throw std::logic_error(state.error);
 
+    // The frozen helper stays as an independent cross-check, never as the
+    // source of the bytes the writer emits. A drift is a defect, so it throws
+    // naming the slot instead of silently shifting output.
+    RequireTablesMatchFrozen(state.quant, state.scale, std::clamp(state.fs_rate_limiter, 0, 20));
+
     ProfileTables out;
     out.fs_rate_limiter = std::clamp(state.fs_rate_limiter, 0, 20);
-
-    // Keep one frozen table source for FilmScan3: the existing helper is the
-    // writer's only quant/scale producer, and the shared calculator must agree
-    // with it exactly. A drift between the two is a defect, not a preference.
-    out.tables = ComputeFilmScan3Tables(out.fs_rate_limiter);
     for (unsigned i = 0; i < 36; ++i) {
-        if (static_cast<unsigned>(state.quant[i]) != out.tables.quant[i] ||
-            static_cast<unsigned>(state.scale[i]) != out.tables.scale[i]) {
-            throw std::logic_error(
-                "shared quality state and frozen FilmScan3 table disagree at slot "
-                + std::to_string(i));
-        }
+        // Checked conversions: the ranges were validated by the guard above.
+        out.tables.quant[i] = static_cast<unsigned>(state.quant[i]);
+        out.tables.scale[i] = static_cast<unsigned>(state.scale[i]);
     }
     return out;
 }

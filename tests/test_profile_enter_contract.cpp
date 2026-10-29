@@ -8,6 +8,7 @@
 #include "hypercine/quality_state.h"
 #include "../src/core/quality_profile_bridge.h"
 #include "reference_frame_generator.h"
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -73,7 +74,81 @@ int main() {
             }
         }
 
-        // 2. Rate feedback through the shared calculator equals the frozen
+        // 2. The writer's tables come from the shared calculator, and the frozen
+        // helper is only its oracle. A deliberately drifted pair must trip the
+        // guard, so the cross-check is provably live rather than decorative.
+        {
+            const auto frozen = ComputeFilmScan3Tables(4);
+            std::array<int, 36> quant{};
+            std::array<int, 36> scale{};
+            for (unsigned i = 0; i < 36; ++i) {
+                quant[i] = static_cast<int>(frozen.quant[i]);
+                scale[i] = static_cast<int>(frozen.scale[i]);
+            }
+            RequireTablesMatchFrozen(quant, scale, 4);  // identical pair passes
+            quant[17] += 1;
+            Reject([&] { RequireTablesMatchFrozen(quant, scale, 4); },
+                   "drifted quant slot was not reported");
+            quant[17] -= 1;
+            scale[31] += 1;
+            Reject([&] { RequireTablesMatchFrozen(quant, scale, 4); },
+                   "drifted scale slot was not reported");
+            scale[31] -= 1;
+            RequireTablesMatchFrozen(quant, scale, 4);  // restored pair passes
+            std::array<int, 36> negative = quant;
+            negative[0] = -1;
+            Reject([&] { RequireTablesMatchFrozen(negative, scale, 4); },
+                   "negative shared entry was accepted");
+        }
+
+        // 1b. The returned pair is the shared calculator's own output, not a
+        // value rebuilt elsewhere: recompute CalculateQualityState here and
+        // require the seam to hand back exactly those entries. The shared
+        // calculator's validation must also govern this path, so a request it
+        // rejects cannot be answered from the frozen limiter-only helper.
+        for (int limiter : {0, 4, 9, 16, 20}) {
+            ProfileTableRequest request;
+            request.fs_rate_limiter = limiter;
+            request.frame_index = 3;
+            request.previous_completed_sample_bytes = 0;
+            const auto result = ComputeProfileTables(request);
+            QualityStateInput input;
+            input.quality = EncodingQuality::FilmScan3;
+            input.coding_width = request.width;
+            input.coding_height = request.height;
+            input.encoded_precision = 10;
+            input.frame_rate_numerator = 30;
+            input.frame_rate_denominator = 1;
+            input.gop_length = 1;
+            input.full_resolution_chroma = false;
+            input.frame_index = request.frame_index;
+            input.previous_fs_rate_limiter = request.fs_rate_limiter;
+            input.previous_overbitrate = 0;
+            input.previous_completed_sample_bytes = request.previous_completed_sample_bytes;
+            input.prescale = {{0, 0, 0}};
+            const auto shared = CalculateQualityState(input);
+            Require(shared.ok, "shared calculator rejected a legal request");
+            Require(result.fs_rate_limiter == shared.fs_rate_limiter,
+                    "seam did not return the shared limiter");
+            for (unsigned i = 0; i < 36; ++i) {
+                Require(result.tables.quant[i] == static_cast<unsigned>(shared.quant[i]),
+                        "seam did not return the shared quant entry");
+                Require(result.tables.scale[i] == static_cast<unsigned>(shared.scale[i]),
+                        "seam did not return the shared scale entry");
+            }
+        }
+        {
+            ProfileTableRequest odd;
+            odd.width = 1921;
+            Reject([&] { ComputeProfileTables(odd); },
+                   "shared calculator's odd-width rejection did not govern the seam");
+            ProfileTableRequest zero_height;
+            zero_height.height = 0;
+            Reject([&] { ComputeProfileTables(zero_height); },
+                   "shared calculator's zero-height rejection did not govern the seam");
+        }
+
+        // 3. Rate feedback through the shared calculator equals the frozen
         // formula across the whole reachable window, including the clamps.
         for (std::uint64_t prior = 0; prior <= 4000000; prior += 7919) {
             for (int start : {0, 4, 8, 16, 20}) {
@@ -89,7 +164,7 @@ int main() {
             }
         }
 
-        // 3. Frame 0 seeds the profile limiter, not a carried-over value.
+        // 4. Frame 0 seeds the profile limiter, not a carried-over value.
         {
             ProfileTableRequest request;
             request.quality = EncodingQuality::FilmScan3;
@@ -100,7 +175,7 @@ int main() {
                     "frame 0 must seed the FilmScan3 limiter");
         }
 
-        // 4. The five unqualified profiles are refused, not mislabelled.
+        // 5. The five unqualified profiles are refused, not mislabelled.
         for (EncodingQuality quality : {EncodingQuality::Low, EncodingQuality::Medium,
                                         EncodingQuality::High, EncodingQuality::FilmScan1,
                                         EncodingQuality::FilmScan2}) {
@@ -121,7 +196,7 @@ int main() {
         Require(*SessionProfileRefusalReason(EncodingQuality::FilmScan3) == '\0',
                 "FilmScan3 must not carry a refusal reason");
 
-        // 5. Invalid enum values are rejected, including the boundary values.
+        // 6. Invalid enum values are rejected, including the boundary values.
         for (int raw : {0, 7, 8, 255}) {
             const auto quality = static_cast<EncodingQuality>(raw);
             ProfileTableRequest request;
@@ -133,7 +208,7 @@ int main() {
                    "encoder accepted an invalid quality profile");
         }
 
-        // 6. An explicit FilmScan3 session is byte-identical to the default
+        // 7. An explicit FilmScan3 session is byte-identical to the default
         // session, and the default stays FilmScan3.
         {
             std::vector<uint8_t> bgra(1920u * 1080u * 4, 0);
@@ -153,7 +228,7 @@ int main() {
                     "explicit FilmScan3 session changed tables");
         }
 
-        // 7. Reset keeps the session profile: it is a session property, not a
+        // 8. Reset keeps the session profile: it is a session property, not a
         // per-frame one, and rate state resets underneath it.
         {
             FilmScan3Encoder encoder;
