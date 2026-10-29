@@ -103,6 +103,26 @@ class StandaloneGateTests(unittest.TestCase):
         self.assertNotIn('--encoder $<TARGET_FILE:hypercine_encode_filmscan3>', gate)
         self.assertIn('HYPERCINE_METAL_AUDIT=1', cmake)
 
+    def test_cuda_session_gate_is_gpu_required_and_inside_cuda_block(self):
+        # #259 step 2. The strict standalone inventory deliberately refuses a
+        # CUDA-on tree, so this registration cannot be expressed as a REQUIRED
+        # entry: it is checked at the source instead. Losing the gate, moving it
+        # out of the CUDA block, or making it skippable must fail here.
+        cmake = (Path(__file__).resolve().parent.parent / 'CMakeLists.txt').read_text()
+        registration = 'add_test(NAME encoder_cuda_session_packets COMMAND test_encoder_cuda_session)'
+        self.assertIn(registration, cmake)
+        properties = cmake.split('set_tests_properties(encoder_cuda_session_packets', 1)[1]
+        properties = properties.split(')', 1)[0]
+        self.assertIn('gpu-required', properties)
+        self.assertIn('RUN_SERIAL TRUE', properties)
+        self.assertNotIn('SKIP_RETURN_CODE', properties)
+        # The gate must sit in the CUDA branch, not in the shared standalone block.
+        cuda_block = cmake.split('# Issue #259 step 2: the same capability-gated session', 1)
+        self.assertEqual(len(cuda_block), 2, 'CUDA session gate lost its CUDA guard')
+        self.assertTrue(cuda_block[0].rstrip().endswith('if(HYPERCINE_ENABLE_CUDA)'))
+        block = cuda_block[1].split('endif()', 1)[0]
+        self.assertIn(registration, block)
+
     def test_metal_enabled_requires_all_existing_metal_gates(self):
         cache = {'HYPERCINE_ENABLE_METAL': 'ON'}
         required = required_tests(cache)

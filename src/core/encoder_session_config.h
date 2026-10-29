@@ -97,6 +97,9 @@ struct EncoderDevice {
     // Required for a present Metal session; zero limits fail closed.
     std::uint64_t metal_max_buffer_length_bytes = 0;
     std::uint64_t metal_recommended_working_set_bytes = 0;
+    // Required for a present CUDA session; zero fails closed. Only a real
+    // runtime probe may set this, never a build flag alone.
+    std::uint64_t cuda_total_global_memory_bytes = 0;
 };
 
 enum class CapabilityReason : int {

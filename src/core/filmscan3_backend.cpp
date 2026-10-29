@@ -88,6 +88,18 @@ std::shared_ptr<Frontend> MetalFrontend(FilmScan3Geometry) { throw std::runtime_
 MetalTiming ReadMetalTiming(const Frontend&) { throw std::runtime_error("Metal backend not built"); }
 void FailNextMetalCompletion(Frontend&) { throw std::runtime_error("Metal backend not built"); }
 #endif
+#ifndef HYPERCINE_CUDA_AVAILABLE
+// The stub CUDA layer compiles, so the symbols exist, but no device is reachable.
+// Report the backend absent instead of relying on a later launch failure, and let
+// a session factory call fail loudly rather than return a fake frontend.
+EncoderDevice ProbeCudaEncoderDevice() { return {}; }
+std::shared_ptr<Frontend> CudaFrontend(FilmScan3Geometry, CudaTestMode) {
+    throw std::runtime_error("CUDA backend not built");
+}
+std::shared_ptr<Frontend> CudaSessionFrontend(FilmScan3Geometry) {
+    throw std::runtime_error("CUDA backend not built");
+}
+#endif
 void ValidateFilmScan3Input(const uint8_t* input,std::size_t bytes,int width,int height,std::size_t stride) {
     ValidateFilmScan3Geometry({width,height});
     const auto row=static_cast<std::size_t>(width)*4;

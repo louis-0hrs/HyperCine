@@ -53,7 +53,8 @@ BackendSelection SelectBackend(const EncoderSessionConfig& config, const Encoder
     // Do not acquire a new product backend implicitly when a future capability
     // revision changes. It needs its own reviewed factory/qualification wiring.
     if (result.effective.effective_backend != SessionBackend::CpuScalar &&
-        result.effective.effective_backend != SessionBackend::Metal) {
+        result.effective.effective_backend != SessionBackend::Metal &&
+        result.effective.effective_backend != SessionBackend::Cuda) {
         result.effective.allocation_permitted = false;
         result.effective.primary = CapabilityReason::ValidButNotImplemented;
         result.effective.reasons.valid_but_not_implemented = true;
@@ -64,17 +65,26 @@ BackendSelection SelectBackend(const EncoderSessionConfig& config, const Encoder
                                     static_cast<std::size_t>(config.max_sample_bytes)};
     try {
         // Explicit scalar policy is session-bound; never Auto/process-global.
-        const bool metal = result.effective.effective_backend == SessionBackend::Metal;
-        if (metal) {
-            if (factories.metal) result.frontend = factories.metal(geometry);
+        const auto backend = result.effective.effective_backend;
+        const bool metal = backend == SessionBackend::Metal;
+        const bool cuda = backend == SessionBackend::Cuda;
+        if (metal || cuda) {
+            const auto factory = metal ? factories.metal : factories.cuda;
+            if (factory) result.frontend = factory(geometry);
         } else if (factories.scalar) {
             result.frontend = factories.scalar(geometry, WaveletIsa::Scalar);
         }
+        // GPU backends are not a CPU ISA: only the scalar session pins Scalar and
+        // only Metal claims Auto. Anything else would let one GPU frontend pass
+        // for another or for the scalar reference.
+        const auto expected_backend = metal ? FrontendBackend::Metal
+            : (cuda ? FrontendBackend::Cuda : FrontendBackend::Cpu);
+        const auto expected_isa = metal || cuda ? WaveletIsa::Auto : WaveletIsa::Scalar;
         if (!result.frontend || result.frontend->Geometry().width != geometry.width ||
             result.frontend->Geometry().height != geometry.height ||
             result.frontend->Geometry().sample_capacity_bytes != geometry.sample_capacity_bytes ||
-            result.frontend->Backend() != (metal ? FrontendBackend::Metal : FrontendBackend::Cpu) ||
-            result.frontend->Isa() != (metal ? WaveletIsa::Auto : WaveletIsa::Scalar)) {
+            result.frontend->Backend() != expected_backend ||
+            result.frontend->Isa() != expected_isa) {
             result.frontend.reset();
             result.status = BackendSelectionStatus::InitializationFailed;
             return result;

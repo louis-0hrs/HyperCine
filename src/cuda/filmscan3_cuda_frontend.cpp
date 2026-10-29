@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "../core/filmscan3_backend.h"
+#include "../core/encoder_session_config.h"
 #include "filmscan3_cuda_stats.h"
 #include "hypercine/wavelet.h"
 #include <atomic>
@@ -67,6 +68,9 @@ public:
         CheckCuda(cudaGetDeviceProperties(&properties_, 0), "cudaGetDeviceProperties");
     }
     FilmScan3Geometry Geometry() const noexcept override { return geometry_; }
+    // Identity is the class, not a caller-supplied field: a CPU frontend cannot
+    // masquerade as CUDA and a CUDA frontend cannot pass for the scalar reference.
+    FrontendBackend Backend() const noexcept override { return FrontendBackend::Cuda; }
     // Test seam accessors; see filmscan3_cuda_stats.h. Instance-scoped by design.
     // Public only because the free seam functions reach them; this class is an
     // internal implementation detail of the CUDA frontend, not a public API.
@@ -204,6 +208,31 @@ bool CudaSpatialLaunchShouldFail(const Frontend& frontend) noexcept {
 
 std::shared_ptr<Frontend> CudaFrontend(FilmScan3Geometry geometry, CudaTestMode mode) {
     return std::make_shared<Cuda>(geometry,mode);
+}
+
+std::shared_ptr<Frontend> CudaSessionFrontend(FilmScan3Geometry geometry) {
+    return std::make_shared<Cuda>(geometry,CudaTestMode::Normal);
+}
+
+EncoderDevice ProbeCudaEncoderDevice() {
+    // Presence and size only. No queue, stream, buffer, frame or kernel is created
+    // here, so probing cannot allocate a session-sized workspace or move a byte.
+    EncoderDevice facts;
+    int device_count = 0;
+    if (cudaGetDeviceCount(&device_count) != cudaSuccess || device_count <= 0) {
+        cudaGetLastError();
+        return facts;
+    }
+    cudaDeviceProp properties{};
+    if (cudaGetDeviceProperties(&properties, 0) != cudaSuccess) {
+        cudaGetLastError();
+        return facts;
+    }
+    facts.cuda_hardware_observed = true;
+    facts.cuda_available = HyperCine_IsCUDAAvailable();
+    facts.cuda_total_global_memory_bytes = facts.cuda_available
+        ? static_cast<std::uint64_t>(properties.totalGlobalMem) : 0;
+    return facts;
 }
 
 }}} // namespace hypercine::standalone::detail
