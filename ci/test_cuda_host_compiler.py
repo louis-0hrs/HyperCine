@@ -15,6 +15,7 @@ exactly the failure mode a fail-closed gate is supposed to prevent.
 """
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 import unittest
@@ -87,7 +88,32 @@ def _tool(name):
 @unittest.skipUnless(_tool('nvcc') and _tool('cmake'),
                      'needs nvcc and cmake for the real configuration')
 class RealConfiguration(unittest.TestCase):
-    """The guard must fire from the project, not only in isolation."""
+    """The guard must fire from the project, not only in isolation.
+
+    This half is environment-dependent: it needs a real nvcc and a second C++
+    front end newer than nvcc's host compiler. Where that combination does not
+    exist the class skips, and because CTest reports a Python unittest skip as
+    a pass, it says so on stderr instead of disappearing quietly. The
+    environment-independent half above is what the strict gate actually relies
+    on; this one is the end-to-end proof on a host that can carry it.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        missing = [n for n in ('nvcc', 'cmake') if not _tool(n)]
+        reason = ''
+        if missing:
+            reason = 'missing ' + ' '.join(missing)
+        else:
+            host = cls.nvcc_host_version()
+            if not cls.newer_front_end(host):
+                reason = ('no C++ front end newer than nvcc host compiler '
+                          + repr(host))
+        if reason:
+            # CTest reports a Python unittest skip as a pass, so the reason is
+            # written where a reader of the log will see it.
+            print('NOT EXERCISED: real CUDA configure half skipped, ' + reason,
+                  file=sys.stderr)
 
     def configure(self, compiler, extra=()):
         temporary = tempfile.TemporaryDirectory()
@@ -125,18 +151,29 @@ class RealConfiguration(unittest.TestCase):
                 return line.split('HOST=')[1].strip()
         return ''
 
+    @staticmethod
+    def newer_front_end(host):
+        """Front ends strictly newer than the host compiler nvcc reports."""
+        if not host.startswith('GNU') or len(host.split()) < 2:
+            return []
+        host_major = int(host.split()[1].split('.')[0])
+        return [c for c in ('g++-16', 'g++-15', 'g++-14')
+                if _tool(c) and int(c.rsplit('-', 1)[1]) > host_major]
+
     def test_cuda_project_refuses_split_toolchain(self):
         host = self.nvcc_host_version()
         if not host.startswith('GNU'):
             self.skipTest('nvcc host compiler is not GNU: ' + repr(host))
-        host_major = host.split()[1].split('.')[0]
-        # Pick a C++ front end strictly newer than the host compiler nvcc uses.
-        newer = [c for c in ('g++-15', 'g++-14') if _tool(c)]
-        newer = [c for c in newer
-                 if int(c.rsplit('-', 1)[1]) > int(host_major)]
+        newer = self.newer_front_end(host)
         if not newer:
-            self.skipTest('no C++ front end newer than GNU ' + host_major)
+            self.skipTest('no C++ front end newer than ' + host)
         result = self.configure(newer[0])
+        if 'unsupported GNU version' in result.stderr:
+            # nvcc uses this very front end as its own host compiler and rejects
+            # it outright. That is the out-of-scope direction documented in the
+            # guard: language enablement fails before the guard is reached.
+            self.skipTest(newer[0] + ' is nvcc\'s own host compiler and is '
+                          'rejected by nvcc itself')
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn('CUDA host compiler mismatch', result.stderr)
 
