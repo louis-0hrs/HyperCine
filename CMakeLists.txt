@@ -418,6 +418,20 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME encoder_backend_session_packets COMMAND test_encoder_backend_selection packets)
         set_tests_properties(encoder_backend_selection_contract encoder_backend_session_packets PROPERTIES
             LABELS "cpu;encoder;session" TIMEOUT 180)
+        if(HYPERCINE_ENABLE_CUDA)
+            # Issue #259 step 2: the same capability-gated session, now with the
+            # existing internal CUDA frontend. GPU-required, no skip exit: a host
+            # with the toolkit but no usable device must fail, not report green.
+            add_executable(test_encoder_cuda_session tests/test_encoder_cuda_session.cpp)
+            target_include_directories(test_encoder_cuda_session PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda")
+            target_link_libraries(test_encoder_cuda_session PRIVATE
+                hypercine_standalone CUDA::cudart Threads::Threads)
+            add_test(NAME encoder_cuda_session_packets COMMAND test_encoder_cuda_session)
+            set_tests_properties(encoder_cuda_session_packets PROPERTIES
+                LABELS "cuda;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 1800)
+        endif()
         if(HYPERCINE_ENABLE_METAL)
             add_executable(test_encoder_metal_session tests/test_encoder_metal_session.cpp)
             target_link_libraries(test_encoder_metal_session PRIVATE hypercine_standalone Threads::Threads)

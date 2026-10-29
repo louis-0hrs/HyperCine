@@ -39,6 +39,18 @@ constexpr Evidence kMetalExperimentalEvidence[] = {
     {3840, 2160, "bounded experimental Metal; original-SDK reference missing"},
 };
 
+// Separate bounded CUDA records. Metal and CPU evidence never qualify CUDA,
+// which additionally carries device-memory limits. Vulkan has no records at
+// all in this revision, so it stays unqualified even when present.
+constexpr Evidence kCudaExperimentalEvidence[] = {
+    {128, 24, "bounded experimental CUDA; original-SDK reference missing"},
+    {256, 256, "bounded experimental CUDA; original-SDK reference missing"},
+    {1280, 720, "bounded experimental CUDA; original-SDK reference missing"},
+    {1920, 1080, "bounded experimental CUDA; 1080p A2 packet parity exists on main"},
+    {2048, 1080, "bounded experimental CUDA; original-SDK reference missing"},
+    {3840, 2160, "bounded experimental CUDA; original-SDK reference missing"},
+};
+
 bool FitsInt(std::int64_t value) noexcept {
     return value >= std::numeric_limits<int>::min() && value <= std::numeric_limits<int>::max();
 }
@@ -70,11 +82,15 @@ bool BackendPresent(const EncoderDevice& device, SessionBackend backend) noexcep
 }
 
 const Evidence* FindEvidence(int width, int height, SessionBackend backend) noexcept {
-    const auto* records = backend == SessionBackend::Metal
-        ? kMetalExperimentalEvidence : kCpuExperimentalEvidence;
-    const auto count = backend == SessionBackend::Metal
-        ? sizeof(kMetalExperimentalEvidence) / sizeof(kMetalExperimentalEvidence[0])
-        : sizeof(kCpuExperimentalEvidence) / sizeof(kCpuExperimentalEvidence[0]);
+    const Evidence* records = kCpuExperimentalEvidence;
+    std::size_t count = sizeof(kCpuExperimentalEvidence) / sizeof(kCpuExperimentalEvidence[0]);
+    if (backend == SessionBackend::Metal) {
+        records = kMetalExperimentalEvidence;
+        count = sizeof(kMetalExperimentalEvidence) / sizeof(kMetalExperimentalEvidence[0]);
+    } else if (backend == SessionBackend::Cuda) {
+        records = kCudaExperimentalEvidence;
+        count = sizeof(kCudaExperimentalEvidence) / sizeof(kCudaExperimentalEvidence[0]);
+    }
     for (std::size_t i = 0; i < count; ++i) {
         const auto& item = records[i];
         if (item.width == width && item.height == height) return &item;
@@ -289,11 +305,13 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
 
     const bool cpu_attempt = effective == SessionBackend::CpuScalar && device.cpu_scalar_available;
     const bool metal_attempt = effective == SessionBackend::Metal && device.metal_available;
+    const bool cuda_attempt = effective == SessionBackend::Cuda && device.cuda_available;
+    const bool gpu_attempt = metal_attempt || cuda_attempt;
     const bool gpu_effective = effective == SessionBackend::Metal || effective == SessionBackend::Cuda ||
                                effective == SessionBackend::Vulkan;
     const bool backend_blocks_early = result.reasons.backend_not_present && !result.fell_back_to_cpu_scalar;
-    if (!backend_blocks_early && (result.outside_qualified_dimension_envelope || (gpu_effective && !metal_attempt) ||
-        ((cpu_attempt || metal_attempt) && result.geometry_validator_passed && !result.evidence_record))) {
+    if (!backend_blocks_early && (result.outside_qualified_dimension_envelope || (gpu_effective && !gpu_attempt) ||
+        ((cpu_attempt || gpu_attempt) && result.geometry_validator_passed && !result.evidence_record))) {
         result.reasons.backend_not_qualified_for_geometry = true;
     }
 
@@ -303,6 +321,12 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
                           device.metal_recommended_working_set_bytes == 0)) {
         result.reasons.valid_but_not_implemented = true;
         unimplemented_detail = "Metal requires bound input storage and nonzero device limits";
+    }
+    // Same rule for CUDA: a build flag or an observed card is not a bound
+    // session. The device size has to come from a real runtime probe.
+    if (cuda_attempt && (!storage_bound || device.cuda_total_global_memory_bytes == 0)) {
+        result.reasons.valid_but_not_implemented = true;
+        unimplemented_detail = "CUDA requires bound input storage and a probed device memory size";
     }
     if (product_ok && (cpu_attempt || gpu_effective)) {
         std::uint64_t extra = 0;
@@ -339,6 +363,15 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
             result.reasons.memory_budget_exceeded = true;
             memory_detail = "Metal input extent or plane exceeds GPU buffer/index limits";
         }
+        // CUDA stages one source plane plus four output bands per level, all
+        // through cudaMalloc; the probed total device memory must cover the
+        // static planning ceiling before any allocation is attempted.
+        if (cuda_attempt && extra_ok && result.pixel_budget_ok &&
+            device.cuda_total_global_memory_bytes != 0 &&
+            device.cuda_total_global_memory_bytes < ceiling) {
+            result.reasons.memory_budget_exceeded = true;
+            memory_detail = "probed CUDA device memory is below the static planning ceiling";
+        }
     }
 
     const bool reference_blocks = config.require_reference_oracle && !result.reference_qualified;
@@ -347,7 +380,7 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
                          result.reasons.valid_but_not_implemented || backend_blocks ||
                          result.reasons.memory_budget_exceeded ||
                          result.reasons.backend_not_qualified_for_geometry || reference_blocks;
-    if (!blocked && (cpu_attempt || metal_attempt) && result.evidence_record && result.geometry_validator_passed) {
+    if (!blocked && (cpu_attempt || gpu_attempt) && result.evidence_record && result.geometry_validator_passed) {
         result.reasons.experimentally_supported = true;
         result.allocation_permitted = true;
     }
@@ -361,7 +394,7 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     } else if (backend_blocks) {
         result.primary = CapabilityReason::BackendNotPresent;
         result.detail = device.cuda_hardware_observed && config.backend == SessionBackend::Cuda
-            ? "CUDA hardware was observed but this build has no CUDA FilmScan3 backend"
+            ? "CUDA hardware was observed but no usable CUDA FilmScan3 session is bound"
             : "requested backend is not present";
     } else if (result.outside_qualified_dimension_envelope &&
                result.reasons.backend_not_qualified_for_geometry) {
@@ -383,7 +416,8 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         result.detail = result.fell_back_to_cpu_scalar
             ? "experimental CPU scalar fallback; original-SDK reference is still missing"
             : (metal_attempt ? "bounded experimental Metal attempt; original-SDK reference is still missing"
-                             : "experimental CPU scalar attempt; original-SDK reference is still missing");
+                             : (cuda_attempt ? "bounded experimental CUDA attempt; original-SDK reference is still missing"
+                                             : "experimental CPU scalar attempt; original-SDK reference is still missing"));
     } else {
         result.primary = CapabilityReason::FormatMathematicallyInvalid;
         result.detail = "fail-closed: request did not match an experimental CPU session";

@@ -417,6 +417,13 @@ int main() {
         cuda.backend = SessionBackend::Cuda;
         auto cuda_result = Check("cuda-a2", cuda, host, CapabilityReason::BackendNotPresent);
         Require(cuda_result.reasons.backend_not_present && !cuda_result.allocation_permitted, "A2 does not qualify CUDA");
+        // Presence without bound storage and a probed device size stays fail-closed.
+        auto cuda_present = host; cuda_present.cuda_available = true;
+        auto cuda_unbound = Check("cuda-unbound", cuda, cuda_present, CapabilityReason::ValidButNotImplemented);
+        Require(cuda_unbound.requested_backend_present && !cuda_unbound.allocation_permitted, "CUDA presence alone allocated");
+        cuda.input_stride_bytes = 1920u * 4u; cuda.input_bytes = cuda.input_stride_bytes * 1080u;
+        auto cuda_no_memory = Check("cuda-no-device-memory", cuda, cuda_present, CapabilityReason::ValidButNotImplemented);
+        Require(cuda_no_memory.requested_backend_present && !cuda_no_memory.allocation_permitted, "CUDA without probed memory allocated");
 
         auto metal = Film(1920, 1080);
         metal.backend = SessionBackend::Metal;
@@ -454,9 +461,14 @@ int main() {
             ++d.metal_recommended_working_set_bytes; --d.metal_max_buffer_length_bytes;
             Check("metal-single-buffer-minus-one", c, d, CapabilityReason::MemoryBudgetExceeded);
             d = metal_device;
+            // Metal limits are not CUDA limits and vice versa: a CUDA request with
+            // Metal-shaped device facts but no probed CUDA memory stays refused.
+            c.backend = SessionBackend::Cuda; d.cuda_available = true;
+            Check("cuda-without-probe", c, d, CapabilityReason::ValidButNotImplemented);
             for (const auto backend : {SessionBackend::Cuda, SessionBackend::Vulkan}) {
                 c.backend = backend; d.cuda_available = d.vulkan_available = true;
-                Check("other-gpu-still-unqualified", c, d, CapabilityReason::BackendNotQualifiedForGeometry);
+                if (backend == SessionBackend::Vulkan)
+                    Check("vulkan-still-unqualified", c, d, CapabilityReason::BackendNotQualifiedForGeometry);
             }
         }
         auto metal_unbound = Film(128, 24); metal_unbound.backend = SessionBackend::Metal;

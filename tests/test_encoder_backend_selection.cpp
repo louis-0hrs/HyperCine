@@ -70,8 +70,7 @@ struct FakeMetal final : Frontend {
     WaveletLevel Forward(const Plane&, int) override { throw std::logic_error("fake Metal must never execute"); }
     std::string DeviceName() const override { return "fake Metal contract only"; }
 };
-std::shared_ptr<Frontend> CountMetal(FilmScan3Geometry g) { ++metal_calls; return std::make_shared<FakeMetal>(g); }
-std::shared_ptr<Frontend> CpuMasquerade(FilmScan3Geometry g) { ++metal_calls; return CpuFrontend(g, WaveletIsa::Scalar); }
+std::shared_ptr<Frontend> CountMetal(FilmScan3Geometry g) { ++metal_calls; return std::make_shared<FakeMetal>(g); }std::shared_ptr<Frontend> CpuMasquerade(FilmScan3Geometry g) { ++metal_calls; return CpuFrontend(g, WaveletIsa::Scalar); }
 std::shared_ptr<Frontend> MetalWrongGeometry(FilmScan3Geometry g) { g.width += 128; return CountMetal(g); }
 std::shared_ptr<Frontend> MetalWrongCapacity(FilmScan3Geometry g) { ++g.sample_capacity_bytes; return CountMetal(g); }
 std::shared_ptr<Frontend> MetalWrongIsa(FilmScan3Geometry g) {
@@ -83,6 +82,113 @@ std::shared_ptr<Frontend> MetalUnknown(FilmScan3Geometry g) {
 std::shared_ptr<Frontend> MetalMissing(FilmScan3Geometry) { ++metal_calls; throw std::runtime_error("Metal init failed"); }
 std::shared_ptr<Frontend> MetalNoMemory(FilmScan3Geometry) { throw std::bad_alloc(); }
 std::shared_ptr<Frontend> MetalLogic(FilmScan3Geometry) { throw std::logic_error("Metal contract broken"); }
+
+// CUDA uses the same seam shape and the same falsifiers, so a CUDA request can
+// never be satisfied by the scalar or Metal factory. A fake CUDA frontend proves
+// the wiring and identity checks without pretending to be GPU evidence.
+unsigned cuda_calls = 0;
+struct FakeCuda final : Frontend {
+    FilmScan3Geometry geometry;
+    FrontendBackend identity = FrontendBackend::Cuda;
+    WaveletIsa isa = WaveletIsa::Auto;
+    explicit FakeCuda(FilmScan3Geometry g) : geometry(g) {}
+    FilmScan3Geometry Geometry() const noexcept override { return geometry; }
+    FrontendBackend Backend() const noexcept override { return identity; }
+    WaveletIsa Isa() const noexcept override { return isa; }
+    Planes Convert(const uint8_t*, std::size_t, int, int, std::size_t) override {
+        throw std::logic_error("fake CUDA must never execute");
+    }
+    WaveletLevel Forward(const Plane&, int) override { throw std::logic_error("fake CUDA must never execute"); }
+    std::string DeviceName() const override { return "fake CUDA contract only"; }
+};
+std::shared_ptr<Frontend> CountCuda(FilmScan3Geometry g) { ++cuda_calls; return std::make_shared<FakeCuda>(g); }
+std::shared_ptr<Frontend> CudaMasquerade(FilmScan3Geometry g) { ++cuda_calls; return CpuFrontend(g, WaveletIsa::Scalar); }
+std::shared_ptr<Frontend> CudaAsMetal(FilmScan3Geometry g) { ++cuda_calls; return std::make_shared<FakeMetal>(g); }
+std::shared_ptr<Frontend> CudaWrongGeometry(FilmScan3Geometry g) { g.height += 8; return CountCuda(g); }
+std::shared_ptr<Frontend> CudaWrongIsa(FilmScan3Geometry g) {
+    auto f = std::make_shared<FakeCuda>(g); f->isa = WaveletIsa::Scalar; return f;
+}
+std::shared_ptr<Frontend> CudaMissing(FilmScan3Geometry) { ++cuda_calls; throw std::runtime_error("CUDA init failed"); }
+std::shared_ptr<Frontend> CudaNoMemory(FilmScan3Geometry) { throw std::bad_alloc(); }
+std::shared_ptr<Frontend> CudaLogic(FilmScan3Geometry) { throw std::logic_error("CUDA contract broken"); }
+
+void CudaContract() {
+    auto config = Small(); config.backend = SessionBackend::Cuda;
+    config.input_stride_bytes = 512; config.input_bytes = 512 * 24;
+    EncoderDevice device; device.cuda_available = true;
+    device.cuda_hardware_observed = true;
+    device.cuda_total_global_memory_bytes = 1ull << 34;
+    BackendFactories factories{Count, CountMetal, CountCuda};
+    calls = metal_calls = cuda_calls = 0;
+    auto selected = SelectBackend(config, device, factories);
+    Require(selected && calls == 0 && metal_calls == 0 && cuda_calls == 1 &&
+            selected.frontend->Backend() == FrontendBackend::Cuda,
+            "CUDA selected wrong factory/identity");
+    Require(selected.effective.effective_backend == SessionBackend::Cuda &&
+            selected.fallback == ScalarFallbackReason::None, "CUDA selection lost backend origin");
+    // Neither the legacy scalar seam nor the Metal seam may satisfy a CUDA request.
+    calls = metal_calls = 0;
+    const auto legacy = SelectBackend(config, device, Count);
+    Require(calls == 0 && (!legacy || legacy.frontend->Backend() == FrontendBackend::Cuda),
+            "scalar seam satisfied a CUDA request");
+    for (auto factory : {CudaSessionFactory{nullptr}, CudaMasquerade, CudaAsMetal, CudaWrongGeometry,
+                         CudaWrongIsa, CudaMissing}) {
+        factories.cuda = factory; config.allow_cpu_scalar_fallback = true; calls = metal_calls = 0;
+        const auto failed = SelectBackend(config, device, factories);
+        Require(!failed && !failed.frontend && failed.status == BackendSelectionStatus::InitializationFailed &&
+                calls == 0, "CUDA initialization failed open or fell back");
+    }
+    for (auto factory : {CudaNoMemory, CudaLogic}) {
+        factories.cuda = factory; bool propagated = false;
+        try { (void)SelectBackend(config, device, factories); }
+        catch (const std::bad_alloc&) { propagated = factory == CudaNoMemory; }
+        catch (const std::logic_error&) { propagated = factory == CudaLogic; }
+        Require(propagated, "CUDA non-runtime failure hidden");
+    }
+    factories.cuda = CountCuda;
+    const auto refused = [&](EncoderSessionConfig c, EncoderDevice d, CapabilityReason reason) {
+        calls = metal_calls = cuda_calls = 0; c.allow_cpu_scalar_fallback = true;
+        const auto r = SelectBackend(c, d, factories);
+        Require(!r && calls == 0 && metal_calls == 0 && cuda_calls == 0 && r.effective.primary == reason,
+                "CUDA refusal reached a factory or changed reason");
+    };
+    auto c = config;
+    EncoderDevice unprobed = device; unprobed.cuda_total_global_memory_bytes = 0;
+    refused(c, unprobed, CapabilityReason::ValidButNotImplemented);
+    c = config; c.input_bytes = 0; refused(c, device, CapabilityReason::FormatMathematicallyInvalid);
+    c = config; c.input_stride_bytes = c.input_bytes = 0;
+    refused(c, device, CapabilityReason::ValidButNotImplemented);
+    c = config; c.gpu_memory_budget_bytes = 1; refused(c, device, CapabilityReason::MemoryBudgetExceeded);
+    auto d = device; d.cuda_total_global_memory_bytes = 1;
+    refused(config, d, CapabilityReason::MemoryBudgetExceeded);
+    d = device; d.cuda_total_global_memory_bytes = 36ull * 128 * 24 + 1024 * 1024 + config.input_bytes - 1;
+    refused(config, d, CapabilityReason::MemoryBudgetExceeded);
+    d = device; d.cuda_total_global_memory_bytes = 36ull * 128 * 24 + 1024 * 1024 + config.input_bytes;
+    Require(static_cast<bool>(SelectBackend(config, d, factories)), "CUDA ceiling boundary refused");
+    c = config; c.require_reference_oracle = true; refused(c, device, CapabilityReason::ReferenceMissing);
+    c = config; c.width = 200; refused(c, device, CapabilityReason::FormatMathematicallyInvalid);
+    c = config; c.width = 384; c.height = 40; c.input_stride_bytes = 1536; c.input_bytes = 1536 * 40;
+    refused(c, device, CapabilityReason::BackendNotQualifiedForGeometry);
+    // Observed hardware without a bound backend must not become permission. The
+    // explicit-fallback variant is checked below, so this refusal runs without it.
+    auto observed = device; observed.cuda_available = false;
+    {
+        auto strict = config; strict.allow_cpu_scalar_fallback = false;
+        calls = metal_calls = cuda_calls = 0;
+        const auto r = SelectBackend(strict, observed, factories);
+        Require(!r && r.effective.primary == CapabilityReason::BackendNotPresent &&
+                calls == 0 && metal_calls == 0 && cuda_calls == 0,
+                "observed-but-absent CUDA became permission");
+    }
+    // Explicit scalar fallback still works, but only via a complete scalar query.
+    c = config; c.allow_cpu_scalar_fallback = true; calls = cuda_calls = 0;
+    const auto fallback = SelectBackend(c, observed, factories);
+    Require(fallback && calls == 1 && metal_calls == 0 && cuda_calls == 0 &&
+            fallback.frontend->Backend() == FrontendBackend::Cpu &&
+            fallback.fallback == ScalarFallbackReason::BackendNotPresent,
+            "absent CUDA did not use the scalar contract");
+    std::cout << "PASS fake CUDA binding/refusal/identity/init falsifiers (no GPU execution)\n";
+}
 void MetalContract() {
     auto config = Small(); config.backend = SessionBackend::Metal;
     config.input_stride_bytes = 512; config.input_bytes = 512 * 24;
@@ -193,7 +299,9 @@ void Contract() {
                 result.requested.reasons.backend_not_present, "explicit absent-backend fallback");
         auto present = host;
         present.metal_available = present.cuda_available = present.vulkan_available = true;
-        if (backend == SessionBackend::Metal) {
+        if (backend == SessionBackend::Metal || backend == SessionBackend::Cuda) {
+            // Present GPU backend without bound storage and real device limits is
+            // not a capability failure that fallback may repair.
             config.allow_cpu_scalar_fallback = true;
             Refused(config, present, CapabilityReason::ValidButNotImplemented);
             continue;
@@ -343,7 +451,7 @@ int main(int argc, char** argv) {
     try {
         if(argc != 2) throw std::invalid_argument("expected contract or packets");
         const std::string mode=argv[1];
-        if(mode == "contract") { Contract(); MetalContract(); }
+        if(mode == "contract") { Contract(); MetalContract(); CudaContract(); }
         else if(mode == "packets") Packets();
         else throw std::invalid_argument("unknown test mode");
         return 0;

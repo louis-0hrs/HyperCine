@@ -3,7 +3,8 @@
 The internal session implementation connects capability permission to an actual
 frontend without changing public headers, legacy constructors or the FilmScan3
 writer. The original CPU-first step is now extended by the bounded internal Metal
-contract in [ENCODER_METAL_SESSIONS.md](ENCODER_METAL_SESSIONS.md). This is not a
+contract in [ENCODER_METAL_SESSIONS.md](ENCODER_METAL_SESSIONS.md) and the bounded
+internal CUDA contract in [ENCODER_CUDA_SESSIONS.md](ENCODER_CUDA_SESSIONS.md). This is not a
 public product backend API or original-reference qualification.
 
 ## Entry points
@@ -44,10 +45,13 @@ is subsequently refused. Only status Selected plus a non-null frontend is succes
 
 ## Deliberate qualification boundary
 
-The capability table permits experimental scalar CPU and explicitly listed Metal
-sessions; Metal additionally requires bound storage and concrete device limits.
-Presence alone does not grant permission. CUDA/Vulkan and CpuSimd remain outside
-this revision. An absent SIMD backend can use explicit scalar fallback, but a
+The capability table permits experimental scalar CPU, explicitly listed Metal and
+explicitly listed CUDA sessions; Metal additionally requires bound storage and
+concrete device limits, and CUDA requires bound storage and a probed total device
+memory size. Presence alone does not grant permission. Each GPU backend has its own
+evidence records: CPU evidence never qualifies a GPU, Metal limits never qualify
+CUDA, and CUDA limits never qualify Metal. Vulkan and CpuSimd remain outside this
+revision. An absent SIMD backend can use explicit scalar fallback, but a
 present unimplemented SIMD request is refused. Explicit scalar fallback is CPU
 evidence only. Metal factory identity and actual native dispatch are separately
 checked; #304/#309 native backend-required gates remain mandatory. Public
@@ -57,7 +61,6 @@ new conservative internal policy. See the Metal contract for the exact limits.
 The public legacy fixed-Q2 cap remains 2,097,152 pixels. FilmScan3 sample/wire,
 quality, timebase, reference and pixel limits are unchanged. No original GoPro,
 VC-5 conformance, 8K, performance improvement or release claim follows.
-
 ## Reproduction
 
 ```sh
@@ -73,11 +76,16 @@ python ci/run_standalone.py --build-dir build --system Linux --machine x86_64
 ```
 
 The new mandatory CTests are 'encoder_backend_selection_contract' and
-'encoder_backend_session_packets'. The latter compares complete samples, state,
-36 quant/scale entries and 30 coefficient hashes against the existing scalar
-encoder for 128x24, 256x256, 1280x720 and 2048x1080; the first two run concurrently
-for 16 ordered changing frames each. It checks padded storage, failed-input
-rollback, Reset, fallback geometry and concurrent hash-on/off sample equivalence. Existing
+'encoder_backend_session_packets'.
+The CUDA build additionally registers the GPU-required
+'encoder_cuda_session_packets' gate; see
+[ENCODER_CUDA_SESSIONS.md](ENCODER_CUDA_SESSIONS.md).
+
+'encoder_backend_session_packets' compares complete samples, state, 36 quant/scale
+entries and 30 coefficient hashes against the existing scalar encoder for 128x24,
+256x256, 1280x720 and 2048x1080; the first two run concurrently for 16 ordered
+changing frames each. It checks padded storage, failed-input rollback, Reset,
+fallback geometry and concurrent hash-on/off sample equivalence. Existing
 full-suite external decode gates remain separate from this in-memory equivalence.
 Use a sufficiently large scratch directory via the platform temporary-directory
 setting when running the full independent-decode suite.

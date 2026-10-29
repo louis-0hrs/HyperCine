@@ -20,7 +20,7 @@ struct HostTiming {
     double quant_ms=0, coefficient_hash_ms=0, entropy_ms=0, framing_ms=0;
 };
 // Internal stage boundary. Implementations throw before returning incomplete data.
-enum class FrontendBackend { Unknown, Cpu, Metal };
+enum class FrontendBackend { Unknown, Cpu, Metal, Cuda };
 struct Frontend {
     virtual ~Frontend() = default;
     // Internal identity is checked by session selection, independently of ISA.
@@ -58,6 +58,9 @@ std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry, WaveletIsa);
 // selection API and both must make the complete-sample comparison fail.
 enum class CudaTestMode { Normal, SkipKernel, AlterOutput };
 std::shared_ptr<Frontend> CudaFrontend(FilmScan3Geometry, CudaTestMode = CudaTestMode::Normal);
+// Geometry-only production entry to the same CUDA frontend. Keeps fault-injection
+// modes out of the session factory table; throws when CUDA is not built.
+std::shared_ptr<Frontend> CudaSessionFrontend(FilmScan3Geometry);
 std::shared_ptr<Frontend> MetalFrontend(); // throws if disabled/device/pipeline unavailable
 // Geometry-carrying Metal frontend. Same failure contract: it throws rather than
 // degrading, so an explicitly requested Metal backend cannot silently become CPU.

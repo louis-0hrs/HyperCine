@@ -28,12 +28,20 @@ struct BackendSelection {
 // capability permission. Production uses the existing shared CPU frontend.
 using ScalarFrontendFactory = std::shared_ptr<Frontend>(*)(FilmScan3Geometry, WaveletIsa);
 using MetalSessionFactory = std::shared_ptr<Frontend>(*)(FilmScan3Geometry);
+// Same shape as the Metal seam: geometry only, no test mode. A production or
+// test CUDA injection cannot reach a fault-injection mode through this table.
+using CudaSessionFactory = std::shared_ptr<Frontend>(*)(FilmScan3Geometry);
 struct BackendFactories {
     ScalarFrontendFactory scalar = CpuFrontend;
     MetalSessionFactory metal = MetalFrontend;
+    CudaSessionFactory cuda = CudaSessionFrontend;
 };
 // Hardware/build facts only; never allocates frame-sized storage.
 EncoderDevice ProbeMetalEncoderDevice();
+// Real runtime probe. Presence, device name and total device memory are read
+// from the driver; nothing is allocated and no kernel is launched. A build
+// without CUDA reports the backend absent rather than pretending it is ready.
+EncoderDevice ProbeCudaEncoderDevice();
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&);
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, const BackendFactories&);
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, ScalarFrontendFactory);
