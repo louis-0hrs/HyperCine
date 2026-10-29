@@ -1,0 +1,4168 @@
+{
+  "cases": [
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 228340,
+      "packet_sha256": "f11ee3a324aea7e4afb8de48be38f135c9c838790e5148513f7df5329011b2bb",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/asymmetric/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 4616848,
+      "packet_sha256": "b0a31a73a40f79ad3266d500342ad7ac4921de16ca4d8dbdee2214ce4aed5054",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/checker/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 247220,
+      "packet_sha256": "a4e2836516e09c0e8862b383f66ddf309de09d1f2a960b5a029f88d98779baaa",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/edge/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 228340,
+      "packet_sha256": "e461a69c3821b8d76a1c5dd6c29069c5e4428d129a62b6038f8eea750a2c67cc",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/flat/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 228340,
+      "packet_sha256": "3046472bbf34427460c26594798fc88aef13cf014e81ba30706c8568a5c58ade",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/gradient/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 2858460,
+      "packet_sha256": "e1d379f06d5490a012cd51e4a1f4b4973a8433f4b74ae86ef2266948300f4ac6",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/minmax/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 7973240,
+      "packet_sha256": "12d54fe68d8474f7528d831956d35300cc5a41ce55c3ee37f9ff5021663e3849",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/noise/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 96,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 144,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 12,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 192,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 288,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 254600,
+      "packet_sha256": "64696cd1f33b094a68d00cc33f1d2aa530b0ed33a54daeea7f7e32d5bec9ef12",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan1/primaries/sdk.cfhd",
+      "quality_l": 4
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 228340,
+      "packet_sha256": "cd65bb52978a5e7c6e1a49468e79e96ebd49b2c4847c092980e9985251aa437d",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/asymmetric/sdk.cfhd",
+      "quality_l": 6
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 6369364,
+      "packet_sha256": "eefc21d29884959219a10ab63047a7ca6979c4d6519b84e5567eecab352338d8",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/checker/sdk.cfhd",
+      "quality_l": 6
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 250356,
+      "packet_sha256": "31210b4957022b8b890b1789caae0faf0ab8f740bd2cf28d53b4f02ad84ca639",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/edge/sdk.cfhd",
+      "quality_l": 6
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 228340,
+      "packet_sha256": "26bc71deb19601bd0c8334cff73360ab053d7c82dbba4c80c8029949dcc3ca08",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/flat/sdk.cfhd",
+      "quality_l": 6
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 228340,
+      "packet_sha256": "4a067eb342d67925fbdca0898c5e7b778e77db8e01f26176945de7db2cd11861",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/gradient/sdk.cfhd",
+      "quality_l": 6
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 3632156,
+      "packet_sha256": "6e7015b4d3f3784edae55c8dc3a0c2d7f81af83d76985b2bdb9fe236177d79b5",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/minmax/sdk.cfhd",
+      "quality_l": 6
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 11682216,
+      "packet_sha256": "7a629e2a157cade6700640d234606bb6bff5e4cc6dfc26ba8a1192809ce071de",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/noise/sdk.cfhd",
+      "quality_l": 6
+    },
+    {
+      "bands": [
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 24,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 36,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ],
+        [
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "LH",
+            "subband": 1,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 32,
+            "height": 135,
+            "level": 3,
+            "orientation": "HL",
+            "subband": 2,
+            "width": 240
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 16,
+            "height": 135,
+            "level": 3,
+            "orientation": "HH",
+            "subband": 3,
+            "width": 240
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "LH",
+            "subband": 4,
+            "width": 480
+          },
+          {
+            "band_quantization": 16,
+            "band_scale": 8,
+            "height": 270,
+            "level": 2,
+            "orientation": "HL",
+            "subband": 5,
+            "width": 480
+          },
+          {
+            "band_quantization": 8,
+            "band_scale": 4,
+            "height": 270,
+            "level": 2,
+            "orientation": "HH",
+            "subband": 6,
+            "width": 480
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "LH",
+            "subband": 7,
+            "width": 960
+          },
+          {
+            "band_quantization": 48,
+            "band_scale": 2,
+            "height": 540,
+            "level": 1,
+            "orientation": "HL",
+            "subband": 8,
+            "width": 960
+          },
+          {
+            "band_quantization": 72,
+            "band_scale": 1,
+            "height": 540,
+            "level": 1,
+            "orientation": "HH",
+            "subband": 9,
+            "width": 960
+          }
+        ]
+      ],
+      "measured_band_total": 30,
+      "num_subbands": 10,
+      "packet_bytes": 260004,
+      "packet_sha256": "13b96928b0c9c56c7d629d9ba2d42482cb317601cf6a4bcd2d2ee461c2610741",
+      "path": "RGB_444/f1/1920x1080/RG48/filmscan3/primaries/sdk.cfhd",
+      "quality_l": 6
+    }
+  ],
+  "corpus": "F1 RGB_444, resolved privately through HYPERCINE_GOLDEN_DIR",
+  "findings": {
+    "band_total": "3 channels x (1 lowpass + 9 highpass) = 30 bands, not the 40-band hypothesis recorded from #17",
+    "geometry": "all three planes are full resolution; every level halves width and height",
+    "quant_table": "differs from the YUV profile tables; measured per profile from the packets",
+    "scale_table": "matches the YUV per-level/orientation scale (2/2/1, 8/8/4, 32/32/16) in all 16 packets"
+  },
+  "index_verification": {
+    "entries": 64,
+    "index": "RGB_444/TRANSFER_SHA256.tsv",
+    "method": "size and SHA-256 per listed file before any packet was read",
+    "ok": 64,
+    "problems": 0
+  },
+  "issue": 37,
+  "measured": 16,
+  "packets": 16,
+  "rejected": 0,
+  "schema": "hypercine.rgb444-bands/1",
+  "scope": "declared band geometry and quant/scale values read from original packets; no transform, entropy or pixel claim"
+}
