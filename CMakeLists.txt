@@ -79,6 +79,9 @@ function(hypercine_register_sdk_free_contracts)
         return()
     endif()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME windows_sdk_corpus_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_windows_sdk_corpus.py")
+    set_tests_properties(windows_sdk_corpus_contract PROPERTIES LABELS "validation;reference-oracle")
     add_test(NAME qualification_report_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_summarize_qualification.py")
     set_tests_properties(qualification_report_contract PROPERTIES LABELS "validation;reference-oracle")
