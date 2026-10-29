@@ -2,7 +2,8 @@
      Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE. -->
 # Where the shared profile tables enter `FilmScan3Encoder` (#46)
 
-Status: **PROFILE_SEAM_PASS / PROFILES_UNQUALIFIED_BEYOND_FILMSCAN3**.
+Status: **PROFILE_SEAM_PASS** (superseded on profile admission by
+`docs/P6_SIX_PROFILES_46.md`).
 
 Issue [#46](https://github.com/louis-0hrs/HyperCine/issues/46) asks for six
 CineForm qualities on the macOS CPU/Metal FilmScan3 path with the *same*
@@ -66,27 +67,19 @@ in both directions. It is no longer a producer.
 (`<algorithm>`, `<limits>`, `<stdexcept>`, `<string>` for `std::to_string`)
 instead of relying on transitive inclusion; MSVC rejects the transitive form.
 
-## Why the five other profiles are refused, not enabled
+## Superseded: the five other profiles are now enabled
 
-`FilmScan3Encoder::SetSessionQuality` and `ComputeProfileTables` throw
-`std::invalid_argument` for Low/Medium/High/FilmScan1/FilmScan2, with an explicit
-reason string. This is deliberate:
+This section previously explained why Low/Medium/High/FilmScan1/FilmScan2 were
+refused. That refusal has been retired by measurement, not by preference:
+`docs/P6_SIX_PROFILES_46.md` records that the SDK-free writer reproduces the
+original Windows packets byte-for-byte for all six profiles once tag -80
+carries the session quality enum. Only FilmScan3 had been tried, so only
+FilmScan3 was labelled; the writer itself was never FilmScan3-specific.
 
-- The writer emits one CFHD family: progressive YUV422 p10, GOP1, 30 fps
-  timebase, three channels, ten subbands. Low/Medium/High additionally use the
-  upstream fixed-quality ceiling table (`overbitrate`) at 1080p, which this
-  writer has never exercised.
-- The pinned Windows corpus carries per-profile `quant`, `scale` and
-  `fs_rate_limiter` for all six profiles at 1080p, 4K and 8K, but that qualifies
-  the *calculator* (already proven on #46 by the corpus oracle), not this
-  writer's packet bytes for those profiles.
-- Emitting FilmScan3 bytes under a `medium` label would be a silent quality
-  misrepresentation. Refusing is the honest state until each profile has an
-  original SDK packet gate.
-
-What the refusal buys is testability: the boundary is a value, not a comment.
-`profile_enter_contract` proves all five are rejected and that FilmScan3 is
-accepted.
+The refusal boundary is retained in the code as a *value* rather than deleted
+silently: `p6_six_profile_packets` fails when any profile's emitted bytes
+diverge from the pinned originals, and `profile_enter_contract` fails when the
+header stamp stops following the session.
 
 ## Measured facts behind the design
 

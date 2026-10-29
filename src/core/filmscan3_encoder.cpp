@@ -124,6 +124,14 @@ void FilmScan3Encoder::SetCoefficientHashing(bool enabled) noexcept { coefficien
 void FilmScan3Encoder::SetSessionQuality(EncodingQuality quality) {
     const char* refusal=SessionProfileRefusalReason(quality);
     if(*refusal)throw std::invalid_argument(refusal);
+    // The profile owns the rate limiter, the hysteresis token and the previous
+    // sample size. Letting it change after a frame exists would hand one
+    // profile's rate state to another profile's tables, so the session profile
+    // is settled by the first successfully encoded frame. Re-asserting the same
+    // profile is a no-op and stays allowed.
+    if(quality_locked_ && quality!=quality_)
+        throw std::logic_error("session quality profile is already fixed by an encoded frame; "
+                               "construct a new encoder for another profile");
     quality_=quality;
 }
 void FilmScan3Encoder::StampDiagnosticOff(FilmScan3Frame& result) {
@@ -171,18 +179,26 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     request.frame_index=state_.frame_index;
     request.fs_rate_limiter=state_.fs_rate_limiter;
     request.previous_completed_sample_bytes=state_.previous_sample_bytes;
+    request.previous_overbitrate=state_.fs_overbitrate;
     request.width=g.width;request.height=g.height;
     const auto session=ComputeProfileTables(request);
-    if(session.fs_rate_limiter!=NextLimiter(state_,pixels))
+    // The frozen rate formula is the FilmScan3 law. The other profiles run the
+    // shared calculator's own feedback, so comparing them against this formula
+    // would fail on correct input rather than catch a defect.
+    if(quality_==EncodingQuality::FilmScan3 && session.fs_rate_limiter!=NextLimiter(state_,pixels))
         throw std::logic_error("shared quality state and frozen FilmScan3 rate feedback disagree");
     result.state.fs_rate_limiter=session.fs_rate_limiter;
+    result.state.fs_overbitrate=session.overbitrate;
     result.tables=session.tables;
     Writer s(g.sample_capacity_bytes ? g.sample_capacity_bytes : 8*pixels+16384);
     s.Tag(1,9);s.Tag(2,3);const auto index=s.bytes.size();for(int c=0;c<3;++c)s.Tag(0,0);
     s.Tag(10,0);s.Tag(11,1);s.Tag(12,3);s.Tag(-71,32);s.Tag(84,1);s.Tag(-91,2);
     s.Tag(13,3);s.Tag(14,10);s.Tag(15,2);s.Tag(16,3);s.Tag(20,g.width);s.Tag(21,g.height);
     s.Tag(-69,state_.frame_index+1);s.Tag(70,10);s.Tag(-85,g.height);s.Tag(-79,0xa100);
-    s.Tag(-80,6);s.Tag(-81,0x1a0);s.Tag(-83,0x2000);
+    // Tag -80 carries the session quality enum. The SDK writes 1..6 here for
+    // low..filmscan3; hard-coding 6 would relabel every other profile while
+    // leaving the rest of the packet untouched.
+    s.Tag(-80,static_cast<unsigned>(static_cast<int>(quality_)));s.Tag(-81,0x1a0);s.Tag(-83,0x2000);
     const auto sample=s.Begin(0x2200);Metadata(s,metadata,state_.frame_index);
     s.Tag(-63,0);s.Tag(-64,0);s.Tag(-65,16);s.Tag(-66,9);s.Tag(68,1);
     for(int c=0;c<3;++c) {
@@ -233,7 +249,12 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     // leaves that identity untouched. Rate state is committed immediately after.
     if(coefficient_hashing_) result.coefficient_hash=FilmScan3CoefficientHash::Full;
     else StampDiagnosticOff(result);
-    state_.fs_rate_limiter=result.state.fs_rate_limiter;state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
+    state_.fs_rate_limiter=result.state.fs_rate_limiter;
+    state_.fs_overbitrate=result.state.fs_overbitrate;
+    state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
+    // First successful frame settles the profile. Only reached after every
+    // throwing step above, so a rejected Encode does not lock the session.
+    quality_locked_=true;
     return result;
 }
 }}

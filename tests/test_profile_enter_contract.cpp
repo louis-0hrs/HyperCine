@@ -9,6 +9,8 @@
 #include "../src/core/quality_profile_bridge.h"
 #include "reference_frame_generator.h"
 #include <array>
+#include <map>
+#include <set>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -45,6 +47,27 @@ int FrozenLimiter(int limiter, std::uint64_t previous_bytes, std::size_t pixels)
         }
     }
     return limiter < 0 ? 0 : (limiter > 20 ? 20 : limiter);
+}
+
+// Reads tag -80 (the SDK quality enum) straight out of an emitted packet. The
+// header is walked with the same size encoding the writer uses, so payload
+// bytes can never be mistaken for tags.
+unsigned HeaderQualityStamp(const std::vector<uint8_t>& sample) {
+    std::size_t at = 0;
+    while (at + 4 <= sample.size()) {
+        const int tag = static_cast<int16_t>(sample[at] << 8 | sample[at + 1]);
+        const unsigned value = unsigned(sample[at + 2]) << 8 | sample[at + 3];
+        if (tag == -80) return value;
+        if (tag < 0) {
+            const int code = -tag;
+            const int group = code & 0xff00;
+            if (group == 0x2000) { at += 4 + std::size_t(((code & 255) << 16) | value) * 4; continue; }
+            if (group == 0x4000) { at += 4 + std::size_t(value) * 4; continue; }
+            if (group == 0x2100 || group == 0x2200) { at += 4; continue; }
+        }
+        at += 4;
+    }
+    throw std::runtime_error("emitted packet carries no quality stamp");
 }
 }  // namespace
 
@@ -175,28 +198,218 @@ int main() {
                     "frame 0 must seed the FilmScan3 limiter");
         }
 
-        // 5. The five unqualified profiles are refused, not mislabelled.
-        for (EncodingQuality quality : {EncodingQuality::Low, EncodingQuality::Medium,
-                                        EncodingQuality::High, EncodingQuality::FilmScan1,
-                                        EncodingQuality::FilmScan2}) {
-            Require(!IsQualifiedSessionProfile(quality),
-                    "unqualified profile reported as qualified");
-            Require(*SessionProfileRefusalReason(quality) != '\0',
-                    "refused profile must state a reason");
-            ProfileTableRequest request;
-            request.quality = quality;
-            Reject([&] { ComputeProfileTables(request); },
-                   "unqualified profile produced tables");
-            FilmScan3Encoder encoder;
-            Reject([&] { encoder.SetSessionQuality(quality); },
-                   "encoder accepted an unqualified profile");
+        // 5. All six regular profiles are accepted, and each one produces the
+        // tables the shared calculator computes for it - not FilmScan3's.
+        {
+            const std::map<EncodingQuality, std::string> names{
+                {EncodingQuality::Low, "low"}, {EncodingQuality::Medium, "medium"},
+                {EncodingQuality::High, "high"}, {EncodingQuality::FilmScan1, "filmscan1"},
+                {EncodingQuality::FilmScan2, "filmscan2"}, {EncodingQuality::FilmScan3, "filmscan3"}};
+            std::vector<std::array<unsigned, 36>> seen;
+            for (const auto& entry : names) {
+                Require(IsQualifiedSessionProfile(entry.first),
+                        "regular profile reported as unqualified");
+                Require(*SessionProfileRefusalReason(entry.first) == '\0',
+                        "regular profile carried a refusal reason");
+                ProfileTableRequest request;
+                request.quality = entry.first;
+                request.frame_index = 0;  // seeds the profile's own limiter
+                const auto result = ComputeProfileTables(request);
+                // Same-input profile separation: the tables must differ between
+                // profiles, otherwise "six profiles" would be one profile with
+                // six labels.
+                for (const auto& previous : seen)
+                    Require(previous != result.tables.quant,
+                            "two profiles produced identical quant tables");
+                seen.push_back(result.tables.quant);
+            }
+            Require(seen.size() == 6, "expected six distinct regular profiles");
         }
-        Require(IsQualifiedSessionProfile(EncodingQuality::FilmScan3),
-                "FilmScan3 must be qualified");
-        Require(*SessionProfileRefusalReason(EncodingQuality::FilmScan3) == '\0',
-                "FilmScan3 must not carry a refusal reason");
 
-        // 6. Invalid enum values are rejected, including the boundary values.
+        // 5b. The session profile is what reaches the writer's header field:
+        // tag -80 carries the SDK quality enum, so a profile cannot be emitted
+        // without being named.
+        {
+            std::vector<uint8_t> bgra(1920u * 1080u * 4, 0);
+            reference_fixture::GeneratePhase3AFrame(
+                1920, 1080, 0, reference_fixture::Phase3APattern::FlatBlack,
+                bgra.data(), 7680, 0x1337beef);
+            std::set<unsigned> stamps;
+            for (EncodingQuality quality : {EncodingQuality::Low, EncodingQuality::Medium,
+                                            EncodingQuality::High, EncodingQuality::FilmScan1,
+                                            EncodingQuality::FilmScan2, EncodingQuality::FilmScan3}) {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(quality);
+                const auto frame = encoder.Encode(bgra.data(), bgra.size(), 7680);
+                stamps.insert(HeaderQualityStamp(frame.sample));
+            }
+            Require(stamps == std::set<unsigned>({1, 2, 3, 4, 5, 6}),
+                    "header quality stamp did not follow the session profile");
+        }
+
+        // 5c. Rate-control hysteresis is session state, not a constant.
+        //
+        // Low/Medium/High choose between their own table and the midpoint table
+        // with the profile below them. The hold branch fires when the previous
+        // bitrate sits between 80% and 100% of the ceiling AND the previous frame
+        // already used the overrate table. A constant previous_overbitrate = 0
+        // makes "hold" unreachable: the frame would drop back to its own table as
+        // soon as the bitrate fell under the ceiling.
+        //
+        // The forced trajectory below is enter -> hold -> leave, driven through
+        // the same seam the encoder calls, and compared against a control run
+        // that always passes 0. The two must differ at "hold"; a regression that
+        // agrees with the broken behaviour proves nothing.
+        {
+            struct Case { EncodingQuality quality; const char* name; };
+            // Prior sample sizes that land in each region of the ceiling,
+            // bitrate = bytes * 8 * 30. Ceilings are 110/130/150 Mbit for
+            // low/medium/high.
+            const std::array<std::uint64_t, 3> above{504166, 595833, 687500};
+            const std::array<std::uint64_t, 3> hold{412500, 487500, 562500};
+            const std::array<std::uint64_t, 3> below{320833, 379166, 437500};
+            const std::array<Case, 3> cases{{{EncodingQuality::Low, "low"},
+                                             {EncodingQuality::Medium, "medium"},
+                                             {EncodingQuality::High, "high"}}};
+
+            bool saw_difference = false;
+            for (std::size_t i = 0; i < cases.size(); ++i) {
+                const auto quality = cases[i].quality;
+
+                // enter: bitrate above the ceiling -> overrate table.
+                ProfileTableRequest enter;
+                enter.quality = quality;
+                enter.frame_index = 5;
+                enter.previous_completed_sample_bytes = above[i];
+                enter.previous_overbitrate = 0;
+                const auto entered = ComputeProfileTables(enter);
+                Require(entered.overbitrate > 0,
+                        "overrate table was not entered above the bitrate ceiling");
+
+                // hold: bitrate inside 80%..100% of the ceiling, previous frame
+                // was overrate -> must stay on the midpoint table.
+                ProfileTableRequest held;
+                held.quality = quality;
+                held.frame_index = 6;
+                held.previous_completed_sample_bytes = hold[i];
+                held.previous_overbitrate = entered.overbitrate;
+                const auto hold_with_state = ComputeProfileTables(held);
+
+                // Control: identical inputs with the token dropped, which is what
+                // the pre-fix encoder did unconditionally.
+                ProfileTableRequest dropped = held;
+                dropped.previous_overbitrate = 0;
+                const auto hold_without_state = ComputeProfileTables(dropped);
+
+                Require(hold_with_state.overbitrate > 0,
+                        "hysteresis did not hold inside the 80..100% band");
+                Require(hold_without_state.overbitrate == 0,
+                        "control unexpectedly held: the band is not what is tested");
+                if (hold_with_state.tables.quant != hold_without_state.tables.quant) {
+                    saw_difference = true;
+                } else {
+                    // Low's midpoint table coincides with its own table, so the
+                    // token is observable in the state but not in the bytes.
+                    Require(quality == EncodingQuality::Low,
+                            "a profile with distinct midpoint tables showed no byte difference");
+                }
+
+                // leave: bitrate below the band -> back to the profile's table.
+                ProfileTableRequest leave;
+                leave.quality = quality;
+                leave.frame_index = 7;
+                leave.previous_completed_sample_bytes = below[i];
+                leave.previous_overbitrate = hold_with_state.overbitrate;
+                const auto left_band = ComputeProfileTables(leave);
+                Require(left_band.overbitrate == 0,
+                        "hysteresis did not release below the 80% band");
+            }
+            Require(saw_difference,
+                    "forcing the hysteresis trajectory produced no table difference at all");
+        }
+
+        // 5d. The token is committed into the session and cleared by Reset.
+        // Without this the seam could honour the token and the encoder could
+        // still forget it between frames.
+        {
+            FilmScan3Encoder encoder;
+            Require(encoder.state().fs_overbitrate == 0,
+                    "overbitrate must start at zero for a fresh session");
+            std::vector<uint8_t> bgra(1920u * 1080u * 4, 0);
+            reference_fixture::GeneratePhase3AFrame(
+                1920, 1080, 0, reference_fixture::Phase3APattern::FlatBlack,
+                bgra.data(), 7680, 0x1337beef);
+            const auto frame = encoder.Encode(bgra.data(), bgra.size(), 7680);
+            Require(frame.state.fs_overbitrate == encoder.state().fs_overbitrate,
+                    "frame state and committed session state disagree on overbitrate");
+            encoder.Reset();
+            Require(encoder.state().fs_overbitrate == 0,
+                    "Reset must clear the overbitrate token with the rate state");
+        }
+
+        // 5e. The session profile is settled by the first successfully encoded
+        // frame and stays settled across Reset(). Without this, a caller could
+        // encode FilmScan3 frames and then switch to Medium, carrying FilmScan3's
+        // rate limiter, hysteresis token and previous sample size into Medium's
+        // tables - the profile would be a label on someone else's state.
+        {
+            std::vector<uint8_t> bgra(1920u * 1080u * 4, 0);
+            reference_fixture::GeneratePhase3AFrame(
+                1920, 1080, 0, reference_fixture::Phase3APattern::FlatBlack,
+                bgra.data(), 7680, 0x1337beef);
+
+            // Before any frame the profile is still selectable, otherwise the
+            // session could never be configured at all.
+            {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(EncodingQuality::Medium);
+                Require(encoder.session_quality() == EncodingQuality::Medium,
+                        "profile must be selectable before the first frame");
+            }
+
+            // After a successful frame, a different profile is refused...
+            {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(EncodingQuality::FilmScan3);
+                const auto first = encoder.Encode(bgra.data(), bgra.size(), 7680);
+                Require(first.sample.size() == 185648,
+                        "FilmScan3 reference sample changed before the lock test");
+                Reject([&] { encoder.SetSessionQuality(EncodingQuality::Medium); },
+                       "profile switched after an encoded frame");
+                // ...while re-asserting the profile already in force is a no-op,
+                // so an idempotent caller is not punished.
+                encoder.SetSessionQuality(EncodingQuality::FilmScan3);
+                Require(encoder.session_quality() == EncodingQuality::FilmScan3,
+                        "re-asserting the active profile changed the session");
+                // The refusal must not have disturbed the rate state.
+                const auto second = encoder.Encode(bgra.data(), bgra.size(), 7680);
+                Require(second.state.frame_index == 1,
+                        "a rejected profile switch disturbed the session state");
+
+                // The lock outlives Reset(): the profile is a session property,
+                // and Reset only clears rate state underneath it.
+                encoder.Reset();
+                Require(encoder.session_quality() == EncodingQuality::FilmScan3,
+                        "Reset dropped the session profile");
+                Reject([&] { encoder.SetSessionQuality(EncodingQuality::High); },
+                       "Reset released the profile lock");
+            }
+
+            // A rejected Encode must not lock anything: the lock is earned by a
+            // successful frame, not by an attempt.
+            {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(EncodingQuality::FilmScan3);
+                const std::vector<uint8_t> too_short(16, 0);
+                Reject([&] { encoder.Encode(too_short.data(), too_short.size(), 7680); },
+                       "short input was accepted");
+                encoder.SetSessionQuality(EncodingQuality::Low);
+                Require(encoder.session_quality() == EncodingQuality::Low,
+                        "a rejected Encode must not settle the profile");
+            }
+        }
+
+        // 6. Invalid enum values stay rejected, including the boundary values.
         for (int raw : {0, 7, 8, 255}) {
             const auto quality = static_cast<EncodingQuality>(raw);
             ProfileTableRequest request;

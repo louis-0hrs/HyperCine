@@ -24,6 +24,10 @@ struct ProfileTableRequest {
     unsigned frame_index = 0;
     int fs_rate_limiter = 4;
     std::uint64_t previous_completed_sample_bytes = 0;
+    // Hysteresis token from the previous completed frame. Low/Medium/High use
+    // it to hold the midpoint table while the bitrate sits between 80% and 100%
+    // of their ceiling; passing a constant 0 silently disables that hold.
+    int previous_overbitrate = 0;
     int width = 1920;
     int height = 1080;
 };
@@ -32,6 +36,8 @@ struct ProfileTables {
     FilmScan3Tables tables;
     // Limiter that applies to the frame being encoded, after rate feedback.
     int fs_rate_limiter = 4;
+    // Hysteresis token to carry into the next frame of this session.
+    int overbitrate = 0;
 };
 
 // Returns the 36-entry quant/scale pair for this session profile and the rate

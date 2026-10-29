@@ -544,6 +544,33 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_link_libraries(test_profile_enter_contract PRIVATE
             hypercine_standalone hypercine_quality_state)
         add_test(NAME profile_enter_contract COMMAND test_profile_enter_contract)
+        # Issue #46: the only admissible proof that the writer emits another
+        # profile is the original Windows packet itself. Registered only when a
+        # verified corpus is configured; a missing corpus is not a pass.
+        if(HYPERCINE_QUALITY_ORACLE_ROOT)
+            find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            add_test(NAME p6_six_profile_packets COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_writer_parity.py"
+                --corpus "${HYPERCINE_QUALITY_ORACLE_ROOT}"
+                --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --geometry 1080p-16f --max-frames 16
+                --work "${CMAKE_CURRENT_BINARY_DIR}/p6-parity"
+                --report "${CMAKE_CURRENT_BINARY_DIR}/p6-parity/report.json")
+            set_tests_properties(p6_six_profile_packets PROPERTIES
+                LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
+            # The gate above is only worth its green result if it fails on the
+            # things it claims to reject: a same-length tampered SDK packet, a
+            # truncated trace, a reordered trace, and a poisoned work cache. These
+            # controls are not optional, because a gate that always exits 0 looks
+            # exactly like a passing one.
+            add_test(NAME p6_gate_negative_controls COMMAND "${CMAKE_COMMAND}" -E env
+                "HYPERCINE_QUALITY_ORACLE_ROOT=${HYPERCINE_QUALITY_ORACLE_ROOT}"
+                "HYPERCINE_P6_ENCODER=$<TARGET_FILE:hypercine_encode_filmscan3>"
+                "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_gate_negative.py")
+            set_tests_properties(p6_gate_negative_controls PROPERTIES
+                LABELS "reference-oracle;quality-profile;negative-control" TIMEOUT 3600)
+        endif()
         add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)
