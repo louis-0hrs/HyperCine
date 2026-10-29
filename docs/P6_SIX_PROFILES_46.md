@@ -57,7 +57,18 @@ picture; it was writing the right picture under the wrong label.
 - `tools/p6_writer_parity.py` + `tools/p6_profile_measure.py`: the measurement
   harness. Registered as `p6_six_profile_packets` when
   `HYPERCINE_QUALITY_ORACLE_ROOT` is set; a missing corpus registers nothing
-  rather than passing.
+  rather than passing. The gate verifies every input and every SDK packet
+  against the manifest's pinned length and SHA-256 *and* against the corpus
+  transfer index before use, re-copies a cached work input whose hash no longer
+  matches instead of trusting its size, discards stale output directories, and
+  requires the encoder trace to describe exactly the requested frames in order
+  rather than zipping short.
+- `tests/test_p6_gate_negative.py`: negative controls for that gate, registered
+  as `p6_gate_negative_controls`. It builds a same-length tampered SDK packet, a
+  truncated trace, a reordered trace and a poisoned work cache, and requires the
+  gate to reject or heal each one. Without these, a gate that always exits 0
+  would look identical to a passing one — which is exactly what the first
+  revision of `p6_writer_parity.py` did.
 - `docs/MACOS_PROFILE_ENTRY_46.md` is superseded on the refusal paragraph by
   this file.
 
@@ -81,7 +92,8 @@ profile"*. A guard that cannot fail is not evidence.
 | 8K byte-exact | **NOT RUN — geometry budget rejects 8K** |
 | 120-frame sequences, filmscan2/3 | **PASS** (240/240) |
 | 120-frame sequences, low/medium/high/filmscan1 | **NOT AVAILABLE** in corpus |
-| Overbitrate hysteresis window | **NOT EXERCISED** by this corpus |
+| Overbitrate hysteresis, forced trajectory | **PASS** (`profile_enter_contract` 5c) |
+| Overbitrate hysteresis, real packets | **NOT EXERCISED** by this corpus |
 | Metal per-profile | **ABSENT** (blocked by #45) |
 | macOS native execution of this change | **NOT RUN** (Linux x64 only) |
 | Decode / PSNR / visual quality | **NOT CLAIMED** |
@@ -90,9 +102,36 @@ The 8K blocker is separate and named: `ValidateFilmScan3Geometry` caps the
 pixel budget at 8,294,400 px, which is exactly 4K. Raising it is a memory and
 allocation decision, not a quality-profile one, and is not part of this change.
 
-The overbitrate note matters for the low/medium/high profiles: their tables can
-switch to the mid-point table when the bitrate sits between 80 % and 100 % of
-the profile ceiling. On this corpus the feedback chain stayed identical whether
-or not `previous_overbitrate` was carried, so this run does not distinguish the
-two behaviours. The writer currently passes a constant 0. That is a real,
-untested gap — not a proven equivalence.
+## The rate-control hysteresis, and a correction
+
+Low/Medium/High each choose between their own table and the midpoint table
+between them and the profile below. Which one applies depends on a session
+token: when the previous frame used the overrate table and the bitrate stayed
+between 80 % and 100 % of the ceiling, the choice is *held*, not re-decided.
+Passing a constant `previous_overbitrate = 0` makes that hold unreachable, so a
+session that entered the overrate table would drop straight back out as soon as
+the bitrate fell under the ceiling.
+
+That token is now session state (`FilmScan3State::fs_overbitrate`), fed through
+`ProfileTableRequest`, returned in `ProfileTables`, committed with the rest of
+the rate state and cleared by `Reset()`.
+
+It is worth being precise about what is and is not proven. This corpus **never
+enters the 80–100 % hold band** — every overrate frame in the pinned packets is
+above the ceiling, so the corpus alone cannot distinguish the two behaviours.
+An earlier revision of this document described that as a gap while claiming the
+six profiles were done; that was too weak a statement, and the measured rows
+above did not support a claim either way.
+
+What closes it is a forced trajectory in `profile_enter_contract` (5c):
+enter → hold → leave, driven through the same seam the encoder calls, compared
+against a control that passes 0. At `hold`, the shared table differs between the
+two runs for medium and high; for low the midpoint table coincides with the
+profile's own table, so the token is observable in the state but not in the
+bytes, and the test asserts exactly that rather than pretending a difference
+exists. Reverting the feed to `0` fails the suite with *"hysteresis did not hold
+inside the 80..100% band"*.
+
+So: the state is implemented and the branch is proven live. Real-packet parity
+inside the hold band still has no oracle, because the corpus does not contain
+that trajectory. It is not claimed.

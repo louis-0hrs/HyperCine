@@ -171,6 +171,7 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     request.frame_index=state_.frame_index;
     request.fs_rate_limiter=state_.fs_rate_limiter;
     request.previous_completed_sample_bytes=state_.previous_sample_bytes;
+    request.previous_overbitrate=state_.fs_overbitrate;
     request.width=g.width;request.height=g.height;
     const auto session=ComputeProfileTables(request);
     // The frozen rate formula is the FilmScan3 law. The other profiles run the
@@ -179,6 +180,7 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     if(quality_==EncodingQuality::FilmScan3 && session.fs_rate_limiter!=NextLimiter(state_,pixels))
         throw std::logic_error("shared quality state and frozen FilmScan3 rate feedback disagree");
     result.state.fs_rate_limiter=session.fs_rate_limiter;
+    result.state.fs_overbitrate=session.overbitrate;
     result.tables=session.tables;
     Writer s(g.sample_capacity_bytes ? g.sample_capacity_bytes : 8*pixels+16384);
     s.Tag(1,9);s.Tag(2,3);const auto index=s.bytes.size();for(int c=0;c<3;++c)s.Tag(0,0);
@@ -239,7 +241,9 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     // leaves that identity untouched. Rate state is committed immediately after.
     if(coefficient_hashing_) result.coefficient_hash=FilmScan3CoefficientHash::Full;
     else StampDiagnosticOff(result);
-    state_.fs_rate_limiter=result.state.fs_rate_limiter;state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
+    state_.fs_rate_limiter=result.state.fs_rate_limiter;
+    state_.fs_overbitrate=result.state.fs_overbitrate;
+    state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
     return result;
 }
 }}

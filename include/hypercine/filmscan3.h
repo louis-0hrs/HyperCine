@@ -22,6 +22,13 @@ struct FilmScan3State {
     unsigned frame_index = 0;
     int fs_rate_limiter = 4;
     std::size_t previous_sample_bytes = 0;
+    // Rate-control hysteresis token for Low/Medium/High. The shared calculator
+    // returns it, and it feeds the *next* frame's choice between a profile's
+    // own table and the midpoint table between that profile and the one below.
+    // Dropping it would make the encoder leave the overrate table as soon as the
+    // bitrate fell back under the ceiling, instead of holding it across the
+    // 80%..100% band. Zero for the FilmScan profiles, which have no such table.
+    int fs_overbitrate = 0;
 };
 // Optional explicit variable metadata injection. The encoder always constructs
 // its own records, tags, padding and UFRM. No reference sample/header is accepted.

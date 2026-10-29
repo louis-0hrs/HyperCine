@@ -120,7 +120,9 @@ int main(int argc,char** argv) {
             if(!output)throw std::runtime_error("sample write failed");
             if(i!=begin)trace<<',';
             trace<<"{\"frame_index\":"<<result.state.frame_index<<",\"fs_rate_limiter\":"<<result.state.fs_rate_limiter
-                 <<",\"previous_sample_bytes\":"<<result.state.previous_sample_bytes<<",\"sample_bytes\":"<<result.sample.size()<<",\"quant\":[";
+                 <<",\"previous_sample_bytes\":"<<result.state.previous_sample_bytes
+                 <<",\"fs_overbitrate\":"<<result.state.fs_overbitrate
+                 <<",\"sample_bytes\":"<<result.sample.size()<<",\"quant\":[";
             for(unsigned k=0;k<36;++k){if(k)trace<<',';trace<<result.tables.quant[k];}trace<<"],\"scale\":[";
             for(unsigned k=0;k<36;++k){if(k)trace<<',';trace<<result.tables.scale[k];}trace<<"],\"coefficient_hash\":\""<<FilmScan3CoefficientHashName(result.coefficient_hash)<<"\"";
             if(result.coefficient_hash!=FilmScan3CoefficientHash::Full) trace<<",\"coefficient_fnv64\":null}";

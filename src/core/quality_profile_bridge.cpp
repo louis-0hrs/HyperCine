@@ -76,7 +76,7 @@ ProfileTables ComputeProfileTables(const ProfileTableRequest& request) {
     input.full_resolution_chroma = false;
     input.frame_index = request.frame_index;
     input.previous_fs_rate_limiter = request.fs_rate_limiter;
-    input.previous_overbitrate = 0;
+    input.previous_overbitrate = request.previous_overbitrate;
     input.previous_completed_sample_bytes = request.previous_completed_sample_bytes;
     input.prescale = {{0, 0, 0}};
 
@@ -95,6 +95,7 @@ ProfileTables ComputeProfileTables(const ProfileTableRequest& request) {
 
     ProfileTables out;
     out.fs_rate_limiter = std::clamp(state.fs_rate_limiter, 0, 20);
+    out.overbitrate = std::clamp(state.overbitrate, 0, 16);
     for (unsigned i = 0; i < 36; ++i) {
         // Checked conversions: the ranges were validated by the guard above.
         out.tables.quant[i] = static_cast<unsigned>(state.quant[i]);

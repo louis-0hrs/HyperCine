@@ -247,6 +247,106 @@ int main() {
                     "header quality stamp did not follow the session profile");
         }
 
+        // 5c. Rate-control hysteresis is session state, not a constant.
+        //
+        // Low/Medium/High choose between their own table and the midpoint table
+        // with the profile below them. The hold branch fires when the previous
+        // bitrate sits between 80% and 100% of the ceiling AND the previous frame
+        // already used the overrate table. A constant previous_overbitrate = 0
+        // makes "hold" unreachable: the frame would drop back to its own table as
+        // soon as the bitrate fell under the ceiling.
+        //
+        // The forced trajectory below is enter -> hold -> leave, driven through
+        // the same seam the encoder calls, and compared against a control run
+        // that always passes 0. The two must differ at "hold"; a regression that
+        // agrees with the broken behaviour proves nothing.
+        {
+            struct Case { EncodingQuality quality; const char* name; };
+            // Prior sample sizes that land in each region of the ceiling,
+            // bitrate = bytes * 8 * 30. Ceilings are 110/130/150 Mbit for
+            // low/medium/high.
+            const std::array<std::uint64_t, 3> above{504166, 595833, 687500};
+            const std::array<std::uint64_t, 3> hold{412500, 487500, 562500};
+            const std::array<std::uint64_t, 3> below{320833, 379166, 437500};
+            const std::array<Case, 3> cases{{{EncodingQuality::Low, "low"},
+                                             {EncodingQuality::Medium, "medium"},
+                                             {EncodingQuality::High, "high"}}};
+
+            bool saw_difference = false;
+            for (std::size_t i = 0; i < cases.size(); ++i) {
+                const auto quality = cases[i].quality;
+
+                // enter: bitrate above the ceiling -> overrate table.
+                ProfileTableRequest enter;
+                enter.quality = quality;
+                enter.frame_index = 5;
+                enter.previous_completed_sample_bytes = above[i];
+                enter.previous_overbitrate = 0;
+                const auto entered = ComputeProfileTables(enter);
+                Require(entered.overbitrate > 0,
+                        "overrate table was not entered above the bitrate ceiling");
+
+                // hold: bitrate inside 80%..100% of the ceiling, previous frame
+                // was overrate -> must stay on the midpoint table.
+                ProfileTableRequest held;
+                held.quality = quality;
+                held.frame_index = 6;
+                held.previous_completed_sample_bytes = hold[i];
+                held.previous_overbitrate = entered.overbitrate;
+                const auto hold_with_state = ComputeProfileTables(held);
+
+                // Control: identical inputs with the token dropped, which is what
+                // the pre-fix encoder did unconditionally.
+                ProfileTableRequest dropped = held;
+                dropped.previous_overbitrate = 0;
+                const auto hold_without_state = ComputeProfileTables(dropped);
+
+                Require(hold_with_state.overbitrate > 0,
+                        "hysteresis did not hold inside the 80..100% band");
+                Require(hold_without_state.overbitrate == 0,
+                        "control unexpectedly held: the band is not what is tested");
+                if (hold_with_state.tables.quant != hold_without_state.tables.quant) {
+                    saw_difference = true;
+                } else {
+                    // Low's midpoint table coincides with its own table, so the
+                    // token is observable in the state but not in the bytes.
+                    Require(quality == EncodingQuality::Low,
+                            "a profile with distinct midpoint tables showed no byte difference");
+                }
+
+                // leave: bitrate below the band -> back to the profile's table.
+                ProfileTableRequest leave;
+                leave.quality = quality;
+                leave.frame_index = 7;
+                leave.previous_completed_sample_bytes = below[i];
+                leave.previous_overbitrate = hold_with_state.overbitrate;
+                const auto left_band = ComputeProfileTables(leave);
+                Require(left_band.overbitrate == 0,
+                        "hysteresis did not release below the 80% band");
+            }
+            Require(saw_difference,
+                    "forcing the hysteresis trajectory produced no table difference at all");
+        }
+
+        // 5d. The token is committed into the session and cleared by Reset.
+        // Without this the seam could honour the token and the encoder could
+        // still forget it between frames.
+        {
+            FilmScan3Encoder encoder;
+            Require(encoder.state().fs_overbitrate == 0,
+                    "overbitrate must start at zero for a fresh session");
+            std::vector<uint8_t> bgra(1920u * 1080u * 4, 0);
+            reference_fixture::GeneratePhase3AFrame(
+                1920, 1080, 0, reference_fixture::Phase3APattern::FlatBlack,
+                bgra.data(), 7680, 0x1337beef);
+            const auto frame = encoder.Encode(bgra.data(), bgra.size(), 7680);
+            Require(frame.state.fs_overbitrate == encoder.state().fs_overbitrate,
+                    "frame state and committed session state disagree on overbitrate");
+            encoder.Reset();
+            Require(encoder.state().fs_overbitrate == 0,
+                    "Reset must clear the overbitrate token with the rate state");
+        }
+
         // 6. Invalid enum values stay rejected, including the boundary values.
         for (int raw : {0, 7, 8, 255}) {
             const auto quality = static_cast<EncodingQuality>(raw);
