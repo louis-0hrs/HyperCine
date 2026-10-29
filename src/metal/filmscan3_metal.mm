@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "../core/filmscan3_backend.h"
+#include "../core/encoder_session_config.h"
 #include "filmscan3_msl.h"
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
@@ -122,6 +123,7 @@ public:
             color_=pipeline(@"color709");horizontal_=pipeline(@"horizontal26");vertical_=pipeline(@"vertical26");
         }
     }
+    FrontendBackend Backend() const noexcept override { return FrontendBackend::Metal; }
     FilmScan3Geometry Geometry() const noexcept override { return geometry_; }
     std::string DeviceName() const override { return [device_.name UTF8String]; }
     MetalTiming Timing() const { return timing_; }
@@ -248,6 +250,19 @@ public:
         }
     }
 };
+}
+// Facts only: no command queue, pipeline, frame or resident workspace allocation.
+EncoderDevice ProbeMetalEncoderDevice() {
+    EncoderDevice facts;
+    @autoreleasepool {
+        id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+        if (device) {
+            facts.metal_available = true;
+            facts.metal_max_buffer_length_bytes = device.maxBufferLength;
+            facts.metal_recommended_working_set_bytes = device.recommendedMaxWorkingSetSize;
+        }
+    }
+    return facts;
 }
 std::shared_ptr<Frontend> MetalFrontend() { return std::make_shared<Metal>(); }
 std::shared_ptr<Frontend> MetalFrontend(FilmScan3Geometry geometry) {

@@ -423,11 +423,48 @@ int main() {
         Check("metal-absent", metal, host, CapabilityReason::BackendNotPresent);
         auto metal_device = host;
         metal_device.metal_available = true;
-        auto metal_built = Check("metal-unqualified", metal, metal_device, CapabilityReason::BackendNotQualifiedForGeometry);
+        auto metal_built = Check("metal-missing-limits-storage", metal, metal_device, CapabilityReason::ValidButNotImplemented);
         Require(metal_built.requested_backend_present && metal_built.geometry_validator_passed, "present is not qualified");
+        metal_device.metal_max_buffer_length_bytes = 1ull << 30;
+        metal_device.metal_recommended_working_set_bytes = 1ull << 30;
+        metal.input_stride_bytes = 1920u * 4u;
+        metal.input_bytes = metal.input_stride_bytes * 1080u;
         metal.gpu_memory_budget_bytes = 1;
         auto metal_memory = Check("metal-gpu-budget", metal, metal_device, CapabilityReason::MemoryBudgetExceeded);
-        Require(metal_memory.reasons.backend_not_qualified_for_geometry && metal_memory.reasons.memory_budget_exceeded, "gpu axes");
+        Require(!metal_memory.reasons.backend_not_qualified_for_geometry && metal_memory.reasons.memory_budget_exceeded, "gpu axes");
+
+        for (const auto& item : pass) {
+            auto c = Film(item.w, item.h); c.backend = SessionBackend::Metal;
+            c.input_stride_bytes = static_cast<std::uint64_t>(item.w) * 4u + 64u;
+            c.input_bytes = c.input_stride_bytes * item.h;
+            const auto ceiling = 36ull * item.w * item.h + 1024u * 1024u + c.input_bytes;
+            c.cpu_memory_budget_bytes = c.gpu_memory_budget_bytes = ceiling;
+            auto d = metal_device;
+            d.metal_recommended_working_set_bytes = ceiling;
+            d.metal_max_buffer_length_bytes = c.input_bytes;
+            const auto r = Check("metal-bounded-matrix", c, d, CapabilityReason::ExperimentallySupported);
+            Require(r.allocation_permitted && r.evidence_record && r.effective_backend == SessionBackend::Metal,
+                    "Metal matrix did not preserve backend");
+            --c.cpu_memory_budget_bytes;
+            Check("metal-host-ceiling-minus-one", c, d, CapabilityReason::MemoryBudgetExceeded);
+            ++c.cpu_memory_budget_bytes; --c.gpu_memory_budget_bytes;
+            Check("metal-gpu-ceiling-minus-one", c, d, CapabilityReason::MemoryBudgetExceeded);
+            ++c.gpu_memory_budget_bytes; --d.metal_recommended_working_set_bytes;
+            Check("metal-working-set-minus-one", c, d, CapabilityReason::MemoryBudgetExceeded);
+            ++d.metal_recommended_working_set_bytes; --d.metal_max_buffer_length_bytes;
+            Check("metal-single-buffer-minus-one", c, d, CapabilityReason::MemoryBudgetExceeded);
+            d = metal_device;
+            for (const auto backend : {SessionBackend::Cuda, SessionBackend::Vulkan}) {
+                c.backend = backend; d.cuda_available = d.vulkan_available = true;
+                Check("other-gpu-still-unqualified", c, d, CapabilityReason::BackendNotQualifiedForGeometry);
+            }
+        }
+        auto metal_unbound = Film(128, 24); metal_unbound.backend = SessionBackend::Metal;
+        metal_unbound.allow_cpu_scalar_fallback = true;
+        Check("metal-unbound-no-fallback", metal_unbound, metal_device, CapabilityReason::ValidButNotImplemented);
+        Check("metal-absent-unbound-fallback", metal_unbound, host, CapabilityReason::ExperimentallySupported);
+        metal_unbound.cpu_memory_budget_bytes = 1;
+        Check("metal-absent-fallback-host-budget", metal_unbound, host, CapabilityReason::MemoryBudgetExceeded);
 
         auto simd = Film(1920, 1080);
         simd.backend = SessionBackend::CpuSimd;

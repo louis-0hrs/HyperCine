@@ -29,6 +29,16 @@ constexpr Evidence kCpuExperimentalEvidence[] = {
     {3840, 2160, "experimental 4K CPU; original-SDK 4K parity remains pending"},
 };
 
+// Separate bounded Metal records: CPU evidence alone never qualifies a GPU.
+constexpr Evidence kMetalExperimentalEvidence[] = {
+    {128, 24, "bounded experimental Metal; original-SDK reference missing"},
+    {256, 256, "bounded experimental Metal; original-SDK reference missing"},
+    {1280, 720, "bounded experimental Metal; original-SDK reference missing"},
+    {1920, 1080, "bounded experimental Metal; original-SDK reference missing"},
+    {2048, 1080, "bounded experimental Metal; original-SDK reference missing"},
+    {3840, 2160, "bounded experimental Metal; original-SDK reference missing"},
+};
+
 bool FitsInt(std::int64_t value) noexcept {
     return value >= std::numeric_limits<int>::min() && value <= std::numeric_limits<int>::max();
 }
@@ -59,8 +69,14 @@ bool BackendPresent(const EncoderDevice& device, SessionBackend backend) noexcep
     return false;
 }
 
-const Evidence* FindEvidence(int width, int height) noexcept {
-    for (const auto& item : kCpuExperimentalEvidence) {
+const Evidence* FindEvidence(int width, int height, SessionBackend backend) noexcept {
+    const auto* records = backend == SessionBackend::Metal
+        ? kMetalExperimentalEvidence : kCpuExperimentalEvidence;
+    const auto count = backend == SessionBackend::Metal
+        ? sizeof(kMetalExperimentalEvidence) / sizeof(kMetalExperimentalEvidence[0])
+        : sizeof(kCpuExperimentalEvidence) / sizeof(kCpuExperimentalEvidence[0]);
+    for (std::size_t i = 0; i < count; ++i) {
+        const auto& item = records[i];
         if (item.width == width && item.height == height) return &item;
     }
     return nullptr;
@@ -265,21 +281,29 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     }
 
     if (const auto* evidence = (FitsInt(config.width) && FitsInt(config.height))
-            ? FindEvidence(static_cast<int>(config.width), static_cast<int>(config.height))
+            ? FindEvidence(static_cast<int>(config.width), static_cast<int>(config.height), effective)
             : nullptr) {
         result.evidence_record = true;
         result.evidence_note = evidence->note;
     }
 
     const bool cpu_attempt = effective == SessionBackend::CpuScalar && device.cpu_scalar_available;
+    const bool metal_attempt = effective == SessionBackend::Metal && device.metal_available;
     const bool gpu_effective = effective == SessionBackend::Metal || effective == SessionBackend::Cuda ||
                                effective == SessionBackend::Vulkan;
     const bool backend_blocks_early = result.reasons.backend_not_present && !result.fell_back_to_cpu_scalar;
-    if (!backend_blocks_early && (result.outside_qualified_dimension_envelope || gpu_effective ||
-        (cpu_attempt && result.geometry_validator_passed && !result.evidence_record))) {
+    if (!backend_blocks_early && (result.outside_qualified_dimension_envelope || (gpu_effective && !metal_attempt) ||
+        ((cpu_attempt || metal_attempt) && result.geometry_validator_passed && !result.evidence_record))) {
         result.reasons.backend_not_qualified_for_geometry = true;
     }
 
+    // Missing limits/storage are ValidButNotImplemented, not a backend-only
+    // refusal that fallback may erase. Absent Metal inherits no GPU requirements.
+    if (metal_attempt && (!storage_bound || device.metal_max_buffer_length_bytes == 0 ||
+                          device.metal_recommended_working_set_bytes == 0)) {
+        result.reasons.valid_but_not_implemented = true;
+        unimplemented_detail = "Metal requires bound input storage and nonzero device limits";
+    }
     if (product_ok && (cpu_attempt || gpu_effective)) {
         std::uint64_t extra = 0;
         bool extra_ok = true;
@@ -288,15 +312,32 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
             if (config.input_stride_bytes > std::numeric_limits<std::uint64_t>::max() / h) extra_ok = false;
             else extra = config.input_stride_bytes * h;
         }
+        // Last-row storage may fit while full padded storage overflows. That
+        // must reject explicitly, never skip all budget/device checks.
+        if (!extra_ok) {
+            result.reasons.memory_budget_exceeded = true;
+            memory_detail = "padded stride*height overflows uint64";
+        }
         std::uint64_t ceiling = 0;
+        // Conservative static planning, not RSS: 36P + 1MiB + stride*height.
+        const bool planning_ok = extra_ok && PlanningCeiling(pixels, extra, ceiling);
         const auto budget = gpu_effective ? config.gpu_memory_budget_bytes : config.cpu_memory_budget_bytes;
-        // An overflowing stride is already a format failure. Do not also call it a budget miss.
-        if (extra_ok && (!PlanningCeiling(pixels, extra, ceiling) || budget < ceiling)) {
+        if (extra_ok && (!planning_ok || budget < ceiling ||
+            (metal_attempt && (config.cpu_memory_budget_bytes < ceiling ||
+             (device.metal_recommended_working_set_bytes != 0 &&
+              device.metal_recommended_working_set_bytes < ceiling))))) {
             result.reasons.memory_budget_exceeded = true;
             if (result.pixel_budget_ok)
-                memory_detail = gpu_effective
-                    ? "gpu memory budget is below the static planning ceiling"
-                    : "cpu memory budget is below the static planning ceiling";
+                memory_detail = "host/device budget is below the static planning ceiling";
+        }
+        // Transform uses uint32 pitch/extent; largest U16 plane is 2P bytes.
+        if (metal_attempt && extra_ok &&
+            (extra > std::numeric_limits<std::uint32_t>::max() ||
+             (device.metal_max_buffer_length_bytes != 0 &&
+              (extra > device.metal_max_buffer_length_bytes ||
+               pixels > device.metal_max_buffer_length_bytes / 2u)))) {
+            result.reasons.memory_budget_exceeded = true;
+            memory_detail = "Metal input extent or plane exceeds GPU buffer/index limits";
         }
     }
 
@@ -306,7 +347,7 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
                          result.reasons.valid_but_not_implemented || backend_blocks ||
                          result.reasons.memory_budget_exceeded ||
                          result.reasons.backend_not_qualified_for_geometry || reference_blocks;
-    if (!blocked && cpu_attempt && result.evidence_record && result.geometry_validator_passed) {
+    if (!blocked && (cpu_attempt || metal_attempt) && result.evidence_record && result.geometry_validator_passed) {
         result.reasons.experimentally_supported = true;
         result.allocation_permitted = true;
     }
@@ -341,7 +382,8 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         result.primary = CapabilityReason::ExperimentallySupported;
         result.detail = result.fell_back_to_cpu_scalar
             ? "experimental CPU scalar fallback; original-SDK reference is still missing"
-            : "experimental CPU scalar attempt; original-SDK reference is still missing";
+            : (metal_attempt ? "bounded experimental Metal attempt; original-SDK reference is still missing"
+                             : "experimental CPU scalar attempt; original-SDK reference is still missing");
     } else {
         result.primary = CapabilityReason::FormatMathematicallyInvalid;
         result.detail = "fail-closed: request did not match an experimental CPU session";

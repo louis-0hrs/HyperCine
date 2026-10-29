@@ -1,8 +1,10 @@
 # Internal backend selection (#259)
 
-This CPU-first implementation connects the existing capability prototype to an
-actual session, without changing public headers, legacy constructors or the
-FilmScan3 writer. It is not a public product backend API or a GPU qualification.
+The internal session implementation connects capability permission to an actual
+frontend without changing public headers, legacy constructors or the FilmScan3
+writer. The original CPU-first step is now extended by the bounded internal Metal
+contract in [ENCODER_METAL_SESSIONS.md](ENCODER_METAL_SESSIONS.md). This is not a
+public product backend API or original-reference qualification.
 
 ## Entry points
 
@@ -42,16 +44,15 @@ is subsequently refused. Only status Selected plus a non-null frontend is succes
 
 ## Deliberate qualification boundary
 
-The existing capability table only permits experimental CPU-scalar sessions at
-its explicit geometry list. The selector does **not** override that evidence
-policy. Metal/CUDA/Vulkan presence bits are not proof of qualified execution.
-This patch adds no GPU product selector, no ISA qualification entry and no new
-public enum. Explicit scalar fallback for such requests is CPU evidence only.
-CpuSimd remains unimplemented in this capability revision; an absent SIMD backend
-can use the existing explicit fallback, but a present unimplemented SIMD request
-is refused. GPU qualification/factory integration follows separately, with #304
-and native backend-required evidence gates retained. Public CPU/Metal constructors
-keep their historical behavior and do not acquire the new conservative policy.
+The capability table permits experimental scalar CPU and explicitly listed Metal
+sessions; Metal additionally requires bound storage and concrete device limits.
+Presence alone does not grant permission. CUDA/Vulkan and CpuSimd remain outside
+this revision. An absent SIMD backend can use explicit scalar fallback, but a
+present unimplemented SIMD request is refused. Explicit scalar fallback is CPU
+evidence only. Metal factory identity and actual native dispatch are separately
+checked; #304/#309 native backend-required gates remain mandatory. Public
+CPU/Metal constructors keep their historical behavior and do not acquire the
+new conservative internal policy. See the Metal contract for the exact limits.
 
 The public legacy fixed-Q2 cap remains 2,097,152 pixels. FilmScan3 sample/wire,
 quality, timebase, reference and pixel limits are unchanged. No original GoPro,
@@ -81,7 +82,7 @@ full-suite external decode gates remain separate from this in-memory equivalence
 Use a sufficiently large scratch directory via the platform temporary-directory
 setting when running the full independent-decode suite.
 
-## Local validation snapshot
+## Historical CPU-first validation snapshot (#308)
 
 Linux x86_64, GCC 14.2, CMake 3.31.6, FFmpeg 7.1.5; CPU-only SDK-free
 configuration above, without optional original-SDK corpora:

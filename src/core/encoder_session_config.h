@@ -94,6 +94,9 @@ struct EncoderDevice {
     bool cuda_available = false;
     bool vulkan_available = false;
     bool cuda_hardware_observed = false;
+    // Required for a present Metal session; zero limits fail closed.
+    std::uint64_t metal_max_buffer_length_bytes = 0;
+    std::uint64_t metal_recommended_working_set_bytes = 0;
 };
 
 enum class CapabilityReason : int {
@@ -121,7 +124,7 @@ struct EncoderCapabilityResult {
     CapabilityFlags reasons{};
     CapabilityReason primary = CapabilityReason::FormatMathematicallyInvalid;
     const char* detail = "unclassified rejection";
-    // True only when an experimental CPU-scalar attempt may allocate.
+    // True only when an experimental scalar CPU or bounded Metal attempt may allocate.
     // Never a CODEC_PASS and never an original-SDK reference.
     bool allocation_permitted = false;
     bool geometry_validator_passed = false;
