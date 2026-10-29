@@ -26,10 +26,16 @@ MODULE = ROOT / 'cmake' / 'cuda_host_compiler.cmake'
 
 def call_guard(cxx_id, cxx_version, host_id, host_version):
     """Invoke the guard in a throwaway project and return the configure result."""
+    # CMake treats a backslash inside a quoted argument as an escape, so a
+    # Windows build path has to be written with forward slashes. Getting this
+    # wrong used to fail as 'Invalid character escape \a' rather than as a
+    # guard verdict, which is the kind of false red this contract must not
+    # produce on a platform it is supposed to stay silent on.
+    module = MODULE.as_posix()
     script = (
         'cmake_minimum_required(VERSION 3.16)\n'
         'project(guard_probe NONE)\n'
-        f'include("{MODULE}")\n'
+        f'include("{module}")\n'
         'hypercine_require_consistent_cuda_host_compiler(\n'
         f'  "{cxx_id}" "{cxx_version}" "{host_id}" "{host_version}" "g++")\n'
         'message(STATUS "guard accepted")\n')
