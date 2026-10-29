@@ -173,7 +173,10 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     request.previous_completed_sample_bytes=state_.previous_sample_bytes;
     request.width=g.width;request.height=g.height;
     const auto session=ComputeProfileTables(request);
-    if(session.fs_rate_limiter!=NextLimiter(state_,pixels))
+    // The frozen rate formula is the FilmScan3 law. The other profiles run the
+    // shared calculator's own feedback, so comparing them against this formula
+    // would fail on correct input rather than catch a defect.
+    if(quality_==EncodingQuality::FilmScan3 && session.fs_rate_limiter!=NextLimiter(state_,pixels))
         throw std::logic_error("shared quality state and frozen FilmScan3 rate feedback disagree");
     result.state.fs_rate_limiter=session.fs_rate_limiter;
     result.tables=session.tables;
@@ -182,7 +185,10 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     s.Tag(10,0);s.Tag(11,1);s.Tag(12,3);s.Tag(-71,32);s.Tag(84,1);s.Tag(-91,2);
     s.Tag(13,3);s.Tag(14,10);s.Tag(15,2);s.Tag(16,3);s.Tag(20,g.width);s.Tag(21,g.height);
     s.Tag(-69,state_.frame_index+1);s.Tag(70,10);s.Tag(-85,g.height);s.Tag(-79,0xa100);
-    s.Tag(-80,6);s.Tag(-81,0x1a0);s.Tag(-83,0x2000);
+    // Tag -80 carries the session quality enum. The SDK writes 1..6 here for
+    // low..filmscan3; hard-coding 6 would relabel every other profile while
+    // leaving the rest of the packet untouched.
+    s.Tag(-80,static_cast<unsigned>(static_cast<int>(quality_)));s.Tag(-81,0x1a0);s.Tag(-83,0x2000);
     const auto sample=s.Begin(0x2200);Metadata(s,metadata,state_.frame_index);
     s.Tag(-63,0);s.Tag(-64,0);s.Tag(-65,16);s.Tag(-66,9);s.Tag(68,1);
     for(int c=0;c<3;++c) {

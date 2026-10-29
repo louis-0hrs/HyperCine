@@ -9,6 +9,8 @@
 #include "../src/core/quality_profile_bridge.h"
 #include "reference_frame_generator.h"
 #include <array>
+#include <map>
+#include <set>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -45,6 +47,27 @@ int FrozenLimiter(int limiter, std::uint64_t previous_bytes, std::size_t pixels)
         }
     }
     return limiter < 0 ? 0 : (limiter > 20 ? 20 : limiter);
+}
+
+// Reads tag -80 (the SDK quality enum) straight out of an emitted packet. The
+// header is walked with the same size encoding the writer uses, so payload
+// bytes can never be mistaken for tags.
+unsigned HeaderQualityStamp(const std::vector<uint8_t>& sample) {
+    std::size_t at = 0;
+    while (at + 4 <= sample.size()) {
+        const int tag = static_cast<int16_t>(sample[at] << 8 | sample[at + 1]);
+        const unsigned value = unsigned(sample[at + 2]) << 8 | sample[at + 3];
+        if (tag == -80) return value;
+        if (tag < 0) {
+            const int code = -tag;
+            const int group = code & 0xff00;
+            if (group == 0x2000) { at += 4 + std::size_t(((code & 255) << 16) | value) * 4; continue; }
+            if (group == 0x4000) { at += 4 + std::size_t(value) * 4; continue; }
+            if (group == 0x2100 || group == 0x2200) { at += 4; continue; }
+        }
+        at += 4;
+    }
+    throw std::runtime_error("emitted packet carries no quality stamp");
 }
 }  // namespace
 
@@ -175,28 +198,56 @@ int main() {
                     "frame 0 must seed the FilmScan3 limiter");
         }
 
-        // 5. The five unqualified profiles are refused, not mislabelled.
-        for (EncodingQuality quality : {EncodingQuality::Low, EncodingQuality::Medium,
-                                        EncodingQuality::High, EncodingQuality::FilmScan1,
-                                        EncodingQuality::FilmScan2}) {
-            Require(!IsQualifiedSessionProfile(quality),
-                    "unqualified profile reported as qualified");
-            Require(*SessionProfileRefusalReason(quality) != '\0',
-                    "refused profile must state a reason");
-            ProfileTableRequest request;
-            request.quality = quality;
-            Reject([&] { ComputeProfileTables(request); },
-                   "unqualified profile produced tables");
-            FilmScan3Encoder encoder;
-            Reject([&] { encoder.SetSessionQuality(quality); },
-                   "encoder accepted an unqualified profile");
+        // 5. All six regular profiles are accepted, and each one produces the
+        // tables the shared calculator computes for it - not FilmScan3's.
+        {
+            const std::map<EncodingQuality, std::string> names{
+                {EncodingQuality::Low, "low"}, {EncodingQuality::Medium, "medium"},
+                {EncodingQuality::High, "high"}, {EncodingQuality::FilmScan1, "filmscan1"},
+                {EncodingQuality::FilmScan2, "filmscan2"}, {EncodingQuality::FilmScan3, "filmscan3"}};
+            std::vector<std::array<unsigned, 36>> seen;
+            for (const auto& entry : names) {
+                Require(IsQualifiedSessionProfile(entry.first),
+                        "regular profile reported as unqualified");
+                Require(*SessionProfileRefusalReason(entry.first) == '\0',
+                        "regular profile carried a refusal reason");
+                ProfileTableRequest request;
+                request.quality = entry.first;
+                request.frame_index = 0;  // seeds the profile's own limiter
+                const auto result = ComputeProfileTables(request);
+                // Same-input profile separation: the tables must differ between
+                // profiles, otherwise "six profiles" would be one profile with
+                // six labels.
+                for (const auto& previous : seen)
+                    Require(previous != result.tables.quant,
+                            "two profiles produced identical quant tables");
+                seen.push_back(result.tables.quant);
+            }
+            Require(seen.size() == 6, "expected six distinct regular profiles");
         }
-        Require(IsQualifiedSessionProfile(EncodingQuality::FilmScan3),
-                "FilmScan3 must be qualified");
-        Require(*SessionProfileRefusalReason(EncodingQuality::FilmScan3) == '\0',
-                "FilmScan3 must not carry a refusal reason");
 
-        // 6. Invalid enum values are rejected, including the boundary values.
+        // 5b. The session profile is what reaches the writer's header field:
+        // tag -80 carries the SDK quality enum, so a profile cannot be emitted
+        // without being named.
+        {
+            std::vector<uint8_t> bgra(1920u * 1080u * 4, 0);
+            reference_fixture::GeneratePhase3AFrame(
+                1920, 1080, 0, reference_fixture::Phase3APattern::FlatBlack,
+                bgra.data(), 7680, 0x1337beef);
+            std::set<unsigned> stamps;
+            for (EncodingQuality quality : {EncodingQuality::Low, EncodingQuality::Medium,
+                                            EncodingQuality::High, EncodingQuality::FilmScan1,
+                                            EncodingQuality::FilmScan2, EncodingQuality::FilmScan3}) {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(quality);
+                const auto frame = encoder.Encode(bgra.data(), bgra.size(), 7680);
+                stamps.insert(HeaderQualityStamp(frame.sample));
+            }
+            Require(stamps == std::set<unsigned>({1, 2, 3, 4, 5, 6}),
+                    "header quality stamp did not follow the session profile");
+        }
+
+        // 6. Invalid enum values stay rejected, including the boundary values.
         for (int raw : {0, 7, 8, 255}) {
             const auto quality = static_cast<EncodingQuality>(raw);
             ProfileTableRequest request;

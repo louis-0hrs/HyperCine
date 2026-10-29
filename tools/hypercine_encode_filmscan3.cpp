@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/filmscan3.h"
+#include "hypercine/quality_state.h"
 #ifdef HYPERCINE_METAL_AUDIT
 #include "../tests/metal_audit.h"
 #endif
@@ -15,6 +16,8 @@
 #include <limits>
 namespace fs=std::filesystem;
 using namespace hypercine::standalone;
+using hypercine::EncodingQuality;
+using hypercine::EncodingQualityName;
 namespace {
 // Strict WIDTHxHEIGHT. std::stoi stops at the first unparsable character, which
 // would silently accept "3840x2160junk" or " 3840x 2160"; every character must be
@@ -44,6 +47,9 @@ FilmScan3Geometry ParseGeometry(const std::string& value) {
 int main(int argc,char** argv) {
     try {
         int begin=1;std::ifstream metadata;bool reference_yuv=false;bool coefficient_hashing=true;
+        // The session profile is explicit rather than implied: a caller that
+        // asks for another profile must get that profile or a refusal.
+        EncodingQuality quality=EncodingQuality::FilmScan3;
         // Default stays 1080p so every existing caller keeps its exact contract.
         FilmScan3Geometry geometry{};
         while(begin<argc && std::string(argv[begin]).rfind("--",0)==0) {
@@ -58,15 +64,26 @@ int main(int argc,char** argv) {
                 else if(mode=="off") coefficient_hashing=false;
                 else throw std::invalid_argument("--coefficient-hash expects full or off");
             }
+            else if(flag=="--quality" && begin<argc) {
+                const std::string name=argv[begin++];
+                if(name=="low")quality=EncodingQuality::Low;
+                else if(name=="medium")quality=EncodingQuality::Medium;
+                else if(name=="high")quality=EncodingQuality::High;
+                else if(name=="filmscan1")quality=EncodingQuality::FilmScan1;
+                else if(name=="filmscan2")quality=EncodingQuality::FilmScan2;
+                else if(name=="filmscan3")quality=EncodingQuality::FilmScan3;
+                else throw std::invalid_argument("--quality expects one of low, medium, high, filmscan1, filmscan2, filmscan3");
+            }
             else if(flag=="--metadata-binary" && begin<argc) {
                 metadata.open(argv[begin++],std::ios::binary);if(!metadata)throw std::runtime_error("cannot read explicit metadata");
             } else throw std::invalid_argument("unknown or incomplete FilmScan3 option");
         }
-        if(argc-begin<2)throw std::invalid_argument("usage: hypercine_encode_filmscan3 [--geometry WIDTHxHEIGHT] [--metadata-binary values.raw] [--coefficient-hash full|off] OUTPUT_DIR INPUT.bgra [INPUT.bgra ...]");
+        if(argc-begin<2)throw std::invalid_argument("usage: hypercine_encode_filmscan3 [--geometry WIDTHxHEIGHT] [--quality PROFILE] [--metadata-binary values.raw] [--coefficient-hash full|off] OUTPUT_DIR INPUT.bgra [INPUT.bgra ...]");
         const fs::path directory=argv[begin++];fs::create_directories(directory);
-        std::ofstream trace(directory/"trace.json");trace<<"{\"profile\":\"FilmScan3\",\"frames\":[";
+        std::ofstream trace(directory/"trace.json");trace<<"{\"profile\":\""<<EncodingQualityName(quality)<<"\",\"frames\":[";
         FilmScan3Encoder encoder(geometry);
         encoder.SetCoefficientHashing(coefficient_hashing);
+        encoder.SetSessionQuality(quality);
         const std::size_t frame_bytes=static_cast<std::size_t>(geometry.width)*geometry.height*4;
         const std::size_t stride=static_cast<std::size_t>(geometry.width)*4;
 #ifdef HYPERCINE_METAL_AUDIT

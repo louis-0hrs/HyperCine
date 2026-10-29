@@ -530,6 +530,21 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_link_libraries(test_profile_enter_contract PRIVATE
             hypercine_standalone hypercine_quality_state)
         add_test(NAME profile_enter_contract COMMAND test_profile_enter_contract)
+        # Issue #46: the only admissible proof that the writer emits another
+        # profile is the original Windows packet itself. Registered only when a
+        # verified corpus is configured; a missing corpus is not a pass.
+        if(HYPERCINE_QUALITY_ORACLE_ROOT)
+            find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            add_test(NAME p6_six_profile_packets COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_writer_parity.py"
+                --corpus "${HYPERCINE_QUALITY_ORACLE_ROOT}"
+                --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --geometry 1080p-16f --max-frames 16
+                --work "${CMAKE_CURRENT_BINARY_DIR}/p6-parity"
+                --report "${CMAKE_CURRENT_BINARY_DIR}/p6-parity/report.json")
+            set_tests_properties(p6_six_profile_packets PROPERTIES
+                LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
+        endif()
         add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)

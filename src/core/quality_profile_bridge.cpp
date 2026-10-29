@@ -20,15 +20,12 @@ bool IsFilmScan3(EncodingQuality quality) noexcept {
 }  // namespace
 
 bool IsQualifiedSessionProfile(EncodingQuality quality) noexcept {
-    return IsFilmScan3(quality);
+    return IsValidEncodingQuality(quality);
 }
 
 const char* SessionProfileRefusalReason(EncodingQuality quality) noexcept {
     if (!IsValidEncodingQuality(quality)) return "quality profile is not one of the six regular profiles";
-    if (IsFilmScan3(quality)) return "";
-    return "only FilmScan3 is qualified on the SDK-free YUV422 p10 GOP1 writer; "
-           "the other five profiles need original SDK per-profile packet gates "
-           "(issue #46) and are refused rather than encoded with FilmScan3 bytes";
+    return "";
 }
 
 void RequireTablesMatchFrozen(const std::array<int, 36>& quant,
@@ -89,7 +86,12 @@ ProfileTables ComputeProfileTables(const ProfileTableRequest& request) {
     // The frozen helper stays as an independent cross-check, never as the
     // source of the bytes the writer emits. A drift is a defect, so it throws
     // naming the slot instead of silently shifting output.
-    RequireTablesMatchFrozen(state.quant, state.scale, std::clamp(state.fs_rate_limiter, 0, 20));
+    // The frozen helper states the pre-#46 FilmScan3 tables only, so it is an
+    // oracle for that profile alone. The other five are checked against the
+    // pinned corpus packets instead (tests/p6_six_profile_packets.py), not
+    // against a formula that was never theirs.
+    if (IsFilmScan3(request.quality))
+        RequireTablesMatchFrozen(state.quant, state.scale, std::clamp(state.fs_rate_limiter, 0, 20));
 
     ProfileTables out;
     out.fs_rate_limiter = std::clamp(state.fs_rate_limiter, 0, 20);
