@@ -229,6 +229,18 @@ if(HYPERCINE_BUILD_STANDALONE)
     # The six-profile quality mathematics lives in one shared SDK-free library
     # (#29). The encoder consumes it instead of keeping a second table set.
     target_link_libraries(hypercine_standalone PRIVATE hypercine_quality_state)
+    # Issue #37: the RGB444 p12 transformation stage. Separate from the p10 YUV
+    # writer on purpose: the family differs before quantisation (three full-
+    # resolution channels, and a prescale table whose 12-bit form declares one
+    # more non-zero entry than the 10-bit one). It links the frame storage and the
+    # shared wavelet, and nothing else.
+    add_library(hypercine_rgb444_transform STATIC src/cpu/rgb444_transform.cpp)
+    target_include_directories(hypercine_rgb444_transform PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    target_compile_features(hypercine_rgb444_transform PUBLIC cxx_std_17)
+    target_link_libraries(hypercine_rgb444_transform
+        PUBLIC hypercine_rgb444_frame
+        PRIVATE hypercine_standalone)
     if(HYPERCINE_BUILD_BENCHMARKS)
         find_package(Threads REQUIRED)
         add_executable(benchmark_wavelet_simd benchmarks/benchmark_wavelet_simd.cpp)
@@ -395,6 +407,16 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_compile_features(test_rgb444_rg48_allocation PRIVATE cxx_std_17)
         add_test(NAME rgb444_rg48_allocation_failure COMMAND test_rgb444_rg48_allocation)
         set_tests_properties(rgb444_rg48_allocation_failure PROPERTIES TIMEOUT 20)
+        # Issue #37: the p12 transformation stage. This is the level the family was
+        # missing: the merged writer is a p10 YUV path, and the p12 prescale table
+        # carries one more non-zero entry than the p10 one. The test pins the
+        # measured sequence, proves the stage applies what it records, and rejects
+        # a precision it does not model instead of defaulting to p10.
+        add_executable(test_rgb444_transform tests/test_rgb444_transform.cpp)
+        target_link_libraries(test_rgb444_transform PRIVATE hypercine_rgb444_transform)
+        add_test(NAME rgb444_p12_transform_contract COMMAND test_rgb444_transform)
+        set_tests_properties(rgb444_p12_transform_contract PROPERTIES
+            LABELS "cpu;rgb444;transform" TIMEOUT 300)
         # The Quality-only mode returns before this block; require the same
         # shared arithmetic unit suite in normal SDK-free Standalone builds.
         add_executable(test_quality_state tests/test_quality_state.cpp)
