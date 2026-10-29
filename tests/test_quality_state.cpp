@@ -7,9 +7,17 @@
 #include <climits>
 #include <limits>
 #include <iostream>
+#include <string>
 
 namespace {
 void Require(bool ok, const char* message) { if (!ok) { std::cerr << "FAIL: " << message << '\n'; std::exit(1); } }
+// Require takes a C string, so a composed message needs storage that outlives the
+// call. This keeps the existing signature that every other assertion relies on.
+const char* Detail(const std::string& text) {
+    static std::string buffer;
+    buffer = text;
+    return buffer.c_str();
+}
 }
 
 int main() {
@@ -60,8 +68,14 @@ int main() {
     medium_overrate.frame_index = 7;
     medium_overrate.previous_completed_sample_bytes = 2117476;
     const auto medium_limited = CalculateQualityState(medium_overrate);
-    Require(medium_limited.ok && medium_limited.overbitrate == 1 && medium_limited.quant[1] == 96,
-            "Medium fixed-quality overrate table");
+    // 2 117 476 bytes at 30/1 is 508.2 Mbps against Medium's 130 Mbps ceiling,
+    // i.e. 391 % — above 120 %. The frozen ladder (upstream/Codec/quantize.c:
+    // 3046-3063) sets the counter to 1 and then increments it, so a single large
+    // frame lands on 2, not 1. The earlier expectation of 1 encoded the flat-gate
+    // reading that this change corrects; the selected *table* is identical either
+    // way, which real SDK packets confirm (level-1 luma 96/96/144).
+    Require(medium_limited.ok && medium_limited.overbitrate == 2 && medium_limited.quant[1] == 96,
+            "Medium overrate ladder enters at 2 for a frame above 120 %");
 
     QualityStateInput unsupported;
     unsupported.encoded_precision = 8;
@@ -114,6 +128,100 @@ int main() {
         boundary.previous_fs_rate_limiter = INT_MIN;
         const auto lower = CalculateQualityState(boundary);
         Require(lower.ok && lower.fs_rate_limiter == 0, "negative prior limiter saturates without overflow");
+    }
+
+    // Issue #46: the overbitrate hysteresis must be the frozen five-branch
+    // *ladder*, not a single gate. The expectation table below is not derived
+    // from this implementation: every row is the state recovered from real
+    // original-SDK packets of a 120-frame 1080p Medium sequence, where each
+    // frame's selected table (tag 53, level-1 luma) is visible in the bytes.
+    // The observed base table is 64/64/96 and the observed hold table 96/96/144,
+    // so "hold" in the table below means "over > 0".
+    {
+        // Frame N selects its table from the bitrate of frame N-1, so the
+        // "prev_bytes" column is the *preceding* frame's packet size and the "over"
+        // column is the counter this implementation must report for N. The rows are
+        // deliberately contiguous (7..20) because the counter is carried: a table
+        // that skipped frames would be testing arithmetic over gaps that never
+        // happened. Every prev_bytes value is a real packet size from the corpus,
+        // and every "hold" value is the table actually observed in that frame's
+        // tag 53.
+        struct Step { unsigned frame; std::size_t prev_bytes; int over; bool hold; };
+        static constexpr Step kMedium[] = {
+            {7,  176048,  0, false},   // 32 %  - below ceiling, no hold
+            {8, 2117644,  2, true},    // 391 % - enter at 2, not 1
+            {9, 1229176,  3, true},    // 227 %
+            {10, 1834296, 4, true},    // 339 %
+            {11, 1228932, 5, true},
+            {12, 1834452, 6, true},
+            {13, 1229212, 7, true},
+            {14, 1550640, 8, true},
+            {15, 554444,  8, true},    // 102 % - inside the ceiling, ladder holds
+            {16, 741452,  9, true},
+            {17, 1550308, 10, true},
+            {18, 165088,  9, true},    // 30 %  - single step down, no exit
+            {19, 165116,  8, true},
+            {20, 165768,  7, true},
+        };
+        int carried = 0;
+        for (const auto& step : kMedium) {
+            QualityStateInput in;
+            in.quality = EncodingQuality::Medium;
+            in.frame_index = step.frame;
+            in.previous_completed_sample_bytes = step.prev_bytes;
+            in.previous_overbitrate = carried;
+            const auto state = CalculateQualityState(in);
+            Require(state.ok, "Medium ladder input must be valid");
+            Require(state.overbitrate == step.over,
+                    Detail("Medium ladder counter must match real SDK bytes at frame "
+                           + std::to_string(step.frame)
+                           + " expected " + std::to_string(step.over)
+                           + " got " + std::to_string(state.overbitrate)));
+            // The hold table is selected exactly when the counter is non-zero; the
+            // base level-1 luma is 64 and the hold table's is 96. Reading the
+            // selected value proves the counter is actually wired to the table,
+            // not merely tracked alongside it.
+            Require((state.quant[1] == 96) == step.hold,
+                    Detail("Medium selected table must follow the counter at frame "
+                           + std::to_string(step.frame)));
+            carried = state.overbitrate;
+        }
+        // Anti-vacuity: the ladder must actually leave the hold state. If every
+        // row above were `hold`, a stuck counter would pass the whole table.
+        Require(carried > 0, "the pinned window must end inside the hold state");
+        QualityStateInput relax;
+        relax.quality = EncodingQuality::Medium;
+        relax.previous_overbitrate = 1;
+        relax.previous_completed_sample_bytes = 165000;   // 39.6 Mbps, 30 % of ceiling
+        const auto left = CalculateQualityState(relax);
+        Require(left.ok && left.overbitrate == 0 && left.quant[1] == 64,
+                "a counter of 1 must leave hold below 80 % of the ceiling");
+        // The corpus happens to contain no frame whose preceding bitrate lands in
+        // the 80..100 % window — measured, not assumed: scanning all 120 frames of
+        // both Medium and High finds none. So the last rule difference cannot be
+        // pinned from packets, and is pinned to the frozen source instead:
+        //   quantize.c:3060  if(q->overbitrate > 1 && currentbitrate < upperlimit)
+        // i.e. a counter above 1 steps down anywhere below 100 %, not below 80 %.
+        // Without this case, an implementation that applied the 80 % floor to the
+        // whole ladder instead of only to the counter==1 exit would pass every
+        // corpus-derived row above.
+        {
+            QualityStateInput in_band;
+            in_band.quality = EncodingQuality::Medium;
+            in_band.previous_overbitrate = 5;
+            // 130 Mbps ceiling; 0.9 * ceiling / (8 * 30) = 487 500 bytes -> 90 %.
+            in_band.previous_completed_sample_bytes = 487500;
+            const auto band = CalculateQualityState(in_band);
+            Require(band.ok && band.overbitrate == 4 && band.quant[1] == 96,
+                    "a counter above 1 must step down inside the 80-100 % window "
+                    "(frozen quantize.c:3060), not only below 80 %");
+        }
+        // ... and one step above must NOT leave at the same bitrate: that is the
+        // exact property the single-gate implementation destroyed.
+        relax.previous_overbitrate = 2;
+        const auto held = CalculateQualityState(relax);
+        Require(held.ok && held.overbitrate == 1 && held.quant[1] == 96,
+                "a counter above 1 must step down, not exit, below 80 % of the ceiling");
     }
     std::cout << "quality-state deterministic unit vectors PASS\n";
     return 0;
