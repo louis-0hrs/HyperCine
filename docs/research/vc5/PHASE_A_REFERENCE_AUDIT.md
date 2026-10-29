@@ -72,14 +72,36 @@ codes.** The landing page `https://www.smpte.org/standards/st2073-landing-page`
 listing is the evidence that ST 2073-1:2017 is the current edition of part 1,
 which matters for §4.1.
 
-The page also lists two documents that this audit did **not** fetch or pin:
-`OV 2073-0:2023` (Overview) and `ST 2073-10:2017` (MXF Wrapper). An earlier
-draft of this document described the landing page as listing "exactly the six
-parts above". That was wrong: it lists nine documents, and the omission of the
-Overview and the MXF wrapper is recorded here rather than silently carried.
-Both stay out of scope — ST 2073-10 is a container mapping and OV 2073-0 is
-informative — but the omission is now explicit rather than an implied claim of
-completeness.
+The landing page lists two further documents, and an earlier revision of this
+audit wrongly described them as unfetchable. They are not blocked: both return
+`200` on `pub.smpte.org` and were downloaded and pinned on 2026-10-29.
+
+| Document | Path under `https://pub.smpte.org/latest/` | Bytes | SHA-256 (full) |
+| --- | --- | --- | --- |
+| OV 2073-0:2023 (Suite Overview) | `ov2073-0/ov2073-0-2023.pdf` | 200,439 | `1a0d83c0299f99d9e0a9871a06ae9886d65e77ed1df196abdddaa77ff51b27dc` |
+| ST 2073-10:2017 (MXF Wrapper) | `st2073-10/st2073-10-2017.pdf` | 408,377 | `1b64b097aeae8649bfd1f92bcbe7a9b9257ecfaa7e2ea16321bea7120ac94761` |
+
+OV 2073-0:2023 is a 5-page overview that scopes the eight documents above; it
+adds no normative requirement, so it informs nothing in §4. It is a revision of
+OV 2073-0:2018. ST 2073-10:2017 is a 12-page container mapping — how a VC-5
+essence stream is carried in an MXF constrained generic container, including the
+essence container label, `VC5CDCIPictureEssenceSubDescriptor` and
+`VC5BayerPictureEssenceSubDescriptor`. It constrains **wrapping**, not the
+elementary bitstream, so it cannot affect the §4.1 prescale finding or the §4.2
+framing check; it would matter only for a Phase B variant that consumes `.mxf`
+files instead of bare `.vc5`.
+
+Neither document changes a verdict in this audit. They are pinned so that a
+reader re-obtaining the same catalogue gets the same nine bytes-sets, and so
+that "out of scope" is a stated decision rather than an unexplained gap.
+
+**Cosmetic observation, no bearing on anything below.** The OV's copyright page
+reads "Approved February 23, 20223" — a five-digit year in the published PDF.
+It is recorded only because it confirms the pinned bytes are the ones a reader
+will get, not because it implies any substantive defect.
+
+The catalogue itself lists nine documents and no errata page, which is the
+whole of what it establishes.
 
 **Probe results are recorded as `ACCESS_DENIED`, not as absence.** On
 2026-10-29 these requests returned HTTP 403: `st2073-1/st2073-1-2020.pdf`,
@@ -779,6 +801,17 @@ for u in st2073-1/st2073-1-2020.pdf st2073-1/st2073-1-2022.pdf \
     https://pub.smpte.org/latest/$u)" "$u"
 done
 # 403 for each; a 403 is a denial of access, not proof the edition is absent
+
+# 1d. The two documents beyond the six numbered parts are reachable too.
+for u in ov2073-0/ov2073-0-2023.pdf st2073-10/st2073-10-2017.pdf; do
+  printf '%s  %s  %s  %s\n' \
+    "$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 25 https://pub.smpte.org/latest/$u)" \
+    "$(curl -sL --max-time 60 https://pub.smpte.org/latest/$u | wc -c)" \
+    "$(curl -sL --max-time 60 https://pub.smpte.org/latest/$u | sha256sum | cut -d' ' -f1)" \
+    "$u"
+done
+# expect 200 200439 1a0d83c0... ov2073-0/ov2073-0-2023.pdf
+#        200 408377 1b64b097... st2073-10/st2073-10-2017.pdf
 
 # 2. Repository pin, and the missing tag
 git ls-remote https://github.com/SMPTE/rp2073-2-a.git             # one ref, no tags
