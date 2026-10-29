@@ -187,6 +187,17 @@ void CudaContract() {
             fallback.frontend->Backend() == FrontendBackend::Cpu &&
             fallback.fallback == ScalarFallbackReason::BackendNotPresent,
             "absent CUDA did not use the scalar contract");
+    for (const auto quality : {hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
+                               hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
+                               hypercine::EncodingQuality::FilmScan2, hypercine::EncodingQuality::FilmScan3}) {
+        c = config; c.quality = quality; c.allow_cpu_scalar_fallback = true;
+        calls = metal_calls = cuda_calls = 0;
+        const auto admitted = SelectBackend(c, device, factories);
+        Require(static_cast<bool>(admitted) && calls == 0 && metal_calls == 0 && cuda_calls == 1 &&
+                admitted.effective.effective_backend == SessionBackend::Cuda &&
+                admitted.frontend->Backend() == FrontendBackend::Cuda,
+                "measured CUDA profile did not bind the CUDA factory");
+    }
     std::cout << "PASS fake CUDA binding/refusal/identity/init falsifiers (no GPU execution)\n";
 }
 void MetalContract() {
@@ -274,6 +285,12 @@ void MetalContract() {
     const auto fallback = SelectBackend(c, d, factories);
     Require(fallback && calls == 1 && metal_calls == 0 && fallback.frontend->Backend() == FrontendBackend::Cpu,
             "absent Metal inherited GPU requirements or reached Metal factory");
+    for (const auto quality : {hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
+                               hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
+                               hypercine::EncodingQuality::FilmScan2}) {
+        c = config; c.quality = quality;
+        refused(c, device, CapabilityReason::ProfileNotQualifiedForBackend);
+    }
     std::cout << "PASS fake Metal binding/refusal/identity/init falsifiers (no GPU execution)\n";
 }
 void Contract() {
@@ -352,8 +369,19 @@ void Contract() {
     Refused(config, host, CapabilityReason::ReferenceMissing);
     config = Small(); config.frame_rate = {24,1};
     Refused(config, host, CapabilityReason::ValidButNotImplemented);
-    config = Small(); config.quality = hypercine::EncodingQuality::Medium;
-    Refused(config, host, CapabilityReason::ValidButNotImplemented);
+    for (const auto quality : {hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
+                               hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
+                               hypercine::EncodingQuality::FilmScan2, hypercine::EncodingQuality::FilmScan3}) {
+        config = Small(); config.quality = quality; calls = 0;
+        result = SelectBackend(config, host, Count);
+        Require(static_cast<bool>(result) && calls == 1 &&
+                result.effective.primary == CapabilityReason::ExperimentallySupported,
+                "CPU scalar refused a regular profile");
+    }
+    config = Small(); config.quality = static_cast<hypercine::EncodingQuality>(0);
+    Refused(config, host, CapabilityReason::FormatMathematicallyInvalid);
+    config = Small(); config.quality = static_cast<hypercine::EncodingQuality>(7);
+    Refused(config, host, CapabilityReason::FormatMathematicallyInvalid);
     config = Small(); config.codec = CodecFamily::LegacyFixedQ2;
     Refused(config, host, CapabilityReason::ValidButNotImplemented);
     config = Small(); config.pixel_format = SourcePixelFormat::Yuy2;

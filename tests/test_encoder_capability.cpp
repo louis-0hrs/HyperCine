@@ -67,6 +67,7 @@ EncoderCapabilityResult Check(const char* name, const EncoderSessionConfig& conf
               << " unimplemented=" << result.reasons.valid_but_not_implemented
               << " missing_backend=" << result.reasons.backend_not_present
               << " format=" << result.reasons.format_mathematically_invalid
+              << " profile_unqualified=" << result.reasons.profile_not_qualified_for_backend
               << " reference_missing=" << result.reasons.reference_missing
               << " reference_qualified=" << result.reference_qualified
               << " fallback=" << result.fell_back_to_cpu_scalar
@@ -485,9 +486,54 @@ int main() {
         auto simd_fallback = Check("cpu-simd-fallback", simd, host, CapabilityReason::ExperimentallySupported);
         Require(simd_fallback.fell_back_to_cpu_scalar && simd_fallback.reasons.backend_not_present, "simd fallback keeps the missing-backend axis");
 
-        auto medium = Film(1920, 1080);
-        medium.quality = hypercine::EncodingQuality::Medium;
-        Check("quality-medium", medium, host, CapabilityReason::ValidButNotImplemented);
+        for (const auto quality : {hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
+                                   hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
+                                   hypercine::EncodingQuality::FilmScan2, hypercine::EncodingQuality::FilmScan3}) {
+            auto profile = Film(1920, 1080);
+            profile.quality = quality;
+            const auto admitted = Check(hypercine::EncodingQualityName(quality), profile, host,
+                                        CapabilityReason::ExperimentallySupported);
+            Require(admitted.allocation_permitted && ProfileAdmitted(SessionBackend::CpuScalar, quality),
+                    "CPU scalar did not admit a regular profile");
+        }
+        auto invalid_quality = Film(1920, 1080);
+        invalid_quality.quality = static_cast<hypercine::EncodingQuality>(0);
+        Check("quality-zero", invalid_quality, host, CapabilityReason::FormatMathematicallyInvalid);
+        invalid_quality.quality = static_cast<hypercine::EncodingQuality>(7);
+        Check("quality-seven", invalid_quality, host, CapabilityReason::FormatMathematicallyInvalid);
+        auto cuda_profiles = host;
+        cuda_profiles.cuda_available = true;
+        cuda_profiles.cuda_hardware_observed = true;
+        cuda_profiles.cuda_total_global_memory_bytes = 1ull << 34;
+        auto metal_profiles = host;
+        metal_profiles.metal_available = true;
+        metal_profiles.metal_max_buffer_length_bytes = 1ull << 30;
+        metal_profiles.metal_recommended_working_set_bytes = 1ull << 30;
+        for (const auto quality : {hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
+                                   hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
+                                   hypercine::EncodingQuality::FilmScan2, hypercine::EncodingQuality::FilmScan3}) {
+            auto cuda_profile = Film(1920, 1080);
+            cuda_profile.backend = SessionBackend::Cuda;
+            cuda_profile.quality = quality;
+            cuda_profile.allow_cpu_scalar_fallback = true;
+            cuda_profile.input_stride_bytes = 1920u * 4u;
+            cuda_profile.input_bytes = cuda_profile.input_stride_bytes * 1080u;
+            const std::string cuda_name = std::string("cuda-") + hypercine::EncodingQualityName(quality);
+            const auto cuda_admitted = Check(cuda_name.c_str(), cuda_profile,
+                                             cuda_profiles, CapabilityReason::ExperimentallySupported);
+            Require(cuda_admitted.allocation_permitted && cuda_admitted.effective_backend == SessionBackend::Cuda &&
+                    !cuda_admitted.fell_back_to_cpu_scalar && ProfileAdmitted(SessionBackend::Cuda, quality),
+                    "measured CUDA profile was not admitted on CUDA");
+            if (quality == hypercine::EncodingQuality::FilmScan3) continue;
+            auto metal_profile = cuda_profile;
+            metal_profile.backend = SessionBackend::Metal;
+            const std::string metal_name = std::string("metal-") + hypercine::EncodingQualityName(quality);
+            const auto metal_refused = Check(metal_name.c_str(), metal_profile,
+                                             metal_profiles, CapabilityReason::ProfileNotQualifiedForBackend);
+            Require(metal_refused.reasons.profile_not_qualified_for_backend && !metal_refused.fell_back_to_cpu_scalar &&
+                    !ProfileAdmitted(SessionBackend::Metal, quality),
+                    "unmeasured Metal profile was admitted or fell back");
+        }
         auto yuy2 = Film(1920, 1080);
         yuy2.pixel_format = SourcePixelFormat::Yuy2;
         Check("yuy2", yuy2, host, CapabilityReason::ValidButNotImplemented);

@@ -109,7 +109,10 @@ enum class CapabilityReason : int {
     BackendNotQualifiedForGeometry = 4,
     MemoryBudgetExceeded = 5,
     ReferenceMissing = 6,
-    ExperimentallySupported = 7
+    ExperimentallySupported = 7,
+    // The writer can emit the profile, but this backend has no native
+    // packet measurement for it. Fail closed; do not relabel it as FilmScan3.
+    ProfileNotQualifiedForBackend = 8
 };
 
 // Independent axes. A single "unsupported" is intentionally not the result.
@@ -121,6 +124,7 @@ struct CapabilityFlags {
     bool memory_budget_exceeded = false;
     bool reference_missing = false;
     bool experimentally_supported = false;
+    bool profile_not_qualified_for_backend = false;
 };
 
 struct EncoderCapabilityResult {
@@ -147,6 +151,13 @@ struct EncoderCapabilityResult {
 // throw; that exception is caught here and is not a frame allocation.
 EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& config,
                                                const EncoderDevice& device);
+
+// Regular profiles the SDK-free writer can emit are not automatically
+// admissible on every backend. CPU scalar admits all six. Metal and CUDA
+// admit a profile only when a native packet measurement exists for that
+// backend. This is not a product qualification and not an original-SDK or
+// SMPTE conformance claim.
+bool ProfileAdmitted(SessionBackend backend, EncodingQuality quality) noexcept;
 
 const char* CapabilityReasonName(CapabilityReason reason) noexcept;
 

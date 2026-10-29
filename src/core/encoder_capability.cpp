@@ -126,8 +126,41 @@ const char* CapabilityReasonName(CapabilityReason reason) noexcept {
     case CapabilityReason::MemoryBudgetExceeded: return "MemoryBudgetExceeded";
     case CapabilityReason::ReferenceMissing: return "ReferenceMissing";
     case CapabilityReason::ExperimentallySupported: return "ExperimentallySupported";
+    case CapabilityReason::ProfileNotQualifiedForBackend: return "ProfileNotQualifiedForBackend";
     }
     return "Unclassified";
+}
+
+bool ProfileAdmitted(SessionBackend backend, EncodingQuality quality) noexcept {
+    if (!IsValidEncodingQuality(quality)) return false;
+    switch (backend) {
+    case SessionBackend::CpuScalar:
+        // #318 measured SDK-free writer packets for every regular profile.
+        return true;
+    case SessionBackend::Metal:
+        // No per-profile Metal packet measurement in this revision.
+        // FilmScan3 remains the only Metal row with a bounded session record.
+        return quality == EncodingQuality::FilmScan3;
+    case SessionBackend::Cuda:
+        // encoder_cuda_profile_matrix, 1920x1080, frames 0..3. A row is listed
+        // only after that gate matched packet bytes, all 36 quant/scale entries,
+        // rate state, the exact frame index and all 30 coefficient hashes
+        // against an independent CPU scalar session on the same input.
+        switch (quality) {
+        case EncodingQuality::Low:
+        case EncodingQuality::Medium:
+        case EncodingQuality::High:
+        case EncodingQuality::FilmScan1:
+        case EncodingQuality::FilmScan2:
+        case EncodingQuality::FilmScan3:
+            return true;
+        }
+        return false;
+    case SessionBackend::CpuSimd:
+    case SessionBackend::Vulkan:
+        return false;
+    }
+    return false;
 }
 
 EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& config,
@@ -139,8 +172,10 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     const char* unimplemented_detail = "not implemented";
     const char* memory_detail = "memory budget exceeded";
 
+    // Geometry stays on the FilmScan3 YUV422 path for every regular profile.
+    // An out-of-range quality is not a profile the writer can name.
     const bool filmscan3 = config.codec == CodecFamily::FilmScan3 &&
-                           config.quality == EncodingQuality::FilmScan3;
+                           IsValidEncodingQuality(config.quality);
     if (config.codec != CodecFamily::FilmScan3 && config.codec != CodecFamily::LegacyFixedQ2 &&
         config.codec != CodecFamily::Rgb444) {
         result.reasons.format_mathematically_invalid = true;
@@ -149,9 +184,9 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         result.reasons.valid_but_not_implemented = true;
         unimplemented_detail = "codec family is outside the FilmScan3 session writer";
     }
-    if (config.codec == CodecFamily::FilmScan3 && config.quality != EncodingQuality::FilmScan3) {
-        result.reasons.valid_but_not_implemented = true;
-        unimplemented_detail = "only the FilmScan3 quality profile is implemented";
+    if (config.codec == CodecFamily::FilmScan3 && !IsValidEncodingQuality(config.quality)) {
+        result.reasons.format_mathematically_invalid = true;
+        format_detail = "quality profile is not one of the six regular profiles";
     }
     if (config.pixel_format != SourcePixelFormat::Bgra8) {
         if (config.pixel_format == SourcePixelFormat::Yuy2 || config.pixel_format == SourcePixelFormat::Rgb48)
@@ -374,12 +409,21 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         }
     }
 
+    // Profile evidence is per backend. CPU packet parity does not admit Metal
+    // or CUDA, and a missing GPU profile is not repaired by scalar fallback.
+    const char* profile_detail = "quality profile has no native packet evidence for this backend";
+    if ((cpu_attempt || gpu_attempt) && config.codec == CodecFamily::FilmScan3 &&
+        IsValidEncodingQuality(config.quality) && !ProfileAdmitted(effective, config.quality)) {
+        result.reasons.profile_not_qualified_for_backend = true;
+    }
+
     const bool reference_blocks = config.require_reference_oracle && !result.reference_qualified;
     const bool backend_blocks = result.reasons.backend_not_present && !result.fell_back_to_cpu_scalar;
     const bool blocked = result.reasons.format_mathematically_invalid ||
                          result.reasons.valid_but_not_implemented || backend_blocks ||
                          result.reasons.memory_budget_exceeded ||
-                         result.reasons.backend_not_qualified_for_geometry || reference_blocks;
+                         result.reasons.backend_not_qualified_for_geometry ||
+                         result.reasons.profile_not_qualified_for_backend || reference_blocks;
     if (!blocked && (cpu_attempt || gpu_attempt) && result.evidence_record && result.geometry_validator_passed) {
         result.reasons.experimentally_supported = true;
         result.allocation_permitted = true;
@@ -391,6 +435,9 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     } else if (result.reasons.valid_but_not_implemented) {
         result.primary = CapabilityReason::ValidButNotImplemented;
         result.detail = unimplemented_detail;
+    } else if (result.reasons.profile_not_qualified_for_backend) {
+        result.primary = CapabilityReason::ProfileNotQualifiedForBackend;
+        result.detail = profile_detail;
     } else if (backend_blocks) {
         result.primary = CapabilityReason::BackendNotPresent;
         result.detail = device.cuda_hardware_observed && config.backend == SessionBackend::Cuda
