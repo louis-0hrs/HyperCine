@@ -347,6 +347,68 @@ int main() {
                     "Reset must clear the overbitrate token with the rate state");
         }
 
+        // 5e. The session profile is settled by the first successfully encoded
+        // frame and stays settled across Reset(). Without this, a caller could
+        // encode FilmScan3 frames and then switch to Medium, carrying FilmScan3's
+        // rate limiter, hysteresis token and previous sample size into Medium's
+        // tables - the profile would be a label on someone else's state.
+        {
+            std::vector<uint8_t> bgra(1920u * 1080u * 4, 0);
+            reference_fixture::GeneratePhase3AFrame(
+                1920, 1080, 0, reference_fixture::Phase3APattern::FlatBlack,
+                bgra.data(), 7680, 0x1337beef);
+
+            // Before any frame the profile is still selectable, otherwise the
+            // session could never be configured at all.
+            {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(EncodingQuality::Medium);
+                Require(encoder.session_quality() == EncodingQuality::Medium,
+                        "profile must be selectable before the first frame");
+            }
+
+            // After a successful frame, a different profile is refused...
+            {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(EncodingQuality::FilmScan3);
+                const auto first = encoder.Encode(bgra.data(), bgra.size(), 7680);
+                Require(first.sample.size() == 185648,
+                        "FilmScan3 reference sample changed before the lock test");
+                Reject([&] { encoder.SetSessionQuality(EncodingQuality::Medium); },
+                       "profile switched after an encoded frame");
+                // ...while re-asserting the profile already in force is a no-op,
+                // so an idempotent caller is not punished.
+                encoder.SetSessionQuality(EncodingQuality::FilmScan3);
+                Require(encoder.session_quality() == EncodingQuality::FilmScan3,
+                        "re-asserting the active profile changed the session");
+                // The refusal must not have disturbed the rate state.
+                const auto second = encoder.Encode(bgra.data(), bgra.size(), 7680);
+                Require(second.state.frame_index == 1,
+                        "a rejected profile switch disturbed the session state");
+
+                // The lock outlives Reset(): the profile is a session property,
+                // and Reset only clears rate state underneath it.
+                encoder.Reset();
+                Require(encoder.session_quality() == EncodingQuality::FilmScan3,
+                        "Reset dropped the session profile");
+                Reject([&] { encoder.SetSessionQuality(EncodingQuality::High); },
+                       "Reset released the profile lock");
+            }
+
+            // A rejected Encode must not lock anything: the lock is earned by a
+            // successful frame, not by an attempt.
+            {
+                FilmScan3Encoder encoder;
+                encoder.SetSessionQuality(EncodingQuality::FilmScan3);
+                const std::vector<uint8_t> too_short(16, 0);
+                Reject([&] { encoder.Encode(too_short.data(), too_short.size(), 7680); },
+                       "short input was accepted");
+                encoder.SetSessionQuality(EncodingQuality::Low);
+                Require(encoder.session_quality() == EncodingQuality::Low,
+                        "a rejected Encode must not settle the profile");
+            }
+        }
+
         // 6. Invalid enum values stay rejected, including the boundary values.
         for (int raw : {0, 7, 8, 255}) {
             const auto quality = static_cast<EncodingQuality>(raw);

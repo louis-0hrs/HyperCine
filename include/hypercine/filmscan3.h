@@ -103,10 +103,17 @@ public:
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
                          const FilmScan3Metadata& metadata);
-    // Session quality profile. Only FilmScan3 is qualified on this writer today;
-    // the other five regular profiles throw std::invalid_argument instead of
-    // being emitted with FilmScan3 tables under a different label. The profile is
-    // fixed for the session, including across Reset().
+    // Session quality profile. Any of the six regular profiles is accepted; an
+    // invalid enum throws std::invalid_argument.
+    //
+    // The profile is fixed for the session, including across Reset(). It may be
+    // chosen until the first frame has been encoded successfully, and not
+    // afterwards: rate limiter, hysteresis token and previous sample size all
+    // belong to the profile that produced them, so switching mid-session would
+    // carry one profile's rate state into another profile's tables. Re-asserting
+    // the profile already in force stays allowed, because it changes nothing.
+    // A rejected Encode does not lock the session: the first *successful* frame
+    // does.
     void SetSessionQuality(EncodingQuality quality);
     EncodingQuality session_quality() const noexcept { return quality_; }
     const FilmScan3State& state() const noexcept { return state_; }
@@ -122,6 +129,9 @@ public:
 private:
     void StampDiagnosticOff(FilmScan3Frame& result);
     bool coefficient_hashing_ = true;
+    // Set once a frame has been encoded successfully; Reset() deliberately does
+    // not clear it, because the profile stays fixed across a rate-state reset.
+    bool quality_locked_ = false;
     EncodingQuality quality_ = EncodingQuality::FilmScan3;
     uint32_t hash_session_ = 0;
     uint32_t diagnostic_serial_ = 1;

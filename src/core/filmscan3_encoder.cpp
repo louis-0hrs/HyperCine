@@ -124,6 +124,14 @@ void FilmScan3Encoder::SetCoefficientHashing(bool enabled) noexcept { coefficien
 void FilmScan3Encoder::SetSessionQuality(EncodingQuality quality) {
     const char* refusal=SessionProfileRefusalReason(quality);
     if(*refusal)throw std::invalid_argument(refusal);
+    // The profile owns the rate limiter, the hysteresis token and the previous
+    // sample size. Letting it change after a frame exists would hand one
+    // profile's rate state to another profile's tables, so the session profile
+    // is settled by the first successfully encoded frame. Re-asserting the same
+    // profile is a no-op and stays allowed.
+    if(quality_locked_ && quality!=quality_)
+        throw std::logic_error("session quality profile is already fixed by an encoded frame; "
+                               "construct a new encoder for another profile");
     quality_=quality;
 }
 void FilmScan3Encoder::StampDiagnosticOff(FilmScan3Frame& result) {
@@ -244,6 +252,9 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     state_.fs_rate_limiter=result.state.fs_rate_limiter;
     state_.fs_overbitrate=result.state.fs_overbitrate;
     state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
+    // First successful frame settles the profile. Only reached after every
+    // throwing step above, so a rejected Encode does not lock the session.
+    quality_locked_=true;
     return result;
 }
 }}
