@@ -179,6 +179,9 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
     add_executable(test_quality_state tests/test_quality_state.cpp)
     target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
     add_test(NAME quality_state_unit COMMAND test_quality_state)
+    add_executable(test_overbitrate_hysteresis tests/test_overbitrate_hysteresis.cpp)
+    target_link_libraries(test_overbitrate_hysteresis PRIVATE hypercine_quality_state)
+    add_test(NAME overbitrate_hysteresis_sdk_sequence COMMAND test_overbitrate_hysteresis)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     add_test(NAME quality_state_probe_arguments COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_quality_state_probe.py"
@@ -422,6 +425,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_quality_state tests/test_quality_state.cpp)
         target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
         add_test(NAME quality_state_unit COMMAND test_quality_state)
+        # Issue #46: SDK overbitrate window 0,2,3,2,1,1,0, including two
+        # consecutive holds inside the 80..100 % band.
+        add_executable(test_overbitrate_hysteresis tests/test_overbitrate_hysteresis.cpp)
+        target_link_libraries(test_overbitrate_hysteresis PRIVATE hypercine_quality_state)
+        add_test(NAME overbitrate_hysteresis_sdk_sequence COMMAND test_overbitrate_hysteresis)
         # Issue #37: the measured RGB444 p12 band table, pinned from 112 original
         # packets, plus proof that the p10 YUV calculator cannot produce it.
         add_executable(test_rgb444_p12_quality tests/test_rgb444_quality.cpp)
