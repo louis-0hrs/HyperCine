@@ -402,6 +402,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         set_tests_properties(encoder_backend_selection_contract encoder_backend_session_packets PROPERTIES
             LABELS "cpu;encoder;session" TIMEOUT 180)
         if(HYPERCINE_ENABLE_METAL)
+            add_executable(test_encoder_metal_session tests/test_encoder_metal_session.cpp)
+            target_link_libraries(test_encoder_metal_session PRIVATE hypercine_standalone Threads::Threads)
+            add_test(NAME encoder_metal_session_packets COMMAND test_encoder_metal_session)
+            set_tests_properties(encoder_metal_session_packets PROPERTIES
+                LABELS "metal;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 600)
             add_executable(test_metal_filmscan3 tests/test_metal_filmscan3.cpp)
             target_link_libraries(test_metal_filmscan3 PRIVATE hypercine_standalone)
             add_test(NAME filmscan3_metal_required COMMAND test_metal_filmscan3)

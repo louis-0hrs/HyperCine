@@ -2,6 +2,7 @@
 // Dual-licensed under the MIT License or Apache License, Version 2.0.
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "filmscan3_backend.h"
+#include "encoder_session_config.h"
 namespace hypercine { namespace standalone { namespace detail {
 FrontendFrame Frontend::Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool audit) {
     FrontendFrame out;
@@ -33,6 +34,7 @@ public:
     explicit Cpu(FilmScan3Geometry geometry = {}, WaveletIsa isa = WaveletIsa::Auto)
         : geometry_(geometry), requested_(isa),
           resolved_(isa == WaveletIsa::Auto ? WaveletIsa::Auto : ResolveWaveletIsa(isa)) {}
+    FrontendBackend Backend() const noexcept override { return FrontendBackend::Cpu; }
     FilmScan3Geometry Geometry() const noexcept override { return geometry_; }
     WaveletIsa Isa() const noexcept override {
         return requested_ == WaveletIsa::Auto ? ResolveWaveletIsa(WaveletIsa::Auto) : resolved_;
@@ -80,6 +82,7 @@ std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend backend, MetalFactory 
     throw std::invalid_argument("invalid FilmScan3 backend");
 }
 #ifndef HYPERCINE_METAL_AVAILABLE
+EncoderDevice ProbeMetalEncoderDevice() { return {}; }
 std::shared_ptr<Frontend> MetalFrontend() { throw std::runtime_error("Metal backend not built"); }
 std::shared_ptr<Frontend> MetalFrontend(FilmScan3Geometry) { throw std::runtime_error("Metal backend not built"); }
 MetalTiming ReadMetalTiming(const Frontend&) { throw std::runtime_error("Metal backend not built"); }

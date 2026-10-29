@@ -9,8 +9,8 @@
 namespace hypercine { namespace standalone { namespace detail {
 
 // Internal only: public constructors retain their existing compatibility policy.
-// Presence is not qualification. The current capability table admits scalar CPU
-// only; GPU factories must never be reached by overriding that table here.
+// Presence is not qualification. Only the admitted effective backend may
+// reach its matching factory after complete capability validation.
 enum class BackendSelectionStatus { Selected, CapabilityRefused, InitializationFailed };
 enum class ScalarFallbackReason { None, BackendNotPresent, BackendNotQualified };
 struct BackendSelection {
@@ -27,7 +27,15 @@ struct BackendSelection {
 // Per-call injection only, never global mutable dispatch. Invoked only AFTER
 // capability permission. Production uses the existing shared CPU frontend.
 using ScalarFrontendFactory = std::shared_ptr<Frontend>(*)(FilmScan3Geometry, WaveletIsa);
+using MetalSessionFactory = std::shared_ptr<Frontend>(*)(FilmScan3Geometry);
+struct BackendFactories {
+    ScalarFrontendFactory scalar = CpuFrontend;
+    MetalSessionFactory metal = MetalFrontend;
+};
+// Hardware/build facts only; never allocates frame-sized storage.
+EncoderDevice ProbeMetalEncoderDevice();
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&);
+BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, const BackendFactories&);
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, ScalarFrontendFactory);
 
 class BackendSelectionError final : public std::runtime_error {

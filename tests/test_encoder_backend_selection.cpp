@@ -28,6 +28,7 @@ std::shared_ptr<Frontend> WrongCapacity(FilmScan3Geometry g, WaveletIsa isa) {
 struct AutoFrontend final : Frontend {
     FilmScan3Geometry geometry;
     explicit AutoFrontend(FilmScan3Geometry g) : geometry(g) {}
+    FrontendBackend Backend() const noexcept override { return FrontendBackend::Cpu; }
     FilmScan3Geometry Geometry() const noexcept override { return geometry; }
     Planes Convert(const uint8_t*, std::size_t, int, int, std::size_t) override {
         throw std::logic_error("test frontend must never execute");
@@ -54,6 +55,121 @@ void Refused(const EncoderSessionConfig& config, EncoderDevice device, Capabilit
     }
     Require(threw, "session did not enforce typed capability refusal");
 }
+unsigned metal_calls = 0;
+struct FakeMetal final : Frontend {
+    FilmScan3Geometry geometry;
+    FrontendBackend identity = FrontendBackend::Metal;
+    WaveletIsa isa = WaveletIsa::Auto;
+    explicit FakeMetal(FilmScan3Geometry g) : geometry(g) {}
+    FilmScan3Geometry Geometry() const noexcept override { return geometry; }
+    FrontendBackend Backend() const noexcept override { return identity; }
+    WaveletIsa Isa() const noexcept override { return isa; }
+    Planes Convert(const uint8_t*, std::size_t, int, int, std::size_t) override {
+        throw std::logic_error("fake Metal must never execute");
+    }
+    WaveletLevel Forward(const Plane&, int) override { throw std::logic_error("fake Metal must never execute"); }
+    std::string DeviceName() const override { return "fake Metal contract only"; }
+};
+std::shared_ptr<Frontend> CountMetal(FilmScan3Geometry g) { ++metal_calls; return std::make_shared<FakeMetal>(g); }
+std::shared_ptr<Frontend> CpuMasquerade(FilmScan3Geometry g) { ++metal_calls; return CpuFrontend(g, WaveletIsa::Scalar); }
+std::shared_ptr<Frontend> MetalWrongGeometry(FilmScan3Geometry g) { g.width += 128; return CountMetal(g); }
+std::shared_ptr<Frontend> MetalWrongCapacity(FilmScan3Geometry g) { ++g.sample_capacity_bytes; return CountMetal(g); }
+std::shared_ptr<Frontend> MetalWrongIsa(FilmScan3Geometry g) {
+    auto f = std::make_shared<FakeMetal>(g); f->isa = WaveletIsa::Scalar; return f;
+}
+std::shared_ptr<Frontend> MetalUnknown(FilmScan3Geometry g) {
+    auto f = std::make_shared<FakeMetal>(g); f->identity = FrontendBackend::Unknown; return f;
+}
+std::shared_ptr<Frontend> MetalMissing(FilmScan3Geometry) { ++metal_calls; throw std::runtime_error("Metal init failed"); }
+std::shared_ptr<Frontend> MetalNoMemory(FilmScan3Geometry) { throw std::bad_alloc(); }
+std::shared_ptr<Frontend> MetalLogic(FilmScan3Geometry) { throw std::logic_error("Metal contract broken"); }
+void MetalContract() {
+    auto config = Small(); config.backend = SessionBackend::Metal;
+    config.input_stride_bytes = 512; config.input_bytes = 512 * 24;
+    EncoderDevice device; device.metal_available = true;
+    device.metal_max_buffer_length_bytes = 1ull << 30;
+    device.metal_recommended_working_set_bytes = 1ull << 30;
+    BackendFactories factories{Count, CountMetal};
+    calls = metal_calls = 0;
+    auto selected = SelectBackend(config, device, factories);
+    Require(selected && calls == 0 && metal_calls == 1 && selected.frontend->Backend() == FrontendBackend::Metal,
+            "Metal selected wrong factory/identity");
+    // Legacy scalar injection must not turn a Metal request into a CPU frontend.
+    calls = 0;
+    const auto legacy = SelectBackend(config, device, Count);
+    Require(calls == 0 && (!legacy || legacy.frontend->Backend() == FrontendBackend::Metal),
+            "legacy scalar seam used for Metal");
+    for (auto factory : {MetalSessionFactory{nullptr}, CpuMasquerade, MetalWrongGeometry,
+                         MetalWrongCapacity, MetalWrongIsa, MetalUnknown, MetalMissing}) {
+        factories.metal = factory; config.allow_cpu_scalar_fallback = true; calls = 0;
+        const auto failed = SelectBackend(config, device, factories);
+        Require(!failed && !failed.frontend && failed.status == BackendSelectionStatus::InitializationFailed && calls == 0,
+                "Metal initialization failed open or fell back");
+    }
+    for (auto factory : {MetalNoMemory, MetalLogic}) {
+        factories.metal = factory; bool propagated = false;
+        try { (void)SelectBackend(config, device, factories); }
+        catch (const std::bad_alloc&) { propagated = factory == MetalNoMemory; }
+        catch (const std::logic_error&) { propagated = factory == MetalLogic; }
+        Require(propagated, "Metal non-runtime failure hidden");
+    }
+    factories.metal = CountMetal;
+    const auto refused = [&](EncoderSessionConfig c, EncoderDevice d, CapabilityReason reason) {
+        calls = metal_calls = 0; c.allow_cpu_scalar_fallback = true;
+        const auto r = SelectBackend(c, d, factories);
+        Require(!r && calls == 0 && metal_calls == 0 && r.effective.primary == reason,
+                "Metal refusal reached a factory or changed reason");
+    };
+    auto c = config; c.max_sample_bytes = 8192;
+    calls = metal_calls = 0;
+    const auto capped = SelectBackend(c, device, factories);
+    Require(capped && calls == 0 && metal_calls == 1 &&
+            capped.frontend->Geometry().sample_capacity_bytes == 8192, "Metal sample cap not bound");
+    c = config; c.max_sample_bytes = 8ull * 128 * 24 + 16385;
+    refused(c, device, CapabilityReason::MemoryBudgetExceeded);
+    c = config; c.input_stride_bytes = c.input_bytes = 0;
+    refused(c, device, CapabilityReason::ValidButNotImplemented);
+    auto d = device; d.metal_max_buffer_length_bytes = 0;
+    refused(config, d, CapabilityReason::ValidButNotImplemented);
+    d = device; d.metal_recommended_working_set_bytes = 0;
+    refused(config, d, CapabilityReason::ValidButNotImplemented);
+    c = config; c.width = 200; refused(c, device, CapabilityReason::FormatMathematicallyInvalid);
+    c = config; c.max_sample_bytes = 1; refused(c, device, CapabilityReason::MemoryBudgetExceeded);
+    c = config; c.input_bytes = 1; refused(c, device, CapabilityReason::FormatMathematicallyInvalid);
+    c = config; c.require_reference_oracle = true; refused(c, device, CapabilityReason::ReferenceMissing);
+    c = config; c.cpu_memory_budget_bytes = 1; refused(c, device, CapabilityReason::MemoryBudgetExceeded);
+    c = config; c.gpu_memory_budget_bytes = 1; refused(c, device, CapabilityReason::MemoryBudgetExceeded);
+    d = device; d.metal_recommended_working_set_bytes = 1; refused(config, d, CapabilityReason::MemoryBudgetExceeded);
+    d = device; d.metal_max_buffer_length_bytes = config.input_bytes - 1; refused(config, d, CapabilityReason::MemoryBudgetExceeded);
+    d = device; d.metal_max_buffer_length_bytes = ~std::uint64_t{0};
+    d.metal_recommended_working_set_bytes = ~std::uint64_t{0};
+    c = config; c.input_stride_bytes = 178956960; c.input_bytes = c.input_stride_bytes * 24;
+    Require(static_cast<bool>(SelectBackend(c, d, factories)), "Metal uint32 extent boundary refused");
+    c.input_stride_bytes += 16; c.input_bytes = c.input_stride_bytes * 24;
+    refused(c, d, CapabilityReason::MemoryBudgetExceeded);
+    c = config; c.input_stride_bytes = 1ull << 32; c.input_bytes = c.input_stride_bytes * 24;
+    refused(c, device, CapabilityReason::MemoryBudgetExceeded);
+    // Last-row extent is legal, but full padded stride*height overflows.
+    // Tiny budgets/limits must not be skipped; fallback may not repair it.
+    c = config; c.input_stride_bytes = 768614336404564656ull;
+    c.input_bytes = 17678129737304987600ull;
+    c.cpu_memory_budget_bytes = c.gpu_memory_budget_bytes = 1;
+    d = device; d.metal_max_buffer_length_bytes = d.metal_recommended_working_set_bytes = 1;
+    refused(c, d, CapabilityReason::MemoryBudgetExceeded);
+    c.backend = SessionBackend::CpuScalar;
+    refused(c, d, CapabilityReason::MemoryBudgetExceeded);
+    c = config; c.width = 384; c.height = 40; c.input_stride_bytes = 1536; c.input_bytes = 1536 * 40;
+    c.allow_cpu_scalar_fallback = false; calls = metal_calls = 0;
+    const auto unqualified = SelectBackend(c, device, factories);
+    Require(!unqualified && calls == 0 && metal_calls == 0 &&
+            unqualified.effective.primary == CapabilityReason::BackendNotQualifiedForGeometry, "Metal geometry promoted");
+    c = config; c.input_stride_bytes = c.input_bytes = 0; c.allow_cpu_scalar_fallback = true;
+    d = {}; calls = metal_calls = 0;
+    const auto fallback = SelectBackend(c, d, factories);
+    Require(fallback && calls == 1 && metal_calls == 0 && fallback.frontend->Backend() == FrontendBackend::Cpu,
+            "absent Metal inherited GPU requirements or reached Metal factory");
+    std::cout << "PASS fake Metal binding/refusal/identity/init falsifiers (no GPU execution)\n";
+}
 void Contract() {
     EncoderDevice host;
     auto config = Small();
@@ -77,6 +193,11 @@ void Contract() {
                 result.requested.reasons.backend_not_present, "explicit absent-backend fallback");
         auto present = host;
         present.metal_available = present.cuda_available = present.vulkan_available = true;
+        if (backend == SessionBackend::Metal) {
+            config.allow_cpu_scalar_fallback = true;
+            Refused(config, present, CapabilityReason::ValidButNotImplemented);
+            continue;
+        }
         config.allow_cpu_scalar_fallback = false;
         Refused(config, present, CapabilityReason::BackendNotQualifiedForGeometry);
         config.allow_cpu_scalar_fallback = true;
@@ -222,7 +343,7 @@ int main(int argc, char** argv) {
     try {
         if(argc != 2) throw std::invalid_argument("expected contract or packets");
         const std::string mode=argv[1];
-        if(mode == "contract") Contract();
+        if(mode == "contract") { Contract(); MetalContract(); }
         else if(mode == "packets") Packets();
         else throw std::invalid_argument("unknown test mode");
         return 0;

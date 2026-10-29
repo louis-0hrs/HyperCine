@@ -20,8 +20,11 @@ struct HostTiming {
     double quant_ms=0, coefficient_hash_ms=0, entropy_ms=0, framing_ms=0;
 };
 // Internal stage boundary. Implementations throw before returning incomplete data.
+enum class FrontendBackend { Unknown, Cpu, Metal };
 struct Frontend {
     virtual ~Frontend() = default;
+    // Internal identity is checked by session selection, independently of ISA.
+    virtual FrontendBackend Backend() const noexcept { return FrontendBackend::Unknown; }
     virtual FilmScan3Geometry Geometry() const noexcept { return {}; }
     virtual Planes Convert(const uint8_t*, std::size_t, int, int, std::size_t) = 0;
     virtual WaveletLevel Forward(const Plane&, int) = 0;

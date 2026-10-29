@@ -21,11 +21,18 @@ BackendSelection RequireSelection(BackendSelection selection) {
 }
 
 BackendSelection SelectBackend(const EncoderSessionConfig& config, const EncoderDevice& device) {
-    return SelectBackend(config, device, CpuFrontend);
+    return SelectBackend(config, device, BackendFactories{});
 }
 
 BackendSelection SelectBackend(const EncoderSessionConfig& config, const EncoderDevice& device,
                                ScalarFrontendFactory factory) {
+    auto factories = BackendFactories{};
+    factories.scalar = factory;
+    return SelectBackend(config, device, factories);
+}
+
+BackendSelection SelectBackend(const EncoderSessionConfig& config, const EncoderDevice& device,
+                               const BackendFactories& factories) {
     BackendSelection result;
     result.requested = CheckEncoderCapability(config, device);
     result.effective = result.requested;
@@ -45,7 +52,8 @@ BackendSelection SelectBackend(const EncoderSessionConfig& config, const Encoder
         result.fallback = ScalarFallbackReason::BackendNotPresent;
     // Do not acquire a new product backend implicitly when a future capability
     // revision changes. It needs its own reviewed factory/qualification wiring.
-    if (result.effective.effective_backend != SessionBackend::CpuScalar) {
+    if (result.effective.effective_backend != SessionBackend::CpuScalar &&
+        result.effective.effective_backend != SessionBackend::Metal) {
         result.effective.allocation_permitted = false;
         result.effective.primary = CapabilityReason::ValidButNotImplemented;
         result.effective.reasons.valid_but_not_implemented = true;
@@ -56,11 +64,17 @@ BackendSelection SelectBackend(const EncoderSessionConfig& config, const Encoder
                                     static_cast<std::size_t>(config.max_sample_bytes)};
     try {
         // Explicit scalar policy is session-bound; never Auto/process-global.
-        if (factory) result.frontend = factory(geometry, WaveletIsa::Scalar);
+        const bool metal = result.effective.effective_backend == SessionBackend::Metal;
+        if (metal) {
+            if (factories.metal) result.frontend = factories.metal(geometry);
+        } else if (factories.scalar) {
+            result.frontend = factories.scalar(geometry, WaveletIsa::Scalar);
+        }
         if (!result.frontend || result.frontend->Geometry().width != geometry.width ||
             result.frontend->Geometry().height != geometry.height ||
             result.frontend->Geometry().sample_capacity_bytes != geometry.sample_capacity_bytes ||
-            result.frontend->Isa() != WaveletIsa::Scalar) {
+            result.frontend->Backend() != (metal ? FrontendBackend::Metal : FrontendBackend::Cpu) ||
+            result.frontend->Isa() != (metal ? WaveletIsa::Auto : WaveletIsa::Scalar)) {
             result.frontend.reset();
             result.status = BackendSelectionStatus::InitializationFailed;
             return result;
