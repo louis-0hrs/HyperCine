@@ -150,6 +150,12 @@ def build_scratch(root):
     shutil.copyfile(REPO / "CMakeLists.txt", root / "CMakeLists.txt")
 
 
+def write_lf(path, text):
+    # Path.write_text(newline=...) requires Python 3.10; Path.open supports 3.9.
+    with path.open("w", encoding="utf-8", newline="\n") as output:
+        output.write(text)
+
+
 def apply_mutation(root, entry, normalise):
     relative = entry["file"]
     path = root / "upstream" / relative
@@ -184,7 +190,7 @@ def apply_mutation(root, entry, normalise):
 
     if norm_eq(mutated, text):
         raise RuntimeError("%s: mutation did not change the file" % entry["name"])
-    path.write_text(mutated, encoding="utf-8", newline="\n")
+    write_lf(path, mutated)
     return mutated, text
 
 
@@ -249,8 +255,8 @@ def run():
         first = CASES[0]
         apply_mutation(restore, first, normalise)
         path = restore / "upstream" / first["file"]
-        path.write_text(normalise((REPO / "upstream" / first["file"]).read_text(
-            encoding="utf-8", errors="replace")), encoding="utf-8", newline="\n")
+        write_lf(path, normalise((REPO / "upstream" / first["file"]).read_text(
+            encoding="utf-8", errors="replace")))
         code, stderr = run_tool(restore)
         if code != 0:
             failures.append("restored copy failed rc=%d: %s" % (code, stderr.strip()[:300]))

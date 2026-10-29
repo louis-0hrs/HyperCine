@@ -12,7 +12,9 @@ import importlib.util
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.dont_write_bytecode = True
 
@@ -20,6 +22,10 @@ TOOL = Path(__file__).resolve().parents[1] / "tools/rca160_all_channel_contract.
 spec = importlib.util.spec_from_file_location("rca160_all_channel_contract", TOOL)
 contract = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(contract)
+selftest_spec = importlib.util.spec_from_file_location(
+    "rca160_all_channel_selftest", TOOL.with_name("rca160_all_channel_selftest.py"))
+selftest = importlib.util.module_from_spec(selftest_spec)
+selftest_spec.loader.exec_module(selftest)
 
 
 class ReleasedPredicateTests(unittest.TestCase):
@@ -109,6 +115,52 @@ class ScopeTests(unittest.TestCase):
 
 
 class SelfTestTests(unittest.TestCase):
+    def apply_with_python39_path_api(self, original, entry):
+        # Keep this regression effective on newer hosted Python too: Python 3.9
+        # Path.write_text has no newline parameter, while Path.open does.
+        write_text = Path.write_text
+        path_open = Path.open
+        writes = []
+
+        def python39_write_text(path, data, encoding=None, errors=None):
+            return write_text(path, data, encoding=encoding, errors=errors)
+
+        def checked_open(path, mode="r", *args, **kwargs):
+            if mode == "w":
+                self.assertEqual(kwargs.get("encoding"), "utf-8")
+                self.assertEqual(kwargs.get("newline"), "\n")
+                writes.append(path)
+            return path_open(path, mode, *args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / entry["file"]
+            path.write_bytes(original)
+            with patch.object(Path, "write_text", python39_write_text), \
+                    patch.object(Path, "open", checked_open):
+                mutated, previous = selftest.apply_mutation(root, entry, selftest.normalise)
+                self.assertEqual(path.read_bytes(), mutated.encode("utf-8"))
+                self.assertNotIn(b"\r", path.read_bytes())
+                selftest.write_lf(path, previous)
+            self.assertEqual(writes, [path, path])
+            self.assertEqual(path.read_bytes(), previous.encode("utf-8"))
+            return mutated, previous
+
+    def test_replacement_mutation_writes_utf8_lf_with_python39_api(self):
+        entry = dict(name="replace", file="fixture.txt", old="old-é", new="new-ä", occurrences=1)
+        mutated, previous = self.apply_with_python39_path_api(
+            "head\r\nold-é\r\ntail\r\n".encode("utf-8"), entry)
+        self.assertEqual(previous, "head\nold-é\ntail\n")
+        self.assertEqual(mutated, "head\nnew-ä\ntail\n")
+
+    def test_insert_mutation_writes_utf8_lf_with_python39_api(self):
+        entry = dict(name="insert", file="fixture.txt", insert_before_each="anchor-é",
+                     insert_line="insert-ä", occurrences=2)
+        mutated, previous = self.apply_with_python39_path_api(
+            "  anchor-é\r\n\tanchor-é\r\n".encode("utf-8"), entry)
+        self.assertEqual(previous, "  anchor-é\n\tanchor-é\n")
+        self.assertEqual(mutated, "  insert-ä\n  anchor-é\n\tinsert-ä\n\tanchor-é\n")
+
     def test_every_mutation_is_rejected_for_its_stated_reason(self):
         """The checker must disagree with the prose when the tree moves.
 
