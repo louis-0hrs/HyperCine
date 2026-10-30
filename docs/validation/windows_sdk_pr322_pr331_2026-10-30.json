@@ -1,0 +1,721 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "date": "2026-10-30",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "compiler": "MSVC 19.44.35229.0; Visual Studio 17 2022; Release x64",
+  "inventory": {
+    "windows-a": {
+      "status": "PASS",
+      "files": 606,
+      "byte_length": 1520292514,
+      "index_sha256": "62c6f4c9297d760f1f14bde73ad15f62ca254371fa8b05f55c7ddf68e1d2e0bc"
+    },
+    "windows-b": {
+      "status": "PASS",
+      "files": 177,
+      "byte_length": 390885680,
+      "index_sha256": "72e7c314e0e28a9831d1e9270045642b28ade24aec9363f550c825a6a6fa5857"
+    },
+    "windows-c": {
+      "status": "PASS",
+      "files": 35,
+      "byte_length": 59385771,
+      "index_sha256": "a718243eb1f0d9efdd1c8fb030720eff7d2321d20d24fad5860b26bb8f91a4e5"
+    },
+    "linux-sdk-gaps": {
+      "status": "PASS",
+      "files": 776,
+      "byte_length": 2024958339,
+      "index_sha256": "dfb7cace17a73b7bfd1871be545d07acf14692adaafda25907370edec5b6dffb"
+    }
+  },
+  "pr322": {
+    "commit": "31b9c8f0502049f9ff23a75a1f05b9b4eaf99fe3",
+    "passed": 115,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 448.00719649999996,
+    "binary_sha256": "399bd87780f359611134b809015f39e9a553e7cc5c0104ecfde5d7cea85833af",
+    "source_clean": true,
+    "upstream_clean": true,
+    "quality_state_blob": "0d9eab72621072c52667874292db636b75844cdc",
+    "tests": [
+      {
+        "name": "reference_decode_contract",
+        "seconds": 2.24663
+      },
+      {
+        "name": "diagnostic_summary_contract",
+        "seconds": 1.07422
+      },
+      {
+        "name": "decoder_differential_metrics",
+        "seconds": 0.286657
+      },
+      {
+        "name": "cpu_isa_selection",
+        "seconds": 0.049697
+      },
+      {
+        "name": "wavelet_simd_exact",
+        "seconds": 8.58653
+      },
+      {
+        "name": "wavelet_simd_packets",
+        "seconds": 3.8147
+      },
+      {
+        "name": "windows_sdk_corpus_contract",
+        "seconds": 0.262585
+      },
+      {
+        "name": "qualification_report_contract",
+        "seconds": 0.247945
+      },
+      {
+        "name": "windows_reference_process_contract",
+        "seconds": 0.656419
+      },
+      {
+        "name": "cuda_output_dir_platform_contract",
+        "seconds": 0.347289
+      },
+      {
+        "name": "test_reference_release_inventory",
+        "seconds": 0.327402
+      },
+      {
+        "name": "test_compare_sdk_oracle",
+        "seconds": 0.191896
+      },
+      {
+        "name": "test_rca159_witness_contract",
+        "seconds": 0.234184
+      },
+      {
+        "name": "test_rca160_all_channel_contract",
+        "seconds": 24.9512
+      },
+      {
+        "name": "test_rca160_ledger_audit",
+        "seconds": 4.41872
+      },
+      {
+        "name": "test_cuda_host_compiler_contract",
+        "seconds": 23.7054
+      },
+      {
+        "name": "neon_wavelet_bitexact",
+        "seconds": 0.044212
+      },
+      {
+        "name": "neon_concurrency_contract",
+        "seconds": 0.298515
+      },
+      {
+        "name": "wavelet_isa_session_policy",
+        "seconds": 0.0380828
+      },
+      {
+        "name": "wavelet_isa_parallel_sessions",
+        "seconds": 0.539789
+      },
+      {
+        "name": "rgb444_frame_storage",
+        "seconds": 0.0791171
+      },
+      {
+        "name": "rgb444_frame_rejection",
+        "seconds": 0.0094212
+      },
+      {
+        "name": "rgb444_rg48_import",
+        "seconds": 0.0963847
+      },
+      {
+        "name": "rgb444_rg48_rejection",
+        "seconds": 0.0094546
+      },
+      {
+        "name": "rgb444_rg48_allocation_failure",
+        "seconds": 0.0336109
+      },
+      {
+        "name": "rgb444_p12_transform_contract",
+        "seconds": 0.0737572
+      },
+      {
+        "name": "rgb444_p12_prescale_audit",
+        "seconds": 0.179732
+      },
+      {
+        "name": "quality_state_unit",
+        "seconds": 0.0375263
+      },
+      {
+        "name": "overbitrate_hysteresis_sdk_sequence",
+        "seconds": 0.0404196
+      },
+      {
+        "name": "rgb444_p12_quality_table",
+        "seconds": 0.0428027
+      },
+      {
+        "name": "filmscan3_backend_selection",
+        "seconds": 0.226351
+      },
+      {
+        "name": "encoder_backend_selection_contract",
+        "seconds": 0.037529
+      },
+      {
+        "name": "encoder_backend_session_packets",
+        "seconds": 1.33159
+      },
+      {
+        "name": "filmscan3_api",
+        "seconds": 9.09225
+      },
+      {
+        "name": "profile_enter_contract",
+        "seconds": 0.777902
+      },
+      {
+        "name": "p6_sdk_gap_negative_controls",
+        "seconds": 0.309018
+      },
+      {
+        "name": "p6_sdk_gap_historical_pre325",
+        "seconds": 0.181754
+      },
+      {
+        "name": "p6_windows_sdk_gate_contract",
+        "seconds": 0.207578
+      },
+      {
+        "name": "p6_windows_sdk_group-a-sequences",
+        "seconds": 91.8842
+      },
+      {
+        "name": "p6_windows_sdk_group-b-hysteresis",
+        "seconds": 34.7006
+      },
+      {
+        "name": "p6_windows_sdk_group-c-sdk-state",
+        "seconds": 6.44101
+      },
+      {
+        "name": "p6_windows_sdk_comparison_negatives",
+        "seconds": 2.43743
+      },
+      {
+        "name": "p6_sdk_gap_negative_ramp",
+        "seconds": 25.7918
+      },
+      {
+        "name": "p6_sdk_gap_comparison_negatives",
+        "seconds": 22.5479
+      },
+      {
+        "name": "p6_sdk_gap_sequences",
+        "seconds": 82.3681
+      },
+      {
+        "name": "filmscan3_geometry",
+        "seconds": 11.9415
+      },
+      {
+        "name": "filmscan3_geometry_budget",
+        "seconds": 0.0442367
+      },
+      {
+        "name": "filmscan3_fixture_integrity",
+        "seconds": 0.0513912
+      },
+      {
+        "name": "entropy_bitexact",
+        "seconds": 0.49397
+      },
+      {
+        "name": "standalone_color",
+        "seconds": 0.0398954
+      },
+      {
+        "name": "standalone_wavelet",
+        "seconds": 0.009798
+      },
+      {
+        "name": "standalone_quantization",
+        "seconds": 0.009644
+      },
+      {
+        "name": "standalone_entropy",
+        "seconds": 0.0098311
+      },
+      {
+        "name": "standalone_sample",
+        "seconds": 0.0280407
+      },
+      {
+        "name": "standalone_geometry",
+        "seconds": 0.315198
+      },
+      {
+        "name": "standalone_oracle_fixtures",
+        "seconds": 0.200728
+      },
+      {
+        "name": "filmscan3_4k_gate_contract",
+        "seconds": 1.43168
+      },
+      {
+        "name": "filmscan3_geometry_reference_p10",
+        "seconds": 0.190546
+      },
+      {
+        "name": "filmscan3_geometry_validation",
+        "seconds": 0.255894
+      },
+      {
+        "name": "rgb444_rg48_replay_contract",
+        "seconds": 0.348274
+      },
+      {
+        "name": "original_descale_review_contract",
+        "seconds": 8.85517
+      },
+      {
+        "name": "gop2_original_stage_contract",
+        "seconds": 0.339385
+      },
+      {
+        "name": "gop2_reference_inventory_integrity",
+        "seconds": 32.3274
+      },
+      {
+        "name": "windows_reference_inputs",
+        "seconds": 6.10494
+      },
+      {
+        "name": "windows_reference_guardrails",
+        "seconds": 0.363231
+      },
+      {
+        "name": "windows_reference_parser",
+        "seconds": 0.174009
+      },
+      {
+        "name": "optimized_standalone_acceptance",
+        "seconds": 0.246832
+      },
+      {
+        "name": "standalone_gate_guardrails",
+        "seconds": 1.08398
+      },
+      {
+        "name": "rgb444_packet_probe",
+        "seconds": 0.309915
+      },
+      {
+        "name": "rgb444_band_contract",
+        "seconds": 0.210505
+      },
+      {
+        "name": "rgb444_p12_quality_pin",
+        "seconds": 0.181132
+      },
+      {
+        "name": "windows_reference_sdk_coefficients",
+        "seconds": 1.28587
+      },
+      {
+        "name": "filmscan3_autonomous_manifest",
+        "seconds": 3.10788
+      },
+      {
+        "name": "filmscan3_sequence_manifest",
+        "seconds": 20.5017
+      },
+      {
+        "name": "decoder_attachment_292_workers_1",
+        "seconds": 0.0868162
+      },
+      {
+        "name": "decoder_attachment_292_workers_2",
+        "seconds": 0.0468894
+      },
+      {
+        "name": "decoder_attachment_292_workers_4",
+        "seconds": 0.0499045
+      },
+      {
+        "name": "decoder_attachment_292_workers_16",
+        "seconds": 0.0668832
+      },
+      {
+        "name": "rca160_public_evidence",
+        "seconds": 0.739745
+      },
+      {
+        "name": "decode_task_graph_workers_1",
+        "seconds": 0.0446434
+      },
+      {
+        "name": "decode_task_graph_workers_2",
+        "seconds": 0.015505
+      },
+      {
+        "name": "decode_task_graph_workers_4",
+        "seconds": 0.0176304
+      },
+      {
+        "name": "decode_task_graph_workers_16",
+        "seconds": 0.0267437
+      },
+      {
+        "name": "scheduler_contract_195_workers_1",
+        "seconds": 0.0385525
+      },
+      {
+        "name": "scheduler_contract_195_workers_2",
+        "seconds": 0.0138615
+      },
+      {
+        "name": "scheduler_contract_195_workers_4",
+        "seconds": 0.0130096
+      },
+      {
+        "name": "scheduler_contract_195_workers_16",
+        "seconds": 0.0191801
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_1",
+        "seconds": 0.295001
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_2",
+        "seconds": 0.277218
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_4",
+        "seconds": 0.29455
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_16",
+        "seconds": 0.265039
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_1",
+        "seconds": 0.110691
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_2",
+        "seconds": 0.116049
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_4",
+        "seconds": 0.0750277
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_16",
+        "seconds": 0.118036
+      },
+      {
+        "name": "decode_s3_plane",
+        "seconds": 0.0409704
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_1",
+        "seconds": 0.127801
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_2",
+        "seconds": 0.100788
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_4",
+        "seconds": 0.102273
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_8",
+        "seconds": 0.116855
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_1",
+        "seconds": 0.086838
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_2",
+        "seconds": 0.0415144
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_4",
+        "seconds": 0.033124
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_16",
+        "seconds": 0.0386007
+      },
+      {
+        "name": "extreme_geometry_c0_arithmetic",
+        "seconds": 0.169359
+      },
+      {
+        "name": "extreme_geometry_c0_report",
+        "seconds": 0.119578
+      },
+      {
+        "name": "rgb444_allocation_failure",
+        "seconds": 0.0384781
+      },
+      {
+        "name": "scalar_inverse_arithmetic",
+        "seconds": 0.0544083
+      },
+      {
+        "name": "scalar_inverse_rejection",
+        "seconds": 0.0116612
+      },
+      {
+        "name": "scalar_inverse_graph_workers_1",
+        "seconds": 0.0123263
+      },
+      {
+        "name": "scalar_inverse_graph_workers_2",
+        "seconds": 0.0134072
+      },
+      {
+        "name": "scalar_inverse_graph_workers_4",
+        "seconds": 0.0136219
+      },
+      {
+        "name": "scalar_inverse_graph_workers_16",
+        "seconds": 0.0176326
+      },
+      {
+        "name": "scalar_inverse_vectors",
+        "seconds": 0.156246
+      },
+      {
+        "name": "scalar_inverse_replay_contract",
+        "seconds": 2.25885
+      }
+    ]
+  },
+  "pr331": {
+    "commit": "d34eefd025cb6f423c672b540e64a8066aa5103e",
+    "passed": 42,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 51.87839040000002,
+    "binary_sha256": "4c47bbbd047ea1d114c3de30b6a6d6e7b320e840f2dd0d541e33813e96007d7b",
+    "source_clean": true,
+    "upstream_clean": true,
+    "quality_state_blob": "0d9eab72621072c52667874292db636b75844cdc",
+    "tests": [
+      {
+        "name": "reference_decode_contract",
+        "seconds": 2.09061
+      },
+      {
+        "name": "diagnostic_summary_contract",
+        "seconds": 0.977642
+      },
+      {
+        "name": "decoder_differential_metrics",
+        "seconds": 0.259367
+      },
+      {
+        "name": "cpu_isa_selection",
+        "seconds": 0.0485055
+      },
+      {
+        "name": "quality_state_unit",
+        "seconds": 0.0400481
+      },
+      {
+        "name": "overbitrate_hysteresis_sdk_sequence",
+        "seconds": 0.0365943
+      },
+      {
+        "name": "quality_state_probe_arguments",
+        "seconds": 0.957475
+      },
+      {
+        "name": "quality_cmake_mode_contract",
+        "seconds": 36.4593
+      },
+      {
+        "name": "issue46_group_a_verifier_contract",
+        "seconds": 0.267012
+      },
+      {
+        "name": "issue46_group_a_packet_tables",
+        "seconds": 6.76865
+      },
+      {
+        "name": "decoder_attachment_292_workers_1",
+        "seconds": 0.0821867
+      },
+      {
+        "name": "decoder_attachment_292_workers_2",
+        "seconds": 0.0471203
+      },
+      {
+        "name": "decoder_attachment_292_workers_4",
+        "seconds": 0.0521154
+      },
+      {
+        "name": "decoder_attachment_292_workers_16",
+        "seconds": 0.0638146
+      },
+      {
+        "name": "rca160_public_evidence",
+        "seconds": 0.875009
+      },
+      {
+        "name": "decode_task_graph_workers_1",
+        "seconds": 0.0492606
+      },
+      {
+        "name": "decode_task_graph_workers_2",
+        "seconds": 0.0169161
+      },
+      {
+        "name": "decode_task_graph_workers_4",
+        "seconds": 0.0179044
+      },
+      {
+        "name": "decode_task_graph_workers_16",
+        "seconds": 0.0279538
+      },
+      {
+        "name": "scheduler_contract_195_workers_1",
+        "seconds": 0.0459818
+      },
+      {
+        "name": "scheduler_contract_195_workers_2",
+        "seconds": 0.0138037
+      },
+      {
+        "name": "scheduler_contract_195_workers_4",
+        "seconds": 0.0150494
+      },
+      {
+        "name": "scheduler_contract_195_workers_16",
+        "seconds": 0.0218068
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_1",
+        "seconds": 0.327503
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_2",
+        "seconds": 0.322906
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_4",
+        "seconds": 0.26446
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_16",
+        "seconds": 0.276831
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_1",
+        "seconds": 0.120389
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_2",
+        "seconds": 0.0964121
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_4",
+        "seconds": 0.107546
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_16",
+        "seconds": 0.0906585
+      },
+      {
+        "name": "decode_s3_plane",
+        "seconds": 0.0470704
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_1",
+        "seconds": 0.128981
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_2",
+        "seconds": 0.0948834
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_4",
+        "seconds": 0.0975082
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_8",
+        "seconds": 0.102598
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_1",
+        "seconds": 0.0837177
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_2",
+        "seconds": 0.0657996
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_4",
+        "seconds": 0.0447068
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_16",
+        "seconds": 0.0640232
+      },
+      {
+        "name": "extreme_geometry_c0_arithmetic",
+        "seconds": 0.194037
+      },
+      {
+        "name": "extreme_geometry_c0_report",
+        "seconds": 0.114233
+      }
+    ]
+  },
+  "windows_a": {
+    "matched": 480,
+    "requested": 480
+  },
+  "windows_b": {
+    "matched": 145,
+    "requested": 145
+  },
+  "windows_c": {
+    "matched": 21,
+    "requested": 21
+  },
+  "linux_sequences": {
+    "matched": 480,
+    "requested": 480
+  },
+  "negative_ramp": {
+    "matched": 120,
+    "requested": 120
+  },
+  "historical_pre46": {
+    "commit": "a42f7000f61774af3d4e2c0b7e9d273887474983",
+    "divergent_frames": 84,
+    "medium_divergent": 42,
+    "high_divergent": 42,
+    "first_divergence": 17,
+    "rejection_exit_code": 1
+  },
+  "limits": [
+    "No historical Windows compiler/ISA or original seed authentication.",
+    "No explicit SDK FRMR/playback cadence qualification.",
+    "No GPU, performance, external-product, or conformance qualification.",
+    "Only configured suites tested; other optional corpora not enabled."
+  ]
+}
