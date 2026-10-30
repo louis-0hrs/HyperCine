@@ -82,6 +82,10 @@ def replay(probe, frames, enum_value, width, height, carry_state):
             payload = json.loads(subprocess.check_output(argv, text=True))
         except subprocess.CalledProcessError as error:
             fail(f"probe failed on {enum_value}/{index}: {error}")
+        if not isinstance(payload, dict) or any(
+                not isinstance(payload.get(field), list) or len(payload[field]) != 36
+                for field in ("quant", "scale")):
+            fail(f"probe returned incomplete quant/scale tables on {enum_value}/{index}")
         record = {
             "frame_index": index,
             "limiter": payload["limiter"],
@@ -102,15 +106,62 @@ def replay(probe, frames, enum_value, width, height, carry_state):
     return out
 
 
+def validate_frames(frames, profile):
+    """Reject malformed private oracle sequences before invoking the probe."""
+    if len(frames) != FRAMES_PER_SEQUENCE:
+        fail(f"{profile}: {len(frames)} frames, expected {FRAMES_PER_SEQUENCE}")
+    previous_size = 0
+    for expected_index, frame in enumerate(frames):
+        if frame.get("frame_index") != expected_index:
+            fail(f"{profile}: frame indices must be contiguous 0..119; "
+                 f"at position {expected_index} got {frame.get('frame_index')!r}")
+        size = frame.get("sdk_byte_length")
+        if type(size) is not int or size <= 0:
+            fail(f"{profile}/{expected_index}: invalid SDK packet byte length")
+        if frame.get("previous_sdk_sample_bytes") != previous_size:
+            fail(f"{profile}/{expected_index}: previous SDK packet byte chain broken "
+                 f"(expected {previous_size}, got "
+                 f"{frame.get('previous_sdk_sample_bytes')!r})")
+        previous_size = size
+        validate_band_table(frame, profile)
+
+
+def validate_band_table(frame, profile):
+    """Require every observable high-pass quant/scale pair exactly once."""
+    index = frame["frame_index"]
+    entries = frame.get("packet_band_quant_scale")
+    if not isinstance(entries, list) or not entries:
+        fail(f"{profile}/{index}: missing packet band tables")
+    required = {(ch, subband) for ch in range(3) for subband in range(1, 10)}
+    seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            fail(f"{profile}/{index}: malformed packet band entry")
+        key = (entry.get("channel"), entry.get("subband"))
+        if key in seen:
+            fail(f"{profile}/{index}: duplicate packet subband {key}")
+        seen.add(key)
+        if key in required:
+            for field in ("quant_53", "scale_54"):
+                value = entry.get(field)
+                if type(value) is not int:
+                    fail(f"{profile}/{index}: missing or invalid {field} at {key}")
+    missing = required - seen
+    if missing:
+        fail(f"{profile}/{index}: missing high-pass subbands {sorted(missing)}")
+
+
 def compare(replayed, frames):
-    """Compare the calculator's tables with the tables parsed out of each packet."""
+    """Compare all packet tables; no zip truncation or missing-table passes."""
+    if len(replayed) != len(frames):
+        fail(f"replay length mismatch: replay={len(replayed)} corpus={len(frames)}")
     divergence = {"frames": 0, "quant_entries": 0, "scale_entries": 0,
                   "frames_missing_tables": 0, "first": None}
     for record, frame in zip(replayed, frames):
+        if record["frame_index"] != frame["frame_index"]:
+            fail(f"replay index mismatch: {record['frame_index']} != {frame['frame_index']}")
+        validate_band_table(frame, "compare")
         band = frame["packet_band_quant_scale"]
-        if not band:
-            divergence["frames_missing_tables"] += 1
-            continue
         by_subband = {(entry["channel"], entry["subband"]): entry for entry in band}
         frame_bad_quant = 0
         frame_bad_scale = 0
@@ -122,8 +173,6 @@ def compare(replayed, frames):
                     entry = by_subband.get(key)
                     if entry is None:
                         fail(f"packet frame {record['frame_index']} lacks subband {key}")
-                    if entry["quant_53"] is None or entry["scale_54"] is None:
-                        continue  # the SDK omits the low-pass pair by design
                     at = channel * 12 + probe_table_index(level, band_index)
                     if record["quant"][at] != entry["quant_53"]:
                         frame_bad_quant += 1
@@ -203,8 +252,7 @@ def main():
 
     for profile, enum_value in PROFILES.items():
         frames = sessions[profile]["frames"]
-        if len(frames) != FRAMES_PER_SEQUENCE:
-            fail(f"{profile}: {len(frames)} frames, expected {FRAMES_PER_SEQUENCE}")
+        validate_frames(frames, profile)
         if sessions[profile]["sequence"] != "sequence-120f":
             fail(f"{profile}: unexpected sequence {sessions[profile]['sequence']}")
 
