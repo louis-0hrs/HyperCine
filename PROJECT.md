@@ -1,3 +1,25 @@
+# Draft #322 — current-main continuation
+
+Status: REVIEW. Owned gates/docs only, isolated existing branch.
+Current-main integration target: 04c348f848de1eb3a47d3b90fe191722c1ab559e.
+Forward merge validated by full CTest before commit; root CMake merged automatically.
+Original historical FAIL 78/120 and negative 40f ramp preserved.
+Windows-native deferred (node unavailable); original Windows corpus replay on Linux allowed.
+#320 canonical integration and #331 independent verifier are separate owners.
+
+Checklist:
+- [x] Read current coordination, verify pseudonymous identity and worktree hooks.
+- [x] Claim existing Draft #322 continuation.
+- [x] Forward-integrate current main without deleting tests or changing upstream.
+- [x] Private 129/129 PASS; public 122/122 PASS; regular 58 PASS /59 total, 1 ffmpeg_oracle_qualification SKIP.
+- [ ] Source-bound evidence, staged/every-outgoing-commit privacy and publication.
+
+Next action: privacy-reviewed publication to existing Draft #322; independent review and exact-head CI remain pending.
+Blockers: no Windows-native execution; exact-head hosted CI remains separate.
+
+---
+Historical measurement snapshots follow; their old dependency statuses are historical.
+
 # Issue 46 — SDK golden refresh (Draft #322)
 
 Status: REVIEW / local implementation and validation complete.

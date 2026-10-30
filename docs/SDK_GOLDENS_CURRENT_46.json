@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "scope": "Linux x86_64 CPU replay of independent original SDK corpora; no Windows-native execution",
+  "main": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+  "premerge_head": "8fc92e0295781619b79af49ebfcfeb20a2febb24",
+  "implementation_matches_main": true,
+  "suites": {
+    "private_standalone": {
+      "total": 129,
+      "passed": 129,
+      "failed": 0,
+      "skipped": 0,
+      "skipped_tests": [],
+      "failed_tests": [],
+      "seconds": 603.0,
+      "original_gates": [
+        {
+          "name": "p6_sdk_gap_negative_controls",
+          "status": "run",
+          "seconds": 0.13061
+        },
+        {
+          "name": "p6_sdk_gap_historical_pre325",
+          "status": "run",
+          "seconds": 0.115559
+        },
+        {
+          "name": "p6_windows_sdk_gate_contract",
+          "status": "run",
+          "seconds": 0.119786
+        },
+        {
+          "name": "p6_windows_sdk_group-a-sequences",
+          "status": "run",
+          "seconds": 334.985
+        },
+        {
+          "name": "p6_windows_sdk_group-b-hysteresis",
+          "status": "run",
+          "seconds": 151.92
+        },
+        {
+          "name": "p6_windows_sdk_group-c-sdk-state",
+          "status": "run",
+          "seconds": 45.4879
+        },
+        {
+          "name": "p6_windows_sdk_comparison_negatives",
+          "status": "run",
+          "seconds": 4.23911
+        },
+        {
+          "name": "p6_sdk_gap_negative_ramp",
+          "status": "run",
+          "seconds": 137.176
+        },
+        {
+          "name": "p6_sdk_gap_comparison_negatives",
+          "status": "run",
+          "seconds": 87.3073
+        },
+        {
+          "name": "p6_sdk_gap_sequences",
+          "status": "run",
+          "seconds": 273.004
+        }
+      ]
+    },
+    "public_standalone": {
+      "total": 122,
+      "passed": 122,
+      "failed": 0,
+      "skipped": 0,
+      "skipped_tests": [],
+      "failed_tests": [],
+      "seconds": 262.0,
+      "original_gates": [
+        {
+          "name": "p6_sdk_gap_negative_controls",
+          "status": "run",
+          "seconds": 0.124273
+        },
+        {
+          "name": "p6_sdk_gap_historical_pre325",
+          "status": "run",
+          "seconds": 0.136341
+        },
+        {
+          "name": "p6_windows_sdk_gate_contract",
+          "status": "run",
+          "seconds": 0.119901
+        }
+      ]
+    },
+    "required_regular": {
+      "total": 59,
+      "passed": 58,
+      "failed": 0,
+      "skipped": 1,
+      "skipped_tests": [
+        "ffmpeg_oracle_qualification"
+      ],
+      "failed_tests": [],
+      "seconds": 36.0,
+      "original_gates": []
+    }
+  },
+  "tested_git_blobs": {
+    "CMakeLists.txt": "5e4a77a94a093eb9f0dd5a85645619b1151da2f5",
+    "src/core/quality_state.cpp": "0d9eab72621072c52667874292db636b75844cdc",
+    "tests/test_quality_state.cpp": "645868cb2674dd4060fdab87a2b270006b219b47",
+    "tests/test_overbitrate_hysteresis.cpp": "48015887ed95b9a97ec4f0142c31d4fbadc89842",
+    "tools/p6_sdk_gap_gate.py": "b698bc6b4ae1c5852041773f3cb4ac8b64673253",
+    "tools/p6_windows_sdk_gate.py": "e09bef6593ab69c6ee7ef80448550492446a3566",
+    "tools/sdk_gap_corpus.py": "dd93c6fbc6f328d90259501aec07d4a50abdb3fe",
+    "tests/test_p6_sdk_gap_gate.py": "09bd0905e94c983c8d9cef09b248a622e19ea639",
+    "tests/test_p6_sdk_gap_integration.py": "7b49aa7cc9e891d63c629c3c39207cbe0051a439",
+    "tests/test_p6_windows_sdk_gate.py": "e78858497386c4bfe65b403751b299e8881cd20f",
+    "tests/test_p6_windows_sdk_integration.py": "2228fa3c2d644bfe84811d46c7bc4d7464d68d84"
+  },
+  "historical_artifact_sha256": {
+    "docs/SDK_GAP_PARITY_46.json": "24ae84d6221e602f96d851a7a75874bc2ecd6caa89dcb8c481651dc4c797882c",
+    "docs/SDK_GAP_TRAJECTORY_46.json": "1b79278947c259fa010d4c5d33d9dafcb8fc30d412c45c0229501b70a1494a10"
+  },
+  "open_gates": [
+    "Windows-native deferred; node unavailable",
+    "Exact-head hosted CI and independent review pending",
+    "Original Windows compiler/ISA, seed and explicit SDK FRMR not independently qualified",
+    "No GPU, 4K/8K, alternate-timebase, sanitizer, performance or product/conformance qualification"
+  ],
+  "encoder_sha256": "5f04056e11c6b6f89130ba1db5d3d649eef06e5f10664ddb3c870ad0c8cb497e"
+}

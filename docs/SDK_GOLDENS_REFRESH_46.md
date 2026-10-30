@@ -3,6 +3,24 @@
 This is Linux x64 CPU replay of original SDK packets, not production or VC-5
 conformance qualification. No original packets or private paths are in Git.
 
+## Current-main continuation (2026-10-30)
+
+The existing draft forward-integrates main
+`04c348f848de1eb3a47d3b90fe191722c1ab559e` after #325/#329 landed.
+The merge retains the main implementation byte-for-byte; no duplicate ladder
+implementation hunk remains and no original tests were deleted. The tables
+below remain the historical measurement snapshot, not current-head results.
+Current complete suite evidence is recorded separately in
+`SDK_GOLDENS_CURRENT_46.json` once completed. Corpus pins and historical
+FAIL 78/120 artifacts remain unchanged; the original 40f ramp remains negative.
+
+This lane owns #322 gates/docs only. #331 independently verifies packet-table
+replay; it is complementary, not a second implementation to copy into this PR.
+#320 canonical integration is separately owned. Windows-native execution is
+deferred because its node is unavailable; original Windows A/B/C replay here
+is Linux CPU evidence only. Original Windows compiler/ISA, seed, explicit
+FRMR, native GPU, sanitizers and product/conformance admission remain unproved.
+
 ## Source and history
 
 - The first forward merge brings in main `9909bfccf220ec914a3c1ebf3e57fc9d95696f99`,
