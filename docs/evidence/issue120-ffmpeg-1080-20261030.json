@@ -1,0 +1,103 @@
+{
+  "arms": {
+    "bt709_full_neighbor": {
+      "distinct": 1,
+      "output_sha256": "fd3e7b7207d4510e083945aab5a4e1a59fa6a1c4dd63d9654c0dce781e476586",
+      "repeats": 5,
+      "source_rows_as_stored": {
+        "alpha_equal": true,
+        "rgb_exact": false,
+        "rgb_max_abs": 217,
+        "rgb_psnr_db": 10.735392884780602
+      },
+      "source_rows_reversed": {
+        "alpha_equal": true,
+        "rgb_exact": false,
+        "rgb_max_abs": 22,
+        "rgb_psnr_db": 29.86866085286325
+      }
+    },
+    "bt709_limited_neighbor": {
+      "distinct": 1,
+      "output_sha256": "584a661436701b446fb962a41db1830531693164d2a60ad539308e0761fdc67b",
+      "repeats": 5,
+      "source_rows_as_stored": {
+        "alpha_equal": true,
+        "rgb_exact": false,
+        "rgb_max_abs": 230,
+        "rgb_psnr_db": 10.133647709398982
+      },
+      "source_rows_reversed": {
+        "alpha_equal": true,
+        "rgb_exact": false,
+        "rgb_max_abs": 11,
+        "rgb_psnr_db": 41.072952918488085
+      }
+    },
+    "native_yuv422p10le": {
+      "distinct": 1,
+      "output_sha256": "70e62e689dffb9f33ea5ed1ebf17d651b12b1d583a0505aed9d40549f2b3d4ca",
+      "repeats": 5
+    }
+  },
+  "controls": {
+    "quant_mutation": "PIXELS_DIFFER",
+    "zero_initial_tag": "ACCEPTED"
+  },
+  "oracle_qualified": false,
+  "plan": {
+    "arms": [
+      "native_yuv422p10le",
+      "bt709_limited_neighbor",
+      "bt709_full_neighbor"
+    ],
+    "avi_cadence": "adapter synthetic 25 fps; NOT original playback measurement",
+    "controls": {
+      "quant_mutation": "reject or emit different valid pixels",
+      "zero_initial_tag": "require nonzero decoder exit; retain acceptance as failure"
+    },
+    "harness_sha256": "feb7e4d6a45fcbcdea35838c72abd8d51ad76f2b0f97c8c5e33a4f2caf779f14",
+    "height": 1080,
+    "mutation": {
+      "original_quant": 16,
+      "tag": 53,
+      "value_byte_offset": 65671,
+      "xor": 1
+    },
+    "orientation_hypotheses": [
+      "source_rows_as_stored",
+      "source_rows_reversed"
+    ],
+    "packet_sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52",
+    "qualification_policy": "observation only; oracle remains unqualified",
+    "repeats_per_arm": 5,
+    "schema": 1,
+    "source_sha256": "45c166c3d6a3710d620ff5d738980224edf53cf9ce1bceb87267e474294afff1",
+    "tools": {
+      "ffmpeg": {
+        "sha256": "daeea959fd6a400eec29bf1ede560962e92546ec31fe5f60ccdc076a4c3db3fa",
+        "version": "n9.0.1-11-ge47273f4d9-20260831"
+      },
+      "ffprobe": {
+        "sha256": "fe3a94d2b2899191234870d95e85fd2bcc9c0cee830e7d8d78fcea8a2375155f",
+        "version": "n9.0.1-11-ge47273f4d9-20260831"
+      }
+    },
+    "width": 1920
+  },
+  "quant_mutation_evidence": {
+    "decoder_exit": 0,
+    "mutated_packet_sha256": "0d75706b4cfe4b1f40abab982cb9ea1ca40581a9b6ea479e886de5789ab74777",
+    "output_sha256": "58bc157f2cc15f985bc6cd108f2bf02962834524edbb8481ccc3d87a3f62c7b6"
+  },
+  "release_gate": "BLOCKED",
+  "state": "CONTROL_NOT_DISCRIMINATED",
+  "stream": {
+    "codec_name": "cfhd",
+    "height": 1080,
+    "pix_fmt": "yuv422p10le",
+    "width": 1920
+  },
+  "zero_initial_tag_decoder_exit": 0,
+  "zero_initial_tag_output_equal_original": true
+}
