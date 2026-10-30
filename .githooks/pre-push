@@ -1,0 +1,28 @@
+#!/bin/sh
+# Activate per worktree: git config --worktree core.hooksPath .githooks
+# Scan every outgoing commit. Do not exclude other remotes: they can be private.
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+  PYTHON=python3
+elif python -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+  PYTHON=python
+elif py -3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+  PYTHON=py
+else
+  echo "Privacy guard: no working Python 3.8+ interpreter; push blocked." >&2
+  exit 2
+fi
+remote_name=${1:-}
+# A URL-only push cannot be safely compared against an unrelated named remote.
+# Reject it rather than silently miss commits present on a private remote.
+if [ -z "$remote_name" ] || ! git remote | grep -Fqx -- "$remote_name"; then
+  echo "Privacy guard: push via a configured remote name, not a raw URL." >&2
+  exit 2
+fi
+# Python consumes the complete pre-push stream, including deletions and tags.
+if [ "$PYTHON" = py ]; then
+  py -3 ci/privacy_guard.py --push-remote "$remote_name"
+else
+  "$PYTHON" ci/privacy_guard.py --push-remote "$remote_name"
+fi

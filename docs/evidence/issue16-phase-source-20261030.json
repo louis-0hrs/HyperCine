@@ -1,0 +1,229 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "date": "2026-10-30",
+  "first_mainline_merge_preview": {
+    "branches_changed": false,
+    "conflicts": [
+      "benchmarks/CMakeLists.txt",
+      "benchmarks/benchmark_codec.cpp",
+      "docs/UPSTREAM.md",
+      "src/CMakeLists.txt",
+      "tests/CMakeLists.txt"
+    ],
+    "exit": 1,
+    "main": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+    "phase": "decode-phase3af"
+  },
+  "parent_phase": "b11b3da4c6be4cc7005cf634162e3bd1b662f387",
+  "phase_chain": [
+    {
+      "branch": "decode-phase3af",
+      "head": "9eb9e3d5e39aceb4cf8b17083a83e431272a1aaf",
+      "main_only_commits": 181,
+      "phase_only_commits": 34,
+      "previous_phase_is_ancestor": false
+    },
+    {
+      "branch": "decode-phase3b0",
+      "head": "7296f6f3b60ae4d9b902415f1a531f20f4ba70ad",
+      "main_only_commits": 181,
+      "phase_only_commits": 37,
+      "previous_phase_is_ancestor": true
+    },
+    {
+      "branch": "decode-phase3b1",
+      "head": "f1d0fe4258ad70113a9de57e85ab9834d29312cc",
+      "main_only_commits": 181,
+      "phase_only_commits": 40,
+      "previous_phase_is_ancestor": true
+    },
+    {
+      "branch": "decode-phase3b2r",
+      "head": "f433a7491b12b7e053fec0bab48b4ba784e7d3d9",
+      "main_only_commits": 181,
+      "phase_only_commits": 44,
+      "previous_phase_is_ancestor": true
+    },
+    {
+      "branch": "decode-phase3b2a",
+      "head": "b11b3da4c6be4cc7005cf634162e3bd1b662f387",
+      "main_only_commits": 181,
+      "phase_only_commits": 57,
+      "previous_phase_is_ancestor": true
+    }
+  ],
+  "registration": {
+    "additions": [
+      "test_diagnostic_geometry_guard",
+      "test_reference_oracle",
+      "test_reference_release_inventory"
+    ],
+    "candidate_enabled": 47,
+    "old_declarations": 46,
+    "old_enabled": 44,
+    "omitted_by_unchanged_configuration": {
+      "test_decode_phase2fb": "BENCHMARKS OFF; benchmark-only research test",
+      "test_decoder_cpu": "CUDA ON; CPU-only test"
+    },
+    "phase2_skip_return_code": 77,
+    "tests": [
+      "test_avi_sample",
+      "test_codec_roundtrip",
+      "test_color_conversion_cuda",
+      "test_cuda_pyramid",
+      "test_cuda_wavelet",
+      "test_decode_entropy_cuda",
+      "test_decode_entropy_phase2c",
+      "test_decode_gpu_index",
+      "test_decode_inverse_wavelet_cuda",
+      "test_decode_phase0",
+      "test_decode_phase1",
+      "test_decode_phase2a",
+      "test_decode_phase2b",
+      "test_decode_phase2c",
+      "test_decode_phase2d",
+      "test_decode_phase2e",
+      "test_decode_phase2fa",
+      "test_decode_phase2fc",
+      "test_decode_phase2fc_audit",
+      "test_decode_phase3a_rc",
+      "test_decode_phase3ae",
+      "test_decode_phase3b0",
+      "test_decode_phase3b1",
+      "test_decode_phase3b1_acceptance",
+      "test_decode_phase3b2a_api",
+      "test_decode_phase3b2a_failclosed",
+      "test_decode_phase3b2a_mixed_stress",
+      "test_decode_phase3b2a_parser",
+      "test_decode_phase3b2a_reconstruction",
+      "test_decode_phase3b2a_temporal",
+      "test_decode_phase3b2a_upstream_temporal",
+      "test_decode_phase3b2r_math",
+      "test_decode_phase3b2r_reference",
+      "test_decoder",
+      "test_diagnostic_geometry_guard",
+      "test_entropy_capacity",
+      "test_entropy_parallel",
+      "test_hybrid_roundtrip",
+      "test_phase2a",
+      "test_phase2b",
+      "test_phase2c",
+      "test_phase2d",
+      "test_phase3a",
+      "test_reference_oracle",
+      "test_reference_release_inventory",
+      "test_transform_wavelet",
+      "test_yuy2_stability"
+    ]
+  },
+  "schema": 1,
+  "selected_files": {
+    ".githooks/pre-commit": {
+      "candidate_staged_blob": "5d736cbb0e9ab41749e773fa8814a1f64921fcf1",
+      "source_blob": "5d736cbb0e9ab41749e773fa8814a1f64921fcf1",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "6e040cb7e0d785e7b7f7e05f07d6b59d6d32a1df4ec003d6780b04d5e47de1ce"
+    },
+    ".githooks/pre-push": {
+      "candidate_staged_blob": "af7253fe4ac76f248b6321cdb41c53fd8eabd1dd",
+      "source_blob": "af7253fe4ac76f248b6321cdb41c53fd8eabd1dd",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "24b9aed5be990c5e36866c3a2043f078cd14d2a1d114dc181436f4e08bf9ae09"
+    },
+    "ci/privacy_guard.py": {
+      "candidate_staged_blob": "c9615cfbfd45ff8c548607afbe00f7cda4b77607",
+      "source_blob": "c9615cfbfd45ff8c548607afbe00f7cda4b77607",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "89bb19c25dbad057cdaa153e8abd38b68c8ae0df925c3a8f0a3469aec52bd03d"
+    },
+    "tests/diagnostic_decode_guard.h": {
+      "candidate_staged_blob": "cc6a5140adde4e91d63a318b368f8f4d1438db60",
+      "source_blob": "cc6a5140adde4e91d63a318b368f8f4d1438db60",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "d6d5a972800b22b0da5efea114b96673c3fa4c3b6315e8402431dfe1987c4ca9"
+    },
+    "tests/reference_oracle.h": {
+      "candidate_staged_blob": "438cc6b9371e0217b502e813381856a7fe784559",
+      "source_blob": "438cc6b9371e0217b502e813381856a7fe784559",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "5ba3db904e6e88a23aac8749dc368940e0c728ac7c1e66cf8c9d5d7d7a61feed"
+    },
+    "tests/smoke_phase2a_guards.py": {
+      "candidate_staged_blob": "93a837908904b5d71d4f132c8f1a7da73ce7a9a4",
+      "source_blob": "93a837908904b5d71d4f132c8f1a7da73ce7a9a4",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "8afde3d5c4ae0ea926c539defc0763110617370b2ba79cd7700164da36cf72a4"
+    },
+    "tests/test_phase2a.cpp": {
+      "candidate_staged_blob": "1bad0cfb2d8ac07d34a8244c586401b36f8e263d",
+      "source_blob": "1bad0cfb2d8ac07d34a8244c586401b36f8e263d",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "dfe956a52a0032cb6a9b7af38bc35371991c62d4d1a5909498e659cc50b244d9"
+    },
+    "tests/test_phase2b.cpp": {
+      "candidate_staged_blob": "b3884425c80731e422c2d8f1a28a6ee2da9c4fe3",
+      "source_blob": "b3884425c80731e422c2d8f1a28a6ee2da9c4fe3",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "3287b6859868c557c2151bc074f5fa43a79118da584680d457341b6e96525c80"
+    },
+    "tests/test_phase2c.cpp": {
+      "candidate_staged_blob": "d4437949a22abc241b5a41a8d851f7e5805ebe7c",
+      "source_blob": "d4437949a22abc241b5a41a8d851f7e5805ebe7c",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "61a16c5800880a79aba908d1d5eb3f389b17cd10e97823e2b0fd9d47c05c927c"
+    },
+    "tests/test_phase2d.cpp": {
+      "candidate_staged_blob": "06eec59d2a3c0117cbc2a3faf752bd2b4c6b167f",
+      "source_blob": "06eec59d2a3c0117cbc2a3faf752bd2b4c6b167f",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "881c33ce5c2b9555fd948670e744377974d711d8ba07be5f1256ded7a5789202"
+    },
+    "tests/test_reference_oracle.cpp": {
+      "candidate_staged_blob": "d267fe2a7b264a7c21d2730e73731f7d7582a931",
+      "source_blob": "d267fe2a7b264a7c21d2730e73731f7d7582a931",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "12cbff7aeebc5752461827c8bd013c8a6eaf8177c8f598f03946d900ef33deef"
+    },
+    "tests/test_reference_release.py": {
+      "candidate_staged_blob": "bcfb36e7783620032927bff636c7f46b29ecaa32",
+      "source_blob": "bcfb36e7783620032927bff636c7f46b29ecaa32",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "e4621e481dc90dd454d30d56a098ba61e3e76a90e4aeb5e6bc5b92318c2ffb95"
+    },
+    "tools/check_reference_release.py": {
+      "candidate_staged_blob": "980f290b3203efa64d9b2a8dd065f83143873d17",
+      "source_blob": "980f290b3203efa64d9b2a8dd065f83143873d17",
+      "source_ref": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+      "source_sha256": "0e15c024a8be6dc105b9bfd8dfee22dfb9a9ad7cddf9b8fd65ac0f0c16bfefa2"
+    }
+  },
+  "selected_main_source": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+  "sole_source_change": {
+    "candidate_blob": "dde34ee0bb8773fe28979b173b20b37db5af4638",
+    "function": "VerifyPhase2DMetadataSafety",
+    "parent_blob": "5dc905e3e3f3b28aebae032b6d6b71caf54a4cb2",
+    "path": "src/core/phase2d_encoder.cpp"
+  },
+  "unchanged_scopes": {
+    "include": {
+      "parent_git_object": "9cefc637d7af6486668889986e934773a2258cbc",
+      "unchanged": true
+    },
+    "src/cpu": {
+      "parent_git_object": "c0cd0e32e3b6359e8972c51c67688c31eda3edaf",
+      "unchanged": true
+    },
+    "src/cuda": {
+      "parent_git_object": "b60beba80c94307d5cfed65d82ac6cff58f33ee9",
+      "unchanged": true
+    },
+    "tests/test_decode_phase3b2a_failclosed.cpp": {
+      "parent_git_object": "2ec81a715a3d224261654a21ee410cb57b4ca96e",
+      "unchanged": true
+    },
+    "upstream": {
+      "parent_git_object": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+      "unchanged": true
+    }
+  }
+}
