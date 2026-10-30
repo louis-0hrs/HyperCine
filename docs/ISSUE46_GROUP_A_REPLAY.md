@@ -18,6 +18,23 @@ contract `tests/test_issue46_group_a_verifier.py` is registered as
 hosts without the private corpus. This contract tests rejection logic; the
 private 480-packet comparison remains a separate opt-in acceptance gate.
 
+## Continuation contract clarification
+
+The transfer index is pinned by SHA-256
+`62c6f4c9297d760f1f14bde73ad15f62ca254371fa8b05f55c7ddf68e1d2e0bc`.
+The original manifest records `previous_sdk_sample_bytes: null` for frame zero
+in each profile, meaning no previous sample, **not** an observed numeric zero.
+Only this first-frame absence (or explicit integer zero) is accepted; the probe
+receives numeric zero, and subsequent frames require the exact preceding
+positive packet size. Missing fields, booleans and noninteger sizes fail.
+Optional lowpass subband 0 entries may omit quant/scale tags; all 27 highpass
+pairs remain mandatory, and duplicate or unexpected coordinates fail.
+
+This packet-table gate complements #322 byte/direct-state gates; it does not
+replace either gate or promote unobservable SDK state to a measurement. Native
+Windows replay remains deferred while that execution node is unavailable;
+reading original Windows corpus artifacts on Linux is Linux CPU evidence.
+
 ## What was compared
 
 Corpus: the four Windows original-SDK sequences for Low, Medium, High and

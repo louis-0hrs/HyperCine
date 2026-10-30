@@ -34,6 +34,7 @@ from pathlib import Path
 
 PROFILES = {"low": 1, "medium": 2, "high": 3, "filmscan1": 4}
 FRAMES_PER_SEQUENCE = 120
+TRANSFER_SHA256 = "62c6f4c9297d760f1f14bde73ad15f62ca254371fa8b05f55c7ddf68e1d2e0bc"
 EXPECTED_RECORDS = 606  # 4x120 packets + 120 inputs + manifest + 5 provenance files
 
 
@@ -112,13 +113,16 @@ def validate_frames(frames, profile):
         fail(f"{profile}: {len(frames)} frames, expected {FRAMES_PER_SEQUENCE}")
     previous_size = 0
     for expected_index, frame in enumerate(frames):
-        if frame.get("frame_index") != expected_index:
+        if type(frame.get("frame_index")) is not int or frame["frame_index"] != expected_index:
             fail(f"{profile}: frame indices must be contiguous 0..119; "
                  f"at position {expected_index} got {frame.get('frame_index')!r}")
         size = frame.get("sdk_byte_length")
         if type(size) is not int or size <= 0:
             fail(f"{profile}/{expected_index}: invalid SDK packet byte length")
-        if frame.get("previous_sdk_sample_bytes") != previous_size:
+        # Original capture uses null only for frame zero (no prior packet).
+        previous = frame.get("previous_sdk_sample_bytes")
+        initial_null = expected_index == 0 and "previous_sdk_sample_bytes" in frame and previous is None
+        if not initial_null and (type(previous) is not int or previous != previous_size):
             fail(f"{profile}/{expected_index}: previous SDK packet byte chain broken "
                  f"(expected {previous_size}, got "
                  f"{frame.get('previous_sdk_sample_bytes')!r})")
@@ -137,7 +141,11 @@ def validate_band_table(frame, profile):
     for entry in entries:
         if not isinstance(entry, dict):
             fail(f"{profile}/{index}: malformed packet band entry")
-        key = (entry.get("channel"), entry.get("subband"))
+        channel, subband = entry.get("channel"), entry.get("subband")
+        if type(channel) is not int or type(subband) is not int or not (
+                0 <= channel < 3 and 0 <= subband < 10):
+            fail(f"{profile}/{index}: unexpected packet subband")
+        key = (channel, subband)
         if key in seen:
             fail(f"{profile}/{index}: duplicate packet subband {key}")
         seen.add(key)
@@ -212,6 +220,8 @@ def main():
         if not path.is_file():
             fail(f"{label} not found: {path}")
 
+    if digest(transfer) != TRANSFER_SHA256:
+        fail("transfer index provenance SHA-256 mismatch")
     records = {}
     for line_no, line in enumerate(transfer.read_text(encoding="ascii").splitlines(), 1):
         parts = line.split("\t")
@@ -237,12 +247,15 @@ def main():
             print(f"verified corpus hashes {index}/{len(records)}", flush=True)
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    sessions = {session["profile"]: session for session in manifest["sessions"]}
-    if set(sessions) != set(PROFILES):
+    session_list = manifest["sessions"]
+    sessions = {session["profile"]: session for session in session_list}
+    if len(session_list) != len(PROFILES) or set(sessions) != set(PROFILES):
         fail(f"manifest sessions {sorted(sessions)} != expected {sorted(PROFILES)}")
 
     profile_geometry = manifest["profile"]
     width, height = profile_geometry["width"], profile_geometry["height"]
+    if type(width) is not int or type(height) is not int or (width, height) != (1920, 1080):
+        fail("unexpected Group A geometry")
 
     report = {"schema": 1, "corpus_files": len(records), "manifest_sha256": digest(manifest_path),
               "geometry": f"{width}x{height}", "profiles": {}, "totals": {}}

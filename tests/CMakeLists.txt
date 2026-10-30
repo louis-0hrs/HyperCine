@@ -17,6 +17,12 @@ add_executable(test_reference_oracle test_reference_oracle.cpp)
 add_test(NAME test_reference_oracle COMMAND test_reference_oracle)
 set_tests_properties(test_reference_oracle PROPERTIES LABELS "reference-oracle")
 
+# Issue #46. Also registered in the quality-only and standalone blocks, which
+# return before this file is included.
+add_executable(test_overbitrate_hysteresis test_overbitrate_hysteresis.cpp)
+target_link_libraries(test_overbitrate_hysteresis PRIVATE hypercine_quality_state)
+add_test(NAME overbitrate_hysteresis_sdk_sequence COMMAND test_overbitrate_hysteresis)
+
 # Optional validation tooling only; the codec has no Python dependency.
 find_package(Python3 QUIET COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)

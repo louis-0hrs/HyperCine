@@ -22,6 +22,10 @@ REQUIRED = {
     'rgb444_packet_probe',
     # #37: the measured p12 band table must never disappear from the gate.
     'rgb444_p12_quality_table', 'rgb444_p12_quality_pin',
+    # #37: neither may the p12 transformation stage. It is the level the family
+    # was missing; losing its registration would silently return the family to a
+    # p10-shaped transform with a p12 table on top.
+    'rgb444_p12_transform_contract',
     'reference_decode_contract',
     'quality_state_unit', 'standalone_gate_guardrails',
     'optimized_standalone_acceptance',
@@ -46,6 +50,9 @@ REQUIRED = {
     'test_rca160_ledger_audit',
     'qualification_report_contract', 'cuda_output_dir_platform_contract',
     'windows_reference_process_contract',
+    # Toolchain contract: the CUDA host-compiler guard must stay registered, or
+    # the split-toolchain refusal can be dropped without any gate noticing.
+    'test_cuda_host_compiler_contract',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
     'windows_reference_sdk_coefficients', 'filmscan3_autonomous_manifest',
