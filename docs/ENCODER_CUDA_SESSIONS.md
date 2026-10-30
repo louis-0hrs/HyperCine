@@ -64,15 +64,47 @@ CUDA enabled. The build must use one consistent host compiler: on this host the
 default GCC 14.2 front end combined with the toolkit's GCC 13 library path fails
 to link `__cxa_call_terminate`, independently of any repository change.
 
-    cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+That mismatch is now refused at configure time instead of surfacing as a link
+error after the whole tree compiled. `cmake/cuda_host_compiler.cmake` compares
+`CMAKE_CXX_COMPILER` with the host compiler nvcc reports, and a newer C++ front
+end than nvcc's host compiler is a `FATAL_ERROR` naming the consistent configure
+line. The rule is narrow by design: it judges only the GNU/GNU pair and only the
+measured direction (a newer nvcc host compiler is rejected by nvcc itself), and
+it stays silent when a version is unknown rather than guessing. The reason the
+mismatch cannot be fixed here is the link order — CMake places
+`CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES` ahead of the C++ driver's library search
+path, so `-lstdc++` resolves to the host compiler's older release. GCC 14 emits
+`__cxa_call_terminate` (CXXABI_1.3.15); GCC 13's libstdc++ does not export it.
+`ci/test_cuda_host_compiler.py` proves the refusal fires in the real project and
+tests the boundaries that must *not* refuse.
+
+One measured caveat about the remedy: on CMake 3.31.6 with nvcc 12.4.131,
+`-DCMAKE_CUDA_HOST_COMPILER` is accepted and cached but never forwarded to nvcc —
+even a nonexistent path in it configures successfully, and the CUDA
+identification still reports the toolkit's default host compiler. Name the host
+compiler with `CUDAHOSTCXX` instead, which CMake reads while enabling the CUDA
+language. The guard prints that form, and a contract case asserts it does not
+fall back to the ineffective flag.
+
+    CUDAHOSTCXX=g++-13 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_C_COMPILER=gcc-13 \
-      -DCMAKE_CUDA_HOST_COMPILER=g++-13 \
       -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF \
       -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_ENABLE_CUDA=ON \
       -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON -DCMAKE_CUDA_ARCHITECTURES=80
     cmake --build build --parallel
     ctest --test-dir build -C Release --output-on-failure
-    python3 ci/run_standalone.py --build-dir build --system Linux --machine x86_64
+
+The above **CUDA-on** tree runs the native CUDA-required CTests. Do **not** run
+`ci/run_standalone.py` against this tree: that strict inventory intentionally
+rejects CUDA-enabled builds. Run its SDK-free CPU-only inventory in a separate
+build directory instead:
+
+    cmake -S . -B build-cpu-standalone -G Ninja -DCMAKE_BUILD_TYPE=Release \
+      -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF \
+      -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_ENABLE_CUDA=OFF \
+      -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON
+    cmake --build build-cpu-standalone --parallel
+    python3 ci/run_standalone.py --build-dir build-cpu-standalone --system Linux --machine x86_64
 
 `ci/run_standalone.py` requires the CPU-only standalone configuration and
 rejects a CUDA-on tree, so the CUDA session gate is listed for CUDA builds while

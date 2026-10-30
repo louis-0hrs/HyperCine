@@ -31,6 +31,7 @@ REQUIRED = {
     'optimized_standalone_acceptance',
     'filmscan3_backend_selection', 'entropy_bitexact',
     'encoder_backend_selection_contract', 'encoder_backend_session_packets',
+    'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
@@ -50,6 +51,9 @@ REQUIRED = {
     'test_rca160_ledger_audit',
     'qualification_report_contract', 'cuda_output_dir_platform_contract',
     'windows_reference_process_contract',
+    # Toolchain contract: the CUDA host-compiler guard must stay registered, or
+    # the split-toolchain refusal can be dropped without any gate noticing.
+    'test_cuda_host_compiler_contract',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
     'windows_reference_sdk_coefficients', 'filmscan3_autonomous_manifest',
@@ -81,7 +85,8 @@ def required_tests(cache):
     if cmake_enabled(cache.get('HYPERCINE_ENABLE_METAL', '')):
         required |= {'filmscan3_metal_required', 'filmscan3_metal_4k_ffmpeg_gate',
                      'filmscan3_metal_4k_encoder', 'filmscan3_metal_multisession',
-                     'filmscan3_metal_geometry_matrix', 'encoder_metal_session_packets'}
+                     'filmscan3_metal_geometry_matrix', 'encoder_metal_session_packets',
+                     'encoder_metal_profile_matrix'}
         for gate in ('autonomous_manifest', 'sequence_manifest', 'external_decode',
                      'actual_tier_a', 'actual_sequence'):
             if 'filmscan3_' + gate in required:

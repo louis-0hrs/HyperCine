@@ -87,8 +87,8 @@ CPU-only, no GPU required:
 
 - all six profiles on CPU scalar: admitted, encoded, and the emitted packet
   carries its own tag `-80` quality enum (1..6);
-- writer tables equal `CalculateQualityState` output for that profile, slot by
-  slot, for all 36 entries;
+- writer quant tables equal frozen literal per-profile vectors for all 36
+  entries, not the same calculator used by the writer; starting limiter is pinned;
 - Low and FilmScan3 produce different table sets, so the six profiles cannot
   collapse into one;
 - Metal and CUDA refuse the five non-FilmScan3 profiles with

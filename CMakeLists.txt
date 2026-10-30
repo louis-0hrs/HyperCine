@@ -64,7 +64,21 @@ if(HYPERCINE_ENABLE_CUDA)
         enable_language(CUDA)
         set(CMAKE_CUDA_STANDARD 17)
         set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-        message(STATUS "CUDA enabled. Compiler: ${CMAKE_CUDA_COMPILER} (Version: ${CMAKE_CUDA_COMPILER_VERSION}, Architectures: ${CMAKE_CUDA_ARCHITECTURES})")
+        # Refuse a split toolchain now, not as an 'undefined reference to
+        # __cxa_call_terminate' during the link of the whole tree. The check runs
+        # after language enablement because nvcc reports its host compiler only
+        # then, and before any target is generated.
+        include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/cuda_host_compiler.cmake")
+        if(CMAKE_CUDA_HOST_COMPILER)
+            set(hypercine_cuda_host_compiler "${CMAKE_CUDA_HOST_COMPILER}")
+        else()
+            set(hypercine_cuda_host_compiler "${CMAKE_CUDA_HOST_LINK_LAUNCHER}")
+        endif()
+        hypercine_require_consistent_cuda_host_compiler(
+            "${CMAKE_CXX_COMPILER_ID}" "${CMAKE_CXX_COMPILER_VERSION}"
+            "${CMAKE_CUDA_HOST_COMPILER_ID}" "${CMAKE_CUDA_HOST_COMPILER_VERSION}"
+            "${hypercine_cuda_host_compiler}")
+        message(STATUS "CUDA enabled. Compiler: ${CMAKE_CUDA_COMPILER} (Version: ${CMAKE_CUDA_COMPILER_VERSION}, Architectures: ${CMAKE_CUDA_ARCHITECTURES}, host ${CMAKE_CUDA_HOST_COMPILER_ID} ${CMAKE_CUDA_HOST_COMPILER_VERSION})")
     else()
         message(FATAL_ERROR "HYPERCINE_ENABLE_CUDA is ON, but no CUDA compiler was detected on this system.")
     endif()
@@ -79,6 +93,9 @@ function(hypercine_register_sdk_free_contracts)
         return()
     endif()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME windows_sdk_corpus_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_windows_sdk_corpus.py")
+    set_tests_properties(windows_sdk_corpus_contract PROPERTIES LABELS "validation;reference-oracle")
     add_test(NAME qualification_report_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_summarize_qualification.py")
     set_tests_properties(qualification_report_contract PROPERTIES LABELS "validation;reference-oracle")
@@ -109,6 +126,15 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME test_rca160_ledger_audit
         COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_rca160_ledger_audit.py")
     set_tests_properties(test_rca160_ledger_audit PROPERTIES LABELS "validation;recorded-ledger")
+    # CUDA host-compiler consistency. A C++ front end newer than nvcc's host
+    # compiler cannot link its own objects, because nvcc puts the host compiler's
+    # libstdc++ first (`undefined reference to __cxa_call_terminate`). The guard in
+    # cmake/cuda_host_compiler.cmake refuses that configuration; this contract
+    # proves the refusal happens at configure time and only for that pair.
+    add_test(NAME test_cuda_host_compiler_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/../ci/test_cuda_host_compiler.py")
+    set_tests_properties(test_cuda_host_compiler_contract PROPERTIES
+        LABELS "validation;toolchain" TIMEOUT 900)
 endfunction()
 
 # Private synthetic scheduler: no SDK, codec kernels or GPU linkage.
@@ -179,6 +205,9 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
     add_executable(test_quality_state tests/test_quality_state.cpp)
     target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
     add_test(NAME quality_state_unit COMMAND test_quality_state)
+    add_executable(test_overbitrate_hysteresis tests/test_overbitrate_hysteresis.cpp)
+    target_link_libraries(test_overbitrate_hysteresis PRIVATE hypercine_quality_state)
+    add_test(NAME overbitrate_hysteresis_sdk_sequence COMMAND test_overbitrate_hysteresis)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     add_test(NAME quality_state_probe_arguments COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_quality_state_probe.py"
@@ -417,11 +446,27 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME rgb444_p12_transform_contract COMMAND test_rgb444_transform)
         set_tests_properties(rgb444_p12_transform_contract PROPERTIES
             LABELS "cpu;rgb444;transform" TIMEOUT 300)
+        # Issue #37: the prescale mapping itself, audited against the frozen source
+        # and against the table the frozen encoder actually emits. It reads the
+        # repo's own PrescaleSequenceForPrecision so a silent edit there fails here
+        # instead of redefining the expectation it is checked against.
+        if(Python3_Interpreter_FOUND)
+            add_test(NAME rgb444_p12_prescale_audit
+                COMMAND "${Python3_EXECUTABLE}" -B
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/rgb444_p12_prescale_audit.py")
+            set_tests_properties(rgb444_p12_prescale_audit PROPERTIES
+                LABELS "rgb444;prescale" TIMEOUT 120)
+        endif()
         # The Quality-only mode returns before this block; require the same
         # shared arithmetic unit suite in normal SDK-free Standalone builds.
         add_executable(test_quality_state tests/test_quality_state.cpp)
         target_link_libraries(test_quality_state PRIVATE hypercine_quality_state)
         add_test(NAME quality_state_unit COMMAND test_quality_state)
+        # Issue #46: SDK overbitrate window 0,2,3,2,1,1,0, including two
+        # consecutive holds inside the 80..100 % band.
+        add_executable(test_overbitrate_hysteresis tests/test_overbitrate_hysteresis.cpp)
+        target_link_libraries(test_overbitrate_hysteresis PRIVATE hypercine_quality_state)
+        add_test(NAME overbitrate_hysteresis_sdk_sequence COMMAND test_overbitrate_hysteresis)
         # Issue #37: the measured RGB444 p12 band table, pinned from 112 original
         # packets, plus proof that the p10 YUV calculator cannot produce it.
         add_executable(test_rgb444_p12_quality tests/test_rgb444_quality.cpp)
@@ -462,6 +507,16 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME encoder_cuda_session_packets COMMAND test_encoder_cuda_session)
             set_tests_properties(encoder_cuda_session_packets PROPERTIES
                 LABELS "cuda;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 1800)
+            # Measurement only: canonical profile refusal remains in force.
+            add_executable(test_encoder_cuda_profile_matrix tests/test_encoder_cuda_profile_matrix.cpp)
+            target_include_directories(test_encoder_cuda_profile_matrix PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda")
+            target_link_libraries(test_encoder_cuda_profile_matrix PRIVATE
+                hypercine_standalone CUDA::cudart Threads::Threads)
+            add_test(NAME encoder_cuda_profile_matrix COMMAND test_encoder_cuda_profile_matrix)
+            set_tests_properties(encoder_cuda_profile_matrix PROPERTIES
+                LABELS "cuda;gpu-required;encoder;profile-measurement" RUN_SERIAL TRUE TIMEOUT 1800)
         endif()
         if(HYPERCINE_ENABLE_METAL)
             add_executable(test_encoder_metal_session tests/test_encoder_metal_session.cpp)
@@ -469,6 +524,12 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME encoder_metal_session_packets COMMAND test_encoder_metal_session)
             set_tests_properties(encoder_metal_session_packets PROPERTIES
                 LABELS "metal;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 600)
+            # Native Metal only; no non-Darwin skip stub counted as evidence.
+            add_executable(test_encoder_metal_profile_matrix tests/test_encoder_metal_profile_matrix.cpp)
+            target_link_libraries(test_encoder_metal_profile_matrix PRIVATE hypercine_standalone Threads::Threads)
+            add_test(NAME encoder_metal_profile_matrix COMMAND test_encoder_metal_profile_matrix)
+            set_tests_properties(encoder_metal_profile_matrix PROPERTIES
+                LABELS "metal;gpu-required;encoder;profile-measurement" RUN_SERIAL TRUE TIMEOUT 1800)
             add_executable(test_metal_filmscan3 tests/test_metal_filmscan3.cpp)
             target_link_libraries(test_metal_filmscan3 PRIVATE hypercine_standalone)
             add_test(NAME filmscan3_metal_required COMMAND test_metal_filmscan3)

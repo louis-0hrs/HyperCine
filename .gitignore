@@ -91,6 +91,10 @@ Makefile
 !CMakeLists.txt
 !ucm.cmake
 !libcineformsdk.pc.cmake
+# Hand-written CMake modules live here. Without this exception the generated-
+# artifact rule above silently drops a new module from every commit, and a
+# target that includes it fails on a clean checkout while passing locally.
+!cmake/*.cmake
 
 
 # Source fixture verifier (not a generated CMake artifact)

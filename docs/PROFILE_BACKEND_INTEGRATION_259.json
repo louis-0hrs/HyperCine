@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "main": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+  "base": "dbe715a5682f3b934290088a3ca5a887fc4d7957",
+  "scope": "Linux native A2 CUDA measurements with canonical typed GPU profile refusal; final integrated Metal validation pending",
+  "suites": {
+    "native_cuda_standalone": {
+      "total": 130,
+      "passed": 130,
+      "failed": 0,
+      "skipped": []
+    },
+    "regular_sdk": {
+      "total": 59,
+      "passed": 58,
+      "failed": 0,
+      "skipped": [
+        "ffmpeg_oracle_qualification"
+      ]
+    }
+  },
+  "tested_source_blobs": {
+    "CMakeLists.txt": "ea8d987ec71a9b3a847400f1f0d9a7a65cb1a682",
+    "src/core/encoder_capability.cpp": "7e5510ffbed90b2db6e9a689a4b66efa24f8719d",
+    "src/core/encoder_backend_selection.cpp": "05de158dba89a273acb8a0f832e483199aefe0bf",
+    "src/core/encoder_session_config.h": "05a77e6f4c50b627021bc1904e449e6b2f8671b3",
+    "src/core/quality_state.cpp": "0d9eab72621072c52667874292db636b75844cdc",
+    "src/core/filmscan3_encoder.cpp": "30985b5ccecc997142a95192bf903637695fe957",
+    "tests/test_encoder_profile_sessions.cpp": "306e957fd441599c63efdb481a5333f8726ae528",
+    "tests/test_encoder_cuda_profile_matrix.cpp": "2f0067075eb3c9d12c69950e281a6c5b02afbd1f",
+    "tests/test_encoder_metal_profile_matrix.cpp": "2e70d89529b29ef1b091cccfa5ef6630a261ec1b",
+    "tests/test_overbitrate_hysteresis.cpp": "48015887ed95b9a97ec4f0142c31d4fbadc89842",
+    "ci/run_standalone.py": "7a4254323fd82feabe59918628f7c1c9afb7eae0",
+    "ci/test_standalone_gate.py": "c83e207e220b0cbf90dad9f1d6b896e20118b96a"
+  },
+  "corpus_evidence": {
+    "pr322_head": "31b9c8f0502049f9ff23a75a1f05b9b4eaf99fe3",
+    "pr331_head": "d34eefd025cb6f423c672b540e64a8066aa5103e",
+    "scope": "independent current-main CPU original SDK gates; not original SDK vs GPU qualification"
+  },
+  "boundaries": [
+    "CUDA/Metal session admission remains FilmScan3-only",
+    "measurement-only internal writer seams do not grant session permission",
+    "native Windows deferred",
+    "earlier interrupted CTest attempts not counted",
+    "no product or SMPTE/VC-5 claim"
+  ]
+}
