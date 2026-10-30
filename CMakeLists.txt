@@ -165,6 +165,8 @@ if(HYPERCINE_BUILD_TESTS)
     add_subdirectory(tests/geometry_extreme)
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
+        add_test(NAME independent_ffmpeg_1080_contract COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_observe_ffmpeg_1080.py")
         # Strict test-only decoder evidence classifier, no original SDK needed.
         add_test(NAME reference_decode_contract COMMAND "${Python3_EXECUTABLE}" -B
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_decode/test_contract.py")
