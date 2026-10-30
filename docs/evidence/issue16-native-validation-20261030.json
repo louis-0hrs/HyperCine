@@ -1,0 +1,421 @@
+{
+  "cmake": "3.31.6",
+  "compiler": "MSVC 19.44.35229.0",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "cpu_suite": {
+    "configuration": {
+      "BENCHMARKS": false,
+      "CUDA": false,
+      "TESTS": true,
+      "UPSTREAM": true
+    },
+    "counts": {
+      "FAIL": 0,
+      "PASS": 9,
+      "SKIP": 0
+    },
+    "tests": [
+      {
+        "name": "test_reference_oracle",
+        "result": "PASS",
+        "seconds": 0.0504846
+      },
+      {
+        "name": "test_reference_release_inventory",
+        "result": "PASS",
+        "seconds": 0.699022
+      },
+      {
+        "name": "test_decoder_cpu",
+        "result": "PASS",
+        "seconds": 0.0468146
+      },
+      {
+        "name": "test_decode_phase3b2a_parser",
+        "result": "PASS",
+        "seconds": 0.0555794
+      },
+      {
+        "name": "test_transform_wavelet",
+        "result": "PASS",
+        "seconds": 0.0439134
+      },
+      {
+        "name": "test_codec_roundtrip",
+        "result": "PASS",
+        "seconds": 0.0659736
+      },
+      {
+        "name": "test_yuy2_stability",
+        "result": "PASS",
+        "seconds": 1.19669
+      },
+      {
+        "name": "test_decode_phase0",
+        "result": "PASS",
+        "seconds": 3.5807
+      },
+      {
+        "name": "test_avi_sample",
+        "result": "PASS",
+        "seconds": 0.196544
+      }
+    ],
+    "wall_seconds": 5.98
+  },
+  "cuda_suite": {
+    "configuration": {
+      "BENCHMARKS": false,
+      "CUDA": true,
+      "CUDA_ARCHITECTURES": "89",
+      "TESTS": true,
+      "UPSTREAM": true
+    },
+    "counts": {
+      "FAIL": 0,
+      "PASS": 43,
+      "SKIP": 4
+    },
+    "tests": [
+      {
+        "name": "test_reference_oracle",
+        "result": "PASS",
+        "seconds": 0.0433201
+      },
+      {
+        "name": "test_reference_release_inventory",
+        "result": "PASS",
+        "seconds": 0.346402
+      },
+      {
+        "name": "test_decode_phase3b2a_parser",
+        "result": "PASS",
+        "seconds": 0.0439345
+      },
+      {
+        "name": "test_decode_phase3b2a_api",
+        "result": "PASS",
+        "seconds": 0.195703
+      },
+      {
+        "name": "test_decode_phase3b2a_reconstruction",
+        "result": "PASS",
+        "seconds": 3.10399
+      },
+      {
+        "name": "test_decode_phase3b2a_failclosed",
+        "result": "PASS",
+        "seconds": 0.537413
+      },
+      {
+        "name": "test_decode_phase3b2a_temporal",
+        "result": "PASS",
+        "seconds": 0.170828
+      },
+      {
+        "name": "test_decode_phase3b2a_upstream_temporal",
+        "result": "PASS",
+        "seconds": 0.0566371
+      },
+      {
+        "name": "test_decode_phase3ae",
+        "result": "PASS",
+        "seconds": 0.23303
+      },
+      {
+        "name": "test_decode_phase3a_rc",
+        "result": "PASS",
+        "seconds": 31.666
+      },
+      {
+        "name": "test_transform_wavelet",
+        "result": "PASS",
+        "seconds": 0.0408076
+      },
+      {
+        "name": "test_codec_roundtrip",
+        "result": "PASS",
+        "seconds": 0.0528964
+      },
+      {
+        "name": "test_yuy2_stability",
+        "result": "PASS",
+        "seconds": 1.17681
+      },
+      {
+        "name": "test_decode_phase0",
+        "result": "PASS",
+        "seconds": 3.23454
+      },
+      {
+        "name": "test_avi_sample",
+        "result": "PASS",
+        "seconds": 0.180339
+      },
+      {
+        "name": "test_decoder",
+        "result": "PASS",
+        "seconds": 18.6458
+      },
+      {
+        "name": "test_decode_phase3b0",
+        "result": "PASS",
+        "seconds": 1.47545
+      },
+      {
+        "name": "test_decode_phase3b1",
+        "result": "PASS",
+        "seconds": 0.740558
+      },
+      {
+        "name": "test_decode_phase3b1_acceptance",
+        "result": "PASS",
+        "seconds": 18.9279
+      },
+      {
+        "name": "test_decode_phase3b2a_mixed_stress",
+        "result": "PASS",
+        "seconds": 18.5714
+      },
+      {
+        "name": "test_decode_phase3b2r_math",
+        "result": "PASS",
+        "seconds": 0.0609877
+      },
+      {
+        "name": "test_decode_phase3b2r_reference",
+        "result": "PASS",
+        "seconds": 0.0354982
+      },
+      {
+        "name": "test_decode_phase2fa",
+        "result": "PASS",
+        "seconds": 461.052
+      },
+      {
+        "name": "test_decode_gpu_index",
+        "result": "PASS",
+        "seconds": 0.288072
+      },
+      {
+        "name": "test_cuda_wavelet",
+        "result": "PASS",
+        "seconds": 2.07334
+      },
+      {
+        "name": "test_cuda_pyramid",
+        "result": "PASS",
+        "seconds": 0.162891
+      },
+      {
+        "name": "test_entropy_parallel",
+        "result": "PASS",
+        "seconds": 0.14458
+      },
+      {
+        "name": "test_hybrid_roundtrip",
+        "result": "PASS",
+        "seconds": 0.199554
+      },
+      {
+        "name": "test_phase2a",
+        "result": "SKIP",
+        "seconds": 1.40503
+      },
+      {
+        "name": "test_diagnostic_geometry_guard",
+        "result": "PASS",
+        "seconds": 0.013607
+      },
+      {
+        "name": "test_phase2b",
+        "result": "SKIP",
+        "seconds": 0.69743
+      },
+      {
+        "name": "test_phase2c",
+        "result": "SKIP",
+        "seconds": 10.4538
+      },
+      {
+        "name": "test_phase2d",
+        "result": "SKIP",
+        "seconds": 17.5768
+      },
+      {
+        "name": "test_entropy_capacity",
+        "result": "PASS",
+        "seconds": 0.210556
+      },
+      {
+        "name": "test_phase3a",
+        "result": "PASS",
+        "seconds": 44.4456
+      },
+      {
+        "name": "test_decode_inverse_wavelet_cuda",
+        "result": "PASS",
+        "seconds": 1.37003
+      },
+      {
+        "name": "test_decode_phase1",
+        "result": "PASS",
+        "seconds": 1.86161
+      },
+      {
+        "name": "test_color_conversion_cuda",
+        "result": "PASS",
+        "seconds": 0.330888
+      },
+      {
+        "name": "test_decode_phase2a",
+        "result": "PASS",
+        "seconds": 2.44142
+      },
+      {
+        "name": "test_decode_entropy_cuda",
+        "result": "PASS",
+        "seconds": 0.162263
+      },
+      {
+        "name": "test_decode_phase2b",
+        "result": "PASS",
+        "seconds": 7.83543
+      },
+      {
+        "name": "test_decode_entropy_phase2c",
+        "result": "PASS",
+        "seconds": 0.15998
+      },
+      {
+        "name": "test_decode_phase2c",
+        "result": "PASS",
+        "seconds": 26.5591
+      },
+      {
+        "name": "test_decode_phase2d",
+        "result": "PASS",
+        "seconds": 32.3497
+      },
+      {
+        "name": "test_decode_phase2e",
+        "result": "PASS",
+        "seconds": 27.6845
+      },
+      {
+        "name": "test_decode_phase2fc",
+        "result": "PASS",
+        "seconds": 3.01098
+      },
+      {
+        "name": "test_decode_phase2fc_audit",
+        "result": "PASS",
+        "seconds": 36.8378
+      }
+    ],
+    "wall_seconds": 778.94
+  },
+  "cuda_toolkit": "12.8.61",
+  "date": "2026-10-30",
+  "executable_sha256": {
+    "build/tests/Release/test_decode_phase3b2a_failclosed.exe": "8687008a881907449ef79026496b506be4a09f0d5943b486737aa3d502d3b246",
+    "build/tests/Release/test_phase2a.exe": "e4042ee8bfd4f19e7a9f60a8cdff4fcee9ba48a1aaa348bce09cebb63cd90d92",
+    "build/tests/Release/test_phase2b.exe": "6e75f4c7757dce517b27986bec2d88a471633bf204255b456851ead77a103bf0",
+    "build/tests/Release/test_phase2c.exe": "d476c135a2979f03dc258eeaafd3565dfc6c425c8fc1aa2d0096d6f2aa2f9349",
+    "build/tests/Release/test_phase2d.exe": "8505bdc9ddacd54ed30e297e640fe2ae68ba2663a4faff571d2d1e85f599eed8",
+    "build/tests/Release/test_reference_oracle.exe": "0eb9f95d784bcc6b0ad02c78ce4f3af25e995ac111b6614d7907285ac770b07a"
+  },
+  "focused_failclosed": {
+    "cases": 19,
+    "dag_copy_hits": 1,
+    "dag_ready_hits": 0,
+    "exit": 0,
+    "reason": "Retain complete witness after full CTest JUnit truncated passing output to 1024 bytes."
+  },
+  "full_cuda_passes": 1,
+  "guard_smoke": {
+    "capture_unchanged": true,
+    "cases": [
+      {
+        "case": "new_capture",
+        "exit": 77,
+        "expected_exit": 77,
+        "passed": true
+      },
+      {
+        "case": "valid_decode",
+        "exit": 0,
+        "expected_exit": 0,
+        "passed": true
+      },
+      {
+        "case": "oversized",
+        "exit": 1,
+        "expected_exit": 1,
+        "passed": true
+      },
+      {
+        "case": "wrong_geometry",
+        "exit": 1,
+        "expected_exit": 1,
+        "passed": true
+      },
+      {
+        "case": "existing_capture",
+        "exit": 1,
+        "expected_exit": 1,
+        "passed": true
+      }
+    ],
+    "immutable_packet_sha256": {
+      "phase2a_device.cfhd": "baf5c7aa53c49f04650365edc5fa8b08d5faedddf51b2573345cbf123c83b789",
+      "phase2a_host.cfhd": "feb1d6b3bc1c6245121a05243e2a8b721764479a19756d28e39cee38e28a5e54"
+    },
+    "passed": true,
+    "pixel_oracle": "NOT_QUALIFIED"
+  },
+  "hash_basis": "working code bytes identify executed sources; staged bytes record normalized Git content; raw artifacts/logs stay private.",
+  "independent_pixel_oracle_qualified": false,
+  "inventory_python_unit_tests": 27,
+  "parent_phase": "b11b3da4c6be4cc7005cf634162e3bd1b662f387",
+  "platform": "native Windows x64; NVIDIA GeForce RTX 4090 Laptop GPU",
+  "python": "3.10.9",
+  "release_gate": "BLOCKED",
+  "release_runner_exit": 77,
+  "release_target_exit": 1,
+  "staged_code_sha256": {
+    ".githooks/pre-commit": "6e040cb7e0d785e7b7f7e05f07d6b59d6d32a1df4ec003d6780b04d5e47de1ce",
+    ".githooks/pre-push": "24b9aed5be990c5e36866c3a2043f078cd14d2a1d114dc181436f4e08bf9ae09",
+    "ci/privacy_guard.py": "89bb19c25dbad057cdaa153e8abd38b68c8ae0df925c3a8f0a3469aec52bd03d",
+    "src/core/phase2d_encoder.cpp": "db2f179a4aad46f43c962d2523745fdcb666de6cdf1359ad6fdb3a0ccc819645",
+    "tests/CMakeLists.txt": "554e254d3b039d5e46c09a9c2b8ac82e282a256cc7044d18034f4b4225aac238",
+    "tests/diagnostic_decode_guard.h": "d6d5a972800b22b0da5efea114b96673c3fa4c3b6315e8402431dfe1987c4ca9",
+    "tests/reference_oracle.h": "5ba3db904e6e88a23aac8749dc368940e0c728ac7c1e66cf8c9d5d7d7a61feed",
+    "tests/smoke_phase2a_guards.py": "8afde3d5c4ae0ea926c539defc0763110617370b2ba79cd7700164da36cf72a4",
+    "tests/test_phase2a.cpp": "dfe956a52a0032cb6a9b7af38bc35371991c62d4d1a5909498e659cc50b244d9",
+    "tests/test_phase2b.cpp": "3287b6859868c557c2151bc074f5fa43a79118da584680d457341b6e96525c80",
+    "tests/test_phase2c.cpp": "61a16c5800880a79aba908d1d5eb3f389b17cd10e97823e2b0fd9d47c05c927c",
+    "tests/test_phase2d.cpp": "881c33ce5c2b9555fd948670e744377974d711d8ba07be5f1256ded7a5789202",
+    "tests/test_reference_oracle.cpp": "12cbff7aeebc5752461827c8bd013c8a6eaf8177c8f598f03946d900ef33deef",
+    "tests/test_reference_release.py": "e4621e481dc90dd454d30d56a098ba61e3e76a90e4aeb5e6bc5b92318c2ffb95",
+    "tools/check_reference_release.py": "0e15c024a8be6dc105b9bfd8dfee22dfb9a9ad7cddf9b8fd65ac0f0c16bfefa2"
+  },
+  "tested_revision": "Modified working tree on parent_phase; code hashes bound below; evidence commit follows testing.",
+  "working_code_sha256": {
+    ".githooks/pre-commit": "6e040cb7e0d785e7b7f7e05f07d6b59d6d32a1df4ec003d6780b04d5e47de1ce",
+    ".githooks/pre-push": "24b9aed5be990c5e36866c3a2043f078cd14d2a1d114dc181436f4e08bf9ae09",
+    "ci/privacy_guard.py": "89bb19c25dbad057cdaa153e8abd38b68c8ae0df925c3a8f0a3469aec52bd03d",
+    "src/core/phase2d_encoder.cpp": "d23b4b9778cea194b98984ed77b95675a6b833c4e026055c9fa8677c1d575f6f",
+    "tests/CMakeLists.txt": "0e904db48091734f265eaf46fb9b94fb1d7be145ef60d6eadfa2d44d1008753b",
+    "tests/diagnostic_decode_guard.h": "d6d5a972800b22b0da5efea114b96673c3fa4c3b6315e8402431dfe1987c4ca9",
+    "tests/reference_oracle.h": "5ba3db904e6e88a23aac8749dc368940e0c728ac7c1e66cf8c9d5d7d7a61feed",
+    "tests/smoke_phase2a_guards.py": "8afde3d5c4ae0ea926c539defc0763110617370b2ba79cd7700164da36cf72a4",
+    "tests/test_phase2a.cpp": "dfe956a52a0032cb6a9b7af38bc35371991c62d4d1a5909498e659cc50b244d9",
+    "tests/test_phase2b.cpp": "3287b6859868c557c2151bc074f5fa43a79118da584680d457341b6e96525c80",
+    "tests/test_phase2c.cpp": "61a16c5800880a79aba908d1d5eb3f389b17cd10e97823e2b0fd9d47c05c927c",
+    "tests/test_phase2d.cpp": "881c33ce5c2b9555fd948670e744377974d711d8ba07be5f1256ded7a5789202",
+    "tests/test_reference_oracle.cpp": "12cbff7aeebc5752461827c8bd013c8a6eaf8177c8f598f03946d900ef33deef",
+    "tests/test_reference_release.py": "e4621e481dc90dd454d30d56a098ba61e3e76a90e4aeb5e6bc5b92318c2ffb95",
+    "tools/check_reference_release.py": "0e15c024a8be6dc105b9bfd8dfee22dfb9a9ad7cddf9b8fd65ac0f0c16bfefa2"
+  }
+}
