@@ -9,8 +9,14 @@ that axis is not observable in this corpus.
 Verifier: `tools/verify_issue46_group_a.py`, opt-in CTest
 `issue46_group_a_packet_tables` (`-DHYPERCINE_ISSUE46_GROUP_A_CORPUS=<dir>`).
 Fail-closed: a missing file, a wrong byte length, a wrong SHA-256, a wrong frame
-count, a probe failure or an unparsable probe line all abort with a non-zero
-exit. There is no skip path.
+count, a noncontiguous/reordered frame index, a broken previous-packet byte
+chain, a missing or duplicate high-pass subband, an absent quant/scale tag,
+a truncated probe replay, a probe failure or an unparsable probe line all abort
+with a non-zero exit. There is no skip path. The corpus-free adversarial
+contract `tests/test_issue46_group_a_verifier.py` is registered as
+`issue46_group_a_verifier_contract` in quality-state-only CTest, including on
+hosts without the private corpus. This contract tests rejection logic; the
+private 480-packet comparison remains a separate opt-in acceptance gate.
 
 ## What was compared
 
