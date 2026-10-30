@@ -10,7 +10,9 @@ bool BackendOnlyRefusal(const EncoderCapabilityResult& capability) {
     // Backend fallback is not permission to repair a format, profile, resource,
     // or reference failure. A different CPU budget is checked again below.
     return !flags.format_mathematically_invalid && !flags.valid_but_not_implemented &&
-           !flags.memory_budget_exceeded && capability.primary != CapabilityReason::ReferenceMissing &&
+           !flags.memory_budget_exceeded && !flags.profile_not_qualified_for_backend &&
+           capability.primary != CapabilityReason::ReferenceMissing &&
+           capability.primary != CapabilityReason::ProfileNotQualifiedForBackend &&
            (capability.primary == CapabilityReason::BackendNotPresent ||
             capability.primary == CapabilityReason::BackendNotQualifiedForGeometry);
 }
@@ -108,6 +110,10 @@ EncoderSession::EncoderSession(const EncoderSessionConfig& config, const Encoder
     : config_(config), selection_(RequireSelection(SelectBackend(config_, device))) {
     FrontendAccess::Use(encoder_, selection_.frontend);
     encoder_.SetCoefficientHashing(config_.diagnostic == DiagnosticMode::CoefficientFnv64);
+    // The default encoder quality is FilmScan3. Without this call a session
+    // that was admitted as low/medium/high/filmscan1/filmscan2 would still
+    // emit FilmScan3 tables and tag -80 = 6.
+    encoder_.SetSessionQuality(config_.quality);
 }
 
 FilmScan3Frame EncoderSession::Encode(const uint8_t* data, std::size_t bytes, std::size_t stride) {

@@ -498,6 +498,17 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME encoder_cuda_session_packets COMMAND test_encoder_cuda_session)
             set_tests_properties(encoder_cuda_session_packets PROPERTIES
                 LABELS "cuda;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 1800)
+            # Issue #46: six regular profiles, CPU scalar session vs CUDA session.
+            # GPU-required, no skip. Losing the registration is not a pass.
+            add_executable(test_encoder_cuda_profile_matrix tests/test_encoder_cuda_profile_matrix.cpp)
+            target_include_directories(test_encoder_cuda_profile_matrix PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda")
+            target_link_libraries(test_encoder_cuda_profile_matrix PRIVATE
+                hypercine_standalone CUDA::cudart Threads::Threads)
+            add_test(NAME encoder_cuda_profile_matrix COMMAND test_encoder_cuda_profile_matrix)
+            set_tests_properties(encoder_cuda_profile_matrix PROPERTIES
+                LABELS "cuda;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 1800)
         endif()
         if(HYPERCINE_ENABLE_METAL)
             add_executable(test_encoder_metal_session tests/test_encoder_metal_session.cpp)
@@ -505,6 +516,12 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME encoder_metal_session_packets COMMAND test_encoder_metal_session)
             set_tests_properties(encoder_metal_session_packets PROPERTIES
                 LABELS "metal;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 600)
+            # Issue #46: measurement only. A green run is not admission.
+            add_executable(test_encoder_metal_profile_matrix tests/test_encoder_metal_profile_matrix.cpp)
+            target_link_libraries(test_encoder_metal_profile_matrix PRIVATE hypercine_standalone Threads::Threads)
+            add_test(NAME encoder_metal_profile_matrix COMMAND test_encoder_metal_profile_matrix)
+            set_tests_properties(encoder_metal_profile_matrix PROPERTIES
+                LABELS "metal;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 1800)
             add_executable(test_metal_filmscan3 tests/test_metal_filmscan3.cpp)
             target_link_libraries(test_metal_filmscan3 PRIVATE hypercine_standalone)
             add_test(NAME filmscan3_metal_required COMMAND test_metal_filmscan3)

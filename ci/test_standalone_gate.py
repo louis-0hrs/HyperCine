@@ -122,6 +122,13 @@ class StandaloneGateTests(unittest.TestCase):
         self.assertTrue(cuda_block[0].rstrip().endswith('if(HYPERCINE_ENABLE_CUDA)'))
         block = cuda_block[1].split('endif()', 1)[0]
         self.assertIn(registration, block)
+        profile = 'add_test(NAME encoder_cuda_profile_matrix COMMAND test_encoder_cuda_profile_matrix)'
+        self.assertIn(profile, block)
+        profile_properties = cmake.split('set_tests_properties(encoder_cuda_profile_matrix', 1)[1]
+        profile_properties = profile_properties.split(')', 1)[0]
+        self.assertIn('gpu-required', profile_properties)
+        self.assertIn('RUN_SERIAL TRUE', profile_properties)
+        self.assertNotIn('SKIP_RETURN_CODE', profile_properties)
 
     def test_metal_enabled_requires_all_existing_metal_gates(self):
         cache = {'HYPERCINE_ENABLE_METAL': 'ON'}
@@ -130,7 +137,7 @@ class StandaloneGateTests(unittest.TestCase):
                  'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode',
                  'filmscan3_metal_4k_ffmpeg_gate', 'filmscan3_metal_4k_encoder',
                  'filmscan3_metal_multisession', 'filmscan3_metal_geometry_matrix',
-                 'encoder_metal_session_packets'}
+                 'encoder_metal_session_packets', 'encoder_metal_profile_matrix'}
         self.assertEqual(required - REQUIRED, metal)
         for omitted in metal:
             with self.subTest(omitted=omitted), self.assertRaises(ValueError):

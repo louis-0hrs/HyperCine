@@ -48,6 +48,20 @@ cannot pass for Metal, wrong geometry/capacity/ISA and null factories produce
 typed initialization failures without falling back, and `bad_alloc`/logic
 errors propagate instead of being reported as an unavailable backend.
 
+`tests/test_encoder_cuda_profile_matrix.cpp` is the per-profile gate for issue
+#46. At 1920x1080 it runs frames 0, 1, 2 and 3 on an independent CPU scalar
+session and a CUDA session for low, medium, high, filmscan1, filmscan2 and
+filmscan3. Each frame compares the full packet, all 36 quant/scale entries,
+`fs_rate_limiter`, `fs_overbitrate`, `previous_sample_bytes`, the exact frame
+index, tag -80 and all 30 coefficient hashes. The six frame-0 quant tables must
+be distinct. `ProfileAdmitted()` lists a CUDA or Metal profile only when that comparison
+holds. The Metal binary is `encoder_metal_profile_matrix` at the same geometry
+and frame indexes. This is internal packet parity, not a product qualification
+and not an original-SDK or SMPTE/VC-5 conformance claim. The test is GPU-required, serial, and has no
+skip exit. `ci/run_standalone.py` still rejects a CUDA-on tree, so the
+registration is enforced by `ci/test_standalone_gate.py` instead of the CPU
+inventory.
+
 `tests/test_encoder_cuda_session.cpp` is the native gate. It is registered only
 with `HYPERCINE_ENABLE_CUDA=ON`, is GPU-required with no skip exit, and is
 mandatory in the strict standalone inventory for CUDA builds. It checks the
