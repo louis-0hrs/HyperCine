@@ -64,7 +64,21 @@ if(HYPERCINE_ENABLE_CUDA)
         enable_language(CUDA)
         set(CMAKE_CUDA_STANDARD 17)
         set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-        message(STATUS "CUDA enabled. Compiler: ${CMAKE_CUDA_COMPILER} (Version: ${CMAKE_CUDA_COMPILER_VERSION}, Architectures: ${CMAKE_CUDA_ARCHITECTURES})")
+        # Refuse a split toolchain now, not as an 'undefined reference to
+        # __cxa_call_terminate' during the link of the whole tree. The check runs
+        # after language enablement because nvcc reports its host compiler only
+        # then, and before any target is generated.
+        include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/cuda_host_compiler.cmake")
+        if(CMAKE_CUDA_HOST_COMPILER)
+            set(hypercine_cuda_host_compiler "${CMAKE_CUDA_HOST_COMPILER}")
+        else()
+            set(hypercine_cuda_host_compiler "${CMAKE_CUDA_HOST_LINK_LAUNCHER}")
+        endif()
+        hypercine_require_consistent_cuda_host_compiler(
+            "${CMAKE_CXX_COMPILER_ID}" "${CMAKE_CXX_COMPILER_VERSION}"
+            "${CMAKE_CUDA_HOST_COMPILER_ID}" "${CMAKE_CUDA_HOST_COMPILER_VERSION}"
+            "${hypercine_cuda_host_compiler}")
+        message(STATUS "CUDA enabled. Compiler: ${CMAKE_CUDA_COMPILER} (Version: ${CMAKE_CUDA_COMPILER_VERSION}, Architectures: ${CMAKE_CUDA_ARCHITECTURES}, host ${CMAKE_CUDA_HOST_COMPILER_ID} ${CMAKE_CUDA_HOST_COMPILER_VERSION})")
     else()
         message(FATAL_ERROR "HYPERCINE_ENABLE_CUDA is ON, but no CUDA compiler was detected on this system.")
     endif()
@@ -112,6 +126,15 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME test_rca160_ledger_audit
         COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_rca160_ledger_audit.py")
     set_tests_properties(test_rca160_ledger_audit PROPERTIES LABELS "validation;recorded-ledger")
+    # CUDA host-compiler consistency. A C++ front end newer than nvcc's host
+    # compiler cannot link its own objects, because nvcc puts the host compiler's
+    # libstdc++ first (`undefined reference to __cxa_call_terminate`). The guard in
+    # cmake/cuda_host_compiler.cmake refuses that configuration; this contract
+    # proves the refusal happens at configure time and only for that pair.
+    add_test(NAME test_cuda_host_compiler_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/../ci/test_cuda_host_compiler.py")
+    set_tests_properties(test_cuda_host_compiler_contract PROPERTIES
+        LABELS "validation;toolchain" TIMEOUT 900)
 endfunction()
 
 # Private synthetic scheduler: no SDK, codec kernels or GPU linkage.

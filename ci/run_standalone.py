@@ -50,6 +50,9 @@ REQUIRED = {
     'test_rca160_ledger_audit',
     'qualification_report_contract', 'cuda_output_dir_platform_contract',
     'windows_reference_process_contract',
+    # Toolchain contract: the CUDA host-compiler guard must stay registered, or
+    # the split-toolchain refusal can be dropped without any gate noticing.
+    'test_cuda_host_compiler_contract',
     'standalone_oracle_fixtures', 'windows_reference_inputs',
     'windows_reference_guardrails', 'windows_reference_parser',
     'windows_reference_sdk_coefficients', 'filmscan3_autonomous_manifest',
