@@ -187,6 +187,12 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
         $<TARGET_FILE:quality_state_probe>)
     add_test(NAME quality_cmake_mode_contract COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/ci/test_quality_cmake_mode.py")
+    # Corpus-free adversarial regression: malformed private packet tables must
+    # never produce a green oracle result, even on public CI hosts.
+    add_test(NAME issue46_group_a_verifier_contract COMMAND "${Python3_EXECUTABLE}"
+        -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_issue46_group_a_verifier.py")
+    set_tests_properties(issue46_group_a_verifier_contract PROPERTIES
+        LABELS "quality;oracle-contract")
     if(HYPERCINE_QUALITY_ORACLE_ROOT)
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
         add_test(NAME quality_state_windows_oracle COMMAND "${Python3_EXECUTABLE}"
