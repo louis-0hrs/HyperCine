@@ -12,6 +12,39 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import verify_issue321_provenance as v
+import inspect_issue321_origin as origin
+
+
+class ArchiveOrigin(unittest.TestCase):
+    @staticmethod
+    def member(name, payload):
+        header = (name.encode().ljust(16) + b'0'.ljust(12) + b'0'.ljust(6) +
+                  b'0'.ljust(6) + b'0'.ljust(8) + str(len(payload)).encode().ljust(10) + b'`\n')
+        return header + payload + (b'\n' if len(payload) % 2 else b'')
+
+    def test_longname_and_odd_member_preserve_exact_object_bytes(self):
+        payload = b'\x64\x86' + bytes(range(19))
+        data = (b'!<arch>\n' + self.member('/', b'index') +
+                self.member('//', b'PRIVATE_BUILD/member.obj\0') + self.member('/0', payload))
+        self.assertEqual(origin.archive_objects(data), [('PRIVATE_BUILD/member.obj', payload)])
+
+    def test_truncated_archive_and_wrong_padding_rejected(self):
+        data = b'!<arch>\n' + self.member('member.obj/', b'x' * 21)
+        for invalid in (data[:-1], data[:-2], data[:-1] + b'x', data[:30]):
+            with self.subTest(length=len(invalid)), self.assertRaises(ValueError):
+                origin.archive_objects(invalid)
+
+    def test_invalid_longname_reference_rejected(self):
+        for offset in ('/1', '/99', '/bad'):
+            data = (b'!<arch>\n' + self.member('//', b'private.obj\0') +
+                    self.member(offset, b'x' * 20))
+            with self.subTest(offset=offset), self.assertRaises(ValueError):
+                origin.archive_objects(data)
+
+    def test_empty_or_nonarchive_rejected(self):
+        for data in (b'', b'!<arch>\n', b'invalid archive signature'):
+            with self.assertRaises(ValueError):
+                origin.archive_objects(data)
 
 
 class Provenance(unittest.TestCase):

@@ -3,6 +3,8 @@
 Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.
 
 Status: **REVIEW**, native Windows x64, 2026-10-30. Base main `04c348f`.
+Fresh 2026-10-31 execution and source/object-origin inspection:
+[independent recheck with explicit trust boundaries](ISSUE321_INDEPENDENT_RECHECK_20261031.md).
 This follow-up supplies the three previously absent historical artifacts,
 checks their actual bytes against the original pinned manifests, and executes
 the retained programs on a small subset of the existing immutable inputs.
