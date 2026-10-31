@@ -1,0 +1,1023 @@
+{
+  "archive_sha256": "65ba13a8f7d26f5c94cc18520a6e7ce1e4ca5b35ae084d65b5b16b022b7fc84f",
+  "baseline_commit": "11574d0295771edccadd17af14af74a539f924c7",
+  "compile_record_sha256": "eb4acfe3f833bbd2791c4d97c7b1d7aa453ab6c5f907a038da7199ea94ea2b57",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "date": "2026-10-31",
+  "historical_source_to_binary": "NOT_ESTABLISHED",
+  "members": [
+    {
+      "bytes": 6218,
+      "machine": 34404,
+      "member_index": 0,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "d5fbffc61d8210b1ebcd59cb97b69e225ae3c9b1240a29146306a072c2653f88"
+    },
+    {
+      "bytes": 49116,
+      "machine": 34404,
+      "member_index": 1,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "0d1955a19612417f374bfd0701821022ac3fd21a0acb9b5baa29d541644b0ea6"
+    },
+    {
+      "bytes": 920,
+      "machine": 34404,
+      "member_index": 2,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "e964275cfc949bb6fe7466a19a046489a9e245e101b276a96941c27e661a3ea5"
+    },
+    {
+      "bytes": 12470,
+      "machine": 34404,
+      "member_index": 3,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "a29dbeacf93ad246c659df6ca1437cf8c36f2aaf2942bc1b9ccc3b884c66c485"
+    },
+    {
+      "bytes": 35073,
+      "machine": 34404,
+      "member_index": 4,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "672b4d0de607a1d4b12fe92baaabead0fe7a41ae913aba05fa4912ca7bd28d82"
+    },
+    {
+      "bytes": 21718,
+      "machine": 34404,
+      "member_index": 5,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "05fb3279be9238a8712381e893585f4ebdb82b459002341384f7287e2e419127"
+    },
+    {
+      "bytes": 1045,
+      "machine": 34404,
+      "member_index": 6,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "d204f6c9a89a9e25f301508f8da16b8ceaa60c11f725887c1eabcffe5489e9e7"
+    },
+    {
+      "bytes": 162590,
+      "machine": 34404,
+      "member_index": 7,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "392403dd6e4931873fa9be07762973550d7b1c70ecce76e82f14ed73ff5ed0ea"
+    },
+    {
+      "bytes": 43311,
+      "machine": 34404,
+      "member_index": 8,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "7f73b62124f5e1ff3e612ca593dddea7a18c9bf53d63a2656ef4655a521b8839"
+    },
+    {
+      "bytes": 38666,
+      "machine": 34404,
+      "member_index": 9,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "d518ac7279e6a6a13c9b5e530ccb15de2bbcc797eb1d15928dff8d24dd387802"
+    },
+    {
+      "bytes": 4611,
+      "machine": 34404,
+      "member_index": 10,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "1dd09199ab30fb0a4e7ff81b972a8dac1c47fe890f40422fac52b623f8099bb6"
+    },
+    {
+      "bytes": 3346,
+      "machine": 34404,
+      "member_index": 11,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "f4b27db0df37daed92e713dd194961462c19d7efc2f6026af2870b413951588f"
+    },
+    {
+      "bytes": 3135,
+      "machine": 34404,
+      "member_index": 12,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "463e0e7e26e526b8d0545f0b5d09e6abfd9232404af788892a38a40243e07127"
+    },
+    {
+      "bytes": 2922,
+      "machine": 34404,
+      "member_index": 13,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "c30785d2a7922ce8fecc5950761015da0559ef205eef18484adb7438573a9e44"
+    },
+    {
+      "bytes": 36776,
+      "machine": 34404,
+      "member_index": 14,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "df8f6829e2e3d3cf55bd7b6e93ac9dc59e2a8a3ed8a2033c1c14c822c1b2715e"
+    },
+    {
+      "bytes": 14665,
+      "machine": 34404,
+      "member_index": 15,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "54b038d97a439ad292f7d18c5629773d642b338e4c26ea7147a4aad887675bcb"
+    },
+    {
+      "bytes": 30532,
+      "machine": 34404,
+      "member_index": 16,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "fb3c52a7335b63977abaa07ec7c66bbb05f75e36c6af205261d52a28f86cb7f7"
+    },
+    {
+      "bytes": 67774,
+      "machine": 34404,
+      "member_index": 17,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "a96650dbcba9b2e6087a525a2ba2a0e5b760e3abc2d85476261a1a282c961715"
+    },
+    {
+      "bytes": 35943,
+      "machine": 34404,
+      "member_index": 18,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "3eabeb2cb97143a508169fa477c542b8bcb80fd4bb37c9d2e557b68edca06e7a"
+    },
+    {
+      "bytes": 8222,
+      "machine": 34404,
+      "member_index": 19,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "35f9f5fd20f9ad5deb3ec78a845df5137bfc4c64d0970209a0a2c83e5075875c"
+    },
+    {
+      "bytes": 7269,
+      "machine": 34404,
+      "member_index": 20,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "84bfbd63a7bd72b7a4108c0340c706dc45cb278dc550d99f3546e32c2d92853f"
+    },
+    {
+      "bytes": 4538,
+      "machine": 34404,
+      "member_index": 21,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "5e6b3847910ee7d4e6c1a401b16410974719417fd3c60723f4392942fc89b300"
+    },
+    {
+      "bytes": 565,
+      "machine": 34404,
+      "member_index": 22,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "9aaf3d5487b06ed5f76a4848088f0cd993a79f250d02f62d215ce6be2d28d6af"
+    },
+    {
+      "bytes": 36937,
+      "machine": 34404,
+      "member_index": 23,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "bd60be4c5b7bfcf2f07516549e6529736087e830e1c3174d0254120aecb2de38"
+    },
+    {
+      "bytes": 4890,
+      "machine": 34404,
+      "member_index": 24,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "86a751b546ca26a0db8157f8e18088ebf6d894203259ead677e160af331c4722"
+    },
+    {
+      "bytes": 7103,
+      "machine": 34404,
+      "member_index": 25,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "dc6e0249ebde0131f3b57b76ac7578cb043fef1b2b7eb9142a4cf9a903df9c4e"
+    },
+    {
+      "bytes": 14880,
+      "machine": 34404,
+      "member_index": 26,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "989251dcc89b5607e72f175ed454227ef6f5c76d777246811de4fd79012f0dbf"
+    },
+    {
+      "bytes": 19079,
+      "machine": 34404,
+      "member_index": 27,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "76e230081d9809c6d25aaa647270f213db78973fc2bc19305725cc32c03d5840"
+    },
+    {
+      "bytes": 15874,
+      "machine": 34404,
+      "member_index": 28,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "f2bafcef188d90ef782a925d6e9703691b7a04bf354550ee5e88870f14bbc980"
+    },
+    {
+      "bytes": 69534,
+      "machine": 34404,
+      "member_index": 29,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "e849ee5145e8340726f9cef5de8b9552c1e5dd0c3c254637f1605efb17fece45"
+    },
+    {
+      "bytes": 13793,
+      "machine": 34404,
+      "member_index": 30,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "34f6662221ba27eef476d2684042f4cef642a92812a30d05d5da2456f9f07f84"
+    },
+    {
+      "bytes": 561,
+      "machine": 34404,
+      "member_index": 31,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "489cc2bef70941b595596a205089c700f6e67ead78615285bf3e2551992cf8d1"
+    },
+    {
+      "bytes": 12368,
+      "machine": 34404,
+      "member_index": 32,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "64b23b85d4c591f3e90c8770dcf2ff1face29ccab9529bf10cfe2b45bc2e382a"
+    },
+    {
+      "bytes": 607,
+      "machine": 34404,
+      "member_index": 33,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "7cb4cd95791d27b6558e8ecd64482649c03c411bcf6cd862a7fb3462fddf0416"
+    },
+    {
+      "bytes": 69463,
+      "machine": 34404,
+      "member_index": 34,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "8ebb2c0e69e6d568a2ff5af9596f0dd37d44d01e92082872c3a015aa58c49068"
+    },
+    {
+      "bytes": 557,
+      "machine": 34404,
+      "member_index": 35,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "02ff5621195c742748978812e064351c8ceda35e6de93ff06b8f06a29b5c9f58"
+    },
+    {
+      "bytes": 2405,
+      "machine": 34404,
+      "member_index": 36,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "86701a779284c251bca83a824fcec94dec4626a3c6bb6c06f4fa4f2ac8b6a2a6"
+    },
+    {
+      "bytes": 161237,
+      "machine": 34404,
+      "member_index": 37,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "fe800c9764ab7512ba15d137232c5c4308e29f1d54801b76be6a3489e2f3365f"
+    },
+    {
+      "bytes": 6567,
+      "machine": 34404,
+      "member_index": 38,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "ff9fe6513f40e725c08417638cc345289889fb9a5151c042bcd7c7ddb05f59af"
+    },
+    {
+      "bytes": 565,
+      "machine": 34404,
+      "member_index": 39,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "3db6b43dc5996c80864ae41770f47e87dfb72b38aae1ac977972c2b9cab83ffa"
+    },
+    {
+      "bytes": 24950,
+      "machine": 34404,
+      "member_index": 40,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "ffac4d18171a0f203bb7c304033e79ed646ef231bcf8a5d98600ec428caaf949"
+    },
+    {
+      "bytes": 9144,
+      "machine": 34404,
+      "member_index": 41,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "cd8991aa19d92fa98ddba342aa2e15d6158ca5abe45ef0a094f78885a169b002"
+    },
+    {
+      "bytes": 30913,
+      "machine": 34404,
+      "member_index": 42,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "bc1c92f504fd9b504c87874240792b01f55b65077b5a54a710398135be36a6be"
+    },
+    {
+      "bytes": 7077,
+      "machine": 34404,
+      "member_index": 43,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "2cf8ae683652d2ecfc4f40adf11c691d1b4f187d37297ecfd5bb97c2c8375e44"
+    },
+    {
+      "bytes": 40877,
+      "machine": 34404,
+      "member_index": 44,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "a1e1d7ce21fa6e9f426fef6483035b56de9ee42371bcdf0c98b2f834ca74c019"
+    },
+    {
+      "bytes": 158844,
+      "machine": 34404,
+      "member_index": 45,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "d8f74c6baffd8f716c3302d525c1bbf580d85d053f37110541599b868ad7ff8d"
+    },
+    {
+      "bytes": 4607,
+      "machine": 34404,
+      "member_index": 46,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "f5af7563256e04e9b901ac95649bde3c8ff5c6de12ac81b3cfff5406ba3505c6"
+    },
+    {
+      "bytes": 1336,
+      "machine": 34404,
+      "member_index": 47,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "4d66587d1c7613de7c51e6f9c576e07e5c505c23cbdca9c9aa0f5551774e02ea"
+    },
+    {
+      "bytes": 6120,
+      "machine": 34404,
+      "member_index": 48,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "d8709fe0c99dbd3cc43e1281ca7f777a6a3124ea16103794ac15757afbb543cf"
+    },
+    {
+      "bytes": 80834,
+      "machine": 34404,
+      "member_index": 49,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "c7ce444f6e49891de68cdbe57605c2daffc4a6af999c578b086eaa9564b85950"
+    },
+    {
+      "bytes": 603,
+      "machine": 34404,
+      "member_index": 50,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "3d88f75169d61f1bf76762e1acb10c28ed9f0adc3739a411367ad105f91ff4da"
+    },
+    {
+      "bytes": 557,
+      "machine": 34404,
+      "member_index": 51,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "fcf8e3b9772dd6468093221dbb395fd921652d5a76e701d4e4b69a80f5f3cc61"
+    },
+    {
+      "bytes": 2210,
+      "machine": 34404,
+      "member_index": 52,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "02954038a8bd5168d646c6135cd1a483c0ab6175aade11bad905f0ab408d893d"
+    },
+    {
+      "bytes": 259123,
+      "machine": 34404,
+      "member_index": 53,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "f4a6a282edbfa8c402210ca6ed01c13de5eb3c9c407ada5706fc89d107afa7cf"
+    },
+    {
+      "bytes": 561,
+      "machine": 34404,
+      "member_index": 54,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "c44f566b63c4a15129554090ca272c726e8fa06232a29bf1c32760a906e1cfb0"
+    },
+    {
+      "bytes": 1122,
+      "machine": 34404,
+      "member_index": 55,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "251d375ab76680474961c1bbde7a82ebcbae71df0868977e74c736311795412e"
+    },
+    {
+      "bytes": 186573,
+      "machine": 34404,
+      "member_index": 56,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "0f50cfbffbb5b66ea849a103946e5eaa61b1639822f5c38a508f383adc57ef7f"
+    },
+    {
+      "bytes": 29370,
+      "machine": 34404,
+      "member_index": 57,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "637671164debdb2cc5da88c463dbd619022e772e57f7b07c452b40c427de7722"
+    },
+    {
+      "bytes": 224365,
+      "machine": 34404,
+      "member_index": 58,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "b1dac56c497fe83c1430053b9300588578c11a91ba0faff45c88198cfae65a36"
+    },
+    {
+      "bytes": 1736,
+      "machine": 34404,
+      "member_index": 59,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "965b278c666aa826646721eb052b2dcb6e809dcc2b8340610c4a241b8a382883"
+    },
+    {
+      "bytes": 33251,
+      "machine": 34404,
+      "member_index": 60,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "1b588f98ee68602d300ac1013065ad813423bbd398d932101b97e1a13e3aa35c"
+    },
+    {
+      "bytes": 246134,
+      "machine": 34404,
+      "member_index": 61,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "73ce0de3472e988818acdff1af9ee4b4aadf41d9ee3adfee14449d1912d8a700"
+    },
+    {
+      "bytes": 21195,
+      "machine": 34404,
+      "member_index": 62,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "8683e62f6d0152ea83f68be61017ee54c4f994679ce645aedbcf15683491cf0f"
+    },
+    {
+      "bytes": 611,
+      "machine": 34404,
+      "member_index": 63,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "b8f37f7e6aa86103295941f6de9d65896933eb2dae35448e5e9fe25cf8e11c22"
+    },
+    {
+      "bytes": 43290,
+      "machine": 34404,
+      "member_index": 64,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "9f55ae07c8d2dd15a58cf589ab3a1fd4cd1ce63f165ce714cac405c195296c29"
+    },
+    {
+      "bytes": 99225,
+      "machine": 34404,
+      "member_index": 65,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "a60f75d7472576f4e387f8723a9d5cf2c55ba7384edce27e6a4d3acd3be0b6d1"
+    },
+    {
+      "bytes": 100110,
+      "machine": 34404,
+      "member_index": 66,
+      "retained_object_equal": true,
+      "retained_object_exists": true,
+      "sha256": "3f234e2c284fb3981cdf45fcc53460ad31f58ea48d0b24157c92a734cdbe79c0"
+    }
+  ],
+  "observed_checkout_head": "aec37c1f990a4b3dda3e3103154ec2b4e3bdfa2b",
+  "scope": "Current retained source/object observations; not historical source-to-binary attestation.",
+  "source_sha256": {
+    "tests/test_issue321_provenance.py": "62c8cb1c8c313e356ccf1b5a217e36d30ef4f0f6ece73dfc6557f3e423059e42",
+    "tools/inspect_issue321_origin.py": "47bc5bbfbfdbc8b188e56dbcfb48a14c5b9945367d163b10c2b0f763455b20d6"
+  },
+  "sources": [
+    {
+      "baseline_blob_sha256": "e81bcdee9bdcdcc6f99059e67361ad3f2152a6b3fd5d39c13070c9db079de372",
+      "current_sha256": "e81bcdee9bdcdcc6f99059e67361ad3f2152a6b3fd5d39c13070c9db079de372",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/DemoasicFrames.cpp"
+    },
+    {
+      "baseline_blob_sha256": "07f2565fcc2dd476380cb962f9359af23e8f50b8cb76d76a2f343cd389226c25",
+      "current_sha256": "07f2565fcc2dd476380cb962f9359af23e8f50b8cb76d76a2f343cd389226c25",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/exception.cpp"
+    },
+    {
+      "baseline_blob_sha256": "52f8bc03f446a3b20f67a78e578e763a58d31ccf608529b239771126bedbfb7f",
+      "current_sha256": "52f8bc03f446a3b20f67a78e578e763a58d31ccf608529b239771126bedbfb7f",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/lutpath.cpp"
+    },
+    {
+      "baseline_blob_sha256": "713875c0b0552535ed37e586dce47763946fd25cb5d1eb2fa1a1348ae66368ca",
+      "current_sha256": "713875c0b0552535ed37e586dce47763946fd25cb5d1eb2fa1a1348ae66368ca",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/AsyncEncoder.cpp"
+    },
+    {
+      "baseline_blob_sha256": "83d4ee8b21f4480911c97a02b1bffcc2c98206efb577396c743499e51146cd48",
+      "current_sha256": "83d4ee8b21f4480911c97a02b1bffcc2c98206efb577396c743499e51146cd48",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/CFHDEncoder.cpp"
+    },
+    {
+      "baseline_blob_sha256": "81d40e794af931b7d1aa17ebdaf0e575c91e8f721c19dd56b5f0376aae7211f6",
+      "current_sha256": "81d40e794af931b7d1aa17ebdaf0e575c91e8f721c19dd56b5f0376aae7211f6",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/CFHDEncoderMetadata.cpp"
+    },
+    {
+      "baseline_blob_sha256": "d10447321383367cecb964f7fee80201c7c5a545ed3b70db55416aae0ecc9d30",
+      "current_sha256": "d10447321383367cecb964f7fee80201c7c5a545ed3b70db55416aae0ecc9d30",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/CFHDEncoderPool.cpp"
+    },
+    {
+      "baseline_blob_sha256": "296119c58b5769cf90823dacd1f3f0ab41c3cc314ab068e2f9482226c014bb46",
+      "current_sha256": "296119c58b5769cf90823dacd1f3f0ab41c3cc314ab068e2f9482226c014bb46",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/EncoderPool.cpp"
+    },
+    {
+      "baseline_blob_sha256": "4f2a0f561f0001359e1e6173e053b33ba4af030902b778bc215d2416cede3aa7",
+      "current_sha256": "4f2a0f561f0001359e1e6173e053b33ba4af030902b778bc215d2416cede3aa7",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/EncoderQueue.cpp"
+    },
+    {
+      "baseline_blob_sha256": "6fe8b8f160086b9d1aa1b834aab30354a84f5e86e59b6c221cb2d4d184e8703b",
+      "current_sha256": "6fe8b8f160086b9d1aa1b834aab30354a84f5e86e59b6c221cb2d4d184e8703b",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/MetadataWriter.cpp"
+    },
+    {
+      "baseline_blob_sha256": "910db27f55972026fb4842fd9002c6fc8d8fb78c84deadf6c5c96a3140e22a38",
+      "current_sha256": "910db27f55972026fb4842fd9002c6fc8d8fb78c84deadf6c5c96a3140e22a38",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/SampleEncoder.cpp"
+    },
+    {
+      "baseline_blob_sha256": "6229eb23222632bd161b902f4522c6c52a62d1b57cd3034fd476d85e1684a845",
+      "current_sha256": "6229eb23222632bd161b902f4522c6c52a62d1b57cd3034fd476d85e1684a845",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "EncoderSDK/VideoBuffers.cpp"
+    },
+    {
+      "baseline_blob_sha256": "64616741235092c8a902b39a298513478c625489cf1d8883ccd3242cba09557e",
+      "current_sha256": "64616741235092c8a902b39a298513478c625489cf1d8883ccd3242cba09557e",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "ConvertLib/Bilinear.cpp"
+    },
+    {
+      "baseline_blob_sha256": "d181648322569cd809b96cb911e5b97224c0540450af6469c1446363d8748cce",
+      "current_sha256": "d181648322569cd809b96cb911e5b97224c0540450af6469c1446363d8748cce",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "ConvertLib/ColorMatrix.cpp"
+    },
+    {
+      "baseline_blob_sha256": "a8bd52186118d962930258a520a6703427309afc7a223bed9d385caef65cc429",
+      "current_sha256": "a8bd52186118d962930258a520a6703427309afc7a223bed9d385caef65cc429",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "ConvertLib/ConvertYUV8.cpp"
+    },
+    {
+      "baseline_blob_sha256": "cde3ed3c620574ae3764ac1c29bcb241e934628805ee59fda35765f9a9a6f9c4",
+      "current_sha256": "cde3ed3c620574ae3764ac1c29bcb241e934628805ee59fda35765f9a9a6f9c4",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "ConvertLib/DPXConverter.cpp"
+    },
+    {
+      "baseline_blob_sha256": "ba4b81e5a19746273418f34192163567579459ffd416a4e6ade00cac0db1cf6d",
+      "current_sha256": "ba4b81e5a19746273418f34192163567579459ffd416a4e6ade00cac0db1cf6d",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "ConvertLib/ImageConverter.cpp"
+    },
+    {
+      "baseline_blob_sha256": "3a30302f08121b409ebf4236f1ce0e87def988eaff64059c37da32e402864e59",
+      "current_sha256": "3a30302f08121b409ebf4236f1ce0e87def988eaff64059c37da32e402864e59",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "ConvertLib/ImageScaler.cpp"
+    },
+    {
+      "baseline_blob_sha256": "ddbe2095287d3c0be7fc434262b069823af60dd3e52ca98c6bf09da00ff1f864",
+      "current_sha256": "ddbe2095287d3c0be7fc434262b069823af60dd3e52ca98c6bf09da00ff1f864",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "ConvertLib/MemAlloc.cpp"
+    },
+    {
+      "baseline_blob_sha256": "207dc3b9d2fede1d82509bc9d8f82407ff8930ad546e6880cf63da2fbc12c7c0",
+      "current_sha256": "207dc3b9d2fede1d82509bc9d8f82407ff8930ad546e6880cf63da2fbc12c7c0",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "DecoderSDK/CFHDDecoder.cpp"
+    },
+    {
+      "baseline_blob_sha256": "4b73496c65761c074201465e372b543d1ab89ef29f2ffa98fae7aaf0f144e830",
+      "current_sha256": "4b73496c65761c074201465e372b543d1ab89ef29f2ffa98fae7aaf0f144e830",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "DecoderSDK/CFHDMetadata.cpp"
+    },
+    {
+      "baseline_blob_sha256": "ed564ded15672ea8cf13700fa88f1203050be9de4bd4f7731d6b979aff7d042e",
+      "current_sha256": "ed564ded15672ea8cf13700fa88f1203050be9de4bd4f7731d6b979aff7d042e",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "DecoderSDK/Conversion.cpp"
+    },
+    {
+      "baseline_blob_sha256": "c99f4792ecd85195c2672921f1a15ada422999e6ef260cccdaaacad6a51e9d32",
+      "current_sha256": "c99f4792ecd85195c2672921f1a15ada422999e6ef260cccdaaacad6a51e9d32",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "DecoderSDK/ISampleDecoder.cpp"
+    },
+    {
+      "baseline_blob_sha256": "8589453e548645b5563269a64cb00bc25be2b684dc92457f1ea59b0d1b20acf8",
+      "current_sha256": "8589453e548645b5563269a64cb00bc25be2b684dc92457f1ea59b0d1b20acf8",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "DecoderSDK/SampleDecoder.cpp"
+    },
+    {
+      "baseline_blob_sha256": "bda84a3b689587879b2e0d76ac9b23f253ffead858d512389dcd62e5c3043ab8",
+      "current_sha256": "bda84a3b689587879b2e0d76ac9b23f253ffead858d512389dcd62e5c3043ab8",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "DecoderSDK/SampleMetadata.cpp"
+    },
+    {
+      "baseline_blob_sha256": "723eb8a1b7cf027c4b8efecd79c915c7885544aeb2eda4329168ba1edaf0a9ac",
+      "current_sha256": "723eb8a1b7cf027c4b8efecd79c915c7885544aeb2eda4329168ba1edaf0a9ac",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/InvertHorizontalStrip16s.c"
+    },
+    {
+      "baseline_blob_sha256": "f2608b92077fc21cbbc1eda4c3151b433c3208ef219c786809b6098c24cdfeee",
+      "current_sha256": "f2608b92077fc21cbbc1eda4c3151b433c3208ef219c786809b6098c24cdfeee",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/RGB2YUV.c"
+    },
+    {
+      "baseline_blob_sha256": "05c38581d03689f04d31fc195287e4731ee4f6c23011351698ae983ce9936bb8",
+      "current_sha256": "05c38581d03689f04d31fc195287e4731ee4f6c23011351698ae983ce9936bb8",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/allocator.c"
+    },
+    {
+      "baseline_blob_sha256": "70e7cd8e3d33fa86a053847c380c53fc033478b21b44575ca7e06bbea58cbad6",
+      "current_sha256": "70e7cd8e3d33fa86a053847c380c53fc033478b21b44575ca7e06bbea58cbad6",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/bandfile.c"
+    },
+    {
+      "baseline_blob_sha256": "702de7d5611d2ef7e5220447206fd30a585245ac8bd9cc66c17a3ba02953dfef",
+      "current_sha256": "702de7d5611d2ef7e5220447206fd30a585245ac8bd9cc66c17a3ba02953dfef",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/bayer.c"
+    },
+    {
+      "baseline_blob_sha256": "bcbeed32c1d5ad640c48fa8f7a7974c5a87f80a1c2fd2f7ccabb9e9d13ee802d",
+      "current_sha256": "bcbeed32c1d5ad640c48fa8f7a7974c5a87f80a1c2fd2f7ccabb9e9d13ee802d",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/bitstream.c"
+    },
+    {
+      "baseline_blob_sha256": "4de9e0e92417ba38d58843719c152aee1444b3e9749a3fb1ceb310f452e808ea",
+      "current_sha256": "4de9e0e92417ba38d58843719c152aee1444b3e9749a3fb1ceb310f452e808ea",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/buffer.c"
+    },
+    {
+      "baseline_blob_sha256": "c0df5850b167a8fbb356420435910ea7652ec6c60bf8fb7c635759d53c594ef6",
+      "current_sha256": "c0df5850b167a8fbb356420435910ea7652ec6c60bf8fb7c635759d53c594ef6",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/codebooks.c"
+    },
+    {
+      "baseline_blob_sha256": "3115d76debf130d08097edcb37f5253389ca15a683376e736de72af4223cf4cb",
+      "current_sha256": "3115d76debf130d08097edcb37f5253389ca15a683376e736de72af4223cf4cb",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/codec.c"
+    },
+    {
+      "baseline_blob_sha256": "18c6b1eb7331c9631d69bab7187ce592932689be8f6ad19c7fd2a0996ed24cb4",
+      "current_sha256": "18c6b1eb7331c9631d69bab7187ce592932689be8f6ad19c7fd2a0996ed24cb4",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/convert.c"
+    },
+    {
+      "baseline_blob_sha256": "9d08fcd3045518fbfc08f2a2c8082fd46aa8aed112aeab218ff03c09c5241e00",
+      "current_sha256": "9d08fcd3045518fbfc08f2a2c8082fd46aa8aed112aeab218ff03c09c5241e00",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/cpuid.c"
+    },
+    {
+      "baseline_blob_sha256": "01a68c9e7f48ab44fb1a5001de676f57a426519549915da215349f6ad928fdc0",
+      "current_sha256": "01a68c9e7f48ab44fb1a5001de676f57a426519549915da215349f6ad928fdc0",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/debug.c"
+    },
+    {
+      "baseline_blob_sha256": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+      "current_sha256": "acd477cb72bd314cda2d088e5a37fb956810e2f27ec893eb6272abc33fc511a6",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/decoder.c"
+    },
+    {
+      "baseline_blob_sha256": "b3b2a5b25a2badfa94806511dd8031920df46e8cf02ca4e238b26f12c199da5e",
+      "current_sha256": "b3b2a5b25a2badfa94806511dd8031920df46e8cf02ca4e238b26f12c199da5e",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/dither.c"
+    },
+    {
+      "baseline_blob_sha256": "3d8b4e72c0d93d7dd93399f284ba573c61a0108ab6105967eba255bc4817dc7e",
+      "current_sha256": "3d8b4e72c0d93d7dd93399f284ba573c61a0108ab6105967eba255bc4817dc7e",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/draw.c"
+    },
+    {
+      "baseline_blob_sha256": "6bb8171f7981fd827646a444c0f71107ac1be3012356b04e84f1a791ecdce37c",
+      "current_sha256": "6bb8171f7981fd827646a444c0f71107ac1be3012356b04e84f1a791ecdce37c",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/dump.c"
+    },
+    {
+      "baseline_blob_sha256": "99478b9eafacc50b1fd96a7c09dd19ed19037bd6c86f4ebcb512c1be12811be6",
+      "current_sha256": "99478b9eafacc50b1fd96a7c09dd19ed19037bd6c86f4ebcb512c1be12811be6",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/encoder.c"
+    },
+    {
+      "baseline_blob_sha256": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+      "current_sha256": "32033d23498f33ee11d4e032ad46b90a426c3458fb3c4e9a01efab49d5da9874",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/entropy_threading.c"
+    },
+    {
+      "baseline_blob_sha256": "2f80479a83df8f30a1fcdcc3e5f2f1be2c5627f8c42326fcb7edab814733f402",
+      "current_sha256": "2f80479a83df8f30a1fcdcc3e5f2f1be2c5627f8c42326fcb7edab814733f402",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/filter.c"
+    },
+    {
+      "baseline_blob_sha256": "cf9d60588371a59da5d4b76a3def2327f336b62a96a6f356d0ecfbdb198eb094",
+      "current_sha256": "cf9d60588371a59da5d4b76a3def2327f336b62a96a6f356d0ecfbdb198eb094",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/frame.c"
+    },
+    {
+      "baseline_blob_sha256": "b992ebf126f7ef8dceb478f62613f611b0f028d8250730b4b9b13467ad3c6769",
+      "current_sha256": "b992ebf126f7ef8dceb478f62613f611b0f028d8250730b4b9b13467ad3c6769",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/image.c"
+    },
+    {
+      "baseline_blob_sha256": "d337505a79f3ec5e1c29065607e62ca2f6e9da1885a039fc351449ff0e9715cf",
+      "current_sha256": "d337505a79f3ec5e1c29065607e62ca2f6e9da1885a039fc351449ff0e9715cf",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/keyframes.c"
+    },
+    {
+      "baseline_blob_sha256": "2802840093297b68cf7a07c39eafedce22f93306dc7b8cbea611efb9f8382e73",
+      "current_sha256": "2802840093297b68cf7a07c39eafedce22f93306dc7b8cbea611efb9f8382e73",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/metadata.c"
+    },
+    {
+      "baseline_blob_sha256": "a02f10aa6fce80df378adda041a15583c90b9f3fe95ec52bb2bc202f53e1dfa5",
+      "current_sha256": "a02f10aa6fce80df378adda041a15583c90b9f3fe95ec52bb2bc202f53e1dfa5",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/quantize.c"
+    },
+    {
+      "baseline_blob_sha256": "e4d033810faa880c9097cc56f5fd4a5cad74799c393852d5e6a97d9eec3de8f9",
+      "current_sha256": "e4d033810faa880c9097cc56f5fd4a5cad74799c393852d5e6a97d9eec3de8f9",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/recursive.c"
+    },
+    {
+      "baseline_blob_sha256": "255be9fb0f58be043b2dad64ed1eff029fdd0a92f522f3ecb0951e134770935c",
+      "current_sha256": "255be9fb0f58be043b2dad64ed1eff029fdd0a92f522f3ecb0951e134770935c",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/scanner.c"
+    },
+    {
+      "baseline_blob_sha256": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+      "current_sha256": "97555d73195289b7a73521c0ffa52b4e824d31792b36d9f33a6d144775821ff9",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/spatial.c"
+    },
+    {
+      "baseline_blob_sha256": "6b317c5f20a2f5a88854bfc011378fa1c941d90f8b754769e1ddd255c997cd49",
+      "current_sha256": "6b317c5f20a2f5a88854bfc011378fa1c941d90f8b754769e1ddd255c997cd49",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/stats.c"
+    },
+    {
+      "baseline_blob_sha256": "a74ba009ee2015514c85fb359375418afcf4ec10eef90b95a017ac33dd828289",
+      "current_sha256": "a74ba009ee2015514c85fb359375418afcf4ec10eef90b95a017ac33dd828289",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/swap.c"
+    },
+    {
+      "baseline_blob_sha256": "c4e237f49f02cb9236c1a7eb08c54d2b943189ccb29a74648f9941513504ad87",
+      "current_sha256": "c4e237f49f02cb9236c1a7eb08c54d2b943189ccb29a74648f9941513504ad87",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/temporal.c"
+    },
+    {
+      "baseline_blob_sha256": "1a86b0de39c8b36f929f22544160dadada550c78de6f0ebffb6ea954588cbdf9",
+      "current_sha256": "1a86b0de39c8b36f929f22544160dadada550c78de6f0ebffb6ea954588cbdf9",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/thread.c"
+    },
+    {
+      "baseline_blob_sha256": "65a0125712f80b2aad739cf3c62fc23eaf190fe82af2b49d57c3813726606b1f",
+      "current_sha256": "65a0125712f80b2aad739cf3c62fc23eaf190fe82af2b49d57c3813726606b1f",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/thumbnail.c"
+    },
+    {
+      "baseline_blob_sha256": "fd956eab84f52a62c7181d2b74e4440bf7e35811f64f0c9ec9980ad44b97e9f6",
+      "current_sha256": "fd956eab84f52a62c7181d2b74e4440bf7e35811f64f0c9ec9980ad44b97e9f6",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/timing.c"
+    },
+    {
+      "baseline_blob_sha256": "14f39901effb9c8024ff6537f8d5079966cb9e56faf9e18fd0c809e4ea33ed8d",
+      "current_sha256": "14f39901effb9c8024ff6537f8d5079966cb9e56faf9e18fd0c809e4ea33ed8d",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/vlc.c"
+    },
+    {
+      "baseline_blob_sha256": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd",
+      "current_sha256": "62b3db074854a3df5ae82a6eeb1291332617706123c377774ccc5330731991fd",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "Codec/wavelet.c"
+    },
+    {
+      "baseline_blob_sha256": "ec1c2351da0007bddba5d8cc775df19d40877a89ce0df66d1916fe35d68585ee",
+      "current_sha256": "ec1c2351da0007bddba5d8cc775df19d40877a89ce0df66d1916fe35d68585ee",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "WarpLib/GeoMesh.c"
+    },
+    {
+      "baseline_blob_sha256": "7f8f006bc7c2869066fe346fae84d756175b3827c7d4a7fc5411c6044f380196",
+      "current_sha256": "7f8f006bc7c2869066fe346fae84d756175b3827c7d4a7fc5411c6044f380196",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "WarpLib/GeoMeshApply.c"
+    },
+    {
+      "baseline_blob_sha256": "37d12b014a362469017ecd3e595dcdb59c9c595e73a496250c3a02b7cd0ca38d",
+      "current_sha256": "37d12b014a362469017ecd3e595dcdb59c9c595e73a496250c3a02b7cd0ca38d",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "WarpLib/GeoMeshCache.c"
+    },
+    {
+      "baseline_blob_sha256": "0aa914779240a8ca35036ba79a6d0734d6aeacefd1cf66adef3008f1f873ca40",
+      "current_sha256": "0aa914779240a8ca35036ba79a6d0734d6aeacefd1cf66adef3008f1f873ca40",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "WarpLib/GeoMeshGoPro.c"
+    },
+    {
+      "baseline_blob_sha256": "11d74ae4c52e46a7c7679fd17ee8a212df5702151742429296f6f898a88b77f5",
+      "current_sha256": "11d74ae4c52e46a7c7679fd17ee8a212df5702151742429296f6f898a88b77f5",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "WarpLib/GeoMeshInterp.c"
+    },
+    {
+      "baseline_blob_sha256": "877de66e4df2b93f4eaa987238c44e12ece97b3bf78a755b2ffacc301c881eb6",
+      "current_sha256": "877de66e4df2b93f4eaa987238c44e12ece97b3bf78a755b2ffacc301c881eb6",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "WarpLib/GeoMeshTransform.c"
+    },
+    {
+      "baseline_blob_sha256": "922a35da6d4f775f7d513978c87473fd006e0c997c079f4aa7e8a8b8ddd4ff5d",
+      "current_sha256": "922a35da6d4f775f7d513978c87473fd006e0c997c079f4aa7e8a8b8ddd4ff5d",
+      "lf_normalized_equal": true,
+      "raw_equal": true,
+      "source": "WarpLib/GeoMeshYuy2.c"
+    }
+  ]
+}

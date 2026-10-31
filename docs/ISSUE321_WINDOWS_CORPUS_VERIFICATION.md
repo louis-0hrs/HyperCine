@@ -2,6 +2,11 @@
 
 Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.
 
+**2026-10-30 follow-up:** the original Windows library and both capture
+executables have now been recovered, hash-verified, privately archived and
+replayed on native Windows. See [retained-build provenance](validation/ISSUE321_RETAINED_PROVENANCE_20261030.md).
+The historical snapshot and its original limitations below remain dated evidence.
+
 Snapshot: 2026-10-29; repository base `9909bfccf220ec914a3c1ebf3e57fc9d95696f99`.
 This is read-only corpus integrity and bounded packet observation, **not** a
 VC-5 conformance, decoder, GPU or historical-build certification. No exports,

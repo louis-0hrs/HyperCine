@@ -1,0 +1,9 @@
+{
+  "index_sha256": "dabb98270e8b8a11ebb02001bebd5f8077d8cc2d315732a4783862ff65e1c424",
+  "indexed_files": 17,
+  "manifest_sha256": "0ca042dae6cab669e2b47102665396de84b2fa97f5acfc78f48bb7101a7d1a62",
+  "private_records": "Retained raw compiler/compile/link records are PRIVATE; do not upload to GitHub.",
+  "readback_files_including_index": 18,
+  "relative_root": "golden/windows/qualities/2026-10-30-issue321-retained-build-provenance",
+  "status": "PASS_FULL_SHA256_AND_LENGTH_READBACK"
+}
