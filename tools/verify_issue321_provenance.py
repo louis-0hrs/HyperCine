@@ -52,7 +52,11 @@ def build_record(build, target, source=None, library=None):
                 commands.replace('/', '\\').casefold(), 'compile source record differs')
     if library is not None:
         linked = re.findall(r'"([^"]+)"', link.read_text(encoding='utf-16'))
-        require(ntpath.normcase(ntpath.normpath(str(library.resolve()))) in
+        # Compare Windows record spellings lexically on every host: fold case,
+        # separators and parent components on both sides. Resolving only the
+        # expected path can rewrite aliases/junctions absent from retained logs.
+        # Full-path equality remains required; artifact bytes are bound separately.
+        require(ntpath.normcase(ntpath.normpath(str(library))) in
                 {ntpath.normcase(ntpath.normpath(p)) for p in linked},
                 'link input record differs')
     return {'evidence_class': 'retained_local_records_not_attestation',

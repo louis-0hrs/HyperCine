@@ -89,6 +89,33 @@ class Provenance(unittest.TestCase):
         (directory / 'link.command.1.tlog').write_text('"' + linked + '"', encoding='utf-16')
         v.build_record(self.root, 'capture', library=self.binary)
 
+    def test_link_input_keeps_recorded_root_spelling(self):
+        _, directory = self.records()
+        (directory / 'link.command.1.tlog').write_text(
+            '"' + str(self.binary) + '"', encoding='utf-16')
+        # Model a temp-root alias/junction without requiring symlink privileges.
+        with patch.object(Path, 'resolve', return_value=self.root / 'canonical/capture.exe'):
+            v.build_record(self.root, 'capture', library=self.binary)
+
+    def test_link_input_normalizes_expected_parent_components(self):
+        _, directory = self.records()
+        (directory / 'link.command.1.tlog').write_text(
+            '"' + str(self.binary) + '"', encoding='utf-16')
+        v.build_record(self.root, 'capture', library=self.root / 'unused/../capture.exe')
+
+    def test_link_input_uses_windows_case_and_separators(self):
+        _, directory = self.records()
+        linked = str(self.binary).replace('\\', '/').upper()
+        (directory / 'link.command.1.tlog').write_text('"' + linked + '"', encoding='utf-16')
+        v.build_record(self.root, 'capture', library=self.binary)
+
+    def test_link_input_rejects_same_basename_in_other_directory(self):
+        _, directory = self.records()
+        linked = str(self.root / 'unused/../other/capture.exe')
+        (directory / 'link.command.1.tlog').write_text('"' + linked + '"', encoding='utf-16')
+        with self.assertRaisesRegex(ValueError, 'link input record differs'):
+            v.build_record(self.root, 'capture', library=self.binary)
+
     def test_packet_divergence_is_fatal(self):
         # Parser behavior has its own corpus contract; exercise this caller's
         # decision on distinct normalized packets, with raw bytes also distinct.

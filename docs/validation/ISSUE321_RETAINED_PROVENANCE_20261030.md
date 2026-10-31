@@ -94,6 +94,34 @@ verify_index(root, 17,
 
 ## Reproduction and validation
 
+### 2026-10-31 CI normalization correction
+
+Review #5719980168 on PR #334 identified a host-dependent link-input check:
+only the expected library path used `Path.resolve()`, while retained record
+paths used lexical Windows normalization. An alias, junction or symlink in a
+temporary root can therefore change only the expected spelling.
+
+The checker now applies `ntpath.normcase(ntpath.normpath(...))` to both
+spellings, without filesystem resolution in this comparison. It requires
+full-path equality under Windows case/separator/parent-component rules;
+matching basenames alone is insufficient. Artifact SHA-256 binding remains
+a separate required gate. This policy does not establish filesystem identity
+between differently spelled aliases or historical execution authenticity.
+
+The contract now has 17 deterministic controls, including simulated root
+canonicalization, parent components on either side, Windows case/separators,
+and rejection of the same basename in another directory. The root-alias
+control failed with `ValueError: link input record differs` before the fix.
+Both real retained capture link records were also checked against the exact
+SDK input and expected parent-component spelling; wrong-directory controls
+were rejected. The unchanged companion index verified all 17 indexed files.
+
+Revised-source validation is recorded separately in
+[the correction inventory](../evidence/issue321-path-normalization-20261031.json).
+The 2026-10-30 results and hashes below remain historical evidence for the
+previous checker. Fresh hosted Windows/macOS/Linux CI on a committed revised
+head is still required before treating PR #334 as integration-ready.
+
 Bind the private original capture-build directory and SDK library locally via
 `HYPERCINE_ISSUE321_CAPTURE_BUILD` and `HYPERCINE_ISSUE321_SDK_LIBRARY`.
 The audit command below uses the original retained build layout, including its
