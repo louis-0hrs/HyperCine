@@ -25,7 +25,14 @@ def verified(root, rel, index):
 
 
 def trace_contract(trace, count):
-    if [f.get('frame_index') for f in trace] != list(range(count)):
+    # JSON booleans and floats compare equal to integers in Python; neither
+    # is an actual frame index. Validate shape and exact types before equality.
+    if (type(count) is not int or count < 0 or not isinstance(trace, list) or
+        len(trace) != count or any(
+            not isinstance(frame, dict) or
+            type(frame.get('frame_index')) is not int or
+            frame['frame_index'] != index
+            for index, frame in enumerate(trace))):
         raise ValueError('trace count/order mismatch')
 
 

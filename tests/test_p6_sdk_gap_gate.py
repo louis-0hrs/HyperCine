@@ -102,4 +102,33 @@ class GapGateControls(unittest.TestCase):
             for rel in ['../packet','/packet','drive:packet','folder'+chr(92)+'packet']:
                 with self.assertRaisesRegex(ValueError,'unsafe'):gate.verified(Path(tmp),rel,{})
 
+class TraceTypes(unittest.TestCase):
+    def test_accept_integer_indices(self):
+        gate.trace_contract([{'frame_index':i} for i in range(7)],7)
+        gate.trace_contract([],0)
+    def test_reject_boolean_indices(self):
+        for index in (0,1):
+            trace=[{'frame_index':i} for i in range(7)]
+            trace[index]['frame_index']=bool(index)
+            with self.subTest(index=index),self.assertRaises(ValueError): gate.trace_contract(trace,7)
+    def test_reject_float_indices(self):
+        for index in range(7):
+            trace=[{'frame_index':i} for i in range(7)]
+            trace[index]['frame_index']=float(index)
+            with self.subTest(index=index),self.assertRaises(ValueError): gate.trace_contract(trace,7)
+    def test_reject_null_string_missing_indices(self):
+        for value in (None,'0'):
+            with self.subTest(value=value),self.assertRaises(ValueError): gate.trace_contract([{'frame_index':value}],1)
+        with self.assertRaises(ValueError): gate.trace_contract([{}],1)
+    def test_reject_bad_outer_shapes(self):
+        for value in (None,{},'',(),False,0):
+            with self.subTest(value=value),self.assertRaises(ValueError): gate.trace_contract(value,0)
+    def test_reject_bad_frame_shapes(self):
+        for value in (None,[],False,'0',0):
+            with self.subTest(value=value),self.assertRaises(ValueError): gate.trace_contract([value],1)
+    def test_reject_wrong_order_and_count(self):
+        for trace,count in (([],1),([{'frame_index':1}],1),([{'frame_index':0}]*2,2),([],False),([],0.0),([],-1)):
+            with self.subTest(trace=trace,count=count),self.assertRaises(ValueError): gate.trace_contract(trace,count)
+
+
 if __name__=='__main__':unittest.main()
