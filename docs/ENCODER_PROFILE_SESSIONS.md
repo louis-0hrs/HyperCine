@@ -4,14 +4,17 @@ This step makes the internal capability/session contract profile-aware. It is th
 step the merged six-profile writer (#318, `FilmScan3Encoder::SetSessionQuality`)
 left open: the writer accepted six profiles while `detail::CheckEncoderCapability`
 still refused five of them with `ValidButNotImplemented`. Nothing here is a
-product qualification, a per-profile GPU claim, or an original-SDK reference.
+product qualification or a direct original-SDK/GPU reference. The combined
+#320 integration also carries native measurement-only GPU tests; their evidence
+is separate from production session admission (see below).
 
 ## Scope
 
 - Changed: `src/core/encoder_session_config.h`, `src/core/encoder_capability.cpp`,
   `src/core/encoder_backend_selection.cpp`, one new CTest, and the two existing
   session/capability contract tests whose expectation was the old
-  FilmScan3-only rule.
+  FilmScan3-only rule. The combined integration adds measurement-only CUDA/Metal
+  profile matrices and guarded registrations; it does not expand GPU admission.
 - Unchanged: public headers, `FilmScan3Encoder` constructors, the legacy fixed-Q2
   path, RGB444, `upstream/`, and the single sample writer. There is no second
   quality table calculator and no second writer.
@@ -27,8 +30,8 @@ product qualification, a per-profile GPU claim, or an original-SDK reference.
 | FilmScan2 | admitted | refused | refused |
 | FilmScan3 | admitted | admitted | admitted |
 
-Admission means "this session contract has packet evidence for this pair", not
-"this pair is qualified against the original SDK".
+Admission is a reviewed session policy, not an automatic consequence of a
+measurement-only parity result. It does not mean original SDK qualification.
 
 - **CPU scalar, six profiles.** They share one writer, one rate-state calculator
   and one quality stamp, and #318 pinned 16-frame 1080p packets for all six,
@@ -37,8 +40,10 @@ Admission means "this session contract has packet evidence for this pair", not
   already admitted, not a new geometry or backend claim.
 - **Metal and CUDA, FilmScan3 only.** The merged GPU session work (#312, #319)
   carries native packet evidence for FilmScan3. Admitting another profile there
-  would emit bytes that no GPU packet gate has ever compared, behind a GPU claim.
-  That is refused until the pair has its own oracle.
+  is still refused by policy. The combined #320 matrix now measures six profiles
+  through a test-only frontend/writer seam and asserts those typed refusals.
+  This is not production session admission or direct original-SDK/GPU parity.
+  Expanding admission requires a separate source-bound qualification/review.
 
 ## New refusal axis
 
@@ -104,11 +109,33 @@ Existing expectations updated in `encoder_backend_selection_contract` and
 `encoder_capability_contract`: a legal profile on CPU scalar is now admitted, and
 its absence on a GPU backend is the new typed profile refusal.
 
+## Completed combined measurement evidence (historical source head)
+
+At source head `a1861102eed283bff01df435727dc2b5c9a17784` the native owners
+reported A2 CUDA Release **130/130** and M2 Pro Metal Release **114/114**, zero
+failures/skips. Each native matrix executes 240 frames (six profiles, two
+patterns, twenty frames), including frames 8/17 and Low/Medium/High overbitrate
+above one. The Metal run reports 6,480 wavelet dispatches. These are historical
+owner results, not new GPU executions by the documentation follow-up.
+
+The [native Metal handoff](https://github.com/louis-0hrs/HyperCine/pull/320#issuecomment-6526417925)
+pins the exact head and limits. The [integration evidence](PROFILE_BACKEND_INTEGRATION_259.json)
+records unchanged source/test blobs. Original #330 head `9e60f0c` failed native
+coverage; corrected stimulus in canonical #320 does not make that old head pass.
+
+Independent CPU original-SDK gates in #322/#331 remain complementary evidence,
+not a direct GPU-vs-SDK test. Metal FFmpeg/ffprobe were unavailable, so external
+decode was not registered, not passed. Native Windows and final maintainer
+acceptance remain open. GPU session admission is unchanged.
+
 ## Explicit non-claims
 
-- No per-profile Metal or CUDA packet evidence, and no native GPU run in this PR.
+- No new GPU profile session admission or direct GPU-vs-original-SDK proof.
+- No new native GPU run in this documentation follow-up; cited native parity
+  is historical, source-bound, measurement-only evidence.
 - No 8K, no alternate timebase, no RGB444, no CPU SIMD, no Vulkan.
 - No original-SDK per-profile 4K/8K qualification, no SMPTE VC-5 conformance,
   no product release, and no decoded-pixel/PSNR claim.
-- `#46` keeps ownership of the remaining per-profile gaps (hysteresis-band
-  goldens, long profile sequences, GPU per profile, 8K).
+- #46 retains remaining per-profile qualification work. Long CPU original
+  sequences and direct hold witnesses now exist in #322; native measurements
+  do not close GPU/original, native Windows, or larger-geometry gaps.

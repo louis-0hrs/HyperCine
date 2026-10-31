@@ -20,12 +20,47 @@ GPU-required tests are registered only for their enabled native backend; no non-
 
 Preserve historical Medium/High 78/120 failures and the negative forty-frame ramp. Each corpus retains its own SHA-pinned index. Raw assets remain external/read-only; private bindings use HYPERCINE_GOLDEN_DIR.
 
+## Completed evidence and provenance
+
+Historical canonical source head: `a1861102eed283bff01df435727dc2b5c9a17784`.
+Its source/test blobs remain pinned in the adjacent JSON. This documentation
+follow-up changes no implementation, test, build, or upstream file and does not
+rerun unchanged GPU workloads.
+
+- Native owner A2 CUDA Release: **130/130**, zero failures/skips, 268.04 s.
+- Native owner M2 Pro Metal Release: **114/114**, zero failures/skips, 116.93 s;
+  240 frames, 6,480 wavelet dispatches and 240 color/command-buffer/wait operations.
+  [Exact-head native Metal handoff](https://github.com/louis-0hrs/HyperCine/pull/320#issuecomment-6526417925).
+  Five non-FilmScan3 GPU session profiles remain typed-refused. FFmpeg/ffprobe
+  were unavailable on that Mac: external decode was not registered, not passed.
+  Original SDK not wired into GPU matrix; no native GPU sanitizer/performance claim.
+- Required regular suite at that source: **58/59**, zero failures, one
+  `ffmpeg_oracle_qualification` skip, not decoder proof.
+- Independent #322 `31b9c8f0502049f9ff23a75a1f05b9b4eaf99fe3`: 129/129 private,
+  122/122 public; Linux 480/480 and Windows A 480/480, B 145/145, C 21/21 packets
+  plus direct state. Linux replay is not native Windows.
+- Independent #331 `d34eefd025cb6f423c672b540e64a8066aa5103e`: 42/42, 606/606
+  artifacts, 480/480 observable tables. Neither corpus is freshly replayed here.
+- Historical hosted checkpoint: owner and 2026-10-30 independent integration
+  review report 28/28 successful checks on `a186110`. That is not a hosted
+  result for a later documentation commit.
+
+Original #330 `9e60f0c` failed native Metal overbitrate coverage. The corrected
+canonical stimulus preserves that failure rather than relabeling it.
+
 ## Remaining acceptance
 
-- Complete current-main #322 private suite and #331 original table replay.
-- Native A2/Apple Metal results bound to final implementation/test blobs.
-- Exact-head hosted CI and independent policy/integration review.
-- Separate source-bound native GPU/original SDK qualification before any later profile admission expansion. Current measurements do not authorize it.
-- Windows-native execution deferred while its node is unavailable, not silently replaced by Linux fixture replay.
+- The 2026-10-30 integration review inspected policy/fallback and requested this
+  documentation correction; it did not independently replay private fixtures.
+  Final maintainer acceptance remains open, including the native Windows limit.
+- Native Windows execution remains deferred; Linux fixture replay does not
+  replace it. The nightly documentation worker has not rechecked node health.
+- Check exact-head hosted CI after this update; historical 28/28 is not new-head CI.
+- Separate source-bound native GPU/original SDK qualification and explicit review
+  before later profile admission expansion. Measurements do not authorize it.
+- Do not independently merge competing admission policies from #324/#330.
 
-No 4K/8K profile qualification, alternate-timebase, decoded-pixel quality, product release or SMPTE/VC-5 conformance claim. Keep #259/#46 open and affected PRs Draft pending review.
+No 4K/8K profile qualification, alternate-timebase, decoded-pixel quality, product
+release or SMPTE/VC-5 conformance claim. Keep #259/#46 open and #320 Draft.
+Next: review the docs-only correction and decide remaining qualification limits;
+no autonomous merge or draft promotion.

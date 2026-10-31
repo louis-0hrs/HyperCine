@@ -2,13 +2,14 @@
   "schema": 1,
   "main": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
   "base": "dbe715a5682f3b934290088a3ca5a887fc4d7957",
-  "scope": "Linux native A2 CUDA measurements with canonical typed GPU profile refusal; final integrated Metal validation pending",
+  "scope": "Completed source-bound native CUDA/Metal measurement-only parity; production GPU sessions remain FilmScan3-only; documentation follow-up does not rerun GPU suites",
   "suites": {
     "native_cuda_standalone": {
       "total": 130,
       "passed": 130,
       "failed": 0,
-      "skipped": []
+      "skipped": [],
+      "tested_head": "a1861102eed283bff01df435727dc2b5c9a17784"
     },
     "regular_sdk": {
       "total": 59,
@@ -16,7 +17,20 @@
       "failed": 0,
       "skipped": [
         "ffmpeg_oracle_qualification"
-      ]
+      ],
+      "tested_head": "a1861102eed283bff01df435727dc2b5c9a17784"
+    },
+    "native_metal_standalone": {
+      "total": 114,
+      "passed": 114,
+      "failed": 0,
+      "skipped": [],
+      "seconds": 116.93,
+      "platform": "Apple M2 Pro, macOS 26.5.2 arm64, AppleClang 21.0.0.21000101",
+      "evidence_url": "https://github.com/louis-0hrs/HyperCine/pull/320#issuecomment-6526417925",
+      "tested_head": "a1861102eed283bff01df435727dc2b5c9a17784",
+      "external_decode": "NOT_REGISTERED: ffmpeg/ffprobe unavailable; not decoder evidence",
+      "original_sdk": "NOT_COMPARED"
     }
   },
   "tested_source_blobs": {
@@ -43,6 +57,71 @@
     "measurement-only internal writer seams do not grant session permission",
     "native Windows deferred",
     "earlier interrupted CTest attempts not counted",
-    "no product or SMPTE/VC-5 claim"
-  ]
+    "no product or SMPTE/VC-5 claim",
+    "Original SDK is not wired into the GPU matrices; independent CPU corpus evidence is complementary, not direct GPU-vs-SDK proof",
+    "Metal external decode was not registered because tools were unavailable",
+    "Historical native GPU results apply to pinned source/test blobs; no nightly GPU rerun",
+    "No native GPU sanitizer, performance, 4K/8K profile or alternate-timebase qualification",
+    "Independent review requested documentation correction; final maintainer acceptance including Windows-native limitation remains open"
+  ],
+  "evidence_head": "a1861102eed283bff01df435727dc2b5c9a17784",
+  "evidence_attribution": "Historical owner-reported native suites and independent review; not new nightly GPU execution. Source/test blob bindings below must remain unchanged.",
+  "gpu_measurement": {
+    "profiles": 6,
+    "patterns": [
+      "deterministic gradient",
+      "seeded noise"
+    ],
+    "frames_per_profile_per_pattern": 20,
+    "total_frames_per_backend": 240,
+    "metal_wavelet_dispatches": 6480,
+    "metal_color_dispatches": 240,
+    "metal_command_buffers": 240,
+    "metal_waits": 240,
+    "metal_noise_overbitrate": {
+      "profiles": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "frames_above_one_per_profile": 19,
+      "maximum": 16
+    },
+    "coverage": "frames 8/17; complete packets, quant[36], scale[36], coefficient hashes[30], rate state, previous size, frame index and quality stamp",
+    "production_session_admission": "CUDA/Metal FilmScan3 only; other five profiles still typed-refused before allocation; measurement-only frontend seam is not admission",
+    "historical_failure": "Original #330 head 9e60f0c failed native overbitrate coverage; final corrected measurement does not retroactively pass it"
+  },
+  "historical_hosted_ci": {
+    "head": "a1861102eed283bff01df435727dc2b5c9a17784",
+    "reported_successful_checks": 28,
+    "attribution": "Owner handoff and independent 2026-10-30 integration review; not a check result for the documentation follow-up commit",
+    "new_head_status": "Requires separate exact-head check after publication"
+  },
+  "nightly_documentation_verification": {
+    "date": "2026-10-31",
+    "platform": "Debian 13 x86_64, GCC 14.2.0, CMake 3.31.6",
+    "scope": "Fresh CPU-only full public suites; no GPU run or private corpus replay; implementation/test/build files unchanged from evidence_head",
+    "standalone_official_gate": {
+      "command": "python3 ci/run_standalone.py --build-dir build-standalone --system Linux --machine x86_64",
+      "registered": 120,
+      "passed": 120,
+      "failed": 0,
+      "skipped": 0,
+      "required_external_decode": true
+    },
+    "regular_sdk": {
+      "command": "ctest --test-dir build-regular -C Release --output-on-failure",
+      "registered": 58,
+      "passed": 57,
+      "failed": 0,
+      "skipped": [
+        "ffmpeg_oracle_qualification"
+      ],
+      "skip_reason": "FFmpeg 7.1.5 is not on the measured oracle qualification list (n8.0, 9.0.2); not decoder proof"
+    },
+    "configuration": "Release, tests ON, benchmarks OFF, CUDA/Metal OFF; standalone upstream OFF, regular upstream ON; build --parallel 2",
+    "documentation_assertions_passed": 47,
+    "source_test_blobs_verified_unchanged": 12,
+    "hosted_ci": "Must be checked separately after publication; old-head success is not a new-head result"
+  }
 }
