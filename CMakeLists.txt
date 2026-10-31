@@ -178,6 +178,16 @@ if(HYPERCINE_BUILD_TESTS)
     target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
     add_test(NAME cpu_isa_selection COMMAND test_cpu_isa)
+    # Stdlib-only verifier for RCA-160 evidence: proves its own verdict rules
+    # discriminate before it is used on a submitted ledger.
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME rca160_cross_host_verifier_selftest
+            COMMAND "${Python3_EXECUTABLE}" -B
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/verify_rca160_cross_host.py" --self-test)
+        set_tests_properties(rca160_cross_host_verifier_selftest PROPERTIES
+            LABELS "synthetic;reference-decoder-contract")
+    endif()
 endif()
 
 option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)

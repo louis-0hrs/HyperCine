@@ -1,0 +1,355 @@
+{
+ "condition": "worker_threads > affinity_cpus (8 workers / 1 CPU unless noted); one decode per fresh process",
+ "diagnostic_only": true,
+ "interpretation_limits": [
+  "HALF bypasses the inverse frame transform and still corrupts, so the fault is not confined to that transform.",
+  "QUARTER is stable in 88 calls but does ~5x less work, so its stability is a lead, not a proven exclusion.",
+  "RG48 values wrap at 16-bit, so per-row offsets there are bounded by the wrap and are reported as measured, not as true magnitudes."
+ ],
+ "issue": 160,
+ "packet": {
+  "bytes": 900396,
+  "sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52"
+ },
+ "resolution_runs": [
+  {
+   "calls": 24,
+   "distinct": 3,
+   "median_ms": 28.56,
+   "resolution": "FULL"
+  },
+  {
+   "calls": 48,
+   "distinct": 4,
+   "height": 540,
+   "median_ms": 11.21,
+   "resolution": "HALF",
+   "structured_calls": 4,
+   "width": 960
+  },
+  {
+   "calls": 88,
+   "distinct": 1,
+   "height": 270,
+   "median_ms": 5.24,
+   "note": "88 calls include 24 at TAG_CPU_MAX=16 (20 workers on 1 CPU)",
+   "resolution": "QUARTER",
+   "structured_calls": 0,
+   "width": 480
+  }
+ ],
+ "runs": [
+  {
+   "bit_depth": 8,
+   "calls": 24,
+   "distinct": 3,
+   "dither_or_equal": 20,
+   "format": "BGRA 8-bit",
+   "modal_share": 0.875,
+   "structured_frames": [
+    {
+     "id": "p01",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 38.4,
+       "offset_explained_fraction": 0.8779,
+       "row_offset_max": -34,
+       "row_offset_min": -98
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 55.7,
+       "offset_explained_fraction": 0.9543,
+       "row_offset_max": 74,
+       "row_offset_min": -142
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 46.5,
+       "offset_explained_fraction": 0.7865,
+       "row_offset_max": 28,
+       "row_offset_min": -118
+      }
+     }
+    },
+    {
+     "id": "p19",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 38.4,
+       "offset_explained_fraction": 0.8779,
+       "row_offset_max": -34,
+       "row_offset_min": -98
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 29.0,
+       "offset_explained_fraction": 0.9584,
+       "row_offset_max": 74,
+       "row_offset_min": 27
+      },
+      "R": {
+       "shape": "unchanged"
+      }
+     }
+    },
+    {
+     "id": "p21",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 38.4,
+       "offset_explained_fraction": 0.8779,
+       "row_offset_max": -34,
+       "row_offset_min": -98
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 29.0,
+       "offset_explained_fraction": 0.9584,
+       "row_offset_max": 74,
+       "row_offset_min": 27
+      },
+      "R": {
+       "shape": "unchanged"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "bit_depth": 8,
+   "calls": 24,
+   "distinct": 24,
+   "dither_or_equal": 21,
+   "format": "RG24 RGB444 8-bit",
+   "modal_share": 0.0417,
+   "structured_frames": [
+    {
+     "id": "p08",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 38.8,
+       "offset_explained_fraction": 0.88,
+       "row_offset_max": -35,
+       "row_offset_min": -99
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 29.0,
+       "offset_explained_fraction": 0.9585,
+       "row_offset_max": 74,
+       "row_offset_min": 26
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 0.0,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": 0,
+       "row_offset_min": 0
+      }
+     }
+    },
+    {
+     "id": "p22",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 31.4,
+       "offset_explained_fraction": 0.8626,
+       "row_offset_max": 22,
+       "row_offset_min": -80
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 61.6,
+       "offset_explained_fraction": 0.985,
+       "row_offset_max": 22,
+       "row_offset_min": -157
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 46.7,
+       "offset_explained_fraction": 0.9063,
+       "row_offset_max": 22,
+       "row_offset_min": -119
+      }
+     }
+    }
+   ]
+  },
+  {
+   "bit_depth": 16,
+   "calls": 24,
+   "distinct": 4,
+   "dither_or_equal": 20,
+   "format": "RG48 RGB444 16-bit",
+   "modal_share": 0.875,
+   "structured_frames": [
+    {
+     "id": "p01",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 46.4,
+       "offset_explained_fraction": 0.6209,
+       "row_offset_max": 9408,
+       "row_offset_min": -30440
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 24.7,
+       "offset_explained_fraction": 0.9346,
+       "row_offset_max": 16192,
+       "row_offset_min": -2032
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 38.7,
+       "offset_explained_fraction": 0.8959,
+       "row_offset_max": 6880,
+       "row_offset_min": -25376
+      }
+     }
+    },
+    {
+     "id": "p03",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 46.5,
+       "offset_explained_fraction": 0.7171,
+       "row_offset_max": -30032,
+       "row_offset_min": -30504
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 43.4,
+       "offset_explained_fraction": 0.9191,
+       "row_offset_max": 28416,
+       "row_offset_min": 3784
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 37.2,
+       "offset_explained_fraction": 0.8763,
+       "row_offset_max": 5056,
+       "row_offset_min": -24400
+      }
+     }
+    },
+    {
+     "id": "p23",
+     "planes": {
+      "B": {
+       "abs_offset_pct_full_scale": 46.5,
+       "offset_explained_fraction": 0.6986,
+       "row_offset_max": 7312,
+       "row_offset_min": -30472
+      },
+      "G": {
+       "abs_offset_pct_full_scale": 14.6,
+       "offset_explained_fraction": 0.8352,
+       "row_offset_max": 9568,
+       "row_offset_min": -736
+      },
+      "R": {
+       "shape": "unchanged"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "bit_depth": 8,
+   "calls": 24,
+   "distinct": 18,
+   "dither_or_equal": 17,
+   "format": "YUY2 8-bit 422",
+   "modal_share": 0.2917,
+   "structured_frames": [
+    {
+     "id": "p03",
+     "planes": {
+      "G": {
+       "shape": "unchanged"
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 43.5,
+       "offset_explained_fraction": 0.9483,
+       "row_offset_max": 14,
+       "row_offset_min": -111
+      }
+     }
+    },
+    {
+     "id": "p08",
+     "planes": {
+      "G": {
+       "abs_offset_pct_full_scale": 25.3,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": 5,
+       "row_offset_min": -64
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 0.0,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": 0,
+       "row_offset_min": 0
+      }
+     }
+    },
+    {
+     "id": "p10",
+     "planes": {
+      "G": {
+       "abs_offset_pct_full_scale": 25.1,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": -21,
+       "row_offset_min": -64
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 0.0,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": 0,
+       "row_offset_min": 0
+      }
+     }
+    },
+    {
+     "id": "p16",
+     "planes": {
+      "G": {
+       "abs_offset_pct_full_scale": 25.1,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": -32,
+       "row_offset_min": -64
+      },
+      "R": {
+       "shape": "unchanged"
+      }
+     }
+    },
+    {
+     "id": "p17",
+     "planes": {
+      "G": {
+       "abs_offset_pct_full_scale": 25.3,
+       "offset_explained_fraction": 0.0005,
+       "row_offset_max": -32,
+       "row_offset_min": -64
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 0.0,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": 0,
+       "row_offset_min": 0
+      }
+     }
+    },
+    {
+     "id": "p22",
+     "planes": {
+      "G": {
+       "abs_offset_pct_full_scale": 25.1,
+       "offset_explained_fraction": 0.0001,
+       "row_offset_max": -21,
+       "row_offset_min": -64
+      },
+      "R": {
+       "abs_offset_pct_full_scale": 0.0,
+       "offset_explained_fraction": 0.0,
+       "row_offset_max": 0,
+       "row_offset_min": 0
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "schema": "hypercine.rca160.format_path_matrix.v1"
+}

@@ -1,0 +1,120 @@
+{
+ "issue": 160,
+ "pass_": "fourth",
+ "stage": 2,
+ "schema": "rca160_fourth_pass_intervention_v1",
+ "diagnostic_only": true,
+ "packet": {
+  "bytes": 900396,
+  "sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52"
+ },
+ "condition": {
+  "resolution": "HALF",
+  "output_format": "BGRA 8-bit",
+  "cpu_max": 4,
+  "affinity": "taskset -c 0",
+  "one_decode_per_process": true
+ },
+ "modal_output_sha16": "38d1c1498d3a990a",
+ "intervention": {
+  "name": "strict band-0 admission at spatial lowpass call sites",
+  "switch": "RCA160_STRICT_GATE",
+  "replaces": "BANDS_ALL_VALID(wavelet) == (valid == started) at decoder.c:13044 and :13109",
+  "waits_for": "band 0 of the input wavelet to become valid",
+  "bounded_spin_limit": 4000000,
+  "changed": {
+   "transform_math": false,
+   "writer": false,
+   "scheduling": false,
+   "production_code": false
+  }
+ },
+ "arms": {
+  "A": {
+   "calls": 120,
+   "distinct_outputs": 6,
+   "output_counts": {
+    "38d1c1498d3a990a": 95,
+    "fad4a6430e01485b": 21,
+    "f3f3e374eae37bf7": 1,
+    "355aae800d30f9e8": 1,
+    "2660eae720330aa2": 1,
+    "002c24f9b8ffc39d": 1
+   },
+   "corrupt": 25,
+   "gate": {
+    "calls_observed": 120,
+    "gate_records": {},
+    "calls_with_real_wait": 0,
+    "spins_per_call": {
+     "0": 120
+    }
+   }
+  },
+  "B": {
+   "calls": 120,
+   "distinct_outputs": 1,
+   "output_counts": {
+    "38d1c1498d3a990a": 120
+   },
+   "corrupt": 0,
+   "gate": {
+    "calls_observed": 120,
+    "gate_records": {
+     "ch0_idx1": 120,
+     "ch0_idx2": 240,
+     "ch1_idx1": 120,
+     "ch1_idx2": 240,
+     "ch2_idx1": 120,
+     "ch2_idx2": 240
+    },
+    "calls_with_real_wait": 22,
+    "spins_per_call": {
+     "0": 98,
+     "1": 22
+    }
+   }
+  },
+  "AP": {
+   "calls": 120,
+   "distinct_outputs": 3,
+   "output_counts": {
+    "38d1c1498d3a990a": 90,
+    "fad4a6430e01485b": 29,
+    "aa7ddd492480fd5e": 1
+   },
+   "corrupt": 30,
+   "gate": {
+    "calls_observed": 120,
+    "gate_records": {},
+    "calls_with_real_wait": 0,
+    "spins_per_call": {
+     "0": 120
+    }
+   }
+  }
+ },
+ "pre_registration": {
+  "url": "https://github.com/louis-0hrs/HyperCine/issues/160#issuecomment-6264354379",
+  "prediction": "zero corrupt outputs in B; corruption returns in A-prime"
+ },
+ "result": {
+  "prediction_met": true,
+  "control_corrupt": "25/120",
+  "intervention_corrupt": "0/120",
+  "induction_corrupt": "30/120",
+  "notes": [
+   "All 120 intervention calls produced one single output digest.",
+   "The gate demonstrably waited in 22 of 120 calls, always on ch1 index 1, the channel that corrupts.",
+   "No call showed a spin where no incomplete lowpass existed, so the wait is not a blanket sleep.",
+   "A and A-prime share one binary; only the environment variable differs."
+  ]
+ },
+ "what_this_does_not_establish": [
+  "No Windows, macOS or EPYC parity was measured in this pass.",
+  "No rate or throughput claim: the gate is test-only and was not benchmarked.",
+  "The underlying upstream defect is unchanged; this is a controlled intervention, not a production patch.",
+  "Only one packet, one resolution (HALF) and one output format (BGRA) were exercised.",
+  "The 22 observed waits are single-yield windows; longer stalls on other hardware are not characterised."
+ ]
+}

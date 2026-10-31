@@ -1,0 +1,172 @@
+{
+ "issue": 160,
+ "pass": "third",
+ "schema": "rca160_third_pass_v1",
+ "diagnostic_only": true,
+ "packet": {
+  "bytes": 900396,
+  "sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52"
+ },
+ "condition": {
+  "resolution": "HALF",
+  "output_format": "BGRA 8-bit",
+  "cpu_max": 4,
+  "affinity": "taskset -c 0",
+  "one_decode_per_process": true
+ },
+ "route_measured": {
+  "name": "ReconstructSampleFrameToBuffer -> !progressive -> CopyLowpass16sToBuffer -> ConvertLowpass16sToRGBNoIPPFast (RGB32 arm)",
+  "encoded_format": "ENCODED_FORMAT_YUV_422 (1)",
+  "note": "deviates from pre-registration, which named the two progressive-path routes; reported as a deviation"
+ },
+ "calls": 60,
+ "distinct_states": 3,
+ "states": [
+  {
+   "calls": 54,
+   "frame_sha16": "38d1c1498d3a990a",
+   "planes": {
+    "ch0": "70ba375907979a16",
+    "ch1": "e8195619aebdda70",
+    "ch2": "3eec257523ca4338"
+   },
+   "ids": [
+    "p03",
+    "p04",
+    "p05",
+    "p06"
+   ],
+   "modal": true
+  },
+  {
+   "calls": 4,
+   "frame_sha16": "2660eae720330aa2",
+   "planes": {
+    "ch0": "70ba375907979a16",
+    "ch1": "e8195619aebdda70",
+    "ch2": "2cf86acfda8a1b20"
+   },
+   "ids": [
+    "p01",
+    "p02",
+    "p24",
+    "p46"
+   ],
+   "modal": false,
+   "differing_channel": [
+    "ch2"
+   ],
+   "output_diff": {
+    "B": {
+     "rank1_energy_fraction": 0.9999597793907659,
+     "residual_mae": 0.6946462807640487,
+     "max_abs": 237,
+     "rows_touched": 540
+    },
+    "G": {
+     "rank1_energy_fraction": 0.9984827461774746,
+     "residual_mae": 0.9026725700387022,
+     "max_abs": 49,
+     "rows_touched": 540
+    },
+    "R": {
+     "rank1_energy_fraction": null,
+     "residual_mae": null,
+     "max_abs": 0,
+     "rows_touched": 0
+    }
+   },
+   "coefficient_plane": {
+    "ch2": {
+     "modal_min": 708,
+     "modal_max": 3604,
+     "modal_mean": 2154.5,
+     "corrupt_min": -12,
+     "corrupt_max": 12,
+     "corrupt_mean": 0.0,
+     "exactly_zero_fraction": 0.6758,
+     "corr_with_modal": 0.002971
+    }
+   }
+  },
+  {
+   "calls": 2,
+   "frame_sha16": "fad4a6430e01485b",
+   "planes": {
+    "ch0": "70ba375907979a16",
+    "ch1": "8d6dbdc03a926f4d",
+    "ch2": "3eec257523ca4338"
+   },
+   "ids": [
+    "p36",
+    "p56"
+   ],
+   "modal": false,
+   "differing_channel": [
+    "ch1"
+   ],
+   "output_diff": {
+    "B": {
+     "rank1_energy_fraction": null,
+     "residual_mae": null,
+     "max_abs": 0,
+     "rows_touched": 0
+    },
+    "G": {
+     "rank1_energy_fraction": 0.9998293542581599,
+     "residual_mae": 0.580073078578508,
+     "max_abs": 79,
+     "rows_touched": 540
+    },
+    "R": {
+     "rank1_energy_fraction": 0.994318116376338,
+     "residual_mae": 4.048520751462951,
+     "max_abs": 134,
+     "rows_touched": 540
+    }
+   },
+   "coefficient_plane": {
+    "ch1": {
+     "modal_min": 1056,
+     "modal_max": 2388,
+     "modal_mean": 1716.0,
+     "corrupt_min": -30,
+     "corrupt_max": 28,
+     "corrupt_mean": 0.17,
+     "exactly_zero_fraction": 0.1396,
+     "corr_with_modal": 0.019648
+    }
+   }
+  }
+ ],
+ "substitution_test": {
+  "purpose": "decide whether coefficient-plane content alone determines the output",
+  "A_corrupt_calls_forced_to_modal_planes": {
+   "calls": 40,
+   "modal_output": 39,
+   "other_output": 1,
+   "note": "the one other output had a differing LUMA plane with modal chroma (see uncharacterised_state)"
+  },
+  "B_modal_ch1_plus_corrupt_ch2": {
+   "calls": 3,
+   "reproduced_corrupt_digest": 3
+  },
+  "conclusion": "for the two observed chroma states, plane content is necessary and sufficient"
+ },
+ "uncharacterised_state": {
+  "observed_calls": 1,
+  "description": "one call had a differing luma plane (ch0) with modal chroma; not reproduced in the 60-call dump run, recorded and not modelled"
+ },
+ "negative_control": {
+  "cpu_max": 1,
+  "calls": 10,
+  "distinct_frames": 1,
+  "plane_sets": 1
+ },
+ "what_this_does_not_establish": [
+  "No source line and no mechanism: which producer writes the near-zero chroma plane is not measured here.",
+  "No Windows parity and no rate claim; one oversubscribed condition was used to obtain states, not frequency.",
+  "The luma state is recorded, not explained.",
+  "Raw frames and plane dumps stay outside the repository; only relative ids and digests are published."
+ ]
+}

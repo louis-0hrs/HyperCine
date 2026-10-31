@@ -1,0 +1,306 @@
+{
+ "condition": "worker_threads(8, TAG_CPU_MAX=4) > affinity_cpus(1); one decode per fresh process; CPU-only",
+ "corrupt_states": [
+  {
+   "observed_in": [
+    "M1/p18",
+    "M2/p01"
+   ],
+   "planes": {
+    "B": {
+     "affected_rows": 1080,
+     "rows": 1080,
+     "shape": "OTHER",
+     "zero_fraction": 0.4415
+    },
+    "G": {
+     "affected_rows": 1075,
+     "rows": 1080,
+     "shape": "OTHER",
+     "zero_fraction": 0.3228
+    },
+    "R": {
+     "affected_rows": 1080,
+     "rows": 1080,
+     "shape": "OTHER",
+     "zero_fraction": 0.8441
+    }
+   },
+   "sha256_planes_rgb": "1bfbf10ebab9fdc0b4492230d88d470c3ad1aa9369f6697b14cf7c15d0ea854e"
+  },
+  {
+   "observed_in": [
+    "M2/p27"
+   ],
+   "planes": {
+    "B": {
+     "shape": "UNCHANGED"
+    },
+    "G": {
+     "affected_rows": 617,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_RANK1",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "affected_rows": 618,
+     "rows": 1080,
+     "shape": "OTHER",
+     "zero_fraction": 0.5659
+    }
+   },
+   "sha256_planes_rgb": "1e064e0df0d5619e40d1395affa2b247d77fca290cc26facf7bb64d9fab8f35d"
+  },
+  {
+   "observed_in": [
+    "M1/p01"
+   ],
+   "planes": {
+    "B": {
+     "shape": "UNCHANGED"
+    },
+    "G": {
+     "affected_rows": 915,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_RANK1",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "affected_rows": 918,
+     "rows": 1080,
+     "shape": "OTHER",
+     "zero_fraction": 0.8425
+    }
+   },
+   "sha256_planes_rgb": "5d9d465e6f38590c2ff52ef5339888a478c3dbffc3d5b6e3b606b1d13a870629"
+  },
+  {
+   "observed_in": [
+    "M1/p48",
+    "M2/p02",
+    "M2/p15",
+    "M2/p24",
+    "M2/p25",
+    "M2/p31"
+   ],
+   "planes": {
+    "B": {
+     "shape": "UNCHANGED"
+    },
+    "G": {
+     "affected_rows": 1080,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_PARTIAL",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "shape": "ZEROED",
+     "zero_fraction": 1.0
+    }
+   },
+   "sha256_planes_rgb": "62efe77ad53392d508514966c60cfb80cd02fb8f05aeb1fd00482ccae8141164"
+  },
+  {
+   "observed_in": [
+    "M1/p40"
+   ],
+   "planes": {
+    "B": {
+     "shape": "ZEROED",
+     "zero_fraction": 1.0
+    },
+    "G": {
+     "affected_rows": 1080,
+     "rows": 1080,
+     "shape": "OTHER",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "affected_rows": 601,
+     "rows": 1080,
+     "shape": "OTHER",
+     "zero_fraction": 0.5519
+    }
+   },
+   "sha256_planes_rgb": "9187c65dd9b6c136f78aa923a2069d099d461e70da7a41991b1303ef54851836"
+  },
+  {
+   "observed_in": [
+    "M1/p12",
+    "M2/p28"
+   ],
+   "planes": {
+    "B": {
+     "shape": "ZEROED",
+     "zero_fraction": 1.0
+    },
+    "G": {
+     "affected_rows": 1080,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_PARTIAL",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "shape": "UNCHANGED"
+    }
+   },
+   "sha256_planes_rgb": "a48d02e688d7db22ca754303baee5527e84efc47a3450938fa35bc19eda2ee6d"
+  },
+  {
+   "observed_in": [
+    "M1/p38"
+   ],
+   "planes": {
+    "B": {
+     "shape": "UNCHANGED"
+    },
+    "G": {
+     "affected_rows": 403,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_RANK1",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "affected_rows": 406,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_PARTIAL",
+     "zero_fraction": 0.3688
+    }
+   },
+   "sha256_planes_rgb": "bb2736ae8bcfb1f84124a9f2df05e9370f6018f9e3d4822832639710c99b12cc"
+  },
+  {
+   "observed_in": [
+    "M1/p27"
+   ],
+   "planes": {
+    "B": {
+     "affected_rows": 369,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_RANK1",
+     "zero_fraction": 0.3414
+    },
+    "G": {
+     "affected_rows": 367,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_RANK1",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "shape": "UNCHANGED"
+    }
+   },
+   "sha256_planes_rgb": "c03dddc6d1edad25a842ac3fb8bc8f4cd325da18bb502c7cad8c1b3b754fbe15"
+  },
+  {
+   "observed_in": [
+    "M2/p34"
+   ],
+   "planes": {
+    "B": {
+     "shape": "UNCHANGED"
+    },
+    "G": {
+     "affected_rows": 473,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_RANK1",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "affected_rows": 474,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_PARTIAL",
+     "zero_fraction": 0.4319
+    }
+   },
+   "sha256_planes_rgb": "cc51d48af20e537d14a253679d442ccae7006d897b45cb8e1d1a79d8451c08ff"
+  },
+  {
+   "observed_in": [
+    "M1/p35"
+   ],
+   "planes": {
+    "B": {
+     "shape": "UNCHANGED"
+    },
+    "G": {
+     "affected_rows": 165,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_RANK1",
+     "zero_fraction": 0.0
+    },
+    "R": {
+     "affected_rows": 166,
+     "rows": 1080,
+     "shape": "ROW_OFFSET_PARTIAL",
+     "zero_fraction": 0.1479
+    }
+   },
+   "sha256_planes_rgb": "cc67b671fa71a0a4a039bb26dd57ff23f639a954f250e63a0853c93d6ef40a4e"
+  }
+ ],
+ "diagnostic_only": true,
+ "distinct_corrupt_states_total": 10,
+ "issue": 160,
+ "packet": {
+  "bytes": 900396,
+  "sha256": "2b9a28dec5b015bf76a1ba3bce5a458167bd07bd061dbb59a97c00eece4fec52"
+ },
+ "recurring_states": [
+  {
+   "observed_in": [
+    "M1/p18",
+    "M2/p01"
+   ],
+   "sha256_planes_rgb": "1bfbf10ebab9fdc0b4492230d88d470c3ad1aa9369f6697b14cf7c15d0ea854e"
+  },
+  {
+   "observed_in": [
+    "M1/p48",
+    "M2/p02",
+    "M2/p15",
+    "M2/p24",
+    "M2/p25",
+    "M2/p31"
+   ],
+   "sha256_planes_rgb": "62efe77ad53392d508514966c60cfb80cd02fb8f05aeb1fd00482ccae8141164"
+  },
+  {
+   "observed_in": [
+    "M1/p12",
+    "M2/p28"
+   ],
+   "sha256_planes_rgb": "a48d02e688d7db22ca754303baee5527e84efc47a3450938fa35bc19eda2ee6d"
+  }
+ ],
+ "runs": [
+  {
+   "calls": 50,
+   "distinct_frames": 9,
+   "id": "M1",
+   "modal_share": 0.84,
+   "shape_counts": {
+    "OTHER": 6,
+    "ROW_OFFSET_PARTIAL": 4,
+    "ROW_OFFSET_RANK1": 5,
+    "UNCHANGED": 6,
+    "ZEROED": 3
+   }
+  },
+  {
+   "calls": 40,
+   "distinct_frames": 6,
+   "id": "M2",
+   "modal_share": 0.775,
+   "shape_counts": {
+    "OTHER": 4,
+    "ROW_OFFSET_PARTIAL": 7,
+    "ROW_OFFSET_RANK1": 2,
+    "UNCHANGED": 8,
+    "ZEROED": 6
+   }
+  }
+ ],
+ "schema": "hypercine.rca160.output_domain.v2",
+ "source_bgra_sha256": "45c166c3d6a3710d620ff5d738980224edf53cf9ce1bceb87267e474294afff1"
+}
