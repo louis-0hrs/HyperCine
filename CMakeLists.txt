@@ -485,6 +485,15 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME encoder_backend_session_packets COMMAND test_encoder_backend_selection packets)
         set_tests_properties(encoder_backend_selection_contract encoder_backend_session_packets PROPERTIES
             LABELS "cpu;encoder;session" TIMEOUT 180)
+        # Issue #259 step 3: quality profiles are admitted per backend inside the
+        # same capability/session contract. CPU scalar admits the six profiles
+        # pinned by #318; Metal/CUDA keep their FilmScan3-only packet evidence and
+        # refuse the rest with a dedicated typed reason before any factory call.
+        add_executable(test_encoder_profile_sessions tests/test_encoder_profile_sessions.cpp)
+        target_link_libraries(test_encoder_profile_sessions PRIVATE hypercine_standalone Threads::Threads)
+        add_test(NAME encoder_profile_session_matrix COMMAND test_encoder_profile_sessions)
+        set_tests_properties(encoder_profile_session_matrix PROPERTIES
+            LABELS "cpu;encoder;session;profile" TIMEOUT 300)
         if(HYPERCINE_ENABLE_CUDA)
             # Issue #259 step 2: the same capability-gated session, now with the
             # existing internal CUDA frontend. GPU-required, no skip exit: a host
@@ -498,6 +507,16 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME encoder_cuda_session_packets COMMAND test_encoder_cuda_session)
             set_tests_properties(encoder_cuda_session_packets PROPERTIES
                 LABELS "cuda;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 1800)
+            # Measurement only: canonical profile refusal remains in force.
+            add_executable(test_encoder_cuda_profile_matrix tests/test_encoder_cuda_profile_matrix.cpp)
+            target_include_directories(test_encoder_cuda_profile_matrix PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
+                "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda")
+            target_link_libraries(test_encoder_cuda_profile_matrix PRIVATE
+                hypercine_standalone CUDA::cudart Threads::Threads)
+            add_test(NAME encoder_cuda_profile_matrix COMMAND test_encoder_cuda_profile_matrix)
+            set_tests_properties(encoder_cuda_profile_matrix PROPERTIES
+                LABELS "cuda;gpu-required;encoder;profile-measurement" RUN_SERIAL TRUE TIMEOUT 1800)
         endif()
         if(HYPERCINE_ENABLE_METAL)
             add_executable(test_encoder_metal_session tests/test_encoder_metal_session.cpp)
@@ -505,6 +524,12 @@ if(HYPERCINE_BUILD_STANDALONE)
             add_test(NAME encoder_metal_session_packets COMMAND test_encoder_metal_session)
             set_tests_properties(encoder_metal_session_packets PROPERTIES
                 LABELS "metal;gpu-required;encoder;session" RUN_SERIAL TRUE TIMEOUT 600)
+            # Native Metal only; no non-Darwin skip stub counted as evidence.
+            add_executable(test_encoder_metal_profile_matrix tests/test_encoder_metal_profile_matrix.cpp)
+            target_link_libraries(test_encoder_metal_profile_matrix PRIVATE hypercine_standalone Threads::Threads)
+            add_test(NAME encoder_metal_profile_matrix COMMAND test_encoder_metal_profile_matrix)
+            set_tests_properties(encoder_metal_profile_matrix PROPERTIES
+                LABELS "metal;gpu-required;encoder;profile-measurement" RUN_SERIAL TRUE TIMEOUT 1800)
             add_executable(test_metal_filmscan3 tests/test_metal_filmscan3.cpp)
             target_link_libraries(test_metal_filmscan3 PRIVATE hypercine_standalone)
             add_test(NAME filmscan3_metal_required COMMAND test_metal_filmscan3)

@@ -109,7 +109,13 @@ enum class CapabilityReason : int {
     BackendNotQualifiedForGeometry = 4,
     MemoryBudgetExceeded = 5,
     ReferenceMissing = 6,
-    ExperimentallySupported = 7
+    ExperimentallySupported = 7,
+    // The requested profile is a legal regular CFHD quality profile, but this
+    // session contract holds no packet evidence for that profile on the
+    // effective backend. Distinct from ValidButNotImplemented (the writer does
+    // not implement the request at all) and from
+    // BackendNotQualifiedForGeometry (backend/geometry pair unknown).
+    ProfileNotQualifiedForBackend = 8
 };
 
 // Independent axes. A single "unsupported" is intentionally not the result.
@@ -121,6 +127,7 @@ struct CapabilityFlags {
     bool memory_budget_exceeded = false;
     bool reference_missing = false;
     bool experimentally_supported = false;
+    bool profile_not_qualified_for_backend = false;
 };
 
 struct EncoderCapabilityResult {
@@ -140,6 +147,10 @@ struct EncoderCapabilityResult {
     bool fell_back_to_cpu_scalar = false;
     SessionBackend effective_backend = SessionBackend::CpuScalar;
     const char* evidence_note = "";
+    // True only when the requested quality profile is admitted on the effective
+    // backend by this contract revision. Never an original-SDK or product claim.
+    bool profile_admitted = false;
+    const char* profile_note = "";
 };
 
 // Fail-closed. Does not allocate frames, planes, wavelet scratch, or a sample.

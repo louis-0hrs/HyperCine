@@ -353,7 +353,17 @@ void Contract() {
     config = Small(); config.frame_rate = {24,1};
     Refused(config, host, CapabilityReason::ValidButNotImplemented);
     config = Small(); config.quality = hypercine::EncodingQuality::Medium;
-    Refused(config, host, CapabilityReason::ValidButNotImplemented);
+    // #259 step 3: a legal profile is admitted on CPU scalar, not refused. Its
+    // absence on a GPU backend is a separate, typed profile refusal.
+    Require(static_cast<bool>(SelectBackend(config, host, Count)),
+            "CPU scalar no longer admits a legal quality profile");
+    auto gpu_profile = config; gpu_profile.backend = SessionBackend::Cuda;
+    auto gpu_device = host; gpu_device.cuda_available = true;
+    gpu_device.cuda_total_global_memory_bytes = 1ull << 34;
+    gpu_profile.input_stride_bytes = 128u * 4u; gpu_profile.input_bytes = gpu_profile.input_stride_bytes * 24u;
+    Refused(gpu_profile, gpu_device, CapabilityReason::ProfileNotQualifiedForBackend);
+    config = Small(); config.quality = static_cast<hypercine::EncodingQuality>(9);
+    Refused(config, host, CapabilityReason::FormatMathematicallyInvalid);
     config = Small(); config.codec = CodecFamily::LegacyFixedQ2;
     Refused(config, host, CapabilityReason::ValidButNotImplemented);
     config = Small(); config.pixel_format = SourcePixelFormat::Yuy2;

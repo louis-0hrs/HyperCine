@@ -34,6 +34,7 @@ Internal header: 'src/core/encoder_backend_selection.h'.
 | Backend absent, scalar fallback explicitly allowed | Existing capability fallback; CPU budgets, shape, profile and reference requirement must all pass |
 | Backend present but geometry unqualified | Refuse by default; explicitly allowed fallback reruns the **complete** scalar capability query |
 | Format/profile/timebase/sample or resource budget failure | Never repair it by switching backend |
+| Quality profile not admitted on the requested backend | Never repaired by fallback while that backend is the requested one, including when another backend-only refusal is primary |
 | Required original reference missing | Never waived by fallback; scalar query must also reject |
 | Scalar backend absent | Refuse, including GPU-to-scalar fallback attempts |
 | Invalid backend enum | Format refusal, even when fallback is enabled |
@@ -58,6 +59,12 @@ checked; #304/#309 native backend-required gates remain mandatory. Public
 CPU/Metal constructors keep their historical behavior and do not acquire the
 new conservative internal policy. See the Metal contract for the exact limits.
 
+Quality profiles are admitted per backend on top of that, in
+[ENCODER_PROFILE_SESSIONS.md](ENCODER_PROFILE_SESSIONS.md): all six regular
+profiles for CPU scalar, FilmScan3 only for Metal and CUDA. Only the three
+backends with an actual session have a profile matrix, so CpuSimd and Vulkan do
+not acquire a profile verdict on top of their own refusal.
+
 The public legacy fixed-Q2 cap remains 2,097,152 pixels. FilmScan3 sample/wire,
 quality, timebase, reference and pixel limits are unchanged. No original GoPro,
 VC-5 conformance, 8K, performance improvement or release claim follows.
@@ -75,8 +82,8 @@ python ci/test_standalone_gate.py
 python ci/run_standalone.py --build-dir build --system Linux --machine x86_64
 ```
 
-The new mandatory CTests are 'encoder_backend_selection_contract' and
-'encoder_backend_session_packets'.
+The new mandatory CTests are 'encoder_backend_selection_contract',
+'encoder_backend_session_packets' and 'encoder_profile_session_matrix'.
 The CUDA build additionally registers the GPU-required
 'encoder_cuda_session_packets' gate; see
 [ENCODER_CUDA_SESSIONS.md](ENCODER_CUDA_SESSIONS.md).
