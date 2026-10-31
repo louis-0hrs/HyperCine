@@ -1,21 +1,38 @@
-# Draft #322 — current-main continuation
+# Draft #322 — current review continuation (2026-10-31)
 
-Status: REVIEW. Owned gates/docs only, isolated existing branch.
-Current-main integration target: 04c348f848de1eb3a47d3b90fe191722c1ab559e.
-Forward merge validated by full CTest before commit; root CMake merged automatically.
-Original historical FAIL 78/120 and negative 40f ramp preserved.
-Windows-native deferred (node unavailable); original Windows corpus replay on Linux allowed.
-#320 canonical integration and #331 independent verifier are separate owners.
+Status: REVIEW; Draft retained. Scope: gates/docs only.
+Measurement/source baseline: `31b9c8f0502049f9ff23a75a1f05b9b4eaf99fe3`.
+Integrated main: `04c348f848de1eb3a47d3b90fe191722c1ab559e`.
+This continuation changes current documentation only, not codec, gates or tests.
+The final documentation head/publication receipt belongs in the live PR handoff;
+this is not a new private-corpus or native measurement.
 
 Checklist:
-- [x] Read current coordination, verify pseudonymous identity and worktree hooks.
-- [x] Claim existing Draft #322 continuation.
-- [x] Forward-integrate current main without deleting tests or changing upstream.
-- [x] Private 129/129 PASS; public 122/122 PASS; regular 58 PASS /59 total, 1 ffmpeg_oracle_qualification SKIP.
-- [ ] Source-bound evidence, staged/every-outgoing-commit privacy and publication.
+- [x] Forward-integrated main; duplicate ladder hunks removed; implementation and quality-state tests match main.
+- [x] Published baseline source-bound evidence, staged/outgoing privacy checks and Draft handoff.
+- [x] Baseline hosted checks: 28/28 SUCCESS in the 2026-10-31 review snapshot (not native/private evidence).
+- [x] Independent Linux CPU replay: private strict standalone 129/129 PASS, zero failed/skipped, 762.38s.
+- [x] Independent original inventories: 1594 artifacts; Linux/A 480/480 each, B 145/145, C 21/21 packet/direct-state comparisons.
+- [x] Preserved historical Medium/High FAIL 78/120 and negative 40f NON_QUALIFYING_NO_HOLD artifacts unchanged.
+- [x] Kept #331 packet-table oracle distinct from #322 full-packet/direct-state gates.
+- [ ] Maintainer acceptance of final diff/evidence and integration order; not inferred from independent replay.
+- [x] Fresh documentation-only full public standalone: 122/122 PASS, zero failed/skipped, 388.98s; external decode required, GPUs OFF.
+- [ ] New documentation-head hosted CI receipt: see live PR handoff; baseline success is not transferred.
 
-Next action: privacy-reviewed publication to existing Draft #322; independent review and exact-head CI remain pending.
-Blockers: no Windows-native execution; exact-head hosted CI remains separate.
+Independent replay: https://github.com/louis-0hrs/HyperCine/pull/322#issuecomment-6543208160
+Combined candidate: https://github.com/louis-0hrs/HyperCine/pull/320#issuecomment-6543352580
+The latter records unpublished gate-union tree `40444f5eb9bd051ef2073f9f995e89afc1bcea28`
+(quality-only 42/42 and private standalone 130/130), not a canonical PR head or merged-main/native result.
+#331 independently owns observable packet-table replay; its SDK counters are NOT_OBSERVABLE.
+#320 native evidence is attributed only to exact #320 head, not to this documentation continuation.
+
+Remaining gates: native Windows execution; original Windows compiler/ISA provenance,
+seed and explicit SDK FRMR qualification; maintainer acceptance. No GPU/original-SDK
+pixel oracle, GPU admission expansion, 4K/8K, alternate-timebase, sanitizer, performance,
+product or conformance qualification is supplied by this lane. Keep #46/#321 open.
+Next action: maintainer reviews the final gates/docs diff and source-bound evidence,
+checks the new documentation-head hosted CI and decides integration order with #331/#320.
+No autonomous merge, release, upstream edit or protected-branch push.
 
 ---
 Historical measurement snapshots follow; their old dependency statuses are historical.
