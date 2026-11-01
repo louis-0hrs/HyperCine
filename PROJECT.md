@@ -1,24 +1,33 @@
-# Combined #320 + #322 + #331 integration
+# Combined #320 + #322 + #331 integration — merged
 
-Status: IN_PROGRESS / Draft integration only, not merged main.
+Status: **MERGED** to `main` through [PR #339](https://github.com/louis-0hrs/HyperCine/pull/339) on 2026-11-01.
+Integration source: `baccccffe4ec2cab5fe3807e66a49318657f014a`.
+Main merge commit: `37908fc6ead55e5db254ffbac4c9af7961b816b2`.
+Base: `04c348f848de1eb3a47d3b90fe191722c1ab559e`.
 
-Sources: #320 6fbee4a072681247feef55b9cf1317eceecdced9,
-#322 c9172d497e3de5d827e0d4b77439ca910fe89af7,
-#331 59febad252d0ca9f65790542622a11b034b1a039.
-Base: 04c348f848de1eb3a47d3b90fe191722c1ab559e.
+Merged sources: #320 `6fbee4a072681247feef55b9cf1317eceecdced9`,
+#322 `c9172d497e3de5d827e0d4b77439ca910fe89af7`,
+#331 `59febad252d0ca9f65790542622a11b034b1a039`.
+All three source Draft PRs were closed after the combined merge; do not merge them separately.
 
-Exact provenance, resolved status/build overlaps and portable acceptance commands:
-docs/PROFILE_INTEGRATION_320_322_331.md and .json.
+The exact-source acceptance is recorded in #339: Linux private strict **130/130**,
+quality-only Group A **42/42**, Windows public strict **123/123**, native A2 and
+Metal GPU-required profile matrices **1/1 each**, and hosted head checks
+**28/28**. See [Linux/CI](https://github.com/louis-0hrs/HyperCine/pull/339#issuecomment-6558259804),
+[GPU](https://github.com/louis-0hrs/HyperCine/pull/339#issuecomment-6558291175), and
+[Windows](https://github.com/louis-0hrs/HyperCine/pull/339#issuecomment-6558331173).
+The main merge SHA has not been separately native-retested; these receipts bind
+to the unchanged integration source and must not be represented as new post-merge runs.
 
-Next: publish a privacy-checked Draft integration commit, then collect fresh
-strict Linux CPU and quality-only Group-A receipts on that exact commit,
-hosted CI, and independently owned native A2/Metal/Windows receipts or explicit
-PENDING. The PR discussion is the live receipt surface; the material below
-is historical single-branch evidence, not a combined execution claim.
+Full source/provenance inventory, overlap resolution and portable test commands:
+`docs/PROFILE_INTEGRATION_320_322_331.md` and `.json`.
 
-Production GPU admission stays FilmScan3-only. Historical failures, original
-SDK provenance limits and #187 HOLD remain unchanged. Keep #46/#259/#321 open.
-No merge/release or conformance authorization.
+**Scope:** CPU scalar internal six-profile sessions; CUDA/Metal production sessions
+remain FilmScan3-only. Original SDK observable packet-table replay is distinct
+from directly observed SDK state. Historical SDK source/binary/compiler/ISA,
+seed/FRMR, independent pixel oracle, direct GPU-original and SMPTE VC-5
+conformance remain unqualified. Preserve #187 HOLD and keep #46/#259/#321 open.
+No product release or broad GPU admission is implied.
 
 ---
 ## Historical canonical project status (preserved)
