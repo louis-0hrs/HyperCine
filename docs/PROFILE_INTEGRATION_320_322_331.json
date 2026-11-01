@@ -1,0 +1,310 @@
+{
+  "base": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+  "sources": {
+    "320": "6fbee4a072681247feef55b9cf1317eceecdced9",
+    "322": "c9172d497e3de5d827e0d4b77439ca910fe89af7",
+    "331": "59febad252d0ca9f65790542622a11b034b1a039"
+  },
+  "preexisting_qualified_union_tree": "96ef5d99aa7853db328bd94773bd6b592c8726e9",
+  "composition": "Three-parent merge; canonical #320 first parent. An ours merge scaffold establishes the source parents, then its tree is explicitly replaced by the independently reconstructed complete union before commit. No ours-only tree is committed.",
+  "inventory": [
+    {
+      "source_pr": 320,
+      "path": ".gitignore",
+      "source_blob": "392c7651db0b9fa6268e1f18cb27c7cc5ec115bc",
+      "union_blob": "392c7651db0b9fa6268e1f18cb27c7cc5ec115bc",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "CMakeLists.txt",
+      "source_blob": "ea8d987ec71a9b3a847400f1f0d9a7a65cb1a682",
+      "union_blob": "0d5b4cebbf2abd1bfd89b321640a51aa5dbe40b3",
+      "decision": "explicit union of all registrations; base definitions occur once"
+    },
+    {
+      "source_pr": 320,
+      "path": "PROJECT.md",
+      "source_blob": "a557b5923ee564dcbf44312c297ebc0bdb4b2a13",
+      "union_blob": "a557b5923ee564dcbf44312c297ebc0bdb4b2a13",
+      "decision": "branch-specific status omitted; combined status replaces it, canonical history retained"
+    },
+    {
+      "source_pr": 320,
+      "path": "ci/run_standalone.py",
+      "source_blob": "7a4254323fd82feabe59918628f7c1c9afb7eae0",
+      "union_blob": "7a4254323fd82feabe59918628f7c1c9afb7eae0",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "ci/test_standalone_gate.py",
+      "source_blob": "c83e207e220b0cbf90dad9f1d6b896e20118b96a",
+      "union_blob": "c83e207e220b0cbf90dad9f1d6b896e20118b96a",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "docs/ENCODER_BACKEND_SELECTION.md",
+      "source_blob": "5bd3a2237069b69822f2f7d32e20c0d49a36be64",
+      "union_blob": "5bd3a2237069b69822f2f7d32e20c0d49a36be64",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "docs/ENCODER_CAPABILITY_CONTRACT.md",
+      "source_blob": "48587c592268236d248ad2cdf991f130972d5802",
+      "union_blob": "48587c592268236d248ad2cdf991f130972d5802",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "docs/ENCODER_PROFILE_SESSIONS.md",
+      "source_blob": "63cde674a25180bd425e692e66840d5139fb2033",
+      "union_blob": "63cde674a25180bd425e692e66840d5139fb2033",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "docs/PROFILE_BACKEND_INTEGRATION_259.json",
+      "source_blob": "a116f476c7836ea58129294236731fc0373b91b0",
+      "union_blob": "a116f476c7836ea58129294236731fc0373b91b0",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "docs/PROFILE_BACKEND_INTEGRATION_259.md",
+      "source_blob": "545a0e8720b8e182f224750f922698f49c3805c0",
+      "union_blob": "545a0e8720b8e182f224750f922698f49c3805c0",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "docs/README.md",
+      "source_blob": "ddd11f6c3a69c20c37ba75639d28391229d877af",
+      "union_blob": "ddd11f6c3a69c20c37ba75639d28391229d877af",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "src/core/encoder_backend_selection.cpp",
+      "source_blob": "05de158dba89a273acb8a0f832e483199aefe0bf",
+      "union_blob": "05de158dba89a273acb8a0f832e483199aefe0bf",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "src/core/encoder_capability.cpp",
+      "source_blob": "7e5510ffbed90b2db6e9a689a4b66efa24f8719d",
+      "union_blob": "7e5510ffbed90b2db6e9a689a4b66efa24f8719d",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "src/core/encoder_session_config.h",
+      "source_blob": "05a77e6f4c50b627021bc1904e449e6b2f8671b3",
+      "union_blob": "05a77e6f4c50b627021bc1904e449e6b2f8671b3",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "tests/test_encoder_backend_selection.cpp",
+      "source_blob": "84f25999a750870c94474c05fcef4ffd4288418d",
+      "union_blob": "84f25999a750870c94474c05fcef4ffd4288418d",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "tests/test_encoder_capability.cpp",
+      "source_blob": "05d5f38c540883985dd06854e13866dacbd725a5",
+      "union_blob": "05d5f38c540883985dd06854e13866dacbd725a5",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "tests/test_encoder_cuda_profile_matrix.cpp",
+      "source_blob": "2f0067075eb3c9d12c69950e281a6c5b02afbd1f",
+      "union_blob": "2f0067075eb3c9d12c69950e281a6c5b02afbd1f",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "tests/test_encoder_metal_profile_matrix.cpp",
+      "source_blob": "2e70d89529b29ef1b091cccfa5ef6630a261ec1b",
+      "union_blob": "2e70d89529b29ef1b091cccfa5ef6630a261ec1b",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 320,
+      "path": "tests/test_encoder_profile_sessions.cpp",
+      "source_blob": "306e957fd441599c63efdb481a5333f8726ae528",
+      "union_blob": "306e957fd441599c63efdb481a5333f8726ae528",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "CMakeLists.txt",
+      "source_blob": "5e4a77a94a093eb9f0dd5a85645619b1151da2f5",
+      "union_blob": "0d5b4cebbf2abd1bfd89b321640a51aa5dbe40b3",
+      "decision": "explicit union of all registrations; base definitions occur once"
+    },
+    {
+      "source_pr": 322,
+      "path": "PROJECT.md",
+      "source_blob": "dde1d310357e6ba83389acd0ca17698a4e9d15fb",
+      "union_blob": "a557b5923ee564dcbf44312c297ebc0bdb4b2a13",
+      "decision": "branch-specific status omitted; combined status replaces it, canonical history retained"
+    },
+    {
+      "source_pr": 322,
+      "path": "docs/.gitattributes",
+      "source_blob": "d69ab97e7117e0b17924a701531648d6222d7646",
+      "union_blob": "d69ab97e7117e0b17924a701531648d6222d7646",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "docs/SDK_GAP_ORACLES_46.md",
+      "source_blob": "7f559c05ccab29dbef8f9f5d6e1cdc3594eab2b4",
+      "union_blob": "7f559c05ccab29dbef8f9f5d6e1cdc3594eab2b4",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "docs/SDK_GAP_PARITY_46.json",
+      "source_blob": "e350648f23cb2deedc98438e86b68be7a7188af6",
+      "union_blob": "e350648f23cb2deedc98438e86b68be7a7188af6",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "docs/SDK_GAP_TRAJECTORY_46.json",
+      "source_blob": "818fed9dc34ab72605265d036dc2461f95d5f70f",
+      "union_blob": "818fed9dc34ab72605265d036dc2461f95d5f70f",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "docs/SDK_GOLDENS_CURRENT_46.json",
+      "source_blob": "fa00cfd26149f9bcb3a2b4feba1f0e569a601ffa",
+      "union_blob": "fa00cfd26149f9bcb3a2b4feba1f0e569a601ffa",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "docs/SDK_GOLDENS_REFRESH_46.json",
+      "source_blob": "f756ba964a2d45c41a067f43450a8b318ec7ff18",
+      "union_blob": "f756ba964a2d45c41a067f43450a8b318ec7ff18",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "docs/SDK_GOLDENS_REFRESH_46.md",
+      "source_blob": "97615446d4e10f410301cf260230b8b3ef81c19e",
+      "union_blob": "97615446d4e10f410301cf260230b8b3ef81c19e",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tests/test_p6_sdk_gap_gate.py",
+      "source_blob": "486c6b3c694471b9462d296f21a496e7bf0ebad2",
+      "union_blob": "486c6b3c694471b9462d296f21a496e7bf0ebad2",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tests/test_p6_sdk_gap_integration.py",
+      "source_blob": "7b49aa7cc9e891d63c629c3c39207cbe0051a439",
+      "union_blob": "7b49aa7cc9e891d63c629c3c39207cbe0051a439",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tests/test_p6_windows_sdk_gate.py",
+      "source_blob": "47c7dea304275d64d5784b035f49198e11f3f631",
+      "union_blob": "47c7dea304275d64d5784b035f49198e11f3f631",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tests/test_p6_windows_sdk_integration.py",
+      "source_blob": "cfc59e667c38de931195bcba59ae02fa15784181",
+      "union_blob": "cfc59e667c38de931195bcba59ae02fa15784181",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tools/p6_sdk_gap_gate.py",
+      "source_blob": "cc333a71c04da174727c2e2ab4ea2e8961954390",
+      "union_blob": "cc333a71c04da174727c2e2ab4ea2e8961954390",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tools/p6_windows_sdk_gate.py",
+      "source_blob": "6588467f51a65fa23e46777afcdc273b0df70434",
+      "union_blob": "6588467f51a65fa23e46777afcdc273b0df70434",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tools/sdk_gap_corpus.py",
+      "source_blob": "dd93c6fbc6f328d90259501aec07d4a50abdb3fe",
+      "union_blob": "dd93c6fbc6f328d90259501aec07d4a50abdb3fe",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 322,
+      "path": "tools/sdk_packet_capture.cpp",
+      "source_blob": "8435ba9eafac4c14f7991ed42f5ba20e83b5e472",
+      "union_blob": "8435ba9eafac4c14f7991ed42f5ba20e83b5e472",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 331,
+      "path": "CMakeLists.txt",
+      "source_blob": "3d7e6b86656ed7055bf68fdb91bb4d254d63bdc7",
+      "union_blob": "0d5b4cebbf2abd1bfd89b321640a51aa5dbe40b3",
+      "decision": "explicit union of all registrations; base definitions occur once"
+    },
+    {
+      "source_pr": 331,
+      "path": "PROJECT.md",
+      "source_blob": "e46ba9b3946f8a17aff3793dc9c26c05181bda47",
+      "union_blob": "a557b5923ee564dcbf44312c297ebc0bdb4b2a13",
+      "decision": "branch-specific status omitted; combined status replaces it, canonical history retained"
+    },
+    {
+      "source_pr": 331,
+      "path": "docs/ISSUE46_GROUP_A_REPLAY.md",
+      "source_blob": "aacef4e0fc1c97500637d581c4f1ab27bc0e4c3f",
+      "union_blob": "aacef4e0fc1c97500637d581c4f1ab27bc0e4c3f",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 331,
+      "path": "tests/test_issue46_group_a_verifier.py",
+      "source_blob": "32857bcd1b998546c82e4d92206d29b7f828d1b5",
+      "union_blob": "32857bcd1b998546c82e4d92206d29b7f828d1b5",
+      "decision": "unchanged from source"
+    },
+    {
+      "source_pr": 331,
+      "path": "tools/verify_issue46_group_a.py",
+      "source_blob": "256cc373b84c8cb44d470e2423aa1376dde85931",
+      "union_blob": "256cc373b84c8cb44d470e2423aa1376dde85931",
+      "decision": "unchanged from source"
+    }
+  ],
+  "additional_changes": [
+    "PROJECT.md combined status prefix",
+    "docs/PROFILE_INTEGRATION_320_322_331.md",
+    "docs/PROFILE_INTEGRATION_320_322_331.json"
+  ],
+  "limits": [
+    "CPU scalar admits six profiles; production CUDA/Metal FilmScan3-only.",
+    "SDK packet tables are observable; unobserved SDK counters are not inferred.",
+    "Historical source-to-binary/compiler/ISA, seed/explicit FRMR, GPU-original and independent pixel-oracle qualification are not certified.",
+    "#187 HOLD; #46/#259/#321 remain open; no release or conformance claim."
+  ]
+}

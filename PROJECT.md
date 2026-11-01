@@ -1,3 +1,28 @@
+# Combined #320 + #322 + #331 integration
+
+Status: IN_PROGRESS / Draft integration only, not merged main.
+
+Sources: #320 6fbee4a072681247feef55b9cf1317eceecdced9,
+#322 c9172d497e3de5d827e0d4b77439ca910fe89af7,
+#331 59febad252d0ca9f65790542622a11b034b1a039.
+Base: 04c348f848de1eb3a47d3b90fe191722c1ab559e.
+
+Exact provenance, resolved status/build overlaps and portable acceptance commands:
+docs/PROFILE_INTEGRATION_320_322_331.md and .json.
+
+Next: publish a privacy-checked Draft integration commit, then collect fresh
+strict Linux CPU and quality-only Group-A receipts on that exact commit,
+hosted CI, and independently owned native A2/Metal/Windows receipts or explicit
+PENDING. The PR discussion is the live receipt surface; the material below
+is historical single-branch evidence, not a combined execution claim.
+
+Production GPU admission stays FilmScan3-only. Historical failures, original
+SDK provenance limits and #187 HOLD remain unchanged. Keep #46/#259/#321 open.
+No merge/release or conformance authorization.
+
+---
+## Historical canonical project status (preserved)
+
 # Canonical profile/backend integration (#320 / #259)
 
 Status: REVIEW / documentation correction for 2026-10-30 integration review.

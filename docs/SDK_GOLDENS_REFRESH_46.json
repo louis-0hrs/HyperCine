@@ -1,0 +1,567 @@
+{
+  "schema": 1,
+  "scope": "Linux x86_64 CPU original SDK packet replay; NOT conformance or product admission",
+  "source": {
+    "main": "9909bfccf220ec914a3c1ebf3e57fc9d95696f99",
+    "main_merge": "68e4dd5d68d638cdec1847d4378a82b9848cd5ce",
+    "local_ladder_dependency": "0be5bef090906ac047fb018b7c10d6e23da6212b",
+    "tested_working_tree_git_blobs": {
+      "CMakeLists.txt": "d9f6bf84df78ab634017a1f2cf0186a70ea27c6f",
+      "src/core/quality_state.cpp": "0d9eab72621072c52667874292db636b75844cdc",
+      "tests/test_quality_state.cpp": "645868cb2674dd4060fdab87a2b270006b219b47",
+      "tests/test_p6_sdk_gap_gate.py": "09bd0905e94c983c8d9cef09b248a622e19ea639",
+      "tests/test_p6_sdk_gap_integration.py": "7b49aa7cc9e891d63c629c3c39207cbe0051a439",
+      "tests/test_p6_windows_sdk_gate.py": "e78858497386c4bfe65b403751b299e8881cd20f",
+      "tests/test_p6_windows_sdk_integration.py": "2228fa3c2d644bfe84811d46c7bc4d7464d68d84",
+      "tools/p6_sdk_gap_gate.py": "b698bc6b4ae1c5852041773f3cb4ac8b64673253",
+      "tools/p6_windows_sdk_gate.py": "e09bef6593ab69c6ee7ef80448550492446a3566"
+    },
+    "baseline_encoder_sha256": "854b5d4ce1274fc06d5cb3c7e92a000eb293437a357a4ebe96adf67c1dc9655b",
+    "corrected_encoder_sha256": "5f04056e11c6b6f89130ba1db5d3d649eef06e5f10664ddb3c870ad0c8cb497e"
+  },
+  "toolchain": {
+    "compiler": "GCC 14.2.0",
+    "cmake": "3.31.6",
+    "python": "3.13.5",
+    "platform": "Linux x86_64"
+  },
+  "suites": {
+    "main_regular": {
+      "passed": 55,
+      "total": 56,
+      "failed": 0,
+      "skipped": 1,
+      "seconds": 74.27,
+      "special_tests": [],
+      "skipped_tests": [
+        "ffmpeg_oracle_qualification"
+      ]
+    },
+    "corrected_regular": {
+      "passed": 55,
+      "total": 56,
+      "failed": 0,
+      "skipped": 1,
+      "seconds": 75.5,
+      "special_tests": [],
+      "skipped_tests": [
+        "ffmpeg_oracle_qualification"
+      ]
+    },
+    "corrected_public_standalone": {
+      "passed": 118,
+      "total": 118,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 199.18,
+      "special_tests": [
+        {
+          "name": "p6_sdk_gap_negative_controls",
+          "status": "PASS",
+          "seconds": 0.122551
+        },
+        {
+          "name": "p6_sdk_gap_historical_pre325",
+          "status": "PASS",
+          "seconds": 0.0907569
+        },
+        {
+          "name": "p6_windows_sdk_gate_contract",
+          "status": "PASS",
+          "seconds": 0.147537
+        }
+      ],
+      "skipped_tests": []
+    },
+    "corrected_private_standalone": {
+      "passed": 125,
+      "total": 125,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 432.69,
+      "special_tests": [
+        {
+          "name": "p6_sdk_gap_negative_controls",
+          "status": "PASS",
+          "seconds": 0.143549
+        },
+        {
+          "name": "p6_sdk_gap_historical_pre325",
+          "status": "PASS",
+          "seconds": 0.132708
+        },
+        {
+          "name": "p6_windows_sdk_gate_contract",
+          "status": "PASS",
+          "seconds": 0.103653
+        },
+        {
+          "name": "p6_windows_sdk_group-a-sequences",
+          "status": "PASS",
+          "seconds": 367.266
+        },
+        {
+          "name": "p6_windows_sdk_group-b-hysteresis",
+          "status": "PASS",
+          "seconds": 149.583
+        },
+        {
+          "name": "p6_windows_sdk_group-c-sdk-state",
+          "status": "PASS",
+          "seconds": 50.5636
+        },
+        {
+          "name": "p6_windows_sdk_comparison_negatives",
+          "status": "PASS",
+          "seconds": 4.90622
+        },
+        {
+          "name": "p6_sdk_gap_negative_ramp",
+          "status": "PASS",
+          "seconds": 148.085
+        },
+        {
+          "name": "p6_sdk_gap_comparison_negatives",
+          "status": "PASS",
+          "seconds": 99.0395
+        },
+        {
+          "name": "p6_sdk_gap_sequences",
+          "status": "PASS",
+          "seconds": 270.272
+        }
+      ],
+      "skipped_tests": []
+    }
+  },
+  "main_original_sdk_baseline": {
+    "group-a-sequences": {
+      "low/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null
+      },
+      "medium/sequence-120f": {
+        "status": "FAIL",
+        "matched": 78,
+        "requested": 120,
+        "first_packet_mismatch": {
+          "frame_index": 17,
+          "sdk_bytes": 165116,
+          "writer_bytes": 167532,
+          "first_diff": 10
+        }
+      },
+      "high/sequence-120f": {
+        "status": "FAIL",
+        "matched": 78,
+        "requested": 120,
+        "first_packet_mismatch": {
+          "frame_index": 17,
+          "sdk_bytes": 168720,
+          "writer_bytes": 171148,
+          "first_diff": 10
+        }
+      },
+      "filmscan1/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null
+      }
+    },
+    "group-b-hysteresis": {
+      "low/hold-ramp": {
+        "status": "PASS",
+        "matched": 43,
+        "requested": 43,
+        "first_packet_mismatch": null
+      },
+      "medium/hold-ramp": {
+        "status": "FAIL",
+        "matched": 39,
+        "requested": 43,
+        "first_packet_mismatch": {
+          "frame_index": 39,
+          "sdk_bytes": 409428,
+          "writer_bytes": 480684,
+          "first_diff": 9
+        }
+      },
+      "high/hold-ramp": {
+        "status": "FAIL",
+        "matched": 41,
+        "requested": 43,
+        "first_packet_mismatch": {
+          "frame_index": 41,
+          "sdk_bytes": 357528,
+          "writer_bytes": 416704,
+          "first_diff": 9
+        }
+      },
+      "low/hold-calibration": {
+        "status": "PASS",
+        "matched": 16,
+        "requested": 16,
+        "first_packet_mismatch": null
+      }
+    },
+    "group-c-sdk-state": {
+      "low/direct-state": {
+        "status": "FAIL",
+        "matched": 7,
+        "requested": 7,
+        "first_packet_mismatch": null,
+        "state_matched": 4,
+        "direct_sdk_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ],
+        "writer_overbitrate": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0
+        ]
+      },
+      "medium/direct-state": {
+        "status": "FAIL",
+        "matched": 7,
+        "requested": 7,
+        "first_packet_mismatch": null,
+        "state_matched": 4,
+        "direct_sdk_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ],
+        "writer_overbitrate": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0
+        ]
+      },
+      "high/direct-state": {
+        "status": "FAIL",
+        "matched": 7,
+        "requested": 7,
+        "first_packet_mismatch": null,
+        "state_matched": 4,
+        "direct_sdk_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ],
+        "writer_overbitrate": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0
+        ]
+      }
+    },
+    "gap": {
+      "low/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "low/hold-ramp": {
+        "status": "PASS",
+        "matched": 40,
+        "requested": 40,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "medium/sequence-120f": {
+        "status": "FAIL",
+        "matched": 78,
+        "requested": 120,
+        "first_packet_mismatch": {
+          "frame_index": 17,
+          "sdk_bytes": 165116,
+          "writer_bytes": 167532,
+          "first_diff": 10
+        },
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "medium/hold-ramp": {
+        "status": "PASS",
+        "matched": 40,
+        "requested": 40,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "high/sequence-120f": {
+        "status": "FAIL",
+        "matched": 78,
+        "requested": 120,
+        "first_packet_mismatch": {
+          "frame_index": 17,
+          "sdk_bytes": 168720,
+          "writer_bytes": 171148,
+          "first_diff": 10
+        },
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "high/hold-ramp": {
+        "status": "PASS",
+        "matched": 40,
+        "requested": 40,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "filmscan1/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": []
+      }
+    }
+  },
+  "corrected_original_sdk": {
+    "group-a-sequences": {
+      "low/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null
+      },
+      "medium/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null
+      },
+      "high/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null
+      },
+      "filmscan1/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null
+      }
+    },
+    "group-b-hysteresis": {
+      "low/hold-ramp": {
+        "status": "PASS",
+        "matched": 43,
+        "requested": 43,
+        "first_packet_mismatch": null
+      },
+      "medium/hold-ramp": {
+        "status": "PASS",
+        "matched": 43,
+        "requested": 43,
+        "first_packet_mismatch": null
+      },
+      "high/hold-ramp": {
+        "status": "PASS",
+        "matched": 43,
+        "requested": 43,
+        "first_packet_mismatch": null
+      },
+      "low/hold-calibration": {
+        "status": "PASS",
+        "matched": 16,
+        "requested": 16,
+        "first_packet_mismatch": null
+      }
+    },
+    "group-c-sdk-state": {
+      "low/direct-state": {
+        "status": "PASS",
+        "matched": 7,
+        "requested": 7,
+        "first_packet_mismatch": null,
+        "state_matched": 7,
+        "direct_sdk_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ],
+        "writer_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ]
+      },
+      "medium/direct-state": {
+        "status": "PASS",
+        "matched": 7,
+        "requested": 7,
+        "first_packet_mismatch": null,
+        "state_matched": 7,
+        "direct_sdk_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ],
+        "writer_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ]
+      },
+      "high/direct-state": {
+        "status": "PASS",
+        "matched": 7,
+        "requested": 7,
+        "first_packet_mismatch": null,
+        "state_matched": 7,
+        "direct_sdk_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ],
+        "writer_overbitrate": [
+          0,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0
+        ]
+      }
+    },
+    "negative-40f-ramp": {
+      "low/hold-ramp": {
+        "status": "PASS",
+        "matched": 40,
+        "requested": 40,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "medium/hold-ramp": {
+        "status": "PASS",
+        "matched": 40,
+        "requested": 40,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "high/hold-ramp": {
+        "status": "PASS",
+        "matched": 40,
+        "requested": 40,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      }
+    },
+    "linux-120f": {
+      "low/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "medium/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "high/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": [],
+        "in_band_frames": 0
+      },
+      "filmscan1/sequence-120f": {
+        "status": "PASS",
+        "matched": 120,
+        "requested": 120,
+        "first_packet_mismatch": null,
+        "hold_witness_pairs": []
+      }
+    }
+  },
+  "historical_artifact_sha256": {
+    "docs/SDK_GAP_PARITY_46.json": "24ae84d6221e602f96d851a7a75874bc2ecd6caa89dcb8c481651dc4c797882c",
+    "docs/SDK_GAP_TRAJECTORY_46.json": "1b79278947c259fa010d4c5d33d9dafcb8fc30d412c45c0229501b70a1494a10"
+  },
+  "negative_ramp_verdict": "NON_QUALIFYING_NO_HOLD; negative-control PASS is successful rejection, never profile admission",
+  "optimized_windows_comparison_controls": {
+    "passed": 7,
+    "total": 7,
+    "scope": "fake emitter using verified real SDK packets; not encoder parity evidence"
+  },
+  "incomplete_attempts": [
+    "Private suite stopped to correct new helper previous-input-size vs current-output-size timing domain.",
+    "Public suite hit FFmpeg ENOSPC in geometry external decode and was stopped; not a completed passing run.",
+    "Concurrent private suite stopped for shared tmpfs pressure; complete final suites used dedicated disk-backed TMPDIR."
+  ],
+  "open_gates": [
+    "Maintainer acceptance/landing of the local #325 dependency; no protected branch or GitHub PR merged by this refresh.",
+    "Independent review and exact-head hosted CI after publication.",
+    "Independent qualification of the original Windows compiler invocation/ISA dispatch remains pending; this is replay, not a Windows-native rebuild.",
+    "Original generator seed and explicit SDK FRMR remain NOT_MEASURED; 30 fps is documented SDK fallback.",
+    "No fresh FS2/FS3 private oracle run, per-profile native GPU, 4K/8K or alternate-timebase qualification in this refresh."
+  ]
+}

@@ -184,6 +184,8 @@ option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 fro
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
 # This path intentionally returns before any SDK include directory or target.
 set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quality-profile corpus root")
+set(HYPERCINE_ISSUE46_GROUP_A_CORPUS "" CACHE PATH
+    "Optional 120-frame Windows sequence corpus (group-a-sequences) for the #46 packet-table replay")
 add_library(hypercine_quality_state STATIC src/core/quality_state.cpp)
 target_include_directories(hypercine_quality_state PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_features(hypercine_quality_state PUBLIC cxx_std_17)
@@ -214,6 +216,12 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
         $<TARGET_FILE:quality_state_probe>)
     add_test(NAME quality_cmake_mode_contract COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/ci/test_quality_cmake_mode.py")
+    # Corpus-free adversarial regression: malformed private packet tables must
+    # never produce a green oracle result, even on public CI hosts.
+    add_test(NAME issue46_group_a_verifier_contract COMMAND "${Python3_EXECUTABLE}"
+        -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_issue46_group_a_verifier.py")
+    set_tests_properties(issue46_group_a_verifier_contract PROPERTIES
+        LABELS "quality;oracle-contract")
     if(HYPERCINE_QUALITY_ORACLE_ROOT)
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
         add_test(NAME quality_state_windows_oracle COMMAND "${Python3_EXECUTABLE}"
@@ -222,6 +230,19 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
         set_tests_properties(quality_state_windows_oracle PROPERTIES
             ENVIRONMENT "HYPERCINE_TEST_COMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
             TIMEOUT 3600)
+    endif()
+    # Issue #46: the four 120-frame Windows sequences, compared frame by frame
+    # against the band tables parsed out of each packet. Separate from the
+    # manifest replay above because it answers a different question: that one
+    # checks a pinned derivation, this one checks the observable packet tables.
+    if(HYPERCINE_ISSUE46_GROUP_A_CORPUS)
+        find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME issue46_group_a_packet_tables COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/verify_issue46_group_a.py"
+            --probe $<TARGET_FILE:quality_state_probe>
+            --corpus "${HYPERCINE_ISSUE46_GROUP_A_CORPUS}")
+        set_tests_properties(issue46_group_a_packet_tables PROPERTIES
+            LABELS "quality;windows-oracle" TIMEOUT 3600)
     endif()
     return()
 endif()
@@ -636,6 +657,69 @@ if(HYPERCINE_BUILD_STANDALONE)
         target_link_libraries(test_profile_enter_contract PRIVATE
             hypercine_standalone hypercine_quality_state)
         add_test(NAME profile_enter_contract COMMAND test_profile_enter_contract)
+        # Separate dated original-SDK missing-coverage corpus, never the old 16f inventory.
+        set(HYPERCINE_SDK_GAP_CORPUS_ROOT "" CACHE PATH "Original SDK 120f/hold corpus")
+        set(HYPERCINE_SDK_GAP_INDEX_SHA256 "" CACHE STRING "Pinned gap corpus transfer SHA256")
+        find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME p6_sdk_gap_negative_controls COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_gate.py")
+        add_test(NAME p6_sdk_gap_historical_pre325 COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_gate.py"
+            GapGateControls.test_historical_expected_to_fail_before_325)
+        set_tests_properties(p6_sdk_gap_historical_pre325 PROPERTIES LABELS "historical;negative-control")
+        set(HYPERCINE_WINDOWS_SDK_ROOT "" CACHE PATH "Read-only Windows issue321 groups A/B/C")
+        add_test(NAME p6_windows_sdk_gate_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_windows_sdk_gate.py")
+        if(HYPERCINE_WINDOWS_SDK_ROOT)
+            if(NOT HYPERCINE_SDK_GAP_CORPUS_ROOT)
+                message(FATAL_ERROR "Windows input provenance requires the independently pinned gap corpus")
+            endif()
+            foreach(group group-a-sequences group-b-hysteresis group-c-sdk-state)
+                add_test(NAME p6_windows_sdk_${group} COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_windows_sdk_gate.py"
+                    --corpus "${HYPERCINE_WINDOWS_SDK_ROOT}"
+                    --gap-corpus "${HYPERCINE_SDK_GAP_CORPUS_ROOT}" --group ${group}
+                    --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                    --work "${CMAKE_CURRENT_BINARY_DIR}/windows-sdk-work"
+                    --report "${CMAKE_CURRENT_BINARY_DIR}/windows-sdk-${group}.json")
+                set_tests_properties(p6_windows_sdk_${group} PROPERTIES
+                    LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
+            endforeach()
+            add_test(NAME p6_windows_sdk_comparison_negatives COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_windows_sdk_integration.py"
+                --corpus "${HYPERCINE_WINDOWS_SDK_ROOT}")
+            set_tests_properties(p6_windows_sdk_comparison_negatives PROPERTIES
+                LABELS "reference-oracle;negative-control" TIMEOUT 600)
+        endif()
+        if(HYPERCINE_SDK_GAP_CORPUS_ROOT)
+            string(LENGTH "${HYPERCINE_SDK_GAP_INDEX_SHA256}" sdk_gap_pin_length)
+            if(NOT sdk_gap_pin_length EQUAL 64 OR NOT HYPERCINE_SDK_GAP_INDEX_SHA256 MATCHES "^[0-9a-f]+$")
+                message(FATAL_ERROR "A pinned SDK gap corpus transfer SHA256 is required")
+            endif()
+            add_test(NAME p6_sdk_gap_negative_ramp COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_sdk_gap_gate.py"
+                --corpus "${HYPERCINE_SDK_GAP_CORPUS_ROOT}"
+                --index-sha256 "${HYPERCINE_SDK_GAP_INDEX_SHA256}"
+                --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --work "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-work"
+                --report "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-report.json" --expect-negative-ramp)
+            add_test(NAME p6_sdk_gap_comparison_negatives COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_integration.py"
+                --corpus "${HYPERCINE_SDK_GAP_CORPUS_ROOT}")
+            set_tests_properties(p6_sdk_gap_comparison_negatives PROPERTIES
+                LABELS "reference-oracle;negative-control" TIMEOUT 3600)
+            add_test(NAME p6_sdk_gap_sequences COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_sdk_gap_gate.py"
+                --corpus "${HYPERCINE_SDK_GAP_CORPUS_ROOT}"
+                --index-sha256 "${HYPERCINE_SDK_GAP_INDEX_SHA256}"
+                --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
+                --work "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-sequence-work"
+                --report "${CMAKE_CURRENT_BINARY_DIR}/sdk-gap-sequence-report.json" --sequences-only)
+            set_tests_properties(p6_sdk_gap_sequences PROPERTIES
+                LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
+            set_tests_properties(p6_sdk_gap_negative_ramp PROPERTIES
+                LABELS "reference-oracle;negative-control;non-qualifying" TIMEOUT 7200)
+        endif()
         # Issue #46: the only admissible proof that the writer emits another
         # profile is the original Windows packet itself. Registered only when a
         # verified corpus is configured; a missing corpus is not a pass.

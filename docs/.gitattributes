@@ -1,0 +1,12 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+#
+# These evidence files are pinned by SHA-256 over their raw bytes
+# (tests/test_p6_sdk_gap_gate.py). Without this, a Windows checkout rewrites
+# LF as CRLF and the same content hashes differently: the pinned LF digest
+# 24ae84d6... becomes 3f1c331e..., which is a false failure that says nothing
+# about the evidence. -text keeps the recorded bytes as recorded on every host.
+#
+# Same convention as tests/.gitattributes and docs/evidence/.gitattributes.
+/SDK_GAP_PARITY_46.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/SDK_GAP_TRAJECTORY_46.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
