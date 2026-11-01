@@ -41,15 +41,27 @@ if mode=='previous':trace[0]['previous_sample_bytes']=1
 if mode=='tamper':
  p=out/'frame_0000.cfhd';data=bytearray(p.read_bytes());data[87]^=1;p.write_bytes(data)
 if mode=='missing':(out/'frame_0002.cfhd').unlink()
+for field in ('fs_overbitrate','fs_rate_limiter','previous_sample_bytes'):
+ if mode==field+'_bool':trace[0][field]=False
+ if mode==field+'_float':trace[0][field]=float(trace[0][field])
+ if mode==field+'_missing':del trace[0][field]
+if mode=='overbitrate_true':trace[4]['fs_overbitrate']=True
 (out/'trace.json').write_text(json.dumps(dict(frames=trace)))
 """)
         os.environ['WINDOWS_GATE_ROOT'] = str(root)
-        for mode in ('baseline', 'truncate', 'reorder', 'state', 'previous', 'tamper', 'missing'):
+        schema_modes = tuple(field+'_'+kind
+                             for field in ('fs_overbitrate', 'fs_rate_limiter', 'previous_sample_bytes')
+                             for kind in ('bool', 'float', 'missing')) + ('overbitrate_true',)
+        for mode in ('baseline', 'truncate', 'reorder', 'state', 'previous', 'tamper', 'missing') + schema_modes:
             os.environ['WINDOWS_GATE_MUTATION'] = mode
             try:
                 result = gate.compare(root, index, session, runner, work/mode, True)
             except ValueError as error:
-                if mode not in ('truncate', 'reorder') or 'count/order' not in str(error):
+                if mode in ('truncate', 'reorder'):
+                    if 'count/order' not in str(error): raise
+                elif mode in schema_modes:
+                    if 'integer state' not in str(error): raise
+                else:
                     raise
             except FileNotFoundError:
                 if mode != 'missing':

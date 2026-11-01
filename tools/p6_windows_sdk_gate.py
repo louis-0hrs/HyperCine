@@ -34,6 +34,15 @@ def inventory(root, pin):
     return index
 
 
+def integer_state_fields(record, fields):
+    # Python numeric equality aliases JSON booleans/floats with integers.
+    # Validate before state equality so a copied packet cannot hide bad state.
+    if (not isinstance(record, dict) or any(
+            type(record.get(field)) is not int or record[field] < 0
+            for field in fields)):
+        raise ValueError('expected nonnegative integer state fields')
+
+
 def validate_sessions(manifest, group):
     state = group == 'group-c-sdk-state'
     upstream = 'sdk_upstream_commit' if state else 'upstream_commit'
@@ -55,6 +64,15 @@ def validate_sessions(manifest, group):
             expected = count
         trace_contract(frames, expected)
         if state:
+            integer_state_fields(session, ('limit_bits_per_second',))
+            for i, frame in enumerate(frames):
+                integer_state_fields(frame, ('sdk_byte_length', 'sdk_lastgopbitcount_after_encode',
+                                             'sdk_overbitrate_after_encode', 'sdk_rate_limiter_after_encode'))
+                previous_fields = ('previous_sdk_sample_bytes', 'previous_bitrate_30fps')
+                if i:
+                    integer_state_fields(frame, previous_fields)
+                elif any(field not in frame or frame[field] is not None for field in previous_fields):
+                    raise ValueError('frame zero has no previous SDK state')
             if session.get('state_source') != STATE_SOURCE or session.get('limit_bits_per_second') != LIMITS[session['profile']]:
                 raise ValueError('missing directly observed SDK state provenance')
             if [f['sdk_overbitrate_after_encode'] for f in frames] != STATE:
@@ -143,6 +161,9 @@ def compare(root, index, session, encoder, directory, state):
     subprocess.run(prefix+['--coefficient-hash', 'off', '--quality', profile, str(directory)]+
                    [str(root/f['input']) for f in frames], check=True, capture_output=True, text=True)
     trace = json.loads((directory/'trace.json').read_text())['frames']; trace_contract(trace, len(frames))
+    if state:
+        for actual in trace:
+            integer_state_fields(actual, ('fs_overbitrate', 'fs_rate_limiter', 'previous_sample_bytes'))
     rows = []
     for i, (f, actual, sdk) in enumerate(zip(frames, trace, packets)):
         ours = (directory/('frame_%04d.cfhd'%i)).read_bytes()
