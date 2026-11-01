@@ -102,9 +102,18 @@ build directory instead:
     cmake -S . -B build-cpu-standalone -G Ninja -DCMAKE_BUILD_TYPE=Release \
       -DHYPERCINE_BUILD_STANDALONE=ON -DHYPERCINE_BUILD_UPSTREAM=OFF \
       -DHYPERCINE_BUILD_TESTS=ON -DHYPERCINE_ENABLE_CUDA=OFF \
-      -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON
+      -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     cmake --build build-cpu-standalone --parallel
     python3 ci/run_standalone.py --build-dir build-cpu-standalone --system Linux --machine x86_64
+
+`-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` is not optional here. The inventory reads
+`compile_commands.json` to prove the standalone tree links no upstream or CUDA
+translation unit, and nothing in this project turns the export on implicitly
+(only the CI workflows pass the flag). Without it the earlier lines succeed,
+the build succeeds, and the inventory then stops at
+`No such file or directory: .../compile_commands.json` — measured on this
+host, CMake 3.31.6, at the exact commit before this correction.
 
 `ci/run_standalone.py` requires the CPU-only standalone configuration and
 rejects a CUDA-on tree, so the CUDA session gate is listed for CUDA builds while
