@@ -1,5 +1,24 @@
 # Combined internal profile/session and original-reference gates
 
+## Post-merge disposition (2026-11-01)
+
+[PR #339](https://github.com/louis-0hrs/HyperCine/pull/339) merged to `main` as
+`37908fc6ead55e5db254ffbac4c9af7961b816b2` from exact reviewed
+integration head `baccccffe4ec2cab5fe3807e66a49318657f014a`.
+Source Draft PRs #320/#322/#331 are closed, not independently merged.
+The published exact-head receipts report Linux private strict **130/130**,
+quality-only Group A **42/42**, Windows public strict **123/123**, native
+CUDA/A2 and Metal GPU-required matrices **1/1** each, and **28/28** hosted
+head-associated checks successful. These are not new native tests of the
+main merge SHA. See [CPU/CI](https://github.com/louis-0hrs/HyperCine/pull/339#issuecomment-6558259804),
+[GPU](https://github.com/louis-0hrs/HyperCine/pull/339#issuecomment-6558291175),
+and [Windows](https://github.com/louis-0hrs/HyperCine/pull/339#issuecomment-6558331173).
+
+The source inventory and reproduction commands below are retained as the
+pre-merge provenance record. #46/#259/#321 remain open; #187 HOLD remains
+in effect. No product release, broad GPU profile admission or SMPTE VC-5
+conformance is asserted.
+
 ## Source and resolution contract
 
 Base: `04c348f848de1eb3a47d3b90fe191722c1ab559e`.
@@ -10,11 +29,10 @@ Base: `04c348f848de1eb3a47d3b90fe191722c1ab559e`.
 
 Three-parent merge; canonical #320 first parent. An ours merge scaffold establishes the source parents, then its tree is explicitly replaced by the independently reconstructed complete union before commit. No ours-only tree is committed.
 
-The merge preserves all three original commit histories. Existing Draft source
-branches are not rewritten. The executable union equals the independently
-reconstructed and previously CPU-tested tree above; those earlier results are
-historical, not fresh integration-commit execution. New receipts are published
-on this Draft integration PR and name the actual tested commit.
+The integration preserves all three original commit histories. The original
+source branches were not rewritten. The executable union equals the independently
+reconstructed pre-merge tree; those earlier results remain historical. Fresh
+integration-head receipts are linked above and name the exact tested commit.
 
 ## Exact contribution and overlap inventory
 
@@ -104,9 +122,10 @@ Retain command lines, compiler/OS, complete JUnit hashes and blob maps outside G
   40-frame ramp remains NON_QUALIFYING_NO_HOLD. Do not relabel either.
 - Original A/B/C artifacts replayed on Linux are not Windows-native execution.
 - Directly captured Group-C state is distinct from Group-A observable packet tables.
-- Native A2/Metal/Windows and hosted CI are PENDING for the eventual integration
-  commit until source-bound receipts are published. Previous #320 receipts remain
-  separately attributed; unchanged blobs are not automatically new native passes.
+- Native A2/Metal/Windows and hosted CI completed on exact integration head
+  `baccccffe4ec2cab5fe3807e66a49318657f014a` as linked above. Previous
+  #320 receipts remain separately attributed; these are not post-merge native runs.
 - Native GPU profile matrices use measurement-only seams and real dispatch; they
   do not grant production admission or prove original-SDK GPU parity.
-- No main merge, release, broad GPU-profile, sanitizer/performance or SMPTE/VC-5 claim.
+- Internal-scope main merge completed via #339; no release, broad GPU-profile,
+  sanitizer/performance or SMPTE/VC-5 claim.
