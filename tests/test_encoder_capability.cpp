@@ -485,9 +485,26 @@ int main() {
         auto simd_fallback = Check("cpu-simd-fallback", simd, host, CapabilityReason::ExperimentallySupported);
         Require(simd_fallback.fell_back_to_cpu_scalar && simd_fallback.reasons.backend_not_present, "simd fallback keeps the missing-backend axis");
 
+        // #259 step 3: the five non-FilmScan3 profiles are no longer refused on
+        // this writer. They are admitted for CPU scalar, and their absence on a
+        // GPU backend is reported on its own profile axis instead.
         auto medium = Film(1920, 1080);
         medium.quality = hypercine::EncodingQuality::Medium;
-        Check("quality-medium", medium, host, CapabilityReason::ValidButNotImplemented);
+        auto medium_cpu = Check("quality-medium-cpu", medium, host, CapabilityReason::ExperimentallySupported);
+        Require(medium_cpu.profile_admitted && medium_cpu.allocation_permitted, "CPU profile not admitted");
+        auto medium_metal = medium; medium_metal.backend = SessionBackend::Metal;
+        // Bind storage so the Metal request is not refused for a missing storage
+        // contract first; this case is about the profile axis alone.
+        medium_metal.input_stride_bytes = 1920u * 4u;
+        medium_metal.input_bytes = medium_metal.input_stride_bytes * 1080u;
+        auto medium_metal_result = Check("quality-medium-metal", medium_metal, metal_device,
+                                         CapabilityReason::ProfileNotQualifiedForBackend);
+        Require(medium_metal_result.reasons.profile_not_qualified_for_backend &&
+                !medium_metal_result.profile_admitted && !medium_metal_result.allocation_permitted,
+                "unqualified GPU profile was admitted");
+        auto bad_profile = Film(1920, 1080);
+        bad_profile.quality = static_cast<hypercine::EncodingQuality>(42);
+        Check("quality-invalid-enum", bad_profile, host, CapabilityReason::FormatMathematicallyInvalid);
         auto yuy2 = Film(1920, 1080);
         yuy2.pixel_format = SourcePixelFormat::Yuy2;
         Check("yuy2", yuy2, host, CapabilityReason::ValidButNotImplemented);

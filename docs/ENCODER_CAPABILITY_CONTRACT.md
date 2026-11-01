@@ -35,11 +35,18 @@ not a qualified product mode.
 ## Which answers are which
 
 **Profile-specific.** Codec family, quality profile, pixel format, progressive
-GOP1, 10-bit YUV 4:2:2, the FilmScan3 color matrix, and the FilmScan3 quant
-tables. Six other qualities, RGB444, GOP2, interlaced, YUY2, and RGB48 are
-different contracts. This prototype reports them as valid but not implemented.
-Legacy fixed-Q2 (`EncodeBgra`, `kMaxPixels = 2,097,152`) stays on its own path;
-this contract does not raise that cap.
+GOP1, 10-bit YUV 4:2:2, the FilmScan3 color matrix, and the profile's quant
+tables. The six regular profiles share this writer, so all six are admitted for
+the CPU scalar session; the admission matrix is backend-dependent (see
+[ENCODER_PROFILE_SESSIONS.md](ENCODER_PROFILE_SESSIONS.md)). RGB444, GOP2,
+interlaced, YUY2, and RGB48 are different contracts. This prototype reports them
+as valid but not implemented. Legacy fixed-Q2 (`EncodeBgra`,
+`kMaxPixels = 2,097,152`) stays on its own path; this contract does not raise
+that cap.
+
+What must never be inferred: a profile admitted for CPU scalar is not thereby
+admitted for Metal or CUDA. Those backends keep their own per-profile packet
+evidence record, and this revision has one for FilmScan3 only.
 
 **Geometry-dependent.** Width, height, input stride, plane strides, wavelet
 band extents, the pixel budget, the derived sample ceiling `8*pixels+16384`,
@@ -106,7 +113,8 @@ Axes, kept separate:
 | Backend not present | The requested backend is not in the caller-supplied device. A observed CUDA card is not presence |
 | Backend not qualified for this geometry | Outside this implementation's conservative 4096 qualification envelope, a GPU backend, or a CPU geometry with no evidence record. Includes 4096×2024, which is inside the pixel budget |
 | Memory budget exceeded | Pixel budget, sample ceiling, sample floor below the raw lowpass, or the caller's CPU/GPU ceiling below the static planning ceiling |
-| Reference missing | No original-SDK oracle is linked. Always true here. Blocks only if `require_reference_oracle` is set |
+| Reference missing | No original-SDK oracle is linked. Always true here. Blocks only if `require_reference_oracle` is set. Outranks the profile axis, so a demanded reference is reported as a reference gap |
+| Profile not qualified for backend | A legal one of the six regular quality profiles that this contract has no packet evidence for on the effective backend. See [ENCODER_PROFILE_SESSIONS.md](ENCODER_PROFILE_SESSIONS.md). Not a format error and not a geometry gap |
 | Experimentally supported | CPU scalar, validator passed, geometry is on the evidence list, and no axis above blocks. Allocation may start. This is not `CODEC_PASS` and not a reference pass |
 
 `CODEC_PASS` is only a full encode plus an independent FFmpeg decode that

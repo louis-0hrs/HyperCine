@@ -15,7 +15,8 @@ from run_standalone import (REQUIRED, registered_tests, completed_tests,
 
 class StandaloneGateTests(unittest.TestCase):
     def test_internal_backend_session_gates_are_binding(self):
-        for name in ('encoder_backend_selection_contract', 'encoder_backend_session_packets'):
+        for name in ('encoder_backend_selection_contract', 'encoder_backend_session_packets',
+                     'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence'):
             self.assertIn(name, REQUIRED)
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
@@ -123,6 +124,16 @@ class StandaloneGateTests(unittest.TestCase):
         block = cuda_block[1].split('endif()', 1)[0]
         self.assertIn(registration, block)
 
+    def test_cuda_profile_measurement_is_gpu_required_and_guarded(self):
+        cmake = (Path(__file__).resolve().parent.parent / 'CMakeLists.txt').read_text()
+        block = cmake.split('# Issue #259 step 2: the same capability-gated session', 1)[1].split('endif()', 1)[0]
+        registration = 'add_test(NAME encoder_cuda_profile_matrix COMMAND test_encoder_cuda_profile_matrix)'
+        self.assertIn(registration, block)
+        properties = block.split('set_tests_properties(encoder_cuda_profile_matrix', 1)[1].split(')', 1)[0]
+        self.assertIn('gpu-required', properties)
+        self.assertIn('RUN_SERIAL TRUE', properties)
+        self.assertNotIn('SKIP_RETURN_CODE', properties)
+
     def test_metal_enabled_requires_all_existing_metal_gates(self):
         cache = {'HYPERCINE_ENABLE_METAL': 'ON'}
         required = required_tests(cache)
@@ -130,7 +141,7 @@ class StandaloneGateTests(unittest.TestCase):
                  'filmscan3_metal_sequence_manifest', 'filmscan3_metal_external_decode',
                  'filmscan3_metal_4k_ffmpeg_gate', 'filmscan3_metal_4k_encoder',
                  'filmscan3_metal_multisession', 'filmscan3_metal_geometry_matrix',
-                 'encoder_metal_session_packets'}
+                 'encoder_metal_session_packets', 'encoder_metal_profile_matrix'}
         self.assertEqual(required - REQUIRED, metal)
         for omitted in metal:
             with self.subTest(omitted=omitted), self.assertRaises(ValueError):

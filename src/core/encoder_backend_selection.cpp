@@ -9,8 +9,18 @@ bool BackendOnlyRefusal(const EncoderCapabilityResult& capability) {
     const auto& flags = capability.reasons;
     // Backend fallback is not permission to repair a format, profile, resource,
     // or reference failure. A different CPU budget is checked again below.
+    //
+    // The profile flag is repeated here as a second gate even though the primary
+    // check below already excludes ProfileNotQualifiedForBackend: if a future
+    // revision ever raises another reason above the profile axis, a request with
+    // an unproven profile must still not become fallback-eligible merely because
+    // that other reason looks backend-only. Note the intended asymmetry: profile
+    // admission is judged on the effective backend, so an absent or
+    // geometry-unqualified backend may still fall back to an ordinary CPU
+    // session, and the CPU matrix then decides the profile.
     return !flags.format_mathematically_invalid && !flags.valid_but_not_implemented &&
-           !flags.memory_budget_exceeded && capability.primary != CapabilityReason::ReferenceMissing &&
+           !flags.memory_budget_exceeded && !flags.profile_not_qualified_for_backend &&
+           capability.primary != CapabilityReason::ReferenceMissing &&
            (capability.primary == CapabilityReason::BackendNotPresent ||
             capability.primary == CapabilityReason::BackendNotQualifiedForGeometry);
 }
@@ -107,6 +117,11 @@ BackendSelectionError::BackendSelectionError(const BackendSelection& result)
 EncoderSession::EncoderSession(const EncoderSessionConfig& config, const EncoderDevice& device)
     : config_(config), selection_(RequireSelection(SelectBackend(config_, device))) {
     FrontendAccess::Use(encoder_, selection_.frontend);
+    // The profile travels through the one existing writer entry point, and only
+    // after capability permission admitted this profile for the selected
+    // backend. Setting it before the frontend existed would let a refused
+    // session still hold a profile the contract never authorized.
+    encoder_.SetSessionQuality(config_.quality);
     encoder_.SetCoefficientHashing(config_.diagnostic == DiagnosticMode::CoefficientFnv64);
 }
 
