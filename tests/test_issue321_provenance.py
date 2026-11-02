@@ -13,6 +13,117 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import verify_issue321_provenance as v
 import inspect_issue321_origin as origin
+import verify_issue321_toolchain as toolchain
+
+
+class ToolchainProbe(unittest.TestCase):
+    def setUp(self):
+        environment = patch.dict(toolchain.os.environ, {'HYPERCINE_GOLDEN_DIR': ''})
+        environment.start()
+        self.addCleanup(environment.stop)
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name).resolve()
+        self.compiler = self.root / 'cl.exe'
+        self.compiler.write_bytes(b'synthetic compiler bytes')
+        self.record = self.root / 'CMakeCXXCompiler.cmake'
+        self.record.write_text(
+            'set(CMAKE_CXX_COMPILER "' + str(self.compiler) + '")\n'
+            'set(CMAKE_CXX_COMPILER_ID "MSVC")\n'
+            'set(CMAKE_CXX_COMPILER_VERSION "19.44.35228.0")\n')
+
+    def process(self, output=b'Version 19.44.35228.0', code=2):
+        return toolchain.subprocess.CompletedProcess([], code, b'', output)
+
+    def test_version_agreement_is_not_historical_attestation(self):
+        with patch.object(toolchain.subprocess, 'run', return_value=self.process()) as run:
+            report = toolchain.inspect(self.record)
+        self.assertEqual(report['status'], 'VERSION_AGREES')
+        self.assertEqual(report['historical_compiler_identity'], 'NOT_ESTABLISHED')
+        self.assertEqual(report['current_compiler_sha256'], v.file_sha(self.compiler))
+        self.assertEqual(run.call_args.args[0], [str(self.compiler), '/Bv'])
+        self.assertEqual(run.call_args.kwargs['timeout'], 30)
+
+    def test_current_compiler_can_differ_at_same_recorded_path(self):
+        result = self.process(b'PRIVATE_LOCATION Version 19.44.35229 for x64\n19.44.35229.0')
+        with patch.object(toolchain.subprocess, 'run', return_value=result):
+            report = toolchain.inspect(self.record)
+        self.assertEqual(report['status'], 'TOOLCHAIN_VERSION_DRIFT')
+        self.assertFalse(report['version_equal'])
+        self.assertEqual(report['observed_version'], '19.44.35229.0')
+        self.assertNotIn('PRIVATE_LOCATION', json.dumps(report))
+        self.assertNotIn(str(self.compiler), json.dumps(report))
+
+    def test_missing_compiler_does_not_execute(self):
+        self.compiler.unlink()
+        with patch.object(toolchain.subprocess, 'run') as run, self.assertRaises(OSError):
+            toolchain.inspect(self.record)
+        run.assert_not_called()
+
+    def test_invalid_or_ambiguous_record_does_not_execute(self):
+        text = self.record.read_text()
+        for invalid in (text.replace('MSVC', 'Other'),
+                        text.replace('19.44.35228.0', 'unknown'),
+                        text + 'set(CMAKE_CXX_COMPILER_ID "MSVC")\n'):
+            self.record.write_text(invalid)
+            with self.subTest(record=invalid), patch.object(toolchain.subprocess, 'run') as run:
+                with self.assertRaises(ValueError):
+                    toolchain.inspect(self.record)
+                run.assert_not_called()
+
+    def test_failed_or_ambiguous_version_probe_is_rejected(self):
+        for result in (self.process(b'no compiler version'),
+                       self.process(b'19.44.35228.0 19.44.35229.0'),
+                       self.process(code=1)):
+            with patch.object(toolchain.subprocess, 'run', return_value=result):
+                with self.assertRaises(ValueError):
+                    toolchain.inspect(self.record)
+
+    def test_timeout_is_not_version_agreement(self):
+        with patch.object(toolchain.subprocess, 'run', side_effect=
+                          toolchain.subprocess.TimeoutExpired('cl', 30)):
+            with self.assertRaises(toolchain.subprocess.TimeoutExpired):
+                toolchain.inspect(self.record)
+
+    def test_artifacts_must_remain_stable_during_probe(self):
+        for artifact in (self.compiler, self.record):
+            before = artifact.read_bytes()
+
+            def probe(*args, **kwargs):
+                artifact.write_bytes(before + b'changed')
+                return self.process()
+
+            with patch.object(toolchain.subprocess, 'run', side_effect=probe):
+                with self.assertRaises(ValueError):
+                    toolchain.inspect(self.record)
+            artifact.write_bytes(before)
+
+    def test_cli_reports_drift_with_nonzero_exit(self):
+        with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--output', str(self.root / 'report.json')]), \
+                patch.object(toolchain.subprocess, 'run', return_value=
+                             self.process(b'19.44.35229.0')):
+            self.assertEqual(toolchain.main(), 2)
+        report = json.loads((self.root / 'report.json').read_text())
+        self.assertEqual(report['status'], 'TOOLCHAIN_VERSION_DRIFT')
+
+    def test_existing_output_is_never_overwritten(self):
+        output = self.root / 'report.json'
+        output.write_bytes(b'original receipt')
+        with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--output', str(output)]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            self.assertEqual(toolchain.main(), 1)
+        self.assertEqual(output.read_bytes(), b'original receipt')
+        run.assert_not_called()
+
+    def test_corpus_output_is_rejected_before_probe(self):
+        with patch.dict(toolchain.os.environ, {'HYPERCINE_GOLDEN_DIR': str(self.root)}), \
+                patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                          '--output', str(self.root / 'report.json')]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            self.assertEqual(toolchain.main(), 1)
+        run.assert_not_called()
 
 
 class ArchiveOrigin(unittest.TestCase):
