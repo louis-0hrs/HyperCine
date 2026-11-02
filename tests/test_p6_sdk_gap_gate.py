@@ -4,9 +4,11 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 import copy
 import hashlib
+import json
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import p6_sdk_gap_gate as gate
@@ -129,6 +131,61 @@ class TraceTypes(unittest.TestCase):
     def test_reject_wrong_order_and_count(self):
         for trace,count in (([],1),([{'frame_index':1}],1),([{'frame_index':0}]*2,2),([],False),([],0.0),([],-1)):
             with self.subTest(trace=trace,count=count),self.assertRaises(ValueError): gate.trace_contract(trace,count)
+
+
+class ManifestTypes(unittest.TestCase):
+    def manifest(self):
+        return {'schema_version':1,'profile':'low','kind':'sequence-120f',
+                'geometry':[1920,1080],'timebase':'SDK default 30 fps',
+                'sdk':{'implementation':'original CFHD_EncodeSample','frozen_ref':gate.FROZEN},
+                'frames':[{'frame_index':i} for i in range(120)]}
+
+    def validate(self, manifest):
+        gate.validate_manifest(manifest,'low','sequence-120f',120)
+
+    def test_accept_json_integer_manifest(self):
+        self.validate(json.loads(json.dumps(self.manifest())))
+
+    def test_reject_noninteger_schema_version(self):
+        for value in (True,False,1.0,'1',None):
+            manifest=self.manifest();manifest['schema_version']=value
+            with self.subTest(value=value),self.assertRaises(ValueError):self.validate(manifest)
+
+    def test_reject_float_geometry(self):
+        for value in ([1920.0,1080],[1920,1080.0],[1920.0,1080.0]):
+            manifest=self.manifest();manifest['geometry']=value
+            with self.subTest(value=value),self.assertRaises(ValueError):self.validate(manifest)
+
+    def test_reject_bad_geometry_shapes(self):
+        for value in (None,True,1920,'1920x1080',{},[],[1920],[1920,1080,1],
+                      [True,1080],[1920,'1080'],(1920,1080)):
+            manifest=self.manifest();manifest['geometry']=value
+            with self.subTest(value=value),self.assertRaises(ValueError):self.validate(manifest)
+
+    def test_reject_bad_outer_shapes(self):
+        for value in (None,True,1,1.0,'',[],()):
+            with self.subTest(value=value),self.assertRaises(ValueError):self.validate(value)
+
+    def test_reject_missing_required_fields(self):
+        for field in self.manifest():
+            manifest=self.manifest();del manifest[field]
+            with self.subTest(field=field),self.assertRaises(ValueError):self.validate(manifest)
+
+    def test_measure_rejects_pinned_malformed_manifest_before_encoder(self):
+        # Exercise the actual public comparison entry with hash-pinned synthetic
+        # JSON, not just the helper. No original artifacts or fake parity claim.
+        for field,value in (('schema_version',True),('schema_version',1.0),
+                            ('geometry',[1920.0,1080])):
+            with self.subTest(field=field,value=value),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp);manifest=self.manifest();manifest[field]=value
+                rel='low/sequence-120f/manifest.json';path=root/rel
+                path.parent.mkdir(parents=True);data=json.dumps(manifest).encode();path.write_bytes(data)
+                index={rel:(len(data),hashlib.sha256(data).hexdigest())}
+                with mock.patch.object(gate.subprocess,'run') as encoder:
+                    with self.assertRaisesRegex(ValueError,'stale or incompatible manifest'):
+                        gate.measure(root,index,root/'encoder',root/'work','low','sequence-120f',120)
+                    encoder.assert_not_called()
+                self.assertFalse((root/'work').exists())
 
 
 if __name__=='__main__':unittest.main()
