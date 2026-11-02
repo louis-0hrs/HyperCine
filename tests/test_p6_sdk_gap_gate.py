@@ -188,4 +188,79 @@ class ManifestTypes(unittest.TestCase):
                 self.assertFalse((root/'work').exists())
 
 
+class RootManifestTypes(unittest.TestCase):
+    def manifest(self):
+        repository=Path(gate.__file__).resolve().parents[1]
+        sources=['upstream/EncoderSDK/CFHDEncoder.cpp','upstream/EncoderSDK/SampleEncoder.cpp',
+                 'upstream/Codec/encoder.c','upstream/Codec/quantize.c','upstream/Codec/config.h']
+        return {'schema_version':1,'profiles':list(gate.PROFILES),
+                'capture_source_sha256':hashlib.sha256(b'synthetic capture source').hexdigest(),
+                'frozen_source_sha256':{rel:gate.sha_file(repository/rel) for rel in sources}}
+
+    def invoke(self, root, manifest, rejected):
+        # Real JSON, index pin and artifact verification through main(). Only
+        # packet measurement is mocked: these are CLI admission, not parity tests.
+        artifacts={'manifest.json':json.dumps(manifest).encode(),
+                   'provenance/sdk_packet_capture.cpp':b'synthetic capture source'}
+        records=[]
+        for rel,data in artifacts.items():
+            path=root/rel;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
+            records.append('%s\t%d\t%s' % (rel,len(data),hashlib.sha256(data).hexdigest()))
+        index=root/'TRANSFER_SHA256.tsv';index.write_text('\n'.join(records)+'\n')
+        work=root/'work';report=root/'report.json'
+        argv=['gap-gate','--corpus',str(root),'--index-sha256',gate.sha_file(index),
+              '--encoder',str(root/'unused-encoder'),'--work',str(work),
+              '--report',str(report),'--sequences-only']
+        result={'status':'PASS','matched':120,'requested':120,'hold_witness_pairs':[]}
+        with mock.patch.object(sys,'argv',argv),mock.patch.object(gate,'measure',return_value=result) as measure, \
+             mock.patch.object(gate.subprocess,'run') as encoder:
+            if rejected:
+                with self.assertRaisesRegex(ValueError,'stale root manifest|missing frozen SDK provenance|capture source snapshot mismatch'):
+                    gate.main()
+                measure.assert_not_called()
+                self.assertFalse(work.exists());self.assertFalse(report.exists())
+            else:
+                self.assertEqual(gate.main(),0)
+                self.assertEqual(measure.call_count,len(gate.PROFILES))
+                self.assertTrue(work.is_dir());self.assertTrue(report.is_file())
+            encoder.assert_not_called()
+
+    def test_main_accepts_valid_pinned_root(self):
+        with tempfile.TemporaryDirectory() as tmp:self.invoke(Path(tmp),self.manifest(),False)
+
+    def test_main_rejects_noninteger_root_schema(self):
+        for value in (True,False,1.0,'1',None):
+            manifest=self.manifest();manifest['schema_version']=value
+            with self.subTest(value=value),tempfile.TemporaryDirectory() as tmp:
+                self.invoke(Path(tmp),manifest,True)
+
+    def test_main_rejects_bad_root_shapes(self):
+        for value in (None,True,1,1.0,'',[],['schema_version']):
+            with self.subTest(value=value),tempfile.TemporaryDirectory() as tmp:
+                self.invoke(Path(tmp),value,True)
+
+    def test_main_rejects_bad_provenance_shapes(self):
+        for value in (None,True,1,'',[],list(self.manifest()['frozen_source_sha256'])):
+            manifest=self.manifest();manifest['frozen_source_sha256']=value
+            with self.subTest(value=value),tempfile.TemporaryDirectory() as tmp:
+                self.invoke(Path(tmp),manifest,True)
+
+    def test_main_rejects_missing_root_contract_fields(self):
+        for field in self.manifest():
+            manifest=self.manifest();del manifest[field]
+            with self.subTest(field=field),tempfile.TemporaryDirectory() as tmp:
+                self.invoke(Path(tmp),manifest,True)
+
+    def test_main_rejects_wrong_profiles_and_provenance(self):
+        for field,value in (('profiles',list(reversed(gate.PROFILES))),('profiles',None),
+                            ('frozen_source_sha256',{}),('capture_source_sha256','0'*64)):
+            manifest=self.manifest();manifest[field]=value
+            with self.subTest(field=field),tempfile.TemporaryDirectory() as tmp:
+                if field=='capture_source_sha256':
+                    # Existing integrity failures keep their dedicated verdict.
+                    with self.assertRaisesRegex(ValueError,'capture source snapshot mismatch'):
+                        self.invoke(Path(tmp),manifest,False)
+                else:self.invoke(Path(tmp),manifest,True)
+
+
 if __name__=='__main__':unittest.main()

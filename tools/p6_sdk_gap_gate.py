@@ -145,14 +145,17 @@ def main():
     # Verify every indexed artifact, including manifests and original capture traces.
     for rel in index: verified(root,rel,index)
     inventory=json.loads(verified(root,'manifest.json',index).read_text())
-    if inventory.get('schema_version')!=1 or inventory.get('profiles')!=list(PROFILES):
+    if (not isinstance(inventory, dict) or
+        type(inventory.get('schema_version')) is not int or
+        inventory['schema_version'] != 1 or inventory.get('profiles') != list(PROFILES)):
         raise ValueError('stale root manifest')
     if inventory.get('capture_source_sha256')!=sha_file(verified(root,'provenance/sdk_packet_capture.cpp',index)):
         raise ValueError('capture source snapshot mismatch')
     expected_sources=['upstream/EncoderSDK/CFHDEncoder.cpp','upstream/EncoderSDK/SampleEncoder.cpp',
                       'upstream/Codec/encoder.c','upstream/Codec/quantize.c','upstream/Codec/config.h']
     frozen=inventory.get('frozen_source_sha256',{})
-    if set(frozen)!=set(expected_sources): raise ValueError('missing frozen SDK provenance')
+    if not isinstance(frozen, dict) or set(frozen)!=set(expected_sources):
+        raise ValueError('missing frozen SDK provenance')
     for rel,digest in frozen.items():
         if sha_file(Path(__file__).resolve().parents[1]/rel)!=digest:
             raise ValueError('frozen SDK source hash mismatch: '+rel)
