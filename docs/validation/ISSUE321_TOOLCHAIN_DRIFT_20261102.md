@@ -18,6 +18,15 @@ installed bytes versus retained records, not proof of when or why they changed.
 | Probe result / exit | `TOOLCHAIN_VERSION_DRIFT` / 2 |
 | Historical compiler binary identity | `NOT_ESTABLISHED` |
 
+## Local recovery check
+
+A read-only inventory of the installed Visual Studio 2022 toolsets found one
+compiler, 19.44.35229.0. The local installer package cache contains x64 target
+toolset packages 14.44.35219 and 14.44.35229; it does not contain 14.44.35228.
+The exact recorded compiler was therefore not recoverable from the installed
+toolset or this local package cache. No compiler was installed or replaced,
+and no controlled rebuild was attempted with the mismatched version.
+
 The new stdlib-only `tools/verify_issue321_toolchain.py` reads the explicitly
 selected local CMake record and invokes its trusted compiler with `/Bv`, without
 compiling. It hashes the record and current compiler and checks both remain
