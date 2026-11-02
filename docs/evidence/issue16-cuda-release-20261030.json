@@ -1,0 +1,88 @@
+{
+  "counts": {
+    "BLOCKED": 4,
+    "FAIL": 0,
+    "PASS": 1
+  },
+  "coverage": {
+    "complete": true,
+    "lane_registered": [
+      "test_phase2a",
+      "test_phase2b",
+      "test_phase2c",
+      "test_phase2d",
+      "test_reference_oracle"
+    ],
+    "registration_mismatch": [],
+    "registration_missing": [],
+    "required": 5,
+    "required_registered": [
+      "test_reference_oracle",
+      "test_phase2a",
+      "test_phase2b",
+      "test_phase2c",
+      "test_phase2d"
+    ],
+    "results": [
+      "test_phase2a",
+      "test_phase2b",
+      "test_phase2c",
+      "test_phase2d",
+      "test_reference_oracle"
+    ],
+    "unregistered": []
+  },
+  "ctest_exit": 0,
+  "gate_exit": 77,
+  "independent_pixel_oracle": {
+    "qualified": false,
+    "reason": "no reviewed independent pixel-oracle adapter implemented",
+    "state": "BLOCKED"
+  },
+  "reference_lane": "BLOCKED",
+  "release_gate": "BLOCKED",
+  "schema_version": 3,
+  "scope": "reference-oracle lane only",
+  "tests": [
+    {
+      "classification": "REFERENCE_ORACLE_BLOCKED",
+      "gate_exit": 77,
+      "reason": "original-SDK pixel gate blocked via SKIP_RETURN_CODE=77",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2a"
+    },
+    {
+      "classification": "REFERENCE_ORACLE_BLOCKED",
+      "gate_exit": 77,
+      "reason": "original-SDK pixel gate blocked via SKIP_RETURN_CODE=77",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2b"
+    },
+    {
+      "classification": "REFERENCE_ORACLE_BLOCKED",
+      "gate_exit": 77,
+      "reason": "original-SDK pixel gate blocked via SKIP_RETURN_CODE=77",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2c"
+    },
+    {
+      "classification": "REFERENCE_ORACLE_BLOCKED",
+      "gate_exit": 77,
+      "reason": "original-SDK pixel gate blocked via SKIP_RETURN_CODE=77",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2d"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": true,
+      "state": "PASS",
+      "test": "test_reference_oracle"
+    }
+  ]
+}

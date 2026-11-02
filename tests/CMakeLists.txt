@@ -11,6 +11,22 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/upstream/Example/WaveletDemo
 )
 
+add_executable(test_reference_oracle test_reference_oracle.cpp)
+add_test(NAME test_reference_oracle COMMAND test_reference_oracle)
+set_tests_properties(test_reference_oracle PROPERTIES LABELS "reference-oracle")
+find_package(Python3 QUIET COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME test_reference_release_inventory
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_reference_release.py")
+    find_program(HYPERCINE_CTEST_COMMAND NAMES ctest HINTS "${CMAKE_ROOT}/bin" REQUIRED)
+    add_custom_target(reference_release_gate
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/check_reference_release.py"
+            --build "${CMAKE_BINARY_DIR}" --config "$<CONFIG>"
+            --ctest "${HYPERCINE_CTEST_COMMAND}"
+            --output "${CMAKE_BINARY_DIR}/reference-release.json"
+        DEPENDS test_reference_oracle USES_TERMINAL VERBATIM)
+endif()
+
 if(NOT HYPERCINE_ENABLE_CUDA)
     add_executable(test_decoder_cpu test_decoder_cpu.cpp)
     target_link_libraries(test_decoder_cpu PRIVATE HyperCine::Decoder)
@@ -202,6 +218,7 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2a test_phase2a.cpp)
     target_link_libraries(test_phase2a PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2a COMMAND test_phase2a)
+    add_test(NAME test_diagnostic_geometry_guard COMMAND test_phase2a --self-test-geometry-guard)
 
     add_executable(test_phase2b test_phase2b.cpp)
     target_link_libraries(test_phase2b PRIVATE hypercine_wavelet CFHDCodecStatic)
@@ -214,6 +231,11 @@ if(HYPERCINE_ENABLE_CUDA)
     add_executable(test_phase2d test_phase2d.cpp)
     target_link_libraries(test_phase2d PRIVATE hypercine_wavelet CFHDCodecStatic)
     add_test(NAME test_phase2d COMMAND test_phase2d)
+    set_tests_properties(test_phase2a test_phase2b test_phase2c test_phase2d PROPERTIES
+        SKIP_RETURN_CODE 77 LABELS "reference-oracle")
+    if(TARGET reference_release_gate)
+        add_dependencies(reference_release_gate test_phase2a test_phase2b test_phase2c test_phase2d)
+    endif()
 
     add_executable(test_entropy_capacity test_entropy_capacity.cpp)
     target_link_libraries(test_entropy_capacity PRIVATE hypercine_wavelet CFHDCodecStatic)
