@@ -1,5 +1,18 @@
 # HyperCine Reference Test Suite CMakeLists.txt
 
+option(HYPERCINE_BUILD_ISSUE48_SDK_PROBE
+    "Build the opt-in original-SDK extreme-geometry smoke probe (issue #48)" OFF)
+if(HYPERCINE_BUILD_ISSUE48_SDK_PROBE)
+    if(NOT WIN32 OR NOT TARGET CFHDCodecStatic)
+        message(FATAL_ERROR "The issue #48 SDK probe requires Windows and CFHDCodecStatic")
+    endif()
+    add_executable(test_issue48_sdk_geometry_smoke geometry_extreme/sdk_geometry_smoke.cpp)
+    target_include_directories(test_issue48_sdk_geometry_smoke PRIVATE
+        ${CMAKE_SOURCE_DIR}/upstream/Common)
+    target_link_libraries(test_issue48_sdk_geometry_smoke PRIVATE
+        CFHDCodecStatic bcrypt psapi)
+endif()
+
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include

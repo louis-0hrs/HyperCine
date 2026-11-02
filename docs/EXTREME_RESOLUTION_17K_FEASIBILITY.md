@@ -20,6 +20,12 @@ allocated, encoded or decoded in this C0 audit. No production code changes.
 
 Since that snapshot, [PR #50](https://github.com/louis-0hrs/HyperCine/pull/50) landed a bounded, dimensioned **CPU FilmScan3 3840×2160 experimental encoding path**; [PR #271](https://github.com/louis-0hrs/HyperCine/pull/271) added native Metal GPU evidence for several geometries including 3840×2160; and [PR #266](https://github.com/louis-0hrs/HyperCine/pull/266) separated valid wire/shape geometry from session allocation budgets. The current FilmScan3 geometry gate allows legal shapes only within its **8,294,400-pixel session budget**. In that path 7680×4320 and 12288×8040 are **legal shapes rejected by the resource budget**, not universally invalid CineForm formats. The requested 17520×8040 is **not a legal current three-level shape** because 17520 is not divisible by 128; it must not be silently rounded. This note does not qualify 8K, 12K, 17K, original GoPro 4K packet identity or other encoders/backends.
 
+The bounded Windows original-SDK smoke on 2026-11-02 completed all twelve
+flat/gradient/seeded-noise cases at the four requested geometries. See the
+[dated measurements and limits](validation/ISSUE48_WINDOWS_SDK_GEOMETRY_20261102.md).
+It demonstrates SDK self-encode/decode at those sizes on that host; independent
+FFmpeg decode and cross-implementation compatibility remain pending.
+
 The 67,108,860-byte sized-chunk maximum remains a mathematical bound for the audited writer representation; it is **not** a measured universal CineForm format limit. The source and memory estimates below remain pinned to the original audit rather than being retroactively relabelled as present-day runtime results.
 
 ## Geometry and format matrix

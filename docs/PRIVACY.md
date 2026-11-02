@@ -11,6 +11,9 @@ not remove it from Git history. This applies equally to Windows, Linux and macOS
 2. Pass external golden reference locations with the environment variable
    `HYPERCINE_GOLDEN_DIR`. In public docs, show only the variable name
    and a repository-relative example; never disclose its local value.
+   Mobile machines may reach the same private corpus through different SMB or
+   overlay-network routes. Resolve the currently reachable route locally and
+   update this variable for that session; do not hardcode or publish an endpoint.
 3. Keep meaningful evidence: deterministic hashes, frame counts,
    bit-exactness, timings, sanitizer results, GPU model and tool versions.
    Replace machine-specific full paths with repository-relative paths or
