@@ -1,0 +1,171 @@
+{
+  "counts": {
+    "BLOCKED": 6,
+    "FAIL": 0,
+    "PASS": 8
+  },
+  "coverage": {
+    "complete": false,
+    "lane_registered": [
+      "ffmpeg_oracle_qualification",
+      "ffmpeg_oracle_qualification_contract",
+      "qualification_report_contract",
+      "standalone_sdk_decode_3_packets",
+      "test_compare_sdk_oracle",
+      "test_filmscan3_windows_decoder",
+      "test_reference_oracle",
+      "test_reference_release_inventory",
+      "windows_reference_process_contract",
+      "windows_sdk_corpus_contract"
+    ],
+    "registration_mismatch": [],
+    "registration_missing": [
+      "test_phase2a",
+      "test_phase2b",
+      "test_phase2c",
+      "test_phase2d"
+    ],
+    "required": 5,
+    "required_registered": [
+      "test_reference_oracle"
+    ],
+    "results": [
+      "ffmpeg_oracle_qualification",
+      "ffmpeg_oracle_qualification_contract",
+      "qualification_report_contract",
+      "standalone_sdk_decode_3_packets",
+      "test_compare_sdk_oracle",
+      "test_filmscan3_windows_decoder",
+      "test_reference_oracle",
+      "test_reference_release_inventory",
+      "windows_reference_process_contract",
+      "windows_sdk_corpus_contract"
+    ],
+    "unregistered": []
+  },
+  "ctest_exit": 0,
+  "gate_exit": 77,
+  "independent_pixel_oracle": {
+    "qualified": false,
+    "reason": "no reviewed independent pixel-oracle adapter implemented",
+    "state": "BLOCKED"
+  },
+  "reference_lane": "BLOCKED",
+  "release_gate": "BLOCKED",
+  "schema_version": 3,
+  "scope": "reference-oracle lane only",
+  "tests": [
+    {
+      "classification": "REFERENCE_ORACLE_BLOCKED",
+      "gate_exit": 77,
+      "reason": "original-SDK pixel gate blocked via SKIP_RETURN_CODE=77",
+      "required": false,
+      "state": "BLOCKED",
+      "test": "ffmpeg_oracle_qualification"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": false,
+      "state": "PASS",
+      "test": "ffmpeg_oracle_qualification_contract"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": false,
+      "state": "PASS",
+      "test": "qualification_report_contract"
+    },
+    {
+      "classification": "REFERENCE_ORACLE_BLOCKED",
+      "gate_exit": 77,
+      "reason": "original-SDK pixel gate blocked via SKIP_RETURN_CODE=77",
+      "required": false,
+      "state": "BLOCKED",
+      "test": "standalone_sdk_decode_3_packets"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": false,
+      "state": "PASS",
+      "test": "test_compare_sdk_oracle"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": false,
+      "state": "PASS",
+      "test": "test_filmscan3_windows_decoder"
+    },
+    {
+      "classification": "REGISTRATION_MISSING",
+      "gate_exit": 77,
+      "reason": "required test is not registered on this build",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2a"
+    },
+    {
+      "classification": "REGISTRATION_MISSING",
+      "gate_exit": 77,
+      "reason": "required test is not registered on this build",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2b"
+    },
+    {
+      "classification": "REGISTRATION_MISSING",
+      "gate_exit": 77,
+      "reason": "required test is not registered on this build",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2c"
+    },
+    {
+      "classification": "REGISTRATION_MISSING",
+      "gate_exit": 77,
+      "reason": "required test is not registered on this build",
+      "required": true,
+      "state": "BLOCKED",
+      "test": "test_phase2d"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": true,
+      "state": "PASS",
+      "test": "test_reference_oracle"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": false,
+      "state": "PASS",
+      "test": "test_reference_release_inventory"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": false,
+      "state": "PASS",
+      "test": "windows_reference_process_contract"
+    },
+    {
+      "classification": "PASS_EXECUTION_ONLY",
+      "gate_exit": 0,
+      "reason": "CTest executed successfully",
+      "required": false,
+      "state": "PASS",
+      "test": "windows_sdk_corpus_contract"
+    }
+  ]
+}

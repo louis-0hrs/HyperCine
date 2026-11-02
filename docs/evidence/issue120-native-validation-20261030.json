@@ -1,0 +1,401 @@
+{
+  "base": "04c348f",
+  "cmake": "3.31.6",
+  "command": "ctest --test-dir build -C Release --output-on-failure",
+  "compiler": "MSVC 19.44.35229.0",
+  "configuration": {
+    "HYPERCINE_BUILD_BENCHMARKS": false,
+    "HYPERCINE_BUILD_TESTS": true,
+    "HYPERCINE_BUILD_UPSTREAM": true,
+    "HYPERCINE_ENABLE_CUDA": false
+  },
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "date": "2026-10-30",
+  "experiment_exit": 1,
+  "failed": 0,
+  "git_blob_sha256": {
+    "CMakeLists.txt": "3b98f7ef38a209fd13f1d2ae88dd37b54b3dd5dbb75597e46f98409dfed711bc",
+    "docs/evidence/issue120-ffmpeg-1080-20261030.json": "26dab876af1d32355e859e7ca63bd5491fe71df70ed575b82a0a7a3c3c82d77b",
+    "docs/evidence/issue120-reference-lane-20261030.json": "459f4aa98b719eaee3e4e54aae464e3dd0b7bc1ffba78d318a67c4617b524992",
+    "tests/observe_ffmpeg_1080.py": "feb7e4d6a45fcbcdea35838c72abd8d51ad76f2b0f97c8c5e33a4f2caf779f14",
+    "tests/test_observe_ffmpeg_1080.py": "24f5d3e25597fcb92ac56f6e11bcbdca117b1d5a2691170df6106a764f3d4ca4"
+  },
+  "hash_basis": "Executed/read working-tree bytes; line endings may differ from Git blobs.",
+  "oracle_qualified": false,
+  "passed": 70,
+  "platform": "native Windows x64 CPU",
+  "python": "3.10.9",
+  "release_inventory_exit": 77,
+  "skipped": 2,
+  "tests": [
+    {
+      "name": "independent_ffmpeg_1080_contract",
+      "result": "PASS",
+      "seconds": 0.272082
+    },
+    {
+      "name": "reference_decode_contract",
+      "result": "PASS",
+      "seconds": 2.04113
+    },
+    {
+      "name": "diagnostic_summary_contract",
+      "result": "PASS",
+      "seconds": 0.979461
+    },
+    {
+      "name": "decoder_differential_metrics",
+      "result": "PASS",
+      "seconds": 0.224674
+    },
+    {
+      "name": "cpu_isa_selection",
+      "result": "PASS",
+      "seconds": 0.0484092
+    },
+    {
+      "name": "wavelet_simd_exact",
+      "result": "PASS",
+      "seconds": 8.31649
+    },
+    {
+      "name": "decoder_attachment_292_workers_1",
+      "result": "PASS",
+      "seconds": 0.0783455
+    },
+    {
+      "name": "decoder_attachment_292_workers_2",
+      "result": "PASS",
+      "seconds": 0.0460275
+    },
+    {
+      "name": "decoder_attachment_292_workers_4",
+      "result": "PASS",
+      "seconds": 0.0490489
+    },
+    {
+      "name": "decoder_attachment_292_workers_16",
+      "result": "PASS",
+      "seconds": 0.0648144
+    },
+    {
+      "name": "rca160_public_evidence",
+      "result": "PASS",
+      "seconds": 0.719648
+    },
+    {
+      "name": "decode_task_graph_workers_1",
+      "result": "PASS",
+      "seconds": 0.0490444
+    },
+    {
+      "name": "decode_task_graph_workers_2",
+      "result": "PASS",
+      "seconds": 0.0176937
+    },
+    {
+      "name": "decode_task_graph_workers_4",
+      "result": "PASS",
+      "seconds": 0.0190462
+    },
+    {
+      "name": "decode_task_graph_workers_16",
+      "result": "PASS",
+      "seconds": 0.0274019
+    },
+    {
+      "name": "scheduler_contract_195_workers_1",
+      "result": "PASS",
+      "seconds": 0.0419242
+    },
+    {
+      "name": "scheduler_contract_195_workers_2",
+      "result": "PASS",
+      "seconds": 0.0129634
+    },
+    {
+      "name": "scheduler_contract_195_workers_4",
+      "result": "PASS",
+      "seconds": 0.0140276
+    },
+    {
+      "name": "scheduler_contract_195_workers_16",
+      "result": "PASS",
+      "seconds": 0.0235335
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.300461
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.266185
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.271085
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_16",
+      "result": "PASS",
+      "seconds": 0.278341
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.107581
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.0899362
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.0776932
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_16",
+      "result": "PASS",
+      "seconds": 0.10209
+    },
+    {
+      "name": "decode_s3_plane",
+      "result": "PASS",
+      "seconds": 0.0385904
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.126501
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.100504
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.102705
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_8",
+      "result": "PASS",
+      "seconds": 0.10441
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.109045
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.0549291
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.0471895
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_16",
+      "result": "PASS",
+      "seconds": 0.0543763
+    },
+    {
+      "name": "extreme_geometry_c0_arithmetic",
+      "result": "PASS",
+      "seconds": 0.187635
+    },
+    {
+      "name": "extreme_geometry_c0_report",
+      "result": "PASS",
+      "seconds": 0.111612
+    },
+    {
+      "name": "test_reference_oracle",
+      "result": "PASS",
+      "seconds": 0.0447502
+    },
+    {
+      "name": "overbitrate_hysteresis_sdk_sequence",
+      "result": "PASS",
+      "seconds": 0.0420111
+    },
+    {
+      "name": "windows_sdk_corpus_contract",
+      "result": "PASS",
+      "seconds": 0.254494
+    },
+    {
+      "name": "qualification_report_contract",
+      "result": "PASS",
+      "seconds": 0.243634
+    },
+    {
+      "name": "windows_reference_process_contract",
+      "result": "PASS",
+      "seconds": 0.772552
+    },
+    {
+      "name": "cuda_output_dir_platform_contract",
+      "result": "PASS",
+      "seconds": 0.349985
+    },
+    {
+      "name": "test_reference_release_inventory",
+      "result": "PASS",
+      "seconds": 0.288105
+    },
+    {
+      "name": "test_compare_sdk_oracle",
+      "result": "PASS",
+      "seconds": 0.209706
+    },
+    {
+      "name": "test_rca159_witness_contract",
+      "result": "PASS",
+      "seconds": 0.235244
+    },
+    {
+      "name": "test_rca160_all_channel_contract",
+      "result": "PASS",
+      "seconds": 28.3776
+    },
+    {
+      "name": "test_rca160_ledger_audit",
+      "result": "PASS",
+      "seconds": 4.63338
+    },
+    {
+      "name": "test_cuda_host_compiler_contract",
+      "result": "PASS",
+      "seconds": 23.6201
+    },
+    {
+      "name": "decoder_differential_yu64_unpack",
+      "result": "PASS",
+      "seconds": 0.0406409
+    },
+    {
+      "name": "small_chroma_upstream_oracle",
+      "result": "PASS",
+      "seconds": 0.0582804
+    },
+    {
+      "name": "test_transform_wavelet",
+      "result": "PASS",
+      "seconds": 0.036664
+    },
+    {
+      "name": "test_codec_roundtrip",
+      "result": "PASS",
+      "seconds": 0.0516753
+    },
+    {
+      "name": "test_yuy2_stability",
+      "result": "PASS",
+      "seconds": 1.17194
+    },
+    {
+      "name": "test_avi_sample",
+      "result": "PASS",
+      "seconds": 0.169667
+    },
+    {
+      "name": "filmscan3_fixture_integrity",
+      "result": "PASS",
+      "seconds": 0.0566408
+    },
+    {
+      "name": "test_filmscan3_windows_decoder",
+      "result": "PASS",
+      "seconds": 0.0944251
+    },
+    {
+      "name": "format_corpus_probe_faults",
+      "result": "PASS",
+      "seconds": 0.0401808
+    },
+    {
+      "name": "format_corpus_probe_smoke",
+      "result": "PASS",
+      "seconds": 0.627596
+    },
+    {
+      "name": "format_corpus_export_helpers",
+      "result": "PASS",
+      "seconds": 0.0403615
+    },
+    {
+      "name": "format_corpus_export_smoke",
+      "result": "PASS",
+      "seconds": 0.0710613
+    },
+    {
+      "name": "format_corpus_export_smoke_verify",
+      "result": "PASS",
+      "seconds": 0.0223133
+    },
+    {
+      "name": "format_corpus_export_tier_list",
+      "result": "PASS",
+      "seconds": 0.0170773
+    },
+    {
+      "name": "format_corpus_export_tier_invalid",
+      "result": "PASS",
+      "seconds": 0.0169764
+    },
+    {
+      "name": "standalone_oracle_fixture_hashes",
+      "result": "PASS",
+      "seconds": 0.0377254
+    },
+    {
+      "name": "standalone_sdk_decode_3_packets",
+      "result": "SKIP",
+      "seconds": 0.0826349
+    },
+    {
+      "name": "gop2_reference_inventory_integrity",
+      "result": "PASS",
+      "seconds": 27.9318
+    },
+    {
+      "name": "upstream_off_configure_contract",
+      "result": "PASS",
+      "seconds": 38.6071
+    },
+    {
+      "name": "gop2_original_stage_contract",
+      "result": "PASS",
+      "seconds": 0.390951
+    },
+    {
+      "name": "ffmpeg_oracle_qualification",
+      "result": "SKIP",
+      "seconds": 0.155801
+    },
+    {
+      "name": "ffmpeg_oracle_qualification_contract",
+      "result": "PASS",
+      "seconds": 0.243339
+    }
+  ],
+  "unit_controls": 15,
+  "wall_seconds": 144.76,
+  "working_file_sha256": {
+    "CMakeLists.txt": "6d30facea11488139041fc4c8650dea16e29e344d417c6808cab972c6d7a26c6",
+    "docs/evidence/issue120-ffmpeg-1080-20261030.json": "4eb1679af1af1898132e55dd2b968ddddc448aa090a89254a4c1d52638424e8d",
+    "docs/evidence/issue120-reference-lane-20261030.json": "7cb03a6d76afbc0e3615ab358e52ab5083d22f5343d2c99e8b0a110bec8d1fce",
+    "tests/observe_ffmpeg_1080.py": "feb7e4d6a45fcbcdea35838c72abd8d51ad76f2b0f97c8c5e33a4f2caf779f14",
+    "tests/test_observe_ffmpeg_1080.py": "24f5d3e25597fcb92ac56f6e11bcbdca117b1d5a2691170df6106a764f3d4ca4"
+  }
+}
