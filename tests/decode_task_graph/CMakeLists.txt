@@ -30,6 +30,25 @@ if(HYPERCINE_BUILD_TESTS)
             PROPERTIES TIMEOUT 30 LABELS "scheduler;s3")
     endforeach()
     find_package(Python3 QUIET COMPONENTS Interpreter)
+    add_executable(replay_original_s3_144 replay_original_s3_144.cpp)
+    target_include_directories(replay_original_s3_144 PRIVATE ../../src/cpu)
+    target_link_libraries(replay_original_s3_144 PRIVATE hypercine_decode_spatial_attachment)
+    set(HYPERCINE_S3_ORIGINAL_ROOT "" CACHE PATH "Optional immutable original six-pair S3 replay corpus")
+    if(HYPERCINE_S3_ORIGINAL_ROOT AND NOT Python3_Interpreter_FOUND)
+        message(FATAL_ERROR "Requested original S3 replay requires Python validation tooling")
+    endif()
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME s3_original_replay_protocol
+            COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tests/test_spatial_attachment_replay_144.py"
+                --probe $<TARGET_FILE:replay_original_s3_144>)
+        set_tests_properties(s3_original_replay_protocol PROPERTIES TIMEOUT 120 LABELS "scheduler;validation")
+        if(HYPERCINE_S3_ORIGINAL_ROOT)
+            add_test(NAME s3_original_stage_144
+                COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tests/validate_spatial_attachment_144.py"
+                    --probe $<TARGET_FILE:replay_original_s3_144> --golden-dir "${HYPERCINE_S3_ORIGINAL_ROOT}")
+            set_tests_properties(s3_original_stage_144 PROPERTIES TIMEOUT 300 LABELS "scheduler;original-stage")
+        endif()
+    endif()
     if(Python3_Interpreter_FOUND)
         add_test(NAME rca160_public_evidence
             COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tests/rca160/test_evidence.py")

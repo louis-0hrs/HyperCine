@@ -1,0 +1,418 @@
+{
+  "asan_options": "halt_on_error=1",
+  "asan_runtime_dependency_verified": true,
+  "base": "04c348f848de1eb3a47d3b90fe191722c1ab559e",
+  "cmake": "3.31.6",
+  "configuration": {
+    "HYPERCINE_BUILD_BENCHMARKS": false,
+    "HYPERCINE_BUILD_DECODE_TASK_GRAPH_ONLY": true,
+    "HYPERCINE_BUILD_UPSTREAM": false,
+    "HYPERCINE_S3_ORIGINAL_ROOT": "explicit private binding; value redacted"
+  },
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "date": "2026-10-30",
+  "frame_decoder_qualified": false,
+  "hash_basis": "Working bytes identify executed sources; staged hashes record normalized Git bytes.",
+  "initial_invalid_asan_configuration": {
+    "CMAKE_CXX_FLAGS": "/fsanitize=address /Zi",
+    "compiler_C4530_warnings": 9,
+    "disposition": "preserved invalid configuration result; restored baseline compiler flags before final validation",
+    "failed": 16,
+    "failed_tests": [
+      "decode_task_graph_workers_1",
+      "decode_task_graph_workers_2",
+      "decode_task_graph_workers_4",
+      "decode_task_graph_workers_16",
+      "scheduler_t1_t2_144_workers_1",
+      "scheduler_t1_t2_144_workers_2",
+      "scheduler_t1_t2_144_workers_4",
+      "scheduler_t1_t2_144_workers_16",
+      "scheduler_s2_output_144_workers_1",
+      "scheduler_s2_output_144_workers_2",
+      "scheduler_s2_output_144_workers_4",
+      "scheduler_s2_output_144_workers_16",
+      "scheduler_t4_plane_144_workers_1",
+      "scheduler_t4_plane_144_workers_2",
+      "scheduler_t4_plane_144_workers_4",
+      "scheduler_t4_plane_144_workers_8"
+    ],
+    "missing_required_flag": "/EHsc",
+    "passed": 16
+  },
+  "platform": "native Windows x64 / MSVC 19.44.35229.0",
+  "protocol_unit_methods": 8,
+  "python": "3.10.9",
+  "runs": {
+    "asan": {
+      "failed": 0,
+      "flags": {
+        "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc /fsanitize=address /Zi",
+        "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+        "CMAKE_EXE_LINKER_FLAGS": "/INCREMENTAL:NO /DEBUG"
+      },
+      "passed": 32,
+      "skipped": 0,
+      "tests": [
+        {
+          "name": "decoder_attachment_292_workers_1",
+          "result": "PASS",
+          "seconds": 0.268915
+        },
+        {
+          "name": "decoder_attachment_292_workers_2",
+          "result": "PASS",
+          "seconds": 0.234464
+        },
+        {
+          "name": "decoder_attachment_292_workers_4",
+          "result": "PASS",
+          "seconds": 0.237815
+        },
+        {
+          "name": "decoder_attachment_292_workers_16",
+          "result": "PASS",
+          "seconds": 0.271264
+        },
+        {
+          "name": "s3_original_replay_protocol",
+          "result": "PASS",
+          "seconds": 2.36213
+        },
+        {
+          "name": "s3_original_stage_144",
+          "result": "PASS",
+          "seconds": 7.6674
+        },
+        {
+          "name": "rca160_public_evidence",
+          "result": "PASS",
+          "seconds": 0.606472
+        },
+        {
+          "name": "decode_task_graph_workers_1",
+          "result": "PASS",
+          "seconds": 0.0894547
+        },
+        {
+          "name": "decode_task_graph_workers_2",
+          "result": "PASS",
+          "seconds": 0.0589324
+        },
+        {
+          "name": "decode_task_graph_workers_4",
+          "result": "PASS",
+          "seconds": 0.0618525
+        },
+        {
+          "name": "decode_task_graph_workers_16",
+          "result": "PASS",
+          "seconds": 0.0817145
+        },
+        {
+          "name": "scheduler_contract_195_workers_1",
+          "result": "PASS",
+          "seconds": 0.0818354
+        },
+        {
+          "name": "scheduler_contract_195_workers_2",
+          "result": "PASS",
+          "seconds": 0.0422076
+        },
+        {
+          "name": "scheduler_contract_195_workers_4",
+          "result": "PASS",
+          "seconds": 0.0425289
+        },
+        {
+          "name": "scheduler_contract_195_workers_16",
+          "result": "PASS",
+          "seconds": 0.0566205
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.406871
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.395946
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.395427
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_16",
+          "result": "PASS",
+          "seconds": 0.397807
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.171602
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.173852
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.155907
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_16",
+          "result": "PASS",
+          "seconds": 0.157476
+        },
+        {
+          "name": "decode_s3_plane",
+          "result": "PASS",
+          "seconds": 0.0695023
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.169217
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.141742
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.142803
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_8",
+          "result": "PASS",
+          "seconds": 0.147005
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.163272
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.126545
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.126208
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_16",
+          "result": "PASS",
+          "seconds": 0.112022
+        }
+      ]
+    },
+    "release": {
+      "failed": 0,
+      "flags": {
+        "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+        "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+        "CMAKE_EXE_LINKER_FLAGS": "/machine:x64"
+      },
+      "passed": 32,
+      "skipped": 0,
+      "tests": [
+        {
+          "name": "decoder_attachment_292_workers_1",
+          "result": "PASS",
+          "seconds": 0.0530077
+        },
+        {
+          "name": "decoder_attachment_292_workers_2",
+          "result": "PASS",
+          "seconds": 0.0456837
+        },
+        {
+          "name": "decoder_attachment_292_workers_4",
+          "result": "PASS",
+          "seconds": 0.0482304
+        },
+        {
+          "name": "decoder_attachment_292_workers_16",
+          "result": "PASS",
+          "seconds": 0.0642385
+        },
+        {
+          "name": "s3_original_replay_protocol",
+          "result": "PASS",
+          "seconds": 1.27475
+        },
+        {
+          "name": "s3_original_stage_144",
+          "result": "PASS",
+          "seconds": 6.67348
+        },
+        {
+          "name": "rca160_public_evidence",
+          "result": "PASS",
+          "seconds": 0.595497
+        },
+        {
+          "name": "decode_task_graph_workers_1",
+          "result": "PASS",
+          "seconds": 0.0153882
+        },
+        {
+          "name": "decode_task_graph_workers_2",
+          "result": "PASS",
+          "seconds": 0.0149921
+        },
+        {
+          "name": "decode_task_graph_workers_4",
+          "result": "PASS",
+          "seconds": 0.0198032
+        },
+        {
+          "name": "decode_task_graph_workers_16",
+          "result": "PASS",
+          "seconds": 0.0251946
+        },
+        {
+          "name": "scheduler_contract_195_workers_1",
+          "result": "PASS",
+          "seconds": 0.0189992
+        },
+        {
+          "name": "scheduler_contract_195_workers_2",
+          "result": "PASS",
+          "seconds": 0.0121133
+        },
+        {
+          "name": "scheduler_contract_195_workers_4",
+          "result": "PASS",
+          "seconds": 0.0128311
+        },
+        {
+          "name": "scheduler_contract_195_workers_16",
+          "result": "PASS",
+          "seconds": 0.0190211
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.362646
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.363941
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.365388
+        },
+        {
+          "name": "scheduler_t1_t2_144_workers_16",
+          "result": "PASS",
+          "seconds": 0.345804
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.125545
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.111156
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.143138
+        },
+        {
+          "name": "scheduler_s2_output_144_workers_16",
+          "result": "PASS",
+          "seconds": 0.14224
+        },
+        {
+          "name": "decode_s3_plane",
+          "result": "PASS",
+          "seconds": 0.012647
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.111825
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.11033
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.110289
+        },
+        {
+          "name": "scheduler_t4_plane_144_workers_8",
+          "result": "PASS",
+          "seconds": 0.110558
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_1",
+          "result": "PASS",
+          "seconds": 0.105027
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_2",
+          "result": "PASS",
+          "seconds": 0.0786474
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_4",
+          "result": "PASS",
+          "seconds": 0.078636
+        },
+        {
+          "name": "scheduler_t5_publish_after_stop_144_workers_16",
+          "result": "PASS",
+          "seconds": 0.112146
+        }
+      ]
+    }
+  },
+  "scalar_arithmetic_unchanged": true,
+  "scheduler_unchanged": true,
+  "scope": "Original coefficient stage replay through existing Synthetic-profile S3 attachment; no frame decoder.",
+  "staged_test_source_sha256": {
+    "tests/decode_task_graph/CMakeLists.txt": "aed6c3a2bfda0fc3df7ef0379de780d6c22a1a9189150c796db98203ebb6ba9f",
+    "tests/decode_task_graph/replay_original_s3_144.cpp": "698cb7a80adfbe366099b3dc1d342c65f1a38003a0c617d847a2a5da0c726a54",
+    "tests/test_spatial_attachment_replay_144.py": "1f6a230d63088a72670d4aeb8d941732e0deffc078eb7a5f56735d68092c9d60",
+    "tests/validate_spatial_attachment_144.py": "8916d5b7721b6733e7243e5aabd1e4c63c0a47e81dec39f4f393e67cffbf31ed"
+  },
+  "tested_revision": "Modified pre-evidence working tree; final source hashes recorded below.",
+  "unchanged_core_git_blobs": {
+    "src/core/decode_s3_attachment.cpp": "e769c8124a827f35e8c398c0867e7eaea66da598",
+    "src/core/decode_s3_attachment.h": "0e242148bbe82b632cc89d16164d114cba59b566",
+    "src/core/decode_s3_consumer.cpp": "04ad06cb1dc7b09a0c33adecffde8bde768c991d",
+    "src/core/decode_s3_plane.h": "ececa5dab535f23b2ab91252cea900b8d6e5784d",
+    "src/core/decode_task_graph.cpp": "54794c8b78e6c10fdedc05398a4673da12b96893",
+    "src/core/decode_task_graph.h": "d5a646f0d758276cbce58ade0da1d339206e1ca7",
+    "src/cpu/decode_spatial_scalar.cpp": "7da29aec10e721e92487bc19fe670e354466fb5d",
+    "src/cpu/decode_spatial_scalar.h": "b7219135f90a6eff15dcd94f5cb6988641620e7a"
+  },
+  "upstream_unchanged": true,
+  "working_test_source_sha256": {
+    "tests/decode_task_graph/CMakeLists.txt": "253732d86e61d77887a1f4ed392cd7df63c5c8814fd84186fe7bfb49766af27c",
+    "tests/decode_task_graph/replay_original_s3_144.cpp": "698cb7a80adfbe366099b3dc1d342c65f1a38003a0c617d847a2a5da0c726a54",
+    "tests/test_spatial_attachment_replay_144.py": "1f6a230d63088a72670d4aeb8d941732e0deffc078eb7a5f56735d68092c9d60",
+    "tests/validate_spatial_attachment_144.py": "8916d5b7721b6733e7243e5aabd1e4c63c0a47e81dec39f4f393e67cffbf31ed"
+  }
+}
