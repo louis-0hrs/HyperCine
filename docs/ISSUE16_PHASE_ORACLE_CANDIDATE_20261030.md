@@ -47,8 +47,8 @@ All original test declarations remain. No whole-file CMake transplant occurs.
 
 **CUDA sources, CPU decoder sources, public headers, upstream, and the existing
 19-case failclosed test remain unchanged from `b11b3da`.** The only source file
-change is the reviewed #210 verification-helper condition inside
-`VerifyPhase2DMetadataSafety` in `src/core/phase2d_encoder.cpp`:
+change is the verification-helper condition, which `git blame` attributes to
+#206, inside `VerifyPhase2DMetadataSafety` in `src/core/phase2d_encoder.cpp`:
 
 ```cpp
 if (!r.bitstream_byte_match || !r.decode_ok || r.last_bitstream.empty()) return false;
@@ -62,6 +62,20 @@ this helper is under `src/`, the complete source tree is **not** claimed to be
 identical to the phase parent; identities are recorded per unchanged scope.
 
 ## Gate behavior and retained caveats
+
+The `reference_release_gate` is currently an explicit, manual CMake target; no
+workflow in this candidate invokes it. A green ordinary CTest run therefore
+does not enforce the separate release inventory. Run the target explicitly
+when assessing release readiness; it must remain blocked until an independent
+pixel oracle is reviewed.
+
+The release runner recognizes a structured capacity diagnostic used by
+mainline's CUDA allocator, but this candidate's `src/cuda/entropy_gpu.cu` does
+not emit that marker: it reports `entropy output exceeded the proven word
+capacity` instead. Consequently `STRICT_FAILURE_CAPACITY_BOUND` is unreachable
+on this candidate and capacity exhaustion remains an ordinary hard
+`STRICT_FAILURE`. Capacity-specific relabelling requires the mainline-side
+emitter to be included and verified; no such capability is claimed here.
 
 Strict encoder coefficients, entropy/payload bytes, parser-attributed header
 differences, geometry, metadata, resources and API failures retain exit 1.
@@ -119,6 +133,12 @@ conflicts: `benchmarks/CMakeLists.txt`, `benchmarks/benchmark_codec.cpp`,
 `docs/UPSTREAM.md`, `src/CMakeLists.txt`, `tests/CMakeLists.txt`.
 This creates only temporary Git objects, not a branch merge or reviewed result.
 No conflict resolution or mainline integration is claimed here.
+
+Those five conflicts apply to the previewed `decode-phase3af` branch. A
+separate preview of this candidate head against the same `origin/main` returns
+nine conflicts: the five above, plus `src/core/phase2d_encoder.cpp`,
+`.githooks/pre-commit`, `.githooks/pre-push`, and the root `CMakeLists.txt`.
+Do not read the five-conflict phase3af preview as this candidate's merge count.
 
 ## Native validation protocol
 
@@ -213,8 +233,9 @@ promotion. Recheck source identities, registration and native evidence before
 any owner-approved phase merge. If accepted, record the resulting phase SHA;
 no old A2 or Windows head is automatically relabeled as that SHA.
 
-Keep #16 and pixel-release acceptance open. A future mainline proposal must
-resolve the five actual first-landing conflicts, preserve main's newer build,
+Keep #16 and pixel-release acceptance open. The five first-landing conflicts
+refer to `decode-phase3af`; a direct mainline proposal from this candidate must
+resolve its nine conflicts. It must preserve main's newer build,
 test and encoder contracts, and qualify its resulting tree. Then land milestones
 in order, explicitly retargeting each next child to main as its parent lands.
 Do not merge descendants into already-landed temporary parents and assume main
