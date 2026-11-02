@@ -425,6 +425,30 @@ int main() {
         auto cuda_no_memory = Check("cuda-no-device-memory", cuda, cuda_present, CapabilityReason::ValidButNotImplemented);
         Require(cuda_no_memory.requested_backend_present && !cuda_no_memory.allocation_permitted, "CUDA without probed memory allocated");
 
+        // Synthetic device facts exercise admission only, never native GPU work.
+        for (const auto& item : pass) {
+            auto c = Film(item.w, item.h); c.backend = SessionBackend::Cuda;
+            c.input_stride_bytes = static_cast<std::uint64_t>(item.w) * 4u + 64u;
+            c.input_bytes = c.input_stride_bytes * item.h;
+            const auto ceiling = 36ull * item.w * item.h + 1024u * 1024u + c.input_bytes;
+            auto d = host; d.cuda_available = true;
+            d.cuda_total_global_memory_bytes = ceiling;
+            c.cpu_memory_budget_bytes = c.gpu_memory_budget_bytes = ceiling;
+            auto r = Check("cuda-host-exact-ceiling", c, d, CapabilityReason::ExperimentallySupported);
+            Require(r.allocation_permitted && r.effective_backend == SessionBackend::Cuda,
+                    "CUDA exact budget boundary lost backend");
+            for (const auto host_budget : {std::uint64_t{0}, std::uint64_t{ceiling - 1}}) {
+                c.cpu_memory_budget_bytes = host_budget;
+                r = Check("cuda-host-insufficient", c, d, CapabilityReason::MemoryBudgetExceeded);
+                Require(r.reasons.memory_budget_exceeded && !r.fell_back_to_cpu_scalar,
+                        "CUDA ignored host ceiling or changed backend");
+            }
+            c.cpu_memory_budget_bytes = ceiling; --c.gpu_memory_budget_bytes;
+            Check("cuda-gpu-ceiling-minus-one", c, d, CapabilityReason::MemoryBudgetExceeded);
+            ++c.gpu_memory_budget_bytes; --d.cuda_total_global_memory_bytes;
+            Check("cuda-device-ceiling-minus-one", c, d, CapabilityReason::MemoryBudgetExceeded);
+        }
+
         auto metal = Film(1920, 1080);
         metal.backend = SessionBackend::Metal;
         Check("metal-absent", metal, host, CapabilityReason::BackendNotPresent);

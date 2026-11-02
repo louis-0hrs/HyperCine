@@ -407,10 +407,12 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         // Conservative static planning, not RSS: 36P + 1MiB + stride*height.
         const bool planning_ok = extra_ok && PlanningCeiling(pixels, extra, ceiling);
         const auto budget = gpu_effective ? config.gpu_memory_budget_bytes : config.cpu_memory_budget_bytes;
+        // Both GPU frontends still allocate host color/wavelet/writer storage.
+        // A sufficient device ceiling cannot waive the caller's CPU ceiling.
         if (extra_ok && (!planning_ok || budget < ceiling ||
-            (metal_attempt && (config.cpu_memory_budget_bytes < ceiling ||
-             (device.metal_recommended_working_set_bytes != 0 &&
-              device.metal_recommended_working_set_bytes < ceiling))))) {
+            (gpu_attempt && config.cpu_memory_budget_bytes < ceiling) ||
+            (metal_attempt && device.metal_recommended_working_set_bytes != 0 &&
+             device.metal_recommended_working_set_bytes < ceiling))) {
             result.reasons.memory_budget_exceeded = true;
             if (result.pixel_budget_ok)
                 memory_detail = "host/device budget is below the static planning ceiling";
