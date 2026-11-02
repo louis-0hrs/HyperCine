@@ -70,7 +70,7 @@ No existing threshold changes.
    **PIXELS_DIFFER**, a discriminated control. The computed JSON retains the
    mutated packet/output hashes and actual process exit code.
 2. Zeroing the initial four-byte tag was preregistered to require a nonzero
-   decoder exit. FFmpeg instead returns **0** and emits exactly the original
+   FFmpeg process exit. FFmpeg instead returns **0** and emits exactly the original
    p10 output: **ACCEPTED**. The runner preserves this observation as
    `CONTROL_NOT_DISCRIMINATED`, writes the report and exits **1**.
 
@@ -82,10 +82,13 @@ be silently replaced after observing the result and then called a preregistered
 pass. Earlier failed trial evidence remains private; the final instrumented run
 retains the same negative result and changes no criterion.
 
-Adapter, missing-output, timeout or process-launch failures are strict failures;
-only an actual nonzero decoder exit is called `DECODER_REJECTED`. Truncated or
-out-of-range output from a zero-exit mutation is never converted into a passing
-negative control. A stable positive result cannot override a failed control.
+Adapter, missing-output, timeout or process-launch failures are strict failures.
+Any nonzero FFmpeg process exit is **unattributed**: it may come from the CFHD
+decoder, container adapter, filter, or output I/O. The runner does not call it
+`DECODER_REJECTED`; it retains `UNATTRIBUTED_NONZERO_EXIT` in the report and
+returns strict-failure exit 1. Truncated or out-of-range output from a zero-exit
+mutation is never converted into a passing negative control. A stable positive
+result cannot override a failed control.
 
 Computed evidence: [full observations](../evidence/issue120-ffmpeg-1080-20261030.json).
 Raw media, original inputs, scratch outputs and raw process diagnostics stay
@@ -143,6 +146,16 @@ The initial sandboxed MSBuild stalled before compilation and was terminated
 after checking process ownership; the successful native build used
 `cmake --build build --config Release --parallel 4 -- /nodeReuse:false`.
 No test PASS is inferred from the terminated build.
+
+## Review follow-up — 2026-11-02
+
+The process-exit classification now fails closed for both the quant-mutation
+and zero-initial-tag controls. A new synthetic adversarial control models a
+non-decoder process failure and verifies that it remains unattributed and exits
+1. The historical 2026-10-30 FFmpeg measurements above predate this classifier
+correction; the current Windows host has no FFmpeg/FFprobe candidate configured,
+so the external experiment was not rerun. No oracle or release qualification is
+promoted.
 
 ## Remaining gate and next action
 

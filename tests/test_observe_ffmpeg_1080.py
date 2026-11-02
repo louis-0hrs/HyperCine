@@ -68,8 +68,14 @@ class Observation(unittest.TestCase):
             with self.assertRaises(ValueError):
                 v.mutation_result(0, b'\0' * 8, b'\0' * 8)
 
-    def test_real_nonzero_exit_is_decoder_rejection(self):
-        self.assertEqual(v.mutation_result(1, None, b'baseline'), 'DECODER_REJECTED')
+    def test_non_decoder_process_failure_is_unattributed_strict_failure(self):
+        # Simulate FFmpeg exiting because of an output I/O failure. The parent
+        # process cannot attribute this exit code to the CFHD decoder.
+        outcome = v.mutation_result(1, None, b'baseline')
+        self.assertEqual(outcome, 'UNATTRIBUTED_NONZERO_EXIT')
+        report = {'oracle_qualified': False, 'release_gate': 'BLOCKED',
+                  'state': 'STRICT_CONTROL_FAILURE'}
+        self.assertEqual(v.observation_exit(report), 1)
 
     def test_different_valid_pixels_discriminate(self):
         with patch.object(v, 'WIDTH', 2), patch.object(v, 'HEIGHT', 1):
@@ -87,6 +93,8 @@ class Observation(unittest.TestCase):
         self.assertEqual(v.observation_exit(report), 1)
         report['state'] = 'BLOCKED_ORACLE_NOT_QUALIFIED'
         self.assertEqual(v.observation_exit(report), 77)
+        report['state'] = 'STRICT_CONTROL_FAILURE'
+        self.assertEqual(v.observation_exit(report), 1)
 
     def test_observation_cannot_promote_oracle(self):
         for report in ({'oracle_qualified': True, 'release_gate': 'PASS',

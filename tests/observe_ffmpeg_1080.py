@@ -88,7 +88,8 @@ def stable(hashes):
 
 def mutation_result(status, raw, baseline):
     if status:
-        return 'DECODER_REJECTED'
+        # FFmpeg's process exit code alone cannot identify which layer failed.
+        return 'UNATTRIBUTED_NONZERO_EXIT'
     unpack(raw, WIDTH, HEIGHT)
     require(raw != baseline, 'quant mutation was not discriminated')
     return 'PIXELS_DIFFER'
@@ -113,8 +114,8 @@ def experiment(packet, source, ffmpeg, ffprobe, work):
             'orientation_hypotheses': ['source_rows_as_stored', 'source_rows_reversed'],
             'qualification_policy': 'observation only; oracle remains unqualified',
             'harness_sha256': sha(Path(__file__).read_bytes()),
-            'controls': {'quant_mutation': 'reject or emit different valid pixels',
-                         'zero_initial_tag': 'require nonzero decoder exit; retain acceptance as failure'},
+            'controls': {'quant_mutation': 'require valid different pixels; any nonzero process exit is strict',
+                         'zero_initial_tag': 'acceptance is inconclusive; any nonzero process exit is strict'},
             'avi_cadence': 'adapter synthetic 25 fps; NOT original playback measurement'}
     work.mkdir(parents=True, exist_ok=False)
     (work / 'plan.json').write_text(json.dumps(plan, indent=2, sort_keys=True) + '\n')
@@ -168,23 +169,29 @@ def experiment(packet, source, ffmpeg, ffprobe, work):
     mutated = work / 'quant-mutation.avi'
     mutated.write_bytes(avi(bytes(mutant), WIDTH, HEIGHT))
     status, output = decode(mutated, 'quant-mutation', 'yuv422p10le')
-    # Adapter/I/O exceptions cannot masquerade as decoder rejection.
+    # A process error cannot be attributed to the CFHD decoder from its exit code.
     outcome = mutation_result(status, output.read_bytes() if status == 0 else None, native)
     report['controls']['quant_mutation'] = outcome
     report['quant_mutation_evidence'] = {
         'decoder_exit': status, 'mutated_packet_sha256': sha(bytes(mutant)),
         'output_sha256': sha(output.read_bytes()) if status == 0 else None}
-    # A separate malformed-header control must yield actual nonzero decoder exit.
+    if outcome == 'UNATTRIBUTED_NONZERO_EXIT':
+        report['state'] = 'STRICT_CONTROL_FAILURE'
+    # Record the process result without claiming that a nonzero exit came from
+    # the CFHD decoder.
     bad = work / 'invalid-signature.avi'
     bad.write_bytes(avi(b'\0\0\0\0' + data[4:], WIDTH, HEIGHT))
     status, output = decode(bad, 'invalid-signature', 'yuv422p10le')
-    report['controls']['zero_initial_tag'] = 'DECODER_REJECTED' if status else 'ACCEPTED'
+    report['controls']['zero_initial_tag'] = 'UNATTRIBUTED_NONZERO_EXIT' if status else 'ACCEPTED'
     report['zero_initial_tag_decoder_exit'] = status
-    if status == 0:
+    if status:
+        report['state'] = 'STRICT_CONTROL_FAILURE'
+    else:
         raw = output.read_bytes()
         unpack(raw, WIDTH, HEIGHT)
         report['zero_initial_tag_output_equal_original'] = raw == native
-        report['state'] = 'CONTROL_NOT_DISCRIMINATED'
+        if report['state'] != 'STRICT_CONTROL_FAILURE':
+            report['state'] = 'CONTROL_NOT_DISCRIMINATED'
     require(sha(packet.read_bytes()) == PACKET_SHA and sha(source.read_bytes()) == SOURCE_SHA,
             'original input changed during experiment')
     return report
@@ -226,9 +233,10 @@ def main():
 def observation_exit(report):
     require(report['oracle_qualified'] is False and report['release_gate'] == 'BLOCKED',
             'observation cannot qualify a release oracle')
-    require(report['state'] in ('CONTROL_NOT_DISCRIMINATED', 'BLOCKED_ORACLE_NOT_QUALIFIED'),
+    require(report['state'] in ('STRICT_CONTROL_FAILURE', 'CONTROL_NOT_DISCRIMINATED',
+                                'BLOCKED_ORACLE_NOT_QUALIFIED'),
             'unknown observation state')
-    return 1 if report['state'] == 'CONTROL_NOT_DISCRIMINATED' else 77
+    return 1 if report['state'] in ('STRICT_CONTROL_FAILURE', 'CONTROL_NOT_DISCRIMINATED') else 77
 
 
 if __name__ == '__main__':
