@@ -661,6 +661,10 @@ if(HYPERCINE_BUILD_STANDALONE)
         set(HYPERCINE_SDK_GAP_CORPUS_ROOT "" CACHE PATH "Original SDK 120f/hold corpus")
         set(HYPERCINE_SDK_GAP_INDEX_SHA256 "" CACHE STRING "Pinned gap corpus transfer SHA256")
         find_package(Python3 COMPONENTS Interpreter REQUIRED)
+        add_test(NAME p6_writer_trace_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_writer_trace.py")
+        add_test(NAME p6_writer_trace_optimized COMMAND "${Python3_EXECUTABLE}" -O
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_writer_trace.py")
         add_test(NAME p6_sdk_gap_negative_controls COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_gate.py")
         add_test(NAME p6_sdk_gap_historical_pre325 COMMAND "${Python3_EXECUTABLE}"
