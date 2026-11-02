@@ -37,12 +37,20 @@ def trace_contract(trace, count):
 
 
 def validate_manifest(manifest, profile, kind, count):
-    if (manifest.get('schema_version') != 1 or manifest.get('profile') != profile or
-        manifest.get('kind') != kind or manifest.get('geometry') != [1920,1080] or
+    # A JSON schema version and dimensions are integers, not merely values
+    # that compare equal to them (True == 1 and 1920.0 == 1920 in Python).
+    if not isinstance(manifest, dict):
+        raise ValueError('stale or incompatible manifest')
+    geometry = manifest.get('geometry')
+    if (type(manifest.get('schema_version')) is not int or
+        manifest['schema_version'] != 1 or manifest.get('profile') != profile or
+        manifest.get('kind') != kind or not isinstance(geometry, list) or
+        len(geometry) != 2 or any(type(value) is not int for value in geometry) or
+        geometry != [1920,1080] or
         manifest.get('timebase') != 'SDK default 30 fps' or
         manifest.get('sdk') != {'implementation':'original CFHD_EncodeSample','frozen_ref':FROZEN}):
         raise ValueError('stale or incompatible manifest')
-    trace_contract(manifest['frames'], count)
+    trace_contract(manifest.get('frames'), count)
 
 
 def measure(root, index, encoder, work, profile, kind, count):
