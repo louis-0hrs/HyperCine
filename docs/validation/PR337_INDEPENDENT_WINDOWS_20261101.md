@@ -1,4 +1,6 @@
 # PR #337: fresh-checkout native Windows execution
+> **Post-merge status (2026-11-02):** Test-only PR [#337](https://github.com/louis-0hrs/HyperCine/pull/337) was independently reviewed and merged into `main` as `a2656342ef82501030f621d3b65d38d809e398c9`. The measurements and Draft/HOLD language below describe the historical 2026-11-01 validation snapshot; they are not fresh tests on the merge commit. Issues #144/#47 and pixel/release qualification remain open.
+
 
 Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.
 
