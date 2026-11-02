@@ -179,7 +179,15 @@ def main():
         if completed.returncode != 0:
             raise SystemExit("encoder failed for %s: %s" % (profile, completed.stderr.strip()[:400]))
 
-        trace = json.loads((samples / "trace.json").read_text())["frames"]
+        document = json.loads((samples / "trace.json").read_text())
+        trace = document.get("frames") if isinstance(document, dict) else None
+        # JSON booleans/floats alias integer indices in Python equality.
+        # Reject malformed traces before any packet comparison or PASS report.
+        if not isinstance(trace, list) or any(
+                not isinstance(frame, dict) or type(frame.get("frame_index")) is not int
+                for frame in trace):
+            raise SystemExit("%s: trace frames (invalid shape/index type) do not match requested"
+                             % profile)
 
         # Exact correspondence, not zip() truncation: the trace has to describe
         # precisely the frames that were requested, in order.
