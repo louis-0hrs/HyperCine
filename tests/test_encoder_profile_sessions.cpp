@@ -12,10 +12,16 @@
 #include "../src/core/encoder_backend_selection.h"
 #include "hypercine/quality_state.h"
 #include "reference_frame_generator.h"
+#include "test_vectors.h"
 
 #include <array>
+#include <chrono>
+#include <condition_variable>
 #include <cstdint>
 #include <cstdlib>
+#include <exception>
+#include <future>
+#include <mutex>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -325,45 +331,194 @@ void RefusalIsProfileSpecific() {
     std::cout << "PASS profile refusal is an independent axis and invalid enums stay format errors\n";
 }
 
-// Two concurrent sessions on different profiles must not share rate state or
-// tables: this would be the classic "one process-global switch" defect.
-void IndependentProfilesConcurrently() {
-    auto low = Film(EncodingQuality::Low);
-    auto high = Film(EncodingQuality::FilmScan3);
-    std::vector<std::uint8_t> input(static_cast<std::size_t>(low.input_bytes), 0);
-    for (int y = 0; y < kHeight; ++y)
-        for (int x = 0; x < kWidth; ++x) {
-            auto* pixel = input.data() + static_cast<std::size_t>(y) * low.input_stride_bytes + 4u * x;
-            pixel[0] = static_cast<std::uint8_t>(x * 3);
-            pixel[1] = static_cast<std::uint8_t>(y * 5);
-            pixel[2] = static_cast<std::uint8_t>(x + y);
-            pixel[3] = 255;
+// A reusable two-party rendezvous. Failure cancels the peer, even if it has
+// already reached the next round; waits also have a portable finite timeout.
+class ProfileRounds {
+public:
+    void Wait() {
+        std::unique_lock<std::mutex> lock(mutex_);
+        Require(!cancelled_, "mixed-profile peer cancelled");
+        const auto generation = generation_;
+        if (++arrived_ == 2) {
+            arrived_ = 0;
+            ++generation_;
+            changed_.notify_all();
+            return;
         }
-    // Sequential reference first, then the same work interleaved.
-    EncoderSession low_seq(low, Host());
-    EncoderSession high_seq(high, Host());
-    const auto low_reference = low_seq.Encode(input.data(), input.size(), low.input_stride_bytes);
-    const auto high_reference = high_seq.Encode(input.data(), input.size(), high.input_stride_bytes);
-    Require(HeaderQualityStamp(low_reference.sample) == 1 && HeaderQualityStamp(high_reference.sample) == 6,
-            "sequential profile stamps are wrong");
-    Require(low_reference.sample != high_reference.sample, "Low and FilmScan3 emitted identical bytes");
-
-    EncoderSession a(low, Host());
-    EncoderSession b(high, Host());
-    for (int i = 0; i < 4; ++i) {
-        const auto frame_a = a.Encode(input.data(), input.size(), low.input_stride_bytes);
-        const auto frame_b = b.Encode(input.data(), input.size(), high.input_stride_bytes);
-        Require(HeaderQualityStamp(frame_a.sample) == 1, "interleaved Low session changed profile");
-        Require(HeaderQualityStamp(frame_b.sample) == 6, "interleaved FilmScan3 session changed profile");
-        Require(a.config().quality == EncodingQuality::Low &&
-                b.config().quality == EncodingQuality::FilmScan3, "interleaved session config drifted");
+        if (!changed_.wait_for(lock, std::chrono::seconds(30), [&] {
+                return cancelled_ || generation_ != generation;
+            })) {
+            cancelled_ = true;
+            changed_.notify_all();
+            throw std::runtime_error("mixed-profile round rendezvous timed out");
+        }
+        Require(!cancelled_, "mixed-profile peer cancelled");
     }
-    // Reset keeps the profile, as the shared writer locks it at the first frame.
-    a.Reset();
-    const auto after_reset = a.Encode(input.data(), input.size(), low.input_stride_bytes);
-    Require(HeaderQualityStamp(after_reset.sample) == 1, "Reset changed the session profile");
-    Require(a.config().quality == EncodingQuality::Low, "Reset changed the frozen session config");
-    std::cout << "PASS two concurrent profiles keep independent state, tables and stamps across Reset\n";
+    void Cancel(std::exception_ptr failure = nullptr) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!failure_) failure_ = failure;
+        cancelled_ = true;
+        changed_.notify_all();
+    }
+    std::exception_ptr Failure() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return failure_;
+    }
+private:
+    std::exception_ptr failure_;
+    std::mutex mutex_;
+    std::condition_variable changed_;
+    unsigned arrived_ = 0, generation_ = 0;
+    bool cancelled_ = false;
+};
+
+void EqualProfileFrame(const FilmScan3Frame& actual, const FilmScan3Frame& reference,
+                       const std::string& context) {
+    Require(actual.state.frame_index == reference.state.frame_index, context + " frame_index");
+    Require(actual.state.fs_rate_limiter == reference.state.fs_rate_limiter, context + " limiter");
+    Require(actual.state.fs_overbitrate == reference.state.fs_overbitrate, context + " overbitrate");
+    Require(actual.state.previous_sample_bytes == reference.state.previous_sample_bytes,
+            context + " previous_sample_bytes");
+    Require(actual.tables.quant == reference.tables.quant, context + " full quant table");
+    Require(actual.tables.scale == reference.tables.scale, context + " full scale table");
+    Require(FilmScan3FullCoefficientHashesEqual(actual, reference), context + " full 30 hashes");
+    Require(actual.sample == reference.sample, context + " full sample");
+}
+
+void EqualProfileConfig(const EncoderSessionConfig& a, const EncoderSessionConfig& b) {
+    Require(a.codec == b.codec && a.quality == b.quality && a.pixel_format == b.pixel_format &&
+            a.width == b.width && a.height == b.height && a.input_stride_bytes == b.input_stride_bytes &&
+            a.input_bytes == b.input_bytes && a.frame_rate.numerator == b.frame_rate.numerator &&
+            a.frame_rate.denominator == b.frame_rate.denominator && a.gop == b.gop &&
+            a.progressive == b.progressive && a.backend == b.backend &&
+            a.allow_cpu_scalar_fallback == b.allow_cpu_scalar_fallback &&
+            a.cpu_memory_budget_bytes == b.cpu_memory_budget_bytes &&
+            a.gpu_memory_budget_bytes == b.gpu_memory_budget_bytes &&
+            a.max_sample_bytes == b.max_sample_bytes && a.diagnostic == b.diagnostic &&
+            a.require_reference_oracle == b.require_reference_oracle,
+            "mixed-profile frozen config drifted");
+}
+
+// Two real asynchronous workers and independent ordered scalar-writer references.
+// This proves isolation/determinism, not correctness against an original SDK.
+void IndependentProfilesConcurrently() {
+    // 128x24 and 256x256 cannot reach Low's 110 Mbit/s ceiling
+    // with these stimuli. 720p is the next admitted CPU geometry.
+    constexpr int width = 1280, height = 720;
+    constexpr unsigned frames = 32, reset_round = 16, reject_round = 10;
+    std::array<EncoderSessionConfig, 2> configs = {
+        Film(EncodingQuality::Low), Film(EncodingQuality::FilmScan3)};
+    for (auto& config : configs) {
+        config.width = width; config.height = height;
+        config.input_stride_bytes = width * 4u;
+        config.input_bytes = config.input_stride_bytes * height;
+    }
+    using Input = HyperCineTest::AlignedVector<std::uint8_t>;
+    std::array<std::vector<Input>, 2> inputs;
+    std::array<std::vector<FilmScan3Frame>, 2> references;
+    std::array<unsigned, 2> limiter_changes{}, over_changes{}, nonzero_over{};
+    std::array<unsigned, 2> over_rises{}, over_falls{}, quant_changes{};
+    for (unsigned lane = 0; lane < 2; ++lane) {
+        const auto& config = configs[lane];
+        FilmScan3Encoder sequential({width, height, 0}, WaveletIsa::Scalar);
+        sequential.SetSessionQuality(config.quality);
+        for (unsigned round = 0; round < frames; ++round) {
+            Input input(static_cast<std::size_t>(config.input_bytes), 0);
+            std::uint32_t seed = 0x1337beefu ^ (round + 1) * 0x9e3779b9u ^ lane * 0x85ebca6bu;
+            // Sustained high entropy alternates with low detail. The lanes use
+            // different seeds, offsets and schedules, never a repeated gradient.
+            const bool noisy = ((round + lane * 3) % 8) < 4;
+            for (int y = 0; y < height; ++y)
+                for (int x = 0; x < width; ++x) {
+                    auto* pixel = input.data() + y * config.input_stride_bytes + 4u * x;
+                    for (unsigned c = 0; c < 3; ++c)
+                        pixel[c] = noisy ? static_cast<std::uint8_t>(reference_fixture::NextXorShift32(seed))
+                                         : static_cast<std::uint8_t>(round * 7 + lane * 53 + c * 19 + x / 32 + y / 8);
+                    pixel[3] = 255;
+                }
+            for (const auto& prior : inputs[lane])
+                Require(input != prior, "mixed-profile stimulus repeated");
+            inputs[lane].push_back(std::move(input));
+            if (lane == 0 && round == reset_round) sequential.Reset();
+            const auto before = sequential.state();
+            const auto& stored = inputs[lane].back();
+            auto reference = sequential.Encode(stored.data(), stored.size(), config.input_stride_bytes);
+            limiter_changes[lane] += reference.state.fs_rate_limiter != before.fs_rate_limiter;
+            over_changes[lane] += reference.state.fs_overbitrate != before.fs_overbitrate;
+            nonzero_over[lane] += reference.state.fs_overbitrate != 0;
+            over_rises[lane] += reference.state.fs_overbitrate > before.fs_overbitrate;
+            over_falls[lane] += reference.state.fs_overbitrate < before.fs_overbitrate;
+            if (round != 0 && !(lane == 0 && round == reset_round))
+                quant_changes[lane] += reference.tables.quant != references[lane].back().tables.quant;
+            Require(reference.state.frame_index == (lane == 0 && round >= reset_round
+                        ? round - reset_round : round), "sequential reference timeline");
+            Require(reference.state.previous_sample_bytes == before.previous_sample_bytes,
+                    "sequential reference previous sample");
+            references[lane].push_back(std::move(reference));
+        }
+    }
+    // Low's lower-profile midpoint is Low itself: its token must move,
+    // but its quant table is intentionally unchanged by that token.
+    Require(over_rises[0] > 0 && over_falls[0] > 0 && nonzero_over[0] > 0,
+            "Low stimuli never exercised overbitrate feedback");
+    Require(limiter_changes[1] > 1 && quant_changes[1] > 0, "FilmScan3 stimuli never exercised limiter feedback");
+    Require(nonzero_over[1] == 0, "FilmScan3 unexpectedly has Low hysteresis tokens");
+
+    ProfileRounds rounds;
+    auto work = [&](unsigned lane) {
+        try {
+            const auto& config = configs[lane];
+            EncoderSession session(config, Host());
+            for (unsigned round = 0; round < frames; ++round) {
+                rounds.Wait(); // includes synchronized initial launch
+                if (lane == 0 && round == reset_round) session.Reset();
+                const auto& input = inputs[lane][round];
+                if (lane == 0 && round == reject_round) {
+                    bool rejected = false;
+                    try { (void)session.Encode(input.data(), input.size() - 1, config.input_stride_bytes); }
+                    catch (const std::invalid_argument&) { rejected = true; }
+                    Require(rejected, "Low invalid input was accepted");
+                }
+                // Align successful calls after the asymmetric Reset/rejection.
+                rounds.Wait();
+                const auto actual = session.Encode(input.data(), input.size(), config.input_stride_bytes);
+                const auto context = std::string(ProfileLabel(config.quality)) + " round=" + std::to_string(round);
+                EqualProfileFrame(actual, references[lane][round], context);
+                Require(HeaderQualityStamp(actual.sample) == static_cast<unsigned>(config.quality),
+                        context + " quality stamp");
+                EqualProfileConfig(session.config(), config);
+                Require(session.selection().effective.effective_backend == SessionBackend::CpuScalar &&
+                        session.selection().effective.profile_admitted && session.wavelet_isa() == WaveletIsa::Scalar &&
+                        session.geometry().width == width && session.geometry().height == height,
+                        context + " effective profile/backend/geometry");
+            }
+        } catch (...) {
+            rounds.Cancel(std::current_exception());
+            throw;
+        }
+    };
+    std::array<std::future<void>, 2> workers;
+    try {
+        workers[0] = std::async(std::launch::async, work, 0);
+        workers[1] = std::async(std::launch::async, work, 1);
+    } catch (...) {
+        rounds.Cancel(); // release worker 0 if launching worker 1 failed
+        throw;
+    }
+    std::exception_ptr failure;
+    for (auto& worker : workers) {
+        try { worker.get(); }
+        catch (...) { if (!failure) failure = std::current_exception(); }
+    }
+    if (const auto root = rounds.Failure()) std::rethrow_exception(root);
+    if (failure) std::rethrow_exception(failure);
+    for (unsigned lane = 0; lane < 2; ++lane)
+        std::cout << "PASS concurrent " << ProfileLabel(configs[lane].quality)
+                  << " " << width << 'x' << height << " frames=" << frames << " limiter_changes=" << limiter_changes[lane]
+                  << " overbitrate_changes=" << over_changes[lane] << " nonzero_overbitrate=" << nonzero_over[lane]
+                  << " over_rises=" << over_rises[lane] << " over_falls=" << over_falls[lane]
+                  << " quant_changes=" << quant_changes[lane] << '\n';
+    std::cout << "PASS mixed-profile full packet/table/30hash/state/config isolation; Low-only Reset and rollback\n";
 }
 
 // The profile axis must not outrank the axes the contract already ordered before
