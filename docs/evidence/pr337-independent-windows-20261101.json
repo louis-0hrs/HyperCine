@@ -1,0 +1,1405 @@
+{
+  "changed_file_blobs": {
+    "docs/evidence/issue144-native-validation-20261030.json": {
+      "git_blob": "c741f572a3cd33d2ccf7492582469995d9aae392",
+      "working_sha256": "6b2979a77ca9c5b0d03ae0980c4ac4f122bf642ebca9a9af405ce08465f9c2b1"
+    },
+    "docs/evidence/issue144-original-graph-asan-20261030.json": {
+      "git_blob": "903d5539b298c9b81a71e2e97352458bc2873f40",
+      "working_sha256": "56fde50d97393eebe665d1b10eafa83e34c9701d5e25842f496de5661f68fb47"
+    },
+    "docs/evidence/issue144-original-graph-release-20261030.json": {
+      "git_blob": "9688d44d2b1485b9aea55a8562fb0402e2630a19",
+      "working_sha256": "f8fa78f7d70685d5aca568733a4f5e4b86495712f56b72dc04b7512be335126e"
+    },
+    "docs/validation/ISSUE144_ORIGINAL_S3_GRAPH_20261030.md": {
+      "git_blob": "1ff8f0b2c95c98963238c203969bdc666cf28497",
+      "working_sha256": "a32288f72588fa2f2576cfe181bac832c5c00413b6ff72b82fcc20d9c27bd8d2"
+    },
+    "tests/decode_task_graph/CMakeLists.txt": {
+      "git_blob": "2cd31e9d57495a65c49aacab1e1f2463c4af93a3",
+      "working_sha256": "253732d86e61d77887a1f4ed392cd7df63c5c8814fd84186fe7bfb49766af27c"
+    },
+    "tests/decode_task_graph/replay_original_s3_144.cpp": {
+      "git_blob": "cd8c5f62852a5989217e767e94342cb51f06b956",
+      "working_sha256": "f1937af9d4ef1fa7b67ce28bd99c9a1d8ce1e85c76d70cd4cb949ee16a199a61"
+    },
+    "tests/test_spatial_attachment_replay_144.py": {
+      "git_blob": "37061c17ac3a1979f55cf9ce93c70c3f9f8ceb0e",
+      "working_sha256": "0b7ac726a107fc6d81e27686d5fa5dd3042f62302fdd8717b820c489def1fc1b"
+    },
+    "tests/validate_spatial_attachment_144.py": {
+      "git_blob": "1bbbe4b7333536fd188ff8331892f6fa3d1ecd53",
+      "working_sha256": "48a506d8deb3e4fb1daa096a1717e41bfcbb83fc3f5793af250f719a1edda011"
+    }
+  },
+  "compiler_version": "19.44.35229",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "frame_decoder_qualified": false,
+  "graph_profile": "Synthetic",
+  "platform": "native Windows x64",
+  "publication": "local sanitized receipt only",
+  "runs": {
+    "asan": {
+      "asan_runtime_executed_help": true,
+      "asan_runtime_import": [
+        "clang_rt.asan_dynamic-x86_64.dll"
+      ],
+      "asan_runtime_startup_exit": 1,
+      "build_exit": 0,
+      "configure_exit": 0,
+      "ctest_exit": 0,
+      "failed": 0,
+      "flags": {
+        "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc /fsanitize=address /Zi",
+        "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+        "CMAKE_EXE_LINKER_FLAGS": "/INCREMENTAL:NO /DEBUG"
+      },
+      "instrumented_projects": {
+        "hypercine_decode_spatial_attachment": true,
+        "hypercine_decode_task_graph": true,
+        "replay_original_s3_144": true
+      },
+      "junit_sha256": "be5e7c9d95964c53759c92b7bfb339d5dc8b2e3fe74987271fee4d3ea9480c2f",
+      "original_replay": {
+        "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+        "frame_decoder_qualified": false,
+        "graph_profile": "Synthetic",
+        "identity_rejections": 48,
+        "json_sha_sidecars": 60,
+        "observations": [
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 16,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 1,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 2,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 4,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 16,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 16,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 16,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 1,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 2,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 4,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 16,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 16,
+            "wrong_channel_source": 1
+          }
+        ],
+        "original_artifacts": 30,
+        "original_cases": 6,
+        "originals_unchanged": true,
+        "pins_sha256": "e71500661ccf26aaf2a74c623a3037fb899ec844b9dee1feeb8135bb2b9b0111",
+        "positive_comparisons": 24,
+        "probe_sha256": "735272f5d5d3679659b0b99cf5d3145aa5d1bc4338cd50501f292b225249c727",
+        "stage_only": true,
+        "status": "ORIGINAL_STAGE_S3_GRAPH_REPLAY_PASS"
+      },
+      "passed": 32,
+      "probe_sha256": "735272f5d5d3679659b0b99cf5d3145aa5d1bc4338cd50501f292b225249c727",
+      "skipped": 0,
+      "tests": [
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_1",
+          "seconds": "0.276159",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_2",
+          "seconds": "0.240097",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_4",
+          "seconds": "0.241232",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_16",
+          "seconds": "0.28483",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "s3_original_replay_protocol",
+          "seconds": "2.5601",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "s3_original_stage_144",
+          "seconds": "11.3247",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "rca160_public_evidence",
+          "seconds": "0.64594",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_1",
+          "seconds": "0.0960562",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_2",
+          "seconds": "0.0608722",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_4",
+          "seconds": "0.0599839",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_16",
+          "seconds": "0.0875012",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_1",
+          "seconds": "0.0810829",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_2",
+          "seconds": "0.042889",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_4",
+          "seconds": "0.0546769",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_16",
+          "seconds": "0.0606102",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_1",
+          "seconds": "0.428869",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_2",
+          "seconds": "0.383078",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_4",
+          "seconds": "0.381117",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_16",
+          "seconds": "0.405113",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_1",
+          "seconds": "0.157985",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_2",
+          "seconds": "0.164402",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_4",
+          "seconds": "0.153223",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_16",
+          "seconds": "0.168183",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_s3_plane",
+          "seconds": "0.0732342",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_1",
+          "seconds": "0.178927",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_2",
+          "seconds": "0.140329",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_4",
+          "seconds": "0.141929",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_8",
+          "seconds": "0.144323",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_1",
+          "seconds": "0.15959",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_2",
+          "seconds": "0.0903452",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_4",
+          "seconds": "0.126829",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_16",
+          "seconds": "0.123915",
+          "skipped": false,
+          "status": "run"
+        }
+      ]
+    },
+    "release": {
+      "build_exit": 0,
+      "configure_exit": 0,
+      "ctest_exit": 0,
+      "failed": 0,
+      "flags": {
+        "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+        "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+        "CMAKE_EXE_LINKER_FLAGS": "/machine:x64"
+      },
+      "junit_sha256": "41f334e9e3f513d3500e9b98cebd6bc299d14309f6510b3e258d73bd5349b39f",
+      "original_replay": {
+        "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+        "frame_decoder_qualified": false,
+        "graph_profile": "Synthetic",
+        "identity_rejections": 48,
+        "json_sha_sidecars": 60,
+        "observations": [
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 259200,
+            "expected_sha256": "2bbf8b587e41553a0dd67a557532bb9b36aaae4fdd6a784f48dc9e3a0591e629",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 16,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 1,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 2,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 4,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "45017fd6f9e101e1abeb86d0b0fc85b797781ca44fdce1b2da0b094141dc99ce",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 16,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 129600,
+            "expected_sha256": "35172ece6d004ada9a592e108bc62b628d72f0f0785b1c8a1a0fea9281608835",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              1920,
+              1080
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 16,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 1036800,
+            "expected_sha256": "e73cb854e786af0da3d333ba25cbd28572f80072d84251a9b674373dbcf305e2",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 0,
+            "workers": 16,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 1,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 2,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 4,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "e448bf31fb36e7ae33e1d47f6476e8bcb5d9374a2f406d7a5e98a266070f03d4",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 1,
+            "workers": 16,
+            "wrong_channel_source": 2
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 1,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 2,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 4,
+            "wrong_channel_source": 1
+          },
+          {
+            "byte_exact": true,
+            "expected_bytes": 518400,
+            "expected_sha256": "b7660cf26a0f0fe8c28d74b8ce69b4ef1f3cf85646d98faba305b92dec630633",
+            "identity_controls": {
+              "wrong-band": 2,
+              "wrong-channel": 2
+            },
+            "packet_geometry": [
+              3840,
+              2160
+            ],
+            "positive_exit": 0,
+            "sdk_channel": 2,
+            "workers": 16,
+            "wrong_channel_source": 1
+          }
+        ],
+        "original_artifacts": 30,
+        "original_cases": 6,
+        "originals_unchanged": true,
+        "pins_sha256": "e71500661ccf26aaf2a74c623a3037fb899ec844b9dee1feeb8135bb2b9b0111",
+        "positive_comparisons": 24,
+        "probe_sha256": "15ff03406945823a7029add33390e3e5c937096f2f1d95e93ec995446344e978",
+        "stage_only": true,
+        "status": "ORIGINAL_STAGE_S3_GRAPH_REPLAY_PASS"
+      },
+      "passed": 32,
+      "probe_sha256": "15ff03406945823a7029add33390e3e5c937096f2f1d95e93ec995446344e978",
+      "skipped": 0,
+      "tests": [
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_1",
+          "seconds": "0.0737593",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_2",
+          "seconds": "0.0420927",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_4",
+          "seconds": "0.0556799",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decoder_attachment_292_workers_16",
+          "seconds": "0.0656342",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "s3_original_replay_protocol",
+          "seconds": "2.12268",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "s3_original_stage_144",
+          "seconds": "7.46484",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "rca160_public_evidence",
+          "seconds": "0.90863",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_1",
+          "seconds": "0.0432241",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_2",
+          "seconds": "0.0146011",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_4",
+          "seconds": "0.0164475",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_task_graph_workers_16",
+          "seconds": "0.0260154",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_1",
+          "seconds": "0.040399",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_2",
+          "seconds": "0.0133625",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_4",
+          "seconds": "0.014278",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_contract_195_workers_16",
+          "seconds": "0.0191448",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_1",
+          "seconds": "0.37621",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_2",
+          "seconds": "0.341715",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_4",
+          "seconds": "0.360316",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t1_t2_144_workers_16",
+          "seconds": "0.358784",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_1",
+          "seconds": "0.142218",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_2",
+          "seconds": "0.106828",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_4",
+          "seconds": "0.142638",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_s2_output_144_workers_16",
+          "seconds": "0.156303",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "decode_s3_plane",
+          "seconds": "0.0429324",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_1",
+          "seconds": "0.127091",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_2",
+          "seconds": "0.0951068",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_4",
+          "seconds": "0.109178",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t4_plane_144_workers_8",
+          "seconds": "0.108224",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_1",
+          "seconds": "0.120504",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_2",
+          "seconds": "0.0779948",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_4",
+          "seconds": "0.0774897",
+          "skipped": false,
+          "status": "run"
+        },
+        {
+          "failure": false,
+          "name": "scheduler_t5_publish_after_stop_144_workers_16",
+          "seconds": "0.0789216",
+          "skipped": false,
+          "status": "run"
+        }
+      ]
+    }
+  },
+  "source_sha": "0429eebe99cbe92551e960dc49d705f4003f1442",
+  "date": "2026-11-01",
+  "cmake": "cmake version 3.31.6-msvc6",
+  "python": "Python 3.10.9",
+  "crash_control": {
+    "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+    "control": "Real native non-decoder subprocess terminates with access-violation status after forged valid rejection witness",
+    "exit_hex": "0xC0000005",
+    "witness_observed": true,
+    "rejected_by_harness_modes": [
+      "normal",
+      "wrong-band",
+      "wrong-channel"
+    ],
+    "false_positive_count": 0,
+    "source_sha256": "b678fbf032c6e3008cb0c12c691a677b858457b4458d785892b276009ffcf63a",
+    "probe_sha256": "7702e8d445f46c71cca1e1521d2bf80074b9526c86ec0738465c8835b0f4f7bf",
+    "source": "// Copyright (c) 2026 HyperCine Contributors.\n// Dual-licensed MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.\n#include <windows.h>\n#include <cstdio>\nint main() {\n  std::puts(\"S3_IDENTITY_REJECTED no_output_access=1 drained=1 source_channel=1\");\n  std::fflush(stdout);\n  TerminateProcess(GetCurrentProcess(), 0xC0000005u);\n  return 2;\n}\n"
+  }
+}
