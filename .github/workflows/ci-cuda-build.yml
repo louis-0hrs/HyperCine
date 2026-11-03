@@ -57,7 +57,10 @@ env:
 jobs:
   cuda-build:
     name: Linux GCC (CUDA-ON full build, no GPU)
-    runs-on: ubuntu-24.04
+    # Routing only: with HYPERCINE_CI_SELF_HOSTED unset this stays on the hosted
+    # Ubuntu image and the pinned-toolkit installer below runs exactly as before.
+    # Fork pull requests never reach the pool; see ci-standalone.yml.
+    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event.pull_request.head.repo.fork != true && '["self-hosted","hc-linux-x64-cuda12.8"]' || '"ubuntu-24.04"') }}
     timeout-minutes: 90
     steps:
       - name: Checkout repository
@@ -74,6 +77,7 @@ jobs:
           fi
 
       - name: Free runner disk space
+        if: runner.environment != 'self-hosted'
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
                       /opt/hostedtoolcache/CodeQL /usr/local/share/boost
@@ -81,6 +85,7 @@ jobs:
           df -h /
 
       - name: Install pinned CUDA toolkit and build dependencies
+        if: runner.environment != 'self-hosted'
         run: |
           wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
           echo "d2a6b11c096396d868758b86dab1823b25e14d70333f1dfa74da5ddaf6a06dba  cuda-keyring_1.1-1_all.deb" \
@@ -92,7 +97,26 @@ jobs:
           echo "${CUDA_HOME}/bin" >> "$GITHUB_PATH"
           df -h /
 
+      - name: Verify pinned CUDA toolkit (self-hosted)
+        # The hosted image gets its toolkit from the pinned apt package above and
+        # is reproducible. A self-hosted host may carry a newer driver/toolkit, so
+        # the version contract is asserted instead of assumed, and a mismatch fails
+        # instead of quietly building the lane with a different compiler.
+        if: runner.environment == 'self-hosted'
+        run: |
+          set -o pipefail
+          expected="12.8"
+          if [[ ! -x "${CUDA_HOME}/bin/nvcc" ]]; then
+            echo "CUDA_HOME does not contain nvcc: ${CUDA_HOME}" >&2
+            exit 2
+          fi
+          actual="$("${CUDA_HOME}/bin/nvcc" --version | sed -n 's/.*release \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | head -1)"
+          echo "expected_cuda=${expected} actual_cuda=${actual:-unknown}"
+          [[ "$actual" == "$expected" ]] || { echo "pinned toolkit mismatch"; exit 2; }
+          python3 ci/check_runner_capability.py --capability hc-linux-x64-cuda12.8
+
       - name: Publish toolchain versions
+        if: always()
         run: |
           echo "source_sha=$(git rev-parse HEAD)"
           "${CUDA_HOME}/bin/nvcc" --version
@@ -168,6 +192,8 @@ jobs:
     # the whole reason it exists. These controls build a synthetic build tree
     # (no CUDA toolkit, ~1 s) and remove exactly one measurement at a time.
     name: CUDA-ON inventory gate (negative controls)
+    # Synthetic-only: no toolkit, ~1 s. Self-hosted routing is deliberately not
+    # offered here, so a runner with the CUDA label cannot mask a gate defect.
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:

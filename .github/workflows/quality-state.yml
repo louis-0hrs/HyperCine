@@ -33,19 +33,24 @@ permissions:
 jobs:
   quality-state:
     name: Quality state (${{ matrix.name }})
-    runs-on: ${{ matrix.runner }}
+    # Routing only; see docs/SELF_HOSTED_CI_TRANSITION.md.
+    # Fork pull requests never reach the pool; see standalone workflow comment.
+    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event.pull_request.head.repo.fork != true && format('["self-hosted","{0}"]', matrix.capability) || format('"{0}"', matrix.runner)) }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: macOS arm64
             runner: macos-15
+            capability: hc-macos-arm64
             osx_arch: arm64
           - name: Windows MSVC x64
             runner: windows-2022
+            capability: hc-windows-x64-msvc
             osx_arch: ''
           - name: Linux x64
             runner: ubuntu-24.04
+            capability: hc-linux-x64-cpu
             osx_arch: ''
     steps:
       - uses: actions/checkout@v4

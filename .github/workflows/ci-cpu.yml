@@ -15,7 +15,9 @@ on:
 jobs:
   cpu-only-windows-msvc:
     name: Windows MSVC (CPU-Only Build & Tests)
-    runs-on: windows-latest
+    # Routing only; see docs/SELF_HOSTED_CI_TRANSITION.md.
+    # Fork pull requests never reach the pool; see ci-standalone.yml.
+    runs-on: ${{ vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event.pull_request.head.repo.fork != true && fromJSON('["self-hosted","hc-windows-x64-msvc"]') || 'windows-latest' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

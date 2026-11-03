@@ -35,7 +35,14 @@ permissions:
 jobs:
   standalone:
     name: Standalone full decode (${{ matrix.name }})
-    runs-on: ${{ matrix.runner }}
+    # Routing only. With HYPERCINE_CI_SELF_HOSTED unset (the default) every lane
+    # stays on its github-hosted label and the validated inventory is unchanged.
+    # With it set to '1', the lane runs on the self-hosted pool that carries the
+    # matching hc-* capability label. See docs/SELF_HOSTED_CI_TRANSITION.md.
+    # A pull request from a fork never executes on the pool, even with the
+    # variable enabled: fork code is untrusted and would share the host with
+    # repository credentials. It falls back to the github-hosted label.
+    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event.pull_request.head.repo.fork != true && format('["self-hosted","{0}"]', matrix.capability) || format('"{0}"', matrix.runner)) }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -43,30 +50,35 @@ jobs:
         include:
           - name: macOS arm64 Release
             runner: macos-15
+            capability: hc-macos-arm64
             system: Darwin
             machine: arm64
             config: Release
             sanitize: 'OFF'
           - name: macOS arm64 ASan UBSan
             runner: macos-15
+            capability: hc-macos-arm64
             system: Darwin
             machine: arm64
             config: RelWithDebInfo
             sanitize: 'ON'
           - name: Windows MSVC x64 Release
             runner: windows-2022
+            capability: hc-windows-x64-msvc
             system: Windows
             machine: x86_64
             config: Release
             sanitize: 'OFF'
           - name: Linux x64 Release
             runner: ubuntu-24.04
+            capability: hc-linux-x64-cpu
             system: Linux
             machine: x86_64
             config: Release
             sanitize: 'OFF'
           - name: Linux x64 ASan UBSan
             runner: ubuntu-24.04
+            capability: hc-linux-x64-cpu
             system: Linux
             machine: x86_64
             config: RelWithDebInfo
@@ -76,19 +88,26 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+      - name: Verify self-hosted lane capabilities
+        if: runner.environment == 'self-hosted'
+        run: |
+          # A self-hosted host is trusted infrastructure, so the label it was
+          # selected by has to be checked against what it actually is. A
+          # mislabelled host would otherwise green a platform lane it cannot honour.
+          python ci/check_runner_capability.py --capability "${{ matrix.capability }}"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install FFmpeg and Ninja (macOS)
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && runner.environment != 'self-hosted'
         run: brew install ffmpeg ninja
       - name: Install FFmpeg and Ninja (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && runner.environment != 'self-hosted'
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y ffmpeg ninja-build
       - name: Install FFmpeg (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && runner.environment != 'self-hosted'
         shell: pwsh
         run: |
           python ci/test_windows_ffmpeg.py

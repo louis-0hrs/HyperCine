@@ -1,0 +1,56 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+#
+# Static routing gate for the workflow files themselves (issue #349).
+#
+# This job exists because moving lanes to self-hosted runners changes *where*
+# a required check runs, and nothing else in the repository reads that. It is
+# deliberately narrow: it starts only when a workflow file or the verifier
+# changes, has no matrix, no build and no corpus, and finishes in seconds. It
+# is advisory, not a required status check.
+name: Workflow routing contract
+
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - 'ci/workflow_event_matrix.py'
+      - 'ci/test_workflow_event_matrix.py'
+      - 'ci/check_runner_capability.py'
+      - 'ci/test_runner_capability.py'
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'ci/workflow_event_matrix.py'
+      - 'ci/test_workflow_event_matrix.py'
+      - 'ci/check_runner_capability.py'
+      - 'ci/test_runner_capability.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Hosted only, on purpose: this gate judges the routing of every other lane, so
+# it must not be able to run on the pool it is judging.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  routing-contract:
+    name: Workflow routing contract (static)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PyYAML
+        run: python -m pip install --disable-pip-version-check --no-input pyyaml==6.0.2
+      - name: Verify the routing contract and its negative controls
+        run: |
+          python ci/workflow_event_matrix.py
+          python -m unittest ci.test_workflow_event_matrix ci.test_runner_capability
+      - name: Publish the resolved routing table
+        run: python ci/workflow_event_matrix.py --list
