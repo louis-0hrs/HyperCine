@@ -45,7 +45,11 @@ Preview success is not a successful real advisory run.
 2. Separately approve narrow Checks-write/Metadata-read App access to HyperCine
    and deployment of the reviewed package/provider on the trusted host. Verify
    App, source repository, installation, actual private workflow pin and provider
-   hash locally. None of these authorization changes is performed by this PR.
+   hash locally. Set up a canonical service-owned 0700 approval directory under
+   trusted ancestors; existing ledger/lock files must be owned regular 0600
+   single-link files. The controller rejects unsafe directories and symlinks
+   before approval/cycle; see the package deployment boundary. None of these
+   authorization changes is performed by this PR.
 3. Configure an ignored local file with the actual host/queue/provider values.
    Keep `required_gate=false`; leave main-push delegation off. Do not modify any
    required check, ruleset, bypass actor or branch setting for this advisory test.
@@ -85,7 +89,9 @@ policy; they do not qualify this not-yet-deployed production package.
 ## Local validation receipt
 
 [Sanitized test and read-only preview evidence](validation/premerge-controller-review-20261104.json)
-records the component suites, every designated mutation, the clean native full
-CTest rerun and the real-PR read-only preview. The Draft PR records the exact
+records the original package suites, mutations, historical native full CTest
+rerun and real-PR read-only preview. The focused owner-private state correction
+has its own [validation receipt](validation/premerge-state-trust-review-20261104.json).
+Historical native/fixture evidence is not a rerun on the corrected controller. The Draft PR records the exact
 new Head SHA and controller rerun on that committed version. No raw VM/build
 logs, host paths, private queue identifiers or signing material are published.

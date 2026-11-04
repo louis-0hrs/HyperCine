@@ -40,7 +40,6 @@ def main(argv=None,api_factory=GitHubCLI):
         print(json.dumps(result,indent=2));return result
     if a.approve:
         if not a.head or not a.base:p.error('--approve requires explicit --head and --base')
-        a.state.mkdir(parents=True,exist_ok=True)
         record=controller.approve(api,cfg,a.state,a.approve,a.head,a.base,allow_draft=a.allow_draft)
         print(json.dumps({'approved':record['approval'],'dispatched':False},indent=2));return record
     reader_cfg=cfg.get('key_reader',{})

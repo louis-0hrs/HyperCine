@@ -19,7 +19,7 @@ MUTATIONS=[
  ('required-bypass','controller.py',"or rule.get('bypass_actors')!=[]","or False",'test_privacy_strict_and_no_bypass_policy_are_mandatory'),
  ('required-app','controller.py',"if cfg.get('required_gate') and {'context':check_acceptance.RELAY_CHECK,'app_id':APP_ID} not in required:","if False:",'test_required_relay_context_must_have_the_reporter_app'),
  ('approval-revalidation','controller.py',"    if current!=approval:raise RuntimeError('Candidate approval changed')","    if False:raise RuntimeError('Candidate approval changed')",'test_approval_mode_cannot_change_without_reapproval'),
- ('approval-pin-ready','controller.py',"    relay.verify_private(api,cfg)\n    path=", "    pass # Reviewed pin intentionally not checked.\n    path=",'test_approval_cannot_claim_unconfigured_workflow_or_queue'),
+ ('approval-pin-ready','controller.py',"        relay.verify_private(api,cfg)\n", "        pass # Reviewed pin intentionally not checked.\n",'test_approval_cannot_claim_unconfigured_workflow_or_queue'),
  ('approval-dedup-binding','controller.py',"if key in ledger and (ledger[key]['approval']!=a or ledger[key]['relay_commit']!=cfg['relay_commit']):", "if False:",'test_dedup_cannot_return_an_approval_from_a_different_mode'),
  ('nonce-match','controller.py',"if r.get('display_title')==title","if True",'test_spoofed_nonce_never_emits_success'),
  ('workflow-pin','controller.py',"run.get('head_sha')!=record['relay_commit']","False",'test_changed_workflow_actor_or_run_attempt_rejects_success'),
@@ -45,6 +45,12 @@ MUTATIONS=[
  ('cli-write-boundary','adapters.py',"if method!='GET':","if False:",'test_cli_cannot_mutate_rules_runners_checks_or_merge'),
  ('worker-disabled','worker_hook.py',"if cfg.get('enabled') is not True:return","if False:return",'test_worker_hook_missing_or_disabled_does_nothing'),
  ('example-disabled','config.example.json','"enabled": false','"enabled": true','test_example_is_disabled_and_has_no_host_values'),
+ ('state-directory-private','state_store.py',"or stat.S_IMODE(info.st_mode) != 0o700", "or False",'test_group_writable_state_rejected_before_approve_and_cycle'),
+ ('state-file-private','state_store.py',"or stat.S_IMODE(info.st_mode) != 0o600", "or False",'test_unsafe_ledger_mode_rejected'),
+ ('state-ancestor-private','state_store.py',"(writable and not sticky_root)", "False",'test_shared_writable_ancestor_rejected'),
+ ('state-temp-exclusive','state_store.py',"os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW", "os.O_CREAT | os.O_NOFOLLOW",'test_exclusive_temp_collision_does_not_truncate_regular_file'),
+ ('state-legacy-temp','state_store.py',"raise RuntimeError('Unexpected legacy approval temporary entry')", "return",'test_legacy_tmp_symlink_rejected_without_touching_target'),
+ ('state-record-binding','state_store.py',"if key not in {expected, expected + ':retired:' + record['nonce']}:", "if False:",'test_tampered_record_candidate_binding_rejected'),
  ('check-before-dispatch','controller.py',None,None,'test_pending_app_check_is_created_before_private_dispatch'),
 ]
 

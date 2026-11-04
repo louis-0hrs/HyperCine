@@ -22,8 +22,9 @@ name, installation identifier or signing material is bundled.
   reporting is disabled unless explicitly configured; the default key provider
   fails closed. Public output contains only public candidate SHAs and a binding
   digest, not the private queue URL or raw private run identity.
-- `bridge.py`: minimal, machine-independent persistence/private-workflow pin
-  verification. No worker internals are imported.
+- `bridge.py`: private-workflow pin verification. No worker internals are imported.
+- `state_store.py`: owner-private, descriptor-relative approval ledger and lock;
+  exclusive temporary files and durable atomic replacement.
 - `worker_hook.py`: complete worker seam; missing/disabled configuration returns
   without API calls. The worker injects its approved API and reporter interfaces.
 - `adapters.py`: optional scoped GitHub CLI and owner/hash-verified key-reader
@@ -75,6 +76,41 @@ hook does not enable itself or replace the current worker. Deploy only the
 independently reviewed controller version into a trusted host location; never
 import the controller from an untrusted candidate checkout or auto-pull updates
 from a public branch into the privileged host execution path.
+
+## Approval-state deployment boundary
+
+The state directory is security-sensitive: its ledger authorizes private dispatch
+and binds the public check. Deploy it outside candidate checkouts, under the
+trusted service UID, with mode **0700**. Ledger and lock must be owned regular
+single-link files with mode **0600**. Do not use a shared directory. Root and all
+processes running as that service UID are trusted; this is not protection against
+a compromised service UID, nor cryptographic detection of owner-written forgeries.
+
+Supply a canonical path with no symlink components (including operating-system
+path aliases). The controller validates every ancestor using pinned directory
+file descriptors and no-follow opens. Ancestors must belong to root/service UID
+and must not be group/world writable; a root-owned sticky temporary parent is the
+only writable-ancestor exception. Existing unsafe permissions are rejected, never
+silently repaired. Approval may create the final missing directory as 0700;
+parents must already exist and be trusted. Cycle never creates a missing state
+directory. Disabled controllers remain no-ops.
+
+Both approval and enabled cycles validate the directory, ledger and lock before
+GitHub requests, signing or dispatch. Symlinks (including dangling links), FIFOs,
+directories, hardlinked files, malformed/duplicate-key JSON and inconsistent
+record bindings fail closed. The old predictable `premerge.json.tmp` must be
+absent; any leftover entry requires operator investigation, not automatic
+recovery. An absent ledger in an existing safe directory means no approved work.
+
+All ledger reads/writes and lock acquisition are relative to the validated
+state-directory descriptor. Persistence creates a random temporary name with
+`O_CREAT|O_EXCL|O_NOFOLLOW`, flushes and fsyncs that file, atomically replaces the
+ledger, then fsyncs the directory. Failed replacement keeps the previous ledger
+and cleans only the temporary file created by that operation. A colliding name
+is never truncated or followed. Revalidate the deployment's filesystem guarantees
+and effective access controls; use local storage with POSIX locking and atomic
+rename semantics. Windows and network-filesystem service deployment are outside
+this package's qualified scope.
 
 ## Advisory versus required enforcement
 

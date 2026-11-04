@@ -62,9 +62,12 @@ class AdvisoryTests(unittest.TestCase):
             p.revalidate(self.api,self.cfg,record['approval'])
 
     def test_approval_cannot_claim_unconfigured_workflow_or_queue(self):
-        self.cfg['relay_commit']=None
-        with self.assertRaises(RuntimeError):self.approve()
-        self.assertFalse((self.root/'premerge.json').exists())
+        for field in ['relay_commit','repository']:
+            with self.subTest(field=field):
+                original=self.cfg[field];self.cfg[field]=None
+                with self.assertRaises(RuntimeError):self.approve()
+                self.assertFalse((self.root/'premerge.json').exists())
+                self.cfg[field]=original
     def test_dedup_cannot_return_an_approval_from_a_different_mode(self):
         self.approve();self.cfg['required_gate']=False;self.relay_required=False
         with self.assertRaisesRegex(RuntimeError,'Existing approval differs'):self.approve()

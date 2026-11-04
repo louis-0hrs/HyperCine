@@ -4,16 +4,15 @@
 No public event/text grants approval. No source code is executed on this host.
 """
 import datetime
-import fcntl
 import hashlib
 import json
-from pathlib import Path
 import time
 import uuid
 from . import candidate_binding as candidate_approval
 from . import check_protocol as check_acceptance
 from . import checks_reporter
 from . import bridge as relay
+from .state_store import locked_state
 
 SOURCE='louis-0hrs/HyperCine'
 SOURCE_ID=1402247945
@@ -130,12 +129,10 @@ def binding(record,run_id=None):
 
 def approve(api,cfg,state,number,head,base,allow_draft=False):
     # Caller must be an explicit LOCAL operator command, never an issue poller.
-    a=capture(api,cfg,number,head,base,allow_draft=allow_draft)
-    relay.verify_private(api,cfg)
-    path=Path(state)/'premerge.json'
-    with (Path(state)/'premerge.lock').open('a') as lock:
-        fcntl.flock(lock,fcntl.LOCK_EX)
-        ledger=json.loads(path.read_text()) if path.exists() else {}
+    with locked_state(state,create=True) as store:
+        ledger=store.load()
+        a=capture(api,cfg,number,head,base,allow_draft=allow_draft)
+        relay.verify_private(api,cfg)
         key=f'{number}:{head}:{base}'
         if key in ledger and ledger[key]['state']=='invalidated':
             previous=ledger.pop(key)
@@ -145,7 +142,7 @@ def approve(api,cfg,state,number,head,base,allow_draft=False):
         if key not in ledger:
             ledger[key]={'approval':a,'nonce':uuid.uuid4().hex,'relay_commit':cfg['relay_commit'],
                          'state':'approved','created':time.time()}
-            relay.save(path,ledger)
+            store.save(ledger)
         return ledger[key]
 
 
@@ -198,11 +195,9 @@ def cycle(api,cfg,state,reporter_factory=ProductionReporter):
     if cfg.get('enabled') is not True:return
     if cfg.get('source')!=SOURCE or cfg.get('actors')!=['louis-0hrs']:
         raise RuntimeError('Premerge source/operator configuration mismatch')
-    path=Path(state)/'premerge.json'
-    if not path.exists():return
-    with (Path(state)/'premerge.lock').open('a') as lock:
-        fcntl.flock(lock,fcntl.LOCK_EX)
-        ledger=json.loads(path.read_text())
+    with locked_state(state) as store:
+        ledger=store.load()
+        if not ledger:return
         client=reporter_factory(cfg['reporter'])
         for record in ledger.values():
             if record['state'] in {'invalidated','archived'}:continue
@@ -210,7 +205,7 @@ def cycle(api,cfg,state,reporter_factory=ProductionReporter):
             client.candidate=a
             pr=api(f'repos/{SOURCE}/pulls/{a["pull_number"]}')
             if pr.get('merged') is True:
-                record['state']='archived';relay.save(path,ledger);continue
+                record['state']='archived';store.save(ledger);continue
             try:revalidate(api,cfg,a)
             except RuntimeError as exc:
                 # Unresolved GitHub metadata is neither approval nor failure.
@@ -218,31 +213,31 @@ def cycle(api,cfg,state,reporter_factory=ProductionReporter):
                 if record.get('check_id'):
                     client.update(record['check_id'],source,record['check_binding'],'failure')
                 record['state']='invalidated';record['reason']='candidate_or_policy_changed'
-                relay.save(path,ledger);continue
+                store.save(ledger);continue
             if record['relay_commit']!=cfg['relay_commit']:
                 raise RuntimeError('Approved workflow pin changed')
             relay.verify_private(api,cfg)
             if not record.get('check_id'):
                 check=recover_check(api,record) or client.create(source,binding(record))
                 record['check_id']=check['id'];record['check_binding']=check.get('external_id',binding(record))
-                relay.save(path,ledger)
+                store.save(ledger)
             if record['state']=='approved':
                 revalidate(api,cfg,a)
-                record['state']='dispatching';relay.save(path,ledger)
+                record['state']='dispatching';store.save(ledger)
                 api(f'repos/{cfg["repository"]}/actions/workflows/{cfg["workflow"]}/dispatches','POST',
                     {'ref':'main','inputs':{'source_sha':source,'request_id':record['nonce']}})
-                record['state']='queued';relay.save(path,ledger)
+                record['state']='queued';store.save(ledger)
             run=actual_run(api,cfg,record)
             if run is None:
                 if time.time()-record['created']>900:
                     client.update(record['check_id'],source,record['check_binding'],'failure')
                     record['state']='invalidated';record['reason']='dispatch_missing_no_redispatch'
-                    relay.save(path,ledger)
+                    store.save(ledger)
                 continue
-            record['run_id']=run['id'];relay.save(path,ledger)
+            record['run_id']=run['id'];store.save(ledger)
             new=binding(record,run['id'])
             client.bind_run(record['check_id'],source,record['check_binding'],new)
-            record['check_binding']=new;relay.save(path,ledger)
+            record['check_binding']=new;store.save(ledger)
             jobs=api(f'repos/{cfg["repository"]}/actions/runs/{run["id"]}/jobs?filter=latest&per_page=100')['jobs']
             result=outcome(jobs,run)
             revalidate(api,cfg,a) # Last check immediately before any success.
@@ -250,4 +245,4 @@ def cycle(api,cfg,state,reporter_factory=ProductionReporter):
                 client.update(record['check_id'],source,new,result)
                 record['reported']=result
             if run.get('status')=='completed':record['state']='completed'
-            relay.save(path,ledger)
+            store.save(ledger)

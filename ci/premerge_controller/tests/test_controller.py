@@ -15,7 +15,7 @@ class FakeReporter:
 
 class PremergeTests(unittest.TestCase):
     def setUp(self):
-        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name)
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name).resolve()
         self.head='a'*40;self.base='b'*40;self.pin='d'*40;self.events=[];self.runs=[]
         self.cfg={'enabled':True,'source':p.SOURCE,'repository':'owner/private',
                   'workflow':'mac.yml','relay_commit':self.pin,'actors':['louis-0hrs'],
