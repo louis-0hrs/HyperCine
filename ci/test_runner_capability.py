@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -64,9 +65,10 @@ class Rejected(unittest.TestCase):
 
 class Cli(unittest.TestCase):
     def test_cli_exit_codes(self) -> None:
-        self.assertEqual(
-            0, crc.main(["--capability", "hc-linux-x64-cpu", "--allow-missing", "git"])
-        )
+        with patch.object(crc.platform, "system", return_value="Linux"), \
+             patch.object(crc.platform, "machine", return_value="x86_64"), \
+             patch.object(crc.shutil, "which", side_effect=all_tools):
+            self.assertEqual(0, crc.main(["--capability", "hc-linux-x64-cpu"]))
         self.assertEqual(2, crc.main(["--capability", "hc-nope"]))
 
 

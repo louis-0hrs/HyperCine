@@ -35,10 +35,10 @@ _ORIGINAL_SCENARIOS = wem.scenarios
 
 
 def with_pool_enabled() -> list[wem.Event]:
-    """Scenarios as if HYPERCINE_CI_SELF_HOSTED=1 is set on the repository."""
+    """Scenarios with Mac-only private relay activation enabled."""
     events = _ORIGINAL_SCENARIOS()
     for event in events:
-        event.vars = {"HYPERCINE_CI_SELF_HOSTED": "1"}
+        event.vars = {"HYPERCINE_CI_LOCAL_MAC": "1"}
     return events
 
 
@@ -177,24 +177,21 @@ class SelfHostedRouting(unittest.TestCase):
 
     def test_r4_unknown_capability_label(self) -> None:
         d = docs()
-        standalone(d)["strategy"]["matrix"]["include"][3]["capability"] = "hc-linux-x64-gpu"
+        standalone(d)["runs-on"] = ["self-hosted", "hc-linux-x64-gpu"]
         wem.scenarios = with_pool_enabled
         self.addCleanup(setattr, wem, "scenarios", _ORIGINAL_SCENARIOS)
         self.assertIn("R4", rules(wem.check_contract(d)))
 
     def test_r5_linux_label_on_windows_lane(self) -> None:
         d = docs()
-        rows = standalone(d)["strategy"]["matrix"]["include"]
-        next(r for r in rows if r["system"] == "Windows")["capability"] = "hc-linux-x64-cpu"
+        d["ci-cpu.yml"]["jobs"]["cpu-only-windows-msvc"]["runs-on"] = ["self-hosted", "hc-linux-x64-cpu"]
         wem.scenarios = with_pool_enabled
         self.addCleanup(setattr, wem, "scenarios", _ORIGINAL_SCENARIOS)
         self.assertIn("R5", rules(wem.check_contract(d)))
 
     def test_r5_macos_asan_lane_moved_to_linux(self) -> None:
         d = docs()
-        rows = standalone(d)["strategy"]["matrix"]["include"]
-        asan = next(r for r in rows if r["sanitize"] == "ON" and r["system"] == "Darwin")
-        asan["capability"] = "hc-linux-x64-cpu"
+        standalone(d)["runs-on"] = ["self-hosted", "hc-linux-x64-cpu"]
         wem.scenarios = with_pool_enabled
         self.addCleanup(setattr, wem, "scenarios", _ORIGINAL_SCENARIOS)
         self.assertIn("R5", rules(wem.check_contract(d)))
@@ -205,7 +202,7 @@ class SelfHostedRouting(unittest.TestCase):
         for name, job in d["ci-standalone.yml"]["jobs"].items():
             job["runs-on"] = "".join(
                 (
-                    "${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1'",
+                    "${{ fromJSON(vars.HYPERCINE_CI_LOCAL_MAC == '1'",
                     " && format('[\"self-hosted\",\"{0}\"]', matrix.capability)",
                     " || format('\"{0}\"', matrix.runner)) }}",
                 )
@@ -217,46 +214,34 @@ class SelfHostedRouting(unittest.TestCase):
 
     def test_r13_same_repo_pr_exposure(self) -> None:
         d = docs()
-        job = standalone(d)
-        old = job["runs-on"]
-        job["runs-on"] = old.replace(
-            "github.event_name == 'push' && github.ref == 'refs/heads/main'",
-            "github.event.pull_request.head.repo.fork != true",
-        )
-        self.assertNotEqual(old, job["runs-on"])
+        standalone(d)["runs-on"] = ["self-hosted", "hc-macos-arm64"]
         self.assertIn("R13", rules(wem.check_contract(d)))
 
     def test_r13_manual_feature_ref_exposure(self) -> None:
         d = docs()
-        job = standalone(d)
-        old = job["runs-on"]
-        job["runs-on"] = old.replace(
-            "github.event_name == 'push' && github.ref == 'refs/heads/main'",
-            "github.event_name == 'workflow_dispatch'",
-        )
-        self.assertNotEqual(old, job["runs-on"])
+        standalone(d)["runs-on"] = "${{ github.event_name == 'workflow_dispatch' && fromJSON('[\"self-hosted\",\"hc-macos-arm64\"]') || matrix.runner }}"
         self.assertIn("R13", rules(wem.check_contract(d)))
 
     def test_r13_feature_push_exposure(self) -> None:
         d = docs()
-        job = standalone(d)
-        old = job["runs-on"]
-        job["runs-on"] = old.replace(
-            "github.ref == 'refs/heads/main'",
-            "github.ref == 'refs/heads/feature/x'",
-        )
-        self.assertNotEqual(old, job["runs-on"])
+        standalone(d)["runs-on"] = "${{ github.ref == 'refs/heads/feature/x' && fromJSON('[\"self-hosted\",\"hc-macos-arm64\"]') || matrix.runner }}"
+        self.assertIn("R13", rules(wem.check_contract(d)))
+
+    def test_r13_even_main_cannot_register_a_public_runner(self) -> None:
+        d = docs()
+        standalone(d)["runs-on"] = "${{ github.ref == 'refs/heads/main' && fromJSON('[\"self-hosted\",\"hc-macos-arm64\"]') || matrix.runner }}"
         self.assertIn("R13", rules(wem.check_contract(d)))
 
     def test_r14_protected_main_positive_control(self) -> None:
         d = docs()
-        job = standalone(d)
-        old = job["runs-on"]
-        job["runs-on"] = old.replace(
-            "github.ref == 'refs/heads/main'",
-            "github.ref == 'refs/heads/feature/x'",
-        )
-        self.assertNotEqual(old, job["runs-on"])
+        matrix = standalone(d)["strategy"]["matrix"]
+        matrix["include"] = matrix["include"].replace("refs/heads/main", "refs/heads/feature/x")
+        self.assertIn("R14", rules(wem.check_contract(d)))
+
+    def test_r14_flag_must_not_omit_pr_mac_tests(self) -> None:
+        d = docs()
+        matrix = standalone(d)["strategy"]["matrix"]
+        matrix["include"] = matrix["include"].replace("github.event_name == 'push' && github.ref == 'refs/heads/main'", "true")
         self.assertIn("R14", rules(wem.check_contract(d)))
 
 
@@ -271,12 +256,12 @@ class CoverageNotNarrowed(unittest.TestCase):
 
     def test_r8_standalone_row_removed(self) -> None:
         d = docs()
-        standalone(d)["strategy"]["matrix"]["include"].pop()
+        standalone(d)["strategy"]["matrix"]["include"] = [{"name": "Linux x64 Release", "runner": "ubuntu-24.04"}]
         self.assertIn("R8", rules(wem.check_contract(d)))
 
     def test_r8_standalone_row_renamed(self) -> None:
         d = docs()
-        standalone(d)["strategy"]["matrix"]["include"][3]["name"] = "Linux x64 Debug"
+        standalone(d)["strategy"]["matrix"]["include"] = standalone(d)["strategy"]["matrix"]["include"].replace("Linux x64 Release", "Linux x64 Debug")
         self.assertIn("R8", rules(wem.check_contract(d)))
 
     def test_r9_tag_push_schedules_matrix(self) -> None:
@@ -306,8 +291,8 @@ class CoverageNotNarrowed(unittest.TestCase):
 class SelfHostedEnabled(unittest.TestCase):
     """The same rules must hold with the routing variable switched on.
 
-    Activation allows protected-main push jobs only. All PR, manual and
-    feature-ref paths must remain hosted.
+    Activation delegates protected-main Mac rows only. All public jobs
+    remain hosted; all PR/manual/feature Mac rows stay present.
     """
 
     def setUp(self) -> None:
@@ -316,7 +301,7 @@ class SelfHostedEnabled(unittest.TestCase):
         def enabled() -> list[wem.Event]:
             events = self._orig()
             for event in events:
-                event.vars = {"HYPERCINE_CI_SELF_HOSTED": "1"}
+                event.vars = {"HYPERCINE_CI_LOCAL_MAC": "1"}
             return events
 
         wem.scenarios = enabled
@@ -326,18 +311,14 @@ class SelfHostedEnabled(unittest.TestCase):
         findings = wem.check_contract(BASE) + wem.check_local_evidence(BASE)
         self.assertEqual([], [f"{f.rule}: {f.detail}" for f in findings])
 
-    def test_lanes_actually_route_to_the_pool(self) -> None:
-        routed = [
-            item
-            for event in wem.scenarios()
-            if event.name == "push" and event.ref == "refs/heads/main"
-            for item in wem.plan(BASE, event)
-        ]
-        self_hosted = {item.matrix_name or item.job_id for item in routed if wem._is_self_hosted(item.labels)}
-        self.assertIn("Linux x64 ASan UBSan", self_hosted)
-        self.assertIn("Windows MSVC x64 Release", self_hosted)
-        self.assertIn("macOS arm64 ASan UBSan", self_hosted)
-        self.assertIn("cuda-build", self_hosted)
+    def test_only_main_mac_rows_are_delegated(self) -> None:
+        event = next(e for e in wem.scenarios() if e.label == "main push")
+        items = wem.plan(BASE, event)
+        self.assertFalse(any(wem._is_self_hosted(i.labels) for i in items))
+        self.assertFalse(any(i.labels == ["macos-15"] for i in items))
+        rows = wem._by(items, "ci-standalone.yml", "standalone")
+        self.assertEqual(3, len(rows))
+        self.assertEqual({"windows-2022", "ubuntu-24.04"}, {i.labels[0] for i in rows})
 
     def test_prs_feature_pushes_and_manual_refs_stay_hosted(self) -> None:
         for event in wem.scenarios():

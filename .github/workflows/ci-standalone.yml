@@ -35,65 +35,18 @@ permissions:
 jobs:
   standalone:
     name: Standalone full decode (${{ matrix.name }})
-    # Routing only. With HYPERCINE_CI_SELF_HOSTED unset (the default) every lane
-    # stays on its github-hosted label and the validated inventory is unchanged.
-    # With it set to '1', the lane runs on the self-hosted pool that carries the
-    # matching hc-* capability label. See docs/SELF_HOSTED_CI_TRANSITION.md.
-    # Only protected-main push events use the pool. Fork and same-repo PRs,
-    # feature/tag pushes and workflow_dispatch (even on main) stay hosted.
-    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main' && format('["self-hosted","{0}"]', matrix.capability) || format('"{0}"', matrix.runner)) }}
+    # Public jobs stay hosted. Mac-only relay activation filters main-push rows.
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: macOS arm64 Release
-            runner: macos-15
-            capability: hc-macos-arm64
-            system: Darwin
-            machine: arm64
-            config: Release
-            sanitize: 'OFF'
-          - name: macOS arm64 ASan UBSan
-            runner: macos-15
-            capability: hc-macos-arm64
-            system: Darwin
-            machine: arm64
-            config: RelWithDebInfo
-            sanitize: 'ON'
-          - name: Windows MSVC x64 Release
-            runner: windows-2022
-            capability: hc-windows-x64-msvc
-            system: Windows
-            machine: x86_64
-            config: Release
-            sanitize: 'OFF'
-          - name: Linux x64 Release
-            runner: ubuntu-24.04
-            capability: hc-linux-x64-cpu
-            system: Linux
-            machine: x86_64
-            config: Release
-            sanitize: 'OFF'
-          - name: Linux x64 ASan UBSan
-            runner: ubuntu-24.04
-            capability: hc-linux-x64-cpu
-            system: Linux
-            machine: x86_64
-            config: RelWithDebInfo
-            sanitize: 'ON'
+        include: ${{ fromJSON(vars.HYPERCINE_CI_LOCAL_MAC == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main' && '[{"name":"Windows MSVC x64 Release","runner":"windows-2022","capability":"hc-windows-x64-msvc","system":"Windows","machine":"x86_64","config":"Release","sanitize":"OFF"},{"name":"Linux x64 Release","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","system":"Linux","machine":"x86_64","config":"Release","sanitize":"OFF"},{"name":"Linux x64 ASan UBSan","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","system":"Linux","machine":"x86_64","config":"RelWithDebInfo","sanitize":"ON"}]' || '[{"name":"macOS arm64 Release","runner":"macos-15","capability":"hc-macos-arm64","system":"Darwin","machine":"arm64","config":"Release","sanitize":"OFF"},{"name":"macOS arm64 ASan UBSan","runner":"macos-15","capability":"hc-macos-arm64","system":"Darwin","machine":"arm64","config":"RelWithDebInfo","sanitize":"ON"},{"name":"Windows MSVC x64 Release","runner":"windows-2022","capability":"hc-windows-x64-msvc","system":"Windows","machine":"x86_64","config":"Release","sanitize":"OFF"},{"name":"Linux x64 Release","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","system":"Linux","machine":"x86_64","config":"Release","sanitize":"OFF"},{"name":"Linux x64 ASan UBSan","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","system":"Linux","machine":"x86_64","config":"RelWithDebInfo","sanitize":"ON"}]') }}
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v4
-      - name: Verify self-hosted lane capabilities
-        if: runner.environment == 'self-hosted'
-        run: |
-          # A self-hosted host is trusted infrastructure, so the label it was
-          # selected by has to be checked against what it actually is. A
-          # mislabelled host would otherwise green a platform lane it cannot honour.
-          python ci/check_runner_capability.py --capability "${{ matrix.capability }}"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -126,7 +79,11 @@ jobs:
             $value = [Environment]::GetEnvironmentVariable($key)
             if ($value) { "$key=$value" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
           }
+      - name: Native Mac lane
+        if: runner.os == 'macOS'
+        run: python3 ci/run_macos_lane.py --lane "${{ matrix.sanitize == 'ON' && 'standalone-sanitizers' || 'standalone-release' }}"
       - name: Configure SDK-free build
+        if: runner.os != 'macOS'
         env:
           BUILD_CONFIG: ${{ matrix.config }}
           SANITIZE: ${{ matrix.sanitize }}
@@ -143,8 +100,10 @@ jobs:
             -DHYPERCINE_ENABLE_CUDA=OFF -DHYPERCINE_BUILD_TESTS=ON \
             -DHYPERCINE_BUILD_BENCHMARKS=OFF -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON "${flags[@]}"
       - name: Build
+        if: runner.os != 'macOS'
         run: cmake --build build --parallel 3
       - name: Full CTest, architecture and external decode gate
+        if: runner.os != 'macOS'
         env:
           EXPECTED_SYSTEM: ${{ matrix.system }}
           EXPECTED_MACHINE: ${{ matrix.machine }}

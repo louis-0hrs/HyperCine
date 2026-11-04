@@ -15,9 +15,7 @@ on:
 jobs:
   cpu-only-windows-msvc:
     name: Windows MSVC (CPU-Only Build & Tests)
-    # Routing only; see docs/SELF_HOSTED_CI_TRANSITION.md.
-    # Only protected-main pushes may use the pool; PR/manual refs stay hosted.
-    runs-on: ${{ vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","hc-windows-x64-msvc"]') || 'windows-latest' }}
+    runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

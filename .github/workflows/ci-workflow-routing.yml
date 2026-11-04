@@ -18,6 +18,7 @@ on:
       - 'ci/test_workflow_event_matrix.py'
       - 'ci/check_runner_capability.py'
       - 'ci/test_runner_capability.py'
+      - 'ci/run_macos_lane.py'
   pull_request:
     paths:
       - '.github/workflows/**'
@@ -25,6 +26,7 @@ on:
       - 'ci/test_workflow_event_matrix.py'
       - 'ci/check_runner_capability.py'
       - 'ci/test_runner_capability.py'
+      - 'ci/run_macos_lane.py'
   workflow_dispatch:
 
 permissions:

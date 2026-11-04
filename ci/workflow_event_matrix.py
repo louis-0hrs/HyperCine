@@ -5,11 +5,11 @@
 
 Why this exists
 ---------------
-Moving lanes to self-hosted runners is a *routing* change: it decides which host
+Moving Mac lanes through a private relay is a *routing* change: it decides which host
 executes which required check. Nothing about a YAML edit proves that
 
   * the mandatory publication-privacy check still runs on every push and PR,
-  * no PR, manual or unprotected ref can execute on a persistent host,
+  * no public workflow can request a self-hosted runner,
   * a lane did not silently acquire the wrong platform capability label,
   * a paths filter still suppresses the expensive matrix for a docs-only PR.
 
@@ -476,12 +476,16 @@ def trigger_matches(on_block: Any, event: Event) -> bool:
     raise UnsupportedExpression(f"unsupported `on:` block {on_block!r}")
 
 
-def _matrix_rows(job: dict[str, Any]) -> list[dict[str, Any]]:
+def _matrix_rows(job: dict[str, Any], ctx: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     matrix = (job.get("strategy") or {}).get("matrix")
     if not matrix:
         return [{}]
     rows: list[dict[str, Any]] = []
     includes = matrix.get("include") or []
+    if isinstance(includes, str):
+        includes = eval_expr(includes, ctx or {})
+    if not isinstance(includes, list):
+        raise UnsupportedExpression("matrix.include must resolve to a list")
     base_keys = [
         key
         for key, value in matrix.items()
@@ -564,7 +568,7 @@ def plan(docs: dict[str, dict[str, Any]], event: Event) -> list[Scheduled]:
             continue
         concurrency = doc.get("concurrency")
         for job_id, job in (doc.get("jobs") or {}).items():
-            for row in _matrix_rows(job):
+            for row in _matrix_rows(job, build_ctx(workflow_name, event)):
                 ctx = build_ctx(workflow_name, event)
                 ctx["matrix"] = row
                 ctx["runner"] = _runner_ctx(row)
@@ -786,31 +790,30 @@ def check_contract(docs: dict[str, dict[str, Any]]) -> list[Finding]:
             )
 
 
-    # R13: pre-activation simulation: enabling the pool must never route code
-    # from PRs, feature/tag pushes or manually selected refs to persistent hosts.
-    # Only protected main push events are eligible, even if the variable is set.
-    enabled_plans: dict[str, list[Scheduled]] = {}
+    # R13: the public repository must NEVER request any self-hosted runner.
+    # Restricting workflow events cannot stop another workflow stealing a
+    # repository-scoped public runner. The private relay is the only VM path.
+    enabled_plans = {}
     for event in events:
-        enabled = replace(event, vars={**event.vars, "HYPERCINE_CI_SELF_HOSTED": "1"})
+        enabled = replace(event, vars={**event.vars, "HYPERCINE_CI_SELF_HOSTED": "1",
+                                       "HYPERCINE_CI_LOCAL_MAC": "1"})
         items = plan(docs, enabled)
         enabled_plans[event.label] = items
-        if not (event.name == "push" and event.ref == "refs/heads/main"):
-            for item in items:
-                if _is_self_hosted(item.labels):
-                    violation("R13", f"{event.label}: untrusted event executes {item.describe()} on self-hosted")
+        for item in items:
+            if _is_self_hosted(item.labels):
+                violation("R13", f"public repository requests {item.describe()}")
 
-    # R14: ensure that the intended protected-main pool routing is active;
-    # absence of self-hosted jobs everywhere is not valid qualification.
-    expected = {
-        "ci-cpu.yml": "cpu-only-windows-msvc",
-        "ci-cuda-build.yml": "cuda-build",
-        "ci-standalone.yml": "standalone",
-        "quality-state.yml": "quality-state",
-    }
-    for workflow, job_id in expected.items():
-        hits = _by(enabled_plans["main push"], workflow, job_id)
-        if not hits or any(not _is_self_hosted(item.labels) for item in hits):
-            violation("R14", f"protected-main push does not route {workflow}:{job_id} to pool")
+    # R14: Mac-only activation on main removes exactly the three Mac rows;
+    # non-main events retain hosted Mac checks and all other platforms stay put.
+    for event in events:
+        baseline = plan(docs, replace(event, vars={}))
+        expected = [i for i in baseline if not (
+            event.name == "push" and event.ref == "refs/heads/main"
+            and i.labels == ["macos-15"])]
+        actual = enabled_plans[event.label]
+        key = lambda i: (i.workflow, i.job_id, i.matrix_name, tuple(i.labels))
+        if sorted(map(key, actual)) != sorted(map(key, expected)):
+            violation("R14", f"Mac-only relay routing differs for {event.label}")
 
     # R7: a docs-only PR must not start the five-job decode matrix.
     docs_only = plans["pr with docs only"]
@@ -907,7 +910,7 @@ def check_local_evidence(docs: dict[str, dict[str, Any]]) -> list[Finding]:
         trigger = doc.get("on") if isinstance(doc.get("on"), dict) else {}
         uses_pr_target = "pull_request_target" in (trigger or {})
         for job_id, job in (doc.get("jobs") or {}).items():
-            for row in _matrix_rows(job):
+            for row in _matrix_rows(job, build_ctx(workflow_name, scenarios()[0])):
                 ctx = build_ctx(workflow_name, scenarios()[0])
                 ctx["matrix"] = row
                 labels = resolve_labels(job.get("runs-on"), ctx)
@@ -933,9 +936,11 @@ def check_local_evidence(docs: dict[str, dict[str, Any]]) -> list[Finding]:
 # --------------------------------------------------------------------------
 
 
-def render_table(docs: dict[str, dict[str, Any]]) -> str:
+def render_table(docs: dict[str, dict[str, Any]], local_mac: bool = False) -> str:
     lines: list[str] = []
     for event in scenarios():
+        if local_mac:
+            event = replace(event, vars={"HYPERCINE_CI_LOCAL_MAC": "1"})
         lines.append(f"## {event.label} ({event.name} on {event.ref})")
         for item in plan(docs, event):
             lines.append(f"  {item.describe()}")
@@ -948,12 +953,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workflow-dir", default=WORKFLOW_DIR)
     parser.add_argument("--list", action="store_true", help="print the resolved routing table")
     parser.add_argument("--json", action="store_true", help="machine-readable findings")
+    parser.add_argument("--local-mac", action="store_true", help="resolve with Mac relay enabled")
     args = parser.parse_args(argv)
 
     docs = load_workflows(args.workflow_dir)
 
     if args.list:
-        sys.stdout.write(render_table(docs))
+        sys.stdout.write(render_table(docs, args.local_mac))
         return 0
 
     findings = check_contract(docs) + check_local_evidence(docs)
