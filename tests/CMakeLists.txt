@@ -382,6 +382,18 @@ if(Python3_Interpreter_FOUND)
         LABELS "build-contract" TIMEOUT 900)
 endif()
 
+# Issue #93 contract: the SDK-free CPU ISA targets must resolve the toolchain's
+# own <cpuid.h>, not the frozen upstream/Codec/cpuid.h that shadows it. PR #94
+# shipped the correction with no test behind it; this pins it so deleting the
+# scoped set_property() pair cannot silently re-break the full Linux SDK build.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME cpu_isa_include_boundary_contract
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_cpu_isa_include_boundary.py")
+    set_tests_properties(cpu_isa_include_boundary_contract PROPERTIES
+        LABELS "build-contract" TIMEOUT 900)
+endif()
+
 # Phase-B oracle contract: missing stages/neutrality evidence never pass.
 if(Python3_Interpreter_FOUND)
     add_test(NAME gop2_original_stage_contract
