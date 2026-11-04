@@ -215,6 +215,51 @@ class SelfHostedRouting(unittest.TestCase):
         self.assertIn("R6", rules(wem.check_contract(d)))
 
 
+    def test_r13_same_repo_pr_exposure(self) -> None:
+        d = docs()
+        job = standalone(d)
+        old = job["runs-on"]
+        job["runs-on"] = old.replace(
+            "github.event_name == 'push' && github.ref == 'refs/heads/main'",
+            "github.event.pull_request.head.repo.fork != true",
+        )
+        self.assertNotEqual(old, job["runs-on"])
+        self.assertIn("R13", rules(wem.check_contract(d)))
+
+    def test_r13_manual_feature_ref_exposure(self) -> None:
+        d = docs()
+        job = standalone(d)
+        old = job["runs-on"]
+        job["runs-on"] = old.replace(
+            "github.event_name == 'push' && github.ref == 'refs/heads/main'",
+            "github.event_name == 'workflow_dispatch'",
+        )
+        self.assertNotEqual(old, job["runs-on"])
+        self.assertIn("R13", rules(wem.check_contract(d)))
+
+    def test_r13_feature_push_exposure(self) -> None:
+        d = docs()
+        job = standalone(d)
+        old = job["runs-on"]
+        job["runs-on"] = old.replace(
+            "github.ref == 'refs/heads/main'",
+            "github.ref == 'refs/heads/feature/x'",
+        )
+        self.assertNotEqual(old, job["runs-on"])
+        self.assertIn("R13", rules(wem.check_contract(d)))
+
+    def test_r14_protected_main_positive_control(self) -> None:
+        d = docs()
+        job = standalone(d)
+        old = job["runs-on"]
+        job["runs-on"] = old.replace(
+            "github.ref == 'refs/heads/main'",
+            "github.ref == 'refs/heads/feature/x'",
+        )
+        self.assertNotEqual(old, job["runs-on"])
+        self.assertIn("R14", rules(wem.check_contract(d)))
+
+
 class CoverageNotNarrowed(unittest.TestCase):
     def test_r7_docs_only_pr_starts_standalone(self) -> None:
         d = docs()
@@ -261,9 +306,8 @@ class CoverageNotNarrowed(unittest.TestCase):
 class SelfHostedEnabled(unittest.TestCase):
     """The same rules must hold with the routing variable switched on.
 
-    The first version of this routing diff failed R6 here: enabling the variable
-    sent fork pull requests to the pool, because the label expression only
-    looked at the variable and the matrix row. These tests keep that guard.
+    Activation allows protected-main push jobs only. All PR, manual and
+    feature-ref paths must remain hosted.
     """
 
     def setUp(self) -> None:
@@ -286,7 +330,7 @@ class SelfHostedEnabled(unittest.TestCase):
         routed = [
             item
             for event in wem.scenarios()
-            if event.name == "pull_request" and not event.fork
+            if event.name == "push" and event.ref == "refs/heads/main"
             for item in wem.plan(BASE, event)
         ]
         self_hosted = {item.matrix_name or item.job_id for item in routed if wem._is_self_hosted(item.labels)}
@@ -294,6 +338,13 @@ class SelfHostedEnabled(unittest.TestCase):
         self.assertIn("Windows MSVC x64 Release", self_hosted)
         self.assertIn("macOS arm64 ASan UBSan", self_hosted)
         self.assertIn("cuda-build", self_hosted)
+
+    def test_prs_feature_pushes_and_manual_refs_stay_hosted(self) -> None:
+        for event in wem.scenarios():
+            if event.name == "push" and event.ref == "refs/heads/main":
+                continue
+            for item in wem.plan(BASE, event):
+                self.assertFalse(wem._is_self_hosted(item.labels), item.describe())
 
     def test_privacy_stays_hosted_with_pool_enabled(self) -> None:
         for event in wem.scenarios():

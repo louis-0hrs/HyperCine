@@ -9,7 +9,7 @@ Moving lanes to self-hosted runners is a *routing* change: it decides which host
 executes which required check. Nothing about a YAML edit proves that
 
   * the mandatory publication-privacy check still runs on every push and PR,
-  * a fork pull request can never execute on a self-hosted host,
+  * no PR, manual or unprotected ref can execute on a persistent host,
   * a lane did not silently acquire the wrong platform capability label,
   * a paths filter still suppresses the expensive matrix for a docs-only PR.
 
@@ -38,7 +38,7 @@ import fnmatch
 import json
 import os
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Iterable
 
 try:
@@ -671,6 +671,15 @@ def scenarios() -> list[Event]:
             label="manual dispatch",
         ),
         Event(
+            name="workflow_dispatch",
+            ref="refs/heads/feature/x",
+            ref_name="feature/x",
+            ref_type="branch",
+            changed=standalone_entry,
+            run_id="2008",
+            label="manual feature-ref dispatch",
+        ),
+        Event(
             name="pull_request",
             ref="refs/pull/7/merge",
             ref_name="contributor/patch",
@@ -776,6 +785,33 @@ def check_contract(docs: dict[str, dict[str, Any]]) -> list[Finding]:
                 f"fork pull request executes {item.describe()} on self-hosted",
             )
 
+
+    # R13: pre-activation simulation: enabling the pool must never route code
+    # from PRs, feature/tag pushes or manually selected refs to persistent hosts.
+    # Only protected main push events are eligible, even if the variable is set.
+    enabled_plans: dict[str, list[Scheduled]] = {}
+    for event in events:
+        enabled = replace(event, vars={**event.vars, "HYPERCINE_CI_SELF_HOSTED": "1"})
+        items = plan(docs, enabled)
+        enabled_plans[event.label] = items
+        if not (event.name == "push" and event.ref == "refs/heads/main"):
+            for item in items:
+                if _is_self_hosted(item.labels):
+                    violation("R13", f"{event.label}: untrusted event executes {item.describe()} on self-hosted")
+
+    # R14: ensure that the intended protected-main pool routing is active;
+    # absence of self-hosted jobs everywhere is not valid qualification.
+    expected = {
+        "ci-cpu.yml": "cpu-only-windows-msvc",
+        "ci-cuda-build.yml": "cuda-build",
+        "ci-standalone.yml": "standalone",
+        "quality-state.yml": "quality-state",
+    }
+    for workflow, job_id in expected.items():
+        hits = _by(enabled_plans["main push"], workflow, job_id)
+        if not hits or any(not _is_self_hosted(item.labels) for item in hits):
+            violation("R14", f"protected-main push does not route {workflow}:{job_id} to pool")
+
     # R7: a docs-only PR must not start the five-job decode matrix.
     docs_only = plans["pr with docs only"]
     if _by(docs_only, "ci-standalone.yml", "standalone"):
@@ -838,7 +874,7 @@ def check_contract(docs: dict[str, dict[str, Any]]) -> list[Finding]:
             )
 
     # R11: a self-hosted CUDA host must not rely on the hosted image's toolkit.
-    cuda_plan = plans["pr with source changes"]
+    cuda_plan = enabled_plans["main push"]
     for item in cuda_plan:
         if item.workflow != "ci-cuda-build.yml" or not _is_self_hosted(item.labels):
             continue
@@ -930,7 +966,7 @@ def main(argv: list[str] | None = None) -> int:
             checked = sum(len(plan(docs, event)) for event in scenarios())
             print(
                 f"OK: {len(docs)} workflows, {len(scenarios())} events, "
-                f"{checked} job instances, 12 rules"
+                f"{checked} job instances, 14 rules"
             )
     return 1 if findings else 0
 

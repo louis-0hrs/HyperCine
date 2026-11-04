@@ -2,9 +2,9 @@
      Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE. -->
 # Self-hosted CI transition: routing, isolation and verification
 
-Status: **proposal, not enabled.** Every lane in this document is still on its
-github-hosted label on `main`. No runner is registered, no workflow has been
-dispatched, and nothing here has been executed on hardware.
+Status: **proposal, not enabled on main.** Hardware/pool qualification and
+runner registration have not been independently verified here. No hosted
+validation or pool execution for this corrected routing head is claimed.
 
 Tracked under [infrastructure issue #349](https://github.com/louis-0hrs/HyperCine/issues/349).
 Related: the trigger/concurrency budget in the pending `docs/CI_EFFICIENCY.md`
@@ -60,39 +60,26 @@ job up) and any `*-gpu`, `*-cuda`, `*-8k` label that encodes a corpus or GPU
 generation rather than a contract. The verifier rejects a bare `self-hosted`
 label outright (R12).
 
-## 3. Isolation of untrusted pull-request code
+## 3. Protected-main-only trust boundary
 
-A self-hosted runner is a machine, not a sandbox. Two properties of GitHub
-Actions make that dangerous, and both must be addressed by design, not by a
-label:
+A self-hosted runner is **not a sandbox**. A same-repository pull request
+can be untrusted just as a fork can, and `workflow_dispatch` accepts an
+operator-selected branch/ref (including a separate CUDA `checkout_ref`).
+Neither mechanism is safe for executing code on a persistent pool.
 
-1. **`pull_request` from a fork** runs the *merge commit* of untrusted code.
-   Fork pull requests therefore never select the pool: the `runs-on`
-   expression includes `github.event.pull_request.head.repo.fork != true`, so a
-   fork PR falls back to its github-hosted label even with the variable enabled.
-   This is checked by rule R6 against a real fork scenario, and the first
-   version of this diff failed that rule — the guard exists because it was
-   missing.
-2. **Same-repository branches are not automatically trusted.** A contributor
-   with write access, or a compromised token, is enough. The pool therefore
-   runs with these invariants:
+The only pool-eligible event is an exact `push` to `refs/heads/main` after
+independently verifying that the branch is protected. The expression also
+requires `HYPERCINE_CI_SELF_HOSTED=1`. **All PRs (including same-repo PRs),
+manual dispatches (even on main), feature pushes and tag pushes stay hosted.**
+The static verifier checks these denied routes with the variable forcibly
+enabled (R13), and checks that eligible protected-main lanes do route to
+the pool (R14).
 
-   - No repository, organisation or environment secret is exposed to a
-     `pull_request` event (`secrets.*` are already empty for that event; no lane
-     in this repository reads one).
-   - The runner service account has no write access to the repository and no
-     deployment credentials; it can read and execute, nothing else.
-   - Each job runs in a workspace that is created for the job and deleted
-     afterwards, not a shared directory reused across jobs.
-   - No job has `actions: write`, `packages: write` or `id-token: write`; the
-     existing `permissions: contents: read` is kept as-is.
-   - `pull_request_target` is not used anywhere, and the verifier fails if a
-     `pull_request_target` workflow ever targets the pool (R12).
-
-   These are properties of the runner configuration, not of the YAML, so they
-   cannot be proven by this repository. They are listed as **NOT RUN /
-   operator-attested** in §7 and must be confirmed before the variable is
-   enabled.
+Self-hosted hosts must nevertheless be isolated and least-privileged:
+no deployment credentials, no repository write grants, disposable workspaces,
+and explicit trusted-host operators. These are operational requirements;
+a `hc-*` label does **not** prove them. The mandatory publication-privacy
+job and the routing-policy verifier stay on GitHub-hosted runners.
 
 ## 4. Toolkit pinning on a persistent host
 
@@ -112,17 +99,16 @@ The same principle covers the platform lanes: every self-hosted job first runs
 mismatch. A mislabelled host is the realistic failure mode here, and a wrongly
 green platform lane is worse than a red one.
 
-## 5. Local verification (executed)
+## 5. Static verification contract (new head not yet executed)
 
-`ci/workflow_event_matrix.py` parses the real workflow files, applies seven
-synthetic events (PR with sources, docs-only PR, feature-branch push, `main`
-push, tag push, manual dispatch, fork PR), resolves `if:` and `runs-on:` the
-way Actions documents them, and checks twelve rules. It never dispatches
-anything.
+The corrected verifier models eight events, including manual dispatch on an
+untrusted feature branch, and fourteen rules. It resolves actual workflow
+expressions with the pool variable forcibly enabled for security checks.
+**This correction has not been executed on a Python/Actions runner yet.**
 
 ```
 $ python3 ci/workflow_event_matrix.py
-OK: 7 workflows, 7 events, 80 job instances, 12 rules
+# NOT RUN on corrected head; prior head's seven-event output is historical
 ```
 
 Rules, and the failure each one exists for:
@@ -140,6 +126,8 @@ Rules, and the failure each one exists for:
 | R10 | a concurrency group is stable across two commits of the same PR |
 | R11 | a self-hosted CUDA job verifies the pinned toolkit and does not install it |
 | R12 | no bare `self-hosted` label, no `pull_request_target` toward the pool |
+| R13 | with variable enabled, every PR, manual, feature and tag event remains hosted |
+| R14 | with variable enabled, protected-main push still routes all eligible lanes to the pool |
 
 The negative controls are the point. `ci/test_workflow_event_matrix.py` mutates a
 deep copy of the real workflows, one change at a time, and requires the
@@ -151,8 +139,7 @@ configuration is verified, not just the default one.
 
 ```
 $ python3 -m unittest ci.test_workflow_event_matrix ci.test_runner_capability
-Ran 37 tests in 0.16s
-OK
+# NOT RUN on corrected head; execute all new negative controls before acceptance
 ```
 
 `ci/check_runner_capability.py` has its own accepted/rejected matrix per
@@ -163,38 +150,39 @@ evidence that the check fails closed rather than only passing.
 
 ## 6. Activation and rollback
 
-Activation is a variable, not a commit:
+1. Verify that `main` is protected, including the mandatory
+   `Publication privacy (all new commits)` status, required reviews,
+   and restrictions on direct pushes; document the operator-controlled
+   runner account and workspace isolation.
+2. Register and qualify the individual hosts *out of band* against a
+   pinned, trusted `main` SHA using the official test commands. Record
+   toolchain, source SHA, test counts, sanitizer and workspace cleanup.
+   Do not feed an arbitrary PR or manual `checkout_ref` to the pool.
+3. Merge only a separately accepted, exact-head routing change while
+   the variable is still unset. With it unset, all jobs stay hosted.
+4. Once hardware qualification and review gates pass, set
+   `HYPERCINE_CI_SELF_HOSTED=1`. The next eligible **protected-main push**
+   will use the pool. Verify source-bound results, labels and the
+   unchanged hosted privacy status.
+5. **Do not use `workflow_dispatch` to qualify the pool**: even on
+   `main` it must route hosted, to avoid the untrusted-ref/checkout
+   loophole. PRs also stay hosted.
 
-1. Register the hosts and qualify them out of band (§7). Attach exactly the
-   `hc-*` label that was qualified; do not attach several.
-2. Run one manually dispatched qualification per capability with the variable
-   still unset, so the hosted baseline is recorded for the same SHA.
-3. Set `HYPERCINE_CI_SELF_HOSTED=1` for the repository.
-4. Open a PR that changes nothing but a comment, and confirm every lane picks
-   the expected label and that the required privacy check still reports on a
-   hosted runner.
-5. Only then allow a real PR to be judged by the pool.
-
-Rollback is deleting the variable. No commit is needed, every lane returns to
-its github-hosted label on the next event, and no branch protection rule has to
-be touched. If a specific capability is unreliable, remove that one label from
-the affected hosts: those lanes stop being schedulable and the job stays
-queued — which is visible — instead of silently passing somewhere else.
-
-Do not "fix" a stuck queue by adding a second, broader label to a host. That is
-how a lane ends up on the wrong hardware.
+Rollback: delete the repository variable. Never relax the mandatory
+privacy job or add broad labels as a workaround for a failing lane.
 
 ## 7. Evidence status
 
 | Item | Status |
 | --- | --- |
-| `workflow_event_matrix.py` on current `main` | RUN — `OK: 7 workflows, 7 events, 80 job instances, 12 rules` |
-| Negative controls and invariant tests (27 routing + 10 capability) | RUN — 37 tests OK |
-| Routing with `HYPERCINE_CI_SELF_HOSTED=1` (static) | RUN — all pool lanes resolve to the matching `hc-*` label, privacy stays hosted |
-| Fork PR falls back to hosted labels | RUN (static, R6) |
+| Prior routing verifier (parent head only) | HISTORICAL — 7 events/12 rules, did not cover same-repo PR/manual-ref risk |
+| Corrected verifier (8 events, 14 rules) | **NOT RUN** — requires exact-head Python execution |
+| Previous 37 tests | HISTORICAL — parent head only; new routing negatives **NOT RUN** |
+| Corrected pool-enabled event/label matrix | **NOT RUN** — main positive and PR/manual/feature negative controls pending |
+| Fork PR hosted gate | HISTORICAL R6; expanded R13 still unexecuted |
 | `check_runner_capability.py` on this host, matching label | RUN — exit 0 |
 | `check_runner_capability.py` on this host, macOS label | RUN — exit 2, system + machine mismatch |
-| Hosted CI for this diff | **NOT RUN** — single `[skip ci]` commit, per the maintainer's instruction not to spend hosted minutes |
+| Hosted CI for corrected diff | **NOT RUN** — commit uses `[skip ci]` to conserve hosted minutes |
 | Any CTest/Standalone/CUDA build | **NOT RUN** |
 | Runner registration, labels, service accounts, workspace cleanup | **NOT RUN / operator-attested** |
 | Actual job execution on a self-hosted host | **NOT RUN** |

@@ -39,10 +39,9 @@ jobs:
     # stays on its github-hosted label and the validated inventory is unchanged.
     # With it set to '1', the lane runs on the self-hosted pool that carries the
     # matching hc-* capability label. See docs/SELF_HOSTED_CI_TRANSITION.md.
-    # A pull request from a fork never executes on the pool, even with the
-    # variable enabled: fork code is untrusted and would share the host with
-    # repository credentials. It falls back to the github-hosted label.
-    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event.pull_request.head.repo.fork != true && format('["self-hosted","{0}"]', matrix.capability) || format('"{0}"', matrix.runner)) }}
+    # Only protected-main push events use the pool. Fork and same-repo PRs,
+    # feature/tag pushes and workflow_dispatch (even on main) stay hosted.
+    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main' && format('["self-hosted","{0}"]', matrix.capability) || format('"{0}"', matrix.runner)) }}
     timeout-minutes: 45
     strategy:
       fail-fast: false

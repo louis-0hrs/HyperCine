@@ -34,8 +34,8 @@ jobs:
   quality-state:
     name: Quality state (${{ matrix.name }})
     # Routing only; see docs/SELF_HOSTED_CI_TRANSITION.md.
-    # Fork pull requests never reach the pool; see standalone workflow comment.
-    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event.pull_request.head.repo.fork != true && format('["self-hosted","{0}"]', matrix.capability) || format('"{0}"', matrix.runner)) }}
+    # Only protected-main pushes may use the pool; PR/manual refs stay hosted.
+    runs-on: ${{ fromJSON(vars.HYPERCINE_CI_SELF_HOSTED == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main' && format('["self-hosted","{0}"]', matrix.capability) || format('"{0}"', matrix.runner)) }}
     strategy:
       fail-fast: false
       matrix:
