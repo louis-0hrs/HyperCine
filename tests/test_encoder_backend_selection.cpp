@@ -158,6 +158,17 @@ void CudaContract() {
     c = config; c.input_bytes = 0; refused(c, device, CapabilityReason::FormatMathematicallyInvalid);
     c = config; c.input_stride_bytes = c.input_bytes = 0;
     refused(c, device, CapabilityReason::ValidButNotImplemented);
+    const auto ceiling = 36ull * 128 * 24 + 1024 * 1024 + config.input_bytes;
+    for (const auto host_budget : {std::uint64_t{0}, std::uint64_t{ceiling - 1}}) {
+        c = config; c.cpu_memory_budget_bytes = host_budget;
+        refused(c, device, CapabilityReason::MemoryBudgetExceeded);
+    }
+    c = config; c.cpu_memory_budget_bytes = c.gpu_memory_budget_bytes = ceiling;
+    calls = metal_calls = cuda_calls = 0;
+    const auto exact = SelectBackend(c, device, factories);
+    Require(exact && calls == 0 && metal_calls == 0 && cuda_calls == 1 &&
+            exact.fallback == ScalarFallbackReason::None,
+            "CUDA exact host ceiling refused or changed factory");
     c = config; c.gpu_memory_budget_bytes = 1; refused(c, device, CapabilityReason::MemoryBudgetExceeded);
     auto d = device; d.cuda_total_global_memory_bytes = 1;
     refused(config, d, CapabilityReason::MemoryBudgetExceeded);
@@ -187,6 +198,15 @@ void CudaContract() {
             fallback.frontend->Backend() == FrontendBackend::Cpu &&
             fallback.fallback == ScalarFallbackReason::BackendNotPresent,
             "absent CUDA did not use the scalar contract");
+    c = config; c.cpu_memory_budget_bytes = ceiling - 1;
+    refused(c, observed, CapabilityReason::MemoryBudgetExceeded);
+    c.cpu_memory_budget_bytes = ceiling; c.gpu_memory_budget_bytes = 0;
+    c.allow_cpu_scalar_fallback = true;
+    calls = metal_calls = cuda_calls = 0;
+    const auto exact_fallback = SelectBackend(c, observed, factories);
+    Require(exact_fallback && calls == 1 && metal_calls == 0 && cuda_calls == 0 &&
+            exact_fallback.fallback == ScalarFallbackReason::BackendNotPresent,
+            "absent CUDA inherited GPU budget or lost scalar host boundary");
     std::cout << "PASS fake CUDA binding/refusal/identity/init falsifiers (no GPU execution)\n";
 }
 void MetalContract() {
