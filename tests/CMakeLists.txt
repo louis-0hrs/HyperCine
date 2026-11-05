@@ -391,7 +391,7 @@ endif()
 # and must not turn missing optional SDK dependencies into false red CI.
 if(Python3_Interpreter_FOUND AND HYPERCINE_BUILD_UPSTREAM
    AND CMAKE_SYSTEM_NAME STREQUAL "Linux"
-   AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|i[3-6]86)$"
+   AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|i386|i686)$"
    AND CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang)$")
     add_test(NAME cpu_isa_include_boundary_contract
         COMMAND "${Python3_EXECUTABLE}" -B
