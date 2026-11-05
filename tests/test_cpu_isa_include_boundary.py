@@ -29,6 +29,7 @@ archive, no GPU and no corpus.
 """
 import json
 import os
+import platform
 from pathlib import Path
 import shlex
 import shutil
@@ -36,6 +37,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -144,26 +146,60 @@ def _compile(entry, work_dir, extra_includes=(), output='probe.o'):
     return completed.returncode, completed.stdout + completed.stderr
 
 
+def _require_sdk_compile_commands(code, log, commands_path):
+    # This is a regression *gate*. A configure failure on an eligible lane
+    # must never be turned into CTest's overall-successful unittest SKIP.
+    if code != 0:
+        raise AssertionError(
+            'SDK-enabled configure failed (exit {}):\n{}'.format(
+                code, _sanitize(log[-2000:])))
+    if not commands_path.is_file():
+        raise AssertionError('SDK-enabled configure did not export compile_commands.json')
+    return json.loads(commands_path.read_text(encoding='utf-8'))
+
+
+ELIGIBLE_LINUX_X86 = (
+    sys.platform.startswith('linux')
+    and platform.machine().lower() in ('x86_64', 'amd64', 'i386', 'i686')
+)
+
+
 class CpuIsaIncludeBoundaryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # GCC/Clang x86 header shadowing is the supported target. Skip only
+        # deliberately out-of-scope systems *before* invoking any SDK configure.
+        if not ELIGIBLE_LINUX_X86:
+            raise unittest.SkipTest('CPU ISA cpuid.h contract requires Linux x86 GCC/Clang')
         cls.tmp = Path(tempfile.mkdtemp(prefix='hypercine-93-'))
+        cls.addClassCleanup(shutil.rmtree, cls.tmp, ignore_errors=True)
         cls.build_dir = cls.tmp / 'sdk-build'
         code, log = _configure(cls.build_dir)
-        if code != 0:
-            raise unittest.SkipTest(
-                'SDK-enabled configure unavailable here (exit {}):\n{}'.format(
-                    code, _sanitize(log[-2000:])))
-        commands_path = cls.build_dir / 'compile_commands.json'
-        if not commands_path.is_file():
-            raise unittest.SkipTest('compiler commands were not exported')
-        cls.commands = json.loads(commands_path.read_text(encoding='utf-8'))
+        cls.commands = _require_sdk_compile_commands(
+            code, log, cls.build_dir / 'compile_commands.json')
         cls.work = cls.tmp / 'work'
         cls.work.mkdir()
 
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.tmp, ignore_errors=True)
+
+@unittest.skipUnless(ELIGIBLE_LINUX_X86, 'Linux x86 SDK-enabled regression gate only')
+class BoundaryAdmissionNegatives(unittest.TestCase):
+    def test_forced_configure_error_fails_instead_of_skipping(self):
+        with mock.patch.dict(globals(), {'_configure': lambda _: (19, 'forced-negative')}):
+            try:
+                with self.assertRaisesRegex(AssertionError, 'SDK-enabled configure failed'):
+                    CpuIsaIncludeBoundaryTests.setUpClass()
+            finally:
+                CpuIsaIncludeBoundaryTests.doClassCleanups()
+        self.assertFalse(CpuIsaIncludeBoundaryTests.tmp.exists())
+
+    def test_missing_compile_commands_fails_instead_of_skipping(self):
+        with mock.patch.dict(globals(), {'_configure': lambda _: (0, '')}):
+            try:
+                with self.assertRaisesRegex(AssertionError, 'did not export compile_commands'):
+                    CpuIsaIncludeBoundaryTests.setUpClass()
+            finally:
+                CpuIsaIncludeBoundaryTests.doClassCleanups()
+        self.assertFalse(CpuIsaIncludeBoundaryTests.tmp.exists())
 
     def test_recorded_commands_are_present(self):
         for suffix in ISOLATED_SOURCES + (SDK_CONSUMER,):
