@@ -14,6 +14,7 @@ on:
       - 'tests/test_quality_state.cpp'
       - 'CMakeLists.txt'
       - '.github/workflows/quality-state.yml'
+      - 'ci/run_macos_lane.py'
   pull_request:
     paths:
       - 'include/hypercine/quality_state.h'
@@ -25,6 +26,7 @@ on:
       - 'tests/test_quality_state.cpp'
       - 'CMakeLists.txt'
       - '.github/workflows/quality-state.yml'
+      - 'ci/run_macos_lane.py'
   workflow_dispatch:
 
 permissions:
@@ -33,23 +35,19 @@ permissions:
 jobs:
   quality-state:
     name: Quality state (${{ matrix.name }})
+    # Public jobs stay hosted. Mac-only relay activation filters main-push rows.
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: macOS arm64
-            runner: macos-15
-            osx_arch: arm64
-          - name: Windows MSVC x64
-            runner: windows-2022
-            osx_arch: ''
-          - name: Linux x64
-            runner: ubuntu-24.04
-            osx_arch: ''
+        include: ${{ fromJSON(vars.HYPERCINE_CI_LOCAL_MAC == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main' && '[{"name":"Windows MSVC x64","runner":"windows-2022","capability":"hc-windows-x64-msvc","osx_arch":""},{"name":"Linux x64","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","osx_arch":""}]' || '[{"name":"macOS arm64","runner":"macos-15","capability":"hc-macos-arm64","osx_arch":"arm64"},{"name":"Windows MSVC x64","runner":"windows-2022","capability":"hc-windows-x64-msvc","osx_arch":""},{"name":"Linux x64","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","osx_arch":""}]') }}
     steps:
       - uses: actions/checkout@v4
+      - name: Native Mac lane
+        if: runner.os == 'macOS'
+        run: python3 ci/run_macos_lane.py --lane quality-state
       - name: Configure portable calculator only
+        if: runner.os != 'macOS'
         shell: bash
         run: |
           flags=()
@@ -61,6 +59,8 @@ jobs:
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
             -DHYPERCINE_BUILD_QUALITY_STATE_ONLY=ON "${flags[@]}"
       - name: Build
+        if: runner.os != 'macOS'
         run: cmake --build build --config Release --parallel 3
       - name: CTest
+        if: runner.os != 'macOS'
         run: ctest --test-dir build -C Release --output-on-failure
