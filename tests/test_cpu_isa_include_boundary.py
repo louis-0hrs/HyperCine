@@ -181,26 +181,6 @@ class CpuIsaIncludeBoundaryTests(unittest.TestCase):
         cls.work.mkdir()
 
 
-@unittest.skipUnless(ELIGIBLE_LINUX_X86, 'Linux x86 SDK-enabled regression gate only')
-class BoundaryAdmissionNegatives(unittest.TestCase):
-    def test_forced_configure_error_fails_instead_of_skipping(self):
-        with mock.patch.dict(globals(), {'_configure': lambda _: (19, 'forced-negative')}):
-            try:
-                with self.assertRaisesRegex(AssertionError, 'SDK-enabled configure failed'):
-                    CpuIsaIncludeBoundaryTests.setUpClass()
-            finally:
-                CpuIsaIncludeBoundaryTests.doClassCleanups()
-        self.assertFalse(CpuIsaIncludeBoundaryTests.tmp.exists())
-
-    def test_missing_compile_commands_fails_instead_of_skipping(self):
-        with mock.patch.dict(globals(), {'_configure': lambda _: (0, '')}):
-            try:
-                with self.assertRaisesRegex(AssertionError, 'did not export compile_commands'):
-                    CpuIsaIncludeBoundaryTests.setUpClass()
-            finally:
-                CpuIsaIncludeBoundaryTests.doClassCleanups()
-        self.assertFalse(CpuIsaIncludeBoundaryTests.tmp.exists())
-
     def test_recorded_commands_are_present(self):
         for suffix in ISOLATED_SOURCES + (SDK_CONSUMER,):
             entry = _entry(self.commands, suffix)
@@ -251,6 +231,26 @@ class BoundaryAdmissionNegatives(unittest.TestCase):
             'the probe failed for an unrelated reason, not the CPUID shadowing '
             'recorded in #93:\n' + _sanitize(log[-4000:]))
 
+
+@unittest.skipUnless(ELIGIBLE_LINUX_X86, 'Linux x86 SDK-enabled regression gate only')
+class BoundaryAdmissionNegatives(unittest.TestCase):
+    def test_forced_configure_error_fails_instead_of_skipping(self):
+        with mock.patch.dict(globals(), {'_configure': lambda _: (19, 'forced-negative')}):
+            try:
+                with self.assertRaisesRegex(AssertionError, 'SDK-enabled configure failed'):
+                    CpuIsaIncludeBoundaryTests.setUpClass()
+            finally:
+                CpuIsaIncludeBoundaryTests.doClassCleanups()
+        self.assertFalse(CpuIsaIncludeBoundaryTests.tmp.exists())
+
+    def test_missing_compile_commands_fails_instead_of_skipping(self):
+        with mock.patch.dict(globals(), {'_configure': lambda _: (0, '')}):
+            try:
+                with self.assertRaisesRegex(AssertionError, 'did not export compile_commands'):
+                    CpuIsaIncludeBoundaryTests.setUpClass()
+            finally:
+                CpuIsaIncludeBoundaryTests.doClassCleanups()
+        self.assertFalse(CpuIsaIncludeBoundaryTests.tmp.exists())
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
