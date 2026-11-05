@@ -386,7 +386,13 @@ endif()
 # own <cpuid.h>, not the frozen upstream/Codec/cpuid.h that shadows it. PR #94
 # shipped the correction with no test behind it; this pins it so deleting the
 # scoped set_property() pair cannot silently re-break the full Linux SDK build.
-if(Python3_Interpreter_FOUND)
+# Register only for the supported SDK-enabled Linux x86 GCC/Clang lane.
+# Standalone/Windows/macOS configurations do not qualify an SDK compiler guard
+# and must not turn missing optional SDK dependencies into false red CI.
+if(Python3_Interpreter_FOUND AND HYPERCINE_BUILD_UPSTREAM
+   AND CMAKE_SYSTEM_NAME STREQUAL "Linux"
+   AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|i[3-6]86)$"
+   AND CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang)$")
     add_test(NAME cpu_isa_include_boundary_contract
         COMMAND "${Python3_EXECUTABLE}" -B
             "${CMAKE_CURRENT_SOURCE_DIR}/test_cpu_isa_include_boundary.py")
