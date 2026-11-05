@@ -1,5 +1,33 @@
 # Private Mac relay deployment qualification handoff
 
+> **Latest candidate revision — review5785265965:** private Head
+> `2c8212a07459f7e737abd57095a97bb76be0a5a2`, tree `b6345da2e97113d4c80d5604225246f6d5ff35ee`.
+> Manifest `162de97d30fc08c1663150e0b32acc5809cbe7de52f07ee8a9d3d4d4f236bc88` binds 66 files.
+> [Current source-bound receipt](validation/private-candidate-review2-20261105.json).
+> CTest **3/3**, **98 integrated tests**, **36/36 designated mutation kills**
+> and **30/30 lock stress scenarios** PASS. The older receipt below is historical.
+>
+> Collector identity now comes from a protected lifecycle reservation and its own
+> Actions job/run reads. The durable job runner ID/name binds the reserved VM;
+> it does not require a completed ephemeral runner to remain registered. Caller
+> identity mismatch, VM swap, stale/revoked records, authority restart and receipt
+> substitution fail closed. A protected receipt digest is checked before reporting.
+> Collector restart re-reads records; authority restart invalidates old receipts.
+>
+> Cleanup attempts deregistration, guest/process termination and VM deletion
+> independently. Partial failure retains durable recovery attention, pauses owner
+> admission without hosted fallback and preserves the primary execution exception.
+> These are inert-helper fault-injection results, not actual native cleanup.
+>
+> **HOLD remains.** Same-UID test processes do not qualify distinct-UID
+> writer/collector/key/socket/ledger ACLs. Native Tart/JIT and recovery, live
+> controller polling/pending/invalidation, deployed restart persistence and ledger
+> retention/capacity, and real Reporter/Actions advisory remain NOT RUN.
+> Installed source/config, public runtime/workflows, required Privacy and rules
+> are unchanged. No installation, activation, merge or paid CI was performed.
+
+## Previous candidate revision (historical)
+
 > **Private implementation follow-up:** review6656448538 is now addressed by a
 > separate disabled, uninstalled private Draft candidate. Private source
 > `a961b799b8105bffec8ec7f6d8fd0dc56c30a776`, tree
