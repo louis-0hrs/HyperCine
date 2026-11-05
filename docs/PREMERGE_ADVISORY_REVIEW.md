@@ -4,6 +4,15 @@
 protection mutation, merge or paid hosted-CI restart is authorized by this file.**
 The reporter context is not to become required during this trial.
 
+## Cost-policy revision
+
+The historical advisory preparation below does not qualify the newly added
+compute-policy package. Its disabled source, manual recovery and persistent
+owner-controlled pause are described in [the runbook](FAIL_CLOSED_CI_RUNBOOK.md).
+The [revised integration window](INTEGRATION_PRIVACY_WINDOW.md) supersedes the
+old automatic-restoration plan and its unpublished empty candidate. New source
+requires independent exact-head review before any live qualification.
+
 ## Review candidate
 
 The portable controller is submitted in a separate stacked Draft PR against

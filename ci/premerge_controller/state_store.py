@@ -97,8 +97,14 @@ def _validate_ledger(ledger):
 
 
 class StateStore:
-    def __init__(self, fd):
+    def __init__(self, fd, validator=_validate_ledger, ledger=LEDGER, lock_name=LOCK, initial_factory=dict):
+        if (ledger, lock_name) not in {(LEDGER, LOCK), ('compute-policy.json', 'compute-policy.lock')}:
+            raise ValueError('Invalid state filenames')
         self.fd = fd
+        self.validator = validator
+        self.initial_factory = initial_factory
+        self.ledger = ledger
+        self.lock_name = lock_name
 
     def _check(self, name):
         try:
@@ -110,12 +116,12 @@ class StateStore:
 
     def _check_all(self):
         _private_directory(os.fstat(self.fd))
-        self._check(LEDGER)
-        self._check(LOCK)
+        self._check(self.ledger)
+        self._check(self.lock_name)
         # Never use the old predictable name, and refuse any leftover legacy
         # entry rather than interpreting it as recoverable approval data.
         try:
-            os.stat(LEDGER + '.tmp', dir_fd=self.fd, follow_symlinks=False)
+            os.stat(self.ledger + '.tmp', dir_fd=self.fd, follow_symlinks=False)
         except FileNotFoundError:
             return
         raise RuntimeError('Unexpected legacy approval temporary entry')
@@ -123,9 +129,9 @@ class StateStore:
     def load(self):
         self._check_all()
         try:
-            fd = os.open(LEDGER, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=self.fd)
+            fd = os.open(self.ledger, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=self.fd)
         except FileNotFoundError:
-            return {}
+            return self.validator(self.initial_factory())
         try:
             _regular_file(os.fstat(fd))
             with os.fdopen(fd, 'r') as stream:
@@ -136,10 +142,10 @@ class StateStore:
         finally:
             if fd is not None:
                 os.close(fd)
-        return _validate_ledger(value)
+        return self.validator(value)
 
     def save(self, value):
-        _validate_ledger(value)
+        self.validator(value)
         self._check_all()
         name = '.premerge-' + uuid.uuid4().hex + '.tmp'
         fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=self.fd)
@@ -152,7 +158,7 @@ class StateStore:
                 stream.flush()
                 os.fsync(stream.fileno())
             self._check_all()
-            os.replace(name, LEDGER, src_dir_fd=self.fd, dst_dir_fd=self.fd)
+            os.replace(name, self.ledger, src_dir_fd=self.fd, dst_dir_fd=self.fd)
             os.fsync(self.fd)
         finally:
             if fd is not None:
@@ -164,18 +170,18 @@ class StateStore:
 
 
 @contextlib.contextmanager
-def locked_state(path, create=False):
+def locked_state(path, create=False, *, validator=_validate_ledger, ledger=LEDGER, lock_name=LOCK, initial_factory=dict):
     """Validate storage before reading approvals or making privileged API calls."""
     fd = _open_directory(path, create)
     lock_fd = None
     try:
-        store = StateStore(fd)
+        store = StateStore(fd, validator, ledger, lock_name, initial_factory)
         store._check_all()
-        lock_fd = os.open(LOCK, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600, dir_fd=fd)
+        lock_fd = os.open(store.lock_name, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600, dir_fd=fd)
         _regular_file(os.fstat(lock_fd))
         fcntl.flock(lock_fd, fcntl.LOCK_EX)
         store._check_all()
-        current = os.stat(LOCK, dir_fd=fd, follow_symlinks=False)
+        current = os.stat(store.lock_name, dir_fd=fd, follow_symlinks=False)
         opened = os.fstat(lock_fd)
         if (current.st_dev, current.st_ino) != (opened.st_dev, opened.st_ino):
             raise RuntimeError('Approval lock changed during acquisition')

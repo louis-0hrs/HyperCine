@@ -44,7 +44,9 @@ cmake -S ci/premerge_controller -B build/premerge-controller
 ctest --test-dir build/premerge-controller -C Release --output-on-failure
 ```
 
-CTest runs the complete portable package suite and all controlled mutations.
+CTest runs the complete portable package suite and all controlled mutations,
+plus the separate cost-policy unit/failure and mutation suites. See
+[compute policy](../compute_policy/README.md). No production policy is installed.
 The mutation runner uses isolated temporary copies, verifies a passing baseline,
 then removes one security property per copy. A kill requires failure of the
 specifically designated regression test; syntax/import errors and unrelated

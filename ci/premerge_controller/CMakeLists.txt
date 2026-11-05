@@ -13,3 +13,13 @@ add_test(NAME premerge-controller-mutations
 set_tests_properties(premerge-controller-unit premerge-controller-mutations PROPERTIES
   WORKING_DIRECTORY "${REPOSITORY_ROOT}" TIMEOUT 300
   ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1")
+
+# Public cost-policy unit/failure/mutation suites, independent of real GitHub.
+add_test(NAME compute-policy-unit
+  COMMAND "${Python3_EXECUTABLE}" -m unittest discover -s ci/compute_policy/tests -v)
+add_test(NAME compute-policy-mutations
+  COMMAND "${Python3_EXECUTABLE}" -m ci.compute_policy.mutation_suite
+          --output "${CMAKE_BINARY_DIR}/compute-mutation-results.json")
+set_tests_properties(compute-policy-unit compute-policy-mutations PROPERTIES
+  WORKING_DIRECTORY "${REPOSITORY_ROOT}" TIMEOUT 300
+  ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1")
