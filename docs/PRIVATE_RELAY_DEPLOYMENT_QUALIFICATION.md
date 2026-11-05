@@ -1,5 +1,32 @@
 # Private Mac relay deployment qualification handoff
 
+> **Private implementation follow-up:** review6656448538 is now addressed by a
+> separate disabled, uninstalled private Draft candidate. Private source
+> `a961b799b8105bffec8ec7f6d8fd0dc56c30a776`, tree
+> `f2aca6d6b44621ec7bf204a0989746a654918234`, ref
+> `review/private-mac-integration-20261105`; private repository identity and host
+> code are intentionally omitted here. [Redacted source-bound receipt](validation/private-candidate-20261105.json).
+> The historical installed audit below remains accurate: those installed bytes
+> were not changed. Candidate tests must not be used to relabel installed failures.
+>
+> Candidate CTest **3/3**, **64 integrated tests**, **24 designated mutation kills**,
+> **30 lock-order stress scenarios** PASS. The same nine forbidden payloads now
+> reject at the candidate worker entrypoint with zero queue/VM/registration/check
+> port calls; three valid Mac lanes pass a simulated lifecycle. Signed capability
+> binds candidate/nonce/run/job/attempt/runner and rejects non-Mac-labeled results.
+> Real local signatures, a separate producer process/Unix socket and the actual
+> subprocess transport with a sleeping fake executable were exercised. See the
+> receipt for the measured under-ten-second timeout and all mutation identities.
+>
+> This is **isolated implementation evidence, not deployed or native acceptance**.
+> No actual GitHub test request, VM, registration or App check ran. Native Tart/JIT
+> behavior, distinct-UID collector launcher/ACLs and real host monitoring,
+> production controller poll/pending/invalidation wiring, durable capability
+> receipt recovery after restart, and real Reporter/Actions advisory remain
+> unqualified. Missing capability receipts fail closed. No production enablement,
+> workflow/rule mutation, eligible H or merge. Next: independent review of the
+> exact private candidate and its explicit remaining integration gates.
+
 **HOLD — installed deployment is not qualified.** This follows focused source
 review6655968595 (PASS) and owner boundary6656003569 on PR #353. The accepted
 runtime source is C=`693a87b14426ef6771d889bcf65fb730ed217b7d`,
