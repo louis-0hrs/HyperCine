@@ -1,115 +1,114 @@
-> Superseded activation assumption: owner6655103747 moves macOS only, preserving
-> hosted Windows/Linux/CUDA. The former main-only HYPERCINE_CI_LOCAL_MAC flag below
-> is historical. See INTEGRATION_PRIVACY_WINDOW.md and FAIL_CLOSED_CI_RUNBOOK.md
-> for this disabled candidate; no live variable/workflow/rule change authorized.
-
 # Mac CI through a private disposable-runner relay
 
-The public HyperCine repository must never have a repository-scoped self-hosted
-runner attached. Event guards in a reviewed workflow cannot prevent another
-workflow from requesting an online public runner. Fork exclusion alone, and even
-main-only routing expressions, do not enforce that repository-wide boundary.
+This is the **disabled candidate policy**, not a statement that production has
+been installed or activated. The owner Mac-only scope correction supersedes the
+former main-push-only variable design. See [deployment qualification](PRIVATE_RELAY_DEPLOYMENT_QUALIFICATION.md),
+[owner pause/resume](FAIL_CLOSED_CI_RUNBOOK.md), and the separate
+[temporary privacy window](INTEGRATION_PRIVACY_WINDOW.md).
 
 ## Scope and routing
 
-`HYPERCINE_CI_LOCAL_MAC=1` affects only **pushes to protected `main`**. It removes
-the two hosted Mac Standalone rows and the Mac quality-state row from those
-runs. A separately enabled host controller sends the same exact public source
-SHA to a private relay repository. The controller retains intermediate main
-pushes while the VM is busy; activation does not backfill old hosted history.
-That relay uses
-`[self-hosted, macOS, ARM64, hyperci-macos15-arm64]` on an unprivileged disposable
-macOS VM, one job per VM. No runner is registered on public HyperCine.
+Only these three macOS lanes may enter the private relay:
 
-The old `HYPERCINE_CI_SELF_HOSTED` variable has no routing effect. Windows,
-Linux and CUDA keep their hosted labels and test commands. Publication privacy,
-Windows privacy hooks, Python compatibility and the routing gate remain hosted.
-All PRs (including same-repo PRs), feature/tag pushes and manual dispatches retain
-their hosted Mac behavior. With the new variable unset, all five Standalone
-matrix rows and all three quality-state rows retain their existing hosted labels.
+| Lane | Coverage |
+| --- | --- |
+| `standalone-release` | Full SDK-free Standalone CTest, architecture and required FFmpeg external decode gate |
+| `standalone-sanitizers` | Same suite with ASan/UBSan and existing Apple leak-sanitizer exclusion |
+| `quality-state` | Full portable quality-state CTest |
 
-Both hosted Mac and private relay jobs invoke `ci/run_macos_lane.py`:
+The private execution capability is **Darwin/arm64**. Windows, Linux CPU and
+sanitizers, CUDA, privacy/security, compatibility and generic build jobs must
+never enter this relay. Their existing GitHub-hosted labels, triggers and recipes
+remain intact, independently of Mac availability. No repository-scoped
+self-hosted runner may be attached to public HyperCine.
 
-| Lane | Result context | Coverage |
-| --- | --- | --- |
-| `standalone-release` | `Standalone full decode (macOS arm64 Release)` | Full SDK-free Standalone CTest, architecture and required FFmpeg external decode gate |
-| `standalone-sanitizers` | `Standalone full decode (macOS arm64 ASan UBSan)` | Same suite with ASan/UBSan, existing Apple leak-sanitizer exclusion |
-| `quality-state` | `Quality state (macOS arm64)` | Full portable quality-state CTest |
+In the candidate workflow definitions, automatic main/feature pushes, same-repo
+and fork PRs, and ordinary manual dispatches omit all three hosted Mac rows.
+Other event/path/branch filters still apply; this does not introduce new triggers.
+Missing or legacy `HYPERCINE_CI_LOCAL_MAC`/`HYPERCINE_CI_SELF_HOSTED` variables
+cannot turn hosted Mac rows back on. Deleting a variable is **not rollback**.
+An omitted Mac row is **NOT RUN**, never a successful Mac result.
 
-The recipe retains all build flags, test inventories, decode requirements and
-sanitizer fatal-error settings. Build parallelism is two to fit the VM budget.
-It does not mount private reference corpora or qualify CUDA, original SDK,
-production Metal algorithms, or release quality. Virtual Metal availability is
-an infrastructure property, not evidence for an unexecuted GPU algorithm.
+Public events do not authorize private execution. The separately approved
+candidate must pass exact Head/Base/tree/test-merge and private workflow/actor/
+nonce/run/attempt checks before local admission. A fork or manual request is not
+an automatic private queue submission. All three approved Mac lanes must then
+actually succeed. Only Reporter App5612385 may report the bound aggregate
+`HyperCI / Mac relay`; mandatory `Publication privacy (all new commits)` remains
+owned by Actions15368. Reporter is still optional until separately approved rules
+and cutover qualification; this document does not make it required.
 
-## Enforcement outside public workflow code
+## Fail-closed operation and explicit fallback
 
-The controller has two independent opt-ins: a local configuration and the public
-Mac variable. It verifies protected default branch `main`, its required PR rule
-and the mandatory Actions-owned publication privacy check, then resolves its full
-40-character SHA, and dispatches only that SHA automatically. Qualification of
-a Draft requires an explicitly pinned local SHA; arbitrary PR/manual refs are
-never automatically accepted.
+A qualified deployment must enforce the immutable three-lane/capability allowlist
+before queue submission **and before VM provisioning/runner registration**, as
+well as in the pinned private workflow. Unknown lanes, workflows, OS/architecture
+or extra labels are denied. The installed legacy worker has not passed this
+new gate; see the qualification report before using this as an operating runbook.
 
-The private relay definition is pinned to an operator-reviewed commit. Its
-visibility and default-branch commit are rechecked before dispatch and result
-acceptance. The private queue accepts only its pinned workflow, trusted actor,
-and manual-dispatch event. Untrusted users cannot enqueue jobs there.
+Mac/API/relay health loss latches local pause. Healthy return never resumes
+admission automatically: a fresh owner decision and current health/session proof
+are required. Normal runtime cannot disable or enable GitHub workflow families.
+Windows/Linux/CUDA scheduling continues. There is no automatic paid Mac fallback.
 
-The relay validates the SHA and request nonce, checks guest identity and macOS
-protections, and fetches the public source by SHA without Git credentials.
-No host OAuth token, privileged host mount, clipboard, SSH agent or private
-network access enters the VM. Host-side network rules enforce isolation.
-Each job gets a fresh cloned disk; the runner registration and VM are removed
-afterward, including failure paths. No cross-job build workspace is retained.
+The candidate retains original hosted Mac recipes only for an explicit
+`workflow_dispatch` request with all four guards: `mac_hosted_fallback=true`,
+original owner actor ID248477380, triggering actor `louis-0hrs`, and
+`mac_candidate_sha == github.sha`. The selected ref must contain these guarded
+workflow definitions. An ordinary manual request does not add Mac jobs. Owner
+hosted mode alone does not dispatch anything. Non-Mac jobs remain in this manual
+run too; its budget needs separate approval.
 
-The controller retains a private durable dispatch ledger with source SHA,
-request nonce, relay run and per-lane conclusions. It accepts only the pinned
-relay definition and matching nonce/actor. It posts the contexts in the table
-on the exact public source commit. Missing, cancelled, skipped, timed-out or
-failed jobs cannot become success. A runner process exit code is not a test
-result. Public status descriptions contain only a short result; raw logs,
-resource samples and private run details remain private/local.
+A hosted fallback result does **not** automatically satisfy the private Reporter
+aggregate. Its source-bound result adapter remains unqualified. Initial local-only
+cutover may leave that path unused; absent qualified Mac evidence stays pending
+or failing. Never copy Actions success or create dummy/skipped Mac jobs to satisfy
+the App gate.
 
-## Validation
+## Isolation and result boundaries
 
-Run in an isolated review VM from the exact candidate checkout:
+Both hosted Mac and private relay recipes invoke `ci/run_macos_lane.py` with the
+same flags, tests and fatal sanitizer settings. Build parallelism is two. Each
+private lane requires a fresh unprivileged disposable VM and ephemeral private
+runner, with cleanup on failures. Host credentials, privileged mounts, clipboard,
+SSH agent and private network access must not enter the VM.
+
+The private workflow is pinned and rechecked. Its fixed matrix and Darwin/arm64
+guest checks are necessary but do not replace host-side pre-provisioning checks.
+Missing, duplicated, cancelled, skipped, neutral or failed lane evidence cannot
+become aggregate success. A runner process exit is not a test result. Private
+logs, queue identities, machine paths and usage details remain private.
+
+These tests do not qualify CUDA, original SDK, production Metal algorithms or
+release quality. Virtual Metal availability is not evidence for an unexecuted
+GPU algorithm.
+
+## Validation and controlled cutover
+
+Use the exact candidate and the configured test interpreter with PyYAML:
 
 ```sh
+ctest --test-dir build/premerge-controller --output-on-failure
 python3 ci/workflow_event_matrix.py
 python3 -m unittest ci.test_workflow_event_matrix ci.test_runner_capability
-python3 ci/workflow_event_matrix.py --list
-python3 ci/workflow_event_matrix.py --list --local-mac
-python3 ci/run_macos_lane.py --lane standalone-release
-# Use a fresh workspace for each following lane.
-python3 ci/run_macos_lane.py --lane standalone-sanitizers
-python3 ci/run_macos_lane.py --lane quality-state
 ```
 
-The verifier simulates same-repo/fork PRs, feature/main/tag pushes and manual
-main/feature dispatches. R13 forbids public self-hosted routing even on main;
-R14 verifies that activation delegates exactly the Mac main-push rows. Mutation
-controls must fail the corresponding rule. R1/R2 preserve mandatory hosted
-`Publication privacy (all new commits)`, and R8 retains all five PR rows.
+The source model covers main/feature push, same-repo/fork PR and manual events;
+R13 forbids public self-hosted routing and R14 checks automatic Mac omission plus
+owner/SHA-bound manual fallback. Existing non-Mac rows and full step hashes are
+compared with the frozen baseline. This is not actual hosted scheduling evidence.
+Native lane execution requires a separate approved isolated VM trial; do not
+start one merely to inspect the policy.
 
-## Activation and rollback
+Before cutover: independently accept the exact installed adapter/collector/package
+and negative tests, then obtain genuine Actions15368 privacy evidence on the
+owner-authorized integration candidate. Preserve existing required Privacy and
+separately qualify any additive App-pinned gate. Installation, rules, activation,
+workflow toggles and merge each remain outside this source-review handoff.
 
-1. Keep the public variable unset. Independently review this exact head and
-   retain protected-main rules and the mandatory privacy status unchanged.
-2. Qualify the pinned candidate through the private relay: all three full lanes
-   must complete on disposable VMs; verify source SHA, conclusions and cleanup.
-   A local script pass alone does not qualify the Actions relay lifecycle.
-3. Accept and merge the reviewed change only with the required publication
-   privacy gate satisfied. This Draft does not authorize a main merge.
-4. With private relay and host controller qualified and enabled, set only
-   `HYPERCINE_CI_LOCAL_MAC=1`. Verify source-bound Mac statuses on the next main
-   push and the unchanged Windows/Linux/CUDA/privacy checks. No public runner
-   registration or broad global pool switch is part of activation.
-5. Roll back by deleting the Mac variable: subsequent runs use hosted Macs.
-   Already-dispatched local work remains tracked and its real result reported.
-
-The private relay recipe and host controller live outside this public repo.
-No token or private relay credential is added as a public-repo secret. Private
-Actions logs and local usage history provide diagnosis without publishing
-machine paths or environment dumps. See the PR receipt for executed evidence;
-anything not executed remains NOT RUN.
+Operational rollback means **pause local Mac admission and retain visible missing
+Mac evidence**. Do not remove Privacy, reset variables to restart hosted Macs, or
+disable mixed workflows. Track already-submitted work honestly. A full source
+rollback or explicit paid hosted fallback requires its own reviewed owner action.
+The temporary four-workflow privacy qualification window is a separate audited
+operation with explicit owner restoration; it is not steady-state routing.
