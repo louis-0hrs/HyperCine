@@ -1,0 +1,296 @@
+{
+ "decoder_changed": false,
+ "diagnostic_only": true,
+ "issue": 160,
+ "new_hardware_runs": 0,
+ "rederivation": {
+  "arms": {
+   "AP": {
+    "admit_flag_pairs": [],
+    "calls": 120,
+    "calls_with_premature": 38,
+    "calls_with_wait": 0,
+    "corrupt": 1,
+    "corrupt_calls": [
+     37
+    ],
+    "decode_failures": 0,
+    "decode_ms_max": 243.409,
+    "decode_ms_median": 20.603,
+    "distinct_outputs": 2,
+    "entry_flag_pairs": [],
+    "gate_entries_per_call": [
+     9
+    ],
+    "gate_timeouts": 0,
+    "max_spins": 0,
+    "max_wait_ms": 0,
+    "modal_sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+    "nonzero_returncodes": 0,
+    "output_counts": {
+     "2fd83a36ab4bd126d593a2f39f5660b728b76fc3f5c9b33e49dca222149733fe": 1,
+     "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686": 119
+    },
+    "premature_entries": 42,
+    "publishes_band0_per_call": [
+     9,
+     10,
+     11,
+     12
+    ],
+    "real_waits": 0,
+    "timed_out": 0,
+    "unique_call_numbers": 120,
+    "valid_outputs": 120,
+    "waits_by_channel_index": {},
+    "waits_matched": 0
+   },
+   "B": {
+    "admit_flag_pairs": [
+     [
+      "0000000f",
+      "0000000f"
+     ]
+    ],
+    "calls": 120,
+    "calls_with_premature": 57,
+    "calls_with_wait": 57,
+    "corrupt": 0,
+    "corrupt_calls": [],
+    "decode_failures": 0,
+    "decode_ms_max": 2048.237,
+    "decode_ms_median": 20.929,
+    "distinct_outputs": 1,
+    "entry_flag_pairs": [
+     [
+      14,
+      14
+     ]
+    ],
+    "gate_entries_per_call": [
+     9
+    ],
+    "gate_timeouts": 0,
+    "max_spins": 56320,
+    "max_wait_ms": 3,
+    "modal_sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+    "nonzero_returncodes": 0,
+    "output_counts": {
+     "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686": 120
+    },
+    "premature_entries": 60,
+    "publishes_band0_per_call": [
+     9,
+     10,
+     11,
+     12
+    ],
+    "real_waits": 60,
+    "timed_out": 0,
+    "unique_call_numbers": 120,
+    "valid_outputs": 120,
+    "waits_by_channel_index": {
+     "ch0_idx1": 55,
+     "ch2_idx1": 5
+    },
+    "waits_matched": 60
+   },
+   "O": {
+    "admit_flag_pairs": [],
+    "calls": 120,
+    "calls_with_premature": 31,
+    "calls_with_wait": 0,
+    "corrupt": 4,
+    "corrupt_calls": [
+     94,
+     103,
+     108,
+     112
+    ],
+    "decode_failures": 0,
+    "decode_ms_max": 76.583,
+    "decode_ms_median": 19.935,
+    "distinct_outputs": 5,
+    "entry_flag_pairs": [],
+    "gate_entries_per_call": [
+     9
+    ],
+    "gate_timeouts": 0,
+    "max_spins": 0,
+    "max_wait_ms": 0,
+    "modal_sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+    "nonzero_returncodes": 0,
+    "output_counts": {
+     "1e7d83c4ea20198cf83f56a8c75e128d947eb87d27d55d97dd0785c55fe974fa": 1,
+     "36ad6c3d05b432cdfea9ad7b4330de08c5fd0b439eb735befddb8f7f73e3ee63": 1,
+     "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686": 116,
+     "9e9da216fd90be4c01516419cd03897b541bd8abb0dc8ee1b79e4bdc439f1c65": 1,
+     "f10077b40ea0cfa541a72d8b1cb9533162b0abcbd4c74a9a3c69a4218bdc3546": 1
+    },
+    "premature_entries": 31,
+    "publishes_band0_per_call": [
+     9,
+     10,
+     11,
+     12
+    ],
+    "real_waits": 0,
+    "timed_out": 0,
+    "unique_call_numbers": 120,
+    "valid_outputs": 120,
+    "waits_by_channel_index": {},
+    "waits_matched": 0
+   }
+  },
+  "condition_uniform": {
+   "cpu_max": [
+    4
+   ],
+   "format_code": [
+    1111970369
+   ],
+   "height": [
+    540
+   ],
+   "output_bytes": [
+    2073600
+   ],
+   "padding": [
+    0
+   ],
+   "pitch": [
+    3840
+   ],
+   "resolution": [
+    "HALF"
+   ],
+   "width": [
+    960
+   ]
+  },
+  "coverage_gaps": {
+   "entry_identity_retained_for_non_wait_entries": false,
+   "note": "The ledger keeps per-entry identity only for entries that actually waited. Non-wait gate entries are counted, not enumerated, so \"9/9 entries in every call\" is verified as a count and the ch0/ch1/ch2 x index visit claim is evidenced only by the 60 waits.",
+   "publish_rule_enforced_in_code": false,
+   "publish_rule_would_have_passed": false,
+   "publishes_band0_observed_per_call": {
+    "AP": [
+     9,
+     10,
+     11,
+     12
+    ],
+    "B": [
+     9,
+     10,
+     11,
+     12
+    ],
+    "O": [
+     9,
+     10,
+     11,
+     12
+    ]
+   },
+   "publishes_band0_registered_per_call": 6
+  },
+  "entries": 360,
+  "execution_order": [
+   "O",
+   "B",
+   "AP"
+  ],
+  "execution_order_as_registered": true,
+  "ledger_protocol": "rca160-windows-cross-host-band0-20261019-v1",
+  "ledger_reasons_as_submitted": [],
+  "ledger_verdict_as_submitted": "CROSS_HOST_CONFIRMATION_PASS",
+  "modal_identical_across_arms": true,
+  "modal_sha256": "38d1c1498d3a990a141b622b8758a49fd1b634aa8042ef402d219fc9ee68c686",
+  "necessary_not_sufficient": {
+   "AP": {
+    "corrupt": 1,
+    "corrupt_without_premature_entry": 0,
+    "premature_without_corruption": 37
+   },
+   "B": {
+    "corrupt": 0,
+    "corrupt_without_premature_entry": 0,
+    "premature_without_corruption": 57
+   },
+   "O": {
+    "corrupt": 4,
+    "corrupt_without_premature_entry": 0,
+    "premature_without_corruption": 27
+   }
+  },
+  "newline_reproducibility": {
+   "crlf": {
+    "matches_published_patched_decoder": true,
+    "patched_decoder_sha256": "ebf031082905e1b4cfb5818fe23df98b4c804675a06d2834cbfd62a3ca363f09"
+   },
+   "lf": {
+    "matches_published_patched_decoder": false,
+    "patched_decoder_sha256": "cdef2e9a29d2ebf9e3874c23397da51756d8f0587e84d2eee3514dd7dd3cf205"
+   },
+   "note": "apply_rca160_gate.py rewrites with Path.write_text(), which uses os.linesep. On Windows that preserves the CRLF of the frozen tree and reproduces the published hash; on POSIX the same patch yields the LF variant. The decoded behaviour is identical; only the file hash is newline-dependent, so a portable claim should compare content, not this hash.",
+   "pristine_line_endings": "crlf",
+   "published_patched_decoder_sha256": "ebf031082905e1b4cfb5818fe23df98b4c804675a06d2834cbfd62a3ca363f09"
+  },
+  "reasons_rederived": [],
+  "sensitivity": {
+   "ap_vs_b_fisher_p": 1.0,
+   "note": "0/120 is expected with probability ~0.17-0.18 at the observed gate-off rate, so the pass rests on the registered direction and coverage, not on a rate effect size. Do not read 4 vs 0 as a significant rate reduction.",
+   "o_vs_b_fisher_p": 0.1219,
+   "observed_rate_gate_off": 0.02083,
+   "pooled_gate_off_vs_b_fisher_p": 0.174,
+   "probability_zero_corrupt_in_b_at_pooled_rate": 0.0799
+  },
+  "source_checks": {
+   "gate_applier": {
+    "match": true,
+    "registered": "712fa0a81a939eb33e2a39ac2d29b38f79e7f47b123a8bbf2d1df0b7526b9220",
+    "sha256": "712fa0a81a939eb33e2a39ac2d29b38f79e7f47b123a8bbf2d1df0b7526b9220"
+   },
+   "probe_header": {
+    "match": true,
+    "registered": "88031889d7e35d9dc355c492ab311a6d64bd44237628514c4db5ea85a23157c5",
+    "sha256": "88031889d7e35d9dc355c492ab311a6d64bd44237628514c4db5ea85a23157c5"
+   },
+   "protocol": {
+    "match": true,
+    "registered": "c6a52b610e0c55a2b8b10d0984df840913ac68b85ce3ae7fd7fbca15fdfb4c25",
+    "sha256": "c6a52b610e0c55a2b8b10d0984df840913ac68b85ce3ae7fd7fbca15fdfb4c25"
+   }
+  },
+  "tool": "verify_rca160_cross_host",
+  "verdict_matches_submission": true,
+  "verdict_rederived": "CROSS_HOST_CONFIRMATION_PASS"
+ },
+ "review_lane": "Linux CPU (A2) independent review",
+ "reviewed_artifacts": {
+  "doc_sha256": "3a248f0f90abe941c151b9db7215817e5c9a24f38642a8e4ea94db76394b35e2",
+  "gate_applier_sha256": "712fa0a81a939eb33e2a39ac2d29b38f79e7f47b123a8bbf2d1df0b7526b9220",
+  "ledger_sha256": "f2af5c026e8b1a96f193e7cea5d11f7c31a9b89048ea072bcb86ae4bbb70dbe9",
+  "probe_header_sha256": "88031889d7e35d9dc355c492ab311a6d64bd44237628514c4db5ea85a23157c5",
+  "protocol_registered_sha256": "c6a52b610e0c55a2b8b10d0984df840913ac68b85ce3ae7fd7fbca15fdfb4c25",
+  "protocol_sha256": "c6a52b610e0c55a2b8b10d0984df840913ac68b85ce3ae7fd7fbca15fdfb4c25"
+ },
+ "reviewed_head": "a6a22ad1f1e46eab128f47d28a5ee25061f16f06",
+ "reviewed_pr": 192,
+ "schema": "rca160_windows_cross_host_review_v1",
+ "upstream_changed": false,
+ "verifier": {
+  "ctest_name": "rca160_cross_host_verifier_selftest",
+  "self_test_cases": [
+   "registered_pass",
+   "no_induced_positive",
+   "gate_arm_still_corrupt",
+   "gate_never_waited",
+   "modal_agrees"
+  ],
+  "self_test_result": "PASS",
+  "sha256": "ce65c699cdb5a26e69ce0b4d54cfe9b09e80d385af07127d01f7053ae7bf0ae6",
+  "tool": "tools/verify_rca160_cross_host.py"
+ }
+}
