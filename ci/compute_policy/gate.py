@@ -12,7 +12,7 @@ def _pause_if_current(state_path, generation):
         # A later owner's decision must not be overwritten by an old worker.
         if generation is not None and generation == state['generation']:
             state['generation'] += 1;state['mode'] = p.PAUSED
-            state['attention'] = True;state['verified_at'] = None
+            state['attention'] = True;state['verified_at'] = None;state['fallback_sha'] = None
             p.event(state, 'private_relay_failed', automatic_hosted_fallback=False)
             store.save(state)
 

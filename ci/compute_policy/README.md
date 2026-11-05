@@ -1,179 +1,105 @@
-# Cost fail-closed CI policy — disabled review package
+# Mac-only admission — disabled review package
 
-This code is not installed, scheduled or activated by the repository. The example
-configuration is OFF. No import, unit test or mutation contacts GitHub. The four
-public compute workflows currently retain their existing production settings until
-a separately authorized deployment. This package does not pretend they are already
-paused.
+Owner clarification6655103747 supersedes the permanent whole-workflow pause policy.
+**Only macOS migrates.** Windows, Linux CPU/sanitizers and CUDA retain their hosted
+triggers, rows, steps and recipes. The GitHub adapter is GET-only, including owner
+mode changes. No watch/gate/CLI path can enable/disable a workflow or dispatch a job.
 
-## Modes and invariants
-
-| Mode | Public CPU/CUDA/Standalone/Quality workflows | Private Mac admission | Hosted admission |
+| Local mode | Hosted non-Mac | Private Mac | Hosted Mac |
 | --- | --- | --- | --- |
-| `normal` | all paused | fresh trusted owner-bound health session only | denied |
-| `paused/host-unavailable` | desired OFF; actual readback shown separately | denied | denied |
-| `recovering` | all paused | denied | denied |
-| `owner-authorized-hosted` | only explicitly selected, owner-approved workflows | denied | explicit selected scope only |
+| normal | existing jobs continue | fresh owner-bound health/session | never automatic |
+| paused/host-unavailable | existing jobs continue | denied | never automatic |
+| recovering | existing jobs continue | denied | never automatic |
+| owner-authorized-hosted | existing jobs continue | denied | exact candidate grant plus separate explicit owner manual request |
 
-`normal` means local Mac operation, never hosted fallback. The combined public
-workflows contain hosted rows, so they stay OFF even while the Mac is healthy.
-The private relay is a separate queue and uses `gate.admit_local` before private dispatch.
-This seam must be installed in a trusted deployment, not imported from a candidate
-checkout. There is no dispatch/rerun/cancel/check-status API in this package.
-Enabling hosted workflows can allow future repository events to run them; the
-owner's explicit hosted command authorizes that ongoing mode until paused again.
+Automatic main/feature pushes, same-repo/fork PRs and ordinary manual requests
+exclude the three Mac matrix rows. Missing/legacy variables cannot enable paid
+Mac. The original two Standalone and one Quality Mac recipes remain available
+only through manual typed `mac_hosted_fallback=true`, actor ID248477380 AND
+triggering actor `louis-0hrs`, and `mac_candidate_sha` equal to the selected run's
+exact github.sha. Non-owner reruns, missing acknowledgment and stale refs deny
+Mac. Fallback adds Mac rows without removing non-Mac rows. No fallback is executed
+by this package; it changes local admission state only.
 
-A lost/expired health observation, changed health session or private relay error
-latches a pause. Healthy observations alone cannot resume it. No finally block,
-signal handler, timer or recovery path enables compute. Compensation only attempts
-to disable. Existing running/queued jobs are inventoried, not silently cancelled.
-A repository-wide workflow disable is non-atomic and does not cancel existing runs.
+## Reporting and required-check semantics
 
-## Modules and authority
+Absent matrix rows are **NOT RUN**, never green Mac validation. Their individual
+Actions check names will not appear automatically. GitHub can accept skipped jobs;
+do not add a dummy skipped/success job as a substitute Mac gate. The separate
+`HyperCI / Mac relay` aggregate is Reporter App5612385 only, using the existing
+Head/Base/tree/test-merge, nonce/workflow/actor/run/attempt and three successful
+lane proofs in `premerge_controller`. Its protocol/recipes remain unchanged.
+Public Actions15368 statuses cannot impersonate that aggregate.
 
-- `policy.py`: owner plans, four modes, generation fencing, immutable snapshots,
-  hash-chained audit, quiet-window preflight, durable intents, independent readback,
-  OFF-only compensation, expiry and admission.
-- `api.py`: GitHub.com-only CLI boundary. Writes can touch only the four reviewed
-  compute workflow IDs. Watcher transport cannot enable even if asked. Privacy,
-  rules, statuses, runners and dispatch endpoints are unwritable.
-- `admin.py`: manual inspect/plan/execute/reconcile commands and one watchdog tick.
-  No service or timer is installed. Mutations require both enabled local config
-  and explicit `--execute`. Hosted resume also requires `--allow-hosted` and an
-  explicit workflow selection in the owner plan.
-- `gate.py`: complete fail-closed local-worker seam. Disabled/uncertain policy
-  denies admission rather than passing through. It never substitutes hosted work.
-- Existing hardened `premerge_controller.state_store` provides canonical owned
-  0700 directories, owned regular single-link 0600 files, no-follow descriptor
-  access, locking, exclusive temporary files and durable atomic replacement.
-  Separate fixed journal/lock names prevent cross-controller file mixing.
+Reporter is still optional/disabled and no branch rule changes here. Before
+production cutover, independently approve/qualify the additive App-pinned aggregate
+while preserving required Publication privacy Actions15368. Until that occurs
+this remains a Draft source candidate, not production. A new candidate with no
+qualified Mac result must remain pending/failing, never success. Fork code is not
+automatically sent to a private VM; existing owner/repository approval guards apply.
 
-V1 verifies the authenticated public owner's ID/login, repository admin permission
-and actual `X-OAuth-Scopes` grant (`repo` and `workflow`) through the existing CLI.
-Accepted endpoint scopes are not a credential grant. Opaque fine-grained/App grants
-are unsupported and fail closed until an independently reviewed permission adapter
-exists. No credentials are bundled or written to journal/logs. No new token or wider
-grant is requested by installation of this source.
+A manual hosted Mac result is a real Actions result, not automatically an App
+aggregate success. The private-run verifier must not silently accept a different
+public workflow as proof. If fallback must satisfy a future required aggregate,
+separately review a source-bound hosted-result verifier/Reporter adapter first;
+until qualified, the aggregate remains pending/blocking. No copied green check.
 
-All owner decisions serialize through one canonical state directory on one trusted
-control plane. Every command uses a current generation, exact immutable plan ID and
-fresh live inventory. Plans expire after five minutes. Snapshots are never silently
-reused to enable workflows after a newer decision. Originally disabled workflows
-stay disabled on restore; an explicitly selected `--new-hosted-grant` is a new owner
-authorization, not restoration. A fresh pause reconciliation rotates the baseline,
-retaining the old snapshot in audit history. Old worker failures cannot overwrite a
-newer owner's generation.
+## Owner decisions, storage and recovery
 
-See the admission ordering contract below; a watch snapshot alone is never a
-queue authorization.
+Schema2 records Mac mode, immutable expiring plans, generation/audit, health epoch,
+exact fallback SHA and read-only workflow/security snapshots. Schema1 global-policy
+journals reject; no silent import, rollback or stale approval reuse. Keep old audit
+records separately and initialize fresh owner-inspected state. All hosted workflow
+families must stay active; external disable/drift latches Mac attention and never
+triggers automatic remote repair. Unrelated hosted jobs do not block Mac pause.
 
-The local UID/root and the reviewed installed package are trusted. Hash chains are
-corruption detection, not signatures against a compromised same-UID writer. Do not
-roll back the entire journal over a live one. If journal freshness is lost, start
-in uninitialized paused/attention mode with a fresh independent inventory; old plan
-IDs cannot be replayed. GitHub workflow state changes have no compare-and-swap
-transaction across four workflows. Do not claim atomic protection against direct UI
-changes between requests. Use the coordinated quiet window and route all owner
-changes through the control plane; detected external drift stops the operation.
+Owner/admin identity is authenticated. No workflow-write grant is needed/requested
+for this GET-only runtime. Health/API/relay loss or epoch change latches Mac pause;
+healthy return never resumes. Plans expire after five minutes, generations fence
+old commands/errors. Trusted health must be fresh within60 seconds (five seconds
+future skew max), with32-hex availability epoch rotated on outage/relay or collector
+restart. Authenticated independent collector, trusted installed package and actual
+private queue adapter are separate deployment prerequisites. Same-UID/root trusted.
 
 ## Owner pause versus private queue submission
 
-`gate.admit_local` treats the initial watch result only as an expected generation.
-It reacquires the **same canonical OS lock** used by owner plan/execute/reconcile,
-loads fresh journal state, reads live inventory/security and checks fresh health,
-session, verification age and that expected generation. It holds this lock through
-one synchronous **queue submission**, then releases it before any VM/job execution.
+`gate.admit_local` uses watch only as a generation fence. It reloads current state,
+live inventory/security and health/session under the canonical owner-transition
+OS lock, holding it through bounded queue acknowledgment only. Owner pause first
+means zero submissions; submission lock first permits that in-flight request before
+the pause completes. Pre-existing accepted work may execute later. No lock through
+VM/job lifetime. Barrier tests exercise both orders against actual flock.
 
-The lock defines the order. If an owner's pause/other transition commits first,
-the stale worker cannot submit. If final admission/submission owns the lock first,
-the concurrent pause waits for that bounded request to return/fail, then commits;
-that already submitted work may start or finish after the pause. A pause does not
-cancel pre-existing/in-flight queue submissions or running jobs. A pause request
-is not complete merely because its caller has started waiting for the lock.
-No new submission may linearize after a completed pause until a new owner resume.
+Trusted `dispatch_private(*, timeout)` must enforce the supplied ten-second network
+deadline synchronously, return on queue acknowledgment, and never wait for a VM,
+detach/retry, reenter owner commands or use another destination. A keyword cannot
+sandbox trusted Python code; review the installed adapter before activation.
+Uncertain acknowledgment pauses without retry; reconcile nonce/run before another
+request. An old worker error cannot overwrite a newer owner generation.
 
-The injected trusted adapter has a revised interface:
-`dispatch_private(*, timeout)`; the gate supplies ten seconds. The adapter **must**
-enforce that network deadline synchronously, submit only the queue request and
-return on acknowledgment. It must not wait for VM allocation/job completion,
-spawn a background request, retry an uncertain request, reenter owner/policy
-commands, or try another destination. A zero-argument legacy callback is rejected.
-This package supplies the gate, not a production queue transport: enforce/review
-that contract in the installed private adapter before deployment. Passing a timeout
-keyword is not a sandbox for arbitrary same-UID Python code. GitHub metadata reads
-also use the transport's bounded per-request timeout; stalled reads deny admission.
+## Temporary cost window is separate
 
-A timeout/error releases the lock and latches pause only if its generation is still
-current; a later owner decision is never overwritten. An uncertain remote queue
-acknowledgment may still represent already accepted work. Do not automatically
-retry it. The premerge controller's existing nonce/run reconciliation remains the
-job identity mechanism; this gate does not create an exactly-once queue protocol.
-
-Barrier tests prove owner-first => zero dispatch, submission-first => owner blocked
-on the actual flock until acknowledgment, and no lock retained for job lifetime.
-Designated mutations remove final state reload, final admission or OS serialization.
-
-## Mandatory privacy and security
-
-Privacy guard stays active, including its Ubuntu publication scan and Windows
-installed-hook tests. The source blob for its complete workflow is pinned; a
-changed definition requires review. Required PR/privacy rules, App15368 provenance
-and no-bypass applicable rulesets are checked before and after transitions. Unknown
-required contexts, missing readback or unverified write capability prevent start.
-If static routing is required, its workflow must also be active. No paused or unrun
-check is posted as successful; missing required checks block merges.
-
-The whole optional CUDA workflow includes the currently non-required inventory
-self-test. Pausing that workflow also leaves that advisory self-test **NOT RUN**;
-it is not called green. No workflow/job definition is removed here. If that or any
-other compute-contained check becomes mandatory, preflight refuses the unknown
-required context: split the mandatory job into an always-active security workflow
-and review the policy before enabling this operating mode. Do not silently classify
-a newly required security job as optional to make the pause succeed.
-
-## Independent health/control plane
-
-A watchdog on the failed Mac cannot pause remote CI. Deploy the serialized control
-plane/watchdog on an independent trusted host, with a reviewed authenticated health
-collector, before claiming live enforcement. No host location or credential is
-included here. Normal local mode already holds public hosted compute OFF, so a Mac
-outage cannot cause those workflows to become a fallback even if the observer fails.
-
-`host_status` is the owned 0600 local output of that trusted collector, not raw
-untrusted network JSON, a label or a PR comment. It contains:
-
-```json
-{"healthy": true, "observed_at": 0, "session_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
-```
-
-The timestamp is illustrative and deliberately stale. A valid observation must be
-within 60 seconds (at most five seconds future clock skew). The collector's 32-hex
-session identifies an availability epoch, changed on every observed outage, relay
-restart or collector restart. The owner binds that epoch during `normal` resume;
-newly healthy epochs still need another owner action. The collector must preserve
-that contract even if the control-plane process was temporarily stopped. A missing
-collector defaults to unhealthy. Admission additionally needs a current generation,
-fresh policy verification and independent live workflow/security facts.
-
-API loss can prevent a requested remote disable. The journal then records the
-unresolved write, desired pause and owner attention; inspection shows actual
-remaining active workflows. This is not falsely advertised as verified remote OFF.
-Already explicitly authorized hosted work may continue until GitHub can accept the
-owner's recovery request. No algorithm can make unavailable remote APIs atomic.
+A separately owner-authorized audited pause of four workflow families may reduce
+one qualification to privacy-only jobs. That is **temporary repo-wide cost control**,
+not Mac runtime. This adapter cannot perform it. Explicit owner restore/readback of
+previously active families is required before normal non-Mac CI resumes. Failure
+means visible attention/manual reconciliation, never automatic restore or false
+normal-state claims. See the [runbook](../../docs/FAIL_CLOSED_CI_RUNBOOK.md) and
+[integration window](../../docs/INTEGRATION_PRIVACY_WINDOW.md).
 
 ## Reproduction
 
-POSIX Python3.9+, CMake and OpenSSL, repository root:
+POSIX Python3.9+, PyYAML6.0.2, CMake and OpenSSL. TEST_PYTHON must contain PyYAML:
 
 ```sh
-cmake -S ci/premerge_controller -B build/premerge-controller
+cmake -S ci/premerge_controller -B build/premerge-controller -DPython3_EXECUTABLE="$TEST_PYTHON"
 ctest --test-dir build/premerge-controller -C Release --output-on-failure
+python3 -m unittest ci.test_workflow_event_matrix ci.test_runner_capability
 ```
 
-The four CTests cover both complete public packages and both designated mutation
-suites. Failure tests inject errors before/after each disable, during each manual
-resume, during compensation/readback, on signals and after process loss. All GitHub
-calls are mocked. Actual production workflow states remain untouched.
-
-See [manual operating/recovery runbook](../../docs/FAIL_CLOSED_CI_RUNBOOK.md) and
-[revised integration privacy window](../../docs/INTEGRATION_PRIVACY_WINDOW.md).
+CTest retains the complete premerge/protocol/storage suite and mutations, plus
+Mac state/CLI/transport/admission/event tests. Non-Mac rows and full job-step hashes
+compare with frozen parent4ceab03. GitHub is mocked; actual POSIX locks are exercised.
+Old assertions demanding all workflows OFF in normal mode are retired because they
+contradict the corrected scope, not counted as new passing tests. Historical receipts
+remain bound to their original source. No service, credentials or host paths included.

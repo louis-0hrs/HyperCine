@@ -1,6 +1,6 @@
 # Copyright (c) 2026 HyperCine Contributors.
 # Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
-"""Strict CLI boundary. V1 supports verified owner classic OAuth/PAT grants only."""
+"""Read-only GitHub boundary for Mac admission. No workflow state mutation."""
 import json
 import re
 import shutil
@@ -33,9 +33,8 @@ class GitHub:
         if method == 'GET':
             if endpoint not in fixed and not runs and not ruleset:
                 raise ValueError('Read outside reviewed policy boundary')
-        elif (method != 'PUT' or not self.armed or body is not None or not write
-              or int(write[1]) not in COMPUTE or (write[2] == 'enable' and not self.allow_enable)):
-            raise ValueError('Only explicit reviewed compute state changes are writable')
+        else:
+            raise ValueError('Mac runtime is read-only; no GitHub mutation allowed')
         try:
             r = subprocess.run([self.executable, 'api', '--hostname', 'github.com', '--include', '--method', method, endpoint],
                                capture_output=True, timeout=45)

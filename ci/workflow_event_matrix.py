@@ -428,6 +428,9 @@ class Event:
     run_id: str = "1000"
     label: str = ""
     vars: dict[str, str] = field(default_factory=dict)
+    actor_id: str = '248477380'
+    triggering_actor: str = 'louis-0hrs'
+    inputs: dict[str, Any] = field(default_factory=dict)
 
 
 def _paths_ok(trigger: dict[str, Any], event: Event) -> bool:
@@ -512,6 +515,8 @@ def build_ctx(workflow_name: str, event: Event) -> dict[str, Any]:
             "workflow": workflow_name,
             "run_id": event.run_id,
             "sha": "0" * 40,
+            "actor_id": event.actor_id,
+            "triggering_actor": event.triggering_actor,
             "repository": "louis-0hrs/HyperCine",
             "event": {
                 "pull_request": {
@@ -527,7 +532,7 @@ def build_ctx(workflow_name: str, event: Event) -> dict[str, Any]:
             },
         },
         "vars": dict(event.vars),
-        "inputs": {"checkout_ref": ""},
+        "inputs": {"checkout_ref": "", **event.inputs},
         "matrix": {},
         "env": {},
         "secrets": {},
@@ -803,17 +808,26 @@ def check_contract(docs: dict[str, dict[str, Any]]) -> list[Finding]:
             if _is_self_hosted(item.labels):
                 violation("R13", f"public repository requests {item.describe()}")
 
-    # R14: Mac-only activation on main removes exactly the three Mac rows;
-    # non-main events retain hosted Mac checks and all other platforms stay put.
+    # R14: no automatic paid Mac job, regardless of old activation variables.
+    # The only public Mac path is a fresh owner manual approval for exact SHA.
+    key = lambda i: (i.workflow, i.job_id, i.matrix_name, tuple(i.labels))
     for event in events:
-        baseline = plan(docs, replace(event, vars={}))
-        expected = [i for i in baseline if not (
-            event.name == "push" and event.ref == "refs/heads/main"
-            and i.labels == ["macos-15"])]
+        baseline = plan(docs, event)
         actual = enabled_plans[event.label]
-        key = lambda i: (i.workflow, i.job_id, i.matrix_name, tuple(i.labels))
-        if sorted(map(key, actual)) != sorted(map(key, expected)):
-            violation("R14", f"Mac-only relay routing differs for {event.label}")
+        if any(_hosted_label(i.labels) and _hosted_label(i.labels).startswith('macos') for i in actual):
+            violation('R14', f'Automatic hosted Mac fallback for {event.label}')
+        if sorted(map(key, actual)) != sorted(map(key, baseline)):
+            violation('R14', f'Legacy activation flag changes non-Mac jobs for {event.label}')
+    manual = Event('workflow_dispatch','refs/heads/main','main','branch',
+                   inputs={'mac_hosted_fallback':True,'mac_candidate_sha':'0'*40})
+    approved = plan(docs,manual)
+    mac = [i for i in approved if i.labels == ['macos-15']]
+    if len(mac) != 3:violation('R14','Explicit owner fallback must preserve exactly three Mac lanes')
+    for denied in [replace(manual,actor_id='99'),replace(manual,triggering_actor='other'),
+                   replace(manual,inputs={'mac_hosted_fallback':False,'mac_candidate_sha':'0'*40}),
+                   replace(manual,inputs={'mac_hosted_fallback':True,'mac_candidate_sha':'1'*40})]:
+        if any(i.labels == ['macos-15'] for i in plan(docs,denied)):
+            violation('R14','Unapproved actor/rerun/SHA starts hosted Mac')
 
     # R7: a docs-only PR must not start the five-job decode matrix.
     docs_only = plans["pr with docs only"]
@@ -822,8 +836,8 @@ def check_contract(docs: dict[str, dict[str, Any]]) -> list[Finding]:
 
     # R8: a source PR keeps all five Standalone lanes and their platform labels.
     src_pr = _by(plans["pr with source changes"], "ci-standalone.yml", "standalone")
-    if len(src_pr) != 5:
-        violation("R8", f"source PR schedules {len(src_pr)} Standalone rows, expected 5")
+    if len(src_pr) != 3:
+        violation("R8", f"source PR schedules {len(src_pr)} Standalone rows, expected 3")
     else:
         names = sorted(item.matrix_name for item in src_pr)
         expected = sorted(
@@ -831,8 +845,6 @@ def check_contract(docs: dict[str, dict[str, Any]]) -> list[Finding]:
                 "Linux x64 Release",
                 "Linux x64 ASan UBSan",
                 "Windows MSVC x64 Release",
-                "macOS arm64 Release",
-                "macOS arm64 ASan UBSan",
             ]
         )
         if names != expected:

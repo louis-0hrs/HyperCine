@@ -1,109 +1,83 @@
-# #352/#353 privacy-only qualification under persistent pause policy
+# Integration: Mac-only runtime versus temporary privacy window
 
-Supersedes the restore-on-exit assumption in the earlier plan/comment6645154714.
-Owner policy6645766280 requires persistent compute pause after host/relay failure
-and explicit authenticated owner resumption. This file authorizes no live action.
+Owner correction6655103747 supersedes the permanent four-workflow pause assumption
+in plan6654514979/review6654593720 and schema1. Older tree4ceab03 and fc6c39b candidate
+do not qualify this changed source. Actual new skipped Head/tree/manifest are in the
+PR handoff. No eligible non-skipped H is created; no CI/rule/workflow change or merge
+authorized here. #259/#46 and frozen upstream remain independent.
 
-## Candidate binding and current scope
+## Permanent routing
 
-This policy revision changes the #353 controller/security package. The old unpublished
-empty candidate `fc6c39b022af9db76c35afbef60d9fd9b924ba86` / old tree
-`cefd557952fbdef35e5a025992595f2f9f7f969b` is **superseded**, not an eligible candidate
-for this new code. No replacement non-skipped H is created by this revision.
-The PR body/follow-up records the actual new skipped source Head and source manifest.
-The original #352 source `61f8b095759bf178f46a6e2bd220c33a406df52a` and native inputs
-remain unchanged; previous real advisory results bind only to that original source.
+Only Standalone Release, Standalone ASan/UBSan and Quality Mac lanes migrate. Hosted
+Windows, Linux CPU/sanitizers and CUDA keep existing triggers/recipes. All automatic
+mixed matrices exclude Mac; absent legacy flags cannot cause paid fallback. Schema2
+Mac state has a GET-only adapter: no workflow disable/enable or paid dispatch.
 
-After independent review of the new exact source, separately authorize one combined
-integration branch/PR with that reviewed tree. Seed at its skipped reviewed tip;
-create a Draft with no CI. Only then prepare a deliberately authorized empty,
-non-skipped child H preserving the **new** reviewed tree. Recalculate complete
-file/blob/SHA256 equivalence and actual main Base B; do not reuse old approvals,
-checks, trees or tables. No private host/queue/key material belongs in that PR.
+Mac-hosted fallback requires explicit owner manual typed approval plus exact SHA,
+original actor ID and triggering-owner checks. It adds Mac rows, preserves non-Mac
+rows and produces real Actions results. Those do not automatically satisfy the
+separate App5612385 HyperCI / Mac relay aggregate. Before production cutover qualify
+its additive source-pinned requirement, the actual private adapter/health collector/
+trusted package, and any hosted-result Reporter adapter. No missing/skipped Mac row
+is success. Required Privacy15368 remains; no rules change here. This source stays
+Draft/disabled until those independent acceptance and activation steps are complete.
 
-## Narrow one-time window
+The event receipt compares before/after main push, same-repo PR, fork PR, manual and
+feature push for online/offline/owner-hosted modes. Automatic events have zero hosted
+Mac even in hosted-choice mode; an extra exact-source owner manual request is needed.
+Fork/private candidate approval, exact Head/Base/Reporter and dispatch-race guards
+remain. No source-migration or golden/native test scope is silently broadened.
 
-1. Use the independently installed reviewed control plane and an explicit owner
-   privacy-only decision. Read exact four workflow states, grants, active unrelated
-   runs, mandatory privacy and no-bypass protection. Coordinate a quiet window.
-   Unknown required checks or any failed permission/inventory read means no start.
-2. Capture a fresh generation-bound pause plan using the manual runbook. Execute
-   only after separate authorization. No workflow enable, dispatch or timer occurs.
-   The four optional build workflows are paused persistently; mandatory Privacy,
-   its Windows security tests and independent static routing remain active.
-3. Push only the separately approved empty H on the seeded branch. A known-empty
-   two-dot push runs the two Privacy jobs. The PR's full three-dot stack comparison
-   runs those two Privacy jobs and static routing: **five predicted small jobs**
-   (three Ubuntu/two Windows), no macOS/CUDA/codec build matrix. No skip directive
-   may be placed on H. These are counts, not minute/duration guarantees.
-4. Require actual completed/success for the two Privacy runs and routing. The push
-   scanner covers only the metadata tip; it is insufficient to qualify the stack.
-   The PR workflow must scan the whole introduced range detailed below.
-5. Read back all four **still-paused** states and unchanged required privacy. Keep
-   the paused journal/audit. Do not auto-restore original compute states at the end,
-   on error, on a signal, after timeout, after a host restart or when health recovers.
-   A partial disable/readback failure is visible uncertainty and owner attention;
-   an explicit fresh manual pause-reconcile is the recovery path.
-6. Return source-bound H/B/current test-merge S, actual check/run identities and
-   privacy evidence for independent acceptance. No merge or production activation.
-   If the owner later wants Mac or hosted compute, use a fresh authenticated resume
-   plan, not the historical snapshot or a previously saved enable command.
+## Temporary qualification proposal — separate owner authorization
 
-The persistent operating policy and this one-time qualification are distinct. No
-watchdog/service or live mode is installed by the source change. Cost pause itself
-must never disable a required privacy/security workflow. The currently non-required
-CUDA inventory self-test shares a paused optional workflow and remains NOT RUN;
-if it becomes required, preflight refuses until it is split/reviewed.
+After exact-source review, refresh B/A/C, active rules/no-bypass sources, required
+checks, workflow identity/state, narrow write capability and complete queued/running/
+waiting/pending/requested inventory. Coordinate a quiet window. Drift, unknown required
+check or incomplete permission/readback means NO START. The read-only Mac runtime
+is not a qualification-window mutator; a separately reviewed owner operation is needed.
 
-## Actual privacy workflow: checkout S and scan B..S
+Record immutable original states for CPU373401385, CUDA395280516, Standalone385851595,
+Quality386265774. Only after separate approval pause those four families, repo-wide,
+non-atomically; do not cancel existing work. Privacy386331718 (both publication and
+Windows hook jobs) and static routing remain active. Partial failure stays visible
+owner attention; no H push. Preserve required checks, never mark unrun security green.
 
-The workflow remains byte-for-byte unchanged. Its pinned blob is enforced by policy.
-It has `pull_request` and all-branch `push` triggers, no `workflow_dispatch`.
-The Ubuntu `publication-privacy` job runs `actions/checkout@v4` with `fetch-depth:0`.
-For a PR event, default checkout uses the virtual test-merge commit S, not a manual
-checkout of the old source branch. `PR_BASE_SHA` is the event's Base B. The script
-sets `GIT_NO_REPLACE_OBJECTS=1`, verifies B is a commit, then executes:
+Seed only the newly authorized integration branch/Draft at skipped reviewed C; verify
+zero runs. Only in the separately approved pause window create one empty non-skipped
+child H with the exact new C tree. Verify entire tree/modes/blobs, all introduced
+commits/identities and Base, actual hooks; no rewrite of original Draft branches.
 
-```sh
-python ci/privacy_guard.py --commits "$base..HEAD"
-```
+Current revised triggers predict empty feature push3 +PR11 (**14 qualification jobs**,
+zero automatic Mac). A separately authorized family pause reduces this to push2Privacy
++PR2Privacy/1routing = **5 jobs** (3Ubuntu/2Windows). Counts are estimates, not minutes.
+The temporarily suppressed non-Mac builds and CUDA inventory self-test are NOT RUN,
+never PASS. If that self-test becomes required, split/review it before such a window.
+This narrower one-time validation needs explicit owner acceptance.
 
-Thus the required **PR** qualification is **B..S**, including all original introduced
-commits, the new reviewed policy commits, H and S. An empty tip does not exempt the
-stack's earlier added text or commit envelopes. On push C..H only the tip is scanned;
-that push PASS alone is not the full-stack acceptance evidence.
+Normal Mac-only operation afterward requires explicit audited owner restore/readback
+of previously active families, so Windows/Linux/CUDA continue. No automatic restore on
+error/signal/timeout/healthy return. If deferred or failed, report an open temporary
+pause and keep deployment/merge blocked; do not call it steady-state Mac-only mode.
+The obsolete permanent-family-pause design is not an implementation shortcut.
 
-For the actual future run, record the checkout commit from checkout logs, event B,
-current PR H/Base/test-merge S, run event and Head, actual check `head_sha`, name,
-App15368/status/conclusion and the PR check rollup. GitHub may evaluate S rather
-than H; do not equate workflow `head_sha`, checkout SHA and evaluated check SHA
-without reading them. Verify the actual current evaluated SHA before declaring the
-required gate satisfied. Use genuine push/PR checks, not manual dispatch, a local
-scanner, same-name commit status or Reporter5612385. Missing/pending required
-privacy blocks merge; no rules are edited and no success is forged.
+## Actual privacy evidence and later landing
 
-Current official behavior and workflow evidence:
-- [Skip instructions leave required checks pending](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/skip-workflow-runs).
-- [Required-check events and Head/test-merge selection](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks).
-- [PR event merge SHA](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request).
-- [Checkout pull-request merge default](https://github.com/actions/checkout).
-- [Disabling does not cancel existing runs](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows).
+Unchanged Privacy uses checkout@v4/fetch-depth0, PR default virtual merge S, event Base
+B, GIT_NO_REPLACE_OBJECTS=1 and scanner B..HEAD = **B..S**. Require actual successful
+test/scanner steps: two publication scans, two Windows hook jobs, routing. Empty push
+C..H alone does not qualify the stack. Record H/B/S, actual checkout/run/check SHAs,
+event/attempt/actor, App15368 sources, conclusions and current PR rollup. New Head/Base/S
+requires fresh assessment. Local/Reporter/manual-dispatch/skip results never substitute
+for genuine required Actions evidence; missing privacy blocks merge.
 
-## Final landing is a separate decision
+Strict-base policy is currently false; coordinate/recheck Base, not a claimed atomic
+server lease. Hand off genuine H/S receipts for independent landing review and stop
+without merge/activation. Later clean-message squash needs separate owner/tree/identity
+approval because inherited skip messages can suppress main push checks. Verify actual
+F parent/tree and new post-merge Privacy; do not preassign SHA or transfer green checks.
 
-After genuine H/S privacy acceptance, obtain explicit merge/tree/identity approval.
-Historical source commits contain skip markers; a normal merge/rebase can suppress
-main push workflows because GitHub considers every newly pushed commit message.
-A clean-message squash is a reviewable tree-preserving option; it changes main's
-ancestry, so preserve original source refs as provenance and obtain that choice
-explicitly. Final GitHub-created F is not assigned a fictitious SHA in advance.
-Verify its parent/tree, then genuine post-merge privacy on F. No skipped main merge
-or transferred green check substitutes for this.
-
-If the owner deliberately keeps the four optional workflows paused, a later clean
-eligible main push predicts three cheap jobs (two Privacy plus static routing),
-eight total with qualification. **No automatic resume is part of that estimate.**
-If the owner explicitly resumes hosted compute before landing, current restored
-triggers predict fourteen main jobs, nineteen with qualification. Re-inventory
-triggers/states at execution time; neither budget/merge is authorized here.
-Main Mac routing and mandatory Reporter activation remain separate reviewed work.
+With families explicitly restored before clean main push, main predicts11 non-Mac/
+security jobs, zero automatic Mac:5 narrow qualification +11 = **16 total**. Full
+qualification14 +11 =25. A still-paused main would predict3 but omit non-Mac builds;
+that is not normal operation and needs separate narrower scope. No restore, budget,
+CI, merge, required aggregate or activation is executed by this source update.

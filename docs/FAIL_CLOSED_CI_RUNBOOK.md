@@ -1,181 +1,90 @@
-# Manual cost-policy operation and recovery
+# Mac-only pause/recovery — review only
 
-**Review package only. No source change in this PR installs a service, disables a
-workflow, publishes an eligible integration head or authorizes a merge.** The owner
-policy in #353 comment6645766280 supersedes unconditional automatic restoration.
+Owner correction6655103747 supersedes the global compute-pause runtime. Windows,
+Linux CPU and CUDA remain hosted. Runtime GitHub calls are GET-only; owner choices
+write only the protected local Mac journal. Nothing is installed/activated here.
 
-## Pre-deployment prerequisites
+Install only an independently reviewed exact package/manifest on a trusted control
+plane. Canonical shared state0700; owned regular single-link config/health/journal/
+lock0600; no unsafe ancestors or links. Keep example enabled=false until separate
+activation approval. Bind POLICY_CONFIG/POLICY_STATE privately. Schema2 rejects
+old schema1 global journals: preserve old evidence separately, never import old
+approvals into live Mac state. Authenticate/qualify independent health collector
+and availability epochs; missing/stale health denies local admission.
 
-Use the exact independently reviewed commit/package manifest on a trusted control
-plane independent of the Mac. Preserve the durable state on that control plane;
-all owners/operators use the same canonical state and lock. State directory0700,
-owned regular config/health/journal/lock0600; no symlinks/hardlinks/shared writable
-ancestors. Root/service UID and the health collector are trusted. Do not auto-pull
-public PR code into that host. The live private VM worker is not modified here.
+Qualify the installed queue adapter's ten-second synchronous network deadline,
+nonce/run reconciliation, no detached retry/reentrancy/VM wait/hosted fallback.
+The canonical owner lock covers final revalidation and bounded queue acknowledgment,
+not VM lifetime. Pause first denies later work; already submitted work may run after
+pause. Do not claim cancellation/exactly-once from a timeout keyword.
 
-Copy the disabled example into an ignored private local config and fix permissions.
-Bind `POLICY_CONFIG` and `POLICY_STATE` locally; never publish their values. A reviewed
-collector supplies the protected health file with authenticated availability epochs.
-Default null health blocks local resume. Keep `enabled=false` until deployment and
-execution are separately authorized. All write commands fail before API mutation
-without an enabled config, explicit execution and verified owner write grants.
+## Inspect and owner Mac choices
 
-The four IDs/path pairs are fixed in code. Preflight reads each live state/version,
-privacy active state, pinned privacy definition, applicable PR/privacy rules and
-no-bypass rulesets. It inventories queued/in-progress/waiting/pending/requested runs
-with bounded complete pagination. Unknown required checks, unavailable permission
-proof, wrong owner/repo/workflow, any failed state read or drift means **NO START**.
-Do not test write permission by briefly enabling a workflow.
-
-## Read-only inspection and new owner plans
-
-These commands run on the trusted installed package, not a candidate checkout:
+Use trusted installed source, not a PR checkout. No command below mutates GitHub:
 
 ```sh
 python3 -m ci.compute_policy.admin --config "$POLICY_CONFIG" --state "$POLICY_STATE" inspect
-```
-
-Read generation, mode, owner attention, unresolved intent, exact live workflow
-inventory and `all_compute_verified_paused`. Desired mode alone is not proof that
-all remote workflows are disabled. A new uninitialized journal starts desired
-paused with attention, not a claim of already paused production.
-
-Owner-coordinated quiet window: no concurrent repo pushes, merges, policy edits or
-workflow-setting edits. Inspect unrelated active runs; do not cancel their work.
-Default plans refuse any such active run. Obtain the owner's bounded decision,
-then make a fresh plan with the generation just read:
-
-```sh
 python3 -m ci.compute_policy.admin --config "$POLICY_CONFIG" --state "$POLICY_STATE" \
-  plan --generation "$GENERATION" --target paused/host-unavailable --reason owner-pause
-```
-
-The output's immutable `plan_id`, original states and generation are the approval
-binding. Do not replace them with a stale saved command. Within five minutes:
-
-```sh
+  plan --generation "$GENERATION" --target paused/host-unavailable --reason owner-mac-pause
 python3 -m ci.compute_policy.admin --config "$POLICY_CONFIG" --state "$POLICY_STATE" \
   execute --generation "$GENERATION" --plan "$PLAN_ID" --execute
 ```
 
-Each write has a durable preceding intent and an independent readback. Every exit
-path keeps or attempts a pause. A caught signal/API error may compensate only by
-disabling; it never re-enables original states. Pause is persistent: no timer or
-finally restore. Status/audit is the operator notification; integrate nonzero exits
-and `attention` into an independent owner's alert channel before unattended use.
-This package never sends messages or installs a notifier itself.
+Use fresh generation/plan output, within five minutes. Enabled config and explicit
+execution are required for local state changes. Pausing Mac leaves all hosted
+families active; unrelated hosted jobs do not require a quiet window or cancellation.
+API/health/signal/process uncertainty never resumes Mac. Healthy return needs a new
+owner action. CLI denial exits3; other errors2. allowed=false is never permission.
 
-## Manual recovery after partial transition, signal or host/process loss
-
-1. Keep compute paused. Do not replay an old resume token or blindly enable all IDs.
-   `SIGKILL`, power loss and network loss cannot be reliably handled by a trap.
-   Inspect the journal and independently read all four current states and required
-   privacy/rules through the command above. Pending intent is retained after loss.
-2. Verify owner credentials/grants and canonical current journal. If another owner
-   has advanced its generation, the old snapshot is invalid. Never overwrite that
-   journal with a backup. After total journal loss, start fresh in paused/attention
-   mode and require a new authenticated owner decision; do not import old plans.
-3. Make an explicitly reconciled **pause**, binding the fresh current inventory and
-   current generation. It rotates the baseline so old disabled states are not
-   unintentionally overwritten later:
+External workflow drift is visible and denies Mac. This runtime never fixes/toggles
+workflows automatically. For a fresh local pause snapshot use:
 
 ```sh
 python3 -m ci.compute_policy.admin --config "$POLICY_CONFIG" --state "$POLICY_STATE" \
-  plan --generation "$GENERATION" --target paused/host-unavailable \
-  --reconcile --reason owner-recovery
+  plan --generation "$GENERATION" --target paused/host-unavailable --reconcile --reason owner-recovery
 ```
 
-   If work is already queued/running and the owner needs to stop future starts,
-   add explicit `--emergency-pause`. This flag is pause-only and does not cancel
-   those runs. Keep their IDs in the audit and let the owner decide their handling.
-4. Execute that new plan with its generation/ID and `--execute`. Inspect again.
-   Required: all four independently verified non-active, no unresolved intent,
-   unchanged Actions15368 privacy definition/source/rules and no hidden policy
-   bypass. If a disable still fails, retain visible attention/partial inventory,
-   exit nonzero and stop. Never represent partial failure as a successful pause.
-5. Only after repair/owner choice create another **new** plan for either local or
-   hosted resumption. No automatic restore command is scheduled after recovery.
+Execute that new plan; handle external GitHub settings under separate owner control.
+Use target recovering while repairing, then a new normal plan/execution only with
+fresh stable authenticated health and all hosted families/security readback intact.
+Old generation/session approvals and old worker errors cannot override later owner.
 
-## Authenticated local resume
+## Explicit paid Mac fallback — not run during this Draft
 
-An owner may first use `--target recovering` with a fresh plan/execution to keep
-all public compute OFF while repairing. Healthy probes do not exit recovering.
-When the trusted collector has a fresh stable availability session:
-
-```sh
-python3 -m ci.compute_policy.admin --config "$POLICY_CONFIG" --state "$POLICY_STATE" \
-  plan --generation "$GENERATION" --target normal --reason local-repair-confirmed
-```
-
-Execute the resulting fresh plan as above. Public build workflows stay paused;
-only the separate private Mac gate can admit work. Its admission denies on policy,
-API, health, generation or session uncertainty. The worker must use `gate.admit_local`
-and have no alternative hosted dispatch path. The gate is supplied, not installed.
-
-### Queue submission and pause ordering
-
-The initial watch snapshot cannot authorize dispatch. The gate re-locks the same
-canonical journal as owner transitions, reloads current generation/mode and live
-inventory/security, then checks fresh health/session immediately before submission.
-Keep the lock only through the bounded queue acknowledgment; VM execution is outside
-it. A completed owner pause wins against every later admission. If submission owns
-the lock first, the owner's command waits, and the already submitted job may run
-later. That is pre-existing work, not a post-pause admission. Inspect/reconcile such
-work; this gate does not cancel it or falsely promise revocation of accepted jobs.
-
-Install only a separately reviewed synchronous queue adapter implementing
-`dispatch_private(*, timeout)` and enforcing the supplied ten-second network deadline.
-Do not wrap a full VM lifecycle, detached request, automatic retry or reentrant owner
-command in that callback. The gate is not a sandbox for trusted same-UID code; the
-actual private transport must be reviewed before activation. No queue transport or
-private worker is installed by this source correction. Old zero-argument callbacks
-fail closed. On uncertain acknowledgment, retain owner attention, reconcile the
-existing nonce/run before resumption, and never retry automatically or fall back.
-
-## Authenticated hosted choice / manual restore
-
-Enabling public workflows can allow later pushes/PR events to incur hosted compute.
-It is an ongoing explicit owner mode, not a fallback or a timed restoration. In a
-quiet window, inspect fresh generation and choose the exact IDs:
+Bind local owner choice to one exact source SHA:
 
 ```sh
 python3 -m ci.compute_policy.admin --config "$POLICY_CONFIG" --state "$POLICY_STATE" \
   plan --generation "$GENERATION" --target owner-authorized-hosted \
-  --workflow-id 373401385 --workflow-id 395280516 \
-  --workflow-id 385851595 --workflow-id 386265774 --reason owner-hosted-budget
+  --candidate-sha "$SOURCE_SHA" --reason owner-mac-hosted-budget
 python3 -m ci.compute_policy.admin --config "$POLICY_CONFIG" --state "$POLICY_STATE" \
   execute --generation "$GENERATION" --plan "$PLAN_ID" --execute --allow-hosted
 ```
 
-Use the actual generation/plan ID emitted by this new plan. Without a new grant,
-only originally active selected workflows can be restored; omitted or originally
-disabled ones stay OFF. After a fresh reconciliation or intentional change to that
-baseline, an owner who consciously wants a **new** enable authorization must add
-`--new-hosted-grant` to the plan and explicitly select each workflow. That is audited
-as a new decision, never an automatic override of a later owner's disabled choice.
+This launches nothing. Paid execution additionally requires explicit owner manual
+Standalone/Quality dispatch with typed mac_hosted_fallback=true and mac_candidate_sha
+matching that run's github.sha, original actor ID and triggering-owner guards. A
+normal manual dispatch runs non-Mac only. Approved fallback adds original Mac recipes;
+no mode/health/variable can cause automatic events to launch paid Mac. Stale/new SHA
+needs new approval. The CLI's hosted admission query also requires --candidate-sha.
 
-On any partial resume failure the controller attempts OFF-only compensation, retains
-attention and independent readback, then stops. No automatic retry of enable and
-no global hosted fallback exists. Already authorized hosted mode does not depend
-on Mac health; the owner explicitly chose it. Pausing it is another owner action.
+A genuine Actions Mac result does not automatically satisfy the App5612385 aggregate.
+Before using hosted fallback to meet that future required gate, independently qualify
+a hosted-result verifier/Reporter adapter binding Head/Base/tree/workflow/actor/nonce/
+run/attempt and all three successful recipes. Until then aggregate pending/blocking;
+never copy status names or synthesize success. Private Reporter proof is unchanged.
 
-## Scope and hard limits
+## Checks and separate temporary window
 
-GitHub's workflow API is not an atomic four-resource transaction. The control plane
-serializes its own decisions and detects observable external drift, but cannot
-prevent direct UI changes racing between individual requests. Keep the coordinated
-window; do not claim global compare-and-swap or guaranteed remote OFF during an API
-outage. The readback makes uncertainty visible. Disabling also does not cancel
-existing runs. No required privacy/security workflow, status or branch rule can be
-written by this adapter. Unknown required compute/security contexts stop preflight.
+Excluded Mac rows are NOT RUN and emit no individual Actions check. Before production
+cutover, separately qualify/approve additive HyperCI / Mac relay pinned to App5612385,
+while retaining required Publication privacy Actions15368. Reporter remains optional,
+configs disabled, rules unchanged in this review. Fork candidates still need existing
+owner/repo approval and cannot implicitly reach a private host.
 
-The optional CUDA workflow's advisory inventory self-test is also NOT RUN while
-that workflow is paused. It is not presently required. If made mandatory, split it
-out and review the policy before deployment; the engine refuses an unknown required
-context. Required checks that cannot run remain pending/missing and block merge;
-never mark them green via skip or the Reporter App.
-
-The CLI `admit` exits3 on denial; errors exit2. JSON `allowed=false` must never be
-interpreted as permission. No CLI command creates a GitHub check or labels an unrun
-job successful. API grants that cannot be verified by the V1 classic-token adapter
-are rejected, not probed using writes. Tokens/keys/host paths are never printed.
+The [integration window](INTEGRATION_PRIVACY_WINDOW.md) is separately authorized:
+immutable four-ID/original-state snapshot, unrelated-run inventory, coordinated quiet
+window, narrow verified writes and independent readback. No Mac CLI here implements
+it. Explicit audited owner restore of hosted families is required afterward for normal
+non-Mac operation; no timer/finally/health-based restore. Partial failure means visible
+attention and manual reconciliation, never automatic fallback or false resumed CI.

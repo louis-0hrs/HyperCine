@@ -4,6 +4,12 @@
 protection mutation, merge or paid hosted-CI restart is authorized by this file.**
 The reporter context is not to become required during this trial.
 
+## Mac-only scope correction
+
+Owner6655103747 supersedes permanent workflow pause. Only Mac lanes migrate/pause;
+Windows/Linux/CUDA stay hosted. New exact-source review is required. Historical
+receipts and old accepted trees do not qualify this revision.
+
 ## Cost-policy revision
 
 The historical advisory preparation below does not qualify the newly added

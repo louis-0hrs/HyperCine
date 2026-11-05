@@ -1,3 +1,8 @@
+> Superseded activation assumption: owner6655103747 moves macOS only, preserving
+> hosted Windows/Linux/CUDA. The former main-only HYPERCINE_CI_LOCAL_MAC flag below
+> is historical. See INTEGRATION_PRIVACY_WINDOW.md and FAIL_CLOSED_CI_RUNBOOK.md
+> for this disabled candidate; no live variable/workflow/rule change authorized.
+
 # Mac CI through a private disposable-runner relay
 
 The public HyperCine repository must never have a repository-scoped self-hosted

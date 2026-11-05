@@ -24,7 +24,7 @@ class AdapterTests(unittest.TestCase):
                 (f'{p.PREFIX}/check-runs', 'POST'),
                 ('repos/other/project/actions/workflows/373401385/disable', 'PUT'),
                 (f'{p.PREFIX}/actions/runs?status=queued&per_page=100&page=11', 'GET')]:
-            with self.subTest(endpoint=endpoint), patch('ci.compute_policy.api.subprocess.run') as run:
+            with self.subTest(endpoint=endpoint), patch('ci.compute_policy.api.subprocess.run', return_value=subprocess.CompletedProcess([],0,b'HTTP/2 204 No Content\n\n',b'')) as run:
                 with self.assertRaises(ValueError):client(endpoint, method)
                 run.assert_not_called()
 
@@ -61,7 +61,7 @@ class AdapterTests(unittest.TestCase):
     def test_authorized_empty_put_response_is_supported(self):
         client = self.client(armed=True, allow_enable=True)
         with patch('ci.compute_policy.api.subprocess.run', return_value=subprocess.CompletedProcess([], 0, b'HTTP/2 204 No Content\n\n', b'')):
-            self.assertIsNone(client(f'{p.PREFIX}/actions/workflows/373401385/enable', 'PUT'))
+            with self.assertRaises(ValueError):client(f'{p.PREFIX}/actions/workflows/373401385/enable', 'PUT')
 
     def test_malformed_and_timed_out_api_responses_fail_closed(self):
         with patch('ci.compute_policy.api.subprocess.run', return_value=subprocess.CompletedProcess([], 0, b'not a valid response', b'')):
@@ -89,20 +89,18 @@ class CLIGateTests(unittest.TestCase):
             factory.assert_not_called()
 
     def test_cli_manual_hosted_resume_requires_separate_acknowledgment(self):
-        self.fixture.transition();plan = self.fixture.plan('owner-authorized-hosted', selected=list(p.COMPUTE));puts = list(self.api.puts)
+        self.fixture.transition();plan = self.fixture.plan('owner-authorized-hosted', fallback_sha='b'*40);puts = list(self.api.puts)
         with self.assertRaises(RuntimeError):self.cli(['execute', '--plan', plan['plan_id'], '--generation', '1', '--execute'])
         self.assertEqual(puts, self.api.puts)
         result = self.cli(['execute', '--plan', plan['plan_id'], '--generation', '1', '--execute', '--allow-hosted'])
         self.assertEqual('owner-authorized-hosted', result['mode'])
 
     def test_cli_manual_reconcile_works_after_uncertain_process_loss(self):
-        self.fixture.transition();state = self.fixture.load();state['pending'] = {'workflow': next(iter(p.COMPUTE)), 'target': 'active'}
-        with p.journal(self.root) as store:store.save(state)
-        report = self.cli(['inspect']);self.assertTrue(report['pending'])
-        plan = self.cli(['plan', '--generation', '1', '--target', p.PAUSED, '--reconcile', '--reason', 'manual-recovery'])
-        state = self.cli(['execute', '--generation', '1', '--plan', plan['plan_id'], '--execute'])
-        self.assertEqual(p.PAUSED, state['mode']);self.assertTrue(self.fixture.all_off())
-        self.assertFalse(any(t == 'active' for _, t in self.api.puts))
+        self.fixture.transition('normal')
+        self.api.rows[str(next(iter(p.COMPUTE)))]['updated_at']='external'
+        plan=self.cli(['plan','--generation','1','--target',p.PAUSED,'--reconcile','--reason','manual-recovery'])
+        state=self.cli(['execute','--generation','1','--plan',plan['plan_id'],'--execute'])
+        self.assertEqual(p.PAUSED,state['mode']);self.assertTrue(self.fixture.all_on());self.assertFalse(self.api.puts)
 
     def test_configuration_and_health_inputs_must_be_owned_private_regular_files(self):
         self.config.chmod(0o644)
@@ -137,7 +135,7 @@ class CLIGateTests(unittest.TestCase):
     def test_old_worker_error_cannot_overwrite_a_newer_owner_generation(self):
         self.fixture.transition('normal')
         old = self.fixture.load()['generation']
-        self.fixture.transition('owner-authorized-hosted', selected=list(p.COMPUTE))
+        self.fixture.transition('owner-authorized-hosted', fallback_sha='b'*40)
         gate._pause_if_current(self.root, old)
         self.assertEqual('owner-authorized-hosted', self.fixture.load()['mode'])
 

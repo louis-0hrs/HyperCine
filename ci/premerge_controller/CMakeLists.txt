@@ -23,3 +23,10 @@ add_test(NAME compute-policy-mutations
 set_tests_properties(compute-policy-unit compute-policy-mutations PROPERTIES
   WORKING_DIRECTORY "${REPOSITORY_ROOT}" TIMEOUT 300
   ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1")
+
+# Preserve the original routing/capability negative controls alongside Mac scope.
+add_test(NAME workflow-routing-contract
+  COMMAND "${Python3_EXECUTABLE}" -m unittest ci.test_workflow_event_matrix ci.test_runner_capability -v)
+set_tests_properties(workflow-routing-contract PROPERTIES
+  WORKING_DIRECTORY "${REPOSITORY_ROOT}" TIMEOUT 300
+  ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1")

@@ -28,6 +28,15 @@ on:
       - '.github/workflows/quality-state.yml'
       - 'ci/run_macos_lane.py'
   workflow_dispatch:
+    inputs:
+      mac_hosted_fallback:
+        description: 'Explicit owner approval for paid Mac fallback on this exact commit'
+        type: boolean
+        default: false
+      mac_candidate_sha:
+        description: 'Exact selected ref commit SHA; must equal github.sha'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -35,12 +44,12 @@ permissions:
 jobs:
   quality-state:
     name: Quality state (${{ matrix.name }})
-    # Public jobs stay hosted. Mac-only relay activation filters main-push rows.
+    # Windows/Linux remain hosted on every existing event. Mac is owner-only manual fallback.
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(vars.HYPERCINE_CI_LOCAL_MAC == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main' && '[{"name":"Windows MSVC x64","runner":"windows-2022","capability":"hc-windows-x64-msvc","osx_arch":""},{"name":"Linux x64","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","osx_arch":""}]' || '[{"name":"macOS arm64","runner":"macos-15","capability":"hc-macos-arm64","osx_arch":"arm64"},{"name":"Windows MSVC x64","runner":"windows-2022","capability":"hc-windows-x64-msvc","osx_arch":""},{"name":"Linux x64","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","osx_arch":""}]') }}
+        include: ${{ fromJSON(github.event_name == 'workflow_dispatch' && github.actor_id == '248477380' && github.triggering_actor == 'louis-0hrs' && inputs.mac_hosted_fallback == true && inputs.mac_candidate_sha == github.sha && '[{"name":"macOS arm64","runner":"macos-15","capability":"hc-macos-arm64","osx_arch":"arm64"},{"name":"Windows MSVC x64","runner":"windows-2022","capability":"hc-windows-x64-msvc","osx_arch":""},{"name":"Linux x64","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","osx_arch":""}]' || '[{"name":"Windows MSVC x64","runner":"windows-2022","capability":"hc-windows-x64-msvc","osx_arch":""},{"name":"Linux x64","runner":"ubuntu-24.04","capability":"hc-linux-x64-cpu","osx_arch":""}]') }}
     steps:
       - uses: actions/checkout@v4
       - name: Native Mac lane

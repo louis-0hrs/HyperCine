@@ -36,10 +36,8 @@ def main(argv=None, api_factory=GitHub):
     plan = sub.add_parser('plan')
     plan.add_argument('--generation', type=int, required=True)
     plan.add_argument('--target', choices=sorted(p.MODES), required=True)
-    plan.add_argument('--workflow-id', type=int, action='append', default=[])
+    plan.add_argument('--candidate-sha')
     plan.add_argument('--reconcile', action='store_true')
-    plan.add_argument('--emergency-pause', action='store_true')
-    plan.add_argument('--new-hosted-grant', action='store_true')
     plan.add_argument('--reason', required=True)
     execute = sub.add_parser('execute')
     execute.add_argument('--generation', type=int, required=True)
@@ -50,6 +48,7 @@ def main(argv=None, api_factory=GitHub):
     admission = sub.add_parser('admit')
     admission.add_argument('--generation', type=int, required=True)
     admission.add_argument('--destination', choices=['local', 'hosted'], required=True)
+    admission.add_argument('--candidate-sha')
     a = parser.parse_args(argv)
     cfg = owned_json(a.config)
     if set(cfg) != {'enabled', 'host_status'} or type(cfg['enabled']) is not bool:
@@ -57,19 +56,18 @@ def main(argv=None, api_factory=GitHub):
     writing = a.action in {'execute', 'watch-once'}
     if writing and (not a.execute or cfg['enabled'] is not True):
         raise RuntimeError('Explicit execution and enabled reviewed deployment required')
-    api = api_factory(armed=writing, allow_enable=a.action == 'execute' and a.allow_hosted)
+    api = api_factory()  # This adapter is GET-only, even for local state changes.
     probe = lambda: owned_json(Path(cfg['host_status'])) if cfg.get('host_status') else {}
     if a.action == 'inspect':
         with p.journal(a.state) as store:
             state = store.load()
         facts = p.inspect(api)
-        paused = all(v['state'] != 'active' for v in facts['inventory'].values())
+        active = all(v['state'] == 'active' for v in facts['inventory'].values())
         result = {'generation': state['generation'], 'mode': state['mode'], 'attention': state['attention'],
-                  'pending': state['pending'], 'live': facts, 'last_verified': state['verified_at'],
-                  'all_compute_verified_paused': paused, 'inventory_matches_journal': facts['inventory'] == state['expected']}
+                  'live': facts, 'last_verified': state['verified_at'],
+                  'hosted_non_mac_workflows_active': active, 'inventory_matches_journal': facts['inventory'] == state['expected']}
     elif a.action == 'plan':
-        result = p.make_plan(api, a.state, a.generation, a.target, a.workflow_id, a.reconcile, quiet=not a.emergency_pause,
-                             new_hosted_grant=a.new_hosted_grant, reason=a.reason)
+        result = p.make_plan(api, a.state, a.generation, a.target, reconcile=a.reconcile,reason=a.reason,fallback_sha=a.candidate_sha)
     elif a.action == 'execute':
         with p.journal(a.state) as store:
             state = store.load();plan = state['plans'].get(a.plan)
@@ -81,7 +79,7 @@ def main(argv=None, api_factory=GitHub):
     else:
         with p.journal(a.state) as store:
             state = store.load()
-        result = {'allowed': p.admit(state, a.destination, probe, generation=a.generation, live=p.inspect(api)),
+        result = {'allowed': p.admit(state, a.destination, probe, generation=a.generation, live=p.inspect(api),candidate_sha=a.candidate_sha),
                   'generation': state['generation'], 'mode': state['mode']}
     print(json.dumps(result, indent=2))
     return result

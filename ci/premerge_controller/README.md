@@ -40,12 +40,12 @@ On a POSIX host (macOS/Linux), from the repository root, using Python 3.9+
 and OpenSSL. Windows service deployment is not implemented by this package:
 
 ```sh
-cmake -S ci/premerge_controller -B build/premerge-controller
+cmake -S ci/premerge_controller -B build/premerge-controller -DPython3_EXECUTABLE="$TEST_PYTHON"
 ctest --test-dir build/premerge-controller -C Release --output-on-failure
 ```
 
 CTest runs the complete portable package suite and all controlled mutations,
-plus the separate cost-policy unit/failure and mutation suites. See
+plus the Mac-only state/actual-workflow and mutation suites (PyYAML6.0.2 in TEST_PYTHON). See
 [compute policy](../compute_policy/README.md). No production policy is installed.
 The mutation runner uses isolated temporary copies, verifies a passing baseline,
 then removes one security property per copy. A kill requires failure of the

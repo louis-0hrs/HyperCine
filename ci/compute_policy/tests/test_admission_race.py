@@ -94,7 +94,7 @@ class AdmissionRaceTests(unittest.TestCase):
                 def changed(*args, **kwargs):
                     state = watch(*args, **kwargs)
                     if change == 'health':self.fixture.probe = lambda: {}
-                    elif change == 'inventory':self.api.rows[str(next(iter(p.COMPUTE)))]['state'] = 'active'
+                    elif change == 'inventory':self.api.rows[str(next(iter(p.COMPUTE)))]['state'] = 'disabled_manually'
                     else:self.api.privacy_active = False
                     return state
                 with patch('ci.compute_policy.gate.p.watch', side_effect=changed):
@@ -102,6 +102,7 @@ class AdmissionRaceTests(unittest.TestCase):
                                              lambda: self.fixture.probe(), submit)
                 submit.assert_not_called();self.assertFalse(result['allowed'])
                 self.fixture.probe = probe;self.api.privacy_active = True
+                for row in self.api.rows.values():row['state']='active'
                 self.fixture.transition(reconcile=True)
 
     def test_queue_timeout_latches_pause_without_retry(self):
