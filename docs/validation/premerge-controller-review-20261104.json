@@ -1,0 +1,323 @@
+{
+  "scope": "sanitized portable premerge controller; no deployment",
+  "parent_source_sha": "61f8b095759bf178f46a6e2bd220c33a406df52a",
+  "controller": {
+    "unit_tests_passed": 79,
+    "mutation_guards": 37,
+    "mutation_guards_killed": 37,
+    "host_python": "3.9.6",
+    "vm_python": "3.14.8",
+    "ctest_passed": 2,
+    "ctest_total": 2
+  },
+  "mutation_results": [
+    {
+      "id": "controller-disabled",
+      "module": "controller.py",
+      "expected_test": "test_disabled_controller_does_not_even_read_github",
+      "killed": true,
+      "seconds": 0.2
+    },
+    {
+      "id": "reporter-enabled",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.225
+    },
+    {
+      "id": "reporter-identity",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.195
+    },
+    {
+      "id": "source-identity",
+      "module": "controller.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.217
+    },
+    {
+      "id": "advisory-privacy",
+      "module": "controller.py",
+      "expected_test": "test_advisory_preserves_existing_privacy",
+      "killed": true,
+      "seconds": 0.315
+    },
+    {
+      "id": "advisory-not-required",
+      "module": "controller.py",
+      "expected_test": "test_advisory_refuses_an_already_required_reporter_context",
+      "killed": true,
+      "seconds": 0.257
+    },
+    {
+      "id": "required-strict",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.214
+    },
+    {
+      "id": "required-bypass",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.184
+    },
+    {
+      "id": "required-app",
+      "module": "controller.py",
+      "expected_test": "test_required_relay_context_must_have_the_reporter_app",
+      "killed": true,
+      "seconds": 0.187
+    },
+    {
+      "id": "approval-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_approval_mode_cannot_change_without_reapproval",
+      "killed": true,
+      "seconds": 0.261
+    },
+    {
+      "id": "approval-pin-ready",
+      "module": "controller.py",
+      "expected_test": "test_approval_cannot_claim_unconfigured_workflow_or_queue",
+      "killed": true,
+      "seconds": 0.211
+    },
+    {
+      "id": "approval-dedup-binding",
+      "module": "controller.py",
+      "expected_test": "test_dedup_cannot_return_an_approval_from_a_different_mode",
+      "killed": true,
+      "seconds": 0.249
+    },
+    {
+      "id": "nonce-match",
+      "module": "controller.py",
+      "expected_test": "test_spoofed_nonce_never_emits_success",
+      "killed": true,
+      "seconds": 0.307
+    },
+    {
+      "id": "workflow-pin",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.241
+    },
+    {
+      "id": "actor-match",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.199
+    },
+    {
+      "id": "run-attempt",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.21
+    },
+    {
+      "id": "job-attempt",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.198
+    },
+    {
+      "id": "unknown-lane",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.214
+    },
+    {
+      "id": "run-complete",
+      "module": "controller.py",
+      "expected_test": "test_running_run_cannot_emit_terminal_success",
+      "killed": true,
+      "seconds": 0.226
+    },
+    {
+      "id": "last-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_final_revalidation_prevents_success_after_mid_cycle_head_change",
+      "killed": true,
+      "seconds": 0.213
+    },
+    {
+      "id": "no-redispatch",
+      "module": "controller.py",
+      "expected_test": "test_dispatch_uncertainty_does_not_redispatch",
+      "killed": true,
+      "seconds": 0.228
+    },
+    {
+      "id": "public-proof-source",
+      "module": "controller.py",
+      "expected_test": "test_public_proof_cannot_describe_a_different_candidate",
+      "killed": true,
+      "seconds": 0.189
+    },
+    {
+      "id": "main-ref",
+      "module": "candidate_binding.py",
+      "expected_test": "test_current_main_invalidates_approval_even_when_pr_base_is_cached",
+      "killed": true,
+      "seconds": 0.165
+    },
+    {
+      "id": "main-protected",
+      "module": "candidate_binding.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.205
+    },
+    {
+      "id": "draft-permission",
+      "module": "candidate_binding.py",
+      "expected_test": "test_draft_requires_explicit_advisory_permission",
+      "killed": true,
+      "seconds": 0.203
+    },
+    {
+      "id": "lane-run-id",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.291
+    },
+    {
+      "id": "duplicate-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.182
+    },
+    {
+      "id": "failed-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.292
+    },
+    {
+      "id": "token-repository",
+      "module": "checks_reporter.py",
+      "expected_test": "test_token_is_requested_for_only_hypercine_with_checks_write",
+      "killed": true,
+      "seconds": 0.204
+    },
+    {
+      "id": "check-app-source",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_app_result_is_never_accepted",
+      "killed": true,
+      "seconds": 0.273
+    },
+    {
+      "id": "token-excess-rights",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_installation_or_excess_token_permissions_reject_authentication",
+      "killed": true,
+      "seconds": 0.232
+    },
+    {
+      "id": "queue-private",
+      "module": "bridge.py",
+      "expected_test": "test_private_queue_visibility_change_prevents_dispatch",
+      "killed": true,
+      "seconds": 0.281
+    },
+    {
+      "id": "reader-digest",
+      "module": "adapters.py",
+      "expected_test": "test_reader_digest_and_permissions_before_execution",
+      "killed": true,
+      "seconds": 0.209
+    },
+    {
+      "id": "cli-write-boundary",
+      "module": "adapters.py",
+      "expected_test": "test_cli_cannot_mutate_rules_runners_checks_or_merge",
+      "killed": true,
+      "seconds": 0.258
+    },
+    {
+      "id": "worker-disabled",
+      "module": "worker_hook.py",
+      "expected_test": "test_worker_hook_missing_or_disabled_does_nothing",
+      "killed": true,
+      "seconds": 0.435
+    },
+    {
+      "id": "example-disabled",
+      "module": "config.example.json",
+      "expected_test": "test_example_is_disabled_and_has_no_host_values",
+      "killed": true,
+      "seconds": 0.218
+    },
+    {
+      "id": "check-before-dispatch",
+      "module": "controller.py",
+      "expected_test": "test_pending_app_check_is_created_before_private_dispatch",
+      "killed": true,
+      "seconds": 0.233
+    }
+  ],
+  "native": {
+    "os": "15.7.7",
+    "architecture": "arm64",
+    "passed": 126,
+    "failed": 0,
+    "native_inputs_unchanged_from_parent": true,
+    "initial_fixture_failure": {
+      "passed": 124,
+      "failed": 2,
+      "cause": "source archive initially lacked public Git objects/index",
+      "tests": [
+        "original_descale_review_contract",
+        "standalone_gate_guardrails"
+      ]
+    },
+    "correction": "restored public Git objects/index without host config or credentials; clean full rerun passed"
+  },
+  "advisory_preview": {
+    "repository": "louis-0hrs/HyperCine",
+    "pull_number": 352,
+    "head_sha": "61f8b095759bf178f46a6e2bd220c33a406df52a",
+    "base_sha": "815be4718220644cf7f158bfd2418c00c0955200",
+    "draft": true,
+    "controller_enabled": false,
+    "advisory": true,
+    "mutation_performed": false,
+    "candidate": {
+      "repository": "louis-0hrs/HyperCine",
+      "pull_number": 352,
+      "head_sha": "61f8b095759bf178f46a6e2bd220c33a406df52a",
+      "base_sha": "815be4718220644cf7f158bfd2418c00c0955200",
+      "candidate_sha": "61f8b095759bf178f46a6e2bd220c33a406df52a",
+      "selection": "head-current-base-advisory",
+      "test_merge_sha": "ad18bb42f0cfba18b73459f8091c281de915b6cd",
+      "tree_sha": "9c3a3e3c0dbb0f18c5226dd4b51a1bf7f59c4a13",
+      "advisory_allow_draft": true
+    },
+    "can_approve": true,
+    "public_owner_identity_verified": true
+  },
+  "boundaries": {
+    "branch_protection_changed": false,
+    "reporter_required": false,
+    "production_activated": false,
+    "app_access_expanded": false,
+    "merge_performed": false,
+    "paid_hosted_ci_restarted": false
+  },
+  "exact_head_receipt": "The Draft PR body/comment records the final commit SHA and post-commit controller rerun."
+}

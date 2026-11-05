@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "reviewed_head": "693a87b14426ef6771d889bcf65fb730ed217b7d",
+  "reviewed_tree": "ba30556b09091339140796669b2b9c89d038bdc9",
+  "audit_script_sha256": "ee52e0eb6fe17f813b97530fe9120a4b72f67e6d2afaa9decc7dca9c6b95b05b",
+  "scope": "Installed file inventory, extracted exact pure eligibility predicate, public outcome evaluator, isolated policy journal. NOT end-to-end deployment or live attack.",
+  "installed_source_sha256": {
+    "worker.py": "41f589c5b6c71f3c371dc87de13b555575a18ac0d6a0956c049bb142b9e55f17",
+    "relay.py": "1a3842f47694d1c4be04d0359b9c4b0b3596db102da60036203c7c1c384a788b",
+    "telemetry.py": "c0ea2dc8a805354f67e166aaa740788fd4457a121e6c06b41a0603a126c3b262"
+  },
+  "reviewed_source_sha256": {
+    "ci/premerge_controller/__init__.py": "6ca3fa341158b219f14a538a1b14268c39076c03963512dcdcf7e709cf7ba8b4",
+    "ci/premerge_controller/adapters.py": "b67d6324387c11d180427f9e151cb3226d13f5f74093f5623df59d89b9aef513",
+    "ci/premerge_controller/admin.py": "458f9b3554225ecb6374c0db0223f187652ba618d1eec10a21cb6a8ed5bcaf71",
+    "ci/premerge_controller/bridge.py": "652db524b0f48ebe489bb6644a266d55ddb9ec694303a26a2c3cc05142b2d80c",
+    "ci/premerge_controller/candidate_binding.py": "e7e4dd90471a22929935e1c3a9f5aaaff03e92097525c31359cb558fdd76f457",
+    "ci/premerge_controller/check_protocol.py": "efe9d0124f4ffd30438cdae05707e5f7d864f9e90a437ecc939532f7c615022c",
+    "ci/premerge_controller/checks_reporter.py": "82134f93ab7f9e6c7cbf934c8916a4ef9fa479f60c6ab6a1f1db0a9fea33ab26",
+    "ci/premerge_controller/controller.py": "7381907f51dd2966c0d05399bc18b818a558e8733fa6b8e61105f06262fc29ae",
+    "ci/premerge_controller/mutation_suite.py": "16a22179705f695ce00b43918613bfb17383820caf1536d1862988113712fc52",
+    "ci/premerge_controller/state_store.py": "284d7bdb7a7fc2d252087e3b32cf499d56412159c7fbdbaebd8a6f2e439e9c05",
+    "ci/premerge_controller/tests/__init__.py": "47188b2ca95696bf7741da1bb9576a77271f436e7a7013f1570f8e7fd4ba412c",
+    "ci/premerge_controller/tests/test_advisory_and_adapters.py": "38c95ccbed70b20b9b6d2b9c68a16afc4a81d20f515f14ca35b87b71c9639888",
+    "ci/premerge_controller/tests/test_binding_and_client.py": "bdc049a34af922e3065df7087626ff55583d54c47d3ac7bb4ecebff925e1831c",
+    "ci/premerge_controller/tests/test_controller.py": "4136588f970d6ec24751ff7dc914320bdab2b579fb9e8fac913cd3bdbdc96674",
+    "ci/premerge_controller/tests/test_protocol.py": "a201cc46a1030f3416e01508e6800776d843acd0a8379204a434102ee5b37740",
+    "ci/premerge_controller/tests/test_state_store.py": "f27b4cde4312c028b5c1a355cdda16d187de48b671c0c80d9f6d4f15dc5706c8",
+    "ci/premerge_controller/worker_hook.py": "f13193b2078d89d24e8b977ee7bb89cace650bb7bad7ad9120a522d90a1d59aa",
+    "ci/compute_policy/__init__.py": "49f0c33accd87a8c8065f52699a5cdd35ca5ace65249def9767c6199efde4db6",
+    "ci/compute_policy/admin.py": "0dd291f3868f311d5973dfddf953ebec3a39bc0bb1821adcaeaf423afc401008",
+    "ci/compute_policy/api.py": "f4b9bf04336216a6093a098839953c4ff429682c202a45ba0147ec3db33b1df4",
+    "ci/compute_policy/gate.py": "461cc3bb1fc7565b727b40c041725026b6b74191f2c633a5a792ca22b6733f7d",
+    "ci/compute_policy/mutation_suite.py": "6b29e87449fe73c51ed1aa5e3e667df880611b8ce655ca00ab75bd7dd48ea445",
+    "ci/compute_policy/policy.py": "7947150017bfe4c900abdd84510ae14efb161a0bd944df8c4bb01d22445b9783",
+    "ci/compute_policy/tests/__init__.py": "47188b2ca95696bf7741da1bb9576a77271f436e7a7013f1570f8e7fd4ba412c",
+    "ci/compute_policy/tests/test_adapter_cli.py": "6e2f86c29c37f74bbec53bc25ea2206965cf686364a9281cf9c4764c4df076d7",
+    "ci/compute_policy/tests/test_admission_race.py": "77e27dbbe0e245eff285f20b2c154b56232ea939158081da62cc8ff188d35b84",
+    "ci/compute_policy/tests/test_policy.py": "3cfd2926e8afc3e415113631e3247dbe16b695f70f5dcb6e10bbfbf8e7df1ee8",
+    "ci/compute_policy/tests/test_routing_scope.py": "582f9c42df0986f1ceb8487c53f7ce7d70529cf7f6aa2d13c05442356b7f8876"
+  },
+  "private_workflow_sha256": "9c13b4ef02c78a50ebfcc3d29974a598dd9ac891446594a97b06e41c5b9d36d4",
+  "installed": {
+    "legacy_relay_enabled": false,
+    "premerge_configured": false,
+    "compute_policy_configured": false,
+    "reviewed_package_present": false,
+    "health_files_found": 0
+  },
+  "worker_controls": [
+    {
+      "case": "standalone-release",
+      "admitted": true
+    },
+    {
+      "case": "standalone-sanitizers",
+      "admitted": true
+    },
+    {
+      "case": "quality-state",
+      "admitted": true
+    },
+    {
+      "case": "unknown-workflow",
+      "denied": true
+    },
+    {
+      "case": "wrong-pin",
+      "denied": true
+    },
+    {
+      "case": "wrong-actor",
+      "denied": true
+    }
+  ],
+  "worker_negative_cases": [
+    {
+      "case": "windows",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "linux",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "cuda",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "privacy",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "generic",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "forged-extra-lane",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "wrong-architecture",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "extra-label",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    },
+    {
+      "case": "missing-capabilities",
+      "expected_admitted": false,
+      "actual_admitted": true,
+      "contract_pass": false
+    }
+  ],
+  "reporter_outcome_cases": [
+    {
+      "case": "all-three-mac",
+      "outcome": "success"
+    },
+    {
+      "case": "missing-lane",
+      "outcome": "failure"
+    },
+    {
+      "case": "extra-non-mac",
+      "outcome": "failure"
+    },
+    {
+      "case": "renamed-non-mac",
+      "outcome": "failure"
+    },
+    {
+      "case": "skipped-mac",
+      "outcome": "failure"
+    },
+    {
+      "case": "mac-names-with-non-mac-labels",
+      "outcome": "success"
+    }
+  ],
+  "isolated_lifecycle": {
+    "disabled_admitted": false,
+    "initial_mode": "paused/host-unavailable",
+    "owner_resume_admitted": true,
+    "outage_mode": "paused/host-unavailable",
+    "healthy_return_mode": "paused/host-unavailable",
+    "new_owner_resume_admitted": true,
+    "network_calls": 0,
+    "mock_api_writes": 0,
+    "queue_callback_calls": 0,
+    "health_source": "synthetic test fixture, NOT installed authenticated collector"
+  },
+  "external_mutations": {
+    "dispatches": 0,
+    "runner_registrations": 0,
+    "vms_started": 0,
+    "hosted_jobs": 0,
+    "checks_written": 0
+  },
+  "deployment_qualification": "HOLD: installed adapter/health/package and pre-provisioning Mac allowlist not qualified"
+}

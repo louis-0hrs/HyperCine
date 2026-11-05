@@ -1,0 +1,370 @@
+{
+  "scope": "focused approval-ledger trust correction; disabled portable package, no deployment",
+  "reviewed_previous_head": "b97fd5428f93d6087809d391bff50ae88458bb7a",
+  "review_comment_id": 6641625870,
+  "environment": {
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "python": "3.9.6"
+  },
+  "results": {
+    "unit_tests_passed": 108,
+    "new_state_tests": 29,
+    "ctest_passed": 2,
+    "ctest_total": 2,
+    "mutations_killed": 43,
+    "mutations_total": 43
+  },
+  "mutation_results": [
+    {
+      "id": "controller-disabled",
+      "module": "controller.py",
+      "expected_test": "test_disabled_controller_does_not_even_read_github",
+      "killed": true,
+      "seconds": 0.235
+    },
+    {
+      "id": "reporter-enabled",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.239
+    },
+    {
+      "id": "reporter-identity",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.22
+    },
+    {
+      "id": "source-identity",
+      "module": "controller.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.264
+    },
+    {
+      "id": "advisory-privacy",
+      "module": "controller.py",
+      "expected_test": "test_advisory_preserves_existing_privacy",
+      "killed": true,
+      "seconds": 0.255
+    },
+    {
+      "id": "advisory-not-required",
+      "module": "controller.py",
+      "expected_test": "test_advisory_refuses_an_already_required_reporter_context",
+      "killed": true,
+      "seconds": 0.24
+    },
+    {
+      "id": "required-strict",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.407
+    },
+    {
+      "id": "required-bypass",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.277
+    },
+    {
+      "id": "required-app",
+      "module": "controller.py",
+      "expected_test": "test_required_relay_context_must_have_the_reporter_app",
+      "killed": true,
+      "seconds": 0.248
+    },
+    {
+      "id": "approval-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_approval_mode_cannot_change_without_reapproval",
+      "killed": true,
+      "seconds": 0.236
+    },
+    {
+      "id": "approval-pin-ready",
+      "module": "controller.py",
+      "expected_test": "test_approval_cannot_claim_unconfigured_workflow_or_queue",
+      "killed": true,
+      "seconds": 0.326
+    },
+    {
+      "id": "approval-dedup-binding",
+      "module": "controller.py",
+      "expected_test": "test_dedup_cannot_return_an_approval_from_a_different_mode",
+      "killed": true,
+      "seconds": 0.234
+    },
+    {
+      "id": "nonce-match",
+      "module": "controller.py",
+      "expected_test": "test_spoofed_nonce_never_emits_success",
+      "killed": true,
+      "seconds": 0.279
+    },
+    {
+      "id": "workflow-pin",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.262
+    },
+    {
+      "id": "actor-match",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.241
+    },
+    {
+      "id": "run-attempt",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.408
+    },
+    {
+      "id": "job-attempt",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.33
+    },
+    {
+      "id": "unknown-lane",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.221
+    },
+    {
+      "id": "run-complete",
+      "module": "controller.py",
+      "expected_test": "test_running_run_cannot_emit_terminal_success",
+      "killed": true,
+      "seconds": 0.339
+    },
+    {
+      "id": "last-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_final_revalidation_prevents_success_after_mid_cycle_head_change",
+      "killed": true,
+      "seconds": 0.239
+    },
+    {
+      "id": "no-redispatch",
+      "module": "controller.py",
+      "expected_test": "test_dispatch_uncertainty_does_not_redispatch",
+      "killed": true,
+      "seconds": 0.431
+    },
+    {
+      "id": "public-proof-source",
+      "module": "controller.py",
+      "expected_test": "test_public_proof_cannot_describe_a_different_candidate",
+      "killed": true,
+      "seconds": 0.248
+    },
+    {
+      "id": "main-ref",
+      "module": "candidate_binding.py",
+      "expected_test": "test_current_main_invalidates_approval_even_when_pr_base_is_cached",
+      "killed": true,
+      "seconds": 0.238
+    },
+    {
+      "id": "main-protected",
+      "module": "candidate_binding.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.329
+    },
+    {
+      "id": "draft-permission",
+      "module": "candidate_binding.py",
+      "expected_test": "test_draft_requires_explicit_advisory_permission",
+      "killed": true,
+      "seconds": 0.368
+    },
+    {
+      "id": "lane-run-id",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.266
+    },
+    {
+      "id": "duplicate-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.267
+    },
+    {
+      "id": "failed-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.256
+    },
+    {
+      "id": "token-repository",
+      "module": "checks_reporter.py",
+      "expected_test": "test_token_is_requested_for_only_hypercine_with_checks_write",
+      "killed": true,
+      "seconds": 0.292
+    },
+    {
+      "id": "check-app-source",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_app_result_is_never_accepted",
+      "killed": true,
+      "seconds": 0.29
+    },
+    {
+      "id": "token-excess-rights",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_installation_or_excess_token_permissions_reject_authentication",
+      "killed": true,
+      "seconds": 0.278
+    },
+    {
+      "id": "queue-private",
+      "module": "bridge.py",
+      "expected_test": "test_private_queue_visibility_change_prevents_dispatch",
+      "killed": true,
+      "seconds": 0.233
+    },
+    {
+      "id": "reader-digest",
+      "module": "adapters.py",
+      "expected_test": "test_reader_digest_and_permissions_before_execution",
+      "killed": true,
+      "seconds": 0.308
+    },
+    {
+      "id": "cli-write-boundary",
+      "module": "adapters.py",
+      "expected_test": "test_cli_cannot_mutate_rules_runners_checks_or_merge",
+      "killed": true,
+      "seconds": 0.284
+    },
+    {
+      "id": "worker-disabled",
+      "module": "worker_hook.py",
+      "expected_test": "test_worker_hook_missing_or_disabled_does_nothing",
+      "killed": true,
+      "seconds": 0.261
+    },
+    {
+      "id": "example-disabled",
+      "module": "config.example.json",
+      "expected_test": "test_example_is_disabled_and_has_no_host_values",
+      "killed": true,
+      "seconds": 0.22
+    },
+    {
+      "id": "state-directory-private",
+      "module": "state_store.py",
+      "expected_test": "test_group_writable_state_rejected_before_approve_and_cycle",
+      "killed": true,
+      "seconds": 0.299
+    },
+    {
+      "id": "state-file-private",
+      "module": "state_store.py",
+      "expected_test": "test_unsafe_ledger_mode_rejected",
+      "killed": true,
+      "seconds": 0.236
+    },
+    {
+      "id": "state-ancestor-private",
+      "module": "state_store.py",
+      "expected_test": "test_shared_writable_ancestor_rejected",
+      "killed": true,
+      "seconds": 0.232
+    },
+    {
+      "id": "state-temp-exclusive",
+      "module": "state_store.py",
+      "expected_test": "test_exclusive_temp_collision_does_not_truncate_regular_file",
+      "killed": true,
+      "seconds": 0.237
+    },
+    {
+      "id": "state-legacy-temp",
+      "module": "state_store.py",
+      "expected_test": "test_legacy_tmp_symlink_rejected_without_touching_target",
+      "killed": true,
+      "seconds": 0.246
+    },
+    {
+      "id": "state-record-binding",
+      "module": "state_store.py",
+      "expected_test": "test_tampered_record_candidate_binding_rejected",
+      "killed": true,
+      "seconds": 0.215
+    },
+    {
+      "id": "check-before-dispatch",
+      "module": "controller.py",
+      "expected_test": "test_pending_app_check_is_created_before_private_dispatch",
+      "killed": true,
+      "seconds": 0.214
+    }
+  ],
+  "coverage": [
+    "private state positive and missing-leaf creation",
+    "group/world writable and readable directories",
+    "foreign owners (isolated simulation)",
+    "untrusted writable ancestors",
+    "state/ancestor/ledger/lock/legacy-temp symlinks",
+    "FIFOs, directory ledger, hardlinks, unsafe file modes",
+    "malformed/duplicate-key JSON and inconsistent candidate binding",
+    "exclusive temp symlink and regular-file collisions",
+    "file fsync, atomic replace, directory fsync ordering",
+    "failed replace preserves ledger and cleans own temp",
+    "approve/cycle CLI reject unsafe state before API or signing"
+  ],
+  "package_sha256": {
+    "ci/premerge_controller/CMakeLists.txt": "8fefcd30fd3d2800da429c02737186dcf45cf4bcd5cc31af192129489056c2f6",
+    "ci/premerge_controller/README.md": "e5042f27868115b3b5cda10be81b232f887caf480feb1de0d0b05d85cd816ac5",
+    "ci/premerge_controller/__init__.py": "6ca3fa341158b219f14a538a1b14268c39076c03963512dcdcf7e709cf7ba8b4",
+    "ci/premerge_controller/adapters.py": "b67d6324387c11d180427f9e151cb3226d13f5f74093f5623df59d89b9aef513",
+    "ci/premerge_controller/admin.py": "458f9b3554225ecb6374c0db0223f187652ba618d1eec10a21cb6a8ed5bcaf71",
+    "ci/premerge_controller/bridge.py": "652db524b0f48ebe489bb6644a266d55ddb9ec694303a26a2c3cc05142b2d80c",
+    "ci/premerge_controller/candidate_binding.py": "e7e4dd90471a22929935e1c3a9f5aaaff03e92097525c31359cb558fdd76f457",
+    "ci/premerge_controller/check_protocol.py": "efe9d0124f4ffd30438cdae05707e5f7d864f9e90a437ecc939532f7c615022c",
+    "ci/premerge_controller/checks_reporter.py": "82134f93ab7f9e6c7cbf934c8916a4ef9fa479f60c6ab6a1f1db0a9fea33ab26",
+    "ci/premerge_controller/config.example.json": "a4d8305bc5e0c655152ca2ec50fa6e8edf2eb563515f61a2cbc991286a1e7b6e",
+    "ci/premerge_controller/controller.py": "7381907f51dd2966c0d05399bc18b818a558e8733fa6b8e61105f06262fc29ae",
+    "ci/premerge_controller/mutation_suite.py": "16a22179705f695ce00b43918613bfb17383820caf1536d1862988113712fc52",
+    "ci/premerge_controller/state_store.py": "85214aca9d2ebc32c7479a705e9900a575bf539729a4c3e778a01089fede0ef3",
+    "ci/premerge_controller/tests/__init__.py": "47188b2ca95696bf7741da1bb9576a77271f436e7a7013f1570f8e7fd4ba412c",
+    "ci/premerge_controller/tests/test_advisory_and_adapters.py": "38c95ccbed70b20b9b6d2b9c68a16afc4a81d20f515f14ca35b87b71c9639888",
+    "ci/premerge_controller/tests/test_binding_and_client.py": "bdc049a34af922e3065df7087626ff55583d54c47d3ac7bb4ecebff925e1831c",
+    "ci/premerge_controller/tests/test_controller.py": "4136588f970d6ec24751ff7dc914320bdab2b579fb9e8fac913cd3bdbdc96674",
+    "ci/premerge_controller/tests/test_protocol.py": "a201cc46a1030f3416e01508e6800776d843acd0a8379204a434102ee5b37740",
+    "ci/premerge_controller/tests/test_state_store.py": "f27b4cde4312c028b5c1a355cdda16d187de48b671c0c80d9f6d4f15dc5706c8",
+    "ci/premerge_controller/worker_hook.py": "f13193b2078d89d24e8b977ee7bb89cace650bb7bad7ad9120a522d90a1d59aa"
+  },
+  "historical_evidence": {
+    "original_package_receipt": "docs/validation/premerge-controller-review-20261104.json",
+    "native_or_fixture_rerun": false,
+    "native_results_attribution": "Prior #352 qualification and original #353 package receipt only; not a current correction-head hardware run."
+  },
+  "boundaries": {
+    "branch_protection_changed": false,
+    "reporter_required": false,
+    "production_activated": false,
+    "app_access_expanded": false,
+    "merge_performed": false,
+    "hosted_ci_started": false
+  },
+  "exact_head_receipt": "The PR body and follow-up comment record the actual final commit SHA and post-commit full component CTest rerun."
+}

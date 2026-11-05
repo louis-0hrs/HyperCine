@@ -79,27 +79,20 @@ class Baseline(unittest.TestCase):
         )
 
 
-class DefaultRoutingUnchanged(unittest.TestCase):
-    """With the variable unset, every job must resolve to exactly the old label.
-
-    This is the property that makes the routing layer safe to land while the pool
-    does not exist yet: an unset variable cannot silently move a lane.
-    """
+class NonMacDefaultRoutingPreserved(unittest.TestCase):
+    """Non-Mac defaults retain all original labels; Mac needs explicit approval."""
 
     def test_default_labels_match_the_hosted_baseline(self) -> None:
         expected = {
             "ci-cpu.yml:cpu-only-windows-msvc": ["windows-latest"],
             "ci-cuda-build.yml:cuda-build": ["ubuntu-24.04"],
             "ci-cuda-build.yml:inventory-gate-selftest": ["ubuntu-24.04"],
-            "ci-standalone.yml:standalone [macOS arm64 Release]": ["macos-15"],
-            "ci-standalone.yml:standalone [macOS arm64 ASan UBSan]": ["macos-15"],
             "ci-standalone.yml:standalone [Windows MSVC x64 Release]": ["windows-2022"],
             "ci-standalone.yml:standalone [Linux x64 Release]": ["ubuntu-24.04"],
             "ci-standalone.yml:standalone [Linux x64 ASan UBSan]": ["ubuntu-24.04"],
             "privacy-guard.yml:windows-installed-hooks": ["windows-2022"],
             "privacy-guard.yml:publication-privacy": ["ubuntu-24.04"],
             "python-compat.yml:rca160-python": ["ubuntu-24.04"],
-            "quality-state.yml:quality-state [macOS arm64]": ["macos-15"],
             "quality-state.yml:quality-state [Windows MSVC x64]": ["windows-2022"],
             "quality-state.yml:quality-state [Linux x64]": ["ubuntu-24.04"],
         }
@@ -235,13 +228,13 @@ class SelfHostedRouting(unittest.TestCase):
     def test_r14_protected_main_positive_control(self) -> None:
         d = docs()
         matrix = standalone(d)["strategy"]["matrix"]
-        matrix["include"] = matrix["include"].replace("refs/heads/main", "refs/heads/feature/x")
+        matrix["include"] = matrix["include"].replace("github.actor_id == '248477380'", "true")
         self.assertIn("R14", rules(wem.check_contract(d)))
 
     def test_r14_flag_must_not_omit_pr_mac_tests(self) -> None:
         d = docs()
         matrix = standalone(d)["strategy"]["matrix"]
-        matrix["include"] = matrix["include"].replace("github.event_name == 'push' && github.ref == 'refs/heads/main'", "true")
+        matrix["include"] = matrix["include"].replace("github.event_name == 'workflow_dispatch'", "true").replace("inputs.mac_hosted_fallback == true", "true").replace("inputs.mac_candidate_sha == github.sha", "true")
         self.assertIn("R14", rules(wem.check_contract(d)))
 
 
@@ -291,8 +284,7 @@ class CoverageNotNarrowed(unittest.TestCase):
 class SelfHostedEnabled(unittest.TestCase):
     """The same rules must hold with the routing variable switched on.
 
-    Activation delegates protected-main Mac rows only. All public jobs
-    remain hosted; all PR/manual/feature Mac rows stay present.
+    Legacy flags cannot affect hosted non-Mac jobs or enable automatic Mac.
     """
 
     def setUp(self) -> None:
