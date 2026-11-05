@@ -112,6 +112,26 @@ only the separate private Mac gate can admit work. Its admission denies on polic
 API, health, generation or session uncertainty. The worker must use `gate.admit_local`
 and have no alternative hosted dispatch path. The gate is supplied, not installed.
 
+### Queue submission and pause ordering
+
+The initial watch snapshot cannot authorize dispatch. The gate re-locks the same
+canonical journal as owner transitions, reloads current generation/mode and live
+inventory/security, then checks fresh health/session immediately before submission.
+Keep the lock only through the bounded queue acknowledgment; VM execution is outside
+it. A completed owner pause wins against every later admission. If submission owns
+the lock first, the owner's command waits, and the already submitted job may run
+later. That is pre-existing work, not a post-pause admission. Inspect/reconcile such
+work; this gate does not cancel it or falsely promise revocation of accepted jobs.
+
+Install only a separately reviewed synchronous queue adapter implementing
+`dispatch_private(*, timeout)` and enforcing the supplied ten-second network deadline.
+Do not wrap a full VM lifecycle, detached request, automatic retry or reentrant owner
+command in that callback. The gate is not a sandbox for trusted same-UID code; the
+actual private transport must be reviewed before activation. No queue transport or
+private worker is installed by this source correction. Old zero-argument callbacks
+fail closed. On uncertain acknowledgment, retain owner attention, reconcile the
+existing nonce/run before resumption, and never retry automatically or fall back.
+
 ## Authenticated hosted choice / manual restore
 
 Enabling public workflows can allow later pushes/PR events to incur hosted compute.

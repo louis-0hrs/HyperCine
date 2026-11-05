@@ -120,7 +120,7 @@ class CLIGateTests(unittest.TestCase):
     def test_guarded_local_dispatch_never_falls_back_to_hosted(self):
         self.fixture.transition('normal');dispatch = Mock()
         result = gate.admit_local(self.api, {'enabled': True}, self.root, self.fixture.probe, dispatch)
-        self.assertTrue(result['allowed']);dispatch.assert_called_once()
+        self.assertTrue(result['allowed']);dispatch.assert_called_once_with(timeout=gate.SUBMISSION_TIMEOUT)
         puts = list(self.api.puts)
         result = gate.admit_local(self.api, {'enabled': True}, self.root, lambda: {}, dispatch)
         self.assertFalse(result['allowed']);self.assertEqual(1, dispatch.call_count);self.assertEqual(puts, self.api.puts)
@@ -136,11 +136,10 @@ class CLIGateTests(unittest.TestCase):
 
     def test_old_worker_error_cannot_overwrite_a_newer_owner_generation(self):
         self.fixture.transition('normal')
-        def changed():
-            self.fixture.transition('owner-authorized-hosted', selected=list(p.COMPUTE))
-            raise RuntimeError('older private callback failed')
-        result = gate.admit_local(self.api, {'enabled': True}, self.root, self.fixture.probe, changed)
-        self.assertFalse(result['allowed']);self.assertEqual('owner-authorized-hosted', self.fixture.load()['mode'])
+        old = self.fixture.load()['generation']
+        self.fixture.transition('owner-authorized-hosted', selected=list(p.COMPUTE))
+        gate._pause_if_current(self.root, old)
+        self.assertEqual('owner-authorized-hosted', self.fixture.load()['mode'])
 
     def test_signal_handler_is_an_interruption_not_automatic_restore(self):
         with self.assertRaises(InterruptedError):admin.interrupted(15, None)

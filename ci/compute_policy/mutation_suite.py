@@ -12,6 +12,9 @@ import sys
 import tempfile
 
 MUTATIONS = [
+ ('final-admission-state', 'gate.py', "            state = store.load()\n            live =", "            state = snapshot\n            live =", 'test_pause_after_watch_snapshot_prevents_private_dispatch'),
+ ('dispatch-owner-lock', '../premerge_controller/state_store.py', '        fcntl.flock(lock_fd, fcntl.LOCK_EX)', '        pass  # Removed owner/admission serialization', 'test_dispatch_boundary_serializes_overlapping_owner_pause'),
+ ('final-admission-check', 'gate.py', "if not p.admit(state, 'local', host_probe, generation=generation, live=live):", 'if False:', 'test_final_admission_refreshes_health_session_and_live_inventory'),
  ('watch-failure-generation', 'policy.py', "if state['mode'] != PAUSED or not state['attention']:", 'if False:', 'test_api_outage_invalidates_old_local_resume_plans'),
  ('owner-auth', 'policy.py', "if actor.get('id') != OWNER_ID or actor.get('login') != OWNER:", 'if False:', 'test_owner_identity_and_capability_required_before_mutation'),
  ('write-capability', 'policy.py', 'if not api.workflow_write_verified():', 'if False:', 'test_owner_identity_and_capability_required_before_mutation'),

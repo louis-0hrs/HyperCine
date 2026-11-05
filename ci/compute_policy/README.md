@@ -64,6 +64,9 @@ authorization, not restoration. A fresh pause reconciliation rotates the baselin
 retaining the old snapshot in audit history. Old worker failures cannot overwrite a
 newer owner's generation.
 
+See the admission ordering contract below; a watch snapshot alone is never a
+queue authorization.
+
 The local UID/root and the reviewed installed package are trusted. Hash chains are
 corruption detection, not signatures against a compromised same-UID writer. Do not
 roll back the entire journal over a live one. If journal freshness is lost, start
@@ -72,6 +75,43 @@ IDs cannot be replayed. GitHub workflow state changes have no compare-and-swap
 transaction across four workflows. Do not claim atomic protection against direct UI
 changes between requests. Use the coordinated quiet window and route all owner
 changes through the control plane; detected external drift stops the operation.
+
+## Owner pause versus private queue submission
+
+`gate.admit_local` treats the initial watch result only as an expected generation.
+It reacquires the **same canonical OS lock** used by owner plan/execute/reconcile,
+loads fresh journal state, reads live inventory/security and checks fresh health,
+session, verification age and that expected generation. It holds this lock through
+one synchronous **queue submission**, then releases it before any VM/job execution.
+
+The lock defines the order. If an owner's pause/other transition commits first,
+the stale worker cannot submit. If final admission/submission owns the lock first,
+the concurrent pause waits for that bounded request to return/fail, then commits;
+that already submitted work may start or finish after the pause. A pause does not
+cancel pre-existing/in-flight queue submissions or running jobs. A pause request
+is not complete merely because its caller has started waiting for the lock.
+No new submission may linearize after a completed pause until a new owner resume.
+
+The injected trusted adapter has a revised interface:
+`dispatch_private(*, timeout)`; the gate supplies ten seconds. The adapter **must**
+enforce that network deadline synchronously, submit only the queue request and
+return on acknowledgment. It must not wait for VM allocation/job completion,
+spawn a background request, retry an uncertain request, reenter owner/policy
+commands, or try another destination. A zero-argument legacy callback is rejected.
+This package supplies the gate, not a production queue transport: enforce/review
+that contract in the installed private adapter before deployment. Passing a timeout
+keyword is not a sandbox for arbitrary same-UID Python code. GitHub metadata reads
+also use the transport's bounded per-request timeout; stalled reads deny admission.
+
+A timeout/error releases the lock and latches pause only if its generation is still
+current; a later owner decision is never overwritten. An uncertain remote queue
+acknowledgment may still represent already accepted work. Do not automatically
+retry it. The premerge controller's existing nonce/run reconciliation remains the
+job identity mechanism; this gate does not create an exactly-once queue protocol.
+
+Barrier tests prove owner-first => zero dispatch, submission-first => owner blocked
+on the actual flock until acknowledgment, and no lock retained for job lifetime.
+Designated mutations remove final state reload, final admission or OS serialization.
 
 ## Mandatory privacy and security
 
