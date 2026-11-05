@@ -1,9 +1,38 @@
 # Private Mac relay deployment qualification handoff
 
-> **Latest candidate revision — review5785265965:** private Head
+> **Latest revision — review5785671091:** private Head
+> `a148312c8b8ba9dcbab16effead925eb00ca02d8`, tree `75c35f597c73c4d4a4364779312027f3a7d5fa4b`.
+> Manifest `4ed655b769ade22df3561d266d2e4fefcb62b36e2d905a57652b6814676b114c` binds 67 files.
+> [Current source-bound receipt](validation/private-candidate-review3-20261105.json).
+> **119 tests, 39/39 designated mutation kills and 30/30 lock stress scenarios**
+> PASS (CTest 3/3). Prior findings passed the independent source review; this
+> revision adds the requested explicit cleanup-success gate and finite journal.
+>
+> Worker completion now requires an affirmative structured cleanup receipt bound
+> to the exact VM/repository/run/job/runner. None, missing fields, silent incomplete,
+> attention and incorrect bindings revoke the receipt, pause admission and cannot
+> produce Reporter success. Reporting also requires completed reservation state.
+> Primary execution errors retain precedence. Tests use inert lifecycle ports.
+>
+> At most 64 reservation rows are retained, below a 256-KiB file limit, with space
+> reserved for receipt/disposition updates. Capacity is checked before provisioning
+> and again atomically during reservation. Exhaustion latches durable attention;
+> restart does not clear it. No rows are pruned, including active, uncertain,
+> recovery and expired replay records. Repeated-job tests exceed the old 16-KiB
+> reader limit. **Continuous operation still needs reviewed reconciliation/archive
+> preserving replay history. Clearing the journal is not an approved workaround.**
+>
+> **Production HOLD remains.** Actual identity/ACL separation, native Tart/JIT,
+> deployed restart/recovery, controller polling/pending/invalidation and real
+> Actions/Reporter advisory remain NOT RUN/NOT QUALIFIED. No installed changes,
+> workflow/rule edits, activation, merge or paid CI.
+
+## Previous revision — review5785265965 (historical)
+
+> **Candidate revision — review5785265965:** private Head
 > `2c8212a07459f7e737abd57095a97bb76be0a5a2`, tree `b6345da2e97113d4c80d5604225246f6d5ff35ee`.
 > Manifest `162de97d30fc08c1663150e0b32acc5809cbe7de52f07ee8a9d3d4d4f236bc88` binds 66 files.
-> [Current source-bound receipt](validation/private-candidate-review2-20261105.json).
+> [Historical source-bound receipt](validation/private-candidate-review2-20261105.json).
 > CTest **3/3**, **98 integrated tests**, **36/36 designated mutation kills**
 > and **30/30 lock stress scenarios** PASS. The older receipt below is historical.
 >
