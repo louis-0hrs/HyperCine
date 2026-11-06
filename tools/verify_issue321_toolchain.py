@@ -78,10 +78,14 @@ def inspect(record):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--compiler-record', type=Path, required=True)
+    parser.add_argument('--sdk-source-root', type=Path, required=True,
+                        help='retained SDK source tree; never write reports inside')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     try:
         output = args.output.resolve()
+        sdk_root = args.sdk_source_root.resolve()
+        require(sdk_root.is_dir() and output != sdk_root and sdk_root not in output.parents)
         golden = os.environ.get('HYPERCINE_GOLDEN_DIR')
         if golden:
             root = Path(golden).resolve()
