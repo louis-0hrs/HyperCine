@@ -110,7 +110,18 @@ def replay(binary, root, sessions, destination, state):
     return observations
 
 
+def outside_evidence(target, roots):
+    """Refuse destinations inside private evidence trees, including path aliases."""
+    candidate = Path(target).resolve()
+    return all(candidate != root and root not in candidate.parents
+               for root in (Path(root).resolve() for root in roots))
+
+
 def run(golden, historical, library, replay_dir=None):
+    # Also enforce this when run() is called directly, not just through CLI.
+    if replay_dir is not None:
+        require(outside_evidence(replay_dir, (golden, historical)),
+                'replay inside protected evidence')
     roots = {g: golden / WINDOWS / g for g in INDEXES if g != 'linux-sdk-gaps'}
     indexes = {g: verify_index(root, *INDEXES[g]) for g, root in roots.items()}
     manifests = {g: json.loads((root / 'manifest.json').read_text()) for g, root in roots.items()}
@@ -147,8 +158,6 @@ def run(golden, historical, library, replay_dir=None):
     result['sdk_build_record'] = build_record(library.parents[2], 'CFHDCodecStatic')
     result['replay'] = {'status': 'NOT_RUN'}
     if replay_dir is not None:
-        require(golden.resolve() != replay_dir.resolve() and
-                golden.resolve() not in replay_dir.resolve().parents, 'replay inside corpus')
         replay_dir.mkdir(parents=True, exist_ok=False)
         rows = {}
         for label, group in [('api', 'group-a-sequences'), ('state', 'group-c-sdk-state')]:
@@ -169,11 +178,18 @@ def main():
     a = p.parse_args()
     try:
         require(bool(a.golden_root), 'missing golden root')
-        golden, output = Path(a.golden_root).resolve(), Path(a.output).resolve()
-        require(output != golden and golden not in output.parents and not output.exists(),
-                'unsafe or existing report destination')
-        report = run(golden, Path(a.historical_root).resolve(), Path(a.sdk_library).resolve(),
-                     Path(a.replay_dir).resolve() if a.replay_dir else None)
+        golden = Path(a.golden_root).resolve()
+        historical = Path(a.historical_root).resolve()
+        library = Path(a.sdk_library).resolve()
+        output = Path(a.output).resolve()
+        replay_dir = Path(a.replay_dir).resolve() if a.replay_dir else None
+        # A retained SDK checkout is evidence too: never deposit fresh JSON or
+        # replay frames under it, including symlink/relative-path aliases.
+        require(outside_evidence(output, (golden, historical)) and
+                (replay_dir is None or outside_evidence(replay_dir, (golden, historical))),
+                'output or replay destination overlaps retained evidence')
+        require(not output.exists(), 'unsafe or existing report destination')
+        report = run(golden, historical, library, replay_dir)
         with output.open('x', encoding='utf-8') as stream:
             json.dump(report, stream, indent=2, sort_keys=True)
             stream.write('\n')
