@@ -28,6 +28,7 @@ class ToolchainProbe(unittest.TestCase):
         self.sdk_root.mkdir()
         self.compiler = self.root / 'cl.exe'
         self.compiler.write_bytes(b'synthetic compiler bytes')
+        self.trusted_digest = toolchain.digest(self.compiler.read_bytes())
         self.record = self.root / 'CMakeCXXCompiler.cmake'
         self.record.write_text(
             'set(CMAKE_CXX_COMPILER "' + str(self.compiler) + '")\n'
@@ -39,7 +40,7 @@ class ToolchainProbe(unittest.TestCase):
 
     def test_version_agreement_is_not_historical_attestation(self):
         with patch.object(toolchain.subprocess, 'run', return_value=self.process()) as run:
-            report = toolchain.inspect(self.record)
+            report = toolchain.inspect(self.record, self.compiler, self.trusted_digest)
         self.assertEqual(report['status'], 'VERSION_AGREES')
         self.assertEqual(report['historical_compiler_identity'], 'NOT_ESTABLISHED')
         self.assertEqual(report['current_compiler_sha256'], v.file_sha(self.compiler))
@@ -49,7 +50,7 @@ class ToolchainProbe(unittest.TestCase):
     def test_current_compiler_can_differ_at_same_recorded_path(self):
         result = self.process(b'PRIVATE_LOCATION Version 19.44.35229 for x64\n19.44.35229.0')
         with patch.object(toolchain.subprocess, 'run', return_value=result):
-            report = toolchain.inspect(self.record)
+            report = toolchain.inspect(self.record, self.compiler, self.trusted_digest)
         self.assertEqual(report['status'], 'TOOLCHAIN_VERSION_DRIFT')
         self.assertFalse(report['version_equal'])
         self.assertEqual(report['observed_version'], '19.44.35229.0')
@@ -59,7 +60,7 @@ class ToolchainProbe(unittest.TestCase):
     def test_missing_compiler_does_not_execute(self):
         self.compiler.unlink()
         with patch.object(toolchain.subprocess, 'run') as run, self.assertRaises(OSError):
-            toolchain.inspect(self.record)
+            toolchain.inspect(self.record, self.compiler, self.trusted_digest)
         run.assert_not_called()
 
     def test_invalid_or_ambiguous_record_does_not_execute(self):
@@ -70,7 +71,7 @@ class ToolchainProbe(unittest.TestCase):
             self.record.write_text(invalid)
             with self.subTest(record=invalid), patch.object(toolchain.subprocess, 'run') as run:
                 with self.assertRaises(ValueError):
-                    toolchain.inspect(self.record)
+                    toolchain.inspect(self.record, self.compiler, self.trusted_digest)
                 run.assert_not_called()
 
     def test_failed_or_ambiguous_version_probe_is_rejected(self):
@@ -79,13 +80,13 @@ class ToolchainProbe(unittest.TestCase):
                        self.process(code=1)):
             with patch.object(toolchain.subprocess, 'run', return_value=result):
                 with self.assertRaises(ValueError):
-                    toolchain.inspect(self.record)
+                    toolchain.inspect(self.record, self.compiler, self.trusted_digest)
 
     def test_timeout_is_not_version_agreement(self):
         with patch.object(toolchain.subprocess, 'run', side_effect=
                           toolchain.subprocess.TimeoutExpired('cl', 30)):
             with self.assertRaises(toolchain.subprocess.TimeoutExpired):
-                toolchain.inspect(self.record)
+                toolchain.inspect(self.record, self.compiler, self.trusted_digest)
 
     def test_artifacts_must_remain_stable_during_probe(self):
         for artifact in (self.compiler, self.record):
@@ -97,11 +98,13 @@ class ToolchainProbe(unittest.TestCase):
 
             with patch.object(toolchain.subprocess, 'run', side_effect=probe):
                 with self.assertRaises(ValueError):
-                    toolchain.inspect(self.record)
+                    toolchain.inspect(self.record, self.compiler, self.trusted_digest)
             artifact.write_bytes(before)
 
     def test_cli_reports_drift_with_nonzero_exit(self):
         with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
                                        '--sdk-source-root', str(self.sdk_root),
                                        '--output', str(self.root / 'report.json')]), \
                 patch.object(toolchain.subprocess, 'run', return_value=
@@ -114,6 +117,8 @@ class ToolchainProbe(unittest.TestCase):
         output = self.root / 'report.json'
         output.write_bytes(b'original receipt')
         with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
                                        '--sdk-source-root', str(self.sdk_root),
                                        '--output', str(output)]), \
                 patch.object(toolchain.subprocess, 'run') as run:
@@ -124,6 +129,8 @@ class ToolchainProbe(unittest.TestCase):
     def test_corpus_output_is_rejected_before_probe(self):
         with patch.dict(toolchain.os.environ, {'HYPERCINE_GOLDEN_DIR': str(self.root)}), \
                 patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
                                        '--sdk-source-root', str(self.sdk_root),
                                           '--output', str(self.root / 'report.json')]), \
                 patch.object(toolchain.subprocess, 'run') as run:
@@ -135,12 +142,56 @@ class ToolchainProbe(unittest.TestCase):
         for suffix in ('report.json', 'unused/../report.json'):
             with self.subTest(suffix=suffix), \
                     patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
-                        '--sdk-source-root', str(self.sdk_root),
+                        '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
+                                       '--sdk-source-root', str(self.sdk_root),
                         '--output', str(self.sdk_root / suffix)]), \
                     patch.object(toolchain.subprocess, 'run') as run:
                 self.assertEqual(toolchain.main(), 1)
                 run.assert_not_called()
             self.assertFalse((self.sdk_root / 'report.json').exists())
+
+
+
+    def test_record_cannot_select_another_cl_even_with_same_bytes(self):
+        other = self.root / 'second-install'
+        other.mkdir()
+        substituted = other / 'cl.exe'
+        substituted.write_bytes(self.compiler.read_bytes())
+        self.record.write_text(self.record.read_text().replace(
+            str(self.compiler), str(substituted)))
+        with patch.object(toolchain.subprocess, 'run') as run, self.assertRaises(ValueError):
+            toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+        run.assert_not_called()
+
+    def test_wrong_independent_compiler_pin_blocks_execution(self):
+        with patch.object(toolchain.subprocess, 'run') as run, self.assertRaises(ValueError):
+            toolchain.inspect(self.record, self.compiler, '0' * 64)
+        run.assert_not_called()
+
+    def test_cli_rejects_missing_trust_options_without_receipt(self):
+        output = self.root / 'not-created.json'
+        with patch.object(sys, 'argv', [
+                'probe', '--compiler-record', str(self.record),
+                '--sdk-source-root', str(self.sdk_root), '--output', str(output)]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            with self.assertRaises(SystemExit) as ex:
+                toolchain.main()
+        self.assertEqual(ex.exception.code, 2)
+        run.assert_not_called()
+        self.assertFalse(output.exists())
+
+    def test_cli_rejects_wrong_sha_before_probe_or_output(self):
+        output = self.root / 'not-created.json'
+        with patch.object(sys, 'argv', [
+                'probe', '--compiler-record', str(self.record),
+                '--trusted-compiler', str(self.compiler),
+                '--trusted-compiler-sha256', 'f' * 64,
+                '--sdk-source-root', str(self.sdk_root), '--output', str(output)]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            self.assertEqual(toolchain.main(), 1)
+        run.assert_not_called()
+        self.assertFalse(output.exists())
 
 
 class ArchiveOrigin(unittest.TestCase):
