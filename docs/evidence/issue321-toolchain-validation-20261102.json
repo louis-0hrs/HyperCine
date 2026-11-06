@@ -1,0 +1,189 @@
+{
+  "base_head": "1554d403ff9b16dbbaa6bdace7853df5f9e5ab6a",
+  "command": "ctest --test-dir build -C Release --output-on-failure --output-junit issue321-20261102.xml",
+  "configuration": "Existing quality-state-only Release; tests ON; upstream/benchmarks/CUDA OFF",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "date": "2026-11-02",
+  "elapsed_seconds": 43.12,
+  "failed": 0,
+  "file_sha256": {
+    "CMakeLists.txt": "1c4dcc96b25ecef860cafe1372b7ad1899b4c25b8294e288c5fe64f5b01d3d89",
+    "docs/evidence/issue321-retained-replay-20261102.json": "977d3c6ec98422f8bc2146b2f36d868cf2cad0fd555070b817ae3113b214f5b1",
+    "docs/evidence/issue321-toolchain-drift-20261102.json": "cc1e5f73c5baa8a65f81ecaf4f6a4d80c9457346f32f6f1221aa00fb8142a920",
+    "tests/test_issue321_provenance.py": "334c57ea0880b2f0ca4791acc3fa23ecca98e118e196e64be48d66a394d2fbe7",
+    "tools/verify_issue321_provenance.py": "8d11939dbf4f3396c665d2705449a68a929a11c36f7a8520e15c0a15ddbdbe34",
+    "tools/verify_issue321_toolchain.py": "94a5c45b4845f9a484aa367c393b7494f5da736c8fc7973ff96395e94aa30342"
+  },
+  "file_sha256_basis": "Executed/read working-tree bytes; committed revised head requires separate hosted CI.",
+  "passed": 41,
+  "platform": "native Windows x64 CPU",
+  "provenance_contract_controls": 31,
+  "registered": 41,
+  "skipped": 0,
+  "tests": [
+    {
+      "name": "issue321_provenance_contract",
+      "result": "PASS"
+    },
+    {
+      "name": "reference_decode_contract",
+      "result": "PASS"
+    },
+    {
+      "name": "diagnostic_summary_contract",
+      "result": "PASS"
+    },
+    {
+      "name": "decoder_differential_metrics",
+      "result": "PASS"
+    },
+    {
+      "name": "cpu_isa_selection",
+      "result": "PASS"
+    },
+    {
+      "name": "quality_state_unit",
+      "result": "PASS"
+    },
+    {
+      "name": "overbitrate_hysteresis_sdk_sequence",
+      "result": "PASS"
+    },
+    {
+      "name": "quality_state_probe_arguments",
+      "result": "PASS"
+    },
+    {
+      "name": "quality_cmake_mode_contract",
+      "result": "PASS"
+    },
+    {
+      "name": "decoder_attachment_292_workers_1",
+      "result": "PASS"
+    },
+    {
+      "name": "decoder_attachment_292_workers_2",
+      "result": "PASS"
+    },
+    {
+      "name": "decoder_attachment_292_workers_4",
+      "result": "PASS"
+    },
+    {
+      "name": "decoder_attachment_292_workers_16",
+      "result": "PASS"
+    },
+    {
+      "name": "rca160_public_evidence",
+      "result": "PASS"
+    },
+    {
+      "name": "decode_task_graph_workers_1",
+      "result": "PASS"
+    },
+    {
+      "name": "decode_task_graph_workers_2",
+      "result": "PASS"
+    },
+    {
+      "name": "decode_task_graph_workers_4",
+      "result": "PASS"
+    },
+    {
+      "name": "decode_task_graph_workers_16",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_contract_195_workers_1",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_contract_195_workers_2",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_contract_195_workers_4",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_contract_195_workers_16",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_1",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_2",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_4",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_16",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_1",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_2",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_4",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_16",
+      "result": "PASS"
+    },
+    {
+      "name": "decode_s3_plane",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_1",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_2",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_4",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_8",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_1",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_2",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_4",
+      "result": "PASS"
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_16",
+      "result": "PASS"
+    },
+    {
+      "name": "extreme_geometry_c0_arithmetic",
+      "result": "PASS"
+    },
+    {
+      "name": "extreme_geometry_c0_report",
+      "result": "PASS"
+    }
+  ]
+}

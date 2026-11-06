@@ -1,0 +1,209 @@
+{
+  "base_head": "ff57bd4693e1defd0e037269af15d5dcef28f9c0",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "ctest": {
+    "command": "ctest --test-dir build -C Release --output-on-failure",
+    "configuration": {
+      "HYPERCINE_BUILD_BENCHMARKS": false,
+      "HYPERCINE_BUILD_QUALITY_STATE_ONLY": true,
+      "HYPERCINE_BUILD_TESTS": true,
+      "HYPERCINE_BUILD_UPSTREAM": false,
+      "HYPERCINE_ENABLE_CUDA": false
+    },
+    "failed": 0,
+    "passed": 41,
+    "platform": "native Windows x64 CPU",
+    "skipped": 0,
+    "tests": [
+      {
+        "name": "issue321_provenance_contract",
+        "result": "PASS"
+      },
+      {
+        "name": "reference_decode_contract",
+        "result": "PASS"
+      },
+      {
+        "name": "diagnostic_summary_contract",
+        "result": "PASS"
+      },
+      {
+        "name": "decoder_differential_metrics",
+        "result": "PASS"
+      },
+      {
+        "name": "cpu_isa_selection",
+        "result": "PASS"
+      },
+      {
+        "name": "quality_state_unit",
+        "result": "PASS"
+      },
+      {
+        "name": "overbitrate_hysteresis_sdk_sequence",
+        "result": "PASS"
+      },
+      {
+        "name": "quality_state_probe_arguments",
+        "result": "PASS"
+      },
+      {
+        "name": "quality_cmake_mode_contract",
+        "result": "PASS"
+      },
+      {
+        "name": "decoder_attachment_292_workers_1",
+        "result": "PASS"
+      },
+      {
+        "name": "decoder_attachment_292_workers_2",
+        "result": "PASS"
+      },
+      {
+        "name": "decoder_attachment_292_workers_4",
+        "result": "PASS"
+      },
+      {
+        "name": "decoder_attachment_292_workers_16",
+        "result": "PASS"
+      },
+      {
+        "name": "rca160_public_evidence",
+        "result": "PASS"
+      },
+      {
+        "name": "decode_task_graph_workers_1",
+        "result": "PASS"
+      },
+      {
+        "name": "decode_task_graph_workers_2",
+        "result": "PASS"
+      },
+      {
+        "name": "decode_task_graph_workers_4",
+        "result": "PASS"
+      },
+      {
+        "name": "decode_task_graph_workers_16",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_contract_195_workers_1",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_contract_195_workers_2",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_contract_195_workers_4",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_contract_195_workers_16",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_1",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_2",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_4",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_16",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_1",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_2",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_4",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_16",
+        "result": "PASS"
+      },
+      {
+        "name": "decode_s3_plane",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_1",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_2",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_4",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_8",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_1",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_2",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_4",
+        "result": "PASS"
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_16",
+        "result": "PASS"
+      },
+      {
+        "name": "extreme_geometry_c0_arithmetic",
+        "result": "PASS"
+      },
+      {
+        "name": "extreme_geometry_c0_report",
+        "result": "PASS"
+      }
+    ],
+    "wall_seconds": 41.38
+  },
+  "date": "2026-10-31",
+  "file_sha256": {
+    "CMakeLists.txt": "1c4dcc96b25ecef860cafe1372b7ad1899b4c25b8294e288c5fe64f5b01d3d89",
+    "tests/test_issue321_provenance.py": "174299020d23d2848d3c06ae32b9eaf957ff590e49506ec221dc5dee316a91dd",
+    "tools/verify_issue321_provenance.py": "8d11939dbf4f3396c665d2705449a68a929a11c36f7a8520e15c0a15ddbdbe34"
+  },
+  "file_sha256_basis": "Executed working-tree bytes; historical 2026-10-30 inventories are unchanged.",
+  "limitations": [
+    "No new packet replay or historical execution attestation.",
+    "Hosted Windows/macOS/Linux CI has not been rerun for this local correction.",
+    "PR remains draft and issue #321 remains open."
+  ],
+  "provenance_unit_controls": 17,
+  "provenance_unit_result": "PASS",
+  "regression_before_fix": "Root-canonicalization control failed with ValueError: link input record differs.",
+  "retained_record_recheck": {
+    "archive_indexed_files_verified": 17,
+    "exact_library_inputs": "PASS",
+    "expected_parent_components": "PASS",
+    "private_paths_published": false,
+    "retained_link_records": 2,
+    "wrong_directory_same_basename_rejected": "PASS"
+  },
+  "scope": "Local working-tree correction; hosted CI on a committed revised head remains required."
+}

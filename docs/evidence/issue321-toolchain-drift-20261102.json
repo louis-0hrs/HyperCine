@@ -1,0 +1,25 @@
+{
+  "checker_sha256": "94a5c45b4845f9a484aa367c393b7494f5da736c8fc7973ff96395e94aa30342",
+  "compiler_record_sha256": "a5c5754928e40e21838b2182d534a58cf6724a42251b864672dac513f899f233",
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "current_compiler_sha256": "fe251ef50a1545b1b0835ee17b1e785459712b38d79e45b5c1d3d28970a36619",
+  "date": "2026-11-02",
+  "executed_from_head": "1554d403ff9b16dbbaa6bdace7853df5f9e5ab6a",
+  "historical_compiler_identity": "NOT_ESTABLISHED",
+  "limitations": [
+    "The retained record is not an authenticated historical process log.",
+    "A current executable hash cannot recover the historical compiler hash.",
+    "Matching versions alone do not bind source, headers, commands, environment or binaries.",
+    "No compilation, corpus export or historical execution proof is performed."
+  ],
+  "observed_version": "19.44.35229.0",
+  "platform": "native Windows x64 CPU",
+  "probe_arguments": [
+    "/Bv"
+  ],
+  "probe_exit_code": 2,
+  "recorded_version": "19.44.35228.0",
+  "scope": "Current local compiler probe versus retained CMake version; not historical attestation.",
+  "status": "TOOLCHAIN_VERSION_DRIFT",
+  "version_equal": false
+}
