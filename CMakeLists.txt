@@ -167,6 +167,9 @@ if(HYPERCINE_BUILD_TESTS)
     if(Python3_Interpreter_FOUND)
         add_test(NAME independent_ffmpeg_1080_contract COMMAND "${Python3_EXECUTABLE}" -B
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_observe_ffmpeg_1080.py")
+        # Corpus-free Windows provenance/origin/toolchain adversarial controls (#321).
+        add_test(NAME issue321_provenance_contract COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_issue321_provenance.py")
         # Strict test-only decoder evidence classifier, no original SDK needed.
         add_test(NAME reference_decode_contract COMMAND "${Python3_EXECUTABLE}" -B
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/reference_decode/test_contract.py")

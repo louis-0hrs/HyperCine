@@ -1,0 +1,403 @@
+{
+  "captures": {
+    "api": {
+      "binary": {
+        "bytes": 1021440,
+        "sha256": "6b1b88ddbfc45f56390e77e63ac4bcbb496723b86af292ac788a1531f6924d53"
+      },
+      "build_record": {
+        "compile_record_sha256": "f5711318a1d6777621e81589c50045e4c0d3df5b95a6de29cff8aefef6fbb9d2",
+        "compiler_id": "MSVC",
+        "compiler_record_sha256": "1ed505f284475901263f1eb5e215be5b0d8685e7955b1a987c43cb94384a3bb2",
+        "compiler_version": "19.44.35229.0",
+        "evidence_class": "retained_local_records_not_attestation",
+        "link_or_archive_record_sha256": "b23ea4cf280ca28c115acb4aedcc2645a565b930e14ef22a3280399abf3e79f8",
+        "selected_compile_flags": [
+          "/O2",
+          "/Ob2",
+          "/MD",
+          "/std:c++17"
+        ]
+      },
+      "cmake_recipe": {
+        "bytes": 446,
+        "sha256": "4ad8650b07f08f83b8d68c782cd029b985a2d94415cad4953aaa587d60a7ed77"
+      },
+      "source": {
+        "bytes": 2950,
+        "sha256": "564d9813e91f05ca11c70c549c72343a4ad9601721936c7fc53069a4c84cbdbe"
+      }
+    },
+    "state": {
+      "binary": {
+        "bytes": 1021440,
+        "sha256": "6e218944b0a5724c3da4e3482a9efe11fdfd3447a204b81d4456b03847e7106a"
+      },
+      "build_record": {
+        "compile_record_sha256": "510f335c66d0dce9886aa1a980c801d8e4a3adea4c37e95c0701072f302d5a63",
+        "compiler_id": "MSVC",
+        "compiler_record_sha256": "1ed505f284475901263f1eb5e215be5b0d8685e7955b1a987c43cb94384a3bb2",
+        "compiler_version": "19.44.35229.0",
+        "evidence_class": "retained_local_records_not_attestation",
+        "link_or_archive_record_sha256": "72c092b04c0e9e841fd14bf8ef92a10fb659be6849e568c9997302b352195bec",
+        "selected_compile_flags": [
+          "/O2",
+          "/Ob2",
+          "/MD",
+          "/std:c++17"
+        ]
+      },
+      "cmake_recipe": {
+        "bytes": 739,
+        "sha256": "ed45ce71003c6eb8d8449cc1304580d1cd696fa85e58a900c1550c30943973f4"
+      },
+      "source": {
+        "bytes": 3402,
+        "sha256": "63f1419cc0a7fcfbc57b3c00f732297379ab790253873aac8404981f11b9beb4"
+      }
+    }
+  },
+  "indexed_files_verified": 818,
+  "limitations": [
+    "Retained records are not a historical build or execution attestation.",
+    "Archive-to-pristine-source reproduction remains NOT_ESTABLISHED.",
+    "Historical generator seed and actual playback cadence remain NOT_MEASURED.",
+    "30 fps is the inspected SDK quantizer fallback, not measured playback.",
+    "Replay covers four first frames and three seven-frame state sequences only.",
+    "No independent pixel decoder, GPU or product qualification."
+  ],
+  "replay": {
+    "frames": 25,
+    "observations": {
+      "api": [
+        {
+          "bytes": 163452,
+          "frame": 0,
+          "normalized_equal": true,
+          "normalized_sha256": "1accc07424316f0e7a06f6298a7138bcf7f34720c8b41c0a6e4d48c61257b4fa",
+          "profile": "low",
+          "raw_equal": false
+        },
+        {
+          "bytes": 167256,
+          "frame": 0,
+          "normalized_equal": true,
+          "normalized_sha256": "71a25181a3a23a489e2739d54128abcb7805c200fd2ac88a51fe2be097e0cc6a",
+          "profile": "medium",
+          "raw_equal": false
+        },
+        {
+          "bytes": 170824,
+          "frame": 0,
+          "normalized_equal": true,
+          "normalized_sha256": "bf08c45d3194fbd8c8fdc8b3a1a01251bc9be2006530aadf277be0f8711bad72",
+          "profile": "high",
+          "raw_equal": false
+        },
+        {
+          "bytes": 173876,
+          "frame": 0,
+          "normalized_equal": true,
+          "normalized_sha256": "adc11de12eb518d2b920f80929585d9aaed2d25e1f39fd6f4502a72af6b21a3a",
+          "profile": "filmscan1",
+          "raw_equal": false
+        }
+      ],
+      "state": [
+        {
+          "bytes": 1655372,
+          "frame": 0,
+          "normalized_equal": true,
+          "normalized_sha256": "799f642a9168b747a2f5145bcb2fd657748f8da3a0f6913efb909f01f7bb91f4",
+          "profile": "low",
+          "raw_equal": false,
+          "sdk_state": [
+            0,
+            0,
+            13242976
+          ]
+        },
+        {
+          "bytes": 1655372,
+          "frame": 1,
+          "normalized_equal": true,
+          "normalized_sha256": "f2d7f848f4dd1152298b4aa097dd3f87bab0f810d4bc640d9ef78def986a2b5d",
+          "profile": "low",
+          "raw_equal": false,
+          "sdk_state": [
+            2,
+            0,
+            13242976
+          ]
+        },
+        {
+          "bytes": 440980,
+          "frame": 2,
+          "normalized_equal": true,
+          "normalized_sha256": "02b7c98e904096a93a55f5af1a7f7967245cb85f412f27a2a58293009e0d58d3",
+          "profile": "low",
+          "raw_equal": false,
+          "sdk_state": [
+            3,
+            0,
+            3527840
+          ]
+        },
+        {
+          "bytes": 440980,
+          "frame": 3,
+          "normalized_equal": true,
+          "normalized_sha256": "444e9900021bf4226967b3200b12728007e507ef29cb1318b38f0fa24eee07a9",
+          "profile": "low",
+          "raw_equal": false,
+          "sdk_state": [
+            2,
+            0,
+            3527840
+          ]
+        },
+        {
+          "bytes": 440980,
+          "frame": 4,
+          "normalized_equal": true,
+          "normalized_sha256": "2267d6936a83e7f6d78dddc7d765149b1329985e9e5e4ab76ab54dc52467bea0",
+          "profile": "low",
+          "raw_equal": false,
+          "sdk_state": [
+            1,
+            0,
+            3527840
+          ]
+        },
+        {
+          "bytes": 163452,
+          "frame": 5,
+          "normalized_equal": true,
+          "normalized_sha256": "e15efdc9e6643518ea5db203a7984011b590919debb5f27851515dfe66e69280",
+          "profile": "low",
+          "raw_equal": false,
+          "sdk_state": [
+            1,
+            0,
+            1307616
+          ]
+        },
+        {
+          "bytes": 163452,
+          "frame": 6,
+          "normalized_equal": true,
+          "normalized_sha256": "0848a945a271534a2046d7020ec08890172b09943775200c64dc6b34abe71175",
+          "profile": "low",
+          "raw_equal": false,
+          "sdk_state": [
+            0,
+            0,
+            1307616
+          ]
+        },
+        {
+          "bytes": 2117644,
+          "frame": 0,
+          "normalized_equal": true,
+          "normalized_sha256": "4a445c6745bad3b2677c6a2fbba9a790ddaf441e6397e9836934da29a681b0f2",
+          "profile": "medium",
+          "raw_equal": false,
+          "sdk_state": [
+            0,
+            0,
+            16941152
+          ]
+        },
+        {
+          "bytes": 1834008,
+          "frame": 1,
+          "normalized_equal": true,
+          "normalized_sha256": "a5d6449c50c877b32aab0e34443e1b673484c8324e4532c7662ce57992a86bef",
+          "profile": "medium",
+          "raw_equal": false,
+          "sdk_state": [
+            2,
+            0,
+            14672064
+          ]
+        },
+        {
+          "bytes": 520400,
+          "frame": 2,
+          "normalized_equal": true,
+          "normalized_sha256": "e4d75213977c103a9eb1b980778ffcead01fb54c83b0643c1fb204f800003887",
+          "profile": "medium",
+          "raw_equal": false,
+          "sdk_state": [
+            3,
+            0,
+            4163200
+          ]
+        },
+        {
+          "bytes": 520400,
+          "frame": 3,
+          "normalized_equal": true,
+          "normalized_sha256": "8b63b1baac40d3d18914e433a73d7b08aae205b26ee3db4af40f3469167fb4fc",
+          "profile": "medium",
+          "raw_equal": false,
+          "sdk_state": [
+            2,
+            0,
+            4163200
+          ]
+        },
+        {
+          "bytes": 520400,
+          "frame": 4,
+          "normalized_equal": true,
+          "normalized_sha256": "d232834d61a2d6d0cdc4454b4ba19891d2093864040942304e951f6c8159a8a7",
+          "profile": "medium",
+          "raw_equal": false,
+          "sdk_state": [
+            1,
+            0,
+            4163200
+          ]
+        },
+        {
+          "bytes": 165024,
+          "frame": 5,
+          "normalized_equal": true,
+          "normalized_sha256": "43f9844726444d9b7d26e0e076ca7f93751933233b9f2c64eb6ef0794eb955d5",
+          "profile": "medium",
+          "raw_equal": false,
+          "sdk_state": [
+            1,
+            0,
+            1320192
+          ]
+        },
+        {
+          "bytes": 167256,
+          "frame": 6,
+          "normalized_equal": true,
+          "normalized_sha256": "02316529dab1c4650f29c6132ca0073c4384859316d27ea51e5d9352196962be",
+          "profile": "medium",
+          "raw_equal": false,
+          "sdk_state": [
+            0,
+            0,
+            1338048
+          ]
+        },
+        {
+          "bytes": 2712844,
+          "frame": 0,
+          "normalized_equal": true,
+          "normalized_sha256": "ce8f09ac9f9fe065cd2d6a29dec563178819c67ba1a485fe5e7932bca8e03031",
+          "profile": "high",
+          "raw_equal": false,
+          "sdk_state": [
+            0,
+            0,
+            21702752
+          ]
+        },
+        {
+          "bytes": 2336132,
+          "frame": 1,
+          "normalized_equal": true,
+          "normalized_sha256": "7fe05ecd1e6afeccbce32c178a016432b75968c5348a24a540a83147bae444a6",
+          "profile": "high",
+          "raw_equal": false,
+          "sdk_state": [
+            2,
+            0,
+            18689056
+          ]
+        },
+        {
+          "bytes": 525552,
+          "frame": 2,
+          "normalized_equal": true,
+          "normalized_sha256": "a43d1e300013ee3f40f19001f3b7f1149d57f202fefc6e0b57dd3c7b776cd038",
+          "profile": "high",
+          "raw_equal": false,
+          "sdk_state": [
+            3,
+            0,
+            4204416
+          ]
+        },
+        {
+          "bytes": 525552,
+          "frame": 3,
+          "normalized_equal": true,
+          "normalized_sha256": "db0267acfe8cf482d04320c183587c2b7ff1bd692be16d10237bf7f026f1347b",
+          "profile": "high",
+          "raw_equal": false,
+          "sdk_state": [
+            2,
+            0,
+            4204416
+          ]
+        },
+        {
+          "bytes": 525552,
+          "frame": 4,
+          "normalized_equal": true,
+          "normalized_sha256": "923c38d0c3856604ef0c7926b8defce38c8af93041663b55f01c8336fc3ac98c",
+          "profile": "high",
+          "raw_equal": false,
+          "sdk_state": [
+            1,
+            0,
+            4204416
+          ]
+        },
+        {
+          "bytes": 168408,
+          "frame": 5,
+          "normalized_equal": true,
+          "normalized_sha256": "f1590c78f3a132a33d4538ca566af5610a35825ef48a33074667b62ea1f5f22b",
+          "profile": "high",
+          "raw_equal": false,
+          "sdk_state": [
+            1,
+            0,
+            1347264
+          ]
+        },
+        {
+          "bytes": 170824,
+          "frame": 6,
+          "normalized_equal": true,
+          "normalized_sha256": "b1ca46a44e48efa031479da176c7fc697ed44dbe47854599d0efbf2a2067bb95",
+          "profile": "high",
+          "raw_equal": false,
+          "sdk_state": [
+            0,
+            0,
+            1366592
+          ]
+        }
+      ]
+    },
+    "status": "PASS"
+  },
+  "scope": "retained Windows artifacts and bounded replay; no conformance claim",
+  "sdk_build_record": {
+    "compile_record_sha256": "eb4acfe3f833bbd2791c4d97c7b1d7aa453ab6c5f907a038da7199ea94ea2b57",
+    "compiler_id": "MSVC",
+    "compiler_record_sha256": "a5c5754928e40e21838b2182d534a58cf6724a42251b864672dac513f899f233",
+    "compiler_version": "19.44.35228.0",
+    "evidence_class": "retained_local_records_not_attestation",
+    "link_or_archive_record_sha256": "849d50fe994d32bf29ec733dc969ca267ee1716ef369d7e0c4f9583fbd9d88aa",
+    "selected_compile_flags": [
+      "/O2",
+      "/Ob2",
+      "/MD",
+      "/std:c++17"
+    ]
+  },
+  "sdk_library": {
+    "bytes": 2778866,
+    "sha256": "65ba13a8f7d26f5c94cc18520a6e7ce1e4ca5b35ae084d65b5b16b022b7fc84f"
+  }
+}
