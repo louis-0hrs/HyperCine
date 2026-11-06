@@ -157,6 +157,45 @@ class ArchiveOrigin(unittest.TestCase):
             with self.assertRaises(ValueError):
                 origin.archive_objects(data)
 
+    def test_origin_cli_rejects_corpus_and_sdk_tree_outputs_before_inspection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sdk = root / 'retained-sdk'
+            golden = root / 'private-golden'
+            sdk.mkdir()
+            golden.mkdir()
+            for output in (sdk / 'report.json', golden / 'report.json'):
+                with self.subTest(target=output.parent.name), \
+                        patch.dict(origin.os.environ, {'HYPERCINE_GOLDEN_DIR': str(golden)}), \
+                        patch.object(sys, 'argv', ['origin', '--sdk-source-root', str(sdk),
+                            '--compile-record', str(root / 'dummy.tlog'),
+                            '--library', str(root / 'dummy.lib'), '--output', str(output)]), \
+                        patch.object(origin, 'inspect') as inspect:
+                    self.assertEqual(origin.main(), 1)
+                    inspect.assert_not_called()
+                    self.assertFalse(output.exists())
+
+    def test_origin_cli_external_new_receipt_and_existing_output_refusal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sdk = root / 'retained-sdk'
+            golden = root / 'private-golden'
+            sdk.mkdir()
+            golden.mkdir()
+            output = root / 'receipt.json'
+            args = ['origin', '--sdk-source-root', str(sdk),
+                    '--compile-record', str(root / 'dummy.tlog'),
+                    '--library', str(root / 'dummy.lib'), '--output', str(output)]
+            with patch.dict(origin.os.environ, {'HYPERCINE_GOLDEN_DIR': str(golden)}), \
+                    patch.object(sys, 'argv', args), \
+                    patch.object(origin, 'inspect', return_value={'scope': 'synthetic'}) as inspect:
+                self.assertEqual(origin.main(), 0)
+                self.assertEqual(json.loads(output.read_text()), {'scope': 'synthetic'})
+                self.assertEqual(inspect.call_count, 1)
+                self.assertEqual(origin.main(), 1)
+                self.assertEqual(inspect.call_count, 1)
+                self.assertEqual(json.loads(output.read_text()), {'scope': 'synthetic'})
+
 
 class Provenance(unittest.TestCase):
     def setUp(self):
