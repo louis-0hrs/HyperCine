@@ -24,6 +24,8 @@ class ToolchainProbe(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
+        self.sdk_root = self.root / 'retained-sdk'
+        self.sdk_root.mkdir()
         self.compiler = self.root / 'cl.exe'
         self.compiler.write_bytes(b'synthetic compiler bytes')
         self.record = self.root / 'CMakeCXXCompiler.cmake'
@@ -100,6 +102,7 @@ class ToolchainProbe(unittest.TestCase):
 
     def test_cli_reports_drift_with_nonzero_exit(self):
         with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--sdk-source-root', str(self.sdk_root),
                                        '--output', str(self.root / 'report.json')]), \
                 patch.object(toolchain.subprocess, 'run', return_value=
                              self.process(b'19.44.35229.0')):
@@ -111,6 +114,7 @@ class ToolchainProbe(unittest.TestCase):
         output = self.root / 'report.json'
         output.write_bytes(b'original receipt')
         with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--sdk-source-root', str(self.sdk_root),
                                        '--output', str(output)]), \
                 patch.object(toolchain.subprocess, 'run') as run:
             self.assertEqual(toolchain.main(), 1)
@@ -120,10 +124,23 @@ class ToolchainProbe(unittest.TestCase):
     def test_corpus_output_is_rejected_before_probe(self):
         with patch.dict(toolchain.os.environ, {'HYPERCINE_GOLDEN_DIR': str(self.root)}), \
                 patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--sdk-source-root', str(self.sdk_root),
                                           '--output', str(self.root / 'report.json')]), \
                 patch.object(toolchain.subprocess, 'run') as run:
             self.assertEqual(toolchain.main(), 1)
         run.assert_not_called()
+
+
+    def test_sdk_source_tree_output_is_rejected_before_probe(self):
+        for suffix in ('report.json', 'unused/../report.json'):
+            with self.subTest(suffix=suffix), \
+                    patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                        '--sdk-source-root', str(self.sdk_root),
+                        '--output', str(self.sdk_root / suffix)]), \
+                    patch.object(toolchain.subprocess, 'run') as run:
+                self.assertEqual(toolchain.main(), 1)
+                run.assert_not_called()
+            self.assertFalse((self.sdk_root / 'report.json').exists())
 
 
 class ArchiveOrigin(unittest.TestCase):
