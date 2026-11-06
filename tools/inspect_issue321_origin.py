@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import ntpath
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -108,8 +109,18 @@ def main():
         parser.add_argument('--' + option, type=Path, required=True)
     args = parser.parse_args()
     try:
+        # Reports must never be created within the private corpus or retained
+        # SDK source tree. Resolve symlinked parents before the first input read.
+        output = args.output.resolve()
+        source_root = args.sdk_source_root.resolve()
+        require(output != source_root and source_root not in output.parents)
+        golden_env = os.environ.get('HYPERCINE_GOLDEN_DIR')
+        if golden_env:
+            golden_root = Path(golden_env).resolve()
+            require(output != golden_root and golden_root not in output.parents)
+        require(not output.exists())
         report = inspect(args.sdk_source_root, args.compile_record, args.library)
-        with args.output.open('x', encoding='utf-8') as stream:
+        with output.open('x', encoding='utf-8') as stream:
             json.dump(report, stream, indent=2, sort_keys=True)
             stream.write('\n')
         print('Origin observations written; inspect equality fields and scope.')
