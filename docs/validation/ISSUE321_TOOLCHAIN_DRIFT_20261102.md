@@ -20,6 +20,16 @@ installed bytes versus retained records, not proof of when or why they changed.
 
 ## Local recovery check
 
+> **2026-11-06 forward-port security update (Draft #355, not yet tested):**
+> The original tool executed whatever `CMAKE_CXX_COMPILER` the retained
+> record selected. That is now fail-closed behind an independently provided
+> trusted path and current SHA-256 pin. Four additional *synthetic* regression
+> methods check substituted `cl.exe`, mismatching SHA, missing CLI trust
+> arguments, and no receipt/execution on refusal. Total corpus-free methods
+> on the current integration source: **40**, pending native Windows execution.
+> Historic measurements and the older 31-method suite below still refer only
+> to their dated historical run, not the new head. No SDK provenance upgrade.
+
 A read-only inventory of the installed Visual Studio 2022 toolsets found one
 compiler, 19.44.35229.0. The local installer package cache contains x64 target
 toolset packages 14.44.35219 and 14.44.35229; it does not contain 14.44.35228.
@@ -27,9 +37,13 @@ The exact recorded compiler was therefore not recoverable from the installed
 toolset or this local package cache. No compiler was installed or replaced,
 and no controlled rebuild was attempted with the mismatched version.
 
-The new stdlib-only `tools/verify_issue321_toolchain.py` reads the explicitly
-selected local CMake record and invokes its trusted compiler with `/Bv`, without
-compiling. It hashes the record and current compiler and checks both remain
+The stdlib-only `tools/verify_issue321_toolchain.py` treats the retained
+CMake compiler path as **untrusted comparison data**. Before invoking `/Bv`,
+it requires a separate operator-selected local `cl.exe` and an independently
+verified SHA-256 pin for its *current bytes*. It resolves and compares both
+paths, hashes the selected executable, and refuses to start a different
+compiler even if the retained record contains well-formed CMake syntax.
+It does not compile. It hashes the record and current compiler and checks both remain
 unchanged during the probe. It rejects missing/ambiguous records, missing or
 ambiguous versions, failed processes and timeouts. Public JSON excludes private
 paths and raw diagnostics. Exit 0 means version agreement only; exit 2 writes
@@ -41,12 +55,18 @@ Reproduce on native Windows with a locally bound path to the retained record:
 ```powershell
 python -B tools/verify_issue321_toolchain.py `
   --compiler-record "$env:HYPERCINE_ISSUE321_COMPILER_RECORD" `
+  --trusted-compiler "$env:HYPERCINE_ISSUE321_TRUSTED_COMPILER" `
+  --trusted-compiler-sha256 "$env:HYPERCINE_ISSUE321_TRUSTED_COMPILER_SHA256" `
   --sdk-source-root "$env:HYPERCINE_ISSUE321_SDK_SOURCE_ROOT" `
   --output build/issue321-toolchain-new.json
 ```
 
-The recorded compiler path is executed, so use a locally trusted record. The
-CLI requires an existing, locally bound retained SDK source root; it refuses
+The **separately specified trusted compiler** is executed. Establish its path
+and current SHA-256 from an independent local administrator/verified install
+source, **not** by copying the path or hash from the retained CMake record.
+The record is a comparison target, not an execution authority. Do not publish
+local absolute paths. The CLI requires an existing, locally bound retained SDK
+source root; it refuses
 report paths inside either that source tree or the configured Golden corpus,
 including normalized parent components. Bind `HYPERCINE_ISSUE321_SDK_SOURCE_ROOT`
 locally to the retained SDK root, not to a public worktree. It needs read access
