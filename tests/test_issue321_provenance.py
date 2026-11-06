@@ -198,6 +198,39 @@ class ArchiveOrigin(unittest.TestCase):
 
 
 class Provenance(unittest.TestCase):
+    def test_provenance_cli_refuses_historical_source_output_before_audit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            golden, historical = base / 'private-golden', base / 'retained-sdk'
+            golden.mkdir()
+            historical.mkdir()
+            for report, replay_dir in ((historical / 'receipt.json', None),
+                                       (base / 'external-receipt.json', historical / 'replay'),
+                                       (historical / 'a/../receipt.json', None)):
+                with self.subTest(report=report, replay_dir=replay_dir), \
+                        patch.object(sys, 'argv', ['verify', '--golden-root', str(golden),
+                            '--historical-root', str(historical),
+                            '--sdk-library', str(base / 'library.lib'),
+                            '--output', str(report)] +
+                            (['--replay-dir', str(replay_dir)] if replay_dir else [])), \
+                        patch.object(v, 'run') as audit:
+                    self.assertEqual(v.main(), 1)
+                    audit.assert_not_called()
+                self.assertFalse((historical / 'receipt.json').exists())
+                self.assertFalse((historical / 'replay').exists())
+
+    def test_provenance_run_refuses_historical_replay_before_private_reads(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            golden, historical = base / 'private-golden', base / 'retained-sdk'
+            golden.mkdir()
+            historical.mkdir()
+            with patch.object(v, 'verify_index') as index:
+                with self.assertRaises(ValueError):
+                    v.run(golden, historical, base / 'library.lib', historical / 'new-replay')
+                index.assert_not_called()
+            self.assertFalse((historical / 'new-replay').exists())
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
