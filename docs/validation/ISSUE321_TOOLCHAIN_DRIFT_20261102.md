@@ -41,13 +41,17 @@ Reproduce on native Windows with a locally bound path to the retained record:
 ```powershell
 python -B tools/verify_issue321_toolchain.py `
   --compiler-record "$env:HYPERCINE_ISSUE321_COMPILER_RECORD" `
+  --sdk-source-root "$env:HYPERCINE_ISSUE321_SDK_SOURCE_ROOT" `
   --output build/issue321-toolchain-new.json
 ```
 
 The recorded compiler path is executed, so use a locally trusted record. The
-CLI checks the configured corpus boundary and therefore needs read access to
-that location even though the probe performs no corpus writes. Synthetic tests
-are corpus-free and invoke no actual compiler.
+CLI requires an existing, locally bound retained SDK source root; it refuses
+report paths inside either that source tree or the configured Golden corpus,
+including normalized parent components. Bind `HYPERCINE_ISSUE321_SDK_SOURCE_ROOT`
+locally to the retained SDK root, not to a public worktree. It needs read access
+to the protected root only for path checks; it writes no files there. Synthetic
+tests are corpus-free and invoke no actual compiler.
 
 The [machine-readable receipt](../evidence/issue321-toolchain-drift-20261102.json)
 binds this measurement and the checker source. Ten added deterministic controls
