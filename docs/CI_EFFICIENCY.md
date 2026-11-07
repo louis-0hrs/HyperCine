@@ -55,14 +55,14 @@ A skipped check, no run and a cancelled superseded run are **not PASS**.
 ## Cross-PR mode boundary: Mac-only relay proposal (#352/#353)
 
 The later [#353 Mac-only proposal](https://github.com/louis-0hrs/HyperCine/pull/353)
-changes the *execution routing* for exactly three Standalone macOS lanes,
-not the owner’s non-Mac hosted coverage or the required Actions-owned privacy
-job. The five-row matrix above describes #350 **by itself**; do not treat that
+changes the *execution routing* for exactly three macOS jobs (two Standalone lanes and one Quality State lane),
+not the owner's non-Mac hosted coverage or the required Actions-owned privacy
+job. The event-routing matrix above describes #350 **by itself**; do not treat that
 hosted-Mac schedule as the production contract after a separately reviewed
 #353 stack integration. #353 remains Draft: these descriptions are intended
 future states, **not** an assertion of deployment or check success.
 
-| Explicitly selected state | Windows/Linux/CUDA jobs | Three macOS Standalone lanes | Publication privacy |
+| Explicitly selected state | Windows/Linux/CUDA jobs | Three macOS jobs (2 Standalone + 1 Quality) | Publication privacy |
 | --- | --- | --- | --- |
 | #350-only, workflows enabled | Hosted where trigger/path filters match | Hosted where trigger/path filters match | Actions-owned, required |
 | #353 Mac-only mode, Mac healthy, workflows enabled | Hosted where trigger/path filters match | Private relay, independently verified; **no automatic hosted Mac jobs** | Actions-owned, required |
@@ -102,8 +102,10 @@ non-skipped qualification PR revision and verify:
 - Required publication privacy job passes on the final review head.
 - For #350-only hosted mode, all five Standalone jobs, CPU Reference and
   applicable Python/Quality/CUDA checks report real results. For a separately
-  authorized #353 Mac-only stack, two non-Mac Standalone jobs remain hosted
-  while three actual Mac lanes require separately qualified relay receipts;
+  authorized #353 Mac-only stack, three non-Mac Standalone jobs (Windows
+  Release, Linux Release, Linux ASan/UBSan) plus Windows/Linux Quality State
+  remain hosted, while the two macOS Standalone jobs and one macOS Quality
+  State job require separately qualified relay receipts;
   do not require or launch paid hosted Mac jobs by accident. No changed
   test inventories or weakened thresholds in either mode.
 - Push to a development branch does not duplicate hosted compile matrices;
