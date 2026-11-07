@@ -392,6 +392,32 @@ class HostedDedupIntegration(unittest.TestCase):
                          "privacy-guard.yml"}.isdisjoint(actual)
                     )
 
+    def test_tag_push_ignores_path_filters(self) -> None:
+        """Actions evaluates tag filters, not paths, for a tag push."""
+        event = next(e for e in wem.scenarios() if e.label == "tag push")
+        event.changed = ["docs/unrelated-change.md"]
+        scheduled = {item.workflow for item in wem.plan(BASE, event)}
+        self.assertTrue(
+            {"ci-cpu.yml", "python-compat.yml", "quality-state.yml"}.issubset(scheduled),
+            f"tag-triggered reference/quality jobs missing: {sorted(scheduled)}",
+        )
+        self.assertTrue(
+            {"ci-standalone.yml", "ci-cuda-build.yml", "privacy-guard.yml"}.isdisjoint(scheduled)
+        )
+
+    def test_tag_only_push_filter_never_schedules_branch(self) -> None:
+        """Removing a branches filter must not let tag-only CPU run on feature/main pushes."""
+        mutant = docs()
+        del mutant["ci-cpu.yml"]["on"]["push"]["branches"]
+        for label in ("feature branch push with open pr", "main push"):
+            with self.subTest(event=label):
+                event = next(e for e in wem.scenarios() if e.label == label)
+                self.assertNotIn(
+                    "ci-cpu.yml", {item.workflow for item in wem.plan(mutant, event)}
+                )
+        event = next(e for e in wem.scenarios() if e.label == "tag push")
+        self.assertIn("ci-cpu.yml", {item.workflow for item in wem.plan(mutant, event)})
+
     def test_each_tag_trigger_loss_is_detected(self) -> None:
         """One-at-a-time negative controls for the retained tag qualifiers."""
         event = next(e for e in wem.scenarios() if e.label == "tag push")
