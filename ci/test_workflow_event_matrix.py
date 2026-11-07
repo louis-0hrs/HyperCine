@@ -325,6 +325,85 @@ class SelfHostedEnabled(unittest.TestCase):
                 self.assertFalse(wem._is_self_hosted(item.labels), event.label)
 
 
+
+class HostedDedupIntegration(unittest.TestCase):
+    """Regression controls for #350 event dedup combined with #353 Mac-only routing.
+
+    This tests YAML scheduling decisions, NOT real GitHub Actions dispatches,
+    check conclusions or private Mac runner execution.
+    """
+
+    def test_feature_push_suppresses_duplicate_compute_but_keeps_privacy(self) -> None:
+        event = next(e for e in wem.scenarios()
+                     if e.label == "feature branch push with open pr")
+        event.changed = [
+            "CMakeLists.txt",
+            "tools/rca160_all_channel_contract.py",
+            "src/core/quality_state.cpp",
+        ]
+        rows = wem.plan(BASE, event)
+        compute = {"ci-cpu.yml", "ci-standalone.yml", "python-compat.yml",
+                   "quality-state.yml"}
+        self.assertTrue(compute.isdisjoint({item.workflow for item in rows}))
+        self.assertEqual(1, len(wem._by(rows, "privacy-guard.yml",
+                                        "publication-privacy")))
+        self.assertEqual([], wem._by(rows, "privacy-guard.yml",
+                                     "windows-installed-hooks"))
+
+    def test_branch_push_mutations_reintroduce_duplicate_compute(self) -> None:
+        event = next(e for e in wem.scenarios()
+                     if e.label == "feature branch push with open pr")
+        event.changed = [
+            "CMakeLists.txt",
+            "tools/rca160_all_channel_contract.py",
+            "src/core/quality_state.cpp",
+        ]
+        for name in ("ci-cpu.yml", "ci-standalone.yml",
+                     "python-compat.yml", "quality-state.yml"):
+            with self.subTest(workflow=name):
+                changed = docs()
+                changed[name]["on"]["push"]["branches"] = ["**"]
+                self.assertTrue(any(row.workflow == name
+                                    for row in wem.plan(changed, event)))
+                self.assertEqual(1, len(wem._by(wem.plan(changed, event),
+                                                "privacy-guard.yml",
+                                                "publication-privacy")))
+
+    def test_same_pr_supersedes_only_its_workflow_run(self) -> None:
+        pr = next(e for e in wem.scenarios()
+                  if e.label == "pr with source changes")
+        main = next(e for e in wem.scenarios() if e.label == "main push")
+        for name, job in (("ci-standalone.yml", "standalone"),
+                          ("quality-state.yml", "quality-state")):
+            with self.subTest(workflow=name):
+                old = wem._by(wem.plan(BASE, pr), name, job)
+                new = wem._by(wem.plan(BASE, wem.replace(pr, run_id="2099")), name, job)
+                self.assertTrue(old and new)
+                self.assertEqual({row.group for row in old},
+                                 {row.group for row in new})
+                self.assertTrue(BASE[name]["concurrency"]["cancel-in-progress"])
+                first = wem._by(wem.plan(BASE, main), name, job)
+                second = wem._by(wem.plan(BASE, wem.replace(main, run_id="2099")), name, job)
+                self.assertTrue(first and second)
+                self.assertNotEqual({row.group for row in first},
+                                    {row.group for row in second})
+                self.assertNotEqual({row.group for row in old},
+                                    {row.group for row in first})
+
+    def test_default_mac_never_hosted_while_nonmac_pr_remains(self) -> None:
+        pr = next(e for e in wem.scenarios()
+                  if e.label == "pr with source changes")
+        rows = wem.plan(BASE, pr)
+        standalone_rows = wem._by(rows, "ci-standalone.yml", "standalone")
+        quality_rows = wem._by(rows, "quality-state.yml", "quality-state")
+        self.assertEqual(3, len(standalone_rows))
+        self.assertEqual(2, len(quality_rows))
+        self.assertFalse(any(row.labels == ["macos-15"] for row in rows))
+        self.assertEqual(1, len(wem._by(rows, "privacy-guard.yml",
+                                        "publication-privacy")))
+
+
+
 class FailClosed(unittest.TestCase):
     def test_unsupported_syntax_raises(self) -> None:
         with self.assertRaises(wem.UnsupportedExpression):
