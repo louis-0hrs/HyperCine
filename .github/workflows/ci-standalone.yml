@@ -15,7 +15,7 @@ on:
         type: string
         default: ''
   push:
-    branches: ['**']
+    branches: ['main']
     paths:
       - 'CMakeLists.txt'
       - 'cmake/**'
@@ -40,6 +40,11 @@ on:
 
 permissions:
   contents: read
+
+# Cancel superseded PR heads; retain independent main/manual run IDs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   standalone:

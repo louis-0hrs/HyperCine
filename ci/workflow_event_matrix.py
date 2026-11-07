@@ -467,12 +467,21 @@ def trigger_matches(on_block: Any, event: Event) -> bool:
         if event.name in ("push", "pull_request"):
             branches = trigger.get("branches")
             tags = trigger.get("tags")
-            if event.name == "push" and tags and event.ref_type == "tag":
-                if not any(glob_match(pattern, event.ref_name) for pattern in tags):
+            if event.name == "push" and event.ref_type == "tag":
+                # GitHub does not evaluate paths/paths-ignore for tag pushes.
+                # A workflow with only a branches filter cannot run on tags.
+                if tags is None and branches is not None:
                     return False
-            elif branches:
-                if event.ref_type == "tag":
+                if tags is not None and not any(
+                    glob_match(pattern, event.ref_name) for pattern in tags
+                ):
                     return False
+                return True
+            if event.name == "push" and event.ref_type == "branch":
+                # Conversely, tag-only filters do not admit branch pushes.
+                if branches is None and tags is not None:
+                    return False
+            if branches:
                 if not any(glob_match(pattern, event.ref_name) for pattern in branches):
                     return False
         return _paths_ok(trigger, event)
