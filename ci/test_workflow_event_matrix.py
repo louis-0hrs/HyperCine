@@ -405,6 +405,33 @@ class HostedDedupIntegration(unittest.TestCase):
             {"ci-standalone.yml", "ci-cuda-build.yml", "privacy-guard.yml"}.isdisjoint(scheduled)
         )
 
+    def test_ref_glob_slash_behavior_matches_actions(self) -> None:
+        """Single-star tag filters must not include tags with slash."""
+        event = next(e for e in wem.scenarios() if e.label == "tag push")
+        nested = wem.replace(event, ref="refs/tags/release/v1.0",
+                             ref_name="release/v1.0")
+        actual = {row.workflow for row in wem.plan(BASE, nested)}
+        self.assertNotIn("ci-cpu.yml", actual)  # tags: ['*']
+        self.assertIn("python-compat.yml", actual)  # tags: ['**']
+        self.assertIn("quality-state.yml", actual)  # tags: ['**']
+        self.assertTrue(wem.ref_glob_match("release/*", "release/v1.0"))
+        self.assertFalse(wem.ref_glob_match("release/*", "release/rc/v1.0"))
+        self.assertTrue(wem.ref_glob_match("release/**", "release/rc/v1.0"))
+        self.assertFalse(wem.ref_glob_match("*", "release/v1.0"))
+
+    def test_nested_branch_does_not_match_single_star(self) -> None:
+        """A feature/* rule covers one segment, not nested branch refs."""
+        mutant = docs()
+        mutant["ci-cpu.yml"]["on"]["push"]["branches"] = ["feature/*"]
+        event = next(e for e in wem.scenarios()
+                     if e.label == "feature branch push with open pr")
+        shallow = {row.workflow for row in wem.plan(mutant, event)}
+        self.assertIn("ci-cpu.yml", shallow)
+        deep = wem.replace(event, ref="refs/heads/feature/rc/x",
+                           ref_name="feature/rc/x")
+        actual = {row.workflow for row in wem.plan(mutant, deep)}
+        self.assertNotIn("ci-cpu.yml", actual)
+
     def test_tag_only_push_filter_never_schedules_branch(self) -> None:
         """Removing a branches filter must not let tag-only CPU run on feature/main pushes."""
         mutant = docs()

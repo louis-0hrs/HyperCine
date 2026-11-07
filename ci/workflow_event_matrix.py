@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import json
+import re
 import os
 import sys
 from dataclasses import dataclass, field, replace
@@ -414,6 +415,33 @@ def glob_match(pattern: str, path: str) -> bool:
     return fnmatch.fnmatchcase(path, pattern)
 
 
+
+def ref_glob_match(pattern: str, name: str) -> bool:
+    """Match supported Actions branch/tag globs with slash-sensitive '*'.
+
+    Python fnmatch allows '*' to consume '/', unlike GitHub Actions.
+    '**' may consume slash. Unsupported advanced syntax fails closed.
+    File-path globs use the existing separate matcher.
+    """
+    parts: list[str] = []
+    i = 0
+    while i < len(pattern):
+        char = pattern[i]
+        if char == "*":
+            if i + 1 < len(pattern) and pattern[i + 1] == "*":
+                parts.append(".*")
+                i += 2
+            else:
+                parts.append("[^/]*")
+                i += 1
+        elif char in "?+![]\\{}":
+            raise UnsupportedExpression(f"unsupported Actions ref glob {pattern!r}")
+        else:
+            parts.append(re.escape(char))
+            i += 1
+    return re.fullmatch("".join(parts), name) is not None
+
+
 @dataclass
 class Event:
     """One synthetic Actions event."""
@@ -473,7 +501,7 @@ def trigger_matches(on_block: Any, event: Event) -> bool:
                 if tags is None and branches is not None:
                     return False
                 if tags is not None and not any(
-                    glob_match(pattern, event.ref_name) for pattern in tags
+                    ref_glob_match(pattern, event.ref_name) for pattern in tags
                 ):
                     return False
                 return True
@@ -482,7 +510,7 @@ def trigger_matches(on_block: Any, event: Event) -> bool:
                 if branches is None and tags is not None:
                     return False
             if branches:
-                if not any(glob_match(pattern, event.ref_name) for pattern in branches):
+                if not any(ref_glob_match(pattern, event.ref_name) for pattern in branches):
                     return False
         return _paths_ok(trigger, event)
     raise UnsupportedExpression(f"unsupported `on:` block {on_block!r}")
