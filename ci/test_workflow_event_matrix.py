@@ -369,6 +369,43 @@ class HostedDedupIntegration(unittest.TestCase):
                                                 "privacy-guard.yml",
                                                 "publication-privacy")))
 
+    def test_main_and_tag_keep_existing_compute_coverage(self) -> None:
+        """Dedup feature pushes without silently dropping main or tag gates."""
+        expected = {
+            "main push": {
+                "ci-cpu.yml", "ci-standalone.yml", "ci-cuda-build.yml",
+                "python-compat.yml", "quality-state.yml", "privacy-guard.yml",
+            },
+            "tag push": {
+                "ci-cpu.yml", "python-compat.yml", "quality-state.yml",
+            },
+        }
+        for label, required in expected.items():
+            with self.subTest(event=label):
+                event = next(e for e in wem.scenarios() if e.label == label)
+                actual = {item.workflow for item in wem.plan(BASE, event)}
+                self.assertTrue(required.issubset(actual),
+                                f"{label} missing {sorted(required - actual)}")
+                if label == "tag push":
+                    self.assertTrue(
+                        {"ci-standalone.yml", "ci-cuda-build.yml",
+                         "privacy-guard.yml"}.isdisjoint(actual)
+                    )
+
+    def test_each_tag_trigger_loss_is_detected(self) -> None:
+        """One-at-a-time negative controls for the retained tag qualifiers."""
+        event = next(e for e in wem.scenarios() if e.label == "tag push")
+        required = {"ci-cpu.yml", "python-compat.yml", "quality-state.yml"}
+        baseline = {item.workflow for item in wem.plan(BASE, event)}
+        self.assertTrue(required.issubset(baseline))
+        for name in sorted(required):
+            with self.subTest(workflow=name):
+                mutant = docs()
+                del mutant[name]["on"]["push"]["tags"]
+                actual = {item.workflow for item in wem.plan(mutant, event)}
+                self.assertNotIn(name, actual)
+                self.assertFalse(required.issubset(actual))
+
     def test_same_pr_supersedes_only_its_workflow_run(self) -> None:
         pr = next(e for e in wem.scenarios()
                   if e.label == "pr with source changes")
