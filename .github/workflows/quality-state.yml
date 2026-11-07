@@ -4,6 +4,8 @@ name: Portable quality state
 
 on:
   push:
+    branches: ['main']
+    tags: ['**']
     paths:
       - 'include/hypercine/quality_state.h'
       - 'src/core/quality_state.cpp'
@@ -37,6 +39,11 @@ on:
         description: 'Exact selected ref commit SHA; must equal github.sha'
         type: string
         default: ''
+
+# Cancel superseded PR heads; preserve unique main/tag/manual runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

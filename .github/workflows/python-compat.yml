@@ -5,6 +5,8 @@ name: RCA160 Python compatibility
 on:
   workflow_dispatch:
   push:
+    branches: ['main']
+    tags: ['**']
     paths:
       - tools/rca160_all_channel_contract.py
       - tools/rca160_all_channel_selftest.py

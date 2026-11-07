@@ -11,6 +11,9 @@ permissions:
 
 jobs:
   windows-installed-hooks:
+    # Keep Windows hook regression on PRs/main; on feature pushes the required
+    # publication-privacy job still audits every newly introduced commit.
+    if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
     name: Installed privacy hooks (Windows)
     runs-on: windows-2022
     timeout-minutes: 15
