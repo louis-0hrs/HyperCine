@@ -556,7 +556,7 @@ def build_ctx(workflow_name: str, event: Event) -> dict[str, Any]:
             "triggering_actor": event.triggering_actor,
             "repository": "louis-0hrs/HyperCine",
             "event": {
-                "pull_request": {
+                **({"pull_request": {
                     "number": event.pr_number or 1,
                     "base": {"sha": "b" * 40, "ref": "main"},
                     "head": {
@@ -564,7 +564,7 @@ def build_ctx(workflow_name: str, event: Event) -> dict[str, Any]:
                         "ref": event.ref_name,
                         "repo": {"full_name": head_repo, "fork": event.fork},
                     },
-                },
+                }} if event.name == "pull_request" else {}),
                 "before": "c" * 40,
             },
         },

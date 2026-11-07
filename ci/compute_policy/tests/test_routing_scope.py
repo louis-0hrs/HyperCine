@@ -22,6 +22,18 @@ def events():
             w.Event('push','refs/heads/feature/x','feature/x','branch',changed=c)]
 
 
+def expected_non_mac(event):
+    # The frozen inventory predates #350's reviewed feature-push dedup.
+    # Keep its full PR/main/manual assertions; only the redundant feature
+    # builds and the optional Windows hook job are intentionally removed.
+    rows=BASE['non_mac_jobs'][f'{event.name}:{event.ref}']
+    if event.name == 'push' and event.ref != 'refs/heads/main':
+        rows=[r for r in rows if (r[0],r[1]) in {
+            ('ci-workflow-routing.yml','routing-contract'),
+            ('privacy-guard.yml','publication-privacy')}]
+    return rows
+
+
 class MacScopeTests(unittest.TestCase):
     def setUp(self):self.docs=w.load_workflows(str(ROOT/'.github/workflows'))
     def test_non_mac_jobs_equal_before_in_all_modes_and_events(self):
@@ -32,15 +44,16 @@ class MacScopeTests(unittest.TestCase):
                     changed=replace(event,vars={'HYPERCINE_CI_LOCAL_MAC':'1','MAC_MODE':mode},
                         inputs={'mac_hosted_fallback':mode=='owner-authorized-hosted','mac_candidate_sha':'0'*40})
                     actual=[[i.workflow,i.job_id,i.matrix_name,i.labels] for i in w.plan(self.docs,changed) if i.labels != ['macos-15']]
-                    self.assertEqual(BASE['non_mac_jobs'][f'{event.name}:{event.ref}'],actual)
+                    self.assertEqual(expected_non_mac(event),actual)
     def test_offline_has_no_hosted_mac_fallback_but_non_mac_jobs(self):
         for event in events():
             jobs=w.plan(self.docs,replace(event,vars={'MAC_MODE':'paused/host-unavailable'}))
             self.assertFalse(any(i.labels==['macos-15'] for i in jobs))
-            before=BASE['non_mac_jobs'][f'{event.name}:{event.ref}']
+            before=expected_non_mac(event)
             for wf in ['ci-cpu.yml','ci-cuda-build.yml']:
                 self.assertEqual(any(i[0]==wf for i in before),any(i.workflow==wf for i in jobs))
-            self.assertTrue(any(i.labels==['windows-2022'] for i in jobs))
+            if event.name != 'push' or event.ref == 'refs/heads/main':
+                self.assertTrue(any(i.labels==['windows-2022'] for i in jobs))
             self.assertTrue(any(i.labels==['ubuntu-24.04'] for i in jobs))
     def test_only_explicit_owner_manual_exact_sha_starts_three_hosted_mac_jobs(self):
         for event in events():
@@ -67,7 +80,10 @@ class MacScopeTests(unittest.TestCase):
         for event in events():
             if event.name=='workflow_dispatch':continue
             jobs=[i for i in w.plan(self.docs,event) if i.workflow=='privacy-guard.yml']
-            self.assertEqual({'publication-privacy','windows-installed-hooks'},{i.job_id for i in jobs})
+            expected={'publication-privacy'}
+            if event.name=='pull_request' or event.ref=='refs/heads/main':
+                expected.add('windows-installed-hooks')
+            self.assertEqual(expected,{i.job_id for i in jobs})
     def test_fallback_inputs_typed_and_off_by_default(self):
         for wf in ['ci-standalone.yml','quality-state.yml']:
             i=self.docs[wf]['on']['workflow_dispatch']['inputs']

@@ -459,6 +459,12 @@ class HostedDedupIntegration(unittest.TestCase):
                 self.assertNotIn(name, actual)
                 self.assertFalse(required.issubset(actual))
 
+    def test_non_pr_events_do_not_invent_pull_request_context(self) -> None:
+        for event in wem.scenarios():
+            context = wem.build_ctx('synthetic-workflow', event)
+            self.assertEqual(event.name == 'pull_request',
+                             'pull_request' in context['github']['event'])
+
     def test_same_pr_supersedes_only_its_workflow_run(self) -> None:
         pr = next(e for e in wem.scenarios()
                   if e.label == "pr with source changes")
