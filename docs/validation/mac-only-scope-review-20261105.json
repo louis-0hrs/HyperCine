@@ -1,0 +1,579 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "scope": "Owner6655103747: Mac-only routing/admission; hosted non-Mac preserved; disabled review candidate",
+  "parent_commit": "4ceab0361b792b571b3f6c59bc57b57a3de65eb9",
+  "review_comment": 6655103747,
+  "source_binding": "Manifest verified against final commit; actual SHA in PR353 handoff, no self-referential hash",
+  "environment": {
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "python": "3.9.6",
+    "pyyaml": "6.0.2"
+  },
+  "results": {
+    "controller_unit_tests": 108,
+    "mac_policy_workflow_unit_tests": 57,
+    "routing_capability_tests": 44,
+    "ctest_passed": 5,
+    "ctest_total": 5,
+    "unit_tests_total": 209,
+    "controller_mutations_killed": 43,
+    "mac_scope_mutations_killed": 29,
+    "mutations_killed_total": 72,
+    "privacy_tests": 158
+  },
+  "scope_test_migration": "Old steady-state global-disable/restore expectations deliberately replaced; preserved original108 controller/protocol/state tests and43 mutations. Current Mac tests reject all remote writes and compare non-Mac jobs/steps to frozen parent; old counts are not transferred.",
+  "event_matrix": "mac-only-event-matrix-20261105.json",
+  "event_cases": 15,
+  "hosted_non_mac_baseline": "ci/compute_policy/tests/hosted_non_mac_baseline.json",
+  "new_guards": [
+    "Offline Mac: no hosted Mac, non-Mac jobs identical to parent",
+    "No global workflow toggles in any runtime mode; adapter rejects every non-GET",
+    "Owner-only manual typed fallback plus original/triggering actor and exact selected-ref SHA",
+    "Candidate-bound local hosted grant; no automatic dispatch or aggregate success",
+    "Owner-pause/final-state reload under canonical OS lock, no VM-lifetime lock",
+    "Legacy global schema1 rejected; no stale owner/health/API approvals imported"
+  ],
+  "controller_mutation_results": [
+    {
+      "id": "controller-disabled",
+      "module": "controller.py",
+      "expected_test": "test_disabled_controller_does_not_even_read_github",
+      "killed": true,
+      "seconds": 0.222
+    },
+    {
+      "id": "reporter-enabled",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.342
+    },
+    {
+      "id": "reporter-identity",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.228
+    },
+    {
+      "id": "source-identity",
+      "module": "controller.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.216
+    },
+    {
+      "id": "advisory-privacy",
+      "module": "controller.py",
+      "expected_test": "test_advisory_preserves_existing_privacy",
+      "killed": true,
+      "seconds": 0.234
+    },
+    {
+      "id": "advisory-not-required",
+      "module": "controller.py",
+      "expected_test": "test_advisory_refuses_an_already_required_reporter_context",
+      "killed": true,
+      "seconds": 0.312
+    },
+    {
+      "id": "required-strict",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.239
+    },
+    {
+      "id": "required-bypass",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.223
+    },
+    {
+      "id": "required-app",
+      "module": "controller.py",
+      "expected_test": "test_required_relay_context_must_have_the_reporter_app",
+      "killed": true,
+      "seconds": 0.296
+    },
+    {
+      "id": "approval-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_approval_mode_cannot_change_without_reapproval",
+      "killed": true,
+      "seconds": 0.229
+    },
+    {
+      "id": "approval-pin-ready",
+      "module": "controller.py",
+      "expected_test": "test_approval_cannot_claim_unconfigured_workflow_or_queue",
+      "killed": true,
+      "seconds": 0.232
+    },
+    {
+      "id": "approval-dedup-binding",
+      "module": "controller.py",
+      "expected_test": "test_dedup_cannot_return_an_approval_from_a_different_mode",
+      "killed": true,
+      "seconds": 0.306
+    },
+    {
+      "id": "nonce-match",
+      "module": "controller.py",
+      "expected_test": "test_spoofed_nonce_never_emits_success",
+      "killed": true,
+      "seconds": 0.227
+    },
+    {
+      "id": "workflow-pin",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.318
+    },
+    {
+      "id": "actor-match",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.302
+    },
+    {
+      "id": "run-attempt",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.249
+    },
+    {
+      "id": "job-attempt",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.223
+    },
+    {
+      "id": "unknown-lane",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.344
+    },
+    {
+      "id": "run-complete",
+      "module": "controller.py",
+      "expected_test": "test_running_run_cannot_emit_terminal_success",
+      "killed": true,
+      "seconds": 0.29
+    },
+    {
+      "id": "last-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_final_revalidation_prevents_success_after_mid_cycle_head_change",
+      "killed": true,
+      "seconds": 0.23
+    },
+    {
+      "id": "no-redispatch",
+      "module": "controller.py",
+      "expected_test": "test_dispatch_uncertainty_does_not_redispatch",
+      "killed": true,
+      "seconds": 0.306
+    },
+    {
+      "id": "public-proof-source",
+      "module": "controller.py",
+      "expected_test": "test_public_proof_cannot_describe_a_different_candidate",
+      "killed": true,
+      "seconds": 0.364
+    },
+    {
+      "id": "main-ref",
+      "module": "candidate_binding.py",
+      "expected_test": "test_current_main_invalidates_approval_even_when_pr_base_is_cached",
+      "killed": true,
+      "seconds": 0.323
+    },
+    {
+      "id": "main-protected",
+      "module": "candidate_binding.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.255
+    },
+    {
+      "id": "draft-permission",
+      "module": "candidate_binding.py",
+      "expected_test": "test_draft_requires_explicit_advisory_permission",
+      "killed": true,
+      "seconds": 0.273
+    },
+    {
+      "id": "lane-run-id",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.269
+    },
+    {
+      "id": "duplicate-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.237
+    },
+    {
+      "id": "failed-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.235
+    },
+    {
+      "id": "token-repository",
+      "module": "checks_reporter.py",
+      "expected_test": "test_token_is_requested_for_only_hypercine_with_checks_write",
+      "killed": true,
+      "seconds": 0.312
+    },
+    {
+      "id": "check-app-source",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_app_result_is_never_accepted",
+      "killed": true,
+      "seconds": 0.225
+    },
+    {
+      "id": "token-excess-rights",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_installation_or_excess_token_permissions_reject_authentication",
+      "killed": true,
+      "seconds": 0.232
+    },
+    {
+      "id": "queue-private",
+      "module": "bridge.py",
+      "expected_test": "test_private_queue_visibility_change_prevents_dispatch",
+      "killed": true,
+      "seconds": 0.247
+    },
+    {
+      "id": "reader-digest",
+      "module": "adapters.py",
+      "expected_test": "test_reader_digest_and_permissions_before_execution",
+      "killed": true,
+      "seconds": 0.305
+    },
+    {
+      "id": "cli-write-boundary",
+      "module": "adapters.py",
+      "expected_test": "test_cli_cannot_mutate_rules_runners_checks_or_merge",
+      "killed": true,
+      "seconds": 0.309
+    },
+    {
+      "id": "worker-disabled",
+      "module": "worker_hook.py",
+      "expected_test": "test_worker_hook_missing_or_disabled_does_nothing",
+      "killed": true,
+      "seconds": 0.27
+    },
+    {
+      "id": "example-disabled",
+      "module": "config.example.json",
+      "expected_test": "test_example_is_disabled_and_has_no_host_values",
+      "killed": true,
+      "seconds": 0.298
+    },
+    {
+      "id": "state-directory-private",
+      "module": "state_store.py",
+      "expected_test": "test_group_writable_state_rejected_before_approve_and_cycle",
+      "killed": true,
+      "seconds": 0.236
+    },
+    {
+      "id": "state-file-private",
+      "module": "state_store.py",
+      "expected_test": "test_unsafe_ledger_mode_rejected",
+      "killed": true,
+      "seconds": 0.249
+    },
+    {
+      "id": "state-ancestor-private",
+      "module": "state_store.py",
+      "expected_test": "test_shared_writable_ancestor_rejected",
+      "killed": true,
+      "seconds": 0.296
+    },
+    {
+      "id": "state-temp-exclusive",
+      "module": "state_store.py",
+      "expected_test": "test_exclusive_temp_collision_does_not_truncate_regular_file",
+      "killed": true,
+      "seconds": 0.236
+    },
+    {
+      "id": "state-legacy-temp",
+      "module": "state_store.py",
+      "expected_test": "test_legacy_tmp_symlink_rejected_without_touching_target",
+      "killed": true,
+      "seconds": 0.229
+    },
+    {
+      "id": "state-record-binding",
+      "module": "state_store.py",
+      "expected_test": "test_tampered_record_candidate_binding_rejected",
+      "killed": true,
+      "seconds": 0.38
+    },
+    {
+      "id": "check-before-dispatch",
+      "module": "controller.py",
+      "expected_test": "test_pending_app_check_is_created_before_private_dispatch",
+      "killed": true,
+      "seconds": 0.235
+    }
+  ],
+  "mac_scope_mutation_results": [
+    {
+      "id": "final-admission-state",
+      "module": "gate.py",
+      "designated_test": "test_pause_after_watch_snapshot_prevents_private_dispatch",
+      "killed": true
+    },
+    {
+      "id": "dispatch-owner-lock",
+      "module": "../premerge_controller/state_store.py",
+      "designated_test": "test_dispatch_boundary_serializes_overlapping_owner_pause",
+      "killed": true
+    },
+    {
+      "id": "final-admission-check",
+      "module": "gate.py",
+      "designated_test": "test_final_admission_refreshes_health_session_and_live_inventory",
+      "killed": true
+    },
+    {
+      "id": "owner-identity",
+      "module": "policy.py",
+      "designated_test": "test_owner_identity_admin_required_before_transition",
+      "killed": true
+    },
+    {
+      "id": "owner-admin",
+      "module": "policy.py",
+      "designated_test": "test_owner_identity_admin_required_before_transition",
+      "killed": true
+    },
+    {
+      "id": "privacy-active",
+      "module": "policy.py",
+      "designated_test": "test_missing_privacy_wrong_app_or_unknown_required_gate_refuses",
+      "killed": true
+    },
+    {
+      "id": "privacy-blob",
+      "module": "policy.py",
+      "designated_test": "test_missing_privacy_wrong_app_or_unknown_required_gate_refuses",
+      "killed": true
+    },
+    {
+      "id": "unknown-required-context",
+      "module": "policy.py",
+      "designated_test": "test_missing_privacy_wrong_app_or_unknown_required_gate_refuses",
+      "killed": true
+    },
+    {
+      "id": "rules-no-bypass",
+      "module": "policy.py",
+      "designated_test": "test_missing_privacy_wrong_app_or_unknown_required_gate_refuses",
+      "killed": true
+    },
+    {
+      "id": "current-owner-plan",
+      "module": "policy.py",
+      "designated_test": "test_plan_creation_requires_current_generation",
+      "killed": true
+    },
+    {
+      "id": "execute-generation",
+      "module": "policy.py",
+      "designated_test": "test_stale_plan_cannot_override_newer_owner",
+      "killed": true
+    },
+    {
+      "id": "plan-expiry",
+      "module": "policy.py",
+      "designated_test": "test_expired_owner_decision_is_rejected",
+      "killed": true
+    },
+    {
+      "id": "plan-live-inventory",
+      "module": "policy.py",
+      "designated_test": "test_changed_inventory_or_security_between_plan_execute_refuses",
+      "killed": true
+    },
+    {
+      "id": "enabled-deployment",
+      "module": "policy.py",
+      "designated_test": "test_disabled_config_prevents_local_state_change",
+      "killed": true
+    },
+    {
+      "id": "offline-local-only",
+      "module": "policy.py",
+      "designated_test": "test_offline_mac_never_pauses_windows_linux_or_cuda",
+      "killed": true
+    },
+    {
+      "id": "health-freshness",
+      "module": "policy.py",
+      "designated_test": "test_stale_unhealthy_future_nan_health_cannot_resume",
+      "killed": true
+    },
+    {
+      "id": "no-healthy-auto-resume",
+      "module": "policy.py",
+      "designated_test": "test_healthy_return_requires_new_owner_resume",
+      "killed": true
+    },
+    {
+      "id": "legacy-schema",
+      "module": "policy.py",
+      "designated_test": "test_legacy_global_policy_journal_is_not_imported",
+      "killed": true
+    },
+    {
+      "id": "admission-generation",
+      "module": "policy.py",
+      "designated_test": "test_admission_requires_current_generation_live_state_and_freshness",
+      "killed": true
+    },
+    {
+      "id": "hosted-candidate-binding",
+      "module": "policy.py",
+      "designated_test": "test_hosted_mac_requires_explicit_exact_candidate_owner_plan",
+      "killed": true
+    },
+    {
+      "id": "no-workflow-toggle-in-runtime",
+      "module": "policy.py",
+      "designated_test": "test_every_mode_is_read_only_against_github",
+      "killed": true
+    },
+    {
+      "id": "transport-rejects-all-writes",
+      "module": "api.py",
+      "designated_test": "test_read_write_boundaries_never_touch_security_or_dispatch",
+      "killed": true
+    },
+    {
+      "id": "old-worker-fence",
+      "module": "gate.py",
+      "designated_test": "test_old_worker_error_cannot_overwrite_a_newer_owner_generation",
+      "killed": true
+    },
+    {
+      "id": "workflow-owner-approval",
+      "module": "../../.github/workflows/ci-standalone.yml",
+      "designated_test": "test_non_owner_rerun_missing_ack_and_stale_sha_cannot_start_mac",
+      "killed": true
+    },
+    {
+      "id": "workflow-rerun-owner",
+      "module": "../../.github/workflows/ci-standalone.yml",
+      "designated_test": "test_non_owner_rerun_missing_ack_and_stale_sha_cannot_start_mac",
+      "killed": true
+    },
+    {
+      "id": "workflow-explicit-ack",
+      "module": "../../.github/workflows/ci-standalone.yml",
+      "designated_test": "test_non_owner_rerun_missing_ack_and_stale_sha_cannot_start_mac",
+      "killed": true
+    },
+    {
+      "id": "workflow-exact-sha",
+      "module": "../../.github/workflows/ci-standalone.yml",
+      "designated_test": "test_non_owner_rerun_missing_ack_and_stale_sha_cannot_start_mac",
+      "killed": true
+    },
+    {
+      "id": "offline-no-automatic-mac",
+      "module": "../../.github/workflows/ci-standalone.yml",
+      "designated_test": "test_offline_has_no_hosted_mac_fallback_but_non_mac_jobs",
+      "killed": true
+    },
+    {
+      "id": "non-mac-job-preserved",
+      "module": "../../.github/workflows/ci-standalone.yml",
+      "designated_test": "test_non_mac_jobs_equal_before_in_all_modes_and_events",
+      "killed": true
+    }
+  ],
+  "reproduction": [
+    "cmake -S ci/premerge_controller -B build/premerge-controller -DPython3_EXECUTABLE=\"$TEST_PYTHON\"",
+    "ctest --test-dir build/premerge-controller -C Release --output-on-failure",
+    "python3 -m unittest discover -s ci -p 'test_privacy*.py'"
+  ],
+  "production": {
+    "deployed": false,
+    "workflow_state_mutations": 0,
+    "workflow_dispatches": 0,
+    "rule_mutations": 0,
+    "merges": 0,
+    "eligible_integration_H_created": false,
+    "native_hardware_rerun": "NOT RUN; recipes unchanged and all step hashes compared",
+    "reporter_required": false,
+    "hosted_fallback_reporter_adapter": "NOT QUALIFIED; real Actions success does not synthesize App aggregate success",
+    "collector_and_private_adapter": "Separate trusted deployment qualification required"
+  },
+  "source_sha256": {
+    ".github/workflows/ci-standalone.yml": "b7321cb912ce2ae6c8ca99b81921ed0bea18a03c6a469189fab7d5d304f88669",
+    ".github/workflows/privacy-guard.yml": "664d88166fd7d4b9eacf5cad9e8e7b6801564b0f85d1b6d0038e788c3a597616",
+    ".github/workflows/quality-state.yml": "43a0d65325b7ae7048dad487c4c7e93596b2980cc3cb57c14b5cdbed92602f8d",
+    "ci/compute_policy/README.md": "86fe37e44ebccc09e6e26394eb9d2cc7e6e627c9ac86fec141c50a78716f7c3f",
+    "ci/compute_policy/__init__.py": "49f0c33accd87a8c8065f52699a5cdd35ca5ace65249def9767c6199efde4db6",
+    "ci/compute_policy/admin.py": "0dd291f3868f311d5973dfddf953ebec3a39bc0bb1821adcaeaf423afc401008",
+    "ci/compute_policy/api.py": "f4b9bf04336216a6093a098839953c4ff429682c202a45ba0147ec3db33b1df4",
+    "ci/compute_policy/config.example.json": "1f2586a71e2eba5be1248e070e3a8ac32d140b7d2f5c7fd97642b13ce9ceaedd",
+    "ci/compute_policy/gate.py": "461cc3bb1fc7565b727b40c041725026b6b74191f2c633a5a792ca22b6733f7d",
+    "ci/compute_policy/mutation_suite.py": "6b29e87449fe73c51ed1aa5e3e667df880611b8ce655ca00ab75bd7dd48ea445",
+    "ci/compute_policy/policy.py": "7947150017bfe4c900abdd84510ae14efb161a0bd944df8c4bb01d22445b9783",
+    "ci/compute_policy/tests/__init__.py": "47188b2ca95696bf7741da1bb9576a77271f436e7a7013f1570f8e7fd4ba412c",
+    "ci/compute_policy/tests/hosted_non_mac_baseline.json": "0bca839596b8c2d5347a15f422d39bfe85efcf677c9344c87e6fa567a123efb8",
+    "ci/compute_policy/tests/test_adapter_cli.py": "6e2f86c29c37f74bbec53bc25ea2206965cf686364a9281cf9c4764c4df076d7",
+    "ci/compute_policy/tests/test_admission_race.py": "77e27dbbe0e245eff285f20b2c154b56232ea939158081da62cc8ff188d35b84",
+    "ci/compute_policy/tests/test_policy.py": "3cfd2926e8afc3e415113631e3247dbe16b695f70f5dcb6e10bbfbf8e7df1ee8",
+    "ci/compute_policy/tests/test_routing_scope.py": "582f9c42df0986f1ceb8487c53f7ce7d70529cf7f6aa2d13c05442356b7f8876",
+    "ci/premerge_controller/CMakeLists.txt": "40b357f2615d19fd420f5e0502afee3daa7556bedc3cc959420400dfe5db0675",
+    "ci/premerge_controller/README.md": "43de87a3e10571d0484055c11e7a20163f07ccd54460902781ca404a1333e427",
+    "ci/premerge_controller/__init__.py": "6ca3fa341158b219f14a538a1b14268c39076c03963512dcdcf7e709cf7ba8b4",
+    "ci/premerge_controller/adapters.py": "b67d6324387c11d180427f9e151cb3226d13f5f74093f5623df59d89b9aef513",
+    "ci/premerge_controller/admin.py": "458f9b3554225ecb6374c0db0223f187652ba618d1eec10a21cb6a8ed5bcaf71",
+    "ci/premerge_controller/bridge.py": "652db524b0f48ebe489bb6644a266d55ddb9ec694303a26a2c3cc05142b2d80c",
+    "ci/premerge_controller/candidate_binding.py": "e7e4dd90471a22929935e1c3a9f5aaaff03e92097525c31359cb558fdd76f457",
+    "ci/premerge_controller/check_protocol.py": "efe9d0124f4ffd30438cdae05707e5f7d864f9e90a437ecc939532f7c615022c",
+    "ci/premerge_controller/checks_reporter.py": "82134f93ab7f9e6c7cbf934c8916a4ef9fa479f60c6ab6a1f1db0a9fea33ab26",
+    "ci/premerge_controller/config.example.json": "a4d8305bc5e0c655152ca2ec50fa6e8edf2eb563515f61a2cbc991286a1e7b6e",
+    "ci/premerge_controller/controller.py": "7381907f51dd2966c0d05399bc18b818a558e8733fa6b8e61105f06262fc29ae",
+    "ci/premerge_controller/mutation_suite.py": "16a22179705f695ce00b43918613bfb17383820caf1536d1862988113712fc52",
+    "ci/premerge_controller/state_store.py": "284d7bdb7a7fc2d252087e3b32cf499d56412159c7fbdbaebd8a6f2e439e9c05",
+    "ci/premerge_controller/tests/__init__.py": "47188b2ca95696bf7741da1bb9576a77271f436e7a7013f1570f8e7fd4ba412c",
+    "ci/premerge_controller/tests/test_advisory_and_adapters.py": "38c95ccbed70b20b9b6d2b9c68a16afc4a81d20f515f14ca35b87b71c9639888",
+    "ci/premerge_controller/tests/test_binding_and_client.py": "bdc049a34af922e3065df7087626ff55583d54c47d3ac7bb4ecebff925e1831c",
+    "ci/premerge_controller/tests/test_controller.py": "4136588f970d6ec24751ff7dc914320bdab2b579fb9e8fac913cd3bdbdc96674",
+    "ci/premerge_controller/tests/test_protocol.py": "a201cc46a1030f3416e01508e6800776d843acd0a8379204a434102ee5b37740",
+    "ci/premerge_controller/tests/test_state_store.py": "f27b4cde4312c028b5c1a355cdda16d187de48b671c0c80d9f6d4f15dc5706c8",
+    "ci/premerge_controller/worker_hook.py": "f13193b2078d89d24e8b977ee7bb89cace650bb7bad7ad9120a522d90a1d59aa",
+    "ci/test_workflow_event_matrix.py": "ff54fe2bbd8e50582aced20c0f0b8704f49e3c978582af6a075a6aee0d7011fe",
+    "ci/workflow_event_matrix.py": "07cc551e1b3153cce8a8ad1fcccf608db4422907685fd37d8219386f649f74ab",
+    "docs/FAIL_CLOSED_CI_RUNBOOK.md": "6eaed3b32a88b85fb4401223e05209d5770a91e86128b0eb3f5a7975a3d16ba3",
+    "docs/INTEGRATION_PRIVACY_WINDOW.md": "185a9a54026704b73d5b021b836edab5aa8b85b61c983558a2477339610222d5",
+    "docs/PREMERGE_ADVISORY_REVIEW.md": "0dbebc368198e4e29a0a536e0d797edb5aaac32b4e6b35c00c50d41baef8dce5",
+    "docs/SELF_HOSTED_CI_TRANSITION.md": "5ce03e33d4746b6f698e64ca19416a71b0241e34ef12555997be90adc20e8e0e",
+    "docs/validation/mac-only-event-matrix-20261105.json": "427a5c382cfc7656603e4e7cae790a4e37ef9f8c4250593e4cec880f52a833f6"
+  }
+}
