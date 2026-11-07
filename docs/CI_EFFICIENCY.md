@@ -16,20 +16,26 @@ the billing gross amount is not an invoice.
 ## Event routing with workflows enabled (#350-only proposal)
 
 This table is a **YAML trigger matrix**, not evidence that jobs ran or a
-claim about the current repository workflow-enable state. Path filters still
-apply; a disabled workflow dispatches **zero** jobs even when the table says
-"Yes". Neither this Draft nor the separate Mac-only relay Draft #353 is merged
+claim about the current repository workflow-enable state. Path filters apply
+to branch pushes and pull requests, **not tag pushes**; a disabled workflow
+dispatches **zero** jobs even when the table says "Yes". Neither this Draft nor the separate Mac-only relay Draft #353 is merged
 or activated by these instructions.
 
 | Workflow | Feature-branch push | Pull request | main push | Tag push | Manual |
 | --- | --- | --- | --- | --- | --- |
 | CPU Reference CI | No | Yes | Yes | Yes | No |
 | Standalone CFHD CI | No | Yes, paths-filtered | Yes, paths-filtered | No | Yes |
-| RCA160 Python compatibility | No | Yes, paths-filtered | Yes, paths-filtered | Yes, paths-filtered | Yes |
-| Portable quality state | No | Yes, paths-filtered | Yes, paths-filtered | Yes, paths-filtered | Yes |
+| RCA160 Python compatibility | No | Yes, paths-filtered | Yes, paths-filtered | Yes, tag-filtered (paths ignored) | Yes |
+| Portable quality state | No | Yes, paths-filtered | Yes, paths-filtered | Yes, tag-filtered (paths ignored) | Yes |
 | CUDA build (Linux, compile-only) | No | Yes, paths-filtered | Yes, paths-filtered | No | Yes |
 | Privacy guard / publication-privacy | **Yes, every branch** | **Yes** | **Yes** | No (tag refs excluded by existing filter) | No |
 | Privacy guard / Windows installed hooks | No | Yes | Yes | No | No |
+
+For GitHub Actions `push` events on a tag, `paths` and `paths-ignore` do not
+restrict dispatch. The tag qualification in `ci/workflow_event_matrix.py`
+explicitly models this; for example, a doc-only tag push still qualifies the
+Python and Quality State jobs when their tag filters match. This table only
+predicts *eligible* jobs with workflows enabled; it is not an Actions receipt.
 
 The independent **Publication privacy (all new commits)** job remains unchanged
 and is the mandatory status check on protected main. Its full-history commit
