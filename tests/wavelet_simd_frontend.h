@@ -16,6 +16,13 @@ public:
         if (!hypercine::detail::WaveletSimdAvailable(isa)) throw std::runtime_error("ISA unavailable");
     }
     std::string DeviceName() const override { return "test-only CPU SIMD"; }
+    // Declared, not inherited: the session geometry of this injection is the
+    // 1920x1080 the packet test drives it with. A frontend that silently reported
+    // some other shape would be exactly the unvalidated-default hazard this
+    // declaration replaces.
+    hypercine::standalone::FilmScan3Geometry Geometry() const noexcept override {
+        return hypercine::standalone::FilmScan3Geometry{1920, 1080};
+    }
     hypercine::standalone::Planes Convert(const uint8_t* p,std::size_t n,int w,int h,std::size_t s) override {
         return hypercine::standalone::ConvertFilmScan3Bgra(p,n,w,h,s);
     }

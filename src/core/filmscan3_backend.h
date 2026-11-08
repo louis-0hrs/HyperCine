@@ -25,7 +25,12 @@ struct Frontend {
     virtual ~Frontend() = default;
     // Internal identity is checked by session selection, independently of ISA.
     virtual FrontendBackend Backend() const noexcept { return FrontendBackend::Unknown; }
-    virtual FilmScan3Geometry Geometry() const noexcept { return {}; }
+    // The geometry a session actually encodes. Deliberately without a default: a
+    // bare `FilmScan3Geometry{}` would report a plausible 1920x1080 that was never
+    // validated for this frontend, so a caller passing 3840x2160 storage through an
+    // injected frontend would get a silently cropped 1080p packet instead of a
+    // refusal. Every implementation must therefore declare the geometry it binds.
+    virtual FilmScan3Geometry Geometry() const noexcept = 0;
     virtual Planes Convert(const uint8_t*, std::size_t, int, int, std::size_t) = 0;
     virtual WaveletLevel Forward(const Plane&, int) = 0;
     virtual std::string DeviceName() const = 0;
@@ -78,6 +83,18 @@ std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend, FilmScan3Geometry);
 struct FrontendAccess {
     static void Use(FilmScan3Encoder& encoder, std::shared_ptr<Frontend> frontend) {
         if (!frontend) throw std::invalid_argument("null FilmScan3 frontend");
+        // Injecting is a session-binding operation, not a way to change the
+        // session geometry. The declaration is validated on its own first, so a
+        // frontend that answers with an impossible shape cannot be installed even
+        // into a fresh encoder; then a width/height change against an already
+        // bound session is refused while the original frontend stays in place.
+        const FilmScan3Geometry declared=frontend->Geometry();
+        ValidateFilmScan3Geometry(declared);
+        if (encoder.frontend_) {
+            const FilmScan3Geometry bound=encoder.frontend_->Geometry();
+            if (bound.width!=declared.width || bound.height!=declared.height)
+                throw std::invalid_argument("injected frontend changes the session geometry");
+        }
         encoder.frontend_=std::move(frontend);
     }
     // Test seam for tombstone identity. Not a production control: the public
