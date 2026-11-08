@@ -112,6 +112,84 @@ std::shared_ptr<Frontend> CudaMissing(FilmScan3Geometry) { ++cuda_calls; throw s
 std::shared_ptr<Frontend> CudaNoMemory(FilmScan3Geometry) { throw std::bad_alloc(); }
 std::shared_ptr<Frontend> CudaLogic(FilmScan3Geometry) { throw std::logic_error("CUDA contract broken"); }
 
+// The byte extent is not packed width*height and does not require unused
+// padding after the last row. All geometry/device/budget axes stay valid so
+// only the bound-storage floor can decide these cases. GPU facts/factories
+// below are synthetic: this is admission proof, not native GPU execution.
+void PaddedStorageContract() {
+    const struct { int width, height; } shapes[] = {
+        {128,24}, {256,256}, {1280,720}, {1920,1080}, {2048,1080}, {3840,2160}
+    };
+    BackendFactories factories; factories.scalar = Count;
+    factories.metal = CountMetal; factories.cuda = CountCuda;
+    unsigned checked = 0;
+    for (const auto& shape : shapes) {
+        auto config = Small(); config.width = shape.width; config.height = shape.height;
+        const auto row = static_cast<std::uint64_t>(shape.width) * 4u;
+        const auto packed = row * shape.height;
+        config.input_stride_bytes = row + 64u;
+        const auto extent = config.input_stride_bytes * (shape.height - 1) + row;
+        const auto full = config.input_stride_bytes * shape.height;
+        Require(packed < extent - 1 && extent < full, "storage cases do not discriminate padding");
+        for (auto backend : {SessionBackend::CpuScalar, SessionBackend::Metal, SessionBackend::Cuda}) {
+            config.backend = backend;
+            for (bool present : {true, false}) {
+                if (backend == SessionBackend::CpuScalar && !present) continue;
+                EncoderDevice device;
+                device.metal_available = backend == SessionBackend::Metal && present;
+                device.cuda_available = backend == SessionBackend::Cuda && present;
+                device.metal_max_buffer_length_bytes = ~std::uint64_t{0};
+                device.metal_recommended_working_set_bytes = ~std::uint64_t{0};
+                device.cuda_total_global_memory_bytes = ~std::uint64_t{0};
+                for (bool fallback : {false, true}) {
+                    config.allow_cpu_scalar_fallback = fallback;
+                    for (const auto bytes : {packed, extent - 1, extent, full}) {
+                        config.input_bytes = bytes;
+                        const bool short_input = bytes < extent;
+                        const bool admitted = !short_input && (present || fallback);
+                        const auto reason = short_input ? CapabilityReason::FormatMathematicallyInvalid
+                            : (admitted ? CapabilityReason::ExperimentallySupported : CapabilityReason::BackendNotPresent);
+                        const auto capability = CheckEncoderCapability(config, device);
+                        Require(capability.primary == reason && capability.allocation_permitted == admitted,
+                                "padded extent capability boundary changed");
+                        Require(capability.geometry_validator_passed && capability.pixel_budget_ok &&
+                                capability.evidence_record && !capability.reasons.memory_budget_exceeded &&
+                                capability.reasons.format_mathematically_invalid == short_input,
+                                "padded extent refusal was masked by another axis");
+                        calls = metal_calls = cuda_calls = 0;
+                        const auto selection = SelectBackend(config, device, factories);
+                        Require(static_cast<bool>(selection) == admitted && selection.effective.primary == reason,
+                                "padded extent selector disagrees with capability");
+                        if (!admitted) {
+                            Require(!selection.frontend && calls == 0 && metal_calls == 0 && cuda_calls == 0 &&
+                                    selection.status == BackendSelectionStatus::CapabilityRefused &&
+                                    selection.fallback == ScalarFallbackReason::None,
+                                    "padded extent refusal reached a factory or attempted fallback");
+                            bool refused = false;
+                            try { EncoderSession session(config, device); }
+                            catch (const BackendSelectionError& error) {
+                                refused = error.status() == BackendSelectionStatus::CapabilityRefused && error.reason() == reason;
+                            }
+                            Require(refused, "padded extent session lost typed refusal");
+                        } else {
+                            const auto effective = present ? backend : SessionBackend::CpuScalar;
+                            Require(selection.effective.effective_backend == effective &&
+                                    calls == (effective == SessionBackend::CpuScalar ? 1u : 0u) &&
+                                    metal_calls == (effective == SessionBackend::Metal ? 1u : 0u) &&
+                                    cuda_calls == (effective == SessionBackend::Cuda ? 1u : 0u) &&
+                                    selection.fallback == (present ? ScalarFallbackReason::None : ScalarFallbackReason::BackendNotPresent),
+                                    "padded extent selected the wrong factory or fallback");
+                        }
+                        ++checked;
+                    }
+                }
+            }
+        }
+    }
+    Require(checked == 240, "padded extent matrix lost cases");
+    std::cout << "PASS padded input extent 240 admission/selection cases (no GPU execution)\n";
+}
+
 void CudaContract() {
     auto config = Small(); config.backend = SessionBackend::Cuda;
     config.input_stride_bytes = 512; config.input_bytes = 512 * 24;
@@ -410,6 +488,54 @@ void Equal(const FilmScan3Frame& a, const FilmScan3Frame& b) {
             a.state.previous_sample_bytes == b.state.previous_sample_bytes &&
             FilmScan3FullCoefficientHashesEqual(a,b), "shared writer packet/state/table/hash changed");
 }
+// A valid physical extent can still be smaller than the session's declared
+// bound. Exercise that second floor separately from the frontend's own input
+// validator, and prove rejected calls do not advance writer state.
+void PaddedStoragePackets() {
+    for (const auto width : {128, 256}) {
+        const int height = width == 128 ? 24 : 256;
+        const auto row = static_cast<std::size_t>(width) * 4u;
+        const auto stride = row + 64u;
+        const auto extent = stride * (height - 1) + row;
+        const auto full = stride * height;
+        AlignedVector<uint8_t> input(full, 0xA5);
+        for (int y = 0; y < height; ++y) for (int x = 0; x < width; ++x) {
+            auto* pixel = input.data() + static_cast<std::size_t>(y) * stride + 4u*x;
+            pixel[0] = static_cast<uint8_t>(x + y*3);
+            pixel[1] = static_cast<uint8_t>(x*7 + y);
+            pixel[2] = static_cast<uint8_t>(x ^ y); pixel[3] = 255;
+        }
+        for (const auto bound : {extent, full}) {
+            auto config = Small(); config.width = width; config.height = height;
+            config.input_stride_bytes = stride; config.input_bytes = bound;
+            for (bool fallback : {false, true}) {
+                config.backend = fallback ? SessionBackend::Cuda : SessionBackend::CpuScalar;
+                config.allow_cpu_scalar_fallback = fallback;
+                EncoderSession session(config, EncoderDevice{});
+                FilmScan3Encoder control({width, height}, WaveletIsa::Scalar);
+                auto reject = [&](std::size_t bytes) {
+                    bool refused = false;
+                    try { (void)session.Encode(input.data(), bytes, stride); }
+                    catch (const std::invalid_argument&) { refused = true; }
+                    Require(refused, "padded session accepted bytes below bound");
+                };
+                for (unsigned frame = 0; frame < 2; ++frame) {
+                    reject(extent - 1);
+                    if (bound == full) { reject(extent); reject(full - 1); }
+                    // Last-row padding is not required by the physical contract.
+                    Equal(session.Encode(input.data(), bound, stride), control.Encode(input.data(), bound, stride));
+                    // Nor is a larger caller allocation an exact-size mismatch.
+                    Equal(session.Encode(input.data(), full, stride), control.Encode(input.data(), full, stride));
+                }
+                session.Reset(); control.Reset();
+                reject(bound - 1);
+                Equal(session.Encode(input.data(), bound, stride), control.Encode(input.data(), bound, stride));
+            }
+        }
+    }
+    std::cout << "PASS padded input session bounds/exact last row/state/reset/absent-CUDA fallback packets\n";
+}
+
 void Sequence(int width, int height, unsigned frames) {
     auto config = Small(); config.width = width; config.height = height;
     config.input_stride_bytes = static_cast<std::size_t>(width)*4+64;
@@ -470,6 +596,7 @@ void Sequence(int width, int height, unsigned frames) {
               << " padded storage/reset/fallback/hash policy/full packet-state-table-30hash parity\n";
 }
 void Packets() {
+    PaddedStoragePackets();
     auto first=std::async(std::launch::async,[]{Sequence(128,24,16);});
     auto second=std::async(std::launch::async,[]{Sequence(256,256,16);});
     first.get(); second.get();
@@ -481,7 +608,7 @@ int main(int argc, char** argv) {
     try {
         if(argc != 2) throw std::invalid_argument("expected contract or packets");
         const std::string mode=argv[1];
-        if(mode == "contract") { Contract(); MetalContract(); CudaContract(); }
+        if(mode == "contract") { Contract(); MetalContract(); CudaContract(); PaddedStorageContract(); }
         else if(mode == "packets") Packets();
         else throw std::invalid_argument("unknown test mode");
         return 0;
