@@ -1,0 +1,331 @@
+{
+  "schema": 1,
+  "scope": "disabled uninstalled private candidate; isolated integration with simulated infrastructure ports",
+  "public_source_head": "62361da0cf5c40f89457a0602f4f3efd22a039cd",
+  "public_runtime_equivalent": "693a87b14426ef6771d889bcf65fb730ed217b7d",
+  "private_head": "a148312c8b8ba9dcbab16effead925eb00ca02d8",
+  "private_tree": "75c35f597c73c4d4a4364779312027f3a7d5fa4b",
+  "private_ref": "review/private-mac-integration-20261105",
+  "manifest_sha256": "4ed655b769ade22df3561d266d2e4fefcb62b36e2d905a57652b6814676b114c",
+  "manifest_files": 67,
+  "qualification_id": "private-mac-20261105-v3",
+  "tests": {
+    "component_ctest": {
+      "passed": 3,
+      "total": 3
+    },
+    "integrated_units": 119,
+    "designated_mutations": {
+      "mutations": 39,
+      "killed": 39,
+      "results": [
+        {
+          "mutation": "guard:repository",
+          "designated_test": "tests.test_integration.AdmissionTests.test_repository",
+          "killed": true
+        },
+        {
+          "mutation": "guard:workflow",
+          "designated_test": "tests.test_integration.AdmissionTests.test_workflow",
+          "killed": true
+        },
+        {
+          "mutation": "guard:pin",
+          "designated_test": "tests.test_integration.AdmissionTests.test_pin",
+          "killed": true
+        },
+        {
+          "mutation": "guard:actor",
+          "designated_test": "tests.test_integration.AdmissionTests.test_actor",
+          "killed": true
+        },
+        {
+          "mutation": "guard:event",
+          "designated_test": "tests.test_integration.AdmissionTests.test_event",
+          "killed": true
+        },
+        {
+          "mutation": "guard:os",
+          "designated_test": "tests.test_integration.AdmissionTests.test_os_alone",
+          "killed": true
+        },
+        {
+          "mutation": "guard:arch",
+          "designated_test": "tests.test_integration.AdmissionTests.test_architecture",
+          "killed": true
+        },
+        {
+          "mutation": "guard:labels",
+          "designated_test": "tests.test_integration.AdmissionTests.test_extra_label",
+          "killed": true
+        },
+        {
+          "mutation": "guard:lane-set",
+          "designated_test": "tests.test_integration.AdmissionTests.test_duplicate_lane",
+          "killed": true
+        },
+        {
+          "mutation": "lane-both-enforcement-points",
+          "designated_test": "tests.test_integration.AdmissionTests.test_extra_lane",
+          "killed": true
+        },
+        {
+          "mutation": "guard:key-pin",
+          "designated_test": "tests.test_health_queue.HealthTests.test_unknown_key_pin_fails",
+          "killed": true
+        },
+        {
+          "mutation": "guard:signature",
+          "designated_test": "tests.test_integration.ResultTests.test_unsigned_capability_fail",
+          "killed": true
+        },
+        {
+          "mutation": "guard:challenge",
+          "designated_test": "tests.test_health_queue.HealthTests.test_replayed_challenge_fails",
+          "killed": true
+        },
+        {
+          "mutation": "guard:freshness",
+          "designated_test": "tests.test_health_queue.HealthTests.test_stale_future_nan_freshness",
+          "killed": true
+        },
+        {
+          "mutation": "guard:sequence",
+          "designated_test": "tests.test_health_queue.HealthTests.test_replayed_sequence_fails",
+          "killed": true
+        },
+        {
+          "mutation": "guard:attestation-binding",
+          "designated_test": "tests.test_integration.ResultTests.test_wrong_nonce_attestation_fail",
+          "killed": true
+        },
+        {
+          "mutation": "guard:attested-capability",
+          "designated_test": "tests.test_integration.ResultTests.test_signed_non_mac_attestation_fail",
+          "killed": true
+        },
+        {
+          "mutation": "guard:nonce",
+          "designated_test": "tests.test_health_queue.QueueTests.test_nonce_no_duplicate_post",
+          "killed": true
+        },
+        {
+          "mutation": "guard:intent -- before the only POST, even on crash.",
+          "designated_test": "tests.test_health_queue.QueueTests.test_intent_durable_before_transport",
+          "killed": true
+        },
+        {
+          "mutation": "result-labels",
+          "designated_test": "tests.test_integration.ResultTests.test_non_mac_labels_with_mac_names_fail",
+          "killed": true
+        },
+        {
+          "mutation": "guest-measurement",
+          "designated_test": "tests.test_integration.AdmissionTests.test_guest_wrong_capability_before_registration",
+          "killed": true
+        },
+        {
+          "mutation": "manifest-hash",
+          "designated_test": "tests.test_manifest_api.ManifestTests.test_exact_package_extra_file_and_changed_byte",
+          "killed": true
+        },
+        {
+          "mutation": "missed-health-sample",
+          "designated_test": "tests.test_health_queue.HealthTests.test_missed_sampling_interval_rotates_epoch",
+          "killed": true
+        },
+        {
+          "mutation": "queue-deadline-overrun",
+          "designated_test": "tests.test_health_queue.QueueTests.test_real_process_deadline_below_ten_seconds",
+          "killed": true
+        },
+        {
+          "mutation": "guard:reservation-session",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_authority_restart_invalidates_reservation",
+          "killed": true
+        },
+        {
+          "mutation": "guard:reservation-expiry",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_expired_reservation",
+          "killed": true
+        },
+        {
+          "mutation": "guard:collector-assignment",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_wrong_nonce",
+          "killed": true
+        },
+        {
+          "mutation": "guard:witness-job",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_actions_wrong_job",
+          "killed": true
+        },
+        {
+          "mutation": "guard:witness-runner-vm",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_actions_runner_vm_swap",
+          "killed": true
+        },
+        {
+          "mutation": "guard:witness-run",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_actions_wrong_run",
+          "killed": true
+        },
+        {
+          "mutation": "guard:witness-nonce",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_actions_wrong_nonce",
+          "killed": true
+        },
+        {
+          "mutation": "guard:protected-receipt",
+          "designated_test": "tests.test_reservations_cleanup.ReservationTests.test_receipt_replacement_cannot_report_success",
+          "killed": true
+        },
+        {
+          "mutation": "cleanup-short-circuit",
+          "designated_test": "tests.test_reservations_cleanup.CleanupTests.test_deregister_failure_still_deletes_vm",
+          "killed": true
+        },
+        {
+          "mutation": "cleanup-recovery-persistence",
+          "designated_test": "tests.test_reservations_cleanup.CleanupTests.test_both_failures_keep_recovery_state",
+          "killed": true
+        },
+        {
+          "mutation": "cleanup-owner-pause",
+          "designated_test": "tests.test_reservations_cleanup.CleanupTests.test_cleanup_failure_pauses_owner_attention",
+          "killed": true
+        },
+        {
+          "mutation": "cleanup-primary-exception",
+          "designated_test": "tests.test_reservations_cleanup.CleanupTests.test_primary_exception_survives_cleanup_failure",
+          "killed": true
+        },
+        {
+          "mutation": "guard:cleanup-receipt",
+          "designated_test": "tests.test_cleanup_receipts_capacity.CleanupReceiptTests.test_none_is_not_cleanup_success",
+          "killed": true
+        },
+        {
+          "mutation": "guard:cleanup-complete",
+          "designated_test": "tests.test_cleanup_receipts_capacity.CleanupReceiptTests.test_report_requires_completed_cleanup_state",
+          "killed": true
+        },
+        {
+          "mutation": "reservation-capacity-latch",
+          "designated_test": "tests.test_cleanup_receipts_capacity.CapacityTests.test_capacity_latches_attention_and_preserves_every_row",
+          "killed": true
+        }
+      ]
+    },
+    "lock_stress_scenarios": 30,
+    "legacy_forbidden_cases_now_rejected": 9,
+    "positive_lane_count": 3
+  },
+  "deadline_observation": {
+    "integrated_submission_seconds": 8.0236,
+    "maximum_seconds": 10,
+    "real_sleeping_subprocess": true,
+    "github_network_requests": 0
+  },
+  "negative_side_effects": {
+    "queue_port_calls": 0,
+    "vm_port_calls": 0,
+    "registration_port_calls": 0,
+    "reporter_port_calls": 0,
+    "scope": "nine admission-denial fixtures; later reservation and cleanup negatives may call simulated lifecycle ports and assert zero Reporter calls"
+  },
+  "positive_fixture_side_effects": {
+    "simulated_queue": 1,
+    "simulated_vms": 3,
+    "simulated_registrations": 3,
+    "simulated_success_report": 1
+  },
+  "real_external_execution": {
+    "github_requests_in_tests": 0,
+    "vms": 0,
+    "runner_registrations": 0,
+    "hosted_jobs": 0,
+    "app_checks": 0
+  },
+  "crypto_and_transport": "real ECDSA signatures, separate local producer process and Unix socket; temporary test keys only",
+  "remaining_qualification": [
+    "independent review of exact revised private source",
+    "distinct-UID reservation writer/collector launcher and key/socket/ledger ACL deployment",
+    "actual host monitoring and native Tart/JIT lifecycle, cleanup and recovery",
+    "live public-controller polling and pending/invalidation wiring",
+    "deployment restart persistence and owner reconciliation/archive preserving replay history; bounded stop policy tested locally, continuous retention not qualified",
+    "real Reporter App and canonical Actions end-to-end advisory",
+    "separately authorized deployment/activation/required App gate and genuine integration privacy evidence"
+  ],
+  "production_status": "HOLD; installed source/config not changed",
+  "review": "private review5785671091: affirmative cleanup receipt and bounded reservation retention",
+  "reservation_evidence": {
+    "protected_binding": [
+      "candidate",
+      "nonce",
+      "run",
+      "job",
+      "attempt",
+      "lane",
+      "VM",
+      "runner"
+    ],
+    "independent_actions_reads": [
+      "job",
+      "run"
+    ],
+    "durable_job_runner_identity": true,
+    "receipt_digest_bound": true,
+    "authority_restart": "old receipts denied; no automatic authority recovery",
+    "collector_restart": "protected records re-read",
+    "test_identity": "same UID; no separate-UID deployment claim"
+  },
+  "cleanup_evidence": {
+    "independent_attempts": [
+      "deregister",
+      "terminate guest",
+      "terminate process",
+      "delete VM"
+    ],
+    "fault_injection": [
+      "deregister",
+      "delete",
+      "both",
+      "guest termination",
+      "process reap"
+    ],
+    "persistent_attention": true,
+    "primary_exception_preserved": true,
+    "owner_pause_without_fallback": true,
+    "native_helpers": "inert fixtures only",
+    "affirmative_receipt_required": true,
+    "identity_binding": [
+      "VM",
+      "repository",
+      "run",
+      "job",
+      "runner"
+    ],
+    "silent_failure_denials": [
+      "None",
+      "missing fields",
+      "incomplete",
+      "attention",
+      "truthy nonboolean",
+      "wrong VM or active binding"
+    ],
+    "reporter_requires_completed_reservation": true,
+    "receipt_revoked_on_failure": true
+  },
+  "reservation_capacity_evidence": {
+    "maximum_rows": 64,
+    "maximum_ledger_bytes_exclusive": 262144,
+    "maximum_assignment_bytes": 2048,
+    "future_update_headroom_bytes": 32768,
+    "eviction": "none",
+    "capacity_disposition": "durable attention and owner pause; proof/report deny; no new VM at preflight exhaustion",
+    "retention": "all active, uncertain, completed, revoked/recovery and expired replay rows retained across restarts",
+    "repeated_job_count": 64,
+    "old_16kib_limit_exceeded_and_readable": true,
+    "archive_reconciliation": "not implemented; reviewed procedure required for sustained deployment; no reset/delete authorized"
+  }
+}

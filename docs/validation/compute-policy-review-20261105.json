@@ -1,0 +1,541 @@
+{
+  "scope": "Disabled cost fail-closed policy review update to Draft PR353; no production activation",
+  "parent_commit": "543a73ec5587c0b11c018a00fdec268800c439db",
+  "policy_review_comment": 6645766280,
+  "environment": {
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "python": "3.9.6"
+  },
+  "source_binding": "SHA256 manifest; final commit SHA is recorded in PR353 handoff, avoiding self-reference",
+  "results": {
+    "ctest_passed": 4,
+    "ctest_total": 4,
+    "controller_unit_tests": 108,
+    "compute_policy_unit_tests": 65,
+    "controller_mutations_killed": 43,
+    "compute_mutations_killed": 25,
+    "privacy_tests_passed": 158,
+    "routing_tests_passed": 44
+  },
+  "negative_and_failure_coverage": [
+    "Each of four disable calls: before write and after applied write with lost response",
+    "Each explicit manual enable: failed response and OFF-only compensation",
+    "Persistent compensation/readback failure, unapplied successful PUT, durable intent",
+    "Signal and process-loss pending intent; explicit manual reconcile",
+    "Stale generation/plan, expiry, snapshot/audit tampering, external workflow drift",
+    "Owner/repo/write grant, mandatory privacy blob/provenance/rules/no bypass",
+    "Complete unrelated active-run inventory and quiet-window change",
+    "Unhealthy/stale/future/nonfinite probe, changed availability session",
+    "API/auth outage invalidates old resume decisions; health return never resumes",
+    "Worker no-passthrough/no-hosted-fallback; stale worker cannot overwrite newer owner",
+    "Disabled config, explicit hosted acknowledgment, strict endpoint/host/write boundaries",
+    "Canonical owned private state, symlink and legacy temporary guards"
+  ],
+  "controller_mutation_results": [
+    {
+      "id": "controller-disabled",
+      "module": "controller.py",
+      "expected_test": "test_disabled_controller_does_not_even_read_github",
+      "killed": true,
+      "seconds": 0.39
+    },
+    {
+      "id": "reporter-enabled",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.222
+    },
+    {
+      "id": "reporter-identity",
+      "module": "controller.py",
+      "expected_test": "test_production_reporter_is_disabled_and_scope_restricted",
+      "killed": true,
+      "seconds": 0.278
+    },
+    {
+      "id": "source-identity",
+      "module": "controller.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.31
+    },
+    {
+      "id": "advisory-privacy",
+      "module": "controller.py",
+      "expected_test": "test_advisory_preserves_existing_privacy",
+      "killed": true,
+      "seconds": 0.326
+    },
+    {
+      "id": "advisory-not-required",
+      "module": "controller.py",
+      "expected_test": "test_advisory_refuses_an_already_required_reporter_context",
+      "killed": true,
+      "seconds": 0.244
+    },
+    {
+      "id": "required-strict",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.282
+    },
+    {
+      "id": "required-bypass",
+      "module": "controller.py",
+      "expected_test": "test_privacy_strict_and_no_bypass_policy_are_mandatory",
+      "killed": true,
+      "seconds": 0.319
+    },
+    {
+      "id": "required-app",
+      "module": "controller.py",
+      "expected_test": "test_required_relay_context_must_have_the_reporter_app",
+      "killed": true,
+      "seconds": 0.206
+    },
+    {
+      "id": "approval-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_approval_mode_cannot_change_without_reapproval",
+      "killed": true,
+      "seconds": 0.335
+    },
+    {
+      "id": "approval-pin-ready",
+      "module": "controller.py",
+      "expected_test": "test_approval_cannot_claim_unconfigured_workflow_or_queue",
+      "killed": true,
+      "seconds": 0.199
+    },
+    {
+      "id": "approval-dedup-binding",
+      "module": "controller.py",
+      "expected_test": "test_dedup_cannot_return_an_approval_from_a_different_mode",
+      "killed": true,
+      "seconds": 0.223
+    },
+    {
+      "id": "nonce-match",
+      "module": "controller.py",
+      "expected_test": "test_spoofed_nonce_never_emits_success",
+      "killed": true,
+      "seconds": 0.263
+    },
+    {
+      "id": "workflow-pin",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.217
+    },
+    {
+      "id": "actor-match",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.218
+    },
+    {
+      "id": "run-attempt",
+      "module": "controller.py",
+      "expected_test": "test_changed_workflow_actor_or_run_attempt_rejects_success",
+      "killed": true,
+      "seconds": 0.27
+    },
+    {
+      "id": "job-attempt",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.299
+    },
+    {
+      "id": "unknown-lane",
+      "module": "controller.py",
+      "expected_test": "test_wrong_job_attempt_or_unknown_extra_job_is_failure",
+      "killed": true,
+      "seconds": 0.247
+    },
+    {
+      "id": "run-complete",
+      "module": "controller.py",
+      "expected_test": "test_running_run_cannot_emit_terminal_success",
+      "killed": true,
+      "seconds": 0.21
+    },
+    {
+      "id": "last-revalidation",
+      "module": "controller.py",
+      "expected_test": "test_final_revalidation_prevents_success_after_mid_cycle_head_change",
+      "killed": true,
+      "seconds": 0.232
+    },
+    {
+      "id": "no-redispatch",
+      "module": "controller.py",
+      "expected_test": "test_dispatch_uncertainty_does_not_redispatch",
+      "killed": true,
+      "seconds": 0.275
+    },
+    {
+      "id": "public-proof-source",
+      "module": "controller.py",
+      "expected_test": "test_public_proof_cannot_describe_a_different_candidate",
+      "killed": true,
+      "seconds": 0.363
+    },
+    {
+      "id": "main-ref",
+      "module": "candidate_binding.py",
+      "expected_test": "test_current_main_invalidates_approval_even_when_pr_base_is_cached",
+      "killed": true,
+      "seconds": 0.233
+    },
+    {
+      "id": "main-protected",
+      "module": "candidate_binding.py",
+      "expected_test": "test_unprotected_main_or_wrong_repository_id_reject_approval",
+      "killed": true,
+      "seconds": 0.263
+    },
+    {
+      "id": "draft-permission",
+      "module": "candidate_binding.py",
+      "expected_test": "test_draft_requires_explicit_advisory_permission",
+      "killed": true,
+      "seconds": 0.3
+    },
+    {
+      "id": "lane-run-id",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.243
+    },
+    {
+      "id": "duplicate-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.309
+    },
+    {
+      "id": "failed-lane",
+      "module": "check_protocol.py",
+      "expected_test": "test_missing_duplicate_wrong_run_failed_cancelled_neutral_skipped_lanes",
+      "killed": true,
+      "seconds": 0.25
+    },
+    {
+      "id": "token-repository",
+      "module": "checks_reporter.py",
+      "expected_test": "test_token_is_requested_for_only_hypercine_with_checks_write",
+      "killed": true,
+      "seconds": 0.215
+    },
+    {
+      "id": "check-app-source",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_app_result_is_never_accepted",
+      "killed": true,
+      "seconds": 0.229
+    },
+    {
+      "id": "token-excess-rights",
+      "module": "checks_reporter.py",
+      "expected_test": "test_wrong_installation_or_excess_token_permissions_reject_authentication",
+      "killed": true,
+      "seconds": 0.319
+    },
+    {
+      "id": "queue-private",
+      "module": "bridge.py",
+      "expected_test": "test_private_queue_visibility_change_prevents_dispatch",
+      "killed": true,
+      "seconds": 0.233
+    },
+    {
+      "id": "reader-digest",
+      "module": "adapters.py",
+      "expected_test": "test_reader_digest_and_permissions_before_execution",
+      "killed": true,
+      "seconds": 0.306
+    },
+    {
+      "id": "cli-write-boundary",
+      "module": "adapters.py",
+      "expected_test": "test_cli_cannot_mutate_rules_runners_checks_or_merge",
+      "killed": true,
+      "seconds": 0.231
+    },
+    {
+      "id": "worker-disabled",
+      "module": "worker_hook.py",
+      "expected_test": "test_worker_hook_missing_or_disabled_does_nothing",
+      "killed": true,
+      "seconds": 0.285
+    },
+    {
+      "id": "example-disabled",
+      "module": "config.example.json",
+      "expected_test": "test_example_is_disabled_and_has_no_host_values",
+      "killed": true,
+      "seconds": 0.221
+    },
+    {
+      "id": "state-directory-private",
+      "module": "state_store.py",
+      "expected_test": "test_group_writable_state_rejected_before_approve_and_cycle",
+      "killed": true,
+      "seconds": 0.283
+    },
+    {
+      "id": "state-file-private",
+      "module": "state_store.py",
+      "expected_test": "test_unsafe_ledger_mode_rejected",
+      "killed": true,
+      "seconds": 0.248
+    },
+    {
+      "id": "state-ancestor-private",
+      "module": "state_store.py",
+      "expected_test": "test_shared_writable_ancestor_rejected",
+      "killed": true,
+      "seconds": 0.316
+    },
+    {
+      "id": "state-temp-exclusive",
+      "module": "state_store.py",
+      "expected_test": "test_exclusive_temp_collision_does_not_truncate_regular_file",
+      "killed": true,
+      "seconds": 0.292
+    },
+    {
+      "id": "state-legacy-temp",
+      "module": "state_store.py",
+      "expected_test": "test_legacy_tmp_symlink_rejected_without_touching_target",
+      "killed": true,
+      "seconds": 0.272
+    },
+    {
+      "id": "state-record-binding",
+      "module": "state_store.py",
+      "expected_test": "test_tampered_record_candidate_binding_rejected",
+      "killed": true,
+      "seconds": 0.237
+    },
+    {
+      "id": "check-before-dispatch",
+      "module": "controller.py",
+      "expected_test": "test_pending_app_check_is_created_before_private_dispatch",
+      "killed": true,
+      "seconds": 0.275
+    }
+  ],
+  "compute_mutation_results": [
+    {
+      "id": "watch-failure-generation",
+      "module": "policy.py",
+      "designated_test": "test_api_outage_invalidates_old_local_resume_plans",
+      "killed": true
+    },
+    {
+      "id": "owner-auth",
+      "module": "policy.py",
+      "designated_test": "test_owner_identity_and_capability_required_before_mutation",
+      "killed": true
+    },
+    {
+      "id": "write-capability",
+      "module": "policy.py",
+      "designated_test": "test_owner_identity_and_capability_required_before_mutation",
+      "killed": true
+    },
+    {
+      "id": "privacy-active",
+      "module": "policy.py",
+      "designated_test": "test_missing_privacy_or_unknown_required_gate_refuses_start",
+      "killed": true
+    },
+    {
+      "id": "unknown-required-gate",
+      "module": "policy.py",
+      "designated_test": "test_missing_privacy_or_unknown_required_gate_refuses_start",
+      "killed": true
+    },
+    {
+      "id": "privacy-definition",
+      "module": "policy.py",
+      "designated_test": "test_changed_scanner_bypass_or_disabled_required_security_blocks_start",
+      "killed": true
+    },
+    {
+      "id": "ruleset-no-bypass",
+      "module": "policy.py",
+      "designated_test": "test_changed_scanner_bypass_or_disabled_required_security_blocks_start",
+      "killed": true
+    },
+    {
+      "id": "owner-plan-expiry",
+      "module": "policy.py",
+      "designated_test": "test_expired_owner_plan_never_changes_workflows",
+      "killed": true
+    },
+    {
+      "id": "quiet-plan",
+      "module": "policy.py",
+      "designated_test": "test_busy_quiet_window_refuses_even_pause",
+      "killed": true
+    },
+    {
+      "id": "quiet-execute",
+      "module": "policy.py",
+      "designated_test": "test_new_run_between_plan_and_execute_refuses_start",
+      "killed": true
+    },
+    {
+      "id": "plan-generation",
+      "module": "policy.py",
+      "designated_test": "test_stale_plan_creation_is_rejected",
+      "killed": true
+    },
+    {
+      "id": "execution-generation",
+      "module": "policy.py",
+      "designated_test": "test_stale_plan_cannot_override_a_later_owner_decision",
+      "killed": true
+    },
+    {
+      "id": "inventory-drift",
+      "module": "policy.py",
+      "designated_test": "test_external_state_change_is_not_blindly_restored",
+      "killed": true
+    },
+    {
+      "id": "original-disabled",
+      "module": "policy.py",
+      "designated_test": "test_originally_disabled_requires_deliberate_new_hosted_grant",
+      "killed": true
+    },
+    {
+      "id": "deployment-disabled",
+      "module": "policy.py",
+      "designated_test": "test_disabled_config_cannot_mutate_even_with_a_valid_plan",
+      "killed": true
+    },
+    {
+      "id": "durable-intent",
+      "module": "policy.py",
+      "designated_test": "test_every_remote_write_has_durable_matching_intent",
+      "killed": true
+    },
+    {
+      "id": "put-readback",
+      "module": "policy.py",
+      "designated_test": "test_failed_put_that_did_not_apply_cannot_be_called_success",
+      "killed": true
+    },
+    {
+      "id": "watch-owner-hosted",
+      "module": "policy.py",
+      "designated_test": "test_hosted_choice_survives_mac_outage_without_automatic_changes",
+      "killed": true
+    },
+    {
+      "id": "health-session",
+      "module": "policy.py",
+      "designated_test": "test_new_health_session_requires_new_owner_local_resume",
+      "killed": true
+    },
+    {
+      "id": "admission-generation",
+      "module": "policy.py",
+      "designated_test": "test_unverified_or_stale_admission_is_denied",
+      "killed": true
+    },
+    {
+      "id": "no-auto-resume",
+      "module": "policy.py",
+      "designated_test": "test_health_recovery_never_reenables_or_admits",
+      "killed": true
+    },
+    {
+      "id": "worker-no-passthrough",
+      "module": "gate.py",
+      "designated_test": "test_disabled_gate_never_invokes_api_or_private_dispatch",
+      "killed": true
+    },
+    {
+      "id": "old-worker-generation",
+      "module": "gate.py",
+      "designated_test": "test_old_worker_error_cannot_overwrite_a_newer_owner_generation",
+      "killed": true
+    },
+    {
+      "id": "watch-transport-enable",
+      "module": "api.py",
+      "designated_test": "test_disarmed_or_watch_adapter_cannot_enable",
+      "killed": true
+    },
+    {
+      "id": "security-write-boundary",
+      "module": "api.py",
+      "designated_test": "test_read_write_boundaries_never_touch_security_or_dispatch",
+      "killed": true
+    }
+  ],
+  "production": {
+    "deployed": false,
+    "workflow_mutations": 0,
+    "workflow_dispatches": 0,
+    "rules_mutations": 0,
+    "merges": 0,
+    "new_eligible_integration_head_created": false,
+    "native_hardware_tests_this_revision": "NOT RUN; no native code or recipe changes"
+  },
+  "source_sha256": {
+    "ci/compute_policy/README.md": "af1e842d1139e3633136edaddf3519f2626357507324a0eb76b09099e288833b",
+    "ci/compute_policy/__init__.py": "49f0c33accd87a8c8065f52699a5cdd35ca5ace65249def9767c6199efde4db6",
+    "ci/compute_policy/admin.py": "a6f4431b7f99b7d5456e96c43e2023ac2227cba132932f84a96f20332180b652",
+    "ci/compute_policy/api.py": "5e022e34495c43a5e5dc935a1d40cf76947d33702ee1817eca79fd8468f06b75",
+    "ci/compute_policy/config.example.json": "1f2586a71e2eba5be1248e070e3a8ac32d140b7d2f5c7fd97642b13ce9ceaedd",
+    "ci/compute_policy/gate.py": "5fd5abab61e3a2715c62bfe8c28094430da1cc057c05f660cf2dca0145cff9db",
+    "ci/compute_policy/mutation_suite.py": "6da3950ccbcef88becdd52cf250336049ae043047093b94039c252933d8ba7cb",
+    "ci/compute_policy/policy.py": "cb233d19e322686eaa659de5b85c19636154cbdc63ae6872bdee1dadd6486030",
+    "ci/compute_policy/tests/__init__.py": "47188b2ca95696bf7741da1bb9576a77271f436e7a7013f1570f8e7fd4ba412c",
+    "ci/compute_policy/tests/test_adapter_cli.py": "e6254118e1c478b59c49b31e7e35e7f107689369a2ba3cae992510e01c27957a",
+    "ci/compute_policy/tests/test_policy.py": "176b68e2b0ebff7cdbeaf3539608ab2a55d16bbb29445d96c8ac701ce4b87bae",
+    "ci/premerge_controller/CMakeLists.txt": "3e22576e47d8b30a6a0efa34ad575e974aabb7c68b4de16475b782490e7617e1",
+    "ci/premerge_controller/README.md": "fd4a7ece3232c4c4d48dd73231ba39127418795b427a2364d5f55f45358e8caa",
+    "ci/premerge_controller/__init__.py": "6ca3fa341158b219f14a538a1b14268c39076c03963512dcdcf7e709cf7ba8b4",
+    "ci/premerge_controller/adapters.py": "b67d6324387c11d180427f9e151cb3226d13f5f74093f5623df59d89b9aef513",
+    "ci/premerge_controller/admin.py": "458f9b3554225ecb6374c0db0223f187652ba618d1eec10a21cb6a8ed5bcaf71",
+    "ci/premerge_controller/bridge.py": "652db524b0f48ebe489bb6644a266d55ddb9ec694303a26a2c3cc05142b2d80c",
+    "ci/premerge_controller/candidate_binding.py": "e7e4dd90471a22929935e1c3a9f5aaaff03e92097525c31359cb558fdd76f457",
+    "ci/premerge_controller/check_protocol.py": "efe9d0124f4ffd30438cdae05707e5f7d864f9e90a437ecc939532f7c615022c",
+    "ci/premerge_controller/checks_reporter.py": "82134f93ab7f9e6c7cbf934c8916a4ef9fa479f60c6ab6a1f1db0a9fea33ab26",
+    "ci/premerge_controller/config.example.json": "a4d8305bc5e0c655152ca2ec50fa6e8edf2eb563515f61a2cbc991286a1e7b6e",
+    "ci/premerge_controller/controller.py": "7381907f51dd2966c0d05399bc18b818a558e8733fa6b8e61105f06262fc29ae",
+    "ci/premerge_controller/mutation_suite.py": "16a22179705f695ce00b43918613bfb17383820caf1536d1862988113712fc52",
+    "ci/premerge_controller/state_store.py": "284d7bdb7a7fc2d252087e3b32cf499d56412159c7fbdbaebd8a6f2e439e9c05",
+    "ci/premerge_controller/tests/__init__.py": "47188b2ca95696bf7741da1bb9576a77271f436e7a7013f1570f8e7fd4ba412c",
+    "ci/premerge_controller/tests/test_advisory_and_adapters.py": "38c95ccbed70b20b9b6d2b9c68a16afc4a81d20f515f14ca35b87b71c9639888",
+    "ci/premerge_controller/tests/test_binding_and_client.py": "bdc049a34af922e3065df7087626ff55583d54c47d3ac7bb4ecebff925e1831c",
+    "ci/premerge_controller/tests/test_controller.py": "4136588f970d6ec24751ff7dc914320bdab2b579fb9e8fac913cd3bdbdc96674",
+    "ci/premerge_controller/tests/test_protocol.py": "a201cc46a1030f3416e01508e6800776d843acd0a8379204a434102ee5b37740",
+    "ci/premerge_controller/tests/test_state_store.py": "f27b4cde4312c028b5c1a355cdda16d187de48b671c0c80d9f6d4f15dc5706c8",
+    "ci/premerge_controller/worker_hook.py": "f13193b2078d89d24e8b977ee7bb89cace650bb7bad7ad9120a522d90a1d59aa",
+    "docs/FAIL_CLOSED_CI_RUNBOOK.md": "5f4e180abe849b838713598e1ee05f521dfe6c81e2f3ce7c325a41bf804cbdc4",
+    "docs/INTEGRATION_PRIVACY_WINDOW.md": "53527accd667c1ddaaecf0e646b66fad51ce4d87884de11ca2c29638c3ceaf4b",
+    "docs/PREMERGE_ADVISORY_REVIEW.md": "957794340c7c784859451ae68ce698a8f9f80f10108be3a460c075cec4fbb649"
+  },
+  "reproduction": [
+    "cmake -S ci/premerge_controller -B build/premerge-controller",
+    "ctest --test-dir build/premerge-controller -C Release --output-on-failure",
+    "python3 -m unittest discover -s ci -p 'test_privacy*.py'",
+    "python3 -m unittest ci.test_workflow_event_matrix ci.test_runner_capability (PyYAML6.0.2)"
+  ]
+}

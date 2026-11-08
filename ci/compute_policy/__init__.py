@@ -1,0 +1,3 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
+"""Opt-in cost fail-closed control plane; import performs no actions."""

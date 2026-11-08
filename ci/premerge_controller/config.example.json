@@ -1,0 +1,25 @@
+{
+  "premerge": {
+    "enabled": false,
+    "source": "louis-0hrs/HyperCine",
+    "repository": null,
+    "workflow": null,
+    "relay_commit": null,
+    "actors": [
+      "louis-0hrs"
+    ],
+    "ruleset_id": null,
+    "required_gate": false,
+    "reporter": {
+      "enabled": false,
+      "repository": "louis-0hrs/HyperCine",
+      "repository_id": 1402247945,
+      "app_id": 5612385,
+      "installation_id": null
+    },
+    "key_reader": {
+      "program": null,
+      "sha256": null
+    }
+  }
+}
