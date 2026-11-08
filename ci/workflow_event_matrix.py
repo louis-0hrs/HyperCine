@@ -24,7 +24,7 @@ guessing.
 Usage
 -----
     python3 ci/workflow_event_matrix.py                  # verify the contract
-    python3 ci/workflow_event_matrix.py --self-test      # mutation negative controls
+    python3 -m unittest ci.test_workflow_event_matrix    # mutation negative controls
     python3 ci/workflow_event_matrix.py --list           # resolved routing table
 
 Exit status 0 means every rule held. Non-zero means at least one rule broke;
