@@ -863,6 +863,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         endif()
         if(HYPERCINE_FFMPEG_EXECUTABLE AND HYPERCINE_FFPROBE_EXECUTABLE)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
+            # Include the already-public P7.A audit and require its independent FFmpeg fixture.
+            add_subdirectory(tests/macos_decode_portability)
             if(HYPERCINE_ENABLE_CUDA)
                 add_test(NAME cuda_filmscan3_ffmpeg_decode COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_cuda_filmscan3.py"
