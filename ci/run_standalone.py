@@ -12,6 +12,8 @@ import sys
 import xml.etree.ElementTree as ET
 
 REQUIRED = {
+    # Public P7.A audit must be executed, not merely present in a separate project.
+    'p7_plane_contract', 'p7_json_contract', 'p7_public_sdk_fixture',
     # Fail closed if the C0 geometry arithmetic or recorded-report gate disappears.
     'extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report',
     # P0 RGB444 frame and RG48 importer must never disappear from standalone CI.
