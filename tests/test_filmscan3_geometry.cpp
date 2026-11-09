@@ -89,6 +89,17 @@ public:
         result.levels[2][0].bands[3].width=1;return result;
     }
 };
+// Declares a session geometry without producing one: proves the injection seam
+// validates the declaration itself instead of trusting whatever a frontend says.
+class Declares final : public detail::Frontend {
+    FilmScan3Geometry geometry_;
+public:
+    explicit Declares(FilmScan3Geometry geometry):geometry_(geometry){}
+    FilmScan3Geometry Geometry() const noexcept override {return geometry_;}
+    Planes Convert(const uint8_t* p,std::size_t n,int w,int h,std::size_t s) override {return ConvertFilmScan3Bgra(p,n,w,h,s);}
+    WaveletLevel Forward(const Plane& p,int s) override {return ForwardLevel(p,s);}
+    std::string DeviceName() const override {return "test declared geometry";}
+};
 }
 int main(int argc,char** argv) {try {
     const std::filesystem::path dir=argc==3 && std::string(argv[1])=="--export" ? argv[2]:"";
@@ -115,6 +126,34 @@ int main(int argc,char** argv) {try {
         Require(Same(previous,encoder.state()),"failed allocation/framing changed state");
     }
     detail::FrontendAccess::Use(encoder,detail::CpuFrontend({3840,2160}));
+    // Session geometry is bound, not negotiable, and a frontend must declare a
+    // valid geometry of its own. Both refusals happen before a frame exists and
+    // leave the already-bound session byte-identical to its control.
+    {
+        FilmScan3Encoder seam(FilmScan3Geometry{128,24});
+        AlignedVector<uint8_t> small(128u*24u*4,128);
+        FilmScan3Encoder control(FilmScan3Geometry{128,24});
+        const auto control_packet=control.Encode(small.data(),small.size(),512).sample;
+        const auto seam_state=seam.state();
+        Reject([&]{detail::FrontendAccess::Use(seam,std::make_shared<Declares>(FilmScan3Geometry{192,24}));});
+        Reject([&]{detail::FrontendAccess::Use(seam,std::make_shared<Declares>(FilmScan3Geometry{128,32}));});
+        Reject([&]{detail::FrontendAccess::Use(seam,std::make_shared<Declares>(FilmScan3Geometry{0,0}));});
+        Require(seam.geometry().width==128 && seam.geometry().height==24,"refused injection changed the session geometry");
+        Require(Same(seam_state,seam.state()),"refused injection changed session state");
+        Require(seam.Encode(small.data(),small.size(),512).sample==control_packet,
+                "session unusable after a refused frontend injection");
+        // A default-constructed session has no bound geometry yet, so this is the
+        // only place where the declaration is the *only* thing that can refuse an
+        // impossible shape.
+        FilmScan3Encoder bare;
+        Reject([&]{detail::FrontendAccess::Use(bare,std::make_shared<Declares>(FilmScan3Geometry{0,0}));});
+        Reject([&]{detail::FrontendAccess::Use(bare,std::make_shared<Declares>(FilmScan3Geometry{129,24}));});
+        Reject([&]{detail::FrontendAccess::Use(bare,std::make_shared<Declares>(FilmScan3Geometry{128,25}));});
+        detail::FrontendAccess::Use(bare,std::make_shared<Declares>(FilmScan3Geometry{128,24}));
+        Require(bare.geometry().width==128 && bare.geometry().height==24,"valid declaration not bound to the session");
+        Require(bare.Encode(small.data(),small.size(),512).sample==control_packet,
+                "same-geometry injection no longer encodes the session packet");
+    }
     FilmScan3Encoder control(FilmScan3Geometry{3840,2160});control.Encode(input.data(),input.size(),15360);
     Require(encoder.Encode(input.data(),input.size(),15360).sample==control.Encode(input.data(),input.size(),15360).sample,"retry after failure");
     encoder.Reset();Require(encoder.geometry().width==3840 && encoder.geometry().height==2160,"Reset changed geometry");
