@@ -68,6 +68,18 @@ class JsonContract(unittest.TestCase):
             with self.subTest(raw=raw):
                 self.verify(raw)
 
+    def test_deeply_nested_baseline_fails_without_traceback(self):
+        # The compared field ensures rejection even where the decoder's limit differs.
+        nested = '[' * 2048 + '0' + ']' * 2048
+        raw = json.dumps(self.report).replace('"frame_count": 24', '"frame_count": ' + nested)
+        self.verify(raw)
+
+    def test_json_recursion_failure_is_sanitized(self):
+        raw = json.dumps(self.report)
+        with patch.object(baseline.json, 'loads',
+                          side_effect=RecursionError('SYNTHETIC_PRIVATE_EVIDENCE')):
+            self.verify(raw)
+
     def test_malformed_tool_json_fails_without_traceback(self):
         import subprocess
         for raw in [b'[]', b'{"streams":[],"streams":[]}',

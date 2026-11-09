@@ -135,7 +135,7 @@ def main():
         if args.output:
             args.output.write_text(json.dumps(report, indent=2) + '\n')
         print('PASS: 24 CFHD packets and 24 complete YUV422p10 frames')
-    except (ValueError, TypeError, UnicodeError, KeyError, IndexError, OSError,
+    except (ValueError, TypeError, UnicodeError, KeyError, IndexError, OSError, RecursionError,
             subprocess.SubprocessError):
         # Raw tool errors can contain local paths or arbitrary input metadata.
         parser.exit(1, 'FAIL: oracle unavailable, invalid fixture, decode error or baseline mismatch\n')
