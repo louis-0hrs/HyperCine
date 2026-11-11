@@ -211,7 +211,7 @@ class OraclePublicationPrivacy(unittest.TestCase):
         self.assertEqual(compare.validated_run_url(good), good)
         for bad in (None, 100, '', '/private/host/path',
                     'https://user:token@github.com/louis-0hrs/HyperCine/actions/runs/1',
-                    good + '?access_token=PRIVATE_DO_NOT_PUBLISH',
+                    good + '?access_token=dummy',
                     good + '#PRIVATE_DO_NOT_PUBLISH',
                     'https://internal.example/actions/runs/123',
                     'https://github.com/louis-0hrs/HyperCine/actions/runs/not-a-number'):
