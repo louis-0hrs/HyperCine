@@ -59,7 +59,7 @@ def extract_log(lines):
             require(len(fields) == 2, 'invalid oracle header')
             name, size = fields
             require(name in ORACLE_NAMES and name not in data, 'invalid or duplicate oracle name')
-            require(size.isascii() and size.isdecimal(), 'invalid oracle length')
+            require(len(size) <= 8 and size.isascii() and size.isdecimal(), 'invalid oracle length')
             declared = int(size)
             require(0 < declared <= 16 * 1024 * 1024, 'oracle record too large')
             require(name == 'control.cfhd' or declared == 65536, 'invalid pixel storage')
@@ -118,17 +118,26 @@ def main():
     data = {}
     observations = []
     if args.windows_fixtures:
-        manifest = json.loads((Path(args.windows_fixtures)/'manifest.json').read_text())
-        require(type(manifest) is dict and type(manifest.get('files')) is list,
-                'invalid fixture manifest')
+        manifest_path = Path(args.windows_fixtures) / 'manifest.json'
+        require(0 < manifest_path.stat().st_size <= 64 * 1024,
+                'fixture manifest exceeds size limit')
+        manifest = json.loads(manifest_path.read_text())
+        require(type(manifest) is dict and type(manifest.get('files')) is list and
+                len(manifest['files']) == len(ORACLE_NAMES), 'invalid fixture manifest')
         fixture_root = Path(args.windows_fixtures).resolve()
         for file in manifest['files']:
-            require(type(file) is dict and file.get('file') in ORACLE_NAMES and
-                    file['file'] not in data, 'invalid or duplicate fixture name')
+            require(type(file) is dict and type(file.get('file')) is str and
+                    file['file'] in ORACLE_NAMES and file['file'] not in data,
+                    'invalid or duplicate fixture name')
+            declared = file.get('bytes')
+            require(type(declared) is int and
+                    (0 < declared <= 16 * 1024 * 1024 if file['file'] == 'control.cfhd'
+                     else declared == 65536), 'invalid fixture byte count')
             path = fixture_root / file['file']
             require(path.resolve().parent == fixture_root, 'fixture escapes directory')
+            require(path.stat().st_size == declared, 'fixture file length mismatch')
             raw = path.read_bytes()
-            require(type(file.get('bytes')) is int and len(raw) == file['bytes'] and
+            require(len(raw) == declared and
                     hashlib.sha256(raw).hexdigest() == file.get('sha256'),
                     'fixture length or digest mismatch')
             data[file['file']] = raw
@@ -136,7 +145,10 @@ def main():
     else:
         require(args.run_url, '--run-url required with --log' )
         run_url = args.run_url
-        log_sha = hashlib.sha256(Path(args.log).read_bytes()).hexdigest()
+        log_path = Path(args.log)
+        require(0 < log_path.stat().st_size <= 64 * 1024 * 1024,
+                'oracle log exceeds size limit')
+        log_sha = hashlib.sha256(log_path.read_bytes()).hexdigest()
     if args.log:
         lines = Path(args.log).read_text().splitlines()
         for line in lines:
