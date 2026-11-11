@@ -119,6 +119,20 @@ def extract_log(lines):
 
 
 
+def read_bounded_log(path):
+    """Hash and parse one immutable snapshot, not two independently read files.
+
+    A producer may replace or rewrite a log between reads; the public digest
+    must bind the exact bytes supplied to extract_log, even in that case.
+    """
+    require(0 < path.stat().st_size <= 64 * 1024 * 1024,
+            'oracle log exceeds size limit')
+    payload = path.read_bytes()
+    require(0 < len(payload) <= 64 * 1024 * 1024,
+            'oracle log exceeds size limit')
+    return hashlib.sha256(payload).hexdigest(), payload.decode('utf-8').splitlines()
+
+
 def write_exclusive(path, data):
     """Create an evidence file once: never follow a final symlink or truncate a prior receipt."""
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -179,12 +193,9 @@ def main():
     else:
         require(args.run_url, '--run-url required with --log' )
         run_url = args.run_url
-        log_path = Path(args.log)
-        require(0 < log_path.stat().st_size <= 64 * 1024 * 1024,
-                'oracle log exceeds size limit')
-        log_sha = hashlib.sha256(log_path.read_bytes()).hexdigest()
+        log_sha, log_lines = read_bounded_log(Path(args.log))
     if args.log:
-        lines = Path(args.log).read_text().splitlines()
+        lines = log_lines
         for line in lines:
             if is_observation_line(line):
                 require(len(observations) < 4096, 'too many oracle observations')
