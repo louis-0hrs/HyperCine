@@ -12,8 +12,9 @@ import hashlib
 import json
 import math
 import os
+import re
 from pathlib import Path
-from validation_support import require, p10_samples
+from validation_support import require, hex_digest, p10_samples
 import subprocess
 from validate_standalone import avi, reference
 
@@ -37,6 +38,14 @@ def observation_receipt(line):
     marker = next(marker for marker in OBSERVATION_MARKERS if marker in line)
     return dict(marker=marker, line_sha256=hashlib.sha256(
         line.encode('utf-8')).hexdigest())
+
+
+def validated_run_url(url):
+    """Never copy user-info, query strings or private run locations into a report."""
+    require(type(url) is str and re.fullmatch(
+        r'https://github[.]com/louis-0hrs/HyperCine/actions/runs/[0-9]{1,20}', url),
+        'invalid public oracle run URL')
+    return url
 
 
 def metric(a, b, peak=1023):
@@ -165,6 +174,8 @@ def main():
                 observations.append(observation_receipt(line))
         data = extract_log(lines)
     require(set(data) == ORACLE_NAMES, 'incomplete oracle inventory')
+    run_url = validated_run_url(run_url)
+    hex_digest(log_sha)
     # Check ALL outputs (not just extracted records) before writing even the first byte.
     destinations = {'control.avi', 'control.ffmpeg-p10', 'comparison.json'}
     if args.log:
