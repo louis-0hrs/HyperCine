@@ -33,6 +33,7 @@ REQUIRED = {
     'encoder_backend_selection_contract', 'encoder_backend_session_packets',
     'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence',
     'wavelet_simd_exact', 'wavelet_simd_packets',
+    'wavelet_cpu_bounds',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'profile_enter_contract', 'p6_writer_trace_contract', 'p6_writer_trace_optimized',

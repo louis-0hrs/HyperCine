@@ -180,6 +180,32 @@ if(HYPERCINE_BUILD_TESTS)
     target_include_directories(test_cpu_isa PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_link_libraries(test_cpu_isa PRIVATE hypercine_cpu_isa)
     add_test(NAME cpu_isa_selection COMMAND test_cpu_isa)
+
+    # Direct public CPU entry points must enforce the same bounds as dispatchers.
+    # Link only this translation unit so deterministic allocation failure stays
+    # local to the test process and does not pull in any SDK or GPU backend.
+    add_executable(test_wavelet_cpu_bounds tests/test_wavelet_cpu_bounds.cpp src/cpu/wavelet_cpu.cpp)
+    target_include_directories(test_wavelet_cpu_bounds PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    add_test(NAME wavelet_cpu_bounds COMMAND test_wavelet_cpu_bounds)
+    set_tests_properties(wavelet_cpu_bounds PROPERTIES LABELS "cpu;api;memory-safety")
+
+    # hypercine.h exposes upstream type definitions. Check it only in SDK mode;
+    # the strict standalone compile database must remain entirely SDK-free.
+    if(HYPERCINE_BUILD_UPSTREAM AND NOT HYPERCINE_BUILD_STANDALONE AND NOT HYPERCINE_BUILD_QUALITY_STATE_ONLY)
+        foreach(language IN ITEMS c cpp)
+            add_executable(test_public_header_${language} tests/test_public_header.${language})
+            target_include_directories(test_public_header_${language} PRIVATE
+                "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}/upstream/Common")
+            # Optimizers can inline the version call and hide C linkage defects.
+            if(MSVC)
+                target_compile_options(test_public_header_${language} PRIVATE /Od)
+            else()
+                target_compile_options(test_public_header_${language} PRIVATE -O0)
+            endif()
+            add_test(NAME public_header_${language} COMMAND test_public_header_${language})
+            set_tests_properties(public_header_${language} PROPERTIES LABELS "cpu;api;header")
+        endforeach()
+    endif()
 endif()
 
 option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)

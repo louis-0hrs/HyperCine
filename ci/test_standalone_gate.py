@@ -14,6 +14,12 @@ from run_standalone import (REQUIRED, registered_tests, completed_tests,
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_public_cpu_wavelet_bounds_are_binding(self):
+        name = 'wavelet_cpu_bounds'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, name):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_internal_backend_session_gates_are_binding(self):
         for name in ('encoder_backend_selection_contract', 'encoder_backend_session_packets',
                      'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence'):
