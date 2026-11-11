@@ -12,7 +12,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
-import struct
+from validation_support import require, p10_samples
 import subprocess
 from validate_standalone import avi, reference
 
@@ -22,6 +22,8 @@ from validate_standalone import avi, reference
 # so replay must select it explicitly instead of silently recording less.
 OBSERVATION_MARKERS = ('distinctYU64=', 'quality_measured=', 'status=',
                        'STRICT_FAILURE', 'Oracle harness error')
+ORACLE_NAMES = {name + ext for name in ('flat', 'gradient', 'canonical')
+                for ext in ('.sdk-p10', '.sdk-bgra')} | {'control.cfhd', 'control.sdk-p10'}
 
 
 def is_observation_line(line):
@@ -29,7 +31,7 @@ def is_observation_line(line):
 
 
 def metric(a, b, peak=1023):
-    assert len(a) == len(b) and len(a) > 0
+    require(len(a) == len(b) and len(a) > 0, 'pixel plane lengths differ or are empty')
     errors = [x-y for x, y in zip(a, b)]
     total = sum(e*e for e in errors)
     first = next((i for i, e in enumerate(errors) if e), None)
@@ -40,10 +42,45 @@ def metric(a, b, peak=1023):
 
 
 def p10_metrics(actual, expected):
-    a, b = struct.unpack('<32768H', actual), struct.unpack('<32768H', expected)
+    a, b = p10_samples(actual, 128, 128), p10_samples(expected, 128, 128)
     bounds = (0, 16384, 24576, 32768)
     return dict(overall=metric(a, b), planes={name: metric(a[bounds[i]:bounds[i+1]], b[bounds[i]:bounds[i+1]])
                 for i, name in enumerate(('Y', 'Cb', 'Cr'))})
+
+
+def extract_log(lines):
+    """Accept exactly the bounded public oracle inventory before any extracted file is written."""
+    data, active, encoded, declared, encoded_size = {}, None, [], 0, 0
+    for line in lines:
+        if 'ORACLE_DATA_BEGIN ' in line:
+            require(active is None, 'nested oracle record')
+            fields = line.split('ORACLE_DATA_BEGIN ', 1)[1].split()
+            require(len(fields) == 2, 'invalid oracle header')
+            name, size = fields
+            require(name in ORACLE_NAMES and name not in data, 'invalid or duplicate oracle name')
+            require(size.isascii() and size.isdecimal(), 'invalid oracle length')
+            declared = int(size)
+            require(0 < declared <= 16 * 1024 * 1024, 'oracle record too large')
+            require(name == 'control.cfhd' or declared == 65536, 'invalid pixel storage')
+            active, encoded, encoded_size = name, [], 0
+        elif 'ORACLE_DATA_END ' in line:
+            require(active is not None and
+                    line.split('ORACLE_DATA_END ', 1)[1].strip() == active,
+                    'unmatched oracle end')
+            raw = base64.b64decode(''.join(encoded), validate=True)
+            require(len(raw) == declared, 'oracle record length mismatch')
+            data[active] = raw
+            active = None
+        elif 'ORACLE_DATA ' in line:
+            require(active is not None, 'oracle payload outside record')
+            part = line.split('ORACLE_DATA ', 1)[1].strip()
+            encoded_size += len(part)
+            require(encoded_size <= 4 * ((declared + 2) // 3),
+                    'oracle payload exceeds declared length')
+            encoded.append(part)
+    require(active is None, 'unterminated oracle record')
+    require(set(data) == ORACLE_NAMES, 'incomplete oracle inventory')
+    return data
 
 
 def main():
@@ -58,36 +95,45 @@ def main():
     args = parser.parse_args()
     root = Path(args.output); root.mkdir(parents=True, exist_ok=True)
     fixture = Path(__file__).parent/'fixtures'/'standalone'
-    data, active, encoded, length = {}, None, [], 0
+    data = {}
     observations = []
     if args.windows_fixtures:
         manifest = json.loads((Path(args.windows_fixtures)/'manifest.json').read_text())
+        require(type(manifest) is dict and type(manifest.get('files')) is list,
+                'invalid fixture manifest')
+        fixture_root = Path(args.windows_fixtures).resolve()
         for file in manifest['files']:
-            raw = (Path(args.windows_fixtures)/file['file']).read_bytes()
-            assert len(raw) == file['bytes'] and hashlib.sha256(raw).hexdigest() == file['sha256']
+            require(type(file) is dict and file.get('file') in ORACLE_NAMES and
+                    file['file'] not in data, 'invalid or duplicate fixture name')
+            path = fixture_root / file['file']
+            require(path.resolve().parent == fixture_root, 'fixture escapes directory')
+            raw = path.read_bytes()
+            require(type(file.get('bytes')) is int and len(raw) == file['bytes'] and
+                    hashlib.sha256(raw).hexdigest() == file.get('sha256'),
+                    'fixture length or digest mismatch')
             data[file['file']] = raw
         run_url, log_sha = manifest['run_url'], manifest['log_sha256']
     else:
-        assert args.run_url, '--run-url required with --log'
+        require(args.run_url, '--run-url required with --log' )
         run_url = args.run_url
         log_sha = hashlib.sha256(Path(args.log).read_bytes()).hexdigest()
-    for line in Path(args.log).read_text().splitlines() if args.log else []:
-        if is_observation_line(line):
-            observations.append(dict(step=line.split('\t')[1], result=line.split('Z ', 1)[-1].strip()))
-        if 'ORACLE_DATA_BEGIN ' in line:
-            assert active is None
-            active, size = line.split('ORACLE_DATA_BEGIN ', 1)[1].split()
-            length = int(size); encoded = []
-        elif 'ORACLE_DATA_END ' in line:
-            assert line.split('ORACLE_DATA_END ', 1)[1].strip() == active
-            raw = base64.b64decode(''.join(encoded), validate=True)
-            assert len(raw) == length and active not in data
-            data[active] = raw; (root/active).write_bytes(raw); active = None
-        elif 'ORACLE_DATA ' in line:
-            assert active is not None
-            encoded.append(line.split('ORACLE_DATA ', 1)[1].strip())
-    assert active is None
-    assert set(data) == {n+ext for n in ('flat', 'gradient', 'canonical') for ext in ('.sdk-p10', '.sdk-bgra')} | {'control.cfhd', 'control.sdk-p10'}, set(data)
+    if args.log:
+        lines = Path(args.log).read_text().splitlines()
+        for line in lines:
+            if is_observation_line(line):
+                observations.append(dict(
+                    step=line.split('\\t')[1] if '\\t' in line else 'unlabelled',
+                    result=line.split('Z ', 1)[-1].strip()))
+        data = extract_log(lines)
+        # Refuse pre-existing files/symlinks and validate all targets before writing any.
+        for name in data:
+            target = root / name
+            require(target.resolve().parent == root.resolve() and
+                    not target.exists() and not target.is_symlink(),
+                    'unsafe or occupied oracle destination')
+        for name, raw in data.items():
+            (root / name).write_bytes(raw)
+    require(set(data) == ORACLE_NAMES, 'incomplete oracle inventory')
     results = dict(copyright='Copyright (c) 2026 HyperCine Contributors.', license='MIT OR Apache-2.0',
         windows_run=run_url, log_sha256=log_sha, windows_observations=observations,
         ffmpeg_version=subprocess.check_output([args.ffmpeg, '-version'], text=True).splitlines()[0],
@@ -111,7 +157,8 @@ def main():
         results['samples'].append(record)
     packet=data['control.cfhd']; container=root/'control.avi';container.write_bytes(avi(packet))
     stream=json.loads(subprocess.check_output([args.ffprobe,'-v','error','-show_streams','-of','json',str(container)]))['streams'][0]
-    assert (stream['codec_name'],stream['width'],stream['height'],stream['pix_fmt']) == ('cfhd',128,128,'yuv422p10le'), stream
+    require((stream['codec_name'],stream['width'],stream['height'],stream['pix_fmt']) ==
+            ('cfhd',128,128,'yuv422p10le'), 'unexpected oracle stream')
     decoded=root/'control.ffmpeg-p10'
     subprocess.run([args.ffmpeg,'-v','error','-xerror','-y','-i',str(container),'-frames:v','1',
         '-c:v','rawvideo','-pix_fmt','yuv422p10le','-f','rawvideo',str(decoded)],check=True)
@@ -126,11 +173,14 @@ def main():
     (root/'comparison.json').write_text(json.dumps(results,indent=2)+'\n')
     for sample in results['samples']:
         overall=sample['sdk_vs_ffmpeg_p10']['overall']
-        assert overall['psnr_db'] is None or overall['psnr_db']>35, sample
-        if sample['pattern']=='flat': assert overall['max_error']==0, sample
+        require(overall['psnr_db'] is None or overall['psnr_db'] > 35,
+                'SDK sample PSNR gate failed')
+        if sample['pattern'] == 'flat':
+            require(overall['max_error'] == 0, 'flat sample mismatch')
     for name in ('sdk_vs_ffmpeg_p10','sdk_vs_source_p10','ffmpeg_vs_source_p10'):
         overall=results['control'][name]['overall']
-        assert overall['psnr_db'] is None or overall['psnr_db']>35, (name,overall)
+        require(overall['psnr_db'] is None or overall['psnr_db'] > 35,
+                'control PSNR gate failed')
     print(json.dumps(results,indent=2))
 
 
