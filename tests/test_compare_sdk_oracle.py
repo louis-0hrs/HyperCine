@@ -102,7 +102,7 @@ class OracleFailClosed(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             log = root / 'oracle.log'
-            log.write_text('\\n'.join(lines) + '\\n', encoding='utf-8')
+            log.write_text(chr(10).join(lines) + chr(10), encoding='utf-8')
             output = root / 'output'
             output.mkdir()
             sentinel = output / 'comparison.json'
