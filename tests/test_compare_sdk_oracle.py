@@ -219,6 +219,37 @@ class OraclePublicationPrivacy(unittest.TestCase):
                     ValueError, 'invalid public oracle run URL'):
                 compare.validated_run_url(bad)
 
+    def test_ffmpeg_version_receipt_never_copies_vendor_banner_or_paths(self):
+        for line, expected in (
+            ('ffmpeg version n8.0 Copyright /private/SDK_PATH PRIVATE_TOKEN',
+             'ffmpeg version n8.0'),
+            ('ffmpeg version 7.0.2-essentials_build built with INTERNAL_PATH',
+             'ffmpeg version 7.0.2-essentials_build'),
+            ('ffmpeg version N-118228-g1234abcd local:/sensitive',
+             'ffmpeg version N-118228-g1234abcd'),
+        ):
+            with self.subTest(line=line.split()[2]):
+                self.assertEqual(compare.validated_ffmpeg_version(line), expected)
+        for invalid in ('ffmpeg version PRIVATE_CREDENTIAL',
+                        'ffmpeg version 8.0/PRIVATE_PATH', 'external-version', ''):
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                compare.validated_ffmpeg_version(invalid)
+
+    def test_unrecognized_cli_arguments_are_not_echoed(self):
+        cmd = [sys.executable, '-B', str(Path(compare.__file__)),
+               '--log', 'unused', '--run-url',
+               'https://github.com/louis-0hrs/HyperCine/actions/runs/1',
+               '--ffmpeg', 'unused', '--ffprobe', 'unused',
+               '--output', 'unused',
+               '--unrecognized', 'PRIVATE_CREDENTIAL_DO_NOT_PUBLISH']
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertEqual(proc.stderr.strip(),
+                         'FAIL: SDK oracle replay rejected or unavailable')
+        self.assertNotIn('PRIVATE_CREDENTIAL_DO_NOT_PUBLISH',
+                         proc.stdout + proc.stderr)
+        self.assertNotIn('Traceback', proc.stderr)
+
     def test_observation_receipt_never_echoes_raw_log_content(self):
         line = ('2026-11-11T12:00Z status=1 '
                 '/private/PRIVATE_SOURCE_PATH ACCESS_KEY_DO_NOT_PUBLISH')

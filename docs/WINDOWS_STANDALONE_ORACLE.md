@@ -110,6 +110,15 @@ GoPro-encoded** control. Thus both decoders consume standalone and GoPro packets
 with explicitly different runtimes. It writes full p10 comparison evidence
 before any failed quality assertion. It never pretends FFmpeg is GoPro.
 
+**External-tool and CLI privacy:** The FFmpeg version receipt contains a
+validated version token only, not arbitrary binary banners or local build
+paths. FFmpeg/ffprobe subprocess stderr is suppressed; decoder stdout is also
+suppressed, so private fixture paths and other diagnostic output are not copied
+to public CI logs. Unknown or malformed CLI arguments fail with a generic
+message rather than echoing the supplied values. Local troubleshooting logs
+must be captured separately, reviewed and redacted; this candidate cannot
+qualify the origin or trustworthiness of caller-supplied tool binaries.
+
 **Publication privacy (validation hardening candidate):** `--log` may contain
 untrusted SDK diagnostics, local paths or sensitive text. The comparison report
 therefore stores each matched Windows observation as a fixed marker and SHA-256

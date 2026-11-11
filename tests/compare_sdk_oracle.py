@@ -19,6 +19,12 @@ import subprocess
 from validate_standalone import avi, reference
 
 
+class QuietArgumentParser(argparse.ArgumentParser):
+    """Argument errors can appear in published CI logs; never echo raw CLI values."""
+    def error(self, message):
+        raise ValueError('invalid SDK oracle arguments')
+
+
 # Log lines that carry a Windows-run observation. The summary line keeps
 # quality_measured= and distinctOutputsMax= after the PASS marker was retired,
 # so replay must select it explicitly instead of silently recording less.
@@ -46,6 +52,17 @@ def validated_run_url(url):
         r'https://github[.]com/louis-0hrs/HyperCine/actions/runs/[0-9]{1,20}', url),
         'invalid public oracle run URL')
     return url
+
+
+def validated_ffmpeg_version(line):
+    """Publish only a version token, never arbitrary vendor banner/build paths."""
+    require(type(line) is str, 'invalid FFmpeg version output')
+    match = re.match(
+        r'^ffmpeg version ((?:n?[0-9]{1,3}(?:[.][0-9]{1,3}){1,3}'
+        r'(?:[-+][A-Za-z0-9_.-]{1,32})?|N-[0-9]{1,10}-g[0-9a-f]{7,40}))(?=\\s|$)',
+        line)
+    require(match is not None, 'invalid FFmpeg version output')
+    return 'ffmpeg version ' + match.group(1)
 
 
 def metric(a, b, peak=1023):
@@ -112,7 +129,7 @@ def write_exclusive(path, data):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = QuietArgumentParser()
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument('--log')
     source.add_argument('--windows-fixtures')
@@ -190,7 +207,8 @@ def main():
             write_exclusive(root / name, data[name])
     results = dict(copyright='Copyright (c) 2026 HyperCine Contributors.', license='MIT OR Apache-2.0',
         windows_run=run_url, log_sha256=log_sha, windows_observations=observations,
-        ffmpeg_version=subprocess.check_output([args.ffmpeg, '-version'], text=True).splitlines()[0],
+        ffmpeg_version=validated_ffmpeg_version(subprocess.check_output(
+            [args.ffmpeg, '-version'], text=True, stderr=subprocess.DEVNULL).splitlines()[0]),
         input_contract='128x128 top-down BT.709 studio YUV422 p10; YU64 LE Y0 Cr Y1 Cb >>6; BGRA SDK bottom-up',
         alpha_excluded=True, samples=[], control={})
     for pattern in ('flat', 'gradient', 'canonical'):
@@ -210,12 +228,14 @@ def main():
             sdk_vs_source_rgb=metric([x for i, x in enumerate(topdown) if i%4 != 3], source_rgb, 255))
         results['samples'].append(record)
     packet=data['control.cfhd']; container=root/'control.avi';write_exclusive(container, avi(packet))
-    stream=json.loads(subprocess.check_output([args.ffprobe,'-v','error','-show_streams','-of','json',str(container)]))['streams'][0]
+    stream=json.loads(subprocess.check_output([args.ffprobe,'-v','error','-show_streams','-of','json',str(container)],
+            stderr=subprocess.DEVNULL))['streams'][0]
     require((stream['codec_name'],stream['width'],stream['height'],stream['pix_fmt']) ==
             ('cfhd',128,128,'yuv422p10le'), 'unexpected oracle stream')
     decoded=root/'control.ffmpeg-p10'
     subprocess.run([args.ffmpeg,'-v','error','-xerror','-n','-i',str(container),'-frames:v','1',
-        '-c:v','rawvideo','-pix_fmt','yuv422p10le','-f','rawvideo',str(decoded)],check=True)
+        '-c:v','rawvideo','-pix_fmt','yuv422p10le','-f','rawvideo',str(decoded)],
+        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     raw=decoded.read_bytes();source=(fixture/'canonical.input-p10').read_bytes()
     results['control']=dict(packet_bytes=len(packet),packet_sha256=hashlib.sha256(packet).hexdigest(),
         sdk_p10_sha256=hashlib.sha256(data['control.sdk-p10']).hexdigest(),
