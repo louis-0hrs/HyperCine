@@ -117,9 +117,11 @@ of the original line, **not its raw message or local step/path**. The number
 of observations is bounded; excess fails rather than truncating evidence.
 On CLI errors the script emits a fixed failure message instead of a traceback
 with subprocess arguments or fixture paths. Source logs remain private and
-must be independently redacted before any separate publication. Supply only a
-public, non-credential-bearing `--run-url`; this CLI argument is not a secret
-redactor. This is an integrity/privacy guard, not an SDK parity claim.
+must be independently redacted before any separate publication. The replay
+requires a canonical public HyperCine GitHub Actions run URL (no user-info,
+query, fragment or other host) and a 64-character lowercase hex log digest;
+invalid metadata fails before evidence is written. This is an integrity/privacy
+guard, not an SDK parity claim.
 
 ## Verified result — SDK decode PASS with single-worker oracle setting
 
