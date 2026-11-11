@@ -110,6 +110,17 @@ GoPro-encoded** control. Thus both decoders consume standalone and GoPro packets
 with explicitly different runtimes. It writes full p10 comparison evidence
 before any failed quality assertion. It never pretends FFmpeg is GoPro.
 
+**Publication privacy (validation hardening candidate):** `--log` may contain
+untrusted SDK diagnostics, local paths or sensitive text. The comparison report
+therefore stores each matched Windows observation as a fixed marker and SHA-256
+of the original line, **not its raw message or local step/path**. The number
+of observations is bounded; excess fails rather than truncating evidence.
+On CLI errors the script emits a fixed failure message instead of a traceback
+with subprocess arguments or fixture paths. Source logs remain private and
+must be independently redacted before any separate publication. Supply only a
+public, non-credential-bearing `--run-url`; this CLI argument is not a secret
+redactor. This is an integrity/privacy guard, not an SDK parity claim.
+
 ## Verified result — SDK decode PASS with single-worker oracle setting
 
 [Push run 38627689864](https://github.com/louis-0hrs/HyperCine/actions/runs/38627689864)
