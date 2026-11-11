@@ -80,7 +80,7 @@ class OracleFailClosed(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             log = root / 'oracle.log'
-            log.write_text('ORACLE_DATA_BEGIN ../escape 4\\n', encoding='utf-8')
+            log.write_text('ORACLE_DATA_BEGIN ../escape 4\n', encoding='utf-8')
             output = root / 'output'
             argv = ['compare_sdk_oracle.py', '--log', str(log), '--run-url',
                     'https://example.invalid/run', '--ffmpeg', 'unused',
