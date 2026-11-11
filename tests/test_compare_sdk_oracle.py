@@ -5,8 +5,10 @@
 
 """Regression coverage for the Windows SDK-oracle log replay filter."""
 import base64
+import hashlib
 import importlib.util
 import json
+import subprocess
 import struct
 import sys
 import tempfile
@@ -201,6 +203,53 @@ class OracleFailClosed(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'oracle log exceeds size limit'):
                     compare.main()
             self.assertFalse(any(output.iterdir()))
+
+
+class OraclePublicationPrivacy(unittest.TestCase):
+    def test_observation_receipt_never_echoes_raw_log_content(self):
+        line = ('2026-11-11T12:00Z status=1 '
+                '/private/PRIVATE_SOURCE_PATH ACCESS_KEY_DO_NOT_PUBLISH')
+        receipt = compare.observation_receipt(line)
+        self.assertEqual(set(receipt), {'marker', 'line_sha256'})
+        self.assertEqual(receipt['marker'], 'status=')
+        self.assertEqual(receipt['line_sha256'],
+                         hashlib.sha256(line.encode('utf-8')).hexdigest())
+        self.assertNotIn('PRIVATE_SOURCE_PATH', json.dumps(receipt))
+        self.assertNotIn('ACCESS_KEY_DO_NOT_PUBLISH', json.dumps(receipt))
+
+    def test_cli_error_does_not_publish_private_path_or_traceback(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / 'PRIVATE_SDK_LOG_DO_NOT_PUBLISH.txt'
+            log.write_text('Oracle harness error: /private/HOST_SECRET_PATH\\n',
+                           encoding='utf-8')
+            cmd = [sys.executable, '-B', str(Path(compare.__file__)),
+                   '--log', str(log), '--run-url', 'https://example.invalid/run',
+                   '--ffmpeg', 'not-executed', '--ffprobe', 'not-executed',
+                   '--output', str(root / 'output')]
+            proc = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 1)
+            self.assertEqual(proc.stderr.strip(),
+                             'FAIL: SDK oracle replay rejected or unavailable')
+            self.assertNotIn('Traceback', proc.stderr)
+            self.assertNotIn('PRIVATE_SDK_LOG_DO_NOT_PUBLISH',
+                             proc.stdout + proc.stderr)
+            self.assertNotIn('HOST_SECRET_PATH', proc.stdout + proc.stderr)
+
+    def test_excessive_observations_fail_before_receipts_written(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / 'oracle.log'
+            log.write_text('status=1\\n' * 4097, encoding='utf-8')
+            output = root / 'output'
+            argv = ['compare_sdk_oracle.py', '--log', str(log),
+                    '--run-url', 'https://example.invalid/run',
+                    '--ffmpeg', 'not-executed', '--ffprobe', 'not-executed',
+                    '--output', str(output)]
+            with patch.object(sys, 'argv', argv), self.assertRaisesRegex(
+                    ValueError, 'too many oracle observations'):
+                compare.main()
+            self.assertEqual(list(output.iterdir()), [])
 
 
 if __name__ == '__main__':
