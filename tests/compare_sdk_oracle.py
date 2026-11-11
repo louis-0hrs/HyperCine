@@ -105,6 +105,12 @@ def main():
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     root = Path(args.output)
+    # The retained Windows fixture root is evidence INPUT, never an output target.
+    if args.windows_fixtures:
+        fixture_root = Path(args.windows_fixtures).resolve()
+        destination = root.resolve()
+        require(destination != fixture_root and fixture_root not in destination.parents,
+                'refusing to write inside retained Windows fixture source')
     require(not root.is_symlink(), 'oracle output directory is a symlink')
     root.mkdir(parents=True, exist_ok=True)
     require(root.is_dir() and not root.is_symlink(), 'invalid oracle output directory')
