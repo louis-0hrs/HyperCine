@@ -91,5 +91,49 @@ class OracleFailClosed(unittest.TestCase):
             self.assertFalse(any(output.iterdir()))
 
 
+    def test_all_output_destinations_checked_before_extraction(self):
+        # A valid oracle inventory must not clobber an unrelated earlier comparison.
+        lines = []
+        for name in sorted(compare.ORACLE_NAMES):
+            raw = b'cfhd' if name == 'control.cfhd' else bytes(65536)
+            lines.extend(['ORACLE_DATA_BEGIN %s %d' % (name, len(raw)),
+                          'ORACLE_DATA ' + base64.b64encode(raw).decode('ascii'),
+                          'ORACLE_DATA_END ' + name])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / 'oracle.log'
+            log.write_text('\\n'.join(lines) + '\\n', encoding='utf-8')
+            output = root / 'output'
+            output.mkdir()
+            sentinel = output / 'comparison.json'
+            sentinel.write_bytes(b'prior-independent-evidence')
+            argv = ['compare_sdk_oracle.py', '--log', str(log), '--run-url',
+                    'https://example.invalid/run', '--ffmpeg', 'must-not-run',
+                    '--ffprobe', 'must-not-run', '--output', str(output)]
+            with patch.object(sys, 'argv', argv), self.assertRaises(ValueError):
+                compare.main()
+            self.assertEqual(sentinel.read_bytes(), b'prior-independent-evidence')
+            self.assertEqual(sorted(p.name for p in output.iterdir()), ['comparison.json'])
+
+    def test_exclusive_evidence_write_does_not_clobber(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            occupied = root / 'comparison.json'
+            occupied.write_bytes(b'previous-evidence')
+            with self.assertRaises(FileExistsError):
+                compare.write_exclusive(occupied, b'corrupt')
+            self.assertEqual(occupied.read_bytes(), b'previous-evidence')
+            outside = root / 'outside'
+            outside.write_bytes(b'protected')
+            alias = root / 'alias'
+            try:
+                alias.symlink_to(outside)
+            except (OSError, NotImplementedError):
+                return  # Windows without symlink privilege still exercises O_EXCL above.
+            with self.assertRaises(OSError):
+                compare.write_exclusive(alias, b'corrupt')
+            self.assertEqual(outside.read_bytes(), b'protected')
+
+
 if __name__ == '__main__':
     unittest.main()
