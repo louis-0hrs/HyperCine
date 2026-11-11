@@ -109,12 +109,12 @@ uint32_t MintHashSession() {
     return next.fetch_add(1, std::memory_order_relaxed);
 }
 }
-FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::SelectFrontend(backend)) {}
-FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry) : frontend_(detail::CpuFrontend(geometry)) {}
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::BindFrontend(detail::SelectFrontend(backend))) {}
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry) : frontend_(detail::BindFrontend(detail::CpuFrontend(geometry))) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry, WaveletIsa isa)
-    : frontend_(detail::CpuFrontend(geometry, isa)) {}
+    : frontend_(detail::BindFrontend(detail::CpuFrontend(geometry, isa))) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry)
-    : frontend_(detail::SelectFrontend(backend, geometry)) {}
+    : frontend_(detail::BindFrontend(detail::SelectFrontend(backend, geometry))) {}
 WaveletIsa FilmScan3Encoder::wavelet_isa() const noexcept {
     // The default-constructed encoder lazily takes the shared CPU frontend, which is
     // Auto-resolved at first use; report what that frontend will actually run.
@@ -158,8 +158,9 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
 }
 FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride,const FilmScan3Metadata& metadata) {
     if(state_.frame_index>=65535)throw std::length_error("FilmScan3 frame counter exhausted");
-    auto& frontend=*(frontend_ ? frontend_ : detail::CpuFrontend());
-    const auto g=geometry();
+    auto selected=frontend_ ? frontend_ : detail::BindFrontend(detail::CpuFrontend());
+    auto& frontend=*selected;
+    const auto g=selected->Geometry();
     ValidateFilmScan3Geometry(g);
     const auto pixels=static_cast<std::size_t>(g.width)*g.height;
     auto pyramid=frontend.Transform(data,bytes,g.width,g.height,stride);
@@ -249,6 +250,10 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     // leaves that identity untouched. Rate state is committed immediately after.
     if(coefficient_hashing_) result.coefficient_hash=FilmScan3CoefficientHash::Full;
     else StampDiagnosticOff(result);
+    // Commit the lazy default binding only with a successful frame. Otherwise
+    // frontend_ would remain null even after encoding, permitting a later
+    // injection to change dimensions while carrying the old rate state.
+    frontend_=std::move(selected);
     state_.fs_rate_limiter=result.state.fs_rate_limiter;
     state_.fs_overbitrate=result.state.fs_overbitrate;
     state_.previous_sample_bytes=result.sample.size();++state_.frame_index;
