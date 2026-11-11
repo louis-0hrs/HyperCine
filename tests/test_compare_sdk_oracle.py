@@ -205,6 +205,35 @@ class OracleFailClosed(unittest.TestCase):
             self.assertFalse(any(output.iterdir()))
 
 
+    def test_log_digest_binds_exact_parsed_bytes_even_if_file_changes(self):
+        # A log producer can replace the input immediately after the read.
+        # The reported digest and parsed records must derive from one snapshot.
+        original = b'status=1\nORACLE_DATA_BEGIN control.cfhd 4\n'
+        changed = b'status=0\nORACLE_DATA_BEGIN control.cfhd 5\n'
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'sdk-oracle.log'
+            path.write_bytes(original)
+            real_read_bytes = Path.read_bytes
+            reads = []
+
+            def change_after_read(subject):
+                payload = real_read_bytes(subject)
+                reads.append(subject)
+                if subject == path:
+                    path.write_bytes(changed)
+                return payload
+
+            with patch.object(Path, 'read_bytes', autospec=True,
+                              side_effect=change_after_read), \\
+                 patch.object(Path, 'read_text',
+                              side_effect=AssertionError('second log read')):
+                digest, lines = compare.read_bounded_log(path)
+            self.assertEqual(reads, [path])
+            self.assertEqual(digest, hashlib.sha256(original).hexdigest())
+            self.assertEqual(lines, original.decode('utf-8').splitlines())
+            self.assertEqual(path.read_bytes(), changed)
+
+
 class OraclePublicationPrivacy(unittest.TestCase):
     def test_public_run_url_requires_canonical_credential_free_github_link(self):
         good = 'https://github.com/louis-0hrs/HyperCine/actions/runs/38627689864'
