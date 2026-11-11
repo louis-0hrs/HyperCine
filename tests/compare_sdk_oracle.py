@@ -11,6 +11,7 @@ import base64
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 from validation_support import require, p10_samples
 import subprocess
@@ -83,6 +84,16 @@ def extract_log(lines):
     return data
 
 
+
+def write_exclusive(path, data):
+    """Create an evidence file once: never follow a final symlink or truncate a prior receipt."""
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, 'O_NOFOLLOW'):
+        flags |= os.O_NOFOLLOW
+    with os.fdopen(os.open(path, flags, 0o600), 'wb') as target:
+        target.write(data)
+
+
 def main():
     parser = argparse.ArgumentParser()
     source = parser.add_mutually_exclusive_group(required=True)
@@ -93,7 +104,10 @@ def main():
     parser.add_argument('--run-url')
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
-    root = Path(args.output); root.mkdir(parents=True, exist_ok=True)
+    root = Path(args.output)
+    require(not root.is_symlink(), 'oracle output directory is a symlink')
+    root.mkdir(parents=True, exist_ok=True)
+    require(root.is_dir() and not root.is_symlink(), 'invalid oracle output directory')
     fixture = Path(__file__).parent/'fixtures'/'standalone'
     data = {}
     observations = []
@@ -125,15 +139,19 @@ def main():
                     step=line.split('\t')[1] if '\t' in line else 'unlabelled',
                     result=line.split('Z ', 1)[-1].strip()))
         data = extract_log(lines)
-        # Refuse pre-existing files/symlinks and validate all targets before writing any.
-        for name in data:
-            target = root / name
-            require(target.resolve().parent == root.resolve() and
-                    not target.exists() and not target.is_symlink(),
-                    'unsafe or occupied oracle destination')
-        for name, raw in data.items():
-            (root / name).write_bytes(raw)
     require(set(data) == ORACLE_NAMES, 'incomplete oracle inventory')
+    # Check ALL outputs (not just extracted records) before writing even the first byte.
+    destinations = {'control.avi', 'control.ffmpeg-p10', 'comparison.json'}
+    if args.log:
+        destinations.update(ORACLE_NAMES)
+    for name in sorted(destinations):
+        target = root / name
+        require(target.resolve().parent == root.resolve() and
+                not target.exists() and not target.is_symlink(),
+                'unsafe or occupied oracle destination')
+    if args.log:
+        for name in sorted(ORACLE_NAMES):
+            write_exclusive(root / name, data[name])
     results = dict(copyright='Copyright (c) 2026 HyperCine Contributors.', license='MIT OR Apache-2.0',
         windows_run=run_url, log_sha256=log_sha, windows_observations=observations,
         ffmpeg_version=subprocess.check_output([args.ffmpeg, '-version'], text=True).splitlines()[0],
@@ -155,12 +173,12 @@ def main():
                                     [x for i, x in enumerate(reference_rgb) if i%4 != 3], 255),
             sdk_vs_source_rgb=metric([x for i, x in enumerate(topdown) if i%4 != 3], source_rgb, 255))
         results['samples'].append(record)
-    packet=data['control.cfhd']; container=root/'control.avi';container.write_bytes(avi(packet))
+    packet=data['control.cfhd']; container=root/'control.avi';write_exclusive(container, avi(packet))
     stream=json.loads(subprocess.check_output([args.ffprobe,'-v','error','-show_streams','-of','json',str(container)]))['streams'][0]
     require((stream['codec_name'],stream['width'],stream['height'],stream['pix_fmt']) ==
             ('cfhd',128,128,'yuv422p10le'), 'unexpected oracle stream')
     decoded=root/'control.ffmpeg-p10'
-    subprocess.run([args.ffmpeg,'-v','error','-xerror','-y','-i',str(container),'-frames:v','1',
+    subprocess.run([args.ffmpeg,'-v','error','-xerror','-n','-i',str(container),'-frames:v','1',
         '-c:v','rawvideo','-pix_fmt','yuv422p10le','-f','rawvideo',str(decoded)],check=True)
     raw=decoded.read_bytes();source=(fixture/'canonical.input-p10').read_bytes()
     results['control']=dict(packet_bytes=len(packet),packet_sha256=hashlib.sha256(packet).hexdigest(),
@@ -170,7 +188,7 @@ def main():
         sdk_vs_source_p10=p10_metrics(data['control.sdk-p10'],source),
         ffmpeg_vs_source_p10=p10_metrics(raw,source))
     # Write genuine evidence before reporting any quality failure.
-    (root/'comparison.json').write_text(json.dumps(results,indent=2)+'\n')
+    write_exclusive(root/'comparison.json', (json.dumps(results,indent=2)+'\n').encode('utf-8'))
     for sample in results['samples']:
         overall=sample['sdk_vs_ffmpeg_p10']['overall']
         require(overall['psnr_db'] is None or overall['psnr_db'] > 35,
