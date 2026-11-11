@@ -4,7 +4,12 @@
 # See LICENSE-MIT and LICENSE-APACHE for details.
 
 """Regression coverage for the Windows SDK-oracle log replay filter."""
+import base64
 import importlib.util
+import struct
+import sys
+import tempfile
+from unittest.mock import patch
 from pathlib import Path
 import unittest
 
@@ -39,6 +44,51 @@ class ObservationFilter(unittest.TestCase):
 
     def test_unrelated_lines_are_ignored(self):
         self.assertFalse(compare.is_observation_line("100% tests passed"))
+
+
+class OracleFailClosed(unittest.TestCase):
+    def test_full_bounded_inventory(self):
+        lines = []
+        for name in sorted(compare.ORACLE_NAMES):
+            raw = b'cfhd' if name == 'control.cfhd' else bytes(65536)
+            lines.extend(['ORACLE_DATA_BEGIN %s %d' % (name, len(raw)),
+                          'ORACLE_DATA ' + base64.b64encode(raw).decode('ascii'),
+                          'ORACLE_DATA_END ' + name])
+        data = compare.extract_log(lines)
+        self.assertEqual(set(data), compare.ORACLE_NAMES)
+
+    def test_unsafe_filename_and_incomplete_log_are_rejected(self):
+        for name in ('../escape', '/tmp/escape', 'foreign.sdk-p10'):
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                compare.extract_log(['ORACLE_DATA_BEGIN %s 4' % name])
+        with self.assertRaises(ValueError):
+            compare.extract_log(['ORACLE_DATA_BEGIN control.cfhd 4',
+                                 'ORACLE_DATA ZGF0YQ==', 'ORACLE_DATA_END control.cfhd'])
+
+    def test_duplicate_and_oversize_refusals(self):
+        with self.assertRaises(ValueError):
+            compare.extract_log(['ORACLE_DATA_BEGIN control.cfhd 16777217'])
+        with self.assertRaises(ValueError):
+            compare.extract_log(['ORACLE_DATA_END control.cfhd'])
+
+    def test_invalid_p10_identical_pixels_are_not_perfect_metrics(self):
+        bad = struct.pack('<32768H', *([1024] * 32768))
+        with self.assertRaises(ValueError):
+            compare.p10_metrics(bad, bad)
+
+    def test_main_never_writes_untrusted_log_name(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / 'oracle.log'
+            log.write_text('ORACLE_DATA_BEGIN ../escape 4\\n', encoding='utf-8')
+            output = root / 'output'
+            argv = ['compare_sdk_oracle.py', '--log', str(log), '--run-url',
+                    'https://example.invalid/run', '--ffmpeg', 'unused',
+                    '--ffprobe', 'unused', '--output', str(output)]
+            with patch.object(sys, 'argv', argv), self.assertRaises(ValueError):
+                compare.main()
+            self.assertFalse((root / 'escape').exists())
+            self.assertFalse(any(output.iterdir()))
 
 
 if __name__ == '__main__':
