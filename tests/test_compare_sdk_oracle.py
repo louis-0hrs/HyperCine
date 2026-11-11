@@ -227,11 +227,15 @@ class OraclePublicationPrivacy(unittest.TestCase):
              'ffmpeg version 7.0.2-essentials_build'),
             ('ffmpeg version N-118228-g1234abcd local:/sensitive',
              'ffmpeg version N-118228-g1234abcd'),
+            ('ffmpeg version 7.1.5-0+deb13u1 Copyright /private/VENDOR_PATH',
+             'ffmpeg version 7.1.5-0+deb13u1'),
         ):
             with self.subTest(line=line.split()[2]):
                 self.assertEqual(compare.validated_ffmpeg_version(line), expected)
         for invalid in ('ffmpeg version PRIVATE_CREDENTIAL',
-                        'ffmpeg version 8.0/PRIVATE_PATH', 'external-version', ''):
+                        'ffmpeg version 8.0/PRIVATE_PATH',
+                        'ffmpeg version 7.1.5-0+deb13u1/PRIVATE_PATH',
+                        'external-version', ''):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 compare.validated_ffmpeg_version(invalid)
 
