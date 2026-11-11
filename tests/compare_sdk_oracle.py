@@ -59,7 +59,7 @@ def validated_ffmpeg_version(line):
     require(type(line) is str, 'invalid FFmpeg version output')
     match = re.match(
         r'^ffmpeg version ((?:n?[0-9]{1,3}(?:[.][0-9]{1,3}){1,3}'
-        r'(?:[-+][A-Za-z0-9_.-]{1,32})?|N-[0-9]{1,10}-g[0-9a-f]{7,40}))(?=\s|$)',
+        r'(?:[-+][A-Za-z0-9_.+-]{1,32})?|N-[0-9]{1,10}-g[0-9a-f]{7,40}))(?=\s|$)',
         line)
     require(match is not None, 'invalid FFmpeg version output')
     return 'ffmpeg version ' + match.group(1)
