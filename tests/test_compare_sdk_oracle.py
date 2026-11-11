@@ -221,7 +221,7 @@ class OraclePublicationPrivacy(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             log = root / 'PRIVATE_SDK_LOG_DO_NOT_PUBLISH.txt'
-            log.write_text('Oracle harness error: /private/HOST_SECRET_PATH\\n',
+            log.write_text('Oracle harness error: /private/HOST_SECRET_PATH\n',
                            encoding='utf-8')
             cmd = [sys.executable, '-B', str(Path(compare.__file__)),
                    '--log', str(log), '--run-url', 'https://example.invalid/run',
@@ -240,7 +240,7 @@ class OraclePublicationPrivacy(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             log = root / 'oracle.log'
-            log.write_text('status=1\\n' * 4097, encoding='utf-8')
+            log.write_text('status=1\n' * 4097, encoding='utf-8')
             output = root / 'output'
             argv = ['compare_sdk_oracle.py', '--log', str(log),
                     '--run-url', 'https://example.invalid/run',
