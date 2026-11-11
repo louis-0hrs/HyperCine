@@ -63,6 +63,32 @@ class Baseline(unittest.TestCase):
         findings = wem.check_contract(BASE) + wem.check_local_evidence(BASE)
         self.assertEqual([], [f"{f.rule}: {f.detail}" for f in findings])
 
+    def test_cmake_only_edits_schedule_both_cuda_jobs(self) -> None:
+        for event in wem.scenarios():
+            if event.name != 'pull_request' and event.label != 'main push':
+                continue
+            for path in ('cmake/cuda_host_compiler.cmake', 'cmake/wavelet_simd.cmake',
+                         'cmake/threaded_encoder_prefix.h'):
+                with self.subTest(event=event.label, path=path):
+                    rows = wem.plan(BASE, wem.replace(event, changed=[path]))
+                    self.assertEqual({'cuda-build', 'inventory-gate-selftest'},
+                                     {row.job_id for row in rows
+                                      if row.workflow == 'ci-cuda-build.yml'})
+
+    def test_losing_either_cmake_trigger_is_detected(self) -> None:
+        for trigger in ('push', 'pull_request'):
+            with self.subTest(trigger=trigger):
+                mutant = docs()
+                mutant['ci-cuda-build.yml']['on'][trigger]['paths'].remove('cmake/**')
+                self.assertIn('R15', rules(wem.check_contract(mutant)))
+
+    def test_unrelated_paths_do_not_schedule_cuda(self) -> None:
+        for event in wem.scenarios():
+            if event.name != 'pull_request' and event.label != 'main push':
+                continue
+            rows = wem.plan(BASE, wem.replace(event, changed=['docs/notes.md']))
+            self.assertFalse(any(row.workflow == 'ci-cuda-build.yml' for row in rows))
+
     def test_every_workflow_is_parsed(self) -> None:
         self.assertIn("privacy-guard.yml", BASE)
         self.assertEqual(

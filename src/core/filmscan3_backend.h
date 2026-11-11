@@ -80,22 +80,26 @@ std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend, MetalFactory = MetalF
 // Geometry-aware selection. MetalOrCpu keeps the requested geometry in its CPU
 // fallback instead of reverting to the 1080p default.
 std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend, FilmScan3Geometry);
+// Encoder-owned geometry snapshot. Factories and BackendSelection keep their
+// original frontend identity for native timing and fault-injection helpers.
+// Only the encoder's private shared_ptr holds this internal adapter; its public
+// object layout is unchanged. A later declaration change fails before Transform.
+std::shared_ptr<Frontend> BindFrontend(std::shared_ptr<Frontend>);
 struct FrontendAccess {
     static void Use(FilmScan3Encoder& encoder, std::shared_ptr<Frontend> frontend) {
-        if (!frontend) throw std::invalid_argument("null FilmScan3 frontend");
         // Injecting is a session-binding operation, not a way to change the
         // session geometry. The declaration is validated on its own first, so a
         // frontend that answers with an impossible shape cannot be installed even
         // into a fresh encoder; then a width/height change against an already
         // bound session is refused while the original frontend stays in place.
-        const FilmScan3Geometry declared=frontend->Geometry();
-        ValidateFilmScan3Geometry(declared);
+        auto candidate=BindFrontend(std::move(frontend));
+        const FilmScan3Geometry declared=candidate->Geometry();
         if (encoder.frontend_) {
             const FilmScan3Geometry bound=encoder.frontend_->Geometry();
             if (bound.width!=declared.width || bound.height!=declared.height)
                 throw std::invalid_argument("injected frontend changes the session geometry");
         }
-        encoder.frontend_=std::move(frontend);
+        encoder.frontend_=std::move(candidate);
     }
     // Test seam for tombstone identity. Not a production control: the public
     // gate still rejects anything that is not Full on both sides.

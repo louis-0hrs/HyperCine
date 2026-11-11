@@ -1,0 +1,731 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "issue": 362,
+  "date": "2026-11-11",
+  "scope": "Direct public scalar CPU wavelet bounds/allocation status and main-header C/C++ compatibility; no NEON or GPU runtime edits.",
+  "source_binding": {
+    "base_commit": "dca0c0707a0d460fb8cb7ca7d198c0a7aa4be8e7",
+    "candidate": "Uncommitted candidate bound by the changed-file SHA-256 inventory below; base commit alone is not the tested source.",
+    "branch": "audit/cpu-wavelet-boundaries-20261111",
+    "changed_files_sha256": {
+      "CMakeLists.txt": "483f02456868576a78977cfc8c64a096e6638c0c5b0097dd7476609ef4feaf73",
+      "ci/run_standalone.py": "630cde442523ceb253ac54722d3a4b17be3cc34e7c3272d13c0e016432842775",
+      "ci/test_standalone_gate.py": "55bf392b64ecb8a17b61a92c8ce774d6e91ad3f4c8a21fb6faac01a3b1c43ea1",
+      "include/hypercine/hypercine.h": "dd2047386531356690ed9d00790dbe7d36191ced1a63e82cc059733e84e2f75e",
+      "include/hypercine/wavelet.h": "535be0c705d2ccc45321e78875e34e39c1cf23650e85f83ac5ef8e5b5047d96a",
+      "src/cpu/wavelet_cpu.cpp": "5d2ad326532558fbae9dc30655707bc68cd21c606738a08e8ed25f20163d32c3",
+      "tests/test_public_header.c": "14260242ad7ab40e7bd6d8a83800cefbf4f70086629d82a5ad89d68899af19c0",
+      "tests/test_public_header.cpp": "5ababc31e72d67637ed972199013acfa268586d5b3261d859681f8610d0652b6",
+      "tests/test_wavelet_cpu_bounds.cpp": "e51b767094a56e63e7ce3de246a025d761891a80923b5de0fde8ec3f0256237d"
+    },
+    "upstream_unchanged": true
+  },
+  "platform": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "compiler": "g++ (Debian 14.2.0-19) 14.2.0",
+    "cmake": "cmake version 3.31.6",
+    "python": "3.12.14",
+    "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1"
+  },
+  "strict_standalone": {
+    "status": "PASS",
+    "build": "Release",
+    "external_decode_required": true,
+    "registered": 128,
+    "passed": 128,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 222.67,
+    "sanitized_ctest_summary_sha256": "fb39815304e7f02068233727c0f389c2ba1a5fb0e5dc47f3a70b591c8086c455",
+    "tests": [
+      {
+        "name": "independent_ffmpeg_1080_contract",
+        "status": "PASS",
+        "seconds": 0.227047
+      },
+      {
+        "name": "reference_decode_contract",
+        "status": "PASS",
+        "seconds": 0.830199
+      },
+      {
+        "name": "diagnostic_summary_contract",
+        "status": "PASS",
+        "seconds": 0.402473
+      },
+      {
+        "name": "decoder_differential_metrics",
+        "status": "PASS",
+        "seconds": 0.147105
+      },
+      {
+        "name": "cpu_isa_selection",
+        "status": "PASS",
+        "seconds": 0.00931873
+      },
+      {
+        "name": "wavelet_cpu_bounds",
+        "status": "PASS",
+        "seconds": 0.0041005
+      },
+      {
+        "name": "wavelet_simd_exact",
+        "status": "PASS",
+        "seconds": 14.5725
+      },
+      {
+        "name": "wavelet_simd_packets",
+        "status": "PASS",
+        "seconds": 3.48765
+      },
+      {
+        "name": "windows_sdk_corpus_contract",
+        "status": "PASS",
+        "seconds": 0.101398
+      },
+      {
+        "name": "qualification_report_contract",
+        "status": "PASS",
+        "seconds": 0.107863
+      },
+      {
+        "name": "windows_reference_process_contract",
+        "status": "PASS",
+        "seconds": 0.465526
+      },
+      {
+        "name": "cuda_output_dir_platform_contract",
+        "status": "PASS",
+        "seconds": 0.156704
+      },
+      {
+        "name": "test_reference_release_inventory",
+        "status": "PASS",
+        "seconds": 0.167744
+      },
+      {
+        "name": "test_compare_sdk_oracle",
+        "status": "PASS",
+        "seconds": 0.165231
+      },
+      {
+        "name": "test_rca159_witness_contract",
+        "status": "PASS",
+        "seconds": 0.117671
+      },
+      {
+        "name": "test_rca160_all_channel_contract",
+        "status": "PASS",
+        "seconds": 34.7654
+      },
+      {
+        "name": "test_rca160_ledger_audit",
+        "status": "PASS",
+        "seconds": 2.59316
+      },
+      {
+        "name": "test_cuda_host_compiler_contract",
+        "status": "PASS",
+        "seconds": 0.371837
+      },
+      {
+        "name": "neon_wavelet_bitexact",
+        "status": "PASS",
+        "seconds": 0.00372996
+      },
+      {
+        "name": "neon_concurrency_contract",
+        "status": "PASS",
+        "seconds": 0.426783
+      },
+      {
+        "name": "wavelet_isa_session_policy",
+        "status": "PASS",
+        "seconds": 0.0210426
+      },
+      {
+        "name": "wavelet_isa_parallel_sessions",
+        "status": "PASS",
+        "seconds": 0.837443
+      },
+      {
+        "name": "rgb444_frame_storage",
+        "status": "PASS",
+        "seconds": 0.0980688
+      },
+      {
+        "name": "rgb444_frame_rejection",
+        "status": "PASS",
+        "seconds": 0.00275959
+      },
+      {
+        "name": "rgb444_rg48_import",
+        "status": "PASS",
+        "seconds": 0.106436
+      },
+      {
+        "name": "rgb444_rg48_rejection",
+        "status": "PASS",
+        "seconds": 0.00321857
+      },
+      {
+        "name": "rgb444_rg48_allocation_failure",
+        "status": "PASS",
+        "seconds": 0.00371323
+      },
+      {
+        "name": "rgb444_p12_transform_contract",
+        "status": "PASS",
+        "seconds": 0.00384834
+      },
+      {
+        "name": "rgb444_p12_prescale_audit",
+        "status": "PASS",
+        "seconds": 0.126497
+      },
+      {
+        "name": "quality_state_unit",
+        "status": "PASS",
+        "seconds": 0.00310623
+      },
+      {
+        "name": "overbitrate_hysteresis_sdk_sequence",
+        "status": "PASS",
+        "seconds": 0.0033093
+      },
+      {
+        "name": "rgb444_p12_quality_table",
+        "status": "PASS",
+        "seconds": 0.00288377
+      },
+      {
+        "name": "filmscan3_backend_selection",
+        "status": "PASS",
+        "seconds": 0.189758
+      },
+      {
+        "name": "encoder_backend_selection_contract",
+        "status": "PASS",
+        "seconds": 0.00340088
+      },
+      {
+        "name": "encoder_backend_session_packets",
+        "status": "PASS",
+        "seconds": 1.65737
+      },
+      {
+        "name": "encoder_profile_session_matrix",
+        "status": "PASS",
+        "seconds": 6.09867
+      },
+      {
+        "name": "filmscan3_api",
+        "status": "PASS",
+        "seconds": 9.56151
+      },
+      {
+        "name": "profile_enter_contract",
+        "status": "PASS",
+        "seconds": 0.815255
+      },
+      {
+        "name": "p6_writer_trace_contract",
+        "status": "PASS",
+        "seconds": 0.319345
+      },
+      {
+        "name": "p6_writer_trace_optimized",
+        "status": "PASS",
+        "seconds": 0.653325
+      },
+      {
+        "name": "p6_sdk_gap_negative_controls",
+        "status": "PASS",
+        "seconds": 0.644002
+      },
+      {
+        "name": "p6_sdk_gap_historical_pre325",
+        "status": "PASS",
+        "seconds": 0.169642
+      },
+      {
+        "name": "p6_windows_sdk_gate_contract",
+        "status": "PASS",
+        "seconds": 0.101834
+      },
+      {
+        "name": "filmscan3_geometry",
+        "status": "PASS",
+        "seconds": 12.1908
+      },
+      {
+        "name": "filmscan3_geometry_budget",
+        "status": "PASS",
+        "seconds": 0.00398685
+      },
+      {
+        "name": "filmscan3_fixture_integrity",
+        "status": "PASS",
+        "seconds": 0.0148703
+      },
+      {
+        "name": "entropy_bitexact",
+        "status": "PASS",
+        "seconds": 0.972834
+      },
+      {
+        "name": "standalone_color",
+        "status": "PASS",
+        "seconds": 0.00394109
+      },
+      {
+        "name": "standalone_wavelet",
+        "status": "PASS",
+        "seconds": 0.00435372
+      },
+      {
+        "name": "standalone_quantization",
+        "status": "PASS",
+        "seconds": 0.00486383
+      },
+      {
+        "name": "standalone_entropy",
+        "status": "PASS",
+        "seconds": 0.00422245
+      },
+      {
+        "name": "standalone_sample",
+        "status": "PASS",
+        "seconds": 0.0224805
+      },
+      {
+        "name": "standalone_geometry",
+        "status": "PASS",
+        "seconds": 0.584535
+      },
+      {
+        "name": "standalone_oracle_fixtures",
+        "status": "PASS",
+        "seconds": 0.0375994
+      },
+      {
+        "name": "filmscan3_4k_gate_contract",
+        "status": "PASS",
+        "seconds": 0.551704
+      },
+      {
+        "name": "filmscan3_geometry_reference_p10",
+        "status": "PASS",
+        "seconds": 0.361911
+      },
+      {
+        "name": "filmscan3_geometry_validation",
+        "status": "PASS",
+        "seconds": 0.621169
+      },
+      {
+        "name": "rgb444_rg48_replay_contract",
+        "status": "PASS",
+        "seconds": 0.309662
+      },
+      {
+        "name": "original_descale_review_contract",
+        "status": "PASS",
+        "seconds": 2.46894
+      },
+      {
+        "name": "gop2_original_stage_contract",
+        "status": "PASS",
+        "seconds": 0.372071
+      },
+      {
+        "name": "gop2_reference_inventory_integrity",
+        "status": "PASS",
+        "seconds": 1.2025
+      },
+      {
+        "name": "windows_reference_inputs",
+        "status": "PASS",
+        "seconds": 5.45643
+      },
+      {
+        "name": "windows_reference_guardrails",
+        "status": "PASS",
+        "seconds": 0.26104
+      },
+      {
+        "name": "windows_reference_parser",
+        "status": "PASS",
+        "seconds": 0.100269
+      },
+      {
+        "name": "optimized_standalone_acceptance",
+        "status": "PASS",
+        "seconds": 0.526518
+      },
+      {
+        "name": "standalone_gate_guardrails",
+        "status": "PASS",
+        "seconds": 0.566959
+      },
+      {
+        "name": "rgb444_packet_probe",
+        "status": "PASS",
+        "seconds": 0.482921
+      },
+      {
+        "name": "rgb444_band_contract",
+        "status": "PASS",
+        "seconds": 0.392007
+      },
+      {
+        "name": "rgb444_p12_quality_pin",
+        "status": "PASS",
+        "seconds": 0.12075
+      },
+      {
+        "name": "windows_reference_sdk_coefficients",
+        "status": "PASS",
+        "seconds": 1.08155
+      },
+      {
+        "name": "filmscan3_autonomous_manifest",
+        "status": "PASS",
+        "seconds": 3.49088
+      },
+      {
+        "name": "filmscan3_sequence_manifest",
+        "status": "PASS",
+        "seconds": 24.0199
+      },
+      {
+        "name": "cuda_filmscan3_output_dir_negative",
+        "status": "PASS",
+        "seconds": 0.0633585
+      },
+      {
+        "name": "encoder_capability_contract",
+        "status": "PASS",
+        "seconds": 3.85434
+      },
+      {
+        "name": "filmscan3_geometry_external_decode",
+        "status": "PASS",
+        "seconds": 161.0
+      },
+      {
+        "name": "filmscan3_external_decode",
+        "status": "PASS",
+        "seconds": 6.89193
+      },
+      {
+        "name": "filmscan3_geometry_negative_gate",
+        "status": "PASS",
+        "seconds": 3.59022
+      },
+      {
+        "name": "standalone_external_decode",
+        "status": "PASS",
+        "seconds": 1.57425
+      },
+      {
+        "name": "standalone_external_256x256",
+        "status": "PASS",
+        "seconds": 4.76563
+      },
+      {
+        "name": "standalone_external_1920x1080",
+        "status": "PASS",
+        "seconds": 62.2702
+      },
+      {
+        "name": "standalone_external_128x24",
+        "status": "PASS",
+        "seconds": 0.994914
+      },
+      {
+        "name": "standalone_external_384x40",
+        "status": "PASS",
+        "seconds": 0.898134
+      },
+      {
+        "name": "standalone_external_4096x24",
+        "status": "PASS",
+        "seconds": 1.52153
+      },
+      {
+        "name": "standalone_external_128x4096",
+        "status": "PASS",
+        "seconds": 4.16339
+      },
+      {
+        "name": "standalone_external_2048x1024",
+        "status": "PASS",
+        "seconds": 14.3526
+      },
+      {
+        "name": "standalone_windows_oracle_replay",
+        "status": "PASS",
+        "seconds": 0.545741
+      },
+      {
+        "name": "decoder_attachment_292_workers_1",
+        "status": "PASS",
+        "seconds": 0.0396021
+      },
+      {
+        "name": "decoder_attachment_292_workers_2",
+        "status": "PASS",
+        "seconds": 0.0397331
+      },
+      {
+        "name": "decoder_attachment_292_workers_4",
+        "status": "PASS",
+        "seconds": 0.0402114
+      },
+      {
+        "name": "decoder_attachment_292_workers_16",
+        "status": "PASS",
+        "seconds": 0.0900927
+      },
+      {
+        "name": "s3_original_replay_protocol",
+        "status": "PASS",
+        "seconds": 0.954785
+      },
+      {
+        "name": "rca160_public_evidence",
+        "status": "PASS",
+        "seconds": 0.771683
+      },
+      {
+        "name": "decode_task_graph_workers_1",
+        "status": "PASS",
+        "seconds": 0.00754443
+      },
+      {
+        "name": "decode_task_graph_workers_2",
+        "status": "PASS",
+        "seconds": 0.00816556
+      },
+      {
+        "name": "decode_task_graph_workers_4",
+        "status": "PASS",
+        "seconds": 0.0098305
+      },
+      {
+        "name": "decode_task_graph_workers_16",
+        "status": "PASS",
+        "seconds": 0.0342436
+      },
+      {
+        "name": "scheduler_contract_195_workers_1",
+        "status": "PASS",
+        "seconds": 0.00470674
+      },
+      {
+        "name": "scheduler_contract_195_workers_2",
+        "status": "PASS",
+        "seconds": 0.00667563
+      },
+      {
+        "name": "scheduler_contract_195_workers_4",
+        "status": "PASS",
+        "seconds": 0.0145874
+      },
+      {
+        "name": "scheduler_contract_195_workers_16",
+        "status": "PASS",
+        "seconds": 0.0276033
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_1",
+        "status": "PASS",
+        "seconds": 0.215965
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_2",
+        "status": "PASS",
+        "seconds": 0.225417
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_4",
+        "status": "PASS",
+        "seconds": 0.228441
+      },
+      {
+        "name": "scheduler_t1_t2_144_workers_16",
+        "status": "PASS",
+        "seconds": 0.217141
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_1",
+        "status": "PASS",
+        "seconds": 0.0525413
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_2",
+        "status": "PASS",
+        "seconds": 0.0483006
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_4",
+        "status": "PASS",
+        "seconds": 0.0494
+      },
+      {
+        "name": "scheduler_s2_output_144_workers_16",
+        "status": "PASS",
+        "seconds": 0.054194
+      },
+      {
+        "name": "decode_s3_plane",
+        "status": "PASS",
+        "seconds": 0.0115403
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_1",
+        "status": "PASS",
+        "seconds": 0.102771
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_2",
+        "status": "PASS",
+        "seconds": 0.0893645
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_4",
+        "status": "PASS",
+        "seconds": 0.0923545
+      },
+      {
+        "name": "scheduler_t4_plane_144_workers_8",
+        "status": "PASS",
+        "seconds": 0.0924058
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_1",
+        "status": "PASS",
+        "seconds": 0.00717666
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_2",
+        "status": "PASS",
+        "seconds": 0.00722934
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_4",
+        "status": "PASS",
+        "seconds": 0.007113
+      },
+      {
+        "name": "scheduler_t5_publish_after_stop_144_workers_16",
+        "status": "PASS",
+        "seconds": 0.0110888
+      },
+      {
+        "name": "extreme_geometry_c0_arithmetic",
+        "status": "PASS",
+        "seconds": 0.098426
+      },
+      {
+        "name": "extreme_geometry_c0_report",
+        "status": "PASS",
+        "seconds": 0.0637786
+      },
+      {
+        "name": "rgb444_allocation_failure",
+        "status": "PASS",
+        "seconds": 0.00305831
+      },
+      {
+        "name": "scalar_inverse_arithmetic",
+        "status": "PASS",
+        "seconds": 0.0137128
+      },
+      {
+        "name": "scalar_inverse_rejection",
+        "status": "PASS",
+        "seconds": 0.00403887
+      },
+      {
+        "name": "scalar_inverse_graph_workers_1",
+        "status": "PASS",
+        "seconds": 0.0169366
+      },
+      {
+        "name": "scalar_inverse_graph_workers_2",
+        "status": "PASS",
+        "seconds": 0.00767998
+      },
+      {
+        "name": "scalar_inverse_graph_workers_4",
+        "status": "PASS",
+        "seconds": 0.0109755
+      },
+      {
+        "name": "scalar_inverse_graph_workers_16",
+        "status": "PASS",
+        "seconds": 0.0379401
+      },
+      {
+        "name": "scalar_inverse_vectors",
+        "status": "PASS",
+        "seconds": 0.06381
+      },
+      {
+        "name": "scalar_inverse_replay_contract",
+        "status": "PASS",
+        "seconds": 0.433727
+      }
+    ]
+  },
+  "focused": {
+    "status": "PASS",
+    "rejected_calls": 116,
+    "valid_padded_transforms": 6,
+    "scratch_allocation_failures_with_cleanup_and_retry": 4,
+    "stdout": "PASS: 116 rejected calls before allocation/stores, six valid padded transforms, four scratch allocation failures with cleanup and retry",
+    "stdout_sha256": "ea855299d85e525fb897e6be08e55f01460aad69b44c2f447a7193fc86ce92ce"
+  },
+  "sanitizers": {
+    "address_sanitizer": "PASS",
+    "undefined_behavior_sanitizer": "PASS",
+    "flags": [
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-sanitize-recover=all",
+      "-fno-omit-frame-pointer"
+    ],
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=0"
+    },
+    "stdout_sha256": "ea855299d85e525fb897e6be08e55f01460aad69b44c2f447a7193fc86ce92ce",
+    "leak_sanitizer": "NOT RUN: runtime reports LeakSanitizer does not work under ptrace. Only leak detection was disabled; test-local live-allocation accounting passed."
+  },
+  "header_smoke": {
+    "C11_O0_compile_link_run": "PASS",
+    "CXX17_O0_compile_link_run": "PASS",
+    "sdk_mode_ctest_registration": [
+      "public_header_c",
+      "public_header_cpp"
+    ],
+    "standalone_registration": "Intentionally absent because the main header exposes frozen SDK types; standalone remains SDK-free."
+  },
+  "inventory_guard": {
+    "status": "PASS",
+    "unittest_methods": 32
+  },
+  "excluded_claims": [
+    "Native Windows/MSVC execution",
+    "Native ARM64/NEON execution",
+    "CUDA/Metal execution",
+    "GoPro SDK qualification",
+    "Private golden corpus replay",
+    "SMPTE VC-5 or product-release qualification",
+    "Performance improvement"
+  ]
+}

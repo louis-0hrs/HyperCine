@@ -893,6 +893,18 @@ def check_contract(docs: dict[str, dict[str, Any]]) -> list[Finding]:
         if any(item.workflow == wf for item in tag_items):
             violation("R9", f"tag push schedules {wf}")
 
+    # R15: toolchain-only edits still require the real CUDA compile gate.
+    # CPU/standalone jobs cannot compile code hidden behind CUDA conditions.
+    for event in events:
+        if event.name != "pull_request" and event.label != "main push":
+            continue
+        for path in ("cmake/cuda_host_compiler.cmake", "cmake/wavelet_simd.cmake",
+                     "cmake/threaded_encoder_prefix.h"):
+            toolchain_plan = plan(docs, replace(event, changed=[path]))
+            for job in ("cuda-build", "inventory-gate-selftest"):
+                if not _by(toolchain_plan, "ci-cuda-build.yml", job):
+                    violation("R15", f"{event.label}: {path} omits CUDA job {job}")
+
     # R10: each workflow's concurrency group is stable per (workflow, PR) and
     # distinct across PRs. Missing concurrency is reported, not failed: trigger
     # trimming is tracked separately in #350.
@@ -1021,7 +1033,7 @@ def main(argv: list[str] | None = None) -> int:
             checked = sum(len(plan(docs, event)) for event in scenarios())
             print(
                 f"OK: {len(docs)} workflows, {len(scenarios())} events, "
-                f"{checked} job instances, 14 rules"
+                f"{checked} job instances, 15 rules"
             )
     return 1 if findings else 0
 

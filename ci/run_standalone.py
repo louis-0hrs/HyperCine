@@ -10,8 +10,13 @@ import platform
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+if __package__:
+    from .check_upstream_immutable import verify_upstream
+else:
+    from check_upstream_immutable import verify_upstream
 
 REQUIRED = {
+    'upstream_immutable', 'upstream_immutable_guardrails',
     # Fail closed if the C0 geometry arithmetic or recorded-report gate disappears.
     'extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report',
     # P0 RGB444 frame and RG48 importer must never disappear from standalone CI.
@@ -33,6 +38,7 @@ REQUIRED = {
     'encoder_backend_selection_contract', 'encoder_backend_session_packets',
     'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence',
     'wavelet_simd_exact', 'wavelet_simd_packets',
+    'wavelet_cpu_bounds',
     'cpu_isa_selection', 'gop2_reference_inventory_integrity', 'gop2_original_stage_contract',
     'filmscan3_api', 'filmscan3_fixture_integrity',
     'profile_enter_contract', 'p6_writer_trace_contract', 'p6_writer_trace_optimized',
@@ -162,9 +168,7 @@ def main():
     for key in ('HYPERCINE_FFMPEG_EXECUTABLE', 'HYPERCINE_FFPROBE_EXECUTABLE'):
         subprocess.run([cache[key], '-version'], check=True)
     subprocess.run(['cmake', '--version'], check=True)
-    subprocess.run(['git', 'diff', '--exit-code', 'HEAD', '--', 'upstream/'], check=True)
-    if subprocess.check_output(['git', 'status', '--porcelain', '--', 'upstream/'], text=True).strip():
-        raise ValueError('upstream working tree is modified')
+    verify_upstream(Path(__file__).resolve().parents[1])
     ctest = ['ctest', '--test-dir', str(build), '-C', 'Release']
     document = json.loads(subprocess.check_output(ctest + ['--show-only=json-v1'], text=True))
     registered = registered_tests(document, required_tests(cache))

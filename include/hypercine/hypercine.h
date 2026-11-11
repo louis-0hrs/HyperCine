@@ -5,6 +5,8 @@
 #ifndef HYPERCINE_H
 #define HYPERCINE_H
 
+#include <stddef.h>
+
 /**
  * @file hypercine.h
  * @brief Main header for HyperCine - Modern GPU-accelerated CineForm codec
@@ -28,7 +30,7 @@ extern "C" {
 /**
  * @brief Returns the version string for HyperCine.
  */
-inline const char* HyperCine_GetVersionString(void) {
+static inline const char* HyperCine_GetVersionString(void) {
     return HYPERCINE_VERSION_STRING;
 }
 
