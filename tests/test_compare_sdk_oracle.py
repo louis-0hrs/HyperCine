@@ -6,6 +6,7 @@
 """Regression coverage for the Windows SDK-oracle log replay filter."""
 import base64
 import importlib.util
+import json
 import struct
 import sys
 import tempfile
@@ -148,6 +149,58 @@ class OracleFailClosed(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         compare.main()
                 self.assertFalse((fixtures / 'accidental-report').exists())
+
+
+    def test_extreme_decimal_length_is_rejected_before_conversion(self):
+        # Length bound is checked before int(), also on Python 3.9 without its
+        # newer built-in maximum-digit conversion limit.
+        with self.assertRaisesRegex(ValueError, 'invalid oracle length'):
+            compare.extract_log(['ORACLE_DATA_BEGIN control.cfhd ' + '9' * 10000])
+
+    def test_retained_fixture_manifest_rejects_bad_entries_before_binary_read(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixtures = root / 'retained'
+            fixtures.mkdir()
+            output = root / 'output'
+            for label, first_name, bad_value in (
+                ('unhashable', 'control.cfhd', []),
+                ('oversized_packet', 'control.cfhd', 16 * 1024 * 1024 + 1),
+                ('invalid_pixel_storage', 'flat.sdk-p10', 64),
+            ):
+                names = [first_name] + sorted(compare.ORACLE_NAMES - {first_name})
+                records = [{'file': name, 'bytes': 65536, 'sha256': '0' * 64}
+                           for name in names]
+                records[0]['file' if label == 'unhashable' else 'bytes'] = bad_value
+                manifest = {'files': records, 'run_url': 'https://example.invalid/run',
+                            'log_sha256': '0' * 64}
+                (fixtures / 'manifest.json').write_text(json.dumps(manifest))
+                argv = ['compare_sdk_oracle.py', '--windows-fixtures', str(fixtures),
+                        '--ffmpeg', 'must-not-run', '--ffprobe', 'must-not-run',
+                        '--output', str(output)]
+                with self.subTest(label=label), patch.object(sys, 'argv', argv), \
+                     patch.object(Path, 'read_bytes', side_effect=AssertionError('unbounded read')):
+                    with self.assertRaisesRegex(ValueError, 'invalid or duplicate fixture name'
+                                               if label == 'unhashable' else
+                                               'invalid fixture byte count'):
+                        compare.main()
+                self.assertFalse(any(output.iterdir()))
+
+    def test_oversized_oracle_log_refuses_before_payload_read(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / 'huge.log'
+            with log.open('wb') as target:
+                target.truncate(64 * 1024 * 1024 + 1)
+            output = root / 'output'
+            argv = ['compare_sdk_oracle.py', '--log', str(log), '--run-url',
+                    'https://example.invalid/run', '--ffmpeg', 'must-not-run',
+                    '--ffprobe', 'must-not-run', '--output', str(output)]
+            with patch.object(sys, 'argv', argv), \
+                 patch.object(Path, 'read_bytes', side_effect=AssertionError('unbounded read')):
+                with self.assertRaisesRegex(ValueError, 'oracle log exceeds size limit'):
+                    compare.main()
+            self.assertFalse(any(output.iterdir()))
 
 
 if __name__ == '__main__':
