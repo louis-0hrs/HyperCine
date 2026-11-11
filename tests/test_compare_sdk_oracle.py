@@ -135,5 +135,20 @@ class OracleFailClosed(unittest.TestCase):
             self.assertEqual(outside.read_bytes(), b'protected')
 
 
+    def test_windows_fixtures_cannot_be_mutated_by_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixtures = root / 'retained-sdk-input'
+            fixtures.mkdir()
+            for output in (fixtures, fixtures / 'accidental-report'):
+                argv = ['compare_sdk_oracle.py', '--windows-fixtures', str(fixtures),
+                        '--ffmpeg', 'must-not-run', '--ffprobe', 'must-not-run',
+                        '--output', str(output)]
+                with self.subTest(output=output), patch.object(sys, 'argv', argv):
+                    with self.assertRaises(ValueError):
+                        compare.main()
+                self.assertFalse((fixtures / 'accidental-report').exists())
+
+
 if __name__ == '__main__':
     unittest.main()
