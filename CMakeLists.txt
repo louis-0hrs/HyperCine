@@ -93,6 +93,14 @@ function(hypercine_register_sdk_free_contracts)
         return()
     endif()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    # #363: a clean checkout is not proof of an unchanged committed SDK.
+    add_test(NAME upstream_immutable
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/check_upstream_immutable.py"
+            --repo "${PROJECT_SOURCE_DIR}")
+    add_test(NAME upstream_immutable_guardrails
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/test_upstream_immutable.py")
+    set_tests_properties(upstream_immutable upstream_immutable_guardrails PROPERTIES
+        LABELS "validation;reference-oracle" TIMEOUT 120)
     add_test(NAME windows_sdk_corpus_contract
         COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_windows_sdk_corpus.py")
     set_tests_properties(windows_sdk_corpus_contract PROPERTIES LABELS "validation;reference-oracle")

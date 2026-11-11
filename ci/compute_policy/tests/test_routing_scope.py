@@ -74,7 +74,17 @@ class MacScopeTests(unittest.TestCase):
     def test_native_job_steps_unchanged(self):
         for wf,jobs in BASE['original_step_definitions_sha256'].items():
             for job,expected in jobs.items():
-                actual=hashlib.sha256(json.dumps(self.docs[wf]['jobs'][job]['steps'],sort_keys=True).encode()).hexdigest()
+                steps=copy.deepcopy(self.docs[wf]['jobs'][job]['steps'])
+                replacement=BASE['reviewed_step_replacements_363'].get(wf,{}).get(job)
+                if replacement:
+                    # #363 intentionally strengthens this one command. Revert
+                    # only its reviewed run text in the comparison, preserving
+                    # the original hash's check of every other step/key/recipe.
+                    matches=[s for s in steps if s.get('name')==replacement['name']]
+                    self.assertEqual(len(matches),1,(wf,job))
+                    self.assertEqual(matches[0]['run'],replacement['run_after'],(wf,job))
+                    matches[0]['run']=replacement['run_before']
+                actual=hashlib.sha256(json.dumps(steps,sort_keys=True).encode()).hexdigest()
                 self.assertEqual(expected,actual,(wf,job))
     def test_privacy_still_runs_on_push_pr_with_same_jobs(self):
         for event in events():

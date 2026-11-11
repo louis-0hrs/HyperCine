@@ -22,12 +22,7 @@ jobs:
 
       - name: Verify upstream immutability
         shell: pwsh
-        run: |
-          $status = git status --porcelain upstream/
-          if ($status) {
-            Write-Error "upstream/ directory has been modified: $status"
-            exit 1
-          }
+        run: python ci/check_upstream_immutable.py
 
       - name: Configure CMake (CPU-Only)
         shell: pwsh

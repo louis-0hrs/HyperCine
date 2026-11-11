@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "issue": 363,
+  "license": "MIT OR Apache-2.0",
+  "status": "LOCAL_LINUX_STANDALONE_PASS",
+  "source_binding": {
+    "base_commit": "dca0c0707a0d460fb8cb7ca7d198c0a7aa4be8e7",
+    "scope": "Final uncommitted worktree source bytes; documentation added afterward",
+    "post_run_fingerprints_verified": true,
+    "source_sha256": {
+      ".github/workflows/ci-cpu.yml": "186989eab5231388afdbd51469e86ded58e53099e01ef7d61dba9617fa34d975",
+      ".github/workflows/ci-cuda-build.yml": "70cff2ae0fa343eb2555a3acad1914d0f403bd0b7e8389f880c513ef5808cfc7",
+      "CMakeLists.txt": "ab88c7a2a5d7bd40cb717cc0ca221078041d25ae5c069c8e72171d9a213d7ef5",
+      "ci/check_upstream_immutable.py": "05ae7acdb61d501b499e023b2fd1e0de967fc1224cc75258817c853004541ca1",
+      "ci/compute_policy/tests/hosted_non_mac_baseline.json": "da0aaf50582dac72c0bfaf502c02656354a231c2ca56cc7d372f69a562ccf468",
+      "ci/compute_policy/tests/test_routing_scope.py": "30b74aa84ad8fbd82bba83e4ad1d924aef9cd71463997ad12f5a180489da5c40",
+      "ci/run_standalone.py": "92520aaac18a5985caf8be19a71b2e8b5f2e212ac44325b6f2c17fd42c0d4ac0",
+      "ci/test_standalone_gate.py": "9bb478f9d13c917b6aad1099cb4c80e1b5dc143c547e768ec0305bd540f46399",
+      "ci/test_upstream_immutable.py": "cd1090b1b34545c91d9c081d668695340f0cd2266d48d18b98c6bd27aa2e177d",
+      "ci/test_workflow_event_matrix.py": "f8f659fc4edf113f98936656a60a3c709feabd2cb43f0d0ad527142b70a703d2",
+      "ci/workflow_event_matrix.py": "2668ecc2f44b138f853b3b97ec733cbe057c0457030a51ca10ff0d7a98503c1f"
+    }
+  },
+  "upstream": {
+    "original_commit": "11574d0295771edccadd17af14af74a539f924c7",
+    "tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+    "files": 222,
+    "modified": false
+  },
+  "environment": {
+    "system": "Linux",
+    "architecture": "x86_64",
+    "compiler": "GCC 14.2.0",
+    "cmake_ctest": "3.31.6",
+    "python": "3.12.14",
+    "git": "2.52.0",
+    "ffmpeg": "7.1.5",
+    "generator": "Unix Makefiles",
+    "build_type": "Release",
+    "temporary_media": "Dedicated filesystem-backed temporary directory; no local path published"
+  },
+  "cmake_options": {
+    "HYPERCINE_BUILD_STANDALONE": "ON",
+    "HYPERCINE_BUILD_UPSTREAM": "OFF",
+    "HYPERCINE_ENABLE_CUDA": "OFF",
+    "HYPERCINE_BUILD_TESTS": "ON",
+    "HYPERCINE_BUILD_BENCHMARKS": "OFF",
+    "HYPERCINE_REQUIRE_EXTERNAL_DECODE": "ON",
+    "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+  },
+  "validation": {
+    "standalone": {
+      "registered": 129,
+      "passed": 129,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 343.55
+    },
+    "immutable_controls": {
+      "tests": 26,
+      "passed": 26,
+      "skipped": 0,
+      "python_optimized_repeat_passed": 26
+    },
+    "package_and_standalone_guardrails": {
+      "tests": 58,
+      "passed": 58
+    },
+    "routing_capability_mac_scope": {
+      "tests": 66,
+      "passed": 66
+    },
+    "routing_model": {
+      "workflows": 7,
+      "events": 8,
+      "job_instances": 66,
+      "rules": 15
+    }
+  },
+  "independent_review": {
+    "result": "SCOPED_ACCEPT",
+    "focused_controls": 6,
+    "passed": 6,
+    "skipped": 0,
+    "corrections": [
+      "No clean-filter or Git diff execution; raw/pinned-blob newline-only checks",
+      "Direct executable-mode inspection despite assume-unchanged",
+      "Case-sensitive untracked inventory despite core.ignorecase=true"
+    ],
+    "native_windows": "NOT_RUN"
+  },
+  "manual_artifact_review": {
+    "junit_testcases": 129,
+    "all_status_run": true,
+    "failure_error_skip_elements": 0,
+    "geometry_4k": {
+      "status": "PASS",
+      "width": 3840,
+      "height": 2160,
+      "independent_decodes": 19,
+      "sequence_frames": 16,
+      "sequence_pixel_identity": "PASS",
+      "minimum_finite_p10_psnr_db": 52.32134949615484,
+      "source_sdk": "REFERENCE_BLOCKED",
+      "eight_k": "PENDING_8K"
+    },
+    "sequence_120_frame_manifest": "PASS",
+    "native_original_sdk_execution": "NOT_RUN"
+  },
+  "artifact_sha256": {
+    "standalone-results.xml": "f82fe9c7af3f7ea04830f9a1f2e5ecd95560f23706222a519a461362c3f259eb",
+    "standalone-gate.json": "eb0a0237f9f5b64eec4ff2928e0d69ac2e3598efcdb3df0da167c061b84c9e7a",
+    "geometry-p4/geometry.json": "f65ed67b8c4959dfc51d98ebbb58bc6eb7a9b9d655fb8ef68e409da2dc9104a2"
+  },
+  "prior_attempts": {
+    "not_receipts": true,
+    "attempts": [
+      "Stopped after a temporary-media write failure during filmscan3_sequence_manifest",
+      "Stopped before completion for independent-review corrections"
+    ]
+  },
+  "not_run_or_not_claimed": [
+    "Native Windows/MSVC/PowerShell",
+    "Native macOS",
+    "CUDA compilation or NVIDIA Compute Sanitizer",
+    "Native Metal/Vulkan algorithms",
+    "ASan/UBSan",
+    "Private original SDK corpus replay",
+    "Performance improvement",
+    "Release qualification",
+    "GitHub workflow execution",
+    "Branch-rule/service/permission changes"
+  ]
+}
