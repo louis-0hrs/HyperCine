@@ -122,7 +122,7 @@ def main():
         for line in lines:
             if is_observation_line(line):
                 observations.append(dict(
-                    step=line.split('\\t')[1] if '\\t' in line else 'unlabelled',
+                    step=line.split('\t')[1] if '\t' in line else 'unlabelled',
                     result=line.split('Z ', 1)[-1].strip()))
         data = extract_log(lines)
         # Refuse pre-existing files/symlinks and validate all targets before writing any.
