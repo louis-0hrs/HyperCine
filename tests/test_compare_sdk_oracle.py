@@ -206,6 +206,19 @@ class OracleFailClosed(unittest.TestCase):
 
 
 class OraclePublicationPrivacy(unittest.TestCase):
+    def test_public_run_url_requires_canonical_credential_free_github_link(self):
+        good = 'https://github.com/louis-0hrs/HyperCine/actions/runs/38627689864'
+        self.assertEqual(compare.validated_run_url(good), good)
+        for bad in (None, 100, '', '/private/host/path',
+                    'https://user:token@github.com/louis-0hrs/HyperCine/actions/runs/1',
+                    good + '?access_token=PRIVATE_DO_NOT_PUBLISH',
+                    good + '#PRIVATE_DO_NOT_PUBLISH',
+                    'https://internal.example/actions/runs/123',
+                    'https://github.com/louis-0hrs/HyperCine/actions/runs/not-a-number'):
+            with self.subTest(bad=type(bad).__name__), self.assertRaisesRegex(
+                    ValueError, 'invalid public oracle run URL'):
+                compare.validated_run_url(bad)
+
     def test_observation_receipt_never_echoes_raw_log_content(self):
         line = ('2026-11-11T12:00Z status=1 '
                 '/private/PRIVATE_SOURCE_PATH ACCESS_KEY_DO_NOT_PUBLISH')
