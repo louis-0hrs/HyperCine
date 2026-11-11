@@ -224,10 +224,10 @@ class OracleFailClosed(unittest.TestCase):
                 return payload
 
             with patch.object(Path, 'read_bytes', autospec=True,
-                              side_effect=change_after_read), \\
-                 patch.object(Path, 'read_text',
-                              side_effect=AssertionError('second log read')):
-                digest, lines = compare.read_bounded_log(path)
+                              side_effect=change_after_read):
+                with patch.object(Path, 'read_text',
+                                  side_effect=AssertionError('second log read')):
+                    digest, lines = compare.read_bounded_log(path)
             self.assertEqual(reads, [path])
             self.assertEqual(digest, hashlib.sha256(original).hexdigest())
             self.assertEqual(lines, original.decode('utf-8').splitlines())
