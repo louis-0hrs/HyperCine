@@ -31,6 +31,14 @@ def is_observation_line(line):
     return any(marker in line for marker in OBSERVATION_MARKERS)
 
 
+def observation_receipt(line):
+    """Preserve observation category and digest, never untrusted log text."""
+    require(is_observation_line(line), 'not an oracle observation')
+    marker = next(marker for marker in OBSERVATION_MARKERS if marker in line)
+    return dict(marker=marker, line_sha256=hashlib.sha256(
+        line.encode('utf-8')).hexdigest())
+
+
 def metric(a, b, peak=1023):
     require(len(a) == len(b) and len(a) > 0, 'pixel plane lengths differ or are empty')
     errors = [x-y for x, y in zip(a, b)]
@@ -153,9 +161,8 @@ def main():
         lines = Path(args.log).read_text().splitlines()
         for line in lines:
             if is_observation_line(line):
-                observations.append(dict(
-                    step=line.split('\t')[1] if '\t' in line else 'unlabelled',
-                    result=line.split('Z ', 1)[-1].strip()))
+                require(len(observations) < 4096, 'too many oracle observations')
+                observations.append(observation_receipt(line))
         data = extract_log(lines)
     require(set(data) == ORACLE_NAMES, 'incomplete oracle inventory')
     # Check ALL outputs (not just extracted records) before writing even the first byte.
@@ -221,4 +228,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        # CLI/CTest logs may be published: never echo fixture paths, SDK log
+        # text, subprocess argv or exception messages to those public logs.
+        raise SystemExit('FAIL: SDK oracle replay rejected or unavailable')
