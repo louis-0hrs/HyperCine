@@ -283,7 +283,11 @@ class OracleFailClosed(unittest.TestCase):
 
             def intercept_open(subject, *args, **kwargs):
                 stream = real_open(subject, *args, **kwargs)
-                if subject in (manifest_path, first_file) and args and args[0] == 'rb':
+                # Replay resolves the retained root before reading packets.
+                # Windows temporary roots may have alternate physical spellings.
+                # Match the actual resolved fixture, not the original path text.
+                if (args and args[0] == 'rb' and
+                        subject.resolve() in (manifest_path.resolve(), first_file.resolve())):
                     return BoundedReader(stream, subject)
                 return stream
 
