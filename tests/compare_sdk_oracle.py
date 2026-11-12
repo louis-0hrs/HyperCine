@@ -127,7 +127,10 @@ def read_bounded_log(path):
     """
     require(0 < path.stat().st_size <= 64 * 1024 * 1024,
             'oracle log exceeds size limit')
-    payload = path.read_bytes()
+    # The preflight stat is not a read bound: a concurrent writer may grow
+    # the log before it is opened. Never call read_bytes() without a limit.
+    with path.open('rb') as source:
+        payload = source.read(64 * 1024 * 1024 + 1)
     require(0 < len(payload) <= 64 * 1024 * 1024,
             'oracle log exceeds size limit')
     return hashlib.sha256(payload).hexdigest(), payload.decode('utf-8').splitlines()
@@ -169,7 +172,12 @@ def main():
         manifest_path = Path(args.windows_fixtures) / 'manifest.json'
         require(0 < manifest_path.stat().st_size <= 64 * 1024,
                 'fixture manifest exceeds size limit')
-        manifest = json.loads(manifest_path.read_text())
+        # Enforce the same limit during IO, even if the file grows after stat().
+        with manifest_path.open('rb') as source:
+            manifest_bytes = source.read(64 * 1024 + 1)
+        require(0 < len(manifest_bytes) <= 64 * 1024,
+                'fixture manifest exceeds size limit')
+        manifest = json.loads(manifest_bytes)
         require(type(manifest) is dict and type(manifest.get('files')) is list and
                 len(manifest['files']) == len(ORACLE_NAMES), 'invalid fixture manifest')
         fixture_root = Path(args.windows_fixtures).resolve()
@@ -184,7 +192,9 @@ def main():
             path = fixture_root / file['file']
             require(path.resolve().parent == fixture_root, 'fixture escapes directory')
             require(path.stat().st_size == declared, 'fixture file length mismatch')
-            raw = path.read_bytes()
+            # A producer may replace the artifact between stat and read.
+            with path.open('rb') as source:
+                raw = source.read(declared + 1)
             require(len(raw) == declared and
                     hashlib.sha256(raw).hexdigest() == file.get('sha256'),
                     'fixture length or digest mismatch')
