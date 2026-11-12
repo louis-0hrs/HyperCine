@@ -278,13 +278,15 @@ class OracleFailClosed(unittest.TestCase):
                     return self
 
                 def __exit__(self, *exc):
-                    return self.stream.__exit__(*exc)
+                    # Close before rewriting: Windows may deny an in-place
+                    # overwrite while the input handle remains open.
+                    result = self.stream.__exit__(*exc)
+                    path.write_bytes(changed)
+                    return result
 
                 def read(self, size=-1):
                     sizes.append(size)
-                    payload = self.stream.read(size)
-                    path.write_bytes(changed)
-                    return payload
+                    return self.stream.read(size)
 
             def intercept_open(subject, *args, **kwargs):
                 stream = real_open(subject, *args, **kwargs)
