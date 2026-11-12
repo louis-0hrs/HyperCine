@@ -7,6 +7,7 @@
 import base64
 import hashlib
 import importlib.util
+import inspect
 import json
 import subprocess
 import struct
@@ -59,6 +60,43 @@ class OracleFailClosed(unittest.TestCase):
                           'ORACLE_DATA_END ' + name])
         data = compare.extract_log(lines)
         self.assertEqual(set(data), compare.ORACLE_NAMES)
+
+    def test_external_decoded_control_read_is_bounded_and_exact(self):
+        # The child decoder can produce an oversized file even if ffprobe
+        # previously reported 128x128. The reader must never use read_bytes().
+        self.assertIn('read_bounded_decoded(decoded)', inspect.getsource(compare.main))
+
+        class GuardedOutput:
+            def __init__(self, length):
+                self.length = length
+                self.requested = []
+
+            def open(self, mode):
+                if mode != 'rb':
+                    raise AssertionError('expected binary read')
+                return self
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self, size=-1):
+                self.requested.append(size)
+                if size != 65537:
+                    raise AssertionError('unbounded FFmpeg output read')
+                return bytes(min(size, self.length))
+
+        for size in (0, 65535, 65536, 65537, 65538):
+            with self.subTest(size=size):
+                output = GuardedOutput(size)
+                if size == 65536:
+                    self.assertEqual(len(compare.read_bounded_decoded(output)), 65536)
+                else:
+                    with self.assertRaisesRegex(ValueError, 'invalid decoded control size'):
+                        compare.read_bounded_decoded(output)
+                self.assertEqual(output.requested, [65537])
 
     def test_unsafe_filename_and_incomplete_log_are_rejected(self):
         for name in ('../escape', '/tmp/escape', 'foreign.sdk-p10'):
