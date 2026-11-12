@@ -122,7 +122,10 @@ function(hypercine_register_sdk_free_contracts)
     set_tests_properties(test_reference_release_inventory PROPERTIES LABELS "reference-oracle")
     add_test(NAME test_compare_sdk_oracle
         COMMAND "${Python3_EXECUTABLE}" "${contracts}/test_compare_sdk_oracle.py")
-    set_tests_properties(test_compare_sdk_oracle PROPERTIES LABELS "reference-oracle")
+    add_test(NAME test_compare_sdk_oracle_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${contracts}/test_compare_sdk_oracle.py")
+    set_tests_properties(test_compare_sdk_oracle test_compare_sdk_oracle_optimized
+        PROPERTIES LABELS "reference-oracle")
     # Recorded RCA-159 band-0 witness (#234). Recomputed statistics and the
     # sanitized records only; no private corpus and no GPU are involved.
     add_test(NAME test_rca159_witness_contract

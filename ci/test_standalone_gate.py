@@ -302,6 +302,7 @@ class StandaloneGateTests(unittest.TestCase):
         # or the merged P4 geometry block; dropping any single registration must
         # fail the gate, not shrink it back to the old green inventory.
         for missing in ('test_reference_release_inventory', 'test_compare_sdk_oracle',
+                        'test_compare_sdk_oracle_optimized',
                         'test_rca159_witness_contract',
                         'filmscan3_geometry_reference_p10'):
             self.assertIn(missing, REQUIRED)
