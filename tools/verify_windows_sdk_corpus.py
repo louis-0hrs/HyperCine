@@ -8,14 +8,28 @@ Exit 0 means integrity and declared structural assertions passed, not that
 historical build provenance, playback cadence or input-to-packet causality did.
 """
 import argparse
+import contextlib
 import hashlib
 import json
 import os
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import re
+import stat
 import struct
 import subprocess
 import sys
+from p6_output_paths import (Directory, absolute_path, bounded_chunks, component,
+                             read_bounded, within)
+
+# Resource budgets for this evidence verifier, not CFHD or SDK format maxima.
+# The retained corpora contain 1080p inputs and individual packets; no archive
+# or unbounded log is an accepted inventory artifact.
+MAX_INDEX_BYTES = 8 * 1024 * 1024
+MAX_METADATA_BYTES = 4 * 1024 * 1024
+MAX_PACKET_BYTES = 128 * 1024 * 1024
+MAX_ARTIFACT_BYTES = 128 * 1024 * 1024
+MAX_PATH_DEPTH = 32
+MAX_COMPONENT_CHARS = 255
 
 WINDOWS = 'golden/windows/qualities/2026-10-29-issue321-windows-sdk-reference'
 LINUX = 'golden/windows/qualities/2026-10-29-sdk-gaps'
@@ -39,44 +53,172 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def _parts(name):
+    require(isinstance(name, str) and bool(name), 'unsafe relative file name')
+    parts = name.split('/')
+    require(len(parts) <= MAX_PATH_DEPTH, 'corpus path exceeds depth limit')
+    for part in parts:
+        component(part)
+        require(len(part) <= MAX_COMPONENT_CHARS and
+                all(32 <= ord(char) < 127 and char not in '<>"|?*' for char in part),
+                'unsupported corpus path component')
+    return parts
+
+
+def _root_directory(root, stack):
+    return root if isinstance(root, Directory) else stack.enter_context(Directory.open(root))
+
+
+def _child_directory(root, name, stack):
+    directory = _root_directory(root, stack)
+    for part in _parts(name):
+        directory = stack.enter_context(directory.child(part))
+    return directory
+
+
+@contextlib.contextmanager
+def _open_artifact(root, name):
+    """Open only relative to retained directories, including intermediate parts."""
+    parts = _parts(name)
+    try:
+        with contextlib.ExitStack() as stack:
+            directory = _root_directory(root, stack)
+            for part in parts[:-1]:
+                directory = stack.enter_context(directory.child(part))
+            with directory.file(parts[-1]) as stream:
+                yield stream
+    except (OSError, RuntimeError):
+        # Public integrity helpers historically use ValueError. Do not expose
+        # private corpus paths from OS errors or symlink-resolution failures.
+        raise ValueError('missing or unsafe corpus artifact') from None
+
+
+def _read_snapshot(root, name, maximum, exact=None):
+    with _open_artifact(root, name) as stream:
+        if exact is None:
+            exact = os.fstat(stream.fileno()).st_size
+        return read_bounded(stream, maximum, exact=exact)
+
+
+def _hash_artifact(root, name, maximum, exact=None):
+    with _open_artifact(root, name) as stream:
+        if exact is None:
+            exact = os.fstat(stream.fileno()).st_size
+        digest = hashlib.sha256()
+        for block in bounded_chunks(stream, maximum, exact=exact):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def file_sha(path):
-    h = hashlib.sha256()
-    with path.open('rb') as stream:
-        for block in iter(lambda: stream.read(4 * 1024 * 1024), b''):
-            h.update(block)
-    return h.hexdigest()
+    """Compatibility helper with an absolute budget and one opened file."""
+    path = Path(path)
+    return _hash_artifact(path.parent, path.name, MAX_ARTIFACT_BYTES)
+
+
+def _pin(rows, name, maximum):
+    require(type(maximum) is int and maximum > 0, 'invalid artifact byte budget')
+    _parts(name)
+    require(isinstance(rows, dict) and name in rows, 'manifest references unindexed file')
+    pin = rows[name]
+    require(isinstance(pin, (tuple, list)) and len(pin) == 2, 'invalid artifact pin')
+    size, digest = pin
+    require(type(size) is int and 0 <= size <= maximum and
+            isinstance(digest, str) and re.fullmatch('[0-9a-f]{64}', digest),
+            'invalid artifact pin or byte budget')
+    return size, digest
+
+
+def read_verified(root, name, rows, maximum):
+    """Return the exact bounded bytes whose index SHA is checked here."""
+    size, digest = _pin(rows, name, maximum)
+    data = _read_snapshot(root, name, maximum, exact=size)
+    require(sha(data) == digest, 'indexed SHA-256 mismatch')
+    return data
+
+
+def _json_verified(root, name, rows):
+    data = read_verified(root, name, rows, MAX_METADATA_BYTES)
+    try:
+        result = json.loads(data.decode('utf-8'))
+    except RecursionError:
+        raise ValueError('unsupported metadata nesting') from None
+    require(isinstance(result, dict), 'expected metadata object')
+    return result
 
 
 def safe_file(root, name):
-    p = PurePosixPath(name)
-    require(bool(name) and not p.is_absolute() and '\\' not in name and
-            all(part not in ('', '.', '..') for part in name.split('/')),
-            'unsafe relative file name')
-    target = root.joinpath(*p.parts)
-    require(not any(root.joinpath(*p.parts[:i]).is_symlink()
-                    for i in range(1, len(p.parts) + 1)), 'symlink rejected')
-    require(target.is_file(), 'missing required corpus file')
-    return target
+    """Compatibility path check; evidence consumers use opened snapshots."""
+    with _open_artifact(root, name):
+        pass
+    return (root.path if isinstance(root, Directory) else Path(root)).joinpath(*_parts(name))
+
+
+def _inventory_shape(rows):
+    tree = {}
+    for name in ['TRANSFER_SHA256.tsv', *rows]:
+        parts = _parts(name)
+        node = tree
+        for part in parts[:-1]:
+            child = node.setdefault(part, {})
+            require(isinstance(child, dict), 'conflicting inventory path')
+            node = child
+        require(parts[-1] not in node, 'conflicting inventory path')
+        node[parts[-1]] = None
+    return tree
+
+
+def _check_inventory(directory, tree):
+    # A streaming directory iterator avoids materializing an attacker-sized
+    # listing. Only prefixes of indexed paths may be traversed; unindexed empty
+    # directories and links are also refused rather than recursively explored.
+    seen = set()
+    with os.scandir(directory.path if os.name == 'nt' else directory.fd) as entries:
+        for entry in entries:
+            name = entry.name
+            require(name in tree and name not in seen, 'unindexed or repeated directory entry')
+            child = tree[name]
+            if child is None:
+                require(stat.S_ISREG(directory.info(name).st_mode), 'unexpected corpus entry')
+            else:
+                with directory.child(name) as nested:
+                    _check_inventory(nested, child)
+            seen.add(name)
+    require(seen == set(tree), 'unindexed or missing files')
+
+
+def _verify_index_snapshot(root, count=None, digest=None):
+    try:
+        with contextlib.ExitStack() as stack:
+            directory = _root_directory(root, stack)
+            data = _read_snapshot(directory, 'TRANSFER_SHA256.tsv', MAX_INDEX_BYTES)
+            actual_digest = sha(data)
+            require(digest is None or actual_digest == digest, 'transfer index SHA-256 mismatch')
+            rows = {}
+            for line in data.decode('utf-8').splitlines():
+                fields = line.split('\t')
+                require(len(fields) == 3, 'malformed transfer row')
+                name, size, expected = fields
+                _parts(name)
+                require(name not in rows and name != 'TRANSFER_SHA256.tsv', 'duplicate/self transfer entry')
+                require(1 <= len(size) <= 20 and re.fullmatch('[0-9]+', size) and
+                        re.fullmatch('[0-9a-f]{64}', expected), 'invalid transfer value')
+                pin = (int(size), expected)
+                rows[name] = pin
+                _pin(rows, name, MAX_ARTIFACT_BYTES)
+            require(count is None or len(rows) == count, 'transfer file count mismatch')
+            tree = _inventory_shape(rows)
+            for name, (size, expected) in rows.items():
+                require(_hash_artifact(directory, name, MAX_ARTIFACT_BYTES, exact=size) == expected,
+                        'indexed SHA-256 mismatch')
+            _check_inventory(directory, tree)
+            return rows, actual_digest
+    except (OSError, RuntimeError):
+        raise ValueError('missing or unsafe corpus inventory') from None
 
 
 def verify_index(root, count=None, digest=None):
-    index = safe_file(root, 'TRANSFER_SHA256.tsv')
-    require(digest is None or file_sha(index) == digest, 'transfer index SHA-256 mismatch')
-    rows = {}
-    for line in index.read_text(encoding='utf-8').splitlines():
-        fields = line.split('	')
-        require(len(fields) == 3, 'malformed transfer row')
-        name, size, expected = fields
-        require(name not in rows and name != 'TRANSFER_SHA256.tsv', 'duplicate/self transfer entry')
-        require(size.isdigit() and re.fullmatch('[0-9a-f]{64}', expected), 'invalid transfer value')
-        path = safe_file(root, name)
-        require(path.stat().st_size == int(size), 'indexed byte length mismatch: ' + name)
-        require(file_sha(path) == expected, 'indexed SHA-256 mismatch: ' + name)
-        rows[name] = (int(size), expected)
-    actual = {p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file()}
-    require(actual == set(rows) | {'TRANSFER_SHA256.tsv'}, 'unindexed or missing files')
-    require(count is None or len(rows) == count, 'transfer file count mismatch')
-    return rows
+    return _verify_index_snapshot(root, count, digest)[0]
 
 
 def parse_packet(data):
@@ -185,19 +327,35 @@ def observe_order(packet, index, profile):
 def checked_frame(root, rows, frame, packet_key):
     for key, prefix in [('input', 'input'), (packet_key, 'sdk')]:
         name = frame[key]
-        require(name in rows, 'manifest references unindexed file')
-        require(rows[name] == (frame[prefix+'_byte_length'], frame[prefix+'_sha256']),
+        size, digest = _pin(rows, name, MAX_ARTIFACT_BYTES if key == 'input' else MAX_PACKET_BYTES)
+        require(type(frame[prefix+'_byte_length']) is int and
+                (size, digest) == (frame[prefix+'_byte_length'], frame[prefix+'_sha256']),
                 'manifest/index binding mismatch')
-    data = safe_file(root, frame[packet_key]).read_bytes()
+    data = read_verified(root, frame[packet_key], rows, MAX_PACKET_BYTES)
     return data, parse_packet(data)
 
 
 def run(golden, repo):
-    roots = {k: golden / WINDOWS / k for k in INDEXES if k != 'linux-sdk-gaps'}
-    roots['linux-sdk-gaps'] = golden / LINUX
-    indexes = {k: verify_index(root, *INDEXES[k]) for k, root in roots.items()}
+    try:
+        with contextlib.ExitStack() as stack:
+            corpus = _root_directory(golden, stack)
+            repository = _root_directory(repo, stack)
+            roots = {k: _child_directory(corpus, WINDOWS+'/'+k, stack)
+                     for k in INDEXES if k != 'linux-sdk-gaps'}
+            roots['linux-sdk-gaps'] = _child_directory(corpus, LINUX, stack)
+            indexes, index_hashes = {}, {}
+            for group, root in roots.items():
+                indexes[group], index_hashes[group] = _verify_index_snapshot(root, *INDEXES[group])
+            report = _observe(roots, indexes, index_hashes, repository)
+            corpus.visible()
+            return report
+    except (OSError, RuntimeError):
+        raise ValueError('missing or changed evidence root') from None
+
+
+def _observe(roots, indexes, index_hashes, repository):
     report = {'scope': 'integrity and independent bounded packet observations; not codec conformance',
-              'indexes': {k: {'files_ok': len(v), 'index_sha256': file_sha(roots[k]/'TRANSFER_SHA256.tsv'),
+              'indexes': {k: {'files_ok': len(v), 'index_sha256': index_hashes[k],
                               'bytes_ok': sum(size for size, _ in v.values())}
                           for k, v in indexes.items()},
               'windows_sessions': [], 'state_trace': [], 'comparison': {}, 'differences': [], 'volatile_metadata_differences': [],
@@ -217,10 +375,12 @@ def run(golden, repo):
                   'Linux executable reproduction claim and generator hash cannot be checked here.',
               ]}
     observed = {}
+    manifests = {}
     for group, root in roots.items():
         if group == 'linux-sdk-gaps':
             continue
-        manifest = json.loads((root/'manifest.json').read_text())
+        manifest = _json_verified(root, 'manifest.json', indexes[group])
+        manifests[group] = manifest
         sessions = []
         signatures = [(s['profile'], s.get('sequence', 'state')) for s in manifest['sessions']]
         expected = ([(p, 'sequence-120f') for p in PROFILES] if group == 'group-a-sequences' else
@@ -237,7 +397,7 @@ def run(golden, repo):
             previous = None
             trace = None
             if group == 'group-c-sdk-state':
-                trace = [line.split('	') for line in safe_file(root, profile+'/trace.tsv').read_text().splitlines()]
+                trace = [line.split('	') for line in read_verified(root, profile+'/trace.tsv', indexes[group], MAX_METADATA_BYTES).decode('utf-8').splitlines()]
                 require(len(trace) == len(frames), 'trace length mismatch')
             for index, frame in enumerate(frames):
                 require(frame['frame_index'] == index, 'manifest order mismatch')
@@ -292,21 +452,27 @@ def run(golden, repo):
                              'packet_ufrm_and_tag69_order_ok': True, 'manifest_input_hash_order_ok': True})
         report['windows_sessions'].append({'group': group, 'sessions': sessions})
     linux = roots['linux-sdk-gaps']
-    lm = json.loads((linux/'manifest.json').read_text())
+    lm = _json_verified(linux, 'manifest.json', indexes['linux-sdk-gaps'])
     frozen = lm['frozen_source_sha256']
+    require(isinstance(frozen, dict), 'invalid frozen source inventory')
     for name, digest in frozen.items():
         require(name.startswith('upstream/'), 'unexpected frozen source scope')
-        require(file_sha(safe_file(repo, name)) == digest, 'frozen source SHA mismatch')
-    require(file_sha(linux/'provenance/sdk_packet_capture.cpp') == lm['capture_source_sha256'],
+        require(_hash_artifact(repository, name, MAX_ARTIFACT_BYTES) == digest, 'frozen source SHA mismatch')
+    capture_name = 'provenance/sdk_packet_capture.cpp'
+    capture_size, capture_pin = _pin(indexes['linux-sdk-gaps'], capture_name, MAX_ARTIFACT_BYTES)
+    capture_digest = _hash_artifact(linux, capture_name, MAX_ARTIFACT_BYTES, exact=capture_size)
+    require(capture_digest == capture_pin and capture_digest == lm['capture_source_sha256'],
             'Linux capture source SHA mismatch')
-    tree = subprocess.check_output(['git', 'rev-parse', 'HEAD:upstream'], cwd=repo, text=True).strip()
+    tree = subprocess.check_output(['git', 'rev-parse', 'HEAD:upstream'], cwd=repository.path,
+                                   text=True, stderr=subprocess.DEVNULL).strip()
     pristine = subprocess.check_output(['git', 'rev-parse',
-        '11574d0295771edccadd17af14af74a539f924c7^{tree}'], cwd=repo, text=True).strip()
+        '11574d0295771edccadd17af14af74a539f924c7^{tree}'], cwd=repository.path,
+        text=True, stderr=subprocess.DEVNULL).strip()
     require(tree == pristine, 'upstream tree differs from pristine SDK commit')
     for group in roots:
         if group == 'linux-sdk-gaps':
             continue
-        wm = json.loads((roots[group]/'manifest.json').read_text())
+        wm = manifests[group]
         require(wm.get('upstream_tree', wm.get('sdk_upstream_tree')) == tree, 'declared SDK tree mismatch')
     report['provenance_verified'] = {'frozen_source_sha256': frozen, 'upstream_tree': tree,
         'linux_capture_source_sha256': lm['capture_source_sha256'],
@@ -314,7 +480,7 @@ def run(golden, repo):
     for profile in PROFILES:
         path = profile+'/sequence-120f/manifest.json'
         require(path in indexes['linux-sdk-gaps'], 'unindexed Linux session manifest')
-        frames = json.loads((linux/path).read_text())['frames']
+        frames = _json_verified(linux, path, indexes['linux-sdk-gaps'])['frames']
         require(len(frames) == 120, 'Linux frame count mismatch')
         summary = {'frames': 120, 'input_equal': 0, 'raw_packet_equal': 0,
                    'normalized_packet_equal': 0, 'quant_scale_equal': 0, 'size_equal': 0}
@@ -384,16 +550,31 @@ def main():
     args = parser.parse_args()
     try:
         require(bool(args.golden_root), 'set HYPERCINE_GOLDEN_DIR or --golden-root')
-        golden = Path(args.golden_root).resolve()
-        output = Path(args.output).resolve()
-        require(output != golden and golden not in output.parents, 'output must be outside corpus')
-        require(not output.exists(), 'refuse existing report (avoid stale PASS ambiguity)')
-        report = run(golden, Path(__file__).resolve().parents[1])
-        output.write_text(json.dumps(report, indent=2, sort_keys=True)+chr(10), encoding='utf-8')
+        output = absolute_path(args.output)
+        component(output.name)
+        with Directory.open(args.golden_root) as golden, Directory.open(output.parent) as parent:
+            require(not within(parent.path/output.name, golden.path) and
+                    golden.identity not in parent.ancestors, 'output must be outside corpus')
+            parent.require_absent(output.name)
+            golden.visible()
+            report = run(golden, Path(__file__).resolve().parents[1])
+            encoded = (json.dumps(report, indent=2, sort_keys=True)+chr(10)).encode('utf-8')
+            files_ok = sum(v['files_ok'] for v in report['indexes'].values())
+            golden.visible()
+            # A parent may have been moved into the corpus and aliased back to
+            # the same inode. Recheck its current ancestry as well as identity.
+            with Directory.open(parent.requested) as current_parent:
+                require(current_parent.identity == parent.identity and
+                        not within(current_parent.path/output.name, golden.path) and
+                        golden.identity not in current_parent.ancestors,
+                        'report parent changed or entered corpus')
+                # publish rechecks the requested parent's identity and atomically
+                # refuses every competing final entry. Failed staging is retained.
+                current_parent.publish(output.name, encoded)
         print('PASS integrity: %d/%d indexed files; observations and limitations in report' %
-              (sum(v['files_ok'] for v in report['indexes'].values()), sum(v['files_ok'] for v in report['indexes'].values())))
+              (files_ok, files_ok))
         return 0
-    except (OSError, ValueError, KeyError, TypeError, struct.error, subprocess.SubprocessError):
+    except (OSError, ValueError, KeyError, TypeError, RuntimeError, struct.error, subprocess.SubprocessError):
         # Deliberately do not echo exceptions: OS diagnostics may contain private paths.
         print('FAIL corpus verification (missing/changed/unsupported evidence); no report written', file=sys.stderr)
         return 1

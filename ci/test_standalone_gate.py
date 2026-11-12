@@ -53,6 +53,13 @@ class StandaloneGateTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
+    def test_windows_evidence_snapshot_gates_are_mandatory(self):
+        for name in ('windows_sdk_corpus_contract', 'windows_sdk_snapshot_contract',
+                     'windows_sdk_snapshot_optimized'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_missing_optimized_acceptance_fails(self):
         name = 'optimized_standalone_acceptance'
         self.assertIn(name, REQUIRED)
