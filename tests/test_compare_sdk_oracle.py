@@ -205,30 +205,98 @@ class OracleFailClosed(unittest.TestCase):
             self.assertFalse(any(output.iterdir()))
 
 
+    def test_retained_fixture_reads_are_io_bounded(self):
+        # stat() alone cannot protect a read if a producer grows its file.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixtures = root / 'retained'
+            fixtures.mkdir()
+            name = 'flat.sdk-p10'
+            first_file = fixtures / name
+            first_file.write_bytes(bytes(65536))
+            manifest_path = fixtures / 'manifest.json'
+            manifest_path.write_text(json.dumps({
+                'files': [{'file': item, 'bytes': 65536, 'sha256': '0' * 64}
+                          for item in [name] + sorted(compare.ORACLE_NAMES - {name})],
+                'run_url': 'https://github.com/louis-0hrs/HyperCine/actions/runs/1',
+                'log_sha256': '0' * 64,
+            }))
+            real_open = Path.open
+            seen = {}
+
+            class BoundedReader:
+                def __init__(self, stream, subject):
+                    self.stream, self.subject = stream, subject
+
+                def __enter__(self):
+                    self.stream.__enter__()
+                    return self
+
+                def __exit__(self, *exc):
+                    return self.stream.__exit__(*exc)
+
+                def read(self, size=-1):
+                    seen[self.subject.name] = size
+                    # An unbounded read() would violate this contract.
+                    expected = 64 * 1024 + 1 if self.subject == manifest_path else 65536 + 1
+                    if size != expected:
+                        raise AssertionError('oracle input read is not bounded')
+                    return self.stream.read(size)
+
+            def intercept_open(subject, *args, **kwargs):
+                stream = real_open(subject, *args, **kwargs)
+                if subject in (manifest_path, first_file) and args and args[0] == 'rb':
+                    return BoundedReader(stream, subject)
+                return stream
+
+            argv = ['compare_sdk_oracle.py', '--windows-fixtures', str(fixtures),
+                    '--ffmpeg', 'unused', '--ffprobe', 'unused',
+                    '--output', str(root / 'output')]
+            with patch.object(sys, 'argv', argv), \
+                 patch.object(Path, 'open', autospec=True, side_effect=intercept_open):
+                with self.assertRaisesRegex(ValueError, 'fixture length or digest mismatch'):
+                    compare.main()
+            self.assertEqual(seen, {'manifest.json': 64 * 1024 + 1,
+                                    name: 65536 + 1})
+
     def test_log_digest_binds_exact_parsed_bytes_even_if_file_changes(self):
-        # A log producer can replace the input immediately after the read.
-        # The reported digest and parsed records must derive from one snapshot.
+        # A producer can rewrite the log immediately after the bounded read.
         original = b'status=1\nORACLE_DATA_BEGIN control.cfhd 4\n'
         changed = b'status=0\nORACLE_DATA_BEGIN control.cfhd 5\n'
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'sdk-oracle.log'
             path.write_bytes(original)
-            real_read_bytes = Path.read_bytes
-            reads = []
+            real_open = Path.open
+            sizes = []
 
-            def change_after_read(subject):
-                payload = real_read_bytes(subject)
-                reads.append(subject)
-                if subject == path:
+            class MutatingReader:
+                def __init__(self, stream):
+                    self.stream = stream
+
+                def __enter__(self):
+                    self.stream.__enter__()
+                    return self
+
+                def __exit__(self, *exc):
+                    return self.stream.__exit__(*exc)
+
+                def read(self, size=-1):
+                    sizes.append(size)
+                    payload = self.stream.read(size)
                     path.write_bytes(changed)
-                return payload
+                    return payload
 
-            with patch.object(Path, 'read_bytes', autospec=True,
-                              side_effect=change_after_read):
-                with patch.object(Path, 'read_text',
-                                  side_effect=AssertionError('second log read')):
-                    digest, lines = compare.read_bounded_log(path)
-            self.assertEqual(reads, [path])
+            def intercept_open(subject, *args, **kwargs):
+                stream = real_open(subject, *args, **kwargs)
+                if subject == path and args and args[0] == 'rb':
+                    return MutatingReader(stream)
+                return stream
+
+            with patch.object(Path, 'open', autospec=True, side_effect=intercept_open), \
+                 patch.object(Path, 'read_bytes',
+                              side_effect=AssertionError('unbounded log read')):
+                digest, lines = compare.read_bounded_log(path)
+            self.assertEqual(sizes, [64 * 1024 * 1024 + 1])
             self.assertEqual(digest, hashlib.sha256(original).hexdigest())
             self.assertEqual(lines, original.decode('utf-8').splitlines())
             self.assertEqual(path.read_bytes(), changed)
