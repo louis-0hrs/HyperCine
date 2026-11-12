@@ -5,6 +5,10 @@
 
 Windows never needs FFmpeg. Its real SDK control packet and unmasked pixel planes
 are carried in log records and decoded/compared on Mac. No SDK is emulated.
+
+Every external tool (ffmpeg/ffprobe) is spawned through run_bounded(): a hard
+wall budget, a stdout capture that is capped while it is produced, and a
+fail-closed kill that reaps the child instead of leaving an orphan behind.
 """
 import argparse
 import base64
@@ -13,10 +17,24 @@ import json
 import math
 import os
 import re
+import signal
+import subprocess
+import threading
+import time
 from pathlib import Path
 from validation_support import require, hex_digest, p10_samples
-import subprocess
 from validate_standalone import avi, reference
+
+
+# Conservative wall budgets for CI machines: a 128x128 one-frame replay needs
+# well under a second locally, so these only fire on a genuinely stuck tool.
+VERSION_BUDGET_SECONDS = 30.0
+PROBE_BUDGET_SECONDS = 60.0
+DECODE_BUDGET_SECONDS = 120.0
+# ffprobe publishes one stream as a few hundred bytes; never buffer a runaway.
+STDOUT_LIMIT_BYTES = 64 * 1024
+STDOUT_CHUNK_BYTES = 8 * 1024
+PROCESS_POLL_SECONDS = 0.05
 
 
 class QuietArgumentParser(argparse.ArgumentParser):
@@ -63,6 +81,11 @@ def validated_ffmpeg_version(line):
         line)
     require(match is not None, 'invalid FFmpeg version output')
     return 'ffmpeg version ' + match.group(1)
+
+
+def isfinite_number(value):
+    """A budget must be a real positive number: bools, NaN and inf are refused."""
+    return type(value) in (int, float) and math.isfinite(value)
 
 
 def metric(a, b, peak=1023):
@@ -142,6 +165,141 @@ def read_bounded_decoded(path):
         payload = source.read(65536 + 1)  # One 128x128 yuv422p10le frame.
     require(len(payload) == 65536, 'invalid decoded control size')
     return payload
+
+
+def bounded_stdout_text(payload):
+    """Decode external output strictly; a partial or non-UTF-8 capture is a failure."""
+    try:
+        text = payload.decode('utf-8')
+    except UnicodeDecodeError:
+        raise ValueError('invalid external tool output') from None
+    require(text != '', 'invalid external tool output')
+    return text
+
+
+def parse_probe_stream(payload):
+    """Parse one bounded ffprobe capture into the single control stream record."""
+    text = bounded_stdout_text(payload)
+    try:
+        stream = json.loads(text)['streams'][0]
+    except (ValueError, KeyError, IndexError, TypeError):
+        # Malformed, truncated or empty inventory: one public message.
+        raise ValueError('invalid oracle stream') from None
+    require(type(stream) is dict, 'invalid oracle stream')
+    return stream
+
+
+def _reap_process_tree(process):
+    """Kill a timed-out tool and, where the platform offers it, its descendants.
+
+    POSIX uses the session we created, so a tool that forked helpers cannot
+    keep the pipe open. Windows has no process group kill in the stdlib, so
+    taskkill /T is the documented descendant sweep; the direct kill and the
+    final wait are unconditional so a missing taskkill still reaps the child.
+    """
+    if os.name == 'nt':
+        try:
+            subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.pid)],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=10)
+        except (OSError, ValueError, subprocess.SubprocessError):
+            pass
+    else:
+        try:
+            os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+        except (OSError, ValueError):
+            pass
+    try:
+        process.kill()
+    except (OSError, ValueError):
+        pass
+    try:
+        process.wait(timeout=10)
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        pass
+
+
+def run_bounded(argv, timeout, limit=None):
+    """Run one external tool with a wall budget and a bounded, early capture.
+
+    ``limit is None`` suppresses stdout entirely (the decoded frame is written
+    to a file, never through a pipe). Otherwise at most ``limit`` bytes are
+    retained; the (limit+1)-th byte stops the run instead of being accumulated
+    and rejected afterwards, so a runaway banner cannot exhaust memory first.
+
+    Every failure mode - missing tool, timeout, oversized stdout, non-zero exit
+    - raises one generic ValueError. The caller's log may be public, so neither
+    argv, tool output, nor an exception from the child may escape this call.
+    """
+    require(isfinite_number(timeout) and timeout > 0, 'invalid external tool budget')
+    require(limit is None or (type(limit) is int and limit >= 0),
+            'invalid external tool budget')
+    options = dict(stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                   bufsize=0, close_fds=True)
+    if os.name == 'nt':
+        options['creationflags'] = getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0)
+    else:
+        options['start_new_session'] = True
+    try:
+        process = subprocess.Popen(
+            list(argv),
+            stdout=subprocess.DEVNULL if limit is None else subprocess.PIPE,
+            **options)
+    except (OSError, ValueError):
+        raise ValueError('external tool unavailable') from None
+    chunks, over_limit = [], False
+    if limit is None:
+        pass
+    else:
+        def drain():
+            nonlocal over_limit
+            total = 0
+            try:
+                while True:
+                    remaining = limit + 1 - total
+                    if remaining <= 0 or over_limit:
+                        over_limit = True
+                        return
+                    chunk = process.stdout.read(min(STDOUT_CHUNK_BYTES, remaining))
+                    if not chunk:
+                        return
+                    total += len(chunk)
+                    if total > limit:
+                        over_limit = True
+                        return
+                    chunks.append(chunk)
+            except (OSError, ValueError):
+                # A closed pipe after our own kill is not extra output.
+                return
+
+        reader = threading.Thread(target=drain, name='bounded-stdout', daemon=True)
+        reader.start()
+    deadline = time.monotonic() + timeout
+    try:
+        while True:
+            try:
+                returncode = process.wait(timeout=PROCESS_POLL_SECONDS)
+                break
+            except subprocess.TimeoutExpired:
+                if limit is not None and over_limit:
+                    _reap_process_tree(process)
+                    raise ValueError('external tool produced too much output') from None
+                if time.monotonic() >= deadline:
+                    _reap_process_tree(process)
+                    raise ValueError('external tool exceeded its runtime budget') from None
+        if limit is not None:
+            reader.join(timeout=10)
+            if over_limit:
+                raise ValueError('external tool produced too much output')
+    finally:
+        if process.stdout is not None:
+            try:
+                process.stdout.close()
+            except (OSError, ValueError):
+                pass
+    if returncode != 0:
+        raise ValueError('external tool failed')
+    return b''.join(chunks)
 
 
 def write_exclusive(path, data):
@@ -236,8 +394,9 @@ def main():
             write_exclusive(root / name, data[name])
     results = dict(copyright='Copyright (c) 2026 HyperCine Contributors.', license='MIT OR Apache-2.0',
         windows_run=run_url, log_sha256=log_sha, windows_observations=observations,
-        ffmpeg_version=validated_ffmpeg_version(subprocess.check_output(
-            [args.ffmpeg, '-version'], text=True, stderr=subprocess.DEVNULL).splitlines()[0]),
+        ffmpeg_version=validated_ffmpeg_version(bounded_stdout_text(run_bounded(
+            [args.ffmpeg, '-version'], timeout=VERSION_BUDGET_SECONDS,
+            limit=STDOUT_LIMIT_BYTES)).splitlines()[0]),
         input_contract='128x128 top-down BT.709 studio YUV422 p10; YU64 LE Y0 Cr Y1 Cb >>6; BGRA SDK bottom-up',
         alpha_excluded=True, samples=[], control={})
     for pattern in ('flat', 'gradient', 'canonical'):
@@ -257,14 +416,16 @@ def main():
             sdk_vs_source_rgb=metric([x for i, x in enumerate(topdown) if i%4 != 3], source_rgb, 255))
         results['samples'].append(record)
     packet=data['control.cfhd']; container=root/'control.avi';write_exclusive(container, avi(packet))
-    stream=json.loads(subprocess.check_output([args.ffprobe,'-v','error','-show_streams','-of','json',str(container)],
-            stderr=subprocess.DEVNULL))['streams'][0]
-    require((stream['codec_name'],stream['width'],stream['height'],stream['pix_fmt']) ==
+    stream=parse_probe_stream(run_bounded(
+            [args.ffprobe,'-v','error','-show_streams','-of','json',str(container)],
+            timeout=PROBE_BUDGET_SECONDS, limit=STDOUT_LIMIT_BYTES))
+    require(
+            (stream.get('codec_name'),stream.get('width'),stream.get('height'),stream.get('pix_fmt')) ==
             ('cfhd',128,128,'yuv422p10le'), 'unexpected oracle stream')
     decoded=root/'control.ffmpeg-p10'
-    subprocess.run([args.ffmpeg,'-v','error','-xerror','-n','-i',str(container),'-frames:v','1',
+    run_bounded([args.ffmpeg,'-v','error','-xerror','-n','-i',str(container),'-frames:v','1',
         '-c:v','rawvideo','-pix_fmt','yuv422p10le','-f','rawvideo',str(decoded)],
-        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        timeout=DECODE_BUDGET_SECONDS)
     raw=read_bounded_decoded(decoded);source=(fixture/'canonical.input-p10').read_bytes()
     results['control']=dict(packet_bytes=len(packet),packet_sha256=hashlib.sha256(packet).hexdigest(),
         sdk_p10_sha256=hashlib.sha256(data['control.sdk-p10']).hexdigest(),
