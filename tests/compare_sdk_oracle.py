@@ -136,6 +136,14 @@ def read_bounded_log(path):
     return hashlib.sha256(payload).hexdigest(), payload.decode('utf-8').splitlines()
 
 
+def read_bounded_decoded(path):
+    """FFmpeg is an external process: never load an arbitrarily large decode."""
+    with path.open('rb') as source:
+        payload = source.read(65536 + 1)  # One 128x128 yuv422p10le frame.
+    require(len(payload) == 65536, 'invalid decoded control size')
+    return payload
+
+
 def write_exclusive(path, data):
     """Create an evidence file once: never follow a final symlink or truncate a prior receipt."""
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -257,7 +265,7 @@ def main():
     subprocess.run([args.ffmpeg,'-v','error','-xerror','-n','-i',str(container),'-frames:v','1',
         '-c:v','rawvideo','-pix_fmt','yuv422p10le','-f','rawvideo',str(decoded)],
         check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    raw=decoded.read_bytes();source=(fixture/'canonical.input-p10').read_bytes()
+    raw=read_bounded_decoded(decoded);source=(fixture/'canonical.input-p10').read_bytes()
     results['control']=dict(packet_bytes=len(packet),packet_sha256=hashlib.sha256(packet).hexdigest(),
         sdk_p10_sha256=hashlib.sha256(data['control.sdk-p10']).hexdigest(),
         ffmpeg_p10_sha256=hashlib.sha256(raw).hexdigest(),
