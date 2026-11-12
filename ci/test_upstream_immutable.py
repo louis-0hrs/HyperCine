@@ -6,6 +6,7 @@
 import os
 from pathlib import Path
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -22,31 +23,49 @@ verify_upstream = checker.verify_upstream
 
 
 class FrozenUpstreamTests(unittest.TestCase):
-    def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
-        self.repo = Path(self.temp.name) / 'repository'
-        self.repo.mkdir()
-        self.env = dict(os.environ, GIT_CONFIG_NOSYSTEM='1',
-                        GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT='0')
+    @classmethod
+    def setUpClass(cls):
+        # Build one synthetic seed, then copy it into a private per-test repo.
+        # Windows Git process startup made 26 identical init/config/commit
+        # sequences exceed the existing 120-second CTest deadline. No tested
+        # mutation or verifier invocation is shared, cached or omitted.
+        cls.seed_temp = tempfile.TemporaryDirectory(prefix='frozen-reference-seed-')
+        cls.addClassCleanup(cls.seed_temp.cleanup)
+        cls.seed = Path(cls.seed_temp.name) / 'repository'
+        cls.seed.mkdir()
+        cls.fixture_env = dict(os.environ, GIT_CONFIG_NOSYSTEM='1',
+                               GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT='0')
         for key in ('GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_COMMON_DIR',
                     'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
                     'GIT_AUTHOR_NAME', 'GIT_AUTHOR_EMAIL', 'GIT_COMMITTER_NAME',
                     'GIT_COMMITTER_EMAIL'):
-            self.env.pop(key, None)
-        self.git('init', '-q')
-        self.git('config', 'user.name', 'HyperCine Test')
-        self.git('config', 'user.email', 'test@users.noreply.github.com')
-        self.git('config', 'commit.gpgsign', 'false')
-        self.git('config', 'core.autocrlf', 'false')
-        self.git('config', 'core.hooksPath', 'disabled-test-hooks')
-        (self.repo / 'upstream').mkdir()
+            cls.fixture_env.pop(key, None)
+        def seed_git(*args):
+            return subprocess.run(['git', '-C', str(cls.seed), *args],
+                                  capture_output=True, env=cls.fixture_env,
+                                  timeout=30, check=True).stdout
+        seed_git('init', '-q')
+        for key, value in (('user.name', 'HyperCine Test'),
+                           ('user.email', 'test@users.noreply.github.com'),
+                           ('commit.gpgsign', 'false'), ('core.autocrlf', 'false'),
+                           ('core.hooksPath', 'disabled-test-hooks')):
+            seed_git('config', key, value)
+        (cls.seed / 'upstream').mkdir()
+        (cls.seed / 'upstream' / 'reference.txt').write_bytes(b'frozen reference\n')
+        seed_git('add', '--', 'upstream')
+        seed_git('commit', '-qm', 'test: synthetic frozen reference')
+        cls.pristine = seed_git('rev-parse', 'HEAD').strip().decode()
+        cls.tree = seed_git('rev-parse', 'HEAD:upstream').strip().decode()
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.repo = Path(self.temp.name) / 'repository'
+        # copytree copies Git objects/index/config; it does not create a linked
+        # worktree, alternate object store or hard links to the shared seed.
+        shutil.copytree(self.seed, self.repo)
+        self.env = self.fixture_env.copy()
         self.source = self.repo / 'upstream' / 'reference.txt'
-        self.source.write_bytes(b'frozen reference\n')
-        self.git('add', '--', 'upstream')
-        self.git('commit', '-qm', 'test: synthetic frozen reference')
-        self.pristine = self.git('rev-parse', 'HEAD').strip().decode()
-        self.tree = self.git('rev-parse', 'HEAD:upstream').strip().decode()
 
     def git(self, *args, repo=None, input_data=None):
         result = subprocess.run(['git', '-C', str(repo or self.repo), *args],
@@ -58,6 +77,18 @@ class FrozenUpstreamTests(unittest.TestCase):
     def verify(self, repo=None):
         with patch.dict(os.environ, self.env, clear=True):
             return verify_upstream(repo or self.repo, expected_tree=self.tree)
+
+    def test_fixture_copy_cannot_mutate_seed_bytes_or_index(self):
+        seed_source = self.seed / 'upstream' / 'reference.txt'
+        seed_index = self.seed / '.git' / 'index'
+        original_source = seed_source.read_bytes()
+        original_index = seed_index.read_bytes()
+        self.source.write_bytes(b'changed private fixture\n')
+        self.git('add', '--', 'upstream')
+        self.assertEqual(seed_source.read_bytes(), original_source)
+        self.assertEqual(seed_index.read_bytes(), original_index)
+        with self.assertRaisesRegex(ValueError, 'upstream index'):
+            self.verify()
 
     def test_clean_reference_passes(self):
         self.assertEqual(self.verify(), self.tree)

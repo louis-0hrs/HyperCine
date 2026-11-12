@@ -258,16 +258,25 @@ public:
             throw std::runtime_error("output staging name changed; run was not published");
 #endif
 #ifdef _WIN32
-        const auto name = final_name_.native();
+        // Win32 SetFileInformationByHandle consumes a Win32 target path. Use
+        // the documented absolute-name form with a null RootDirectory, not an
+        // NT-style root-handle/leaf pair (ERROR_INVALID_PARAMETER on Windows).
+        // https://learn.microsoft.com/windows/win32/api/winbase/ns-winbase-file_rename_info
+        // This is NOT an unpinned path rename: OpenParent retains every physical
+        // ancestor without FILE_SHARE_DELETE, and stage_ retains DELETE access
+        // without sharing it. Neither chain nor staging name can be substituted
+        // while this one atomic, no-replace handle rename executes.
+        const auto name = (parent_path_ / final_name_).make_preferred().native();
         const auto bytes = offsetof(FILE_RENAME_INFO, FileName) + (name.size() + 1) * sizeof(wchar_t);
         // operator new supplies the structure's alignment; placement construction
         // starts its lifetime before the variable-length filename is copied.
         std::unique_ptr<void, void(*)(void*)> storage(::operator new(bytes), [](void* memory) { ::operator delete(memory); });
         auto* info = new (storage.get()) FILE_RENAME_INFO{};
         info->ReplaceIfExists = FALSE;
-        info->RootDirectory = parent_.get();
+        info->RootDirectory = nullptr;
         info->FileNameLength = static_cast<DWORD>(name.size() * sizeof(wchar_t));
-        std::memcpy(info->FileName, name.data(), info->FileNameLength);
+        // Win32 requires a NUL-terminated path even though the length excludes it.
+        std::memcpy(info->FileName, name.c_str(), (name.size() + 1) * sizeof(wchar_t));
         if (!SetFileInformationByHandle(stage_.get(), FileRenameInfo, info, static_cast<DWORD>(bytes)))
             throw std::runtime_error("exclusive output publication failed; choose a new run directory");
 #elif defined(__linux__)

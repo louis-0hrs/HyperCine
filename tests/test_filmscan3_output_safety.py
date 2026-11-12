@@ -181,6 +181,73 @@ class OutputSafety(unittest.TestCase):
                          trace["frames"][0]["sample_bytes"])
         self.assertEqual(self.digest(self.input), self.input_hash)
 
+    def test_long_output_name_publishes_complete_run(self):
+        output = self.root / ("completed-" + "run-" * 30)
+        result = self.invoke(output, self.input)
+        self.assertEqual(result.returncode, 0, result.stderr.decode(errors="replace"))
+        self.assertEqual(len(json.loads((output / "trace.json").read_text())["frames"]), 1)
+        self.assertEqual(self.digest(self.input), self.input_hash)
+
+    @unittest.skipUnless(os.name == "nt", "Windows case-insensitive destination semantics")
+    def test_existing_case_alias_is_preserved(self):
+        incumbent = self.root / "OUTPUT"
+        incumbent.mkdir()
+        sentinel = incumbent / "sentinel"
+        sentinel.write_bytes(b"retained evidence")
+        self.refused(self.invoke(self.output, self.input))
+        self.assertEqual(sentinel.read_bytes(), b"retained evidence")
+        self.assertEqual(list(incumbent.iterdir()), [sentinel])
+
+    def test_killed_encoder_retains_staged_frames_without_publication(self):
+        first = self.inputs / "interrupt.bgra"
+        first.write_bytes(bytes((12, 34, 56, 255)) * (1920 * 1080))
+        before = self.digest(first)
+        command = [str(ENCODER), "--geometry", "1920x1080", str(self.output)] + [str(first)] * 120
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.addCleanup(self.stop, process)
+        deadline = time.monotonic() + 25
+        while time.monotonic() < deadline:
+            stages = list(self.root.glob(".hypercine-incomplete-*"))
+            if stages and (stages[0] / "frame_0000.cfhd").is_file():
+                break
+            self.assertIsNone(process.poll(), "encoder exited before interruption boundary")
+            time.sleep(0.001)
+        else:
+            self.fail("no staged frame reached interruption boundary")
+        process.kill()
+        process.communicate(timeout=10)
+        self.assertNotEqual(process.returncode, 0)
+        self.assertFalse(self.output.exists(), "interrupted run was published")
+        self.assertTrue((stages[0] / "frame_0000.cfhd").is_file())
+        self.assertFalse((stages[0] / "trace.json").exists())
+        self.assertEqual(self.digest(first), before)
+        self.assertEqual(self.digest(self.input), self.input_hash)
+
+    def test_symlink_created_during_encoding_is_not_replaced(self):
+        first = self.inputs / "race.bgra"
+        first.write_bytes(bytes((12, 34, 56, 255)) * (1920 * 1080))
+        before = self.digest(first)
+        command = [str(ENCODER), "--geometry", "1920x1080", str(self.output)] + [str(first)] * 8
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.addCleanup(self.stop, process)
+        deadline = time.monotonic() + 25
+        while time.monotonic() < deadline:
+            stages = list(self.root.glob(".hypercine-incomplete-*"))
+            if stages and (stages[0] / "frame_0000.cfhd").is_file():
+                break
+            self.assertIsNone(process.poll(), "encoder exited before reparse race boundary")
+            time.sleep(0.001)
+        else:
+            self.fail("no staged frame reached reparse race boundary")
+        self.symlink(self.output, self.inputs)
+        _, error = process.communicate(timeout=30)
+        self.assertNotEqual(process.returncode, 0, error.decode(errors="replace"))
+        self.assertTrue(self.output.is_symlink(), "foreign reparse destination replaced")
+        self.assertFalse((self.inputs / "trace.json").exists())
+        self.assertTrue((stages[0] / "frame_0000.cfhd").is_file())
+        self.assertEqual(self.digest(first), before)
+        self.assertEqual(self.digest(self.input), self.input_hash)
+
     @staticmethod
     def stop(process):
         if process.poll() is None:

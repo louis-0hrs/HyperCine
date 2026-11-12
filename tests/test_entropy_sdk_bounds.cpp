@@ -251,11 +251,11 @@ void PositiveBands(Prepared& fixture) {
     for (std::size_t i = 0; i < narrow.size(); ++i) compact[i] = narrow[i] = static_cast<int>(i % 31) - 15;
     auto coeff = Coeff(ref, narrow.data());
     TRANSFORM* one[] = {fixture.transforms[0]};
-    EncodedPiece wide, small;
+    EncodedPiece wide, narrow_piece;
     Require(EncodeOneExternalBand(fixture.encoder, one, 1, coeff, &wide), "one-channel extent rejected");
     coeff.elem_bytes = 1; coeff.data = compact.data(); coeff.value_min = -15; coeff.value_max = 15;
-    Require(EncodeOneExternalBand(fixture.encoder, one, 1, coeff, &small), "valid int8 band rejected");
-    Require(small.used_int8 && small.payload == wide.payload, "int8 payload changed");
+    Require(EncodeOneExternalBand(fixture.encoder, one, 1, coeff, &narrow_piece), "valid int8 band rejected");
+    Require(narrow_piece.used_int8 && narrow_piece.payload == wide.payload, "int8 payload changed");
     positives += 2;
     // A legal peaks override retains the SDK fallback for both transport types.
     WithValue(fixture.encoder->q.codebookflags[ref.subband], CBFLAG_PEAKCODE, [&] {
@@ -263,9 +263,9 @@ void PositiveBands(Prepared& fixture) {
         const auto direct = DirectSdk(fixture, fixture.Image(ref), coeff);
         Require(EncodeOneExternalBand(fixture.encoder, one, 1, coeff, &wide), "valid peaks int16 rejected");
         coeff.elem_bytes = 1; coeff.data = compact.data();
-        Require(EncodeOneExternalBand(fixture.encoder, one, 1, coeff, &small), "valid peaks int8 rejected");
-        Require(wide.peaks_fallback && small.peaks_fallback && !small.used_int8 &&
-                wide.payload == direct && small.payload == direct, "peaks fallback payload changed");
+        Require(EncodeOneExternalBand(fixture.encoder, one, 1, coeff, &narrow_piece), "valid peaks int8 rejected");
+        Require(wide.peaks_fallback && narrow_piece.peaks_fallback && !narrow_piece.used_int8 &&
+                wide.payload == direct && narrow_piece.payload == direct, "peaks fallback payload changed");
         positives += 2;
     });
 }

@@ -9,7 +9,7 @@ import contextlib
 import io
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import sys
 import tempfile
 import threading
@@ -18,6 +18,53 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import p6_writer_parity as gate
+import p6_output_paths as paths
+
+
+class RawPathSpelling(unittest.TestCase):
+    def test_rejects_raw_components_before_absolute_normalization(self):
+        for spelling in ("file.", "file ", "parent./file", "parent /file",
+                         "NUL", "CON.json", "COM1.log", "LPT9", "NUL .txt",
+                         "COM¹.log", "LPT²", "parent/../file", "file:stream",
+                         "file?name", "file*name", 'file"name', "file\x01name"):
+            with self.subTest(spelling=spelling), mock.patch.object(
+                    paths.os.path, "abspath", side_effect=AssertionError("normalized invalid spelling")):
+                with self.assertRaises(ValueError):
+                    paths.absolute_path(spelling)
+
+    def test_windows_drive_unc_and_relative_spelling(self):
+        # Synthetic lexical fixtures only; never access a network share.
+        # Build anchors from components, like the privacy-guard regressions.
+        def unc(server, share, *parts):
+            return "//" + "/".join((server, share, *parts))
+
+        accepted = ("C:/safe/path", "c:/", "relative/file", "./relative/file",
+                    unc("server", "share", "safe", "file"), unc("server", "share", ""), "safe/NUL-safe.txt")
+        for spelling in accepted:
+            with self.subTest(spelling=spelling):
+                self.assertEqual(paths._validate_path_spelling(spelling, PureWindowsPath),
+                                 PureWindowsPath(spelling))
+        refused = ("C:relative", "C:", "/root-relative", unc("server.", "share", "file"),
+                   unc("server", "share.", "file"), unc("server", "share ", "file"), unc("server", "CON", "file"),
+                   unc("?", "C:", "file"), unc(".", "pipe", "name"), unc("?", "UNC", "server", "share", "file"),
+                   unc("?", "share", "file"), unc("server", "share?", "file"),
+                   "C:/safe/trailing.", "C:/bad /file", unc("server", "share", "NUL.txt"),
+                   "C:/safe/../file", "C:/file:stream", "C:/COM³")
+        for spelling in refused:
+            with self.subTest(spelling=spelling), self.assertRaises(ValueError):
+                paths._validate_path_spelling(spelling, PureWindowsPath)
+
+    def test_posix_anchors_and_native_normalization_remain_valid(self):
+        for spelling in ("/safe/path", "/", "relative/file", "./relative/file"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(paths._validate_path_spelling(spelling, PurePosixPath),
+                                 PurePosixPath(spelling))
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp).resolve()
+            self.assertEqual(paths.absolute_path(base / "valid-output"), base / "valid-output")
+            with mock.patch.object(paths.os.path, "abspath", return_value=str(base / "relative")) as normalize:
+                self.assertEqual(paths.absolute_path("relative"), base / "relative")
+                normalize.assert_called_once()
 
 
 class ReadProbe:

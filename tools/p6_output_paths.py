@@ -12,26 +12,54 @@ an untrusted encoder process or another process with the same user's rights.
 """
 import contextlib
 import os
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import stat
 import uuid
 
 
+def _validate_path_spelling(value, path_type=Path):
+    """Validate spelling before abspath/Win32 can discard suffixes.
+
+    Anchors are syntax, not filename components. UNC server/share names still
+    need validation. Device namespaces and drive-relative paths are refused.
+    path_type permits host-independent Windows lexical regression tests.
+    """
+    path = path_type(value)
+    if isinstance(path, PureWindowsPath):
+        drive = path.drive
+        if drive.startswith(("\\\\?\\", "\\\\.\\")):
+            raise ValueError("device path is not accepted")
+        if drive.startswith("\\\\"):
+            anchor_parts = drive[2:].split("\\")
+            if len(anchor_parts) != 2:
+                raise ValueError("invalid UNC anchor")
+            for name in anchor_parts:
+                component(name)
+        elif drive:
+            if (len(drive) != 2 or not drive[0].isascii() or
+                    not drive[0].isalpha() or drive[1] != ":" or not path.root):
+                raise ValueError("drive-relative or device path is not accepted")
+        elif path.root:
+            raise ValueError("drive-relative root is not accepted")
+    for name in path.parts[1:] if path.anchor else path.parts:
+        component(name)
+    return path
+
+
 def absolute_path(value):
-    path = Path(value)
-    if ".." in path.parts:
-        raise ValueError("parent traversal is not accepted")
+    path = _validate_path_spelling(value)
     return Path(os.path.abspath(path))
 
 
 def component(value):
     if (not isinstance(value, str) or not value or value in (".", "..") or
-            any(c in value for c in ("/", "\\", ":", "\x00")) or
+            any(c in value for c in ("/", "\\", ":", '<', '>', '"', '|', '?', '*')) or
+            any(ord(c) < 32 for c in value) or
             value.endswith((".", " "))):
         raise ValueError("invalid path component")
-    stem = value.split(".", 1)[0].upper()
+    stem = value.split(".", 1)[0].rstrip(" ").upper()
     if stem in {"CON", "PRN", "AUX", "NUL"} or (
-            len(stem) == 4 and stem[:3] in ("COM", "LPT") and stem[3] in "123456789"):
+            len(stem) == 4 and stem[:3] in ("COM", "LPT") and stem[3] in "123456789¹²³"):
         raise ValueError("reserved path component")
     return value
 

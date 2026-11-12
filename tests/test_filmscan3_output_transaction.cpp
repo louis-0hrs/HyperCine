@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <functional>
+#include <future>
 
 namespace fs = std::filesystem;
 using hypercine_cli::OutputTransaction;
@@ -136,6 +137,58 @@ int main() {
             Refused([&] { run.Publish(); }, "parent symlink replacement was accepted");
             Unchanged(input / "sentinel"); Check(!fs::exists(input / "result"), "write escaped to retained root");
             ++checks;
+        }
+#endif
+        {
+            const auto parent = fixture.Dir("simultaneous-publication");
+            OutputTransaction first(parent / "result", {input});
+            OutputTransaction second(parent / "result", {input});
+            first.WriteNew("winner", "first", 5);
+            second.WriteNew("winner", "second", 6);
+            std::promise<void> release; const auto start = release.get_future().share();
+            auto publish = [&](OutputTransaction& run) {
+                start.wait();
+                try { run.Publish(); return true; } catch (const std::exception&) { return false; }
+            };
+            auto a = std::async(std::launch::async, [&] { return publish(first); });
+            auto b = std::async(std::launch::async, [&] { return publish(second); });
+            release.set_value();
+            const bool won_a = a.get(), won_b = b.get();
+            Check(won_a != won_b, "exactly one staged publisher must win");
+            std::ifstream file(parent / "result" / "winner", std::ios::binary);
+            const std::string winner((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            Check(winner == (won_a ? "first" : "second"), "winner content replaced");
+            Check(fs::is_regular_file(Stage(parent) / "winner"), "loser staging evidence removed");
+            ++checks;
+        }
+        {
+            const auto parent = fixture.Dir("interrupted-scope");
+            fs::path stage;
+            {
+                OutputTransaction run(parent / "result", {input});
+                run.WriteNew("frame_0000.cfhd", "packet", 6);
+                stage = Stage(parent);
+            }
+            Check(!fs::exists(parent / "result"), "unpublished scope became visible");
+            Check(fs::file_size(stage / "frame_0000.cfhd") == 6, "interrupted evidence removed");
+            ++checks;
+        }
+        {
+            const auto parent = fixture.Dir("unicode-target");
+            const auto name = fs::u8path(u8"r\u00e9sultat-\u03bb");
+            OutputTransaction run(parent / name, {input});
+            run.WriteNew("trace.json", "{}", 2); run.Publish();
+            Check(fs::file_size(parent / name / "trace.json") == 2, "UTF-16 target truncated");
+            ++checks;
+        }
+#ifdef _WIN32
+        {
+            const auto parent = fixture.Dir("case-alias-at-publication");
+            OutputTransaction run(parent / "Result", {input});
+            run.WriteNew("trace.json", "{}", 2);
+            fs::create_directory(parent / "RESULT"); Sentinel(parent / "RESULT" / "sentinel");
+            Refused([&] { run.Publish(); }, "case alias incumbent was overwritten");
+            Unchanged(parent / "RESULT" / "sentinel"); ++checks;
         }
 #endif
         Unchanged(input / "sentinel");

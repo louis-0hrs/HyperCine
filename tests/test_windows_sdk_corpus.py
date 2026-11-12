@@ -27,7 +27,11 @@ class Integrity(unittest.TestCase):
         self.index(self.row)
 
     def index(self, value):
-        (self.root/'TRANSFER_SHA256.tsv').write_text(value)
+        # Literal UTF-8/LF bytes: bounds and hashes must not depend on CRLF translation.
+        (self.root/'TRANSFER_SHA256.tsv').write_bytes(value.encode('utf-8'))
+
+    def test_fixture_bytes_are_exact_utf8_lf(self):
+        self.assertEqual((self.root/'TRANSFER_SHA256.tsv').read_bytes(), self.row.encode('utf-8'))
 
     def test_valid(self):
         self.assertEqual(len(v.verify_index(self.root, 1)), 1)
