@@ -1,0 +1,210 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "tracking_issues": [
+    364,
+    367,
+    371,
+    372
+  ],
+  "main_base": "dca0c0707a0d460fb8cb7ca7d198c0a7aa4be8e7",
+  "integration_base": "5b1724c3097da12ca655000c688e2251278bd9aa",
+  "focused_local_commits": {
+    "output_and_bounded_reads": "1aeb76190049d75ff2853450e02efaf150f095c2",
+    "encoder_ownership": "a170e9451859040a9462ecc247900cf9b12cd277",
+    "sdk_entropy_bounds": "a423f9196f55f40dadc987a116c0a1c12d725489"
+  },
+  "frozen_upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+  "source_sha256": {
+    ".github/workflows/ci-cpu.yml": "186989eab5231388afdbd51469e86ded58e53099e01ef7d61dba9617fa34d975",
+    ".github/workflows/ci-cuda-build.yml": "70cff2ae0fa343eb2555a3acad1914d0f403bd0b7e8389f880c513ef5808cfc7",
+    "CMakeLists.txt": "81484d1996de5a6ba52cc1f79a027c4a298c90fa80e54e9fe06a0359d5716df5",
+    "ci/check_upstream_immutable.py": "05ae7acdb61d501b499e023b2fd1e0de967fc1224cc75258817c853004541ca1",
+    "ci/compute_policy/tests/hosted_non_mac_baseline.json": "da0aaf50582dac72c0bfaf502c02656354a231c2ca56cc7d372f69a562ccf468",
+    "ci/compute_policy/tests/test_routing_scope.py": "30b74aa84ad8fbd82bba83e4ad1d924aef9cd71463997ad12f5a180489da5c40",
+    "ci/run_standalone.py": "af63d8f2791f870c8d5cbc5fd789eb037384c608fdde1b03b59164a210495816",
+    "ci/test_standalone_gate.py": "a0e69da29fa4b1a842012442a2e140db6ce065c750d9bece0b34e8177f0e5085",
+    "ci/test_upstream_immutable.py": "cd1090b1b34545c91d9c081d668695340f0cd2266d48d18b98c6bd27aa2e177d",
+    "ci/test_workflow_event_matrix.py": "f8f659fc4edf113f98936656a60a3c709feabd2cb43f0d0ad527142b70a703d2",
+    "ci/workflow_event_matrix.py": "2668ecc2f44b138f853b3b97ec733cbe057c0457030a51ca10ff0d7a98503c1f",
+    "include/hypercine/entropy_parallel.h": "6cc2d23f45e81902e46b6c3415120f1cb1ba2444ef4e0f88ff134bc659903a7e",
+    "include/hypercine/entropy_stage.h": "2914def4a9b78cdc517b1a0ce65fce7ca640ef0041fc9a894d0f799aba08e62a",
+    "include/hypercine/filmscan3.h": "054655a9377f4ce4359c5c50ebb508f635fa844c9e3d989b3c50681eb17004de",
+    "include/hypercine/hypercine.h": "dd2047386531356690ed9d00790dbe7d36191ced1a63e82cc059733e84e2f75e",
+    "include/hypercine/wavelet.h": "535be0c705d2ccc45321e78875e34e39c1cf23650e85f83ac5ef8e5b5047d96a",
+    "src/CMakeLists.txt": "edc4c6023e11750c667ea62a2b35e2ff0c1eecb0db86c8f31a637ec608c2d728",
+    "src/core/encoder_backend_selection.cpp": "9fec166c924910fd57257bd051bd7d69c16b6c839c17b7a47d7d7ecdae77f5dc",
+    "src/core/encoder_backend_selection.h": "e15d881489213f661c37395ebfb753f029ef8fa90b93ac035cd9e0a898be0106",
+    "src/core/filmscan3_backend.cpp": "4a17a34e29abb07bc0f14341a2fe130daaacc34406f680662015fef2d57b1271",
+    "src/core/filmscan3_backend.h": "c9e2b98f29f732dba252fbcd00bc565d3a253285d7dfb0901dfe6145e49c2a5d",
+    "src/core/filmscan3_encoder.cpp": "e6102e1254e2e97750fd548676743735124af380e17bad7ff9fdc8578c989503",
+    "src/core/phase2a_encoder.cpp": "102579bf24cbb6807ed34367dcdd23c1e0d2b442504d78026d91dccdb84d136c",
+    "src/core/phase2b_encoder.cpp": "5f688459befa6c165adc98d0ba9b9549f05091f12d9d3948973eda3d1872bbcd",
+    "src/core/phase2c_encoder.cpp": "699a29b42b13ddffea795ae0785067dd8e0aeb7219faa3cfdb46caf83f5239a4",
+    "src/core/phase2d_encoder.cpp": "51127e5a205d1f40cb6d8f90fe3f36a588ffb188ec96472efe41532f44af8aea",
+    "src/core/phase3a_encoder.cpp": "af0a4ceb9f2ff356d4819ba3a2b254053f45090a5193fb008be88aa95ed874a3",
+    "src/cpu/entropy_parallel.cpp": "b97eeee46c38c3872ab6b2c72a2b5787b72167452b46b05a12a8ee2b9240934c",
+    "src/cpu/entropy_sdk_guard.h": "5d610e401fd0bdd0cdd46d2f73ad10e658052e6d338f2523b068860146fec785",
+    "src/cpu/entropy_stages.cpp": "b344351c2f2f808f35d86d363c3dc5736920637d0236580f7115a2218de25232",
+    "src/cpu/wavelet_cpu.cpp": "5d2ad326532558fbae9dc30655707bc68cd21c606738a08e8ed25f20163d32c3",
+    "tests/CMakeLists.txt": "15bbdbb0551bd2c0fec456702451cca1ebf9e1b60349eab2c579b79816b5d5cb",
+    "tests/run_p6_writer_parity.py": "8607991f0dd32c526834c480ee4600820eab7f8e7b2c60550302570884a6e8e0",
+    "tests/test_encoder_ownership.cpp": "2ae2f30592045765143bb87d243673adc51bdb592c79923a92d34885e5c361be",
+    "tests/test_entropy_sdk_bounds.cpp": "8d75a052e1ea1099bf7c620636311cb2c469147f963b196bef1bb4a81322957d",
+    "tests/test_filmscan3_4k_gate.py": "7fa5106000beb30c9c232fce2b4c6f6343317bc8796e99bb5a4079fc06f53571",
+    "tests/test_filmscan3_geometry.cpp": "dbe24529ac00219fc34278c02ea8417a9b3cb3fd978a9806825d03d953022aa9",
+    "tests/test_filmscan3_output_safety.py": "60c239dd81dc37a3f502d6343ef7aec056781169a673b5f3e65136d4a84b5fd1",
+    "tests/test_filmscan3_output_transaction.cpp": "4da779760a76a50fca198f0d825f3cd3d095836704ea056a992d80324996b0ab",
+    "tests/test_p6_gate_negative.py": "480c5e079131cac711d39e7382e952e5cf26c0e1aef77d27bfeb11d69aff2848",
+    "tests/test_p6_writer_parity.py": "c0e6b4026ea971e63ff4cb0b8eca33e9dc1e2c3fb53fbac96b533b0c789ef02d",
+    "tests/test_p6_writer_trace.py": "cc82b13c116ce50580a2d5eaea225798e14dbf48ca176d90f14500f414f41646",
+    "tests/test_phase2a.cpp": "4da85da8454e7a0c87c34cf055590f13840941cc715dac33dd70132e7749e24f",
+    "tests/test_phase2b.cpp": "9aa322ec28771b782d3e8343d59f11ec0ad743efe303d0dbb1d4be788bdcf826",
+    "tests/test_public_header.c": "14260242ad7ab40e7bd6d8a83800cefbf4f70086629d82a5ad89d68899af19c0",
+    "tests/test_public_header.cpp": "5ababc31e72d67637ed972199013acfa268586d5b3261d859681f8610d0652b6",
+    "tests/test_wavelet_cpu_bounds.cpp": "e51b767094a56e63e7ce3de246a025d761891a80923b5de0fde8ec3f0256237d",
+    "tests/validate_filmscan3.py": "45c0ccddfdc8c236a6b6509873b00d2144f383dd45df8aa480be5e1248a9d9d3",
+    "tests/validate_filmscan3_4k_ffmpeg.py": "55c8b377aac18446bc8af02eb917a592ed9df29c05c05cbe96f4e7aadbc3b69c",
+    "tests/validate_p6_output_integration.py": "2cebc29c077f9691cf643b290ad4b649433703b5d7b71086ee66d2b46723f200",
+    "tools/filmscan3_output_transaction.h": "48000a242f2e1ea48dc917bef4ad3ca9bb3474607ba8e731eac4f014f1c14fe4",
+    "tools/hypercine_encode_filmscan3.cpp": "c543e5fc2bc194d1dfc68dea0e47d1a7e4cb724da1635b9fedc8088b27a35307",
+    "tools/p6_output_paths.py": "4ff689fb2343355a30f3d3a1247d536059d34a3e235d0a5a8517547f7841a8f3",
+    "tools/p6_sdk_gap_gate.py": "ae39ab3a83f1c53c3a0b1a93080d0da27bb524bc7ac396ff281e8896561d8309",
+    "tools/p6_windows_sdk_gate.py": "1810eeedd13443ef4f6565a4ffab2a0bbbcd947fb184702258ee61740dea7217",
+    "tools/p6_writer_parity.py": "b3a506dc2770510ae4f960932d24eee80d95d96654cf4f9e1cc6c0c2016ae629"
+  },
+  "source_binding": "All 56 changed implementation/build/test inputs relative to main were fingerprinted before and after both complete final runs. Final staged blobs are checked before commit. Documentation and receipts are not executable-input fingerprints.",
+  "environment": {
+    "system": "Linux",
+    "architecture": "x86_64",
+    "compiler": "GCC 14.2.0",
+    "configuration": "Release",
+    "python": "3.12.14",
+    "cmake": "3.31.6",
+    "ffmpeg": "7.1.5-0+deb13u1",
+    "ffprobe": "7.1.5-0+deb13u1"
+  },
+  "standalone_full_gate": {
+    "status": "PASS",
+    "registered": 137,
+    "passed": 137,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "ctest_seconds": 387.97,
+    "external_decode_required": true,
+    "source_unchanged": true,
+    "fingerprints_verified": 56,
+    "log_sha256": "e48a16753d24d7286f0e720d6dc1f2551393dffdd0f5c07dbbb24d46bb5c1d80",
+    "command": "python3 ci/run_standalone.py --build-dir build-standalone --system Linux --machine x86_64",
+    "required_inventory_names": 95,
+    "observed_included_tests": [
+      "encoder_move_ownership",
+      "wavelet_cpu_bounds",
+      "p6_output_ownership_contract",
+      "p6_output_ownership_optimized",
+      "filmscan3_output_safety",
+      "filmscan3_output_transaction",
+      "p6_output_cli_integration",
+      "filmscan3_cli_4k_ffmpeg_gate",
+      "filmscan3_geometry_external_decode"
+    ]
+  },
+  "sdk_full_suite": {
+    "status": "EXECUTED_WITH_BLOCKED_REFERENCE_ORACLE",
+    "registered": 67,
+    "completed": 67,
+    "passed": 66,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 1,
+    "ctest_exit_code": 0,
+    "strict_all_pass_acceptance": false,
+    "ctest_seconds": 64.32,
+    "source_unchanged": true,
+    "fingerprints_verified": 56,
+    "log_sha256": "845977666e10200e57fd6e49416ff0110d7ac70074dacc6a542a2a9561421777",
+    "command": "ctest --test-dir build-sdk -C Release --output-on-failure --no-tests=error",
+    "skipped_test": "ffmpeg_oracle_qualification",
+    "reason": "Installed decoder 7.1.5-0+deb13u1 is not on the unchanged measured list (n8.0, 9.0.2).",
+    "bounds_test": "entropy_sdk_bounds passed with 133 negative controls and 69 positive comparisons.",
+    "dependency_context": "Actual frozen SDK archive, genuine external uuid development header and existing runtime; CMAKE_PREFIX_PATH is supplied to nested configure tests. See the focused #372 receipt."
+  },
+  "integration_review": {
+    "status": "No remaining concrete integration blocker",
+    "sdk_files_exact_from_focus": 15,
+    "common_changes_reviewed": [
+      "Union of CMake registrations and the 95-name strict required inventory",
+      "Preserved BoundFrontend constructors, pre-injection inactive guard and successful lazy-binding commit",
+      "Explicit move continuity through geometry declaration drift",
+      "Older default-session geometry test uses independent construction instead of implicit copy"
+    ],
+    "post_sdk_manifests_identical": true,
+    "initial_component_review": {
+      "exclusive_paths_exact": {
+        "output": 21,
+        "ownership": 6
+      },
+      "phase": "Before the combined ownership/geometry regression and final audit-document updates. These historical comparison counts are not final identical-file counts."
+    },
+    "final_exclusive_component_comparison": {
+      "output": {
+        "identical": 20,
+        "total": 21,
+        "intentional_differences": [
+          "docs/FUNDAMENTAL_SAFETY_FOLLOWUP_20261112.md: continuation pointer preserves historical results"
+        ]
+      },
+      "ownership": {
+        "identical": 5,
+        "total": 6,
+        "intentional_differences": [
+          "tests/test_encoder_ownership.cpp: combined move/geometry regression"
+        ]
+      },
+      "sdk": {
+        "identical": 17,
+        "total": 17,
+        "intentional_differences": []
+      }
+    }
+  },
+  "integration_regressions": {
+    "move_and_geometry": "Move construction with changed live width and assignment with changed live capacity retain the original geometry snapshot, refuse before Transform without rate/diagnostic changes, and recover with matching complete CPU-reference packets. An invalid injected frontend on the inactive source verifies guard ordering.",
+    "reset_copy_migration": "The first combined build exposed an older test using the newly deleted copy API. It now constructs and actually encodes a separate default session before Reset, preserving the lazy-binding and independent-session assertions. Full combined build and CTest then passed."
+  },
+  "initial_sdk_environment_attempt": {
+    "registered": 67,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 1,
+    "ctest_seconds": 66.87,
+    "log_sha256": "867507001f1f2629eae78b18f3e54f0f89a4f3b6519b2bf462a3397e30d31dcc",
+    "failed_tests": [
+      "upstream_off_configure_contract",
+      "cpu_isa_include_boundary_contract"
+    ],
+    "resolution": "Propagated the real local uuid development prefix to child CMake processes and repeated the entire SDK inventory without repository source changes. The oracle skip is still recorded, not converted into acceptance."
+  },
+  "focused_receipts": [
+    "OUTPUT_OWNERSHIP_367_20261112.json",
+    "P6_BOUNDED_READS_20261112.json",
+    "ENCODER_OWNERSHIP_371_20261112.json",
+    "SDK_ENTROPY_BOUNDS_372_20261112.json"
+  ],
+  "timing_context": "Concurrent local qualification; durations are not performance or regression benchmarks.",
+  "publication": {
+    "state": "LOCAL_PREPARED",
+    "remote_code_push_attempted_in_continuation": false,
+    "reason": "Earlier automatic approval review rejected publication of the exact output-safety payload for lack of explicit authorization. No alternate transport, main merge, release or paid CI dispatch was used."
+  },
+  "remaining_acceptance": [
+    "Measured FFmpeg reference-oracle build and pinned-output gate",
+    "Native CUDA toolkit compile of changed call sites and full pipelines",
+    "Native Metal/Vulkan/Windows and cross-thread or multi-device lifecycle qualification",
+    "Oracle #361/#370 lineage privacy remediation and bounded-reader follow-up",
+    "Long-session, timebase, original-SDK provenance and product/conformance gates"
+  ],
+  "excluded_lineage": "The candidate preserves #369 ancestry and does not import #361/#370 source changes or their history. Their historical execution receipt remains separately labeled.",
+  "coverage_note": "Focused and combined test counts overlap; do not add them as unique tests. No claim of an exhaustive security certification."
+}

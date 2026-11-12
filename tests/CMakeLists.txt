@@ -61,6 +61,17 @@ macro(hypercine_test_needs_sdk)
     list(APPEND HYPERCINE_SDK_TESTS_OMITTED ${ARGN})
 endmacro()
 
+# Exercise both real SDK wrapper entry points without requiring CUDA hardware.
+if(TARGET hypercine_entropy_cpu)
+    add_executable(test_entropy_sdk_bounds test_entropy_sdk_bounds.cpp)
+    target_compile_definitions(test_entropy_sdk_bounds PRIVATE _ALLOCATOR=1)
+    target_link_libraries(test_entropy_sdk_bounds PRIVATE hypercine_entropy_cpu)
+    add_test(NAME entropy_sdk_bounds COMMAND test_entropy_sdk_bounds)
+    set_tests_properties(entropy_sdk_bounds PROPERTIES LABELS "sdk;bounds")
+else()
+    hypercine_test_needs_sdk(test_entropy_sdk_bounds)
+endif()
+
 # Bounded Windows original-SDK process probe (not a pixel-correctness oracle).
 if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND TARGET CFHDCodecStatic)
     add_executable(windows_reference_process windows_reference_process.cpp)

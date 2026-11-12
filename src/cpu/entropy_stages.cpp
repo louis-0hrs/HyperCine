@@ -13,6 +13,7 @@
 
 #include "hypercine/entropy_stage.h"
 #include "hypercine/entropy_parallel.h"
+#include "entropy_sdk_guard.h"
 
 #include <chrono>
 #include <cstring>
@@ -185,18 +186,18 @@ bool FinishFromTokens(const EntropyTables& tables, const uint32_t* tokens, int t
 }
 
 bool LoadEntropyTables(encoder* enc_opaque, int subband, EntropyTables* tables) {
-    if (!enc_opaque || !tables) return false;
+    if (!tables) return false;
+    *tables = EntropyTables{};
     ENCODER* encoder = reinterpret_cast<ENCODER*>(enc_opaque);
-    int codebook = 0;
-    int peaks = 0;
-    const int flags = SetCodingFlags(encoder, subband, &codebook, &peaks);
-    if (codebook < 0 || codebook >= CODEC_NUM_CODESETS) return false;
+    entropy_detail::CodingSelection coding;
+    if (!entropy_detail::SelectCoding(encoder, subband, &coding)) return false;
+    const int codebook = coding.codebook;
     RLCBOOK* runs = encoder->codebook_runbook[codebook];
     VALBOOK* values = encoder->valuebook[codebook];
     if (!runs || !values || runs->length <= 1 || values->length <= 0) return false;
     tables->codebook = codebook;
-    tables->peaks = peaks;
-    tables->codingflags = flags;
+    tables->peaks = coding.peaks;
+    tables->codingflags = coding.flags;
     tables->run_length = runs->length;
     tables->value_length = values->length;
     tables->band_end_code = encoder->band_end_code[codebook];
@@ -376,13 +377,14 @@ bool BuildLowpassPayloadPtr(int subband, int level, int width, int height,
     return stream.nBitsFree == BITSTREAM_BUFFER_SIZE;
 }
 
-bool MatchUpstreamHighpass(encoder* enc_opaque, transform* transforms_opaque[], const ExternalCoeff& coeff,
+bool MatchUpstreamHighpass(encoder* enc_opaque, transform* transforms_opaque[], int channel_count, const ExternalCoeff& coeff,
                            EntropySymbols* symbols) {
     if (!symbols) return false;
     *symbols = EntropySymbols{};
     ENCODER* encoder = reinterpret_cast<ENCODER*>(enc_opaque);
     TRANSFORM** transforms = reinterpret_cast<TRANSFORM**>(transforms_opaque);
-    if (!encoder || !transforms || !coeff.data || coeff.elem_bytes != 2 || coeff.lowpass) {
+    IMAGE* wavelet = entropy_detail::ResolveExternalBand(encoder, transforms, channel_count, coeff);
+    if (!wavelet || coeff.elem_bytes != 2 || coeff.lowpass) {
         symbols->error = "upstream match needs a tight int16 highpass band";
         return false;
     }
@@ -393,16 +395,6 @@ bool MatchUpstreamHighpass(encoder* enc_opaque, transform* transforms_opaque[], 
     }
     if (tables.peaks) {
         symbols->error = "peaks coding is not in the GPU entropy path";
-        return false;
-    }
-    IMAGE* wavelet = nullptr;
-    for (int k = 0; transforms[coeff.channel] && k < transforms[coeff.channel]->num_wavelets; ++k) {
-        IMAGE* image = transforms[coeff.channel]->wavelet[k];
-        if (image && image->level == coeff.level) wavelet = image;
-    }
-    if (!wavelet) {
-        symbols->error = "wavelet for this band was not found";
-        symbols->ok = false;
         return false;
     }
     const int pitch_px = std::max(coeff.width, wavelet->pitch / static_cast<int>(sizeof(PIXEL)));
@@ -431,7 +423,7 @@ bool MatchUpstreamHighpass(encoder* enc_opaque, transform* transforms_opaque[], 
 
     EncodedPiece oracle;
     const double t_oracle = NowMs();
-    const bool encoded = EncodeOneExternalBand(enc_opaque, transforms_opaque, coeff, &oracle);
+    const bool encoded = EncodeOneExternalBand(enc_opaque, transforms_opaque, channel_count, coeff, &oracle);
     (void)t_oracle;
     if (!encoded || !oracle.ok) {
         symbols->error = "EncodeOneExternalBand failed";

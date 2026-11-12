@@ -24,12 +24,17 @@ from validate_standalone import avi
 
 def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None, geometry=(1920, 1080)):
     directory.mkdir(parents=True, exist_ok=True)
+    # Keep retained inputs/explicit metadata outside the encoder's fresh output
+    # transaction. A repeated caller must select a new run, never overwrite its
+    # previous generated inputs merely to make another validation pass.
+    input_directory = directory / 'inputs'
+    input_directory.mkdir(exist_ok=False)
     inputs, metadata, expected = [], bytearray(), []
     run_name = 'tier-a-1080' if any('tier-a-1080/' in a['path'] for a in manifest['artifacts']) else 'sequence-1920x1080'
     for frame in manifest['frames']:
         if (frame['width'], frame['height']) != geometry:
             continue
-        path = directory/('input_%04d.bgra' % frame['frame_index'])
+        path = input_directory/('input_%04d.bgra' % frame['frame_index'])
         gate.checked_input(probe, frame, path)
         expected.append(frame); inputs.append(str(path))
         if inject:
@@ -52,7 +57,7 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
     if ffmpeg:
         arguments += ['--reference-yuv']
     if inject:
-        path = directory/'variable-metadata.raw';path.write_bytes(metadata)
+        path = input_directory/'variable-metadata.raw';path.write_bytes(metadata)
         arguments += ['--metadata-binary', str(path)]
     cpu_options = arguments[1:]
     output = directory/'samples';arguments += [str(output)] + inputs
@@ -184,7 +189,7 @@ def main():
     else:
         inventory = {'status': 'PENDING', 'meaning': 'manifest hashes only; no actual Windows bytes supplied'}
     with tempfile.TemporaryDirectory(prefix='hypercine-fs3-production-') as tmp:
-        directory = args.output_dir or Path(tmp)
+        directory = (args.output_dir or Path(tmp)).resolve()
         result = compare_run(args.probe, args.encoder, manifest, args.corpus_root, directory, args.ffmpeg, args.inject_metadata, args.cpu_encoder, args.geometry)
     result.update({'copyright': 'Copyright (c) 2026 HyperCine Contributors.', 'license': 'MIT OR Apache-2.0',
                    'manifest': name, 'inventory': inventory, 'machine': platform.platform(), 'architecture': platform.machine(),

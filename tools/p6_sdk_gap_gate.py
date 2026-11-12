@@ -72,6 +72,9 @@ def measure(root, index, encoder, work, profile, kind, count):
     directory=work/profile/kind
     # A fresh directory is mandatory; stale emitted packets cannot fill gaps.
     if directory.exists(): raise ValueError('work output already exists')
+    # The CLI owns and publishes only its final fresh output directory; the
+    # validator owns the per-profile parent inside its unique run.
+    directory.parent.mkdir(parents=True, exist_ok=True)
     prefix=[sys.executable,str(encoder)] if encoder.suffix=='.py' else [str(encoder)]
     subprocess.run(prefix+['--coefficient-hash','off','--quality',profile,str(directory)]+inputs,
                    check=True,capture_output=True,text=True)

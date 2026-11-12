@@ -77,12 +77,20 @@ FilmScan3Tables ComputeFilmScan3Tables(int fs_rate_limiter);
 // MetalOrCpu falls back only during initialization; dispatch failures propagate.
 enum class FilmScan3Backend { Cpu, Metal, MetalOrCpu };
 namespace detail { struct Frontend; struct FrontendAccess; }
+// A stateful session has one owner. Copying would share a mutable GPU frontend
+// while duplicating rate state and diagnostic identity, so only moves are legal.
+// Concurrent operations on the same encoder (including moves) are unsupported;
+// independent sessions may be used concurrently.
 class FilmScan3Encoder {
     friend struct detail::FrontendAccess;
     std::shared_ptr<detail::Frontend> frontend_;
     FilmScan3State state_;
 public:
     FilmScan3Encoder() = default; // scalar CPU remains the default
+    FilmScan3Encoder(const FilmScan3Encoder&) = delete;
+    FilmScan3Encoder& operator=(const FilmScan3Encoder&) = delete;
+    FilmScan3Encoder(FilmScan3Encoder&&) noexcept;
+    FilmScan3Encoder& operator=(FilmScan3Encoder&&) noexcept;
     explicit FilmScan3Encoder(FilmScan3Backend backend);
     explicit FilmScan3Encoder(FilmScan3Geometry geometry); // CPU only
     // Explicit backend *and* geometry. An explicitly requested Metal backend is
@@ -95,6 +103,13 @@ public:
     // dynamic behaviour: each later forward dispatch reads the global preference.
     // Explicit Neon throws if this build has no NEON kernel.
     FilmScan3Encoder(FilmScan3Geometry geometry, WaveletIsa isa);
+    // A move transfers the complete session; its source becomes inactive.
+    // An inactive encoder reports 0x0 geometry, Auto ISA and default state,
+    // quality and hashing policy. Encode/SetSessionQuality refuse it. Reset and
+    // SetCoefficientHashing are harmless no-ops and cannot reactivate it. It may
+    // be destroyed or receive another session by move assignment. Self-move is
+    // a no-op; moving an inactive encoder produces another inactive encoder.
+    bool active() const noexcept { return active_; }
     FilmScan3Geometry geometry() const noexcept;
     // Effective CPU ISA when queried. For explicit Scalar/Neon sessions this is
     // fixed; for Auto it is a snapshot of the current global preference, not a
@@ -117,7 +132,7 @@ public:
     void SetSessionQuality(EncodingQuality quality);
     EncodingQuality session_quality() const noexcept { return quality_; }
     const FilmScan3State& state() const noexcept { return state_; }
-    void Reset() noexcept { state_ = FilmScan3State{}; }
+    void Reset() noexcept { if (active_) state_ = FilmScan3State{}; }
     // Per session, not process-global. Default is full hashing so existing
     // bit-exact gates keep real fingerprints. false skips the 30 hashes for
     // later frames and marks them DiagnosticOff. Sample bytes, quantization,
@@ -135,5 +150,6 @@ private:
     EncodingQuality quality_ = EncodingQuality::FilmScan3;
     uint32_t hash_session_ = 0;
     uint32_t diagnostic_serial_ = 1;
+    bool active_ = true;
 };
 }}

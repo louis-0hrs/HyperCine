@@ -12,8 +12,9 @@ non-zero exit:
    hash, not accepted because the length still matches;
 2. a truncated encoder trace must be rejected instead of being zipped short;
 3. a reordered encoder trace must be rejected;
-4. a same-length tampered *cached* work input must not be trusted: the gate has
-   to re-copy from the verified original and still pass.
+4. an occupied work directory containing a same-length tampered input must be
+   rejected without changing any retained bytes; a fresh run must copy the
+   verified original and pass.
 
 The baseline case (0) proves the fixture itself is valid, so a failure in 1-3 is
 caused by the tampering and not by a broken fixture.
@@ -181,35 +182,45 @@ def main():
                 failures.append("%s trace failed for the wrong reason: %s"
                                 % (mode, log[-400:]))
 
-        # 4. A tampered cached work input is not trusted: it is re-copied from
-        # the verified original, so the run still passes and the cache is healed.
+        # 4. Every run owns a new directory. Retained evidence is never used as
+        # a mutable cache, even when the previous input copy is now corrupt.
         heal = fresh("cache-heal")
         work = tmp / "w4"
         code, log = run_gate(heal, work, encoder)
         if code != 0:
             failures.append("cache-heal baseline failed: " + log[-400:])
         else:
-            cached = work / "filmscan3" / "input_0000.bgra"
+            cached = work / "filmscan3" / "inputs" / "input_0000.bgra"
             if not cached.is_file():
                 failures.append("gate did not leave a cached input to tamper")
             else:
                 corrupt = bytearray(cached.read_bytes())
                 corrupt[0] ^= 0xFF             # same length again
                 cached.write_bytes(bytes(corrupt))
+                before = {p.relative_to(work).as_posix(): sha_file(p)
+                          for p in work.rglob('*') if p.is_file()}
                 code, log = run_gate(heal, work, encoder)
+                after = {p.relative_to(work).as_posix(): sha_file(p)
+                         for p in work.rglob('*') if p.is_file()}
+                if code == 0:
+                    failures.append("gate reused an occupied work directory")
+                if before != after:
+                    failures.append("rejected rerun changed retained work evidence")
+                fresh_work = tmp / "w4-fresh"
+                code, log = run_gate(heal, fresh_work, encoder)
                 if code != 0:
-                    failures.append("gate trusted a same-length tampered cache: " + log[-400:])
-                elif sha_file(cached) != sha_file(
+                    failures.append("fresh run after occupied-work refusal failed: " + log[-400:])
+                elif sha_file(fresh_work / "filmscan3" / "inputs" / "input_0000.bgra") != sha_file(
                         heal / "filmscan3" / "1080p-16f" / "frames"
                         / "filmscan3-sequence-1920x1080" / "frame_0000" / "input.bgra"):
-                    failures.append("gate reused the tampered cache instead of re-copying")
+                    failures.append("fresh run did not copy the verified original")
 
     if failures:
         for line in failures:
             print("FAIL: " + line, file=sys.stderr)
         return 1
     print("p6_gate_negative: PASS (baseline accepted; tampered sdk, truncated trace, "
-          "reordered trace rejected; tampered cache healed)")
+          "reordered trace rejected; occupied work preserved; fresh run accepted)")
     return 0
 
 

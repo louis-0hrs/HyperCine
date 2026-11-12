@@ -32,7 +32,7 @@ def unique_object(pairs):
 
 def read_trace(directory, count):
     document = json.loads((directory / 'trace.json').read_text(), object_pairs_hook=unique_object)
-    require(isinstance(document, dict) and document.get('profile') == 'FilmScan3', 'invalid trace profile')
+    require(isinstance(document, dict) and document.get('profile') == 'filmscan3', 'invalid trace profile')
     frames = document.get('frames')
     require(isinstance(frames, list) and len(frames) == count, 'missing encoder trace frames')
     for index, frame in enumerate(frames):
@@ -107,8 +107,10 @@ def make_inputs(root, count):
     # The 16-frame sequence repeats the ordered flat/ramp/edge/detail cycle,
     # WITHOUT resetting either encoder between frames. No golden data supplied.
     sources = []
+    input_directory = root / 'inputs'
+    input_directory.mkdir()
     for pattern in ([1] if count == 1 else range(4)):
-        source = root / ('input_%d.bgra' % pattern)
+        source = input_directory / ('input_%d.bgra' % pattern)
         with source.open('wb') as handle:
             for y in range(HEIGHT):
                 if pattern == 0:
@@ -140,7 +142,7 @@ def main():
         require(args.cpu_encoder.resolve() != args.encoder.resolve(), 'CPU and Metal encoder paths must differ')
 
     with tempfile.TemporaryDirectory(prefix='hypercine-fs3-4k-') as tmp:
-        root = Path(tmp)
+        root = Path(tmp).resolve()
         inputs = make_inputs(root, args.frames)
         outputs = [('encoder', args.encoder, root / 'samples')]
         if args.cpu_encoder:

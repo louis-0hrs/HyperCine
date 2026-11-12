@@ -1,0 +1,103 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "tracking_issue": 367,
+  "base_commit": "373d836474ad535143ee21360242e714a50e5d3a",
+  "source_sha256": {
+    "CMakeLists.txt": "edda2b1c5254fbd5df724185d5e03058e2067347f3ff379b5429104297bffc67",
+    "ci/run_standalone.py": "4e9591431aaee43cdb2d7ca3de1e477525f7d53a80265063bfec3fa2f89ca4df",
+    "ci/test_standalone_gate.py": "6323fb59ed6c420931d9ecc8ee327677ba0f758df0f9ce033b31714a7258f17b",
+    "tests/run_p6_writer_parity.py": "8607991f0dd32c526834c480ee4600820eab7f8e7b2c60550302570884a6e8e0",
+    "tests/test_filmscan3_4k_gate.py": "7fa5106000beb30c9c232fce2b4c6f6343317bc8796e99bb5a4079fc06f53571",
+    "tests/test_filmscan3_output_safety.py": "60c239dd81dc37a3f502d6343ef7aec056781169a673b5f3e65136d4a84b5fd1",
+    "tests/test_filmscan3_output_transaction.cpp": "4da779760a76a50fca198f0d825f3cd3d095836704ea056a992d80324996b0ab",
+    "tests/test_p6_gate_negative.py": "480c5e079131cac711d39e7382e952e5cf26c0e1aef77d27bfeb11d69aff2848",
+    "tests/test_p6_writer_parity.py": "c0e6b4026ea971e63ff4cb0b8eca33e9dc1e2c3fb53fbac96b533b0c789ef02d",
+    "tests/test_p6_writer_trace.py": "cc82b13c116ce50580a2d5eaea225798e14dbf48ca176d90f14500f414f41646",
+    "tests/validate_filmscan3.py": "45c0ccddfdc8c236a6b6509873b00d2144f383dd45df8aa480be5e1248a9d9d3",
+    "tests/validate_filmscan3_4k_ffmpeg.py": "55c8b377aac18446bc8af02eb917a592ed9df29c05c05cbe96f4e7aadbc3b69c",
+    "tests/validate_p6_output_integration.py": "2cebc29c077f9691cf643b290ad4b649433703b5d7b71086ee66d2b46723f200",
+    "tools/filmscan3_output_transaction.h": "48000a242f2e1ea48dc917bef4ad3ca9bb3474607ba8e731eac4f014f1c14fe4",
+    "tools/hypercine_encode_filmscan3.cpp": "c543e5fc2bc194d1dfc68dea0e47d1a7e4cb724da1635b9fedc8088b27a35307",
+    "tools/p6_output_paths.py": "4ff689fb2343355a30f3d3a1247d536059d34a3e235d0a5a8517547f7841a8f3",
+    "tools/p6_sdk_gap_gate.py": "ae39ab3a83f1c53c3a0b1a93080d0da27bb524bc7ac396ff281e8896561d8309",
+    "tools/p6_windows_sdk_gate.py": "1810eeedd13443ef4f6565a4ffab2a0bbbcd947fb184702258ee61740dea7217",
+    "tools/p6_writer_parity.py": "b3a506dc2770510ae4f960932d24eee80d95d96654cf4f9e1cc6c0c2016ae629"
+  },
+  "scope": "Bounded P6 reads after output-ownership correction; no Oracle source change",
+  "environment": {
+    "system": "Linux",
+    "architecture": "x86_64",
+    "python": "3.12.14",
+    "compiler": "GCC 14.2.0",
+    "cmake": "3.31.6",
+    "ffmpeg": "7.1.5-0+deb13u1"
+  },
+  "full_gate": {
+    "registered": 133,
+    "passed": 133,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "ctest_seconds": 367.94,
+    "external_decode_required": true,
+    "source_unchanged": true,
+    "fingerprints_verified": 19,
+    "log_sha256": "83b5255545a6823709621f1aa3ec1724a28e745f2da49e6b5ed19aa3ed875ac2",
+    "command": "python3 ci/run_standalone.py --build-dir build --system Linux --machine x86_64",
+    "timing_context": "Concurrent local qualification and builds; not a throughput benchmark"
+  },
+  "focused_cases": {
+    "ownership_normal": 43,
+    "ownership_python_optimized": 43,
+    "trace_normal": 9,
+    "trace_python_optimized": 9,
+    "sdk_gap_import_compatibility": 26,
+    "windows_gate_import_contract_on_linux": 6,
+    "real_cli_p6_integration": "PASS"
+  },
+  "tool_limits_bytes": {
+    "bgra_frame": 33177600,
+    "packet": 134217728,
+    "transfer_index": 8388608,
+    "manifest": 4194304,
+    "trace": 4194304
+  },
+  "focused_log_sha256": {
+    "ownership-normal.log": "50bc7e5e652ae48088a6efaa515c59e4db7c0c8fc4d523966a9bc2d69ff667b8",
+    "ownership-optimized.log": "a8e5a78458ad97e99bd0def59db950a3bd416fc3c8f73e54d2b947b159e6255e",
+    "trace-normal.log": "0ba231bf0463d6f48728d7dd3a090b3c740faa98ec9d63f85044ef25f699e82b",
+    "trace-optimized.log": "8fc96ac30adc7d06c8be21e6ae7f5f8845d6489cdfeb4ca34d5c9f5b4b880bc8",
+    "sdk-gap-import-compat.log": "bc5ea51cabe254fc55995b9cde3b23d64b3a731604adda8e93d0bb99e027c3bc",
+    "windows-gate-import-compat.log": "3a905aace2e1cbc8da64ecd798002d2117c841640327ac68bf5f59551402f908",
+    "real-cli-parity.log": "c98bcb80bc45af89dc565b342bb5862b19fc4c567399c5b3f1609d840da8f795",
+    "old-source-negative-controls.log": "cb7769cf022f91f3bc009b20ad64c423693f4440ad64f4b15f1897d7841de4bf"
+  },
+  "negative_controls": [
+    {
+      "function": "_verified_bytes",
+      "baseline": "373d836474ad535143ee21360242e714a50e5d3a",
+      "expected_failure": "AssertionError: unbounded payload read",
+      "status": "OLD_SOURCE_REJECTED"
+    },
+    {
+      "function": "load_transfer_index",
+      "baseline": "373d836474ad535143ee21360242e714a50e5d3a",
+      "expected_failure": "AssertionError: unbounded payload read",
+      "status": "OLD_SOURCE_REJECTED"
+    },
+    {
+      "function": "require_pinned",
+      "baseline": "373d836474ad535143ee21360242e714a50e5d3a",
+      "expected_failure": "AssertionError: 116 != 17",
+      "status": "OLD_SOURCE_REJECTED"
+    }
+  ],
+  "limits": [
+    "Synthetic small-file growth/EOF controls; no memory-exhaustion experiment.",
+    "Native Windows/macOS, GPU and private original-SDK parity not executed.",
+    "Focused subcase counts overlap aggregate CTests and must not be added.",
+    "The compatibility verification helper does not bind a later separate read in another caller to its earlier snapshot.",
+    "Historical Oracle #361/#370 work and its privacy blocker remain separate."
+  ]
+}

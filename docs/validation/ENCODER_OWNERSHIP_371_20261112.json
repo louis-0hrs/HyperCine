@@ -1,0 +1,133 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "tracking_issue": 371,
+  "base_commit": "dca0c0707a0d460fb8cb7ca7d198c0a7aa4be8e7",
+  "source_sha256": {
+    "CMakeLists.txt": "b0f08ed0fde9fdf1044f4e90e30e53c09b6db701c7f4ef1eda8673b0e57ae973",
+    "ci/run_standalone.py": "c7ab5f0d2e2368907bfc1263ee277101d113bfde4bc131afc0c70f5b49168af6",
+    "ci/test_standalone_gate.py": "31a2c1a18f6deb5de1ac16592e0956b2640780cef6ea975dce54010298b39dd6",
+    "include/hypercine/filmscan3.h": "054655a9377f4ce4359c5c50ebb508f635fa844c9e3d989b3c50681eb17004de",
+    "src/core/encoder_backend_selection.cpp": "9fec166c924910fd57257bd051bd7d69c16b6c839c17b7a47d7d7ecdae77f5dc",
+    "src/core/encoder_backend_selection.h": "e15d881489213f661c37395ebfb753f029ef8fa90b93ac035cd9e0a898be0106",
+    "src/core/filmscan3_backend.h": "c05dfda3d1c998f63e8387bf40c30faf838c48eb55d6a41b1695b7a4bf460b7a",
+    "src/core/filmscan3_encoder.cpp": "520f5e906db5b3389bf4a0f4877d1d6347bde8321711beaa829b77877d37f080",
+    "tests/test_encoder_ownership.cpp": "71e48650e8f7cd62de5ef166a1bfa298deea47db5b9afb579b8edeac07a56fcd"
+  },
+  "environment": {
+    "system": "Linux",
+    "architecture": "x86_64",
+    "compiler": "GCC 14.2.0",
+    "configuration": "Release",
+    "python": "3.12.14",
+    "cmake": "3.31.6",
+    "ffmpeg": "7.1.5-0+deb13u1"
+  },
+  "full_gate": {
+    "registered": 128,
+    "passed": 128,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "ctest_seconds": 355.83,
+    "external_decode_required": true,
+    "source_unchanged": true,
+    "fingerprints_verified": 9,
+    "log_sha256": "5b669f3cfe2e07bf61a383416813ecf75ba233fb76eaefc4deb166e8a50003f2",
+    "command": "python3 ci/run_standalone.py --build-dir build --system Linux --machine x86_64",
+    "timing_context": "Concurrent local qualification and builds; not a throughput benchmark"
+  },
+  "focused_gate": "encoder_move_ownership",
+  "guardrail_cases": 31,
+  "baseline_probe": {
+    "name": "review_encoder_copy_probe",
+    "exit_code": 0,
+    "status": "REPRODUCED",
+    "source_context": "Pre-ownership code from the output-safety worktree at 373d836474ad535143ee21360242e714a50e5d3a; linked the existing build-output-367 standalone and quality-state archives. No source modification was made for this probe.",
+    "compile_time_checks": [
+      "FilmScan3Encoder is copy constructible",
+      "FilmScan3Encoder is copy assignable",
+      "detail::EncoderSession is copy constructible",
+      "detail::EncoderSession is move constructible"
+    ],
+    "observed_stdout": [
+      "copied_encoders_same_tombstone=1",
+      "moved_target_geometry=128x24 frame=2",
+      "moved_source_geometry=1920x1080 frame=2 hashing=0",
+      "moved_session_source_selection_valid=1 config_width=128 geometry_width=1920"
+    ],
+    "raw_log": {
+      "retained": false,
+      "note": "Observed tool output only; raw log not retained."
+    }
+  },
+  "mutations": [
+    {
+      "name": "source_still_active",
+      "file": "src/core/filmscan3_encoder.cpp",
+      "replace": {
+        "before": "other.active_ = false;",
+        "after": "other.active_ = true;"
+      },
+      "expected_failure": "move left the source active",
+      "observed_stderr": "FAIL encoder ownership: move left the source active",
+      "exit_code": 1
+    },
+    {
+      "name": "diagnostic_identity_reset",
+      "file": "src/core/filmscan3_encoder.cpp",
+      "replace": {
+        "before": "hash_session_ = other.hash_session_;",
+        "after": "hash_session_ = 0;"
+      },
+      "expected_failure": "move construction minted or duplicated a diagnostic sequence",
+      "observed_stderr": "FAIL encoder ownership: move construction minted or duplicated a diagnostic sequence",
+      "exit_code": 1
+    },
+    {
+      "name": "stale_selection_status",
+      "file": "src/core/encoder_backend_selection.cpp",
+      "replace": {
+        "before": "other.selection_ = BackendSelection{};",
+        "after": "(void)0;"
+      },
+      "expected_failure": "moved-from session still claims a selected backend",
+      "observed_stderr": "FAIL encoder ownership: moved-from session still claims a selected backend",
+      "exit_code": 1
+    }
+  ],
+  "mutation_method": {
+    "description": "For each mutation, compiled the changed actual C++ translation unit separately with c++ -std=c++17 -O2, then linked it with the already built ownership-test object and unchanged standalone/quality-state archives. Executed the resulting test binary. Files were held in a TemporaryDirectory outside Git and removed automatically afterward. Production source remained unchanged.",
+    "compile_exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "link_exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "raw_log": {
+      "retained": false,
+      "note": "Observed tool outputs only; raw logs and temporary mutant binaries were not retained."
+    }
+  },
+  "independent_review": {
+    "status": "No functional blockers found",
+    "scope": [
+      "Copy/move semantics and inactive-source guards",
+      "Config/selection/encoder state binding",
+      "Diagnostic, quality-lock and rate-state continuity",
+      "Existing callers and discriminating tests",
+      "Required inventory wiring and #365 integration relation"
+    ]
+  },
+  "integration_note": "#365 stores pinned geometry inside BoundFrontend behind frontend_. Transfer preserves it; integration must retain BindFrontend, inactive guards and the successful lazy-binding commit.",
+  "limitations": [
+    "No original-SDK, native Metal, native CUDA, cross-thread move or multi-device execution was performed for this ownership change.",
+    "Concurrent operations on the same encoder/session remain unsupported.",
+    "The change does not make intentional sharing of a mutable frontend through internal test seams safe.",
+    "Source-API and public C++ object-layout changes require consumers to rebuild and replace copies with explicit ownership transfer or independently constructed sessions."
+  ]
+}

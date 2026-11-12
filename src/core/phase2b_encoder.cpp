@@ -230,7 +230,7 @@ Phase2BRun RunPhase2B(encoder* enc_opaque, transform* transforms_opaque[], int c
                 coeff.elem_bytes = 2;
                 coeff.width = ref.width;
                 coeff.height = ref.height;
-                if (!EncodeOneExternalBand(enc_opaque, transforms_opaque, coeff, &out)) {
+                if (!EncodeOneExternalBand(enc_opaque, transforms_opaque, channel_count, coeff, &out)) {
                     into->error = "cpu band encode failed";
                     return false;
                 }

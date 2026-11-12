@@ -64,15 +64,27 @@ private:
 class EncoderSession final {
 public:
     EncoderSession(const EncoderSessionConfig&, const EncoderDevice&);
+    EncoderSession(const EncoderSession&) = delete;
+    EncoderSession& operator=(const EncoderSession&) = delete;
+    EncoderSession(EncoderSession&&) noexcept;
+    EncoderSession& operator=(EncoderSession&&) noexcept;
+    // Same single-owner/concurrency contract as FilmScan3Encoder. After a move,
+    // the source is inactive with a default config and empty selection; its
+    // geometry/ISA remain queryable, but Encode refuses and Reset cannot
+    // reactivate it. Only move assignment can install another session.
+    bool active() const noexcept { return encoder_.active(); }
     FilmScan3Frame Encode(const uint8_t*, std::size_t bytes, std::size_t stride);
-    void Reset() { encoder_.Reset(); }
+    void Reset() noexcept { encoder_.Reset(); }
     const BackendSelection& selection() const noexcept { return selection_; }
     const EncoderSessionConfig& config() const noexcept { return config_; }
     FilmScan3Geometry geometry() const noexcept { return encoder_.geometry(); }
     WaveletIsa wavelet_isa() const noexcept { return encoder_.wavelet_isa(); }
 private:
-    const EncoderSessionConfig config_;
-    const BackendSelection selection_;
+    // Externally immutable snapshots. They change only when ownership moves;
+    // const members would copy selection_.frontend and leave the source claiming
+    // a selected backend after its actual encoder has moved elsewhere.
+    EncoderSessionConfig config_;
+    BackendSelection selection_;
     FilmScan3Encoder encoder_;
 };
 

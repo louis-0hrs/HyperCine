@@ -29,7 +29,7 @@ class ParityGateTests(unittest.TestCase):
             self.trace(directory, [self.frame])
 
     def trace(self, directory, frames):
-        (directory / 'trace.json').write_text(json.dumps(dict(profile='FilmScan3', frames=frames)))
+        (directory / 'trace.json').write_text(json.dumps(dict(profile='filmscan3', frames=frames)))
 
     def test_actual_cmake_registration_requires_metal_and_cpu(self):
         source = (Path(__file__).resolve().parents[1] / 'CMakeLists.txt').read_text()
@@ -71,7 +71,11 @@ class ParityGateTests(unittest.TestCase):
             self.assertEqual(len(set(first)), 4)
             self.assertTrue(all(len(data) == 32*8*4 for data in first))
             self.assertEqual(first[:4], first[4:8])
-            self.assertEqual(first, [p.read_bytes() for p in gate.make_inputs(self.root, 16)])
+            repeat = self.root / 'repeat'
+            repeat.mkdir()
+            self.assertEqual(first, [p.read_bytes() for p in gate.make_inputs(repeat, 16)])
+            with self.assertRaises(FileExistsError):
+                gate.make_inputs(self.root, 16)
 
     def test_required_metal_rejects_missing_or_same_cpu_tool_before_encoding(self):
         base = ['gate', '--encoder', 'tool', '--ffmpeg', 'ffmpeg',
@@ -137,7 +141,7 @@ class ParityGateTests(unittest.TestCase):
 
     def test_duplicate_json_keys_fail(self):
         path = self.metal / 'trace.json'
-        path.write_text('{"profile":"FilmScan3","frames":[],"frames":' + json.dumps([self.frame]) + '}')
+        path.write_text('{"profile":"filmscan3","frames":[],"frames":' + json.dumps([self.frame]) + '}')
         with self.assertRaisesRegex(ValueError, 'duplicate'):
             gate.compare_outputs(self.cpu, self.metal, 1)
 

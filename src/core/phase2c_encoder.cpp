@@ -704,7 +704,7 @@ Phase2CIdentityReport VerifyPhase2CIdentity(int width, int height, uint32_t seed
         ext.height = ref.height;
         if (!EncodeOneExternalBand(reinterpret_cast<encoder*>(ctx.encoder),
                                    reinterpret_cast<transform**>(ctx.transforms),
-                                   ext, &cpu_pieces[i])) {
+                                   ctx.channel_count, ext, &cpu_pieces[i])) {
             rep.error = "CPU EncodeOneExternalBand failed";
             return rep;
         }

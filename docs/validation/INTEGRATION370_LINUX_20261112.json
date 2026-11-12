@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "review_date": "2026-11-12",
+  "pr": 370,
+  "source": {
+    "head": "5eb3ac9b8543ab155782a7e962a66cff6d984a02",
+    "tree": "503fc5824c9937b763f69c842bcf2b2da5bc7433",
+    "main": "dca0c0707a0d460fb8cb7ca7d198c0a7aa4be8e7",
+    "audit_parent": "5b1724c3097da12ca655000c688e2251278bd9aa",
+    "oracle_parent": "b7933c842c3459ee0553a6b4f22f0dde29c8b02c",
+    "only_changes_from_audit": [
+      "docs/WINDOWS_STANDALONE_ORACLE.md",
+      "tests/compare_sdk_oracle.py",
+      "tests/test_compare_sdk_oracle.py"
+    ],
+    "oracle_files_byte_identical": true,
+    "frozen_upstream_tree": "837528ef9e9a55c416e9592ecb54e1c8f1ff9cf8",
+    "source_unchanged_after_run": true
+  },
+  "environment": {
+    "system": "Linux",
+    "architecture": "x86_64",
+    "compiler": "GCC 14.2.0",
+    "cmake": "3.31.6",
+    "python": "3.12.14",
+    "ffmpeg": "7.1.5-0+deb13u1"
+  },
+  "strict_standalone": {
+    "registered": 130,
+    "completed": 130,
+    "passed": 130,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "wall_seconds": 220.18,
+    "external_decode_required": true
+  },
+  "focused": {
+    "oracle_normal": 23,
+    "oracle_optimized": 23,
+    "upstream_normal": 26,
+    "upstream_optimized": 26,
+    "routing_policy": 57,
+    "workflow_event_matrix": 48,
+    "all_passed": true,
+    "replay_and_mutation": {
+      "retained": {
+        "exit": 0,
+        "samples": 3,
+        "log_sha256": "b957a8dfd3f15624aa984ae55c5f2d05867f4d40896b6d2b6902ac443bfeac1c"
+      },
+      "eight-record-log": {
+        "exit": 0,
+        "samples": 3,
+        "log_sha256": "5e92330e17d33318df346cdf7737c8c677f1a7f7c25830351c8c742fc9f1463c"
+      },
+      "ffmpeg-failure": {
+        "exit": 1,
+        "child_secrets_suppressed": true,
+        "report_absent": true
+      },
+      "ffprobe-failure": {
+        "exit": 1,
+        "child_secrets_suppressed": true,
+        "report_absent": true
+      },
+      "mutation_controls": {
+        "double_read": "KILLED_expected_second_read_assertion",
+        "overwrite": "KILLED_expected_no_clobber_assertion",
+        "source_files_modified": false
+      }
+    }
+  },
+  "sanitized_log_sha256": {
+    "370-full-ctest.log": "222213f3ba4bdc8240601666f124aa16983418833122e87bc40323bac1e2c251",
+    "370-oracle-normal.log": "75ad69161f3c55f557abc03bd59bd4c536c3ecbaa5e9500a62e73d2c20ad6949",
+    "370-oracle-optimized.log": "1c7e3b26097e933817c37747be23411fc7b097878a5147c7d2f22310047de6a6",
+    "370-upstream.log": "4b05811b5e32998ef5e3e0a713352e8856daf42129376b2368d229b8625dbd2e",
+    "370-upstream-optimized.log": "c2f3e50539fdec2b8727cbcf616a9f523a2346efd54b62320b41b123a331f046",
+    "370-routing-qualified-temp.log": "20394e86b01986ead8de5d16596d8e5e04a50fb29dc97892229e1e0fe276ebef",
+    "370-event-matrix.log": "95e649dfc0ddfbef772cf265ab35394dc27c73ba0694e32c1fd458d9172ef149",
+    "370-privacy.log": "b665ea0f3c439cfb3fd3ce82169e47bfe5a575540a66ad980329f15a22ae67e5"
+  },
+  "privacy": {
+    "status": "BLOCKED",
+    "commits_scanned": 31,
+    "finding": "POSSIBLE_CREDENTIAL",
+    "historical_commit": "ec35f3c59ee11cfbb69a46657f97c4a57f597451",
+    "path": "tests/test_compare_sdk_oracle.py",
+    "line": 214,
+    "classification": "Synthetic URL-rejection test marker; no live secret identified",
+    "current_head_uses_accepted_placeholder": true,
+    "historical_added_text_still_rejected": true,
+    "guard_bypassed": false,
+    "history_rewritten": false
+  },
+  "excluded_attempt": {
+    "routing_initial": "38 errors from untrusted workspace ancestor permissions; rerun only these small tests in owner-private temporary directory passed; no shared permission changes"
+  },
+  "not_run": [
+    "Windows/MSVC",
+    "macOS/ARM64/NEON/Metal",
+    "CUDA/Vulkan",
+    "private original-SDK replay",
+    "hosted Actions"
+  ],
+  "status": "LINUX_PASS_PUBLICATION_BLOCKED"
+}

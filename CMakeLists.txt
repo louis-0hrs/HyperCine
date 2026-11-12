@@ -542,6 +542,11 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME encoder_backend_session_packets COMMAND test_encoder_backend_selection packets)
         set_tests_properties(encoder_backend_selection_contract encoder_backend_session_packets PROPERTIES
             LABELS "cpu;encoder;session" TIMEOUT 180)
+        add_executable(test_encoder_ownership tests/test_encoder_ownership.cpp)
+        target_link_libraries(test_encoder_ownership PRIVATE hypercine_standalone)
+        add_test(NAME encoder_move_ownership COMMAND test_encoder_ownership)
+        set_tests_properties(encoder_move_ownership PROPERTIES
+            LABELS "cpu;encoder;session;ownership" TIMEOUT 120)
         # Issue #259 step 3: quality profiles are admitted per backend inside the
         # same capability/session contract. CPU scalar admits the six profiles
         # pinned by #318; Metal/CUDA keep their FilmScan3-only packet evidence and
@@ -701,6 +706,24 @@ if(HYPERCINE_BUILD_STANDALONE)
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_writer_trace.py")
         add_test(NAME p6_writer_trace_optimized COMMAND "${Python3_EXECUTABLE}" -O
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_writer_trace.py")
+        add_test(NAME p6_output_ownership_contract COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_writer_parity.py")
+        add_test(NAME p6_output_ownership_optimized COMMAND "${Python3_EXECUTABLE}" -O
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_writer_parity.py")
+        add_test(NAME filmscan3_output_safety COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_output_safety.py"
+            --encoder $<TARGET_FILE:hypercine_encode_filmscan3>)
+        add_executable(test_filmscan3_output_transaction tests/test_filmscan3_output_transaction.cpp)
+        target_include_directories(test_filmscan3_output_transaction PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools")
+        target_compile_features(test_filmscan3_output_transaction PRIVATE cxx_std_17)
+        add_test(NAME filmscan3_output_transaction COMMAND test_filmscan3_output_transaction)
+        add_test(NAME p6_output_cli_integration COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_p6_output_integration.py"
+            --encoder $<TARGET_FILE:hypercine_encode_filmscan3>)
+        set_tests_properties(p6_output_ownership_contract p6_output_ownership_optimized
+            filmscan3_output_safety filmscan3_output_transaction p6_output_cli_integration
+            PROPERTIES LABELS "output-safety;negative-control" TIMEOUT 180)
         add_test(NAME p6_sdk_gap_negative_controls COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_p6_sdk_gap_gate.py")
         add_test(NAME p6_sdk_gap_historical_pre325 COMMAND "${Python3_EXECUTABLE}"
@@ -766,17 +789,16 @@ if(HYPERCINE_BUILD_STANDALONE)
         if(HYPERCINE_QUALITY_ORACLE_ROOT)
             find_package(Python3 COMPONENTS Interpreter REQUIRED)
             add_test(NAME p6_six_profile_packets COMMAND "${Python3_EXECUTABLE}"
-                "${CMAKE_CURRENT_SOURCE_DIR}/tools/p6_writer_parity.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/run_p6_writer_parity.py"
                 --corpus "${HYPERCINE_QUALITY_ORACLE_ROOT}"
                 --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
                 --geometry 1080p-16f --max-frames 16
-                --work "${CMAKE_CURRENT_BINARY_DIR}/p6-parity"
-                --report "${CMAKE_CURRENT_BINARY_DIR}/p6-parity/report.json")
+                --work-root "${CMAKE_CURRENT_BINARY_DIR}")
             set_tests_properties(p6_six_profile_packets PROPERTIES
                 LABELS "reference-oracle;quality-profile" TIMEOUT 7200)
             # The gate above is only worth its green result if it fails on the
             # things it claims to reject: a same-length tampered SDK packet, a
-            # truncated trace, a reordered trace, and a poisoned work cache. These
+            # truncated trace, a reordered trace, and an occupied work run. These
             # controls are not optional, because a gate that always exits 0 looks
             # exactly like a passing one.
             add_test(NAME p6_gate_negative_controls COMMAND "${CMAKE_COMMAND}" -E env
@@ -967,6 +989,16 @@ if(HYPERCINE_BUILD_STANDALONE)
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3.py"
                 --probe $<TARGET_FILE:hypercine_reference_probe> --encoder $<TARGET_FILE:hypercine_encode_filmscan3>
                 --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}")
+            # Exercise the real CLI trace contract on CPU too. The required
+            # Metal variant stays separate; a mocked trace must not hide a
+            # profile spelling that rejects the actual encoder's output.
+            add_test(NAME filmscan3_cli_4k_ffmpeg_gate COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_filmscan3_4k_ffmpeg.py"
+                --encoder $<TARGET_FILE:hypercine_encode_filmscan3> --frames 1
+                --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
+                --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}")
+            set_tests_properties(filmscan3_cli_4k_ffmpeg_gate PROPERTIES
+                LABELS "cpu;cli;external-decode;output-safety" TIMEOUT 180)
             # #45: the geometry contract of the real validator, not a wrapper
             # around it. Wrong geometries must be rejected with the reason that
             # was actually intended, and the manifest geometry must still pass.

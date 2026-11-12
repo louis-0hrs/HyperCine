@@ -280,9 +280,12 @@ int main(int argc,char** argv) {try {
     Reject([&]{detail::FrontendAccess::Use(hd,detail::CpuFrontend({128,24}));});
     Require(Same(hd_state,hd.state()) && hd.geometry().width==1920,
             "successful default Encode did not bind its geometry");
-    // Check Reset on a copy so the independent HD-state assertion below stays
-    // meaningful; geometry is immutable even after rate state is reset.
-    auto reset_hd=hd;reset_hd.Reset();
+    // Bind a separately owned default session so the independent HD-state
+    // assertion below stays meaningful. Reset must retain its lazy binding.
+    FilmScan3Encoder reset_hd;
+    Require(reset_hd.Encode(hdinput.data(),hdinput.size(),7680).sample==hd0.sample,
+            "independent default session packet");
+    reset_hd.Reset();
     Reject([&]{detail::FrontendAccess::Use(reset_hd,detail::CpuFrontend({128,24}));});
     Require(reset_hd.geometry().width==1920 && reset_hd.state().frame_index==0,
             "Reset allowed default-session geometry replacement");

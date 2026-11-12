@@ -3,6 +3,7 @@
 // See LICENSE-MIT and LICENSE-APACHE for details.
 #include "hypercine/filmscan3.h"
 #include "hypercine/quality_state.h"
+#include "filmscan3_output_transaction.h"
 #ifdef HYPERCINE_METAL_AUDIT
 #include "../tests/metal_audit.h"
 #endif
@@ -14,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <limits>
+#include <memory>
 namespace fs=std::filesystem;
 using namespace hypercine::standalone;
 using hypercine::EncodingQuality;
@@ -46,7 +48,7 @@ FilmScan3Geometry ParseGeometry(const std::string& value) {
 }
 int main(int argc,char** argv) {
     try {
-        int begin=1;std::ifstream metadata;bool reference_yuv=false;bool coefficient_hashing=true;
+        int begin=1;fs::path metadata_path;bool reference_yuv=false;bool coefficient_hashing=true;
         // The session profile is explicit rather than implied: a caller that
         // asks for another profile must get that profile or a refusal.
         EncodingQuality quality=EncodingQuality::FilmScan3;
@@ -75,32 +77,50 @@ int main(int argc,char** argv) {
                 else throw std::invalid_argument("--quality expects one of low, medium, high, filmscan1, filmscan2, filmscan3");
             }
             else if(flag=="--metadata-binary" && begin<argc) {
-                metadata.open(argv[begin++],std::ios::binary);if(!metadata)throw std::runtime_error("cannot read explicit metadata");
+                metadata_path=argv[begin++];
+                if(metadata_path.empty())throw std::invalid_argument("explicit metadata path must not be empty");
             } else throw std::invalid_argument("unknown or incomplete FilmScan3 option");
         }
         if(argc-begin<2)throw std::invalid_argument("usage: hypercine_encode_filmscan3 [--geometry WIDTHxHEIGHT] [--quality PROFILE] [--metadata-binary values.raw] [--coefficient-hash full|off] OUTPUT_DIR INPUT.bgra [INPUT.bgra ...]");
-        const fs::path directory=argv[begin++];fs::create_directories(directory);
-        std::ofstream trace(directory/"trace.json");trace<<"{\"profile\":\""<<EncodingQualityName(quality)<<"\",\"frames\":[";
+        const fs::path directory=argv[begin++];
         FilmScan3Encoder encoder(geometry);
         encoder.SetCoefficientHashing(coefficient_hashing);
         encoder.SetSessionQuality(quality);
         const std::size_t frame_bytes=static_cast<std::size_t>(geometry.width)*geometry.height*4;
         const std::size_t stride=static_cast<std::size_t>(geometry.width)*4;
+        // Refuse every invalid input before creating any output. Keep the open
+        // handles so a replaced input name cannot switch the selected file.
+        std::vector<hypercine_cli::Input> sources;
+        std::vector<fs::path> retained_parents;
+        sources.reserve(static_cast<std::size_t>(argc-begin));
+        for(int i=begin;i<argc;++i) {
+            sources.emplace_back(argv[i],frame_bytes);
+            retained_parents.push_back(sources.back().parent());
+        }
+        std::unique_ptr<hypercine_cli::Input> metadata;
+        if(!metadata_path.empty()) {
+            constexpr std::uintmax_t metadata_bytes_per_frame=16+10+8+11;
+            metadata=std::make_unique<hypercine_cli::Input>(metadata_path,
+                metadata_bytes_per_frame*static_cast<std::uintmax_t>(argc-begin));
+            retained_parents.push_back(metadata->parent());
+        }
 #ifdef HYPERCINE_METAL_AUDIT
         auto audit=std::make_shared<metal_test::Audit>(geometry);
         detail::FrontendAccess::Use(encoder,audit);
         std::cout<<"Required Metal device: "<<audit->DeviceName()<<'\n';
 #endif
+        hypercine_cli::OutputTransaction output_run(directory,retained_parents);
+        std::ostringstream trace;
+        trace.exceptions(std::ios::badbit | std::ios::failbit);
+        trace<<"{\"profile\":\""<<EncodingQualityName(quality)<<"\",\"frames\":[";
         for(int i=begin;i<argc;++i) {
             AlignedVector<uint8_t> input(frame_bytes);
-            std::ifstream source(argv[i],std::ios::binary);source.read(reinterpret_cast<char*>(input.data()),input.size());
-            if(!source || source.peek()!=std::char_traits<char>::eof())
-                throw std::runtime_error("input must contain exactly "+std::to_string(geometry.width)+"x"+std::to_string(geometry.height)+" BGRA bytes");
+            sources[static_cast<std::size_t>(i-begin)].ReadExact(input.data(),input.size());
+            sources[static_cast<std::size_t>(i-begin)].RequireEnd();
             FilmScan3Metadata values;
-            if(metadata.is_open()) {
-                metadata.read(reinterpret_cast<char*>(values.guid.data()),values.guid.size());
-                metadata.read(values.date.data(),values.date.size());metadata.read(values.time.data(),values.time.size());metadata.read(values.timecode.data(),values.timecode.size());
-                if(!metadata)throw std::runtime_error("truncated explicit variable metadata");
+            if(metadata) {
+                metadata->ReadExact(values.guid.data(),values.guid.size());
+                metadata->ReadExact(values.date.data(),values.date.size());metadata->ReadExact(values.time.data(),values.time.size());metadata->ReadExact(values.timecode.data(),values.timecode.size());
             } else {
                 const unsigned f=encoder.state().frame_index;
                 const unsigned parts[]={f/(30*60*60)%24,f/(30*60)%60,f/30%60,f%30};
@@ -111,13 +131,12 @@ int main(int argc,char** argv) {
                 std::vector<uint8_t> bytes;bytes.reserve(frame_bytes);
                 for(int c:{0,2,1}) {const auto& p=planes[c];for(int y=0;y<p.height;++y)for(int x=0;x<p.width;++x){
                     const auto value=static_cast<uint16_t>(p.pixels[y*p.stride+x]);bytes.push_back(static_cast<uint8_t>(value));bytes.push_back(static_cast<uint8_t>(value>>8));}}
-                std::ostringstream filename;filename<<"frame_"<<std::setfill('0')<<std::setw(4)<<encoder.state().frame_index<<".reference.yuv";
-                std::ofstream f(directory/filename.str(),std::ios::binary);f.write(reinterpret_cast<const char*>(bytes.data()),bytes.size());f.close();if(!f)throw std::runtime_error("reference plane write failed");
+                std::ostringstream filename;filename.exceptions(std::ios::badbit | std::ios::failbit);filename<<"frame_"<<std::setfill('0')<<std::setw(4)<<encoder.state().frame_index<<".reference.yuv";
+                output_run.WriteNew(filename.str(),bytes.data(),bytes.size());
             }
             auto result=encoder.Encode(input.data(),input.size(),stride,values);
-            std::ostringstream name;name<<"frame_"<<std::setfill('0')<<std::setw(4)<<result.state.frame_index<<".cfhd";
-            std::ofstream output(directory/name.str(),std::ios::binary);output.write(reinterpret_cast<const char*>(result.sample.data()),result.sample.size());output.close();
-            if(!output)throw std::runtime_error("sample write failed");
+            std::ostringstream name;name.exceptions(std::ios::badbit | std::ios::failbit);name<<"frame_"<<std::setfill('0')<<std::setw(4)<<result.state.frame_index<<".cfhd";
+            output_run.WriteNew(name.str(),result.sample.data(),result.sample.size());
             if(i!=begin)trace<<',';
             trace<<"{\"frame_index\":"<<result.state.frame_index<<",\"fs_rate_limiter\":"<<result.state.fs_rate_limiter
                  <<",\"previous_sample_bytes\":"<<result.state.previous_sample_bytes
@@ -129,11 +148,14 @@ int main(int argc,char** argv) {
             else {trace<<",\"coefficient_fnv64\":[";
             for(unsigned k=0;k<30;++k){if(k)trace<<',';trace<<'"'<<std::hex<<std::setw(16)<<std::setfill('0')<<result.coefficient_fnv64[k]<<'"'<<std::dec;}trace<<"]}";}
         }
-        if(metadata.is_open() && metadata.peek()!=std::char_traits<char>::eof())throw std::runtime_error("excess explicit variable metadata");
-        trace<<"]}\n";trace.close();if(!trace)throw std::runtime_error("trace write failed");
+        if(metadata)metadata->RequireEnd();
+        trace<<"]}\n";
+        const auto trace_bytes=trace.str();
+        output_run.WriteNew("trace.json",trace_bytes.data(),trace_bytes.size());
 #ifdef HYPERCINE_METAL_AUDIT
         audit->Report();
 #endif
+        output_run.Publish();
         return 0;
     }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
 }

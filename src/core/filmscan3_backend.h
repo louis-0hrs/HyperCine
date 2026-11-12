@@ -82,11 +82,12 @@ std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend, MetalFactory = MetalF
 std::shared_ptr<Frontend> SelectFrontend(FilmScan3Backend, FilmScan3Geometry);
 // Encoder-owned geometry snapshot. Factories and BackendSelection keep their
 // original frontend identity for native timing and fault-injection helpers.
-// Only the encoder's private shared_ptr holds this internal adapter; its public
-// object layout is unchanged. A later declaration change fails before Transform.
+// Only the encoder's private shared_ptr holds this internal adapter; the adapter
+// needs no additional public fields. A later declaration change fails before Transform.
 std::shared_ptr<Frontend> BindFrontend(std::shared_ptr<Frontend>);
 struct FrontendAccess {
     static void Use(FilmScan3Encoder& encoder, std::shared_ptr<Frontend> frontend) {
+        if (!encoder.active_) throw std::logic_error("moved-from FilmScan3 encoder is inactive");
         // Injecting is a session-binding operation, not a way to change the
         // session geometry. The declaration is validated on its own first, so a
         // frontend that answers with an impossible shape cannot be installed even

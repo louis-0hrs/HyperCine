@@ -209,6 +209,7 @@ struct Pool {
     SlotState* slots = nullptr;
     encoder* enc = nullptr;
     transform** transforms = nullptr;
+    int channel_count = 0;
     std::atomic<int> failed{0};
 };
 
@@ -224,7 +225,7 @@ void WorkerMain(Pool* pool) {
         }
         const double start = NowMs();
         EncodedPiece piece;
-        const bool ok = EncodeOneExternalBand(pool->enc, pool->transforms, work.coeff, &piece);
+        const bool ok = EncodeOneExternalBand(pool->enc, pool->transforms, pool->channel_count, work.coeff, &piece);
         const double end = NowMs();
         if (!ok) {
             piece.ok = false;
@@ -333,6 +334,7 @@ Phase2Run RunPhase2(encoder* enc_opaque, transform* transforms_opaque[], int cha
     pool.slots = slots.data();
     pool.enc = enc_opaque;
     pool.transforms = transforms_opaque;
+    pool.channel_count = channel_count;
     pool.threads.reserve(static_cast<size_t>(run.workers));
     for (int i = 0; i < run.workers; ++i) pool.threads.emplace_back(WorkerMain, &pool);
 

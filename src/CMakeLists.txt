@@ -1,11 +1,21 @@
 # HyperCine Source Library CMakeLists.txt
 
+# Host-side SDK entropy wrappers have no CUDA dependency. Build the actual
+# implementation once so bounds regression tests can run on CPU-only hosts.
+if(TARGET CFHDCodecStatic)
+    find_package(Threads REQUIRED)
+    add_library(hypercine_entropy_cpu STATIC
+        cpu/entropy_parallel.cpp
+        cpu/entropy_stages.cpp)
+    target_include_directories(hypercine_entropy_cpu PUBLIC ${CMAKE_SOURCE_DIR}/include)
+    target_compile_definitions(hypercine_entropy_cpu PRIVATE _ALLOCATOR=1)
+    target_link_libraries(hypercine_entropy_cpu PUBLIC CFHDCodecStatic Threads::Threads)
+endif()
+
 if(HYPERCINE_ENABLE_CUDA)
     add_library(hypercine_wavelet STATIC
         cpu/wavelet_cpu.cpp
         cpu/upstream_wrapper.cpp
-        cpu/entropy_parallel.cpp
-        cpu/entropy_stages.cpp
         core/hybrid_encoder.cpp
         core/phase2a_encoder.cpp
         core/phase2b_encoder.cpp
@@ -43,6 +53,9 @@ else()
 endif()
 
 target_link_libraries(hypercine_wavelet PUBLIC hypercine_quality_state)
+if(TARGET hypercine_entropy_cpu)
+    target_link_libraries(hypercine_wavelet PUBLIC hypercine_entropy_cpu)
+endif()
 
 if(TARGET hypercine_core)
     target_link_libraries(hypercine_core INTERFACE hypercine_wavelet)

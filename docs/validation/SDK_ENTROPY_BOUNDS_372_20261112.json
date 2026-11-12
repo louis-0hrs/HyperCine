@@ -1,0 +1,154 @@
+{
+  "copyright": "Copyright (c) 2026 HyperCine Contributors.",
+  "license": "MIT OR Apache-2.0",
+  "tracking_issue": 372,
+  "base_commit": "dca0c0707a0d460fb8cb7ca7d198c0a7aa4be8e7",
+  "reviewed_source_manifest_sha256": "02c3785dc187da23dd89164bb0fe3d78e72f7995e7ce43b7f195df80fbccca5e",
+  "manifest_scope": "16 implementation/build/test/document files before the full-suite result was appended; source_sha256 below binds the 15 executable/build/test inputs.",
+  "source_sha256": {
+    "include/hypercine/entropy_parallel.h": "6cc2d23f45e81902e46b6c3415120f1cb1ba2444ef4e0f88ff134bc659903a7e",
+    "include/hypercine/entropy_stage.h": "2914def4a9b78cdc517b1a0ce65fce7ca640ef0041fc9a894d0f799aba08e62a",
+    "src/CMakeLists.txt": "edc4c6023e11750c667ea62a2b35e2ff0c1eecb0db86c8f31a637ec608c2d728",
+    "src/core/phase2a_encoder.cpp": "102579bf24cbb6807ed34367dcdd23c1e0d2b442504d78026d91dccdb84d136c",
+    "src/core/phase2b_encoder.cpp": "5f688459befa6c165adc98d0ba9b9549f05091f12d9d3948973eda3d1872bbcd",
+    "src/core/phase2c_encoder.cpp": "699a29b42b13ddffea795ae0785067dd8e0aeb7219faa3cfdb46caf83f5239a4",
+    "src/core/phase2d_encoder.cpp": "51127e5a205d1f40cb6d8f90fe3f36a588ffb188ec96472efe41532f44af8aea",
+    "src/core/phase3a_encoder.cpp": "af0a4ceb9f2ff356d4819ba3a2b254053f45090a5193fb008be88aa95ed874a3",
+    "src/cpu/entropy_parallel.cpp": "b97eeee46c38c3872ab6b2c72a2b5787b72167452b46b05a12a8ee2b9240934c",
+    "src/cpu/entropy_sdk_guard.h": "5d610e401fd0bdd0cdd46d2f73ad10e658052e6d338f2523b068860146fec785",
+    "src/cpu/entropy_stages.cpp": "b344351c2f2f808f35d86d363c3dc5736920637d0236580f7115a2218de25232",
+    "tests/CMakeLists.txt": "15bbdbb0551bd2c0fec456702451cca1ebf9e1b60349eab2c579b79816b5d5cb",
+    "tests/test_entropy_sdk_bounds.cpp": "8d75a052e1ea1099bf7c620636311cb2c469147f963b196bef1bb4a81322957d",
+    "tests/test_phase2a.cpp": "4da85da8454e7a0c87c34cf055590f13840941cc715dac33dd70132e7749e24f",
+    "tests/test_phase2b.cpp": "9aa322ec28771b782d3e8343d59f11ec0ad743efe303d0dbb1d4be788bdcf826"
+  },
+  "environment": {
+    "system": "Linux",
+    "architecture": "x86_64",
+    "compiler": "GCC 14.2.0",
+    "configuration": "Release",
+    "python": "3.12.14",
+    "cmake": "3.31.6",
+    "ffmpeg": "7.1.5-0+deb13u1",
+    "CUDA": false
+  },
+  "full_sdk_suite": {
+    "status": "EXECUTED_WITH_BLOCKED_REFERENCE_ORACLE",
+    "registered": 62,
+    "completed": 62,
+    "passed": 61,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 1,
+    "skipped_tests": [
+      "ffmpeg_oracle_qualification"
+    ],
+    "ctest_exit_code": 0,
+    "strict_all_pass_acceptance": false,
+    "ctest_seconds": 60.27,
+    "log_sha256": "1f87b04712afdeeebcb0b01c86b5f4c1adb955f7319910daf7e7a4939dfde299",
+    "source_unchanged": true,
+    "fingerprints_verified": 15,
+    "command": "ctest --test-dir build-sdk-bounds -C Release --output-on-failure --no-tests=error",
+    "reason": "The installed FFmpeg 7.1.5-0+deb13u1 is not on the measured decoder-build list (n8.0, 9.0.2); the unchanged gate returns 77.",
+    "next_step": "Use an already qualified decoder build and rerun ffmpeg_oracle_qualification, including its pinned-output checks. Do not change the allowlist merely to obtain a passing result."
+  },
+  "sdk_bounds": {
+    "ctest": "entropy_sdk_bounds",
+    "status": "PASS",
+    "negative_controls": 133,
+    "positive_comparisons": 69,
+    "reference": "Actual prepared and encoded 256x256 BGRA SDK frame; every one of 30 bands compared with direct SDK lowpass/highpass encoding before and after invalid requests. One-entry transform extent and int8/int16/peaks cases included.",
+    "NDEBUG": true
+  },
+  "sanitizer": {
+    "status": "PASS",
+    "negative_controls": 133,
+    "positive_comparisons": 69,
+    "compiler_flags": [
+      "-std=c++17",
+      "-O1",
+      "-g",
+      "-DNDEBUG",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-D_ALLOCATOR=1",
+      "-DWARPSTUFF=1"
+    ],
+    "translation_units": [
+      "tests/test_entropy_sdk_bounds.cpp",
+      "src/cpu/entropy_parallel.cpp",
+      "src/cpu/entropy_stages.cpp"
+    ],
+    "linked_dependencies": [
+      "Uninstrumented frozen libCFHDCodec.a",
+      "Real system libuuid.so.1",
+      "pthread",
+      "m"
+    ],
+    "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1",
+    "exit_code": 0,
+    "raw_log_retained": false,
+    "evidence": "Implementing agent observed the actual compile/run tool output; binary remains outside Git. No raw log or log hash is asserted.",
+    "scope": "Actual wrapper and test instrumentation only; no whole-SDK or LeakSanitizer qualification."
+  },
+  "retained_artifact_sha256": {
+    "test_entropy_sdk_bounds_asan": "12c27c02b3403112eb80ac721ed92127fdd1c4ebbb89702340124761dae1da93",
+    "libCFHDCodec.a": "d72b2ba804871e57ca9fe080c91848833f687e8ea1e87fa8c79670131b764791"
+  },
+  "mutation_controls": [
+    {
+      "name": "Relax exact valuebook extent",
+      "change": "Replace the VALUE_TABLE_LENGTH inequality with a lower-bound-only comparison in the actual guard.",
+      "observed_exit_code": 1,
+      "observed_failure": "valuebook extent: encoded invalid band",
+      "source_context": "Earlier reviewed 88-negative/68-positive source; later Refresh additions do not change this table guard.",
+      "raw_log_retained": false
+    },
+    {
+      "name": "Convert before Refresh preflight",
+      "change": "In an out-of-tree copy of entropy_parallel.cpp, add the actual SDK conversion before the unchanged guard only for encoder num_spatial == 0 and valid three-channel/non-null input and scratch.",
+      "safety_context": "Prepared transforms have spatial count 2; all conversion buffers remain valid. No invalid SDK indexing was invoked.",
+      "observed_exit_code": 1,
+      "observed_failure": "refresh encoder spatial mismatch: rejected refresh wrote frame/wavelet/input/scratch bytes",
+      "raw_log_retained": false,
+      "source_context": "Final corrected wrapper/test source; copied mutant sources and binary remain outside Git."
+    }
+  ],
+  "independent_review": {
+    "status": "No remaining functional blockers in scoped wrapper/Refresh changes",
+    "review_corrections": [
+      "Exact three-channel YUV Refresh contract before conversion",
+      "Bounded spatial counts and prepared num_levels/num_wavelets relation",
+      "Independent frame/plane/wavelet/input/scratch byte snapshots",
+      "Copyright/license and manual static-archive linking documentation"
+    ]
+  },
+  "dependency_preparation": {
+    "description": "The minimal environment lacked uuid development files. An unchanged genuine util-linux v2.41 uuid header and a development link to the existing system runtime were prepared outside Git. Parent and nested CMake runs use the same process-local development prefix. No fake header or stub symbol was introduced.",
+    "header_source": "https://github.com/util-linux/util-linux/blob/v2.41/libuuid/src/uuid.h",
+    "header_sha256": "d9319bc9b66c1e34137356b67b03ad41b44b0f8f12a284b47484086aee49f499",
+    "runtime_sha256": "632fd43a9d8d6f3496833b7e62e7840f397163373dddf8b8eb0b2b7f36593117"
+  },
+  "prior_full_attempt": {
+    "failed": 2,
+    "skipped": 1,
+    "ctest_seconds": 69.26,
+    "log_sha256": "ebb17fdb07b0026af892f52451a69b47c7a4b812021711327ea270157bc01e5b",
+    "failed_tests": [
+      "upstream_off_configure_contract",
+      "cpu_isa_include_boundary_contract"
+    ],
+    "cause": "Nested CMake processes did not inherit the local uuid development prefix. Corrected only the process environment and reran the entire SDK inventory with unchanged repository source.",
+    "oracle_skip": "Unchanged and still blocked in final run."
+  },
+  "limitations": [
+    "No CUDA toolkit build or native CUDA/Metal/Vulkan/Windows run.",
+    "Updated CUDA-dependent call sites were reviewed but are not compiled in this CPU-only configuration.",
+    "Prepared spatial/GOP1 wrappers only; unsupported temporal/field layouts fail closed.",
+    "Callers own actual pointer extents, allocation, lifetime and synchronization.",
+    "No original-SDK pixel-correctness or product release qualification follows from fragment parity.",
+    "CTest exit 0 with one explicit skip is not an all-pass acceptance."
+  ]
+}

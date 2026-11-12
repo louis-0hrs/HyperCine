@@ -157,6 +157,8 @@ def compare(root, index, session, encoder, directory, state):
             raise ValueError('direct SDK trace differs from manifest')
     if directory.exists():
         raise ValueError('writer output already exists')
+    # The CLI requires an existing parent and creates its output exclusively.
+    directory.parent.mkdir(parents=True, exist_ok=True)
     prefix = [sys.executable, str(encoder)] if encoder.suffix == '.py' else [str(encoder)]
     subprocess.run(prefix+['--coefficient-hash', 'off', '--quality', profile, str(directory)]+
                    [str(root/f['input']) for f in frames], check=True, capture_output=True, text=True)

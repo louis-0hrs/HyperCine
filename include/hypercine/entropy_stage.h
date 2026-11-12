@@ -99,7 +99,9 @@ EntropySymbols EncodeHighpassStages(const int16_t* coeff, int width, int height,
 
 // Build the band payload around an already packed coefficient bitstream and
 // compare it with EncodeOneExternalBand. `coeff` must be tight (pitch == width).
-bool MatchUpstreamHighpass(encoder* encoder, transform* transforms[], const ExternalCoeff& coeff,
+// channel_count is the actual caller-owned transform array extent.
+// Uses the same prepared spatial/GOP1 relation as EncodeOneExternalBand.
+bool MatchUpstreamHighpass(encoder* encoder, transform* transforms[], int channel_count, const ExternalCoeff& coeff,
                            EntropySymbols* symbols);
 
 // Header and trailer around coefficient bytes that already include the band-end

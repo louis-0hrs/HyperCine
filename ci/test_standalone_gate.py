@@ -37,8 +37,17 @@ class StandaloneGateTests(unittest.TestCase):
                 registered_tests({'tests': [{'name': name} for name in REQUIRED
                                             if name != missing]})
 
+    def test_output_safety_gates_are_mandatory(self):
+        for name in ('filmscan3_output_safety', 'filmscan3_output_transaction',
+                     'p6_output_cli_integration', 'p6_output_ownership_contract',
+                     'p6_output_ownership_optimized', 'filmscan3_cli_4k_ffmpeg_gate'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_internal_backend_session_gates_are_binding(self):
         for name in ('encoder_backend_selection_contract', 'encoder_backend_session_packets',
+                     'encoder_move_ownership',
                      'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence'):
             self.assertIn(name, REQUIRED)
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
