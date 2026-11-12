@@ -125,7 +125,25 @@ EncoderSession::EncoderSession(const EncoderSessionConfig& config, const Encoder
     encoder_.SetCoefficientHashing(config_.diagnostic == DiagnosticMode::CoefficientFnv64);
 }
 
+EncoderSession::EncoderSession(EncoderSession&& other) noexcept
+    : config_(other.config_), selection_(std::move(other.selection_)),
+      encoder_(std::move(other.encoder_)) {
+    other.config_ = EncoderSessionConfig{};
+    other.selection_ = BackendSelection{};
+}
+
+EncoderSession& EncoderSession::operator=(EncoderSession&& other) noexcept {
+    if (this == &other) return *this;
+    config_ = other.config_;
+    selection_ = std::move(other.selection_);
+    encoder_ = std::move(other.encoder_);
+    other.config_ = EncoderSessionConfig{};
+    other.selection_ = BackendSelection{};
+    return *this;
+}
+
 FilmScan3Frame EncoderSession::Encode(const uint8_t* data, std::size_t bytes, std::size_t stride) {
+    if (!active()) throw std::logic_error("moved-from encoder session is inactive");
     if (config_.input_stride_bytes != 0 &&
         (stride != config_.input_stride_bytes || bytes < config_.input_bytes))
         throw std::invalid_argument("input does not match the session storage contract");

@@ -4,11 +4,29 @@
 
 #include "hypercine/wavelet.h"
 #include <atomic>
+#include <cstddef>
 #include <vector>
 #include <cstring>
 #include <cstdlib>
+#include <limits>
+#include <new>
+#include <stdexcept>
 
 namespace {
+
+// The scalar kernels below use int row offsets. Validate the entire active
+// extent before any arithmetic, allocation or store, including output planes.
+// Callers still own the buffers and must provide the declared storage.
+bool CpuPlaneExtentFits(int columns, int rows, int stride) noexcept {
+    if (columns <= 0 || rows <= 0 || stride < columns) return false;
+    constexpr auto int_limit = static_cast<std::size_t>((std::numeric_limits<int>::max)());
+    constexpr auto pointer_limit = static_cast<std::size_t>(
+        (std::numeric_limits<std::ptrdiff_t>::max)()) / sizeof(int16_t);
+    constexpr auto limit = int_limit < pointer_limit ? int_limit : pointer_limit;
+    return static_cast<std::size_t>(columns) <= limit &&
+        static_cast<std::size_t>(rows - 1) <=
+            (limit - static_cast<std::size_t>(columns)) / static_cast<std::size_t>(stride);
+}
 
 // C++17 signed shifts are implementation-defined; use exact floor division.
 inline int32_t FloorDivide8(int32_t value) { return value>=0 ? value/8 : -((-value+7)/8); }
@@ -277,7 +295,9 @@ HyperCineStatus HyperCine_ForwardHorizontal26_CPU(
 ) {
     if (!src || !lowpass || !highpass) return HYPERCINE_STATUS_INVALID_ARGUMENT;
     if (width < 6 || (width % 2) != 0 || height <= 0) return HYPERCINE_STATUS_INVALID_ARGUMENT;
-    if (src_stride < width || low_stride < (width / 2) || high_stride < (width / 2)) {
+    if (!CpuPlaneExtentFits(width, height, src_stride) ||
+        !CpuPlaneExtentFits(width / 2, height, low_stride) ||
+        !CpuPlaneExtentFits(width / 2, height, high_stride)) {
         return HYPERCINE_STATUS_INVALID_ARGUMENT;
     }
 
@@ -339,7 +359,9 @@ HyperCineStatus HyperCine_ForwardVertical26_CPU(
 ) {
     if (!src || !lowpass || !highpass) return HYPERCINE_STATUS_INVALID_ARGUMENT;
     if (height < 6 || (height % 2) != 0 || width <= 0) return HYPERCINE_STATUS_INVALID_ARGUMENT;
-    if (src_stride < width || low_stride < width || high_stride < width) {
+    if (!CpuPlaneExtentFits(width, height, src_stride) ||
+        !CpuPlaneExtentFits(width, height / 2, low_stride) ||
+        !CpuPlaneExtentFits(width, height / 2, high_stride)) {
         return HYPERCINE_STATUS_INVALID_ARGUMENT;
     }
 
@@ -400,7 +422,7 @@ HyperCineStatus HyperCine_ForwardSpatial2D_CPU(
     int16_t* lh, int lh_stride,
     int16_t* hl, int hl_stride,
     int16_t* hh, int hh_stride
-) {
+) try {
     if (!src || !ll || !lh || !hl || !hh) return HYPERCINE_STATUS_INVALID_ARGUMENT;
     if (width < 6 || (width % 2) != 0 || height < 6 || (height % 2) != 0) {
         return HYPERCINE_STATUS_INVALID_ARGUMENT;
@@ -408,6 +430,12 @@ HyperCineStatus HyperCine_ForwardSpatial2D_CPU(
 
     const int half_w = width / 2;
     const int half_h = height / 2;
+    if (!CpuPlaneExtentFits(width, height, src_stride) ||
+        !CpuPlaneExtentFits(half_w, half_h, ll_stride) ||
+        !CpuPlaneExtentFits(half_w, half_h, lh_stride) ||
+        !CpuPlaneExtentFits(half_w, half_h, hl_stride) ||
+        !CpuPlaneExtentFits(half_w, half_h, hh_stride))
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
 
     // Intermediate horizontal lowpass and highpass buffers
     std::vector<int16_t> horiz_low(static_cast<size_t>(half_w) * height);
@@ -435,6 +463,12 @@ HyperCineStatus HyperCine_ForwardSpatial2D_CPU(
         hh, hh_stride
     );
     return status;
+} catch (const std::bad_alloc&) {
+    return HYPERCINE_STATUS_OUT_OF_MEMORY;
+} catch (const std::length_error&) {
+    // Geometry was checked above; a smaller implementation-specific vector
+    // maximum is a resource refusal, not an exception across the C API.
+    return HYPERCINE_STATUS_OUT_OF_MEMORY;
 }
 
 HyperCineStatus HyperCine_InverseVertical26_CPU(
@@ -444,8 +478,11 @@ HyperCineStatus HyperCine_InverseVertical26_CPU(
     int16_t* dst, int dst_stride
 ) {
     if (!lowpass || !highpass || !dst) return HYPERCINE_STATUS_INVALID_ARGUMENT;
-    if (width <= 0 || height < 3) return HYPERCINE_STATUS_INVALID_ARGUMENT;
-    if (low_stride < width || high_stride < width || dst_stride < width) {
+    if (width <= 0 || height < 3 || height > (std::numeric_limits<int>::max)() / 2)
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (!CpuPlaneExtentFits(width, height, low_stride) ||
+        !CpuPlaneExtentFits(width, height, high_stride) ||
+        !CpuPlaneExtentFits(width, 2 * height, dst_stride)) {
         return HYPERCINE_STATUS_INVALID_ARGUMENT;
     }
 
@@ -513,8 +550,11 @@ HyperCineStatus HyperCine_InverseHorizontal26_CPU(
     int16_t* dst, int dst_stride
 ) {
     if (!lowpass || !highpass || !dst) return HYPERCINE_STATUS_INVALID_ARGUMENT;
-    if (width < 3 || height <= 0) return HYPERCINE_STATUS_INVALID_ARGUMENT;
-    if (low_stride < width || high_stride < width || dst_stride < (2 * width)) {
+    if (width < 3 || width > (std::numeric_limits<int>::max)() / 2 || height <= 0)
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (!CpuPlaneExtentFits(width, height, low_stride) ||
+        !CpuPlaneExtentFits(width, height, high_stride) ||
+        !CpuPlaneExtentFits(2 * width, height, dst_stride)) {
         return HYPERCINE_STATUS_INVALID_ARGUMENT;
     }
 
@@ -583,13 +623,21 @@ HyperCineStatus HyperCine_InverseSpatial2D_CPU(
     const int16_t* hh, int hh_stride,
     int subband_width, int subband_height,
     int16_t* dst, int dst_stride
-) {
+) try {
     if (!ll || !lh || !hl || !hh || !dst) return HYPERCINE_STATUS_INVALID_ARGUMENT;
-    if (subband_width < 3 || subband_height < 3) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (subband_width < 3 || subband_height < 3 ||
+        subband_width > (std::numeric_limits<int>::max)() / 2 ||
+        subband_height > (std::numeric_limits<int>::max)() / 2)
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
 
     const int recon_h = subband_height * 2;
     const int recon_w = subband_width * 2;
-    if (dst_stride < recon_w) return HYPERCINE_STATUS_INVALID_ARGUMENT;
+    if (!CpuPlaneExtentFits(subband_width, subband_height, ll_stride) ||
+        !CpuPlaneExtentFits(subband_width, subband_height, lh_stride) ||
+        !CpuPlaneExtentFits(subband_width, subband_height, hl_stride) ||
+        !CpuPlaneExtentFits(subband_width, subband_height, hh_stride) ||
+        !CpuPlaneExtentFits(recon_w, recon_h, dst_stride))
+        return HYPERCINE_STATUS_INVALID_ARGUMENT;
 
     // Intermediate vertical inverse results: horiz_low (from LL and HL) and horiz_high (from LH and HH)
     std::vector<int16_t> horiz_low(static_cast<size_t>(subband_width) * recon_h);
@@ -620,4 +668,8 @@ HyperCineStatus HyperCine_InverseSpatial2D_CPU(
         subband_width, recon_h,
         dst, dst_stride
     );
+} catch (const std::bad_alloc&) {
+    return HYPERCINE_STATUS_OUT_OF_MEMORY;
+} catch (const std::length_error&) {
+    return HYPERCINE_STATUS_OUT_OF_MEMORY;
 }

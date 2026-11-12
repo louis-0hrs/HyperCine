@@ -60,6 +60,15 @@ HyperCineStatus HyperCine_GetCUDADeviceInfo(HyperCineCUDADeviceInfo* info);
 /* CPU Reference Wavelet Transform Functions                                 */
 /* ========================================================================= */
 
+/* The six CPU reference entry points below reject dimensions/strides whose
+ * active plane extent exceeds signed-int indexing, before touching buffers.
+ * Buffers remain caller-owned and must cover the declared active extent.
+ * Invalid arguments return HYPERCINE_STATUS_INVALID_ARGUMENT. The 2D CPU
+ * wrappers contain scratch allocation failures and return
+ * HYPERCINE_STATUS_OUT_OF_MEMORY without modifying caller output buffers.
+ * These guarantees do not describe the separate upstream or GPU entry points.
+ */
+
 /**
  * @brief Production 1D Horizontal 2-6 Forward Wavelet Transform (CPU Reference).
  *

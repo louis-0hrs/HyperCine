@@ -109,19 +109,47 @@ uint32_t MintHashSession() {
     return next.fetch_add(1, std::memory_order_relaxed);
 }
 }
-FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::SelectFrontend(backend)) {}
-FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry) : frontend_(detail::CpuFrontend(geometry)) {}
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend) : frontend_(detail::BindFrontend(detail::SelectFrontend(backend))) {}
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry) : frontend_(detail::BindFrontend(detail::CpuFrontend(geometry))) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Geometry geometry, WaveletIsa isa)
-    : frontend_(detail::CpuFrontend(geometry, isa)) {}
+    : frontend_(detail::BindFrontend(detail::CpuFrontend(geometry, isa))) {}
 FilmScan3Encoder::FilmScan3Encoder(FilmScan3Backend backend, FilmScan3Geometry geometry)
-    : frontend_(detail::SelectFrontend(backend, geometry)) {}
+    : frontend_(detail::BindFrontend(detail::SelectFrontend(backend, geometry))) {}
+FilmScan3Encoder::FilmScan3Encoder(FilmScan3Encoder&& other) noexcept {
+    *this = std::move(other);
+}
+FilmScan3Encoder& FilmScan3Encoder::operator=(FilmScan3Encoder&& other) noexcept {
+    if (this == &other) return *this;
+    frontend_ = std::move(other.frontend_);
+    state_ = other.state_;
+    coefficient_hashing_ = other.coefficient_hashing_;
+    quality_locked_ = other.quality_locked_;
+    quality_ = other.quality_;
+    hash_session_ = other.hash_session_;
+    diagnostic_serial_ = other.diagnostic_serial_;
+    active_ = other.active_;
+    // A null frontend also means a valid, lazy default CPU session. Keep an
+    // explicit inactive flag so the source cannot fall through to that backend
+    // with the transferred session's old frame/profile/diagnostic state.
+    other.state_ = FilmScan3State{};
+    other.coefficient_hashing_ = true;
+    other.quality_locked_ = false;
+    other.quality_ = EncodingQuality::FilmScan3;
+    other.hash_session_ = 0;
+    other.diagnostic_serial_ = 1;
+    other.active_ = false;
+    return *this;
+}
 WaveletIsa FilmScan3Encoder::wavelet_isa() const noexcept {
     // The default-constructed encoder lazily takes the shared CPU frontend, which is
     // Auto-resolved at first use; report what that frontend will actually run.
     return frontend_ ? frontend_->Isa() : WaveletIsa::Auto;
 }
-void FilmScan3Encoder::SetCoefficientHashing(bool enabled) noexcept { coefficient_hashing_=enabled; }
+void FilmScan3Encoder::SetCoefficientHashing(bool enabled) noexcept {
+    if (active_) coefficient_hashing_=enabled;
+}
 void FilmScan3Encoder::SetSessionQuality(EncodingQuality quality) {
+    if (!active_) throw std::logic_error("moved-from FilmScan3 encoder is inactive");
     const char* refusal=SessionProfileRefusalReason(quality);
     if(*refusal)throw std::invalid_argument(refusal);
     // The profile owns the rate limiter, the hysteresis token and the previous
@@ -148,6 +176,7 @@ void FilmScan3Encoder::StampDiagnosticOff(FilmScan3Frame& result) {
     result.coefficient_hash=FilmScan3CoefficientHash::DiagnosticOff;
 }
 FilmScan3Geometry FilmScan3Encoder::geometry() const noexcept {
+    if (!active_) return {0,0,0};
     return frontend_ ? frontend_->Geometry() : FilmScan3Geometry{};
 }
 FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride) {
@@ -157,9 +186,11 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     return Encode(data,bytes,stride,metadata);
 }
 FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride,const FilmScan3Metadata& metadata) {
+    if (!active_) throw std::logic_error("moved-from FilmScan3 encoder is inactive");
     if(state_.frame_index>=65535)throw std::length_error("FilmScan3 frame counter exhausted");
-    auto& frontend=*(frontend_ ? frontend_ : detail::CpuFrontend());
-    const auto g=geometry();
+    auto selected=frontend_ ? frontend_ : detail::BindFrontend(detail::CpuFrontend());
+    auto& frontend=*selected;
+    const auto g=selected->Geometry();
     ValidateFilmScan3Geometry(g);
     const auto pixels=static_cast<std::size_t>(g.width)*g.height;
     auto pyramid=frontend.Transform(data,bytes,g.width,g.height,stride);
@@ -249,6 +280,10 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     // leaves that identity untouched. Rate state is committed immediately after.
     if(coefficient_hashing_) result.coefficient_hash=FilmScan3CoefficientHash::Full;
     else StampDiagnosticOff(result);
+    // Commit the lazy default binding only with a successful frame. Otherwise
+    // frontend_ would remain null even after encoding, permitting a later
+    // injection to change dimensions while carrying the old rate state.
+    frontend_=std::move(selected);
     state_.fs_rate_limiter=result.state.fs_rate_limiter;
     state_.fs_overbitrate=result.state.fs_overbitrate;
     state_.previous_sample_bytes=result.sample.size();++state_.frame_index;

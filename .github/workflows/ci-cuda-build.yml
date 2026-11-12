@@ -25,6 +25,7 @@ on:
     branches: [ 'main' ]
     paths:
       - 'CMakeLists.txt'
+      - 'cmake/**'
       - 'include/**'
       - 'src/**'
       - 'tools/**'
@@ -36,6 +37,7 @@ on:
   pull_request:
     paths:
       - 'CMakeLists.txt'
+      - 'cmake/**'
       - 'include/**'
       - 'src/**'
       - 'tools/**'
@@ -66,12 +68,7 @@ jobs:
           ref: ${{ inputs.checkout_ref || github.sha }}
 
       - name: Verify upstream immutability
-        run: |
-          status="$(git status --porcelain upstream/)"
-          if [ -n "$status" ]; then
-            echo "upstream/ directory has been modified: $status" >&2
-            exit 1
-          fi
+        run: python3 ci/check_upstream_immutable.py
 
       - name: Free runner disk space
         run: |
@@ -177,12 +174,7 @@ jobs:
           ref: ${{ inputs.checkout_ref || github.sha }}
 
       - name: Verify upstream immutability
-        run: |
-          status="$(git status --porcelain upstream/)"
-          if [ -n "$status" ]; then
-            echo "upstream/ directory has been modified: $status" >&2
-            exit 1
-          fi
+        run: python3 ci/check_upstream_immutable.py
 
       - name: Run the negative controls for the inventory gate
         run: |

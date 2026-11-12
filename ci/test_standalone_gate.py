@@ -9,14 +9,53 @@ import json
 import subprocess
 import unittest
 from unittest.mock import patch
-from run_standalone import (REQUIRED, registered_tests, completed_tests,
-                            required_tests, validate_architecture, invalidate_results, main)
+if __package__:
+    from . import run_standalone as runner
+else:
+    import run_standalone as runner
+
+REQUIRED = runner.REQUIRED
+registered_tests = runner.registered_tests
+completed_tests = runner.completed_tests
+required_tests = runner.required_tests
+validate_architecture = runner.validate_architecture
+invalidate_results = runner.invalidate_results
+main = runner.main
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_public_cpu_wavelet_bounds_are_binding(self):
+        name = 'wavelet_cpu_bounds'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, name):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
+    def test_frozen_reference_and_its_negative_controls_are_mandatory(self):
+        for missing in ('upstream_immutable', 'upstream_immutable_guardrails'):
+            self.assertIn(missing, REQUIRED)
+            with self.subTest(missing=missing), self.assertRaisesRegex(ValueError, missing):
+                registered_tests({'tests': [{'name': name} for name in REQUIRED
+                                            if name != missing]})
+
+    def test_output_safety_gates_are_mandatory(self):
+        for name in ('filmscan3_output_safety', 'filmscan3_output_transaction',
+                     'p6_output_cli_integration', 'p6_output_ownership_contract',
+                     'p6_output_ownership_optimized', 'filmscan3_cli_4k_ffmpeg_gate'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_internal_backend_session_gates_are_binding(self):
         for name in ('encoder_backend_selection_contract', 'encoder_backend_session_packets',
+                     'encoder_move_ownership',
                      'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
+    def test_windows_evidence_snapshot_gates_are_mandatory(self):
+        for name in ('windows_sdk_corpus_contract', 'windows_sdk_snapshot_contract',
+                     'windows_sdk_snapshot_optimized'):
             self.assertIn(name, REQUIRED)
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
@@ -181,7 +220,7 @@ class StandaloneGateTests(unittest.TestCase):
             (build / 'diagnostic.log').write_text('retain diagnostics')
             with patch('sys.argv', ['run_standalone.py', '--build-dir', str(build),
                                     '--system', 'Darwin', '--machine', 'arm64']), \
-                 patch('run_standalone.platform.system', return_value='Linux'), \
+                 patch.object(runner.platform, 'system', return_value='Linux'), \
                  self.assertRaises(ValueError):
                 main()
             self.assertTrue(all(not (build / name).exists() for name in names))
@@ -263,6 +302,7 @@ class StandaloneGateTests(unittest.TestCase):
         # or the merged P4 geometry block; dropping any single registration must
         # fail the gate, not shrink it back to the old green inventory.
         for missing in ('test_reference_release_inventory', 'test_compare_sdk_oracle',
+                        'test_compare_sdk_oracle_optimized',
                         'test_rca159_witness_contract',
                         'filmscan3_geometry_reference_p10'):
             self.assertIn(missing, REQUIRED)

@@ -15,7 +15,7 @@ using namespace hypercine::standalone;
 namespace {
 void Require(bool ok,const char* message) { if(!ok)throw std::runtime_error(message); }
 template<class F> void Reject(F f) { bool threw=false;try{f();}catch(const std::exception&){threw=true;}Require(threw,"invalid submission accepted"); }
-bool Same(FilmScan3State a,FilmScan3State b) { return a.frame_index==b.frame_index && a.fs_rate_limiter==b.fs_rate_limiter && a.previous_sample_bytes==b.previous_sample_bytes; }
+bool Same(FilmScan3State a,FilmScan3State b) { return a.frame_index==b.frame_index && a.fs_rate_limiter==b.fs_rate_limiter && a.previous_sample_bytes==b.previous_sample_bytes && a.fs_overbitrate==b.fs_overbitrate; }
 unsigned U16(const std::vector<uint8_t>& s,std::size_t at) { Require(at<=s.size() && s.size()-at>=2,"truncated tag");return (s[at]<<8)|s[at+1]; }
 uint32_t U32(const std::vector<uint8_t>& s,std::size_t at) { return (U16(s,at)<<16)|U16(s,at+2); }
 void Inspect(const std::vector<uint8_t>& s,int width,int height) {
@@ -100,11 +100,102 @@ public:
     WaveletLevel Forward(const Plane& p,int s) override {return ForwardLevel(p,s);}
     std::string DeviceName() const override {return "test declared geometry";}
 };
+// The declaration can change after Use(); the transform itself remains a
+// deterministic CPU implementation. Its counter proves refusal precedes backend
+// work, including when the changed declaration is itself a legal shape.
+class MutableDeclares final : public detail::Frontend {
+    std::shared_ptr<detail::Frontend> inner_;
+public:
+    FilmScan3Geometry declared;
+    unsigned transforms=0, timing_records=0;
+    explicit MutableDeclares(FilmScan3Geometry geometry)
+        : inner_(detail::CpuFrontend(geometry,WaveletIsa::Scalar)), declared(geometry) {}
+    FilmScan3Geometry Geometry() const noexcept override { return declared; }
+    detail::FrontendBackend Backend() const noexcept override { return detail::FrontendBackend::Cpu; }
+    WaveletIsa Isa() const noexcept override { return WaveletIsa::Scalar; }
+    Planes Convert(const uint8_t* p,std::size_t n,int w,int h,std::size_t s) override {return inner_->Convert(p,n,w,h,s);}
+    WaveletLevel Forward(const Plane& p,int s) override {return inner_->Forward(p,s);}
+    std::string DeviceName() const override { return "test mutable declaration"; }
+    bool ProfileHost() const override { return true; }
+    void RecordHostTiming(const detail::HostTiming&) override { ++timing_records; }
+    detail::FrontendFrame Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool audit) override {
+        ++transforms;
+        return inner_->Transform(p,n,w,h,s,audit);
+    }
+};
+void MutableGeometryBinding() {
+    const FilmScan3Geometry original{128,24};
+    AlignedVector<uint8_t> input(128u*24u*4,128);
+    const auto unchanged_input=input;
+    FilmScan3Encoder control(original,WaveletIsa::Scalar),encoder;
+    const auto first=control.Encode(input.data(),input.size(),512);
+    auto frontend=std::make_shared<MutableDeclares>(original);
+    detail::FrontendAccess::Use(encoder,frontend);
+    encoder.SetCoefficientHashing(false);
+    const auto initial=encoder.state();
+    const auto serial=detail::FrontendAccess::DiagnosticSerial(encoder);
+    const auto session=detail::FrontendAccess::HashSession(encoder);
+    for(const auto changed:{FilmScan3Geometry{192,24},FilmScan3Geometry{256,24},
+                            FilmScan3Geometry{128,32},FilmScan3Geometry{128,24,8192}}) {
+        frontend->declared=changed;
+        const auto bound=encoder.geometry();
+        Require(bound.width==128 && bound.height==24 && bound.sample_capacity_bytes==0,
+                "live frontend declaration replaced the bound geometry");
+        Reject([&]{encoder.Encode(input.data(),input.size(),512);});
+        Require(frontend->transforms==0 && frontend->timing_records==0,
+                "changed frontend declaration reached backend work");
+        Require(Same(initial,encoder.state()),"geometry refusal changed rate state");
+        Require(detail::FrontendAccess::DiagnosticSerial(encoder)==serial &&
+                detail::FrontendAccess::HashSession(encoder)==session,
+                "geometry refusal consumed diagnostic identity");
+        Require(input==unchanged_input,"geometry refusal changed caller bytes");
+    }
+    // A replacement must match the original snapshot, not the old frontend's
+    // newly changed answer. A refused replacement retains the original binding.
+    frontend->declared={256,24};
+    Reject([&]{detail::FrontendAccess::Use(encoder,detail::CpuFrontend({256,24}));});
+    Reject([&]{detail::FrontendAccess::Use(encoder,nullptr);});
+    Require(encoder.geometry().width==128 && encoder.geometry().height==24,
+            "failed replacement changed the bound geometry");
+    frontend->declared=original;
+    Require(encoder.wavelet_isa()==WaveletIsa::Scalar,"binding lost frontend ISA");
+    Require(encoder.Encode(input.data(),input.size(),512).sample==first.sample,
+            "recovered declaration changed the packet");
+    Require(frontend->transforms==1 && frontend->timing_records==1,
+            "binding lost original frontend or host timing delegation");
+    const auto completed=encoder.state();
+    frontend->declared={256,24};
+    Reject([&]{encoder.Encode(input.data(),input.size(),512);});
+    Require(Same(completed,encoder.state()) && frontend->transforms==1,
+            "post-frame declaration drift advanced the session");
+    encoder.Reset();
+    Require(encoder.geometry().width==128 && encoder.geometry().height==24,
+            "Reset discarded the immutable geometry");
+    Reject([&]{encoder.Encode(input.data(),input.size(),512);});
+    Require(Same(initial,encoder.state()) && frontend->transforms==1,
+            "Reset admitted a changed frontend declaration");
+    frontend->declared=original;
+    control.Reset();
+    Require(encoder.Encode(input.data(),input.size(),512).sample==
+            control.Encode(input.data(),input.size(),512).sample,"Reset recovery changed the packet");
+    detail::FrontendAccess::Use(encoder,detail::CpuFrontend(original,WaveletIsa::Scalar));
+    Require(encoder.Encode(input.data(),input.size(),512).sample==
+            control.Encode(input.data(),input.size(),512).sample,"same-geometry replacement changed the next packet");
+
+    // A failed first default Encode must not commit a lazy binding. Fresh
+    // same-session injection remains possible until a real frame succeeds.
+    FilmScan3Encoder failed_default;
+    Reject([&]{failed_default.Encode(nullptr,0,0);});
+    detail::FrontendAccess::Use(failed_default,detail::CpuFrontend(original));
+    Require(failed_default.Encode(input.data(),input.size(),512).sample==first.sample,
+            "failed default Encode committed a geometry binding");
+}
 }
 int main(int argc,char** argv) {try {
     const std::filesystem::path dir=argc==3 && std::string(argv[1])=="--export" ? argv[2]:"";
     Require(argc==1 || !dir.empty(),"usage: test_filmscan3_geometry [--export directory]");
     if(!dir.empty())std::filesystem::create_directories(dir);
+    MutableGeometryBinding();
     for(const auto g:{FilmScan3Geometry{0,2160},{-128,1080},{3841,2160},{3840,2161},{4096,2160},{7680,4320},{2147483520,2147483640}})
         Reject([&]{FilmScan3Encoder invalid(g);});
     Reject([]{ValidateGeometry(3840,2160);}); // legacy cap stays unchanged
@@ -185,6 +276,19 @@ int main(int argc,char** argv) {try {
     FilmScan3Encoder explicit_hd(FilmScan3Geometry{});
     Require(explicit_hd.Encode(hdinput.data(),hdinput.size(),7680).sample==hd0.sample,"default constructor compatibility");
     Require(hd.geometry().width==1920 && hd.state().frame_index==1,"independent HD session");
+    const auto hd_state=hd.state();
+    Reject([&]{detail::FrontendAccess::Use(hd,detail::CpuFrontend({128,24}));});
+    Require(Same(hd_state,hd.state()) && hd.geometry().width==1920,
+            "successful default Encode did not bind its geometry");
+    // Bind a separately owned default session so the independent HD-state
+    // assertion below stays meaningful. Reset must retain its lazy binding.
+    FilmScan3Encoder reset_hd;
+    Require(reset_hd.Encode(hdinput.data(),hdinput.size(),7680).sample==hd0.sample,
+            "independent default session packet");
+    reset_hd.Reset();
+    Reject([&]{detail::FrontendAccess::Use(reset_hd,detail::CpuFrontend({128,24}));});
+    Require(reset_hd.geometry().width==1920 && reset_hd.state().frame_index==0,
+            "Reset allowed default-session geometry replacement");
     encoder.Reset();std::set<std::vector<uint8_t>> identities;std::set<int> limiters;
     std::size_t prev=0;
     for(int i=0;i<16;++i) {

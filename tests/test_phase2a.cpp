@@ -712,7 +712,7 @@ int main(int argc, char** argv) {
             coeff.elem_bytes = 2;
         }
         coeff.data = storage[i].data();
-        if (!hypercine::EncodeOneExternalBand(enc, transforms, coeff, &pieces[i])) {
+        if (!hypercine::EncodeOneExternalBand(enc, transforms, sample->m_channelCount, coeff, &pieces[i])) {
             std::cerr << "external band encode failed channel " << ref.channel << " level " << ref.level << "\n";
             return 1;
         }

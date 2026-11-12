@@ -25,7 +25,9 @@ class WriterTraceContract(unittest.TestCase):
 
     def invoke(self, document, rejected=False, tamper=False):
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);corpus=root/'corpus';work=root/'work'
+            # Resolve the test-owned container once (macOS commonly exposes
+            # its temporary directory through the /var system alias).
+            root=Path(tmp).resolve();corpus=root/'corpus';work=root/'work'
             base=corpus/'filmscan3'/'1080p-16f'
             frames=[];packets=[]
             for i in range(2):
@@ -66,7 +68,9 @@ class WriterTraceContract(unittest.TestCase):
                     self.assertFalse((root/'report.json').exists())
                 else:
                     self.assertEqual(gate.main(),1 if tamper else 0)
-                    result=json.loads((root/'report.json').read_text())['profiles']['filmscan3']
+                    report=json.loads((root/'report.json').read_text())
+                    self.assertEqual(report['status'],'FAIL' if tamper else 'PASS')
+                    result=report['profiles']['filmscan3']
                     self.assertEqual(result['traced_frames'],2)
                     self.assertEqual(result['all_normalized_equal'],not tamper)
                     self.assertEqual(parse.call_count,4)

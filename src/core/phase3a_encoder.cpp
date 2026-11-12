@@ -1350,7 +1350,7 @@ Phase3ASequence120Report VerifyPhase3ASequence120(int width, int height, int num
             ext.data = tight.data();
             if (!EncodeOneExternalBand(reinterpret_cast<encoder*>(ctx_b.encoder),
                                        reinterpret_cast<transform**>(ctx_b.transforms),
-                                       ext, &b_pieces[bi])) {
+                                       ctx_b.channel_count, ext, &b_pieces[bi])) {
                 cleanup();
                 rep.error = "EncodeOneExternalBand failed at frame " + std::to_string(f);
                 return rep;

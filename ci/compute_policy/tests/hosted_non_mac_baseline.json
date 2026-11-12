@@ -516,5 +516,27 @@
       "publication-privacy": "83c490ac4bf1245b75972226a44ba5038fee5b7802598bc6fec321516bccb44f"
     }
   },
+  "reviewed_step_replacements_363": {
+    "reason": "Only replace worktree-clean checks with the frozen committed-tree, index and worktree verifier; retain all other original step hashes and routing.",
+    "ci-cpu.yml": {
+      "cpu-only-windows-msvc": {
+        "name": "Verify upstream immutability",
+        "run_before": "$status = git status --porcelain upstream/\nif ($status) {\n  Write-Error \"upstream/ directory has been modified: $status\"\n  exit 1\n}\n",
+        "run_after": "python ci/check_upstream_immutable.py"
+      }
+    },
+    "ci-cuda-build.yml": {
+      "cuda-build": {
+        "name": "Verify upstream immutability",
+        "run_before": "status=\"$(git status --porcelain upstream/)\"\nif [ -n \"$status\" ]; then\n  echo \"upstream/ directory has been modified: $status\" >&2\n  exit 1\nfi\n",
+        "run_after": "python3 ci/check_upstream_immutable.py"
+      },
+      "inventory-gate-selftest": {
+        "name": "Verify upstream immutability",
+        "run_before": "status=\"$(git status --porcelain upstream/)\"\nif [ -n \"$status\" ]; then\n  echo \"upstream/ directory has been modified: $status\" >&2\n  exit 1\nfi\n",
+        "run_after": "python3 ci/check_upstream_immutable.py"
+      }
+    }
+  },
   "license": "MIT OR Apache-2.0"
 }

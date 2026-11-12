@@ -14,6 +14,11 @@ This directory contains **current capability references**, **platform-specific v
 | Which measurements should be quoted publicly? | [Benchmark artifact guide](../benchmarks/results/README.md) |
 | What are the rules for contributions and autonomous agents? | [Contributing](../CONTRIBUTING.md) · [Agent instructions](../AGENTS.md) |
 | How is repository-publication privacy protected? | [Privacy policy and hooks](PRIVACY.md) |
+| How do CLI/parity runs preserve existing inputs and evidence? | [Output ownership and safe reruns](OUTPUT_OWNERSHIP_367.md) |
+| Which fundamental safety findings and acceptance gates remain? | [12 November audit follow-up](FUNDAMENTAL_SAFETY_FOLLOWUP_20261112.md) |
+| How are encoder resources and state transferred safely? | [Encoder session ownership](ENCODER_SESSION_OWNERSHIP.md) |
+| What does the combined safety repair candidate contain? | [Safety continuation and remaining work](SAFETY_CONTINUATION_20261112.md) |
+| How are SDK entropy channel, band and codebook requests bounded? | [SDK entropy wrapper bounds](SDK_ENTROPY_BOUNDS_ISSUE372.md) |
 
 > [!WARNING]
 > **Current decoder investigation:** successful `CFHD_DecodeSample` status does not always imply reproducible decoded pixels from identical packets. The decoder root cause and release gate are still under investigation in [#120](https://github.com/louis-0hrs/HyperCine/issues/120) and the [cross-platform decision board #161](https://github.com/louis-0hrs/HyperCine/issues/161). Do not treat SDK-encoder parity as a decoder-safety certification.

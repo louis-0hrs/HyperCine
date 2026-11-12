@@ -586,7 +586,7 @@ Phase2DUpstreamComparisonReport VerifyPhase2DUpstreamComparison(
         ext.height = ref.height;
         if (!EncodeOneExternalBand(reinterpret_cast<encoder*>(ctx_bc.encoder),
                                    reinterpret_cast<transform**>(ctx_bc.transforms),
-                                   ext, &b_pieces[i])) {
+                                   ctx_bc.channel_count, ext, &b_pieces[i])) {
             rep.error = "EncodeOneExternalBand failed on B";
             return rep;
         }

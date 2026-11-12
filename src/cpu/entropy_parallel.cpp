@@ -13,6 +13,7 @@
 #endif
 
 #include "hypercine/entropy_parallel.h"
+#include "entropy_sdk_guard.h"
 
 #include <algorithm>
 #include <atomic>
@@ -101,6 +102,7 @@ struct BandSnap {
 
 std::vector<BandRef> EnumerateTransform(TRANSFORM* transforms[], int channel_count) {
     std::vector<BandRef> refs;
+    if (!entropy_detail::ValidTransforms(transforms, channel_count)) return refs;
     for (int c = 0; c < channel_count; ++c) {
         TRANSFORM* tf = transforms[c];
         if (!tf || tf->num_wavelets <= 0) continue;
@@ -441,7 +443,22 @@ bool RefreshUpstreamPyramid(encoder* enc_opaque,
                             size_t scratch_bytes) {
     ENCODER* encoder = reinterpret_cast<ENCODER*>(enc_opaque);
     TRANSFORM** transforms = reinterpret_cast<TRANSFORM**>(transforms_opaque);
-    if (!encoder || !transforms || !encoder->frame || !bgra || !scratch) return false;
+    // The frozen conversion writes exactly three YUV planes independently of
+    // channel_count. This contract is intentionally narrower than ExternalBand.
+    if (!encoder || encoder->gop_length != 1 || !encoder->frame || !bgra || !scratch ||
+        channel_count != 3 || encoder->frame->num_channels != 3 ||
+        encoder->frame->format != FRAME_FORMAT_YUV ||
+        encoder->num_spatial >= TRANSFORM_MAX_LEVELS ||
+        !entropy_detail::ValidTransforms(transforms, channel_count) ||
+        channel_count > static_cast<int>(std::size(encoder->frame->channel))) return false;
+    for (int c = 0; c < channel_count; ++c) {
+        // ComputeGroupTransformQuant overwrites num_spatial from the encoder
+        // and then indexes wavelet/prescale up to that count. ValidTransforms
+        // bounds both physical arrays and checks the prepared count relation;
+        // require the encoder's replacement value to match before any writes.
+        if (!encoder->frame->channel[c] || !encoder->frame->channel[c]->band[0] ||
+            transforms[c]->num_spatial != encoder->num_spatial) return false;
+    }
 
     ConvertRGB32to10bitYUVFrame(const_cast<uint8_t*>(bgra), pitch, encoder->frame,
                                 static_cast<uint8_t*>(scratch), static_cast<int>(scratch_bytes),
@@ -540,8 +557,8 @@ EntropyOutput EncodeEntropy(encoder* enc_opaque,
     EntropyOutput result;
     ENCODER* encoder = reinterpret_cast<ENCODER*>(enc_opaque);
     TRANSFORM** transforms = reinterpret_cast<TRANSFORM**>(transforms_opaque);
-    if (!encoder || !transforms || channel_count <= 0) {
-        result.error = "missing encoder";
+    if (!encoder || encoder->gop_length != 1 || !entropy_detail::ValidTransforms(transforms, channel_count)) {
+        result.error = "missing encoder or invalid transform metadata";
         return result;
     }
     if (transforms[0]->type != TRANSFORM_TYPE_SPATIAL) {
@@ -553,6 +570,13 @@ EntropyOutput EncodeEntropy(encoder* enc_opaque,
     if (jobs.empty()) {
         result.error = "no subbands";
         return result;
+    }
+    for (const Job& job : jobs) {
+        entropy_detail::CodingSelection coding;
+        if (!entropy_detail::SelectCoding(encoder, job.subband, &coding)) {
+            result.error = "invalid subband or codebook selection";
+            return result;
+        }
     }
     std::stable_sort(jobs.begin(), jobs.end(), [](const Job& a, const Job& b) {
         return a.coeff_count > b.coeff_count;
@@ -788,14 +812,6 @@ void EncodeQuantLongRunsOf(ENCODER* encoder, BITSTREAM* stream, const Sample* im
     if (count > 0) PutZeroRun(stream, count, runsbook);
 }
 
-IMAGE* FindWavelet(TRANSFORM* tf, int level) {
-    if (!tf) return nullptr;
-    for (int k = 0; k < tf->num_wavelets; ++k) {
-        if (tf->wavelet[k] && tf->wavelet[k]->level == level) return tf->wavelet[k];
-    }
-    return nullptr;
-}
-
 void CopyTightToPitch(const int16_t* src, int width, int height, PIXEL* dst, int dst_stride) {
     for (int y = 0; y < height; ++y) {
         std::memcpy(dst + static_cast<size_t>(y) * static_cast<size_t>(dst_stride),
@@ -805,9 +821,11 @@ void CopyTightToPitch(const int16_t* src, int width, int height, PIXEL* dst, int
 }
 
 bool EncodeHighpassView(ENCODER* encoder, IMAGE* wavelet, const ExternalCoeff& coeff, EncodedPiece* piece) {
-    int active_codebook = 0;
-    int peaks_coding = 0;
-    const int codingflags = SetCodingFlags(encoder, coeff.subband, &active_codebook, &peaks_coding);
+    entropy_detail::CodingSelection coding;
+    if (!entropy_detail::SelectCoding(encoder, coeff.subband, &coding)) return false;
+    const int active_codebook = coding.codebook;
+    const int peaks_coding = coding.peaks;
+    const int codingflags = coding.flags;
     const int scale = wavelet->scale[coeff.band];
     int quantization = wavelet->quantization[coeff.band];
     if (quantization <= 0) quantization = wavelet->quant[coeff.band];
@@ -911,7 +929,7 @@ std::vector<BandRef> EnumerateBands(transform* transforms_opaque[], int channel_
 }
 
 bool EncodeOneExternalBand(encoder* enc_opaque, transform* transforms_opaque[],
-                           const ExternalCoeff& coeff, EncodedPiece* piece) {
+                           int channel_count, const ExternalCoeff& coeff, EncodedPiece* piece) {
     if (!piece) return false;
     *piece = EncodedPiece{};
     piece->channel = coeff.channel;
@@ -921,13 +939,8 @@ bool EncodeOneExternalBand(encoder* enc_opaque, transform* transforms_opaque[],
     piece->lowpass = coeff.lowpass;
     ENCODER* encoder = reinterpret_cast<ENCODER*>(enc_opaque);
     TRANSFORM** transforms = reinterpret_cast<TRANSFORM**>(transforms_opaque);
-    if (!encoder || !transforms || !coeff.data || coeff.width <= 0 || coeff.height <= 0) return false;
-    if (coeff.elem_bytes == 1 && (coeff.value_min < -128 || coeff.value_max > 127 || coeff.lowpass)) return false;
-    if (coeff.elem_bytes != 1 && coeff.elem_bytes != 2) return false;
-    TRANSFORM* tf = transforms[coeff.channel];
-    IMAGE* wavelet = FindWavelet(tf, coeff.level);
-    if (!wavelet || coeff.band < 0 || coeff.band >= wavelet->num_bands) return false;
-    if (wavelet->width != coeff.width || wavelet->height != coeff.height) return false;
+    IMAGE* wavelet = entropy_detail::ResolveExternalBand(encoder, transforms, channel_count, coeff);
+    if (!wavelet) return false;
 
     const double t0 = NowMs();
     const bool ok = coeff.lowpass ? EncodeLowpassView(encoder, wavelet, coeff, piece)
@@ -943,8 +956,9 @@ EntropyOutput AssembleEncodedPieces(encoder* enc_opaque, transform* transforms_o
     EntropyOutput result;
     ENCODER* encoder = reinterpret_cast<ENCODER*>(enc_opaque);
     TRANSFORM** transforms = reinterpret_cast<TRANSFORM**>(transforms_opaque);
-    if (!encoder || !transforms || pieces.empty()) {
-        result.error = "missing pieces";
+    if (!encoder || encoder->gop_length != 1 ||
+        !entropy_detail::ValidTransforms(transforms, channel_count) || pieces.empty()) {
+        result.error = "missing pieces or invalid transform metadata";
         return result;
     }
     std::vector<Job> jobs;

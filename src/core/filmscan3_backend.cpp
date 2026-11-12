@@ -21,6 +21,44 @@ FrontendFrame Frontend::Transform(const uint8_t* p,std::size_t n,int w,int h,std
     return out;
 }
 namespace {
+class BoundFrontend final : public Frontend {
+    const std::shared_ptr<Frontend> inner_;
+    const FilmScan3Geometry geometry_;
+
+    void RequireBoundGeometry() const {
+        const auto current=inner_->Geometry();
+        if(current.width!=geometry_.width || current.height!=geometry_.height ||
+           current.sample_capacity_bytes!=geometry_.sample_capacity_bytes)
+            throw std::invalid_argument("frontend declaration changed after session binding");
+    }
+public:
+    BoundFrontend(std::shared_ptr<Frontend> inner, FilmScan3Geometry geometry)
+        : inner_(std::move(inner)), geometry_(geometry) {}
+    FilmScan3Geometry Geometry() const noexcept override { return geometry_; }
+    FrontendBackend Backend() const noexcept override { return inner_->Backend(); }
+    WaveletIsa Isa() const noexcept override { return inner_->Isa(); }
+    std::string DeviceName() const override { return inner_->DeviceName(); }
+    bool ProfileHost() const override { return inner_->ProfileHost(); }
+    void RecordHostTiming(const HostTiming& timing) override { inner_->RecordHostTiming(timing); }
+    Planes Convert(const uint8_t* data,std::size_t bytes,int width,int height,std::size_t stride) override {
+        RequireBoundGeometry();
+        return inner_->Convert(data,bytes,width,height,stride);
+    }
+    WaveletLevel Forward(const Plane& plane,int prescale) override {
+        RequireBoundGeometry();
+        return inner_->Forward(plane,prescale);
+    }
+    FrontendFrame Transform(const uint8_t* data,std::size_t bytes,int width,int height,
+                            std::size_t stride,bool audit) override {
+        // Check the live declaration against the installation-time snapshot,
+        // not against another live query. No backend dispatch, frame allocation
+        // or packet assembly is allowed after a mismatch.
+        RequireBoundGeometry();
+        if(width!=geometry_.width || height!=geometry_.height)
+            throw std::invalid_argument("transform dimensions differ from the bound session");
+        return inner_->Transform(data,bytes,width,height,stride,audit);
+    }
+};
 class Cpu final : public Frontend {
     FilmScan3Geometry geometry_;
     // `Auto` is stored as-is and stays live: it means "follow the process-global
@@ -50,6 +88,12 @@ private:
         return Isa() == WaveletIsa::Neon ? "CPU neon" : "CPU scalar";
     }
 };
+}
+std::shared_ptr<Frontend> BindFrontend(std::shared_ptr<Frontend> frontend) {
+    if(!frontend)throw std::invalid_argument("null FilmScan3 frontend");
+    const auto geometry=frontend->Geometry();
+    ValidateFilmScan3Geometry(geometry);
+    return std::make_shared<BoundFrontend>(std::move(frontend),geometry);
 }
 std::shared_ptr<Frontend> CpuFrontend() { static auto cpu=std::make_shared<Cpu>();return cpu; }
 std::shared_ptr<Frontend> CpuFrontend(FilmScan3Geometry geometry) {

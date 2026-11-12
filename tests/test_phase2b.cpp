@@ -146,7 +146,7 @@ int CheckBuffer(Opened* opened, const hypercine::BandRef& ref, const std::vector
     hypercine::EntropySymbols cpu;
     if (!hypercine::MatchUpstreamHighpass(reinterpret_cast<encoder*>(opened->sample->m_encoder),
                                           reinterpret_cast<transform**>(opened->sample->m_transformArray),
-                                          coeff, &cpu)) {
+                                          opened->sample->m_channelCount, coeff, &cpu)) {
         return Fail(std::string(name) + " CPU stage: " + cpu.error);
     }
     int16_t* device = nullptr;

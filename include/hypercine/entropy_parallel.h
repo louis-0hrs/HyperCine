@@ -78,6 +78,8 @@ struct EntropyOutput {
 // Rebuild the production spatial pyramid from a BGRA frame into the encoder
 // wavelets without running entropy. Requires a prepared encoder that has
 // already encoded at least one sample (buffers, quantizers, codebooks).
+// This BGRA conversion requires exactly three YUV frame planes/transforms and
+// matching prepared spatial/GOP1 counts; it is not the general ExternalBand view.
 bool RefreshUpstreamPyramid(encoder* encoder,
                             transform* transforms[],
                             int channel_count,
@@ -142,12 +144,20 @@ struct BandRef {
     int height = 0;
 };
 
+// Prepared spatial/GOP1 transforms only. Invalid structure returns no bands.
+// channel_count must describe the actual live caller-owned pointer array.
 std::vector<BandRef> EnumerateBands(transform* transforms[], int channel_count);
 
 // Encode one band from an external buffer. Highpass int8 is read directly.
 // The bitstream fragment matches EncodeQuantizedBand / EncodeLowPassBand.
+// channel_count is the caller-owned array extent, not an inferred channel count.
+// Objects and coefficient storage must remain live and prepared throughout the
+// call. Malformed indices/SDK metadata fail before encoding; no count-less API.
+// The supported relation is a spatial GOP1 pyramid with unique wavelet levels.
+// Temporal/field layouts are rejected, not inferred from the same band numbers.
 bool EncodeOneExternalBand(encoder* encoder,
                            transform* transforms[],
+                           int channel_count,
                            const ExternalCoeff& coeff,
                            EncodedPiece* piece);
 
