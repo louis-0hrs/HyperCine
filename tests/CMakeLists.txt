@@ -431,3 +431,19 @@ if(Python3_Interpreter_FOUND)
     set_tests_properties(ffmpeg_oracle_qualification_contract PROPERTIES
         LABELS "reference-oracle")
 endif()
+
+# Issue #381 compatibility qualification matrix. The committed matrix and its
+# guard suite need no decoder, so they run on every host with Python; the live
+# cross-decoder regenerations stay an explicit manual command.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME compat_qualification_matrix
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_compat_qualification.py")
+    add_test(NAME compat_qualification_committed_matrix
+        COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_SOURCE_DIR}/tools/compat_qualification.py"
+            --verify "${CMAKE_CURRENT_SOURCE_DIR}/compatibility/matrix.json")
+    set_tests_properties(compat_qualification_matrix
+        compat_qualification_committed_matrix PROPERTIES
+        LABELS "contract" TIMEOUT 300)
+endif()
