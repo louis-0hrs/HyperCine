@@ -21,6 +21,7 @@ import subprocess
 import tempfile
 import sys
 import reference_sample as sample
+from validation_support import portable_command
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / 'tests/reference_corpus'
@@ -228,7 +229,7 @@ def main():
               'probe_sha256': sha(args.probe.read_bytes()),
               'compiler': compiler_info(),
               'cmake': subprocess.check_output(['cmake', '--version'], text=True).splitlines()[0],
-              'command': [sys.executable] + sys.argv,
+              'command_template': portable_command('validate_windows_reference.py', sys.argv[1:]),
               'source_files': [{'path': name, 'sha256': sha((ROOT/name).read_bytes())} for name in
                                ['CMakeLists.txt', 'tests/reference_frame_generator.h',
                                 'tests/validate_windows_reference.py', 'tests/reference_sample.py', 'tools/hypercine_reference_probe.cpp',
