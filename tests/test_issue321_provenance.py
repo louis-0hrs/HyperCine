@@ -1,0 +1,459 @@
+# Copyright (c) 2026 HyperCine Contributors.
+# Dual-licensed under the MIT License or Apache License, Version 2.0.
+# See LICENSE-MIT and LICENSE-APACHE for details.
+"""Corpus-free adversarial controls for retained-artifact provenance checks."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+import verify_issue321_provenance as v
+import inspect_issue321_origin as origin
+import verify_issue321_toolchain as toolchain
+
+
+class ToolchainProbe(unittest.TestCase):
+    def setUp(self):
+        environment = patch.dict(toolchain.os.environ, {'HYPERCINE_GOLDEN_DIR': ''})
+        environment.start()
+        self.addCleanup(environment.stop)
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name).resolve()
+        self.sdk_root = self.root / 'retained-sdk'
+        self.sdk_root.mkdir()
+        self.compiler = self.root / 'cl.exe'
+        self.compiler.write_bytes(b'synthetic compiler bytes')
+        self.trusted_digest = toolchain.digest(self.compiler.read_bytes())
+        self.record = self.root / 'CMakeCXXCompiler.cmake'
+        self.record.write_text(
+            'set(CMAKE_CXX_COMPILER "' + str(self.compiler) + '")\n'
+            'set(CMAKE_CXX_COMPILER_ID "MSVC")\n'
+            'set(CMAKE_CXX_COMPILER_VERSION "19.44.35228.0")\n')
+
+    def process(self, output=b'Version 19.44.35228.0', code=2):
+        return toolchain.subprocess.CompletedProcess([], code, b'', output)
+
+    def test_version_agreement_is_not_historical_attestation(self):
+        with patch.object(toolchain.subprocess, 'run', return_value=self.process()) as run:
+            report = toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+        self.assertEqual(report['status'], 'VERSION_AGREES')
+        self.assertEqual(report['historical_compiler_identity'], 'NOT_ESTABLISHED')
+        self.assertEqual(report['current_compiler_sha256'], v.file_sha(self.compiler))
+        self.assertEqual(run.call_args.args[0], [str(self.compiler), '/Bv'])
+        self.assertEqual(run.call_args.kwargs['timeout'], 30)
+
+    def test_current_compiler_can_differ_at_same_recorded_path(self):
+        result = self.process(b'PRIVATE_LOCATION Version 19.44.35229 for x64\n19.44.35229.0')
+        with patch.object(toolchain.subprocess, 'run', return_value=result):
+            report = toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+        self.assertEqual(report['status'], 'TOOLCHAIN_VERSION_DRIFT')
+        self.assertFalse(report['version_equal'])
+        self.assertEqual(report['observed_version'], '19.44.35229.0')
+        self.assertNotIn('PRIVATE_LOCATION', json.dumps(report))
+        self.assertNotIn(str(self.compiler), json.dumps(report))
+
+    def test_missing_compiler_does_not_execute(self):
+        self.compiler.unlink()
+        with patch.object(toolchain.subprocess, 'run') as run, self.assertRaises(OSError):
+            toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+        run.assert_not_called()
+
+    def test_invalid_or_ambiguous_record_does_not_execute(self):
+        text = self.record.read_text()
+        for invalid in (text.replace('MSVC', 'Other'),
+                        text.replace('19.44.35228.0', 'unknown'),
+                        text + 'set(CMAKE_CXX_COMPILER_ID "MSVC")\n'):
+            self.record.write_text(invalid)
+            with self.subTest(record=invalid), patch.object(toolchain.subprocess, 'run') as run:
+                with self.assertRaises(ValueError):
+                    toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+                run.assert_not_called()
+
+    def test_failed_or_ambiguous_version_probe_is_rejected(self):
+        for result in (self.process(b'no compiler version'),
+                       self.process(b'19.44.35228.0 19.44.35229.0'),
+                       self.process(code=1)):
+            with patch.object(toolchain.subprocess, 'run', return_value=result):
+                with self.assertRaises(ValueError):
+                    toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+
+    def test_timeout_is_not_version_agreement(self):
+        with patch.object(toolchain.subprocess, 'run', side_effect=
+                          toolchain.subprocess.TimeoutExpired('cl', 30)):
+            with self.assertRaises(toolchain.subprocess.TimeoutExpired):
+                toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+
+    def test_artifacts_must_remain_stable_during_probe(self):
+        for artifact in (self.compiler, self.record):
+            before = artifact.read_bytes()
+
+            def probe(*args, **kwargs):
+                artifact.write_bytes(before + b'changed')
+                return self.process()
+
+            with patch.object(toolchain.subprocess, 'run', side_effect=probe):
+                with self.assertRaises(ValueError):
+                    toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+            artifact.write_bytes(before)
+
+    def test_cli_reports_drift_with_nonzero_exit(self):
+        with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
+                                       '--sdk-source-root', str(self.sdk_root),
+                                       '--output', str(self.root / 'report.json')]), \
+                patch.object(toolchain.subprocess, 'run', return_value=
+                             self.process(b'19.44.35229.0')):
+            self.assertEqual(toolchain.main(), 2)
+        report = json.loads((self.root / 'report.json').read_text())
+        self.assertEqual(report['status'], 'TOOLCHAIN_VERSION_DRIFT')
+
+    def test_existing_output_is_never_overwritten(self):
+        output = self.root / 'report.json'
+        output.write_bytes(b'original receipt')
+        with patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
+                                       '--sdk-source-root', str(self.sdk_root),
+                                       '--output', str(output)]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            self.assertEqual(toolchain.main(), 1)
+        self.assertEqual(output.read_bytes(), b'original receipt')
+        run.assert_not_called()
+
+    def test_corpus_output_is_rejected_before_probe(self):
+        with patch.dict(toolchain.os.environ, {'HYPERCINE_GOLDEN_DIR': str(self.root)}), \
+                patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                                       '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
+                                       '--sdk-source-root', str(self.sdk_root),
+                                          '--output', str(self.root / 'report.json')]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            self.assertEqual(toolchain.main(), 1)
+        run.assert_not_called()
+
+
+    def test_sdk_source_tree_output_is_rejected_before_probe(self):
+        for suffix in ('report.json', 'unused/../report.json'):
+            with self.subTest(suffix=suffix), \
+                    patch.object(sys, 'argv', ['probe', '--compiler-record', str(self.record),
+                        '--trusted-compiler', str(self.compiler),
+                                       '--trusted-compiler-sha256', self.trusted_digest,
+                                       '--sdk-source-root', str(self.sdk_root),
+                        '--output', str(self.sdk_root / suffix)]), \
+                    patch.object(toolchain.subprocess, 'run') as run:
+                self.assertEqual(toolchain.main(), 1)
+                run.assert_not_called()
+            self.assertFalse((self.sdk_root / 'report.json').exists())
+
+
+
+    def test_record_cannot_select_another_cl_even_with_same_bytes(self):
+        other = self.root / 'second-install'
+        other.mkdir()
+        substituted = other / 'cl.exe'
+        substituted.write_bytes(self.compiler.read_bytes())
+        self.record.write_text(self.record.read_text().replace(
+            str(self.compiler), str(substituted)))
+        with patch.object(toolchain.subprocess, 'run') as run, self.assertRaises(ValueError):
+            toolchain.inspect(self.record, self.compiler, self.trusted_digest)
+        run.assert_not_called()
+
+    def test_wrong_independent_compiler_pin_blocks_execution(self):
+        with patch.object(toolchain.subprocess, 'run') as run, self.assertRaises(ValueError):
+            toolchain.inspect(self.record, self.compiler, '0' * 64)
+        run.assert_not_called()
+
+    def test_cli_rejects_missing_trust_options_without_receipt(self):
+        output = self.root / 'not-created.json'
+        with patch.object(sys, 'argv', [
+                'probe', '--compiler-record', str(self.record),
+                '--sdk-source-root', str(self.sdk_root), '--output', str(output)]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            with self.assertRaises(SystemExit) as ex:
+                toolchain.main()
+        self.assertEqual(ex.exception.code, 2)
+        run.assert_not_called()
+        self.assertFalse(output.exists())
+
+    def test_cli_rejects_wrong_sha_before_probe_or_output(self):
+        output = self.root / 'not-created.json'
+        with patch.object(sys, 'argv', [
+                'probe', '--compiler-record', str(self.record),
+                '--trusted-compiler', str(self.compiler),
+                '--trusted-compiler-sha256', 'f' * 64,
+                '--sdk-source-root', str(self.sdk_root), '--output', str(output)]), \
+                patch.object(toolchain.subprocess, 'run') as run:
+            self.assertEqual(toolchain.main(), 1)
+        run.assert_not_called()
+        self.assertFalse(output.exists())
+
+
+class ArchiveOrigin(unittest.TestCase):
+    @staticmethod
+    def member(name, payload):
+        header = (name.encode().ljust(16) + b'0'.ljust(12) + b'0'.ljust(6) +
+                  b'0'.ljust(6) + b'0'.ljust(8) + str(len(payload)).encode().ljust(10) + b'`\n')
+        return header + payload + (b'\n' if len(payload) % 2 else b'')
+
+    def test_longname_and_odd_member_preserve_exact_object_bytes(self):
+        payload = b'\x64\x86' + bytes(range(19))
+        data = (b'!<arch>\n' + self.member('/', b'index') +
+                self.member('//', b'PRIVATE_BUILD/member.obj\0') + self.member('/0', payload))
+        self.assertEqual(origin.archive_objects(data), [('PRIVATE_BUILD/member.obj', payload)])
+
+    def test_truncated_archive_and_wrong_padding_rejected(self):
+        data = b'!<arch>\n' + self.member('member.obj/', b'x' * 21)
+        for invalid in (data[:-1], data[:-2], data[:-1] + b'x', data[:30]):
+            with self.subTest(length=len(invalid)), self.assertRaises(ValueError):
+                origin.archive_objects(invalid)
+
+    def test_invalid_longname_reference_rejected(self):
+        for offset in ('/1', '/99', '/bad'):
+            data = (b'!<arch>\n' + self.member('//', b'private.obj\0') +
+                    self.member(offset, b'x' * 20))
+            with self.subTest(offset=offset), self.assertRaises(ValueError):
+                origin.archive_objects(data)
+
+    def test_empty_or_nonarchive_rejected(self):
+        for data in (b'', b'!<arch>\n', b'invalid archive signature'):
+            with self.assertRaises(ValueError):
+                origin.archive_objects(data)
+
+    def test_origin_cli_rejects_corpus_and_sdk_tree_outputs_before_inspection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sdk = root / 'retained-sdk'
+            golden = root / 'private-golden'
+            sdk.mkdir()
+            golden.mkdir()
+            for output in (sdk / 'report.json', golden / 'report.json'):
+                with self.subTest(target=output.parent.name), \
+                        patch.dict(origin.os.environ, {'HYPERCINE_GOLDEN_DIR': str(golden)}), \
+                        patch.object(sys, 'argv', ['origin', '--sdk-source-root', str(sdk),
+                            '--compile-record', str(root / 'dummy.tlog'),
+                            '--library', str(root / 'dummy.lib'), '--output', str(output)]), \
+                        patch.object(origin, 'inspect') as inspect:
+                    self.assertEqual(origin.main(), 1)
+                    inspect.assert_not_called()
+                    self.assertFalse(output.exists())
+
+    def test_origin_cli_external_new_receipt_and_existing_output_refusal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sdk = root / 'retained-sdk'
+            golden = root / 'private-golden'
+            sdk.mkdir()
+            golden.mkdir()
+            output = root / 'receipt.json'
+            args = ['origin', '--sdk-source-root', str(sdk),
+                    '--compile-record', str(root / 'dummy.tlog'),
+                    '--library', str(root / 'dummy.lib'), '--output', str(output)]
+            with patch.dict(origin.os.environ, {'HYPERCINE_GOLDEN_DIR': str(golden)}), \
+                    patch.object(sys, 'argv', args), \
+                    patch.object(origin, 'inspect', return_value={'scope': 'synthetic'}) as inspect:
+                self.assertEqual(origin.main(), 0)
+                self.assertEqual(json.loads(output.read_text()), {'scope': 'synthetic'})
+                self.assertEqual(inspect.call_count, 1)
+                self.assertEqual(origin.main(), 1)
+                self.assertEqual(inspect.call_count, 1)
+                self.assertEqual(json.loads(output.read_text()), {'scope': 'synthetic'})
+
+
+class Provenance(unittest.TestCase):
+    def test_provenance_cli_refuses_historical_source_output_before_audit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            golden, historical = base / 'private-golden', base / 'retained-sdk'
+            golden.mkdir()
+            historical.mkdir()
+            for report, replay_dir in ((historical / 'receipt.json', None),
+                                       (base / 'external-receipt.json', historical / 'replay'),
+                                       (historical / 'a/../receipt.json', None)):
+                with self.subTest(report=report, replay_dir=replay_dir), \
+                        patch.object(sys, 'argv', ['verify', '--golden-root', str(golden),
+                            '--historical-root', str(historical),
+                            '--sdk-library', str(base / 'library.lib'),
+                            '--output', str(report)] +
+                            (['--replay-dir', str(replay_dir)] if replay_dir else [])), \
+                        patch.object(v, 'run') as audit:
+                    self.assertEqual(v.main(), 1)
+                    audit.assert_not_called()
+                self.assertFalse((historical / 'receipt.json').exists())
+                self.assertFalse((historical / 'replay').exists())
+
+    def test_provenance_run_refuses_historical_replay_before_private_reads(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            golden, historical = base / 'private-golden', base / 'retained-sdk'
+            golden.mkdir()
+            historical.mkdir()
+            with patch.object(v, 'verify_index') as index:
+                with self.assertRaises(ValueError):
+                    v.run(golden, historical, base / 'library.lib', historical / 'new-replay')
+                index.assert_not_called()
+            self.assertFalse((historical / 'new-replay').exists())
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.binary = self.root / 'capture.exe'
+        self.binary.write_bytes(b'retained artifact')
+        self.digest = hashlib.sha256(self.binary.read_bytes()).hexdigest()
+
+    def test_actual_bytes_required(self):
+        self.assertEqual(v.bound_file(self.binary, self.digest)['bytes'], 17)
+        self.binary.write_bytes(b'modified artifact')
+        with self.assertRaises(ValueError):
+            v.bound_file(self.binary, self.digest)
+
+    def test_missing_binary_is_not_provenance(self):
+        with self.assertRaises(ValueError):
+            v.bound_file(self.root / 'missing.exe', self.digest)
+
+    def records(self):
+        compiler = self.root / 'CMakeFiles/3.31/CMakeCXXCompiler.cmake'
+        compiler.parent.mkdir(parents=True)
+        compiler.write_text('set(CMAKE_CXX_COMPILER_ID "MSVC")\n'
+                            'set(CMAKE_CXX_COMPILER_VERSION "19.44.35229.0")\n')
+        directory = self.root / 'capture.dir/Release/capture.tlog'
+        directory.mkdir(parents=True)
+        (directory / 'CL.command.1.tlog').write_text(
+            '/O2 /Ob2 /MD /std:c++17 /I"PRIVATE_LOCATION"\n', encoding='utf-16')
+        (directory / 'link.command.1.tlog').write_text('PRIVATE_LOCATION', encoding='utf-16')
+        return compiler, directory
+
+    def test_report_emits_selected_flags_not_private_commands(self):
+        self.records()
+        report = v.build_record(self.root, 'capture')
+        self.assertEqual(report['compiler_version'], '19.44.35229.0')
+        self.assertEqual(report['selected_compile_flags'], ['/O2', '/Ob2', '/MD', '/std:c++17'])
+        self.assertNotIn('PRIVATE_LOCATION', json.dumps(report))
+        self.assertIn('not_attestation', report['evidence_class'])
+
+    def test_missing_link_record_rejected(self):
+        _, directory = self.records()
+        (directory / 'link.command.1.tlog').unlink()
+        with self.assertRaises(ValueError):
+            v.build_record(self.root, 'capture')
+
+    def test_ambiguous_compiler_rejected(self):
+        compiler, _ = self.records()
+        duplicate = self.root / 'CMakeFiles/other/CMakeCXXCompiler.cmake'
+        duplicate.parent.mkdir()
+        duplicate.write_bytes(compiler.read_bytes())
+        with self.assertRaises(ValueError):
+            v.build_record(self.root, 'capture')
+
+    def test_unknown_compiler_version_rejected(self):
+        compiler, _ = self.records()
+        compiler.write_text('set(CMAKE_CXX_COMPILER_ID "MSVC")\n')
+        with self.assertRaises(ValueError):
+            v.build_record(self.root, 'capture')
+
+    def test_wrong_link_input_rejected(self):
+        self.records()
+        with self.assertRaises(ValueError):
+            v.build_record(self.root, 'capture', library=self.binary)
+
+    def test_wrong_compile_input_rejected(self):
+        self.records()
+        with self.assertRaises(ValueError):
+            v.build_record(self.root, 'capture', source=self.binary)
+
+    def test_link_input_normalizes_parent_components(self):
+        _, directory = self.records()
+        linked = str(self.root / 'unused/../capture.exe')
+        (directory / 'link.command.1.tlog').write_text('"' + linked + '"', encoding='utf-16')
+        v.build_record(self.root, 'capture', library=self.binary)
+
+    def test_link_input_keeps_recorded_root_spelling(self):
+        _, directory = self.records()
+        (directory / 'link.command.1.tlog').write_text(
+            '"' + str(self.binary) + '"', encoding='utf-16')
+        # Model a temp-root alias/junction without requiring symlink privileges.
+        with patch.object(v, 'file_sha', side_effect=lambda path: hashlib.sha256(path.read_bytes()).hexdigest()), \
+                patch.object(Path, 'resolve', return_value=self.root / 'canonical/capture.exe'):
+            v.build_record(self.root, 'capture', library=self.binary)
+
+    def test_link_input_normalizes_expected_parent_components(self):
+        _, directory = self.records()
+        (directory / 'link.command.1.tlog').write_text(
+            '"' + str(self.binary) + '"', encoding='utf-16')
+        v.build_record(self.root, 'capture', library=self.root / 'unused/../capture.exe')
+
+    def test_link_input_uses_windows_case_and_separators(self):
+        _, directory = self.records()
+        linked = str(self.binary).replace('\\', '/').upper()
+        (directory / 'link.command.1.tlog').write_text('"' + linked + '"', encoding='utf-16')
+        v.build_record(self.root, 'capture', library=self.binary)
+
+    def test_link_input_rejects_same_basename_in_other_directory(self):
+        _, directory = self.records()
+        linked = str(self.root / 'unused/../other/capture.exe')
+        (directory / 'link.command.1.tlog').write_text('"' + linked + '"', encoding='utf-16')
+        with self.assertRaisesRegex(ValueError, 'link input record differs'):
+            v.build_record(self.root, 'capture', library=self.binary)
+
+    def test_packet_divergence_is_fatal(self):
+        # Parser behavior has its own corpus contract; exercise this caller's
+        # decision on distinct normalized packets, with raw bytes also distinct.
+        with patch.object(v, 'parse_packet', side_effect=[
+                {'normalized_sha256': 'a'}, {'normalized_sha256': 'b'}]):
+            with self.assertRaises(ValueError):
+                v.compare_packet(b'candidate', b'original')
+
+    def test_metadata_difference_is_reported_separately(self):
+        with patch.object(v, 'parse_packet', return_value={'normalized_sha256': 'a'}):
+            report = v.compare_packet(b'candidate', b'original')
+        self.assertTrue(report['normalized_equal'])
+        self.assertFalse(report['raw_equal'])
+
+    def test_bad_input_hash_prevents_execution(self):
+        data = self.root / 'frame.bgra'
+        data.write_bytes(b'pixels')
+        sessions = [{'profile': 'low', 'frames': [{'input': 'frame.bgra',
+                     'input_sha256': '0' * 64}]}]
+        with patch.object(v.subprocess, 'run') as process:
+            with self.assertRaises(ValueError):
+                v.replay(self.binary, self.root, sessions, self.root / 'out', False)
+            process.assert_not_called()
+
+    def test_replayed_state_and_order_are_fatal_gates(self):
+        data = self.root / 'frame.bgra'
+        data.write_bytes(b'pixels')
+        packet = self.root / 'original.cfhd'
+        packet.write_bytes(b'packet')
+        frame = {'input': data.name, 'input_sha256': v.file_sha(data),
+                 'sdk_packet': packet.name, 'sdk_sha256': v.file_sha(packet),
+                 'sdk_overbitrate_after_encode': 2, 'sdk_rate_limiter_after_encode': 0,
+                 'sdk_lastgopbitcount_after_encode': 48}
+        for index, trace in enumerate(('2\t0\t48\t0\t6\tframe_0.cfhd',
+                                      '1\t0\t48\t0\t6\tframe_0.cfhd',
+                                      '2\t0\t48\t1\t6\tframe_0.cfhd',
+                                      '2\t0\t48\t0\t7\tframe_0.cfhd')):
+            def capture(argv, **kwargs):
+                out = Path(argv[2])
+                out.mkdir(parents=True)
+                (out / 'frame_0.cfhd').write_bytes(b'packet')
+                (out / 'trace.tsv').write_text(trace + '\n')
+                return v.subprocess.CompletedProcess(argv, 0)
+            with self.subTest(trace=index), patch.object(v.subprocess, 'run', capture), \
+                    patch.object(v, 'compare_packet', return_value={'normalized_equal': True}):
+                args = (self.binary, self.root, [{'profile': 'low', 'frames': [frame]}],
+                        self.root / str(index), True)
+                if index == 0:
+                    self.assertEqual(v.replay(*args)[0]['sdk_state'], [2, 0, 48])
+                else:
+                    with self.assertRaises(ValueError):
+                        v.replay(*args)
+
+
+if __name__ == '__main__':
+    unittest.main()

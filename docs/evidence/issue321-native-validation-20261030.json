@@ -1,0 +1,244 @@
+{
+  "base": "04c348f",
+  "cmake": "3.31.6",
+  "command": "ctest --test-dir build -C Release --output-on-failure",
+  "compiler": "MSVC 19.44.35229.0",
+  "configuration": {
+    "HYPERCINE_BUILD_BENCHMARKS": false,
+    "HYPERCINE_BUILD_QUALITY_STATE_ONLY": true,
+    "HYPERCINE_BUILD_TESTS": true,
+    "HYPERCINE_BUILD_UPSTREAM": false,
+    "HYPERCINE_ENABLE_CUDA": false
+  },
+  "copyright": "Copyright (c) 2026 HyperCine Contributors. Dual-licensed MIT OR Apache-2.0.",
+  "date": "2026-10-30",
+  "failed": 0,
+  "file_git_blob_sha256": {
+    "CMakeLists.txt": "3f52ef4e7e28af74f706e4f1395ce901f368c79a32a5848aa6fce3d1178ef406",
+    "docs/evidence/issue321-retained-archive-20261030.json": "0be2affcf1f2a59cb33b0fea4882bbca6c087f36ba26e78dc028b79927baec45",
+    "docs/evidence/issue321-retained-provenance-20261030.json": "f6d8fd567363ffb0843c263ffec1265a0700505d9748c8c22b4ca2386b5c8ef2",
+    "tests/test_issue321_provenance.py": "95f9a068c7b86b4b4e3ca7ea1948592975b479a98c713c52e1893865da84d687",
+    "tools/verify_issue321_provenance.py": "1e3e0f5ea0e3f20be72b707c431915c740c379c65c31268d709eda2894daf222"
+  },
+  "file_sha256": {
+    "CMakeLists.txt": "1c4dcc96b25ecef860cafe1372b7ad1899b4c25b8294e288c5fe64f5b01d3d89",
+    "docs/evidence/issue321-retained-archive-20261030.json": "8f052664f59170db4f597a8a0f90792d3c479de20a3e63169c8f29551b82d483",
+    "docs/evidence/issue321-retained-provenance-20261030.json": "3ae6c358627d9aea13fa62e5567cf8a76eb070b816fde314d69a9a4a45626a0f",
+    "tests/test_issue321_provenance.py": "95f9a068c7b86b4b4e3ca7ea1948592975b479a98c713c52e1893865da84d687",
+    "tools/verify_issue321_provenance.py": "1e3e0f5ea0e3f20be72b707c431915c740c379c65c31268d709eda2894daf222"
+  },
+  "file_sha256_basis": "Executed/read working-tree bytes; line endings may differ from Git blobs.",
+  "passed": 41,
+  "platform": "native Windows x64 CPU",
+  "provenance_unit_controls": 13,
+  "python": "3.10.9",
+  "skipped": 0,
+  "tests": [
+    {
+      "name": "issue321_provenance_contract",
+      "result": "PASS",
+      "seconds": 0.345326
+    },
+    {
+      "name": "reference_decode_contract",
+      "result": "PASS",
+      "seconds": 1.75092
+    },
+    {
+      "name": "diagnostic_summary_contract",
+      "result": "PASS",
+      "seconds": 0.886575
+    },
+    {
+      "name": "decoder_differential_metrics",
+      "result": "PASS",
+      "seconds": 0.181281
+    },
+    {
+      "name": "cpu_isa_selection",
+      "result": "PASS",
+      "seconds": 0.0203729
+    },
+    {
+      "name": "quality_state_unit",
+      "result": "PASS",
+      "seconds": 0.0149807
+    },
+    {
+      "name": "overbitrate_hysteresis_sdk_sequence",
+      "result": "PASS",
+      "seconds": 0.0208197
+    },
+    {
+      "name": "quality_state_probe_arguments",
+      "result": "PASS",
+      "seconds": 1.32739
+    },
+    {
+      "name": "quality_cmake_mode_contract",
+      "result": "PASS",
+      "seconds": 35.4586
+    },
+    {
+      "name": "decoder_attachment_292_workers_1",
+      "result": "PASS",
+      "seconds": 0.0656079
+    },
+    {
+      "name": "decoder_attachment_292_workers_2",
+      "result": "PASS",
+      "seconds": 0.0457812
+    },
+    {
+      "name": "decoder_attachment_292_workers_4",
+      "result": "PASS",
+      "seconds": 0.0460839
+    },
+    {
+      "name": "decoder_attachment_292_workers_16",
+      "result": "PASS",
+      "seconds": 0.0606387
+    },
+    {
+      "name": "rca160_public_evidence",
+      "result": "PASS",
+      "seconds": 0.694265
+    },
+    {
+      "name": "decode_task_graph_workers_1",
+      "result": "PASS",
+      "seconds": 0.0158093
+    },
+    {
+      "name": "decode_task_graph_workers_2",
+      "result": "PASS",
+      "seconds": 0.0147451
+    },
+    {
+      "name": "decode_task_graph_workers_4",
+      "result": "PASS",
+      "seconds": 0.0153094
+    },
+    {
+      "name": "decode_task_graph_workers_16",
+      "result": "PASS",
+      "seconds": 0.0246352
+    },
+    {
+      "name": "scheduler_contract_195_workers_1",
+      "result": "PASS",
+      "seconds": 0.0212386
+    },
+    {
+      "name": "scheduler_contract_195_workers_2",
+      "result": "PASS",
+      "seconds": 0.0126531
+    },
+    {
+      "name": "scheduler_contract_195_workers_4",
+      "result": "PASS",
+      "seconds": 0.0129645
+    },
+    {
+      "name": "scheduler_contract_195_workers_16",
+      "result": "PASS",
+      "seconds": 0.0177693
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.324186
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.308423
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.289801
+    },
+    {
+      "name": "scheduler_t1_t2_144_workers_16",
+      "result": "PASS",
+      "seconds": 0.290038
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.100462
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.0864939
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.10198
+    },
+    {
+      "name": "scheduler_s2_output_144_workers_16",
+      "result": "PASS",
+      "seconds": 0.126153
+    },
+    {
+      "name": "decode_s3_plane",
+      "result": "PASS",
+      "seconds": 0.011474
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.114701
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.102814
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.105998
+    },
+    {
+      "name": "scheduler_t4_plane_144_workers_8",
+      "result": "PASS",
+      "seconds": 0.101468
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_1",
+      "result": "PASS",
+      "seconds": 0.0490692
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_2",
+      "result": "PASS",
+      "seconds": 0.0668284
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_4",
+      "result": "PASS",
+      "seconds": 0.0712633
+    },
+    {
+      "name": "scheduler_t5_publish_after_stop_144_workers_16",
+      "result": "PASS",
+      "seconds": 0.0599512
+    },
+    {
+      "name": "extreme_geometry_c0_arithmetic",
+      "result": "PASS",
+      "seconds": 0.185829
+    },
+    {
+      "name": "extreme_geometry_c0_report",
+      "result": "PASS",
+      "seconds": 0.116903
+    }
+  ],
+  "wall_seconds": 43.72
+}
