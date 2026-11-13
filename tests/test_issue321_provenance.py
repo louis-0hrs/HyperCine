@@ -378,7 +378,8 @@ class Provenance(unittest.TestCase):
         (directory / 'link.command.1.tlog').write_text(
             '"' + str(self.binary) + '"', encoding='utf-16')
         # Model a temp-root alias/junction without requiring symlink privileges.
-        with patch.object(Path, 'resolve', return_value=self.root / 'canonical/capture.exe'):
+        with patch.object(v, 'file_sha', side_effect=lambda path: hashlib.sha256(path.read_bytes()).hexdigest()), \
+                patch.object(Path, 'resolve', return_value=self.root / 'canonical/capture.exe'):
             v.build_record(self.root, 'capture', library=self.binary)
 
     def test_link_input_normalizes_expected_parent_components(self):
