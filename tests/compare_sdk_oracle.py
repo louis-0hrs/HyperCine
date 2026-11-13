@@ -192,8 +192,9 @@ def parse_probe_stream(payload):
 def _reap_process_tree(process):
     """Kill a timed-out tool and, where the platform offers it, its descendants.
 
-    POSIX uses the session we created, so a tool that forked helpers cannot
-    keep the pipe open. Windows has no process group kill in the stdlib, so
+    POSIX signals the session leader's original PID as the process-group ID:
+    getpgid(leader_pid) is not reliable after the leader exits while a
+    descendant still holds stdout. Windows has no process group kill in the stdlib, so
     taskkill /T is the documented descendant sweep; the direct kill and the
     final wait are unconditional so a missing taskkill still reaps the child.
     """
@@ -206,7 +207,7 @@ def _reap_process_tree(process):
             pass
     else:
         try:
-            os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+            os.killpg(process.pid, signal.SIGKILL)
         except (OSError, ValueError):
             pass
     try:
@@ -247,12 +248,12 @@ def run_bounded(argv, timeout, limit=None):
             **options)
     except (OSError, ValueError):
         raise ValueError('external tool unavailable') from None
-    chunks, over_limit = [], False
+    chunks, over_limit, stdout_eof, read_failed = [], False, False, False
     if limit is None:
         pass
     else:
         def drain():
-            nonlocal over_limit
+            nonlocal over_limit, stdout_eof, read_failed
             total = 0
             try:
                 while True:
@@ -262,6 +263,7 @@ def run_bounded(argv, timeout, limit=None):
                         return
                     chunk = process.stdout.read(min(STDOUT_CHUNK_BYTES, remaining))
                     if not chunk:
+                        stdout_eof = True
                         return
                     total += len(chunk)
                     if total > limit:
@@ -269,35 +271,49 @@ def run_bounded(argv, timeout, limit=None):
                         return
                     chunks.append(chunk)
             except (OSError, ValueError):
-                # A closed pipe after our own kill is not extra output.
+                # A read failure must never be mistaken for clean pipe EOF.
+                read_failed = True
                 return
 
         reader = threading.Thread(target=drain, name='bounded-stdout', daemon=True)
         reader.start()
+    # The child exit alone is insufficient: a descendant may still have the
+    # stdout pipe open. Require both process exit and reader EOF *within the
+    # same budget*, otherwise reject and sweep the original process group.
     deadline = time.monotonic() + timeout
     try:
         while True:
-            try:
-                returncode = process.wait(timeout=PROCESS_POLL_SECONDS)
+            if limit is not None and over_limit:
+                _reap_process_tree(process)
+                raise ValueError('external tool produced too much output') from None
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                _reap_process_tree(process)
+                raise ValueError('external tool exceeded its runtime budget') from None
+            if process.poll() is not None and (limit is None or not reader.is_alive()):
                 break
-            except subprocess.TimeoutExpired:
-                if limit is not None and over_limit:
-                    _reap_process_tree(process)
-                    raise ValueError('external tool produced too much output') from None
-                if time.monotonic() >= deadline:
-                    _reap_process_tree(process)
-                    raise ValueError('external tool exceeded its runtime budget') from None
+            quantum = min(PROCESS_POLL_SECONDS, remaining)
+            if process.poll() is None:
+                try:
+                    process.wait(timeout=quantum)
+                except subprocess.TimeoutExpired:
+                    pass
+            else:
+                reader.join(timeout=quantum)
         if limit is not None:
-            reader.join(timeout=10)
             if over_limit:
+                _reap_process_tree(process)
                 raise ValueError('external tool produced too much output')
+            if read_failed or not stdout_eof:
+                _reap_process_tree(process)
+                raise ValueError('external tool output incomplete')
     finally:
         if process.stdout is not None:
             try:
                 process.stdout.close()
             except (OSError, ValueError):
                 pass
-    if returncode != 0:
+    if process.returncode != 0:
         raise ValueError('external tool failed')
     return b''.join(chunks)
 

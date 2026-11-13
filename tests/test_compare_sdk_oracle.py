@@ -390,6 +390,74 @@ class BoundedExternalProcess(unittest.TestCase):
                 with self.assertRaises(ProcessLookupError):
                     os.kill(pid, 0)
 
+    def test_exited_parent_with_inherited_stdout_must_not_look_successful(self):
+        """A departed root with a live pipe-holding descendant is not EOF.
+
+        The retired implementation returned partial valid JSON after a fixed
+        ten-second reader.join(), and left the descendant alive. This test
+        requires fail-closed completion within the caller's wall budget.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            pid_file = Path(directory) / 'held-pipe-grandchild.pid'
+            grandchild = Path(directory) / 'held-pipe-grandchild.py'
+            grandchild.write_text(
+                'import os, pathlib, time\n'
+                + f'pathlib.Path({str(pid_file)!r}).write_text(str(os.getpid()))\n'
+                + 'time.sleep(30)\n', encoding='utf-8')
+            argv = self.child(directory,
+                'import json, pathlib, subprocess, sys, time\n'
+                + f'subprocess.Popen([sys.executable, "-I", "-B", {str(grandchild)!r}], '
+                + 'stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n'
+                + 'for _ in range(200):\n'
+                + f'    if pathlib.Path({str(pid_file)!r}).exists():\n'
+                + '        break\n'
+                + '    time.sleep(0.01)\n'
+                + 'print(json.dumps({"streams": [{"codec_name": "cfhd"}]}), flush=True)\n',
+                'held-pipe-parent.py')
+            started = time.monotonic()
+            descendant_pid = None
+            try:
+                with self.assertRaisesRegex(
+                        ValueError, 'external tool exceeded its runtime budget'):
+                    compare.run_bounded(argv, timeout=3.0, limit=65536)
+                self.assertLess(time.monotonic() - started, 8.0)
+                self.assertTrue(pid_file.exists(), 'synthetic descendant did not start')
+                descendant_pid = int(pid_file.read_text())
+                if os.name == 'posix':
+                    # Zombies are terminated, not running; they may temporarily
+                    # remain visible when an unrelated init has yet to reap them.
+                    for _ in range(30):
+                        stat_path = Path(f'/proc/{descendant_pid}/stat')
+                        if stat_path.exists():
+                            alive = stat_path.read_text().split()[2] != 'Z'
+                        else:
+                            try:
+                                os.kill(descendant_pid, 0)
+                            except ProcessLookupError:
+                                alive = False
+                            else:
+                                alive = True
+                        if not alive:
+                            break
+                        time.sleep(0.05)
+                    self.assertFalse(alive, 'pipe-holding descendant survived cleanup')
+            finally:
+                # A failed regression must not leave synthetic test processes
+                # running on the builder. Windows tree cleanup requires a
+                # separate native proof (taskkill may see an exited parent).
+                if descendant_pid is None and pid_file.exists():
+                    descendant_pid = int(pid_file.read_text())
+                if descendant_pid is not None:
+                    if os.name == 'nt':
+                        subprocess.run(['taskkill', '/F', '/PID', str(descendant_pid)],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                       timeout=10, check=False)
+                    else:
+                        try:
+                            os.kill(descendant_pid, 9)
+                        except ProcessLookupError:
+                            pass
+
     def test_large_stdout_is_cut_off_while_it_is_produced(self):
         with tempfile.TemporaryDirectory() as directory:
             # 8 MiB cannot sit in a pipe buffer: the writer blocks until we kill it.
