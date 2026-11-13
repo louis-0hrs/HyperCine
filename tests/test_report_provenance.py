@@ -62,6 +62,26 @@ class WindowsReportProvenance(unittest.TestCase):
             self.assertNotIn('SECRET_EXAMPLE_MISSING_PROBE', output)
             self.assertNotIn(missing, output)
 
+    def test_invalid_arguments_never_echo_private_values(self):
+        # Default argparse diagnostics echo unknown switches and invalid integers.
+        # Test the real entrypoint, with disposable synthetic sentinels only.
+        script = str(Path(windows.__file__).resolve())
+        cases = (
+            (['--unexpected', '/private/SECRET_UNKNOWN_ARGUMENT'], 'SECRET_UNKNOWN_ARGUMENT'),
+            (['--frames', 'SECRET_FRAME_NUMBER'], 'SECRET_FRAME_NUMBER'),
+        )
+        for extra, marker in cases:
+            with self.subTest(marker=marker):
+                completed = subprocess.run(
+                    [sys.executable, '-B', script, '--probe',
+                     '/private/SECRET_FAKE_PROBE', *extra],
+                    capture_output=True, text=True, timeout=20, check=False)
+                self.assertEqual(completed.returncode, 1)
+                output = completed.stdout + completed.stderr
+                self.assertIn('FAIL: Windows reference validation rejected', output)
+                self.assertNotIn(marker, output)
+                self.assertNotIn('SECRET_FAKE_PROBE', output)
+
 
 if __name__ == '__main__':
     unittest.main()

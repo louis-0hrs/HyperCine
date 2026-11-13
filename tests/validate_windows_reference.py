@@ -214,8 +214,15 @@ def compiler_info():
             if compiler else 'NOT RECORDED: run through configured CTest')
 
 
+class QuietArgumentParser(argparse.ArgumentParser):
+    """CLI parse errors must never echo arguments containing private paths."""
+
+    def error(self, message):
+        raise ValueError('invalid Windows reference arguments')
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = QuietArgumentParser(description=__doc__)
     parser.add_argument('--probe', type=Path, required=True)
     parser.add_argument('--inputs-only', action='store_true')
     parser.add_argument('--sdk-replay', action='store_true', help='replay documented CG709/default midpoint arithmetic with frozen exported divisors')
