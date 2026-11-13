@@ -4,6 +4,10 @@
 """Reject raw local command paths in published Windows reference reports."""
 import inspect
 import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
 import unittest
 
 import validate_windows_reference as windows
@@ -42,6 +46,21 @@ class WindowsReportProvenance(unittest.TestCase):
             portable_command('validate_windows_reference.py',
                              ['--probe', '/private/SECRET_PROBE',
                               '--unrecognized', '/private/SECRET_PAYLOAD'])
+
+
+    def test_missing_probe_does_not_leak_path(self):
+        # Real CLI failure route, but only a disposable synthetic path.
+        with tempfile.TemporaryDirectory(prefix='hypercine-report-privacy-') as root:
+            missing = str(Path(root) / 'SECRET_EXAMPLE_MISSING_PROBE')
+            completed = subprocess.run(
+                [sys.executable, '-B', str(Path(windows.__file__).resolve()),
+                 '--probe', missing, '--inputs-only'],
+                capture_output=True, text=True, timeout=20, check=False)
+            self.assertEqual(completed.returncode, 1)
+            output = completed.stdout + completed.stderr
+            self.assertIn('FAIL: Windows reference validation rejected', output)
+            self.assertNotIn('SECRET_EXAMPLE_MISSING_PROBE', output)
+            self.assertNotIn(missing, output)
 
 
 if __name__ == '__main__':

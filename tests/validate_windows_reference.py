@@ -278,6 +278,7 @@ def main():
 if __name__ == '__main__':
     try:
         raise SystemExit(main())
-    except (ValueError, KeyError, StopIteration, OSError, subprocess.CalledProcessError) as error:
-        print('FAIL:', error)
+    except (ValueError, KeyError, StopIteration, OSError, subprocess.CalledProcessError):
+        # Exception text may contain private corpus, probe or output paths.
+        print('FAIL: Windows reference validation rejected')
         raise SystemExit(1)
