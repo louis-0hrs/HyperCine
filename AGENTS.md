@@ -38,14 +38,38 @@ Every agent operating in this repository must strictly adhere to these rules.
 
 ---
 
-## 4. Strict Bitstream Compatibility
-- Any bitstream emitted by HyperCine must conform to the SMPTE VC-5 / CineForm `CFHD` standard.
-- Any bitstream produced by HyperCine must decode correctly in:
-  - The pristine upstream GoPro CineForm SDK (`upstream/Example/TestCFHD`).
-  - Adobe Premiere Pro / After Effects.
-  - DaVinci Resolve.
-  - FFmpeg (`cfhd` decoder).
-- Any valid bitstream produced by upstream tools must decode correctly in HyperCine.
+## 4. VC-5 Conformance and GoPro Interoperability
+- Follow the owner-approved [project direction #382](https://github.com/louis-0hrs/HyperCine/issues/382)
+  and [validation contract](docs/VALIDATION_CONTRACT.md). Full VC-5 encode/decode
+  coverage is the development goal, not a claim that the current codec is complete.
+- Declare the wire dialect explicitly: legacy GoPro CineForm `CFHD` is not a
+  synonym for standardized SMPTE VC-5. A VC-5 claim requires edition/part-specific
+  normative evidence; a CFHD claim requires the corresponding compatibility tests.
+  Never advertise an unqualified hybrid as both formats.
+- Bidirectional GoPro compatibility remains required for the declared supported
+  CFHD mode: valid GoPro samples must decode correctly in HyperCine, and HyperCine
+  samples must decode correctly with pinned GoPro and independent decoder builds.
+  Qualify FFmpeg and each claimed application/version separately; opening a file
+  or receiving a success return is insufficient.
+- Prefer standard-permitted VC-5 choices that also interoperate with GoPro and
+  other decoders. Where the wire formats cannot be shared, use explicit output
+  modes and share internal arithmetic only where its semantics are proven equal.
+  Older GoPro limitations must not silently redefine full VC-5 coverage.
+- Universal GoPro **encoder packet identity** is a secondary diagnostic/regression
+  target. Preserve existing exact-parity gates until a reviewed migration provides
+  replacement coverage. Normative **decoder output equality**, internal CPU/GPU
+  determinism, pixel correctness and safety requirements are not relaxed.
+- Treat the frozen SDK and its samples as scoped evidence, not infallible oracles.
+  Keep all old inputs, packets, decoded captures and indexes immutable. Qualify
+  their uses separately; neither hashes nor majority-vote decoding prove correctness.
+  Do not reproduce an SDK race just to obtain parity.
+- Measure initial compression loss and additional decode/re-encode drift separately
+  under [#383](https://github.com/louis-0hrs/HyperCine/issues/383). No universal
+  lossless-recompression promise is established; any fixed-point claim needs its
+  exact pixel, quantization, state and conversion domain plus measured evidence.
+- Report each acceptance class separately. `SKIP`, `BLOCKED`, `UNQUALIFIED` and
+  missing coverage are never `PASS`. External standards materials stay out of
+  the repository unless their use and redistribution rights are established.
 
 ---
 
