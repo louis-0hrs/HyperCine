@@ -24,6 +24,12 @@ main = runner.main
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_dialect_capability_proof_registration_is_required(self):
+        name = 'dialect_capability_proof'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, name):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_public_cpu_wavelet_bounds_are_binding(self):
         name = 'wavelet_cpu_bounds'
         self.assertIn(name, REQUIRED)

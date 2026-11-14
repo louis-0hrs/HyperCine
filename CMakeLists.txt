@@ -84,10 +84,15 @@ if(HYPERCINE_ENABLE_CUDA)
     endif()
 endif()
 
-# SDK-free Python contracts, registered by both the regular test tree and the
+# SDK-free contracts, registered by both the regular test tree and the
 # standalone build, which returns before add_subdirectory(tests). Kept in one
 # function so the two build modes cannot drift apart.
 function(hypercine_register_sdk_free_contracts)
+    # This independent proof must remain available even without Python.
+    add_executable(test_dialect_capability_proof
+        "${PROJECT_SOURCE_DIR}/internal/contract_proofs/dialect_capability/test_contract.cpp")
+    add_test(NAME dialect_capability_proof COMMAND test_dialect_capability_proof)
+
     find_package(Python3 QUIET COMPONENTS Interpreter)
     if(NOT Python3_Interpreter_FOUND)
         return()
