@@ -4,6 +4,33 @@ HyperCine contains an upstream-compatible **CUDA encoder**, an independent **SDK
 
 This document distinguishes the general CineForm algorithm from features actually implemented and validated in HyperCine. For tested formats and host limitations, read [Compatibility](COMPATIBILITY.md).
 
+## Target architecture: shared core, explicit wire dialects
+
+[Direction #382](https://github.com/louis-0hrs/HyperCine/issues/382) and the
+[validation contract](VALIDATION_CONTRACT.md) supersede a universal GoPro
+encoder-byte-identity objective. The architecture must support standard-correct
+VC-5 encoding and decoding while preserving bidirectional legacy CFHD
+interoperability. This section defines a target, **not new runtime capabilities**.
+
+The session/capability work in [#259](https://github.com/louis-0hrs/HyperCine/issues/259)
+must distinguish wire dialect, standard edition/parts, media representation,
+interoperability target, backend/resource admission and qualification status.
+A supported geometry or available GPU is not proof of a supported bitstream mode.
+No silent dialect fallback or immediate unreviewed public ABI change is implied.
+
+Share transforms, quantization, scheduling and resources where the semantic
+contract agrees. Use explicit serializers/parsers where legacy CFHD and VC-5
+framing, fields or representation differ; do not create per-resolution or
+per-GPU codec forks. Prefer standard-permitted encodings that retain measured
+GoPro/other-decoder interoperability, without restricting full VC-5 coverage to
+an older decoder's feature set. Container wrapping and active-metadata rendering
+remain separate from elementary-bitstream and native-component correctness.
+
+The existing [Phase A audit](research/vc5/PHASE_A_REFERENCE_AUDIT.md) records
+framing and PrescaleShift interpretation findings. Resolve the affected
+normative/reference disagreement before qualifying those rows; choosing whichever
+interpretation makes one sample pass is not an acceptance procedure.
+
 ## Implementation status and ownership
 
 | Component | Current boundary | Evidence |
@@ -55,7 +82,7 @@ CineForm is an intra-frame wavelet codec used for intermediates and high-fidelit
                 │
                 ▼
   ┌─────────────────────────┐
-  │ Bitstream Container &   │  SMPTE VC-5 / CFHD bitstream framing,
+  │ Bitstream Container &   │  Explicit dialect-specific framing,
   │ Metadata Packaging      │  subband indices, slice headers, color tags
   └─────────────┬───────────┘
                 │
@@ -107,7 +134,7 @@ CineForm is an intra-frame wavelet codec used for intermediates and high-fidelit
 
 ## 2. Mathematical background: the 2-6 biorthogonal wavelet
 
-CineForm uses a **2-6 biorthogonal wavelet** with integer filtering and specific edge handling. The simplified expressions below are an orientation aid, not a replacement for the SDK's exact rounding, saturation, prescale and boundary contracts. Production bit-exactness must be checked against the relevant reference vectors.
+CineForm uses a **2-6 biorthogonal wavelet** with integer filtering and specific edge handling. The simplified expressions below are an orientation aid, not a normative implementation. Rounding, saturation, prescale and boundary behavior must follow the selected dialect's verified contract. Use the applicable normative requirements and independently qualified vectors; SDK agreement alone does not establish correctness.
 
 ### Forward Decomposition Filter Coefficients
 For an input sequence $x[n]$:
@@ -121,7 +148,7 @@ For an input sequence $x[n]$:
 To reconstruct $x[2n]$ and $x[2n+1]$ from lowpass $L$ and highpass $H$:
 1. The lowpass signal provides the coarse average.
 2. The highpass signal provides detail adjustments filtered across neighboring taps.
-3. The reconstruction produces exact integer recovery in lossless mode and minimum mean squared error (MMSE) in lossy quantization modes.
+3. Exact integer recovery must be demonstrated for any claimed lossless mode. Lossy reconstruction and repeated encode/decode drift require measurement; this overview makes no minimum-error or lossless-recompression guarantee.
 
 ### Separable 2D Transform
 The 2D transform is strictly separable:
