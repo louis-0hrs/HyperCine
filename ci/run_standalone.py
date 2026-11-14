@@ -17,6 +17,7 @@ else:
 
 REQUIRED = {
     'upstream_immutable', 'upstream_immutable_guardrails',
+    'dialect_capability_proof',
     # Fail closed if the C0 geometry arithmetic or recorded-report gate disappears.
     'extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report',
     # P0 RGB444 frame and RG48 importer must never disappear from standalone CI.
