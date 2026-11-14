@@ -9,10 +9,12 @@ import hashlib
 import importlib.util
 import inspect
 import json
+import os
 import subprocess
 import struct
 import sys
 import tempfile
+import time
 from unittest.mock import patch
 from pathlib import Path
 import unittest
@@ -344,6 +346,202 @@ class OracleFailClosed(unittest.TestCase):
             self.assertEqual(digest, hashlib.sha256(original).hexdigest())
             self.assertEqual(lines, original.decode('utf-8').splitlines())
             self.assertEqual(path.read_bytes(), changed)
+
+
+class BoundedExternalProcess(unittest.TestCase):
+    """#377: bounded child runtime and stdout captured under a hard cap."""
+
+    def child(self, directory, source, name='synthetic-child.py'):
+        """A disposable synthetic tool: never the real ffmpeg/ffprobe."""
+        script = Path(directory) / name
+        script.write_text(source, encoding='utf-8')
+        return [sys.executable, '-I', '-B', str(script)]
+
+    def test_nonzero_exit_fails_closed_without_echoing_the_banner(self):
+        with tempfile.TemporaryDirectory() as directory:
+            argv = self.child(directory,
+                              'import sys\n'
+                              'sys.stdout.write("/private/HOST_SECRET_PATH PRIVATE_TOKEN")\n'
+                              'sys.exit(3)\n')
+            with self.assertRaises(ValueError) as caught:
+                compare.run_bounded(argv, timeout=60, limit=4096)
+            text = str(caught.exception)
+            self.assertEqual(text, 'external tool failed')
+            for leaked in ('HOST_SECRET_PATH', 'PRIVATE_TOKEN', directory, 'synthetic'):
+                self.assertNotIn(leaked, text)
+
+    def test_hanging_child_is_killed_and_reaped(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pid_file = Path(directory) / 'child.pid'
+            argv = self.child(directory,
+                              'import os, pathlib, time\n'
+                              'pathlib.Path(' + repr(str(pid_file)) + ').write_text(str(os.getpid()))\n'
+                              'while True:\n'
+                              '    time.sleep(0.05)\n')
+            started = time.monotonic()
+            with self.assertRaisesRegex(
+                    ValueError, 'external tool exceeded its runtime budget'):
+                compare.run_bounded(argv, timeout=1.0, limit=4096)
+            self.assertLess(time.monotonic() - started, 60)
+            pid = int(pid_file.read_text())
+            self.assertNotEqual(pid, os.getpid())
+            if os.name == 'posix':
+                # An unreaped child would still answer signal 0.
+                with self.assertRaises(ProcessLookupError):
+                    os.kill(pid, 0)
+
+    def test_exited_parent_with_inherited_stdout_must_not_look_successful(self):
+        """A departed root with a live pipe-holding descendant is not EOF.
+
+        The retired implementation returned partial valid JSON after a fixed
+        ten-second reader.join(), and left the descendant alive. This test
+        requires fail-closed completion within the caller's wall budget.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            pid_file = Path(directory) / 'held-pipe-grandchild.pid'
+            grandchild = Path(directory) / 'held-pipe-grandchild.py'
+            grandchild.write_text(
+                'import os, pathlib, time\n'
+                + f'pathlib.Path({str(pid_file)!r}).write_text(str(os.getpid()))\n'
+                + 'time.sleep(30)\n', encoding='utf-8')
+            argv = self.child(directory,
+                'import json, pathlib, subprocess, sys, time\n'
+                + f'subprocess.Popen([sys.executable, "-I", "-B", {str(grandchild)!r}], '
+                + 'stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n'
+                + 'for _ in range(200):\n'
+                + f'    if pathlib.Path({str(pid_file)!r}).exists():\n'
+                + '        break\n'
+                + '    time.sleep(0.01)\n'
+                + 'print(json.dumps({"streams": [{"codec_name": "cfhd"}]}), flush=True)\n',
+                'held-pipe-parent.py')
+            started = time.monotonic()
+            descendant_pid = None
+            try:
+                with self.assertRaisesRegex(
+                        ValueError, 'external tool exceeded its runtime budget'):
+                    compare.run_bounded(argv, timeout=3.0, limit=65536)
+                self.assertLess(time.monotonic() - started, 8.0)
+                self.assertTrue(pid_file.exists(), 'synthetic descendant did not start')
+                descendant_pid = int(pid_file.read_text())
+                if os.name == 'posix':
+                    # Zombies are terminated, not running; they may temporarily
+                    # remain visible when an unrelated init has yet to reap them.
+                    for _ in range(30):
+                        stat_path = Path(f'/proc/{descendant_pid}/stat')
+                        if stat_path.exists():
+                            alive = stat_path.read_text().split()[2] != 'Z'
+                        else:
+                            try:
+                                os.kill(descendant_pid, 0)
+                            except ProcessLookupError:
+                                alive = False
+                            else:
+                                alive = True
+                        if not alive:
+                            break
+                        time.sleep(0.05)
+                    self.assertFalse(alive, 'pipe-holding descendant survived cleanup')
+            finally:
+                # A failed regression must not leave synthetic test processes
+                # running on the builder. Windows tree cleanup requires a
+                # separate native proof (taskkill may see an exited parent).
+                if descendant_pid is None and pid_file.exists():
+                    descendant_pid = int(pid_file.read_text())
+                if descendant_pid is not None:
+                    if os.name == 'nt':
+                        subprocess.run(['taskkill', '/F', '/PID', str(descendant_pid)],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                       timeout=10, check=False)
+                    else:
+                        try:
+                            os.kill(descendant_pid, 9)
+                        except ProcessLookupError:
+                            pass
+
+    def test_large_stdout_is_cut_off_while_it_is_produced(self):
+        with tempfile.TemporaryDirectory() as directory:
+            # 8 MiB cannot sit in a pipe buffer: the writer blocks until we kill it.
+            argv = self.child(directory,
+                              'import sys\n'
+                              'sys.stdout.write("x" * (8 * 1024 * 1024))\n')
+            started = time.monotonic()
+            with self.assertRaisesRegex(ValueError,
+                                        'external tool produced too much output'):
+                compare.run_bounded(argv, timeout=60, limit=1024)
+            self.assertLess(time.monotonic() - started, 60)
+
+    def test_exact_limit_is_accepted_and_one_more_byte_is_not(self):
+        with tempfile.TemporaryDirectory() as directory:
+            exact = self.child(directory,
+                               'import sys\n'
+                               'sys.stdout.write("A" * 4096)\n', 'exact.py')
+            self.assertEqual(len(compare.run_bounded(exact, timeout=60, limit=4096)), 4096)
+            one_more = self.child(directory,
+                                 'import sys\n'
+                                 'sys.stdout.write("A" * 4097)\n', 'more.py')
+            with self.assertRaisesRegex(ValueError, 'too much output'):
+                compare.run_bounded(one_more, timeout=60, limit=4096)
+
+    def test_suppressed_stdout_is_never_captured(self):
+        with tempfile.TemporaryDirectory() as directory:
+            argv = self.child(directory,
+                              'import sys\n'
+                              'sys.stdout.write("x" * (4 * 1024 * 1024))\n')
+            # The decode lane discards stdout: a chatty tool must not stall or buffer.
+            self.assertEqual(compare.run_bounded(argv, timeout=60), b'')
+
+    def test_missing_tool_fails_closed_without_the_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = str(Path(directory) / 'absent-tool-PRIVATE_TOKEN')
+            with self.assertRaisesRegex(ValueError, 'external tool unavailable') as caught:
+                compare.run_bounded([missing], timeout=10, limit=64)
+            self.assertNotIn('PRIVATE_TOKEN', str(caught.exception))
+
+    def test_invalid_budget_is_refused_before_spawning(self):
+        for timeout in (0, -1, float('nan'), float('inf'), True, None, '30'):
+            with self.subTest(timeout=timeout), \
+                 patch.object(compare.subprocess, 'Popen',
+                              side_effect=AssertionError('spawned without a budget')):
+                with self.assertRaisesRegex(ValueError, 'invalid external tool budget'):
+                    compare.run_bounded([sys.executable, '-V'], timeout=timeout, limit=64)
+        for limit in (-1, True, 1.5, '64'):
+            with self.subTest(limit=limit), \
+                 patch.object(compare.subprocess, 'Popen',
+                              side_effect=AssertionError('spawned without a budget')):
+                with self.assertRaisesRegex(ValueError, 'invalid external tool budget'):
+                    compare.run_bounded([sys.executable, '-V'], timeout=10, limit=limit)
+
+    def test_mutation_control_legacy_capture_is_unbounded(self):
+        """The retired check_output() collected everything; the fix refuses at the cap."""
+        with tempfile.TemporaryDirectory() as directory:
+            argv = self.child(directory,
+                              'import sys\n'
+                              'sys.stdout.write("A" * (512 * 1024))\n')
+            self.assertEqual(len(subprocess.check_output(argv)), 512 * 1024)
+            with self.assertRaisesRegex(ValueError, 'too much output'):
+                compare.run_bounded(argv, timeout=60, limit=1024)
+
+    def test_replay_uses_only_the_bounded_runner_for_external_tools(self):
+        source = inspect.getsource(compare.main)
+        self.assertNotIn('check_output', source)
+        self.assertNotIn('capture_output', source)
+        self.assertNotIn('subprocess.run(', source)
+        self.assertEqual(source.count('run_bounded('), 3)
+        # The one-frame decode keeps FFmpeg's no-overwrite semantics.
+        self.assertIn("'-n'", source)
+        for budget in ('VERSION_BUDGET_SECONDS', 'PROBE_BUDGET_SECONDS',
+                       'DECODE_BUDGET_SECONDS'):
+            self.assertIn(budget, source)
+
+    def test_malformed_probe_payload_is_rejected(self):
+        for payload in (b'not json', b'{"streams": []}', b'{}', b'[]'):
+            with self.subTest(payload=payload):
+                with self.assertRaisesRegex(ValueError, 'invalid oracle stream'):
+                    compare.parse_probe_stream(payload)
+        for payload in (b'', b'\xff\xfe'):
+            with self.subTest(payload=payload):
+                with self.assertRaisesRegex(ValueError, 'invalid external tool output'):
+                    compare.parse_probe_stream(payload)
 
 
 class OraclePublicationPrivacy(unittest.TestCase):
