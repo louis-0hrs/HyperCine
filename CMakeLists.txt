@@ -901,7 +901,14 @@ if(HYPERCINE_BUILD_STANDALONE)
             COMMAND "${Python3_EXECUTABLE}" -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_gop2_reference_inventory.py")
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
-            --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
+            --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only
+            --output "${CMAKE_CURRENT_BINARY_DIR}/windows-reference-inputs-report.json")
+        add_test(NAME windows_reference_report_artifact COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/check_windows_report_artifact.py"
+            --report "${CMAKE_CURRENT_BINARY_DIR}/windows-reference-inputs-report.json"
+            --probe $<TARGET_FILE:hypercine_reference_probe>)
+        set_tests_properties(windows_reference_report_artifact PROPERTIES
+            DEPENDS windows_reference_inputs TIMEOUT 30)
         add_test(NAME windows_reference_report_provenance COMMAND "${Python3_EXECUTABLE}" -B
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_report_provenance.py")
         add_test(NAME windows_reference_guardrails COMMAND "${Python3_EXECUTABLE}"
