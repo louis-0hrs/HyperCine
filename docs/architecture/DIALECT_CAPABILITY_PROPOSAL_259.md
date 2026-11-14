@@ -43,7 +43,7 @@ Source/document assessment on main 72d6441154322b0065f2de3db7bbd8fb49e28274, not
 
 One computation/resource contract where proven equal, **not one ambiguous wire syntax**. Backend frontends produce explicitly described coefficient/state views. Quantization, prescale and codeblock semantics are shared only where verified identical; common code must not conceal dialect-dependent interpretation. A dialect serializer owns framing/tags/packing; a dialect parser validates those before normalized shared reconstruction. Distinct CFHD/VC-5 serializers/parsers are legitimate; per-GPU/per-resolution writers are not. Serializer selection binds once to immutable session intent. None is implemented here.
 
-Existing writer/constructors remain CFHD with historical contracts. The smallest later integration is an internal wrapper around current request/preflight, not new public class members or virtual methods. Later serializer work requires independent normative/interoperability tests. Resolve PrescaleShift through #303, not whichever interpretation reproduces SDK bytes. See [Phase A audit](../research/vc5/PHASE_A_REFERENCE_AUDIT.md).
+Existing writer/constructors remain CFHD with historical contracts. The smallest later integration is an internal wrapper around current request/preflight, not new public class members or virtual methods. Later serializer work requires independent normative/interoperability tests. Resolve PrescaleShift through #303, not whichever interpretation reproduces SDK bytes. See [Phase A audit](../../research/vc5/PHASE_A_REFERENCE_AUDIT.md).
 
 ## Bounded standalone proof
 

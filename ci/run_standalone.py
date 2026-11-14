@@ -60,6 +60,7 @@ REQUIRED = {
     # from this inventory would let a dropped registration stay green.
     'test_reference_release_inventory', 'test_compare_sdk_oracle',
     'test_compare_sdk_oracle_optimized',
+    'test_generation_control', 'test_generation_control_optimized',
     'test_rca159_witness_contract', 'test_rca160_all_channel_contract',
     'test_rca160_ledger_audit',
     'qualification_report_contract', 'cuda_output_dir_platform_contract',

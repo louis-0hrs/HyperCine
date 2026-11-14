@@ -88,7 +88,7 @@ endif()
 # standalone build, which returns before add_subdirectory(tests). Kept in one
 # function so the two build modes cannot drift apart.
 function(hypercine_register_sdk_free_contracts)
-    # This independent proof must remain available even without Python.
+    # Isolated C++17 dialect capability proof independent of Python and runtime codec.
     add_executable(test_dialect_capability_proof
         "${PROJECT_SOURCE_DIR}/internal/contract_proofs/dialect_capability/test_contract.cpp")
     add_test(NAME dialect_capability_proof COMMAND test_dialect_capability_proof)
@@ -131,6 +131,13 @@ function(hypercine_register_sdk_free_contracts)
         COMMAND "${Python3_EXECUTABLE}" -B -O "${contracts}/test_compare_sdk_oracle.py")
     set_tests_properties(test_compare_sdk_oracle test_compare_sdk_oracle_optimized
         PROPERTIES LABELS "reference-oracle")
+    # Synthetic generation measurement controls; no codec qualification implied.
+    add_test(NAME test_generation_control
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_generation_control.py")
+    add_test(NAME test_generation_control_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${contracts}/test_generation_control.py")
+    set_tests_properties(test_generation_control test_generation_control_optimized
+        PROPERTIES LABELS "validation;quality-control" TIMEOUT 120)
     # Recorded RCA-159 band-0 witness (#234). Recomputed statistics and the
     # sanitized records only; no private corpus and no GPU are involved.
     add_test(NAME test_rca159_witness_contract
