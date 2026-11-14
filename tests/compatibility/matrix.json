@@ -1,0 +1,581 @@
+{
+  "admitted_scope": {
+    "bit_depth": 10,
+    "chroma_siting": "not asserted (no independent capture)",
+    "geometry": "128x128",
+    "gop": 1,
+    "pixel_format": "yuv422p10le",
+    "range": "studio (64-940)",
+    "scan": "progressive"
+  },
+  "backlog": [
+    {
+      "feature": "RGB(A) source or 4:4:4 encoded family",
+      "reason": "no measured case in this repository",
+      "tracked_by": "#381, #259"
+    },
+    {
+      "feature": "RGB48 / B64A high-bit-depth input",
+      "reason": "no measured case in this repository",
+      "tracked_by": "#381"
+    },
+    {
+      "feature": "Bayer (BYR2/BYR4) source family",
+      "reason": "no measured case in this repository",
+      "tracked_by": "#381"
+    },
+    {
+      "feature": "Interlaced scan",
+      "reason": "no measured case in this repository",
+      "tracked_by": "#381"
+    },
+    {
+      "feature": "Temporal GOP > 1",
+      "reason": "no measured case in this repository",
+      "tracked_by": "#381, tests/reference_gop2"
+    },
+    {
+      "feature": "Stereo / multi-eye temporal layout",
+      "reason": "no measured case in this repository",
+      "tracked_by": "#381"
+    },
+    {
+      "feature": "Active metadata beyond masked volatile tags",
+      "reason": "no measured case in this repository",
+      "tracked_by": "#381"
+    },
+    {
+      "feature": "GoPro encoder byte identity",
+      "reason": "not a product objective since #382",
+      "tracked_by": "#382"
+    }
+  ],
+  "generated_by": "tools/compat_qualification.py",
+  "measurement_context": {
+    "command": "tools/compat_qualification.py --ffmpeg FFMPEG --ffprobe FFPROBE --out tests/compatibility/matrix.json",
+    "host": "Linux-6.12.107+deb13-amd64-x86_64-with-glibc2.41"
+  },
+  "rows": [
+    {
+      "comparisons": [
+        {
+          "against": {
+            "artifact": "standalone/flat.input-p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "basis": "committed_artifacts",
+          "capture": {
+            "artifact": "standalone/flat.p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "decoder": {
+            "binary_sha256": null,
+            "id": "ffmpeg-cfhd",
+            "version": "n8.0 140fd653"
+          },
+          "metrics": {
+            "max_error": 0,
+            "mismatches": 0,
+            "psnr_db": null,
+            "samples": 32768
+          },
+          "verdict": "IDENTICAL"
+        },
+        {
+          "against": {
+            "artifact": "standalone/flat.input-p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "basis": "committed_artifacts",
+          "capture": {
+            "artifact": "windows-oracle/flat.sdk-p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "decoder": {
+            "binary_sha256": null,
+            "id": "gopro-sdk-decoder",
+            "version": "pristine TAG_CPU_MAX=1"
+          },
+          "metrics": {
+            "max_error": 0,
+            "mismatches": 0,
+            "psnr_db": null,
+            "samples": 32768
+          },
+          "verdict": "IDENTICAL"
+        },
+        {
+          "against": {
+            "artifact": "standalone/flat.p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/flat.p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 0,
+            "mismatches": 0,
+            "psnr_db": null,
+            "samples": 32768
+          },
+          "verdict": "IDENTICAL"
+        },
+        {
+          "against": {
+            "artifact": "standalone/flat.input-p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/flat.p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 0,
+            "mismatches": 0,
+            "psnr_db": null,
+            "samples": 32768
+          },
+          "verdict": "IDENTICAL"
+        },
+        {
+          "against": {
+            "artifact": "windows-oracle/flat.sdk-p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/flat.p10",
+            "sha256": "427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 0,
+            "mismatches": 0,
+            "psnr_db": null,
+            "samples": 32768
+          },
+          "verdict": "IDENTICAL"
+        }
+      ],
+      "direction": "hypercine-packet-to-external-decoder",
+      "id": "hypercine-packet-flat",
+      "limitations": [
+        "Synthetic 128x128 pattern. A match bounds this packet, this geometry and these decoder builds only."
+      ],
+      "packet": {
+        "artifact": "standalone/flat.cfhd",
+        "producer": "HyperCine standalone CPU encoder",
+        "role": "hypercine_packet",
+        "sha256": "236cacbac9c5f39a5fbd1a4b939619276ccfc622ac486bf5a2ba967bcf28392b",
+        "source_commit": "a0518c0f39649056116eba57547fea1b96457dcf"
+      },
+      "scope": {
+        "bit_depth": 10,
+        "chroma_siting": "not asserted (no independent capture)",
+        "geometry": "128x128",
+        "gop": 1,
+        "pixel_format": "yuv422p10le",
+        "range": "studio (64-940)",
+        "scan": "progressive"
+      },
+      "status": "QUALIFIED_IDENTITY"
+    },
+    {
+      "comparisons": [
+        {
+          "against": {
+            "artifact": "standalone/canonical.input-p10",
+            "sha256": "d639417d370f765f7b384dbfeb9645387bbe8420ad7d7f78f319a6afd433f927"
+          },
+          "basis": "committed_artifacts",
+          "capture": {
+            "artifact": "standalone/canonical.p10",
+            "sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f"
+          },
+          "decoder": {
+            "binary_sha256": null,
+            "id": "ffmpeg-cfhd",
+            "version": "n8.0 140fd653"
+          },
+          "metrics": {
+            "max_error": 4,
+            "mismatches": 18701,
+            "psnr_db": 61.26656,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        },
+        {
+          "against": {
+            "artifact": "standalone/canonical.input-p10",
+            "sha256": "d639417d370f765f7b384dbfeb9645387bbe8420ad7d7f78f319a6afd433f927"
+          },
+          "basis": "committed_artifacts",
+          "capture": {
+            "artifact": "windows-oracle/canonical.sdk-p10",
+            "sha256": "f186174e749b87425cbf905023dc742f167c2d2a3812202189b570c7263ce7f6"
+          },
+          "decoder": {
+            "binary_sha256": null,
+            "id": "gopro-sdk-decoder",
+            "version": "pristine TAG_CPU_MAX=1"
+          },
+          "metrics": {
+            "max_error": 3,
+            "mismatches": 13040,
+            "psnr_db": 63.71533,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        },
+        {
+          "against": {
+            "artifact": "standalone/canonical.p10",
+            "sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/canonical.p10",
+            "sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 0,
+            "mismatches": 0,
+            "psnr_db": null,
+            "samples": 32768
+          },
+          "verdict": "IDENTICAL"
+        },
+        {
+          "against": {
+            "artifact": "standalone/canonical.input-p10",
+            "sha256": "d639417d370f765f7b384dbfeb9645387bbe8420ad7d7f78f319a6afd433f927"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/canonical.p10",
+            "sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 4,
+            "mismatches": 18701,
+            "psnr_db": 61.26656,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        },
+        {
+          "against": {
+            "artifact": "windows-oracle/canonical.sdk-p10",
+            "sha256": "f186174e749b87425cbf905023dc742f167c2d2a3812202189b570c7263ce7f6"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/canonical.p10",
+            "sha256": "0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 3,
+            "mismatches": 16380,
+            "psnr_db": 62.842691,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        }
+      ],
+      "direction": "hypercine-packet-to-external-decoder",
+      "id": "hypercine-packet-canonical",
+      "limitations": [
+        "Synthetic 128x128 pattern. A match bounds this packet, this geometry and these decoder builds only."
+      ],
+      "packet": {
+        "artifact": "standalone/canonical.cfhd",
+        "producer": "HyperCine standalone CPU encoder",
+        "role": "hypercine_packet",
+        "sha256": "9cf732846c1b9838c8f5d24f92db0182b82b5b6a05df63ffd5114fc1606db6fd",
+        "source_commit": "a0518c0f39649056116eba57547fea1b96457dcf"
+      },
+      "scope": {
+        "bit_depth": 10,
+        "chroma_siting": "not asserted (no independent capture)",
+        "geometry": "128x128",
+        "gop": 1,
+        "pixel_format": "yuv422p10le",
+        "range": "studio (64-940)",
+        "scan": "progressive"
+      },
+      "status": "MEASURED_DIFFERENCE"
+    },
+    {
+      "comparisons": [
+        {
+          "against": {
+            "artifact": "standalone/gradient.input-p10",
+            "sha256": "6a45617626d0867912532c194feb36d7d4161ae486354c85d3dcffc05f4033b6"
+          },
+          "basis": "committed_artifacts",
+          "capture": {
+            "artifact": "standalone/gradient.p10",
+            "sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d"
+          },
+          "decoder": {
+            "binary_sha256": null,
+            "id": "ffmpeg-cfhd",
+            "version": "n8.0 140fd653"
+          },
+          "metrics": {
+            "max_error": 5,
+            "mismatches": 19298,
+            "psnr_db": 60.731328,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        },
+        {
+          "against": {
+            "artifact": "standalone/gradient.input-p10",
+            "sha256": "6a45617626d0867912532c194feb36d7d4161ae486354c85d3dcffc05f4033b6"
+          },
+          "basis": "committed_artifacts",
+          "capture": {
+            "artifact": "windows-oracle/gradient.sdk-p10",
+            "sha256": "969a5e4a7357be89a71455ef5fba38a8ec10dcd953320f654c79c8d2deafd870"
+          },
+          "decoder": {
+            "binary_sha256": null,
+            "id": "gopro-sdk-decoder",
+            "version": "pristine TAG_CPU_MAX=1"
+          },
+          "metrics": {
+            "max_error": 4,
+            "mismatches": 15350,
+            "psnr_db": 62.592222,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        },
+        {
+          "against": {
+            "artifact": "standalone/gradient.p10",
+            "sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/gradient.p10",
+            "sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 0,
+            "mismatches": 0,
+            "psnr_db": null,
+            "samples": 32768
+          },
+          "verdict": "IDENTICAL"
+        },
+        {
+          "against": {
+            "artifact": "standalone/gradient.input-p10",
+            "sha256": "6a45617626d0867912532c194feb36d7d4161ae486354c85d3dcffc05f4033b6"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/gradient.p10",
+            "sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 5,
+            "mismatches": 19298,
+            "psnr_db": 60.731328,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        },
+        {
+          "against": {
+            "artifact": "windows-oracle/gradient.sdk-p10",
+            "sha256": "969a5e4a7357be89a71455ef5fba38a8ec10dcd953320f654c79c8d2deafd870"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/gradient.p10",
+            "sha256": "30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 3,
+            "mismatches": 16633,
+            "psnr_db": 62.705486,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        }
+      ],
+      "direction": "hypercine-packet-to-external-decoder",
+      "id": "hypercine-packet-gradient",
+      "limitations": [
+        "Synthetic 128x128 pattern. A match bounds this packet, this geometry and these decoder builds only."
+      ],
+      "packet": {
+        "artifact": "standalone/gradient.cfhd",
+        "producer": "HyperCine standalone CPU encoder",
+        "role": "hypercine_packet",
+        "sha256": "4086e8c7ec3cc0b287ab637a486354eaa89623d048ac9d79d290291099b767fb",
+        "source_commit": "a0518c0f39649056116eba57547fea1b96457dcf"
+      },
+      "scope": {
+        "bit_depth": 10,
+        "chroma_siting": "not asserted (no independent capture)",
+        "geometry": "128x128",
+        "gop": 1,
+        "pixel_format": "yuv422p10le",
+        "range": "studio (64-940)",
+        "scan": "progressive"
+      },
+      "status": "MEASURED_DIFFERENCE"
+    },
+    {
+      "comparisons": [
+        {
+          "against": {
+            "artifact": "standalone/canonical.input-p10",
+            "sha256": "d639417d370f765f7b384dbfeb9645387bbe8420ad7d7f78f319a6afd433f927"
+          },
+          "basis": "committed_artifacts",
+          "capture": {
+            "artifact": "windows-oracle/control.sdk-p10",
+            "sha256": "816499be6629179393e20af57e066a295c909a03d3dcc9326ab9568dfce48d75"
+          },
+          "decoder": {
+            "binary_sha256": null,
+            "id": "gopro-sdk-decoder",
+            "version": "pristine TAG_CPU_MAX=1"
+          },
+          "metrics": {
+            "max_error": 280,
+            "mismatches": 23143,
+            "psnr_db": 38.892686,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        },
+        {
+          "against": {
+            "artifact": "windows-oracle/control.sdk-p10",
+            "sha256": "816499be6629179393e20af57e066a295c909a03d3dcc9326ab9568dfce48d75"
+          },
+          "basis": "local_decoder",
+          "capture": {
+            "artifact": "local/ffmpeg-cfhd/control.p10",
+            "sha256": "110c7e6472ca6d1e77287fc2f6ab8c28672b365d4d701c3afe6b9d45745c734b"
+          },
+          "decoder": {
+            "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+            "id": "ffmpeg-cfhd",
+            "version": "ffmpeg version 7.1.5-0+deb13u1"
+          },
+          "metrics": {
+            "max_error": 3,
+            "mismatches": 16821,
+            "psnr_db": 62.751775,
+            "samples": 32768
+          },
+          "verdict": "DIFFERENT"
+        }
+      ],
+      "direction": "legacy-gopro-packet-to-gopro-sdk-decoder",
+      "id": "legacy-gopro-packet-control",
+      "limitations": [
+        "One frozen control packet. It is not a corpus and does not qualify other GoPro bitstreams or other decoders."
+      ],
+      "packet": {
+        "artifact": "windows-oracle/control.cfhd",
+        "producer": "legacy GoPro encoder (control packet)",
+        "role": "legacy_gopro_packet",
+        "sha256": "2d9d57e3bd9334eca6e9a2e26b27df8a05555ee910bc673cdf0bd44a2671e411",
+        "source_commit": null
+      },
+      "scope": {
+        "bit_depth": 10,
+        "chroma_siting": "not asserted (no independent capture)",
+        "geometry": "128x128",
+        "gop": 1,
+        "pixel_format": "yuv422p10le",
+        "range": "studio (64-940)",
+        "scan": "progressive"
+      },
+      "status": "MEASURED_DIFFERENCE"
+    },
+    {
+      "comparisons": [],
+      "direction": "hypercine-packet-to-external-decoder",
+      "id": "hypercine-metal-filmscan3-packets",
+      "limitations": [
+        "Packets are committed but no decoded-pixel capture and no independent pixel expectation exist in Git, so no compatibility verdict is possible here."
+      ],
+      "packet": {
+        "artifact": "macos-filmscan3/flat.cfhd",
+        "producer": "HyperCine Metal FilmScan3 encoder (macOS)",
+        "role": "hypercine_packet",
+        "sha256": "d75e6af7980558e42a520e8ce3bd3513626a854c3210da1c8b78240f4d75d6df",
+        "source_commit": "cf7a46dda868a4d65bd96eae71460f3a0258b32d"
+      },
+      "scope": {
+        "bit_depth": 10,
+        "chroma_siting": "not asserted (no independent capture)",
+        "geometry": "1920x1080",
+        "gop": 1,
+        "pixel_format": "yuv422p10le",
+        "range": "studio (64-940)",
+        "scan": "progressive"
+      },
+      "status": "NOT_OBSERVABLE"
+    }
+  ],
+  "schema": "hypercine.compat-matrix/1"
+}

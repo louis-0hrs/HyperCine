@@ -114,6 +114,24 @@ function(hypercine_register_sdk_free_contracts)
         test_vc5_inspect_mutations test_vc5_inspect_mutations_optimized
         PROPERTIES LABELS "validation;vc5-structure" TIMEOUT 30)
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    foreach(required_file IN ITEMS
+            "${PROJECT_SOURCE_DIR}/tests/test_compat_qualification.py"
+            "${PROJECT_SOURCE_DIR}/tools/compat_qualification.py"
+            "${PROJECT_SOURCE_DIR}/tools/compat_process.py"
+            "${PROJECT_SOURCE_DIR}/tests/compatibility/matrix.json")
+        if(NOT EXISTS "${required_file}" OR IS_DIRECTORY "${required_file}")
+            message(FATAL_ERROR "Required compatibility contract file missing: ${required_file}")
+        endif()
+    endforeach()
+    add_test(NAME compat_qualification_matrix
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_compat_qualification.py")
+    add_test(NAME compat_qualification_matrix_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${contracts}/test_compat_qualification.py")
+    add_test(NAME compat_qualification_committed_matrix
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tools/compat_qualification.py"
+            --verify "${contracts}/compatibility/matrix.json" --fixtures "${contracts}/fixtures")
+    set_tests_properties(compat_qualification_matrix compat_qualification_matrix_optimized
+        compat_qualification_committed_matrix PROPERTIES LABELS "contract" TIMEOUT 300)
     # #363: a clean checkout is not proof of an unchanged committed SDK.
     add_test(NAME upstream_immutable
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/check_upstream_immutable.py"
