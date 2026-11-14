@@ -84,10 +84,15 @@ if(HYPERCINE_ENABLE_CUDA)
     endif()
 endif()
 
-# SDK-free Python contracts, registered by both the regular test tree and the
+# SDK-free contracts, registered by both the regular test tree and the
 # standalone build, which returns before add_subdirectory(tests). Kept in one
 # function so the two build modes cannot drift apart.
 function(hypercine_register_sdk_free_contracts)
+    # Isolated C++17 dialect capability proof independent of Python and runtime codec.
+    add_executable(test_dialect_capability_proof
+        "${PROJECT_SOURCE_DIR}/internal/contract_proofs/dialect_capability/test_contract.cpp")
+    add_test(NAME dialect_capability_proof COMMAND test_dialect_capability_proof)
+
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
     foreach(required_file IN ITEMS
             tests/test_vc5_inspect.py tests/test_vc5_inspect_mutations.py
@@ -142,6 +147,13 @@ function(hypercine_register_sdk_free_contracts)
         COMMAND "${Python3_EXECUTABLE}" -B -O "${contracts}/test_compare_sdk_oracle.py")
     set_tests_properties(test_compare_sdk_oracle test_compare_sdk_oracle_optimized
         PROPERTIES LABELS "reference-oracle")
+    # Synthetic generation measurement controls; no codec qualification implied.
+    add_test(NAME test_generation_control
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_generation_control.py")
+    add_test(NAME test_generation_control_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${contracts}/test_generation_control.py")
+    set_tests_properties(test_generation_control test_generation_control_optimized
+        PROPERTIES LABELS "validation;quality-control" TIMEOUT 120)
     # Recorded RCA-159 band-0 witness (#234). Recomputed statistics and the
     # sanitized records only; no private corpus and no GPU are involved.
     add_test(NAME test_rca159_witness_contract

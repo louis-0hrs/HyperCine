@@ -4,7 +4,7 @@ Copyright (c) 2026 HyperCine Contributors.
 Dual-licensed under MIT OR Apache-2.0. See LICENSE-MIT and LICENSE-APACHE.
 
 This independently authored SDK-free Python 3 standard-library tool implements
-only the first small slice of the [integrated Phase A audit](../research/vc5/PHASE_A_REFERENCE_AUDIT.md),
+only the first small slice of the [integrated Phase A audit](../../research/vc5/PHASE_A_REFERENCE_AUDIT.md),
 sections 4.1, 4.2 and 8.1. No external reference source, table or media was imported.
 It is **not a conformance oracle**, decoder, entropy validator or CFHD validator.
 A structurally accepted synthetic packet is deliberately not proof of real media.

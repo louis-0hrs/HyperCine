@@ -31,6 +31,12 @@ class StandaloneGateTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
+    def test_dialect_capability_proof_registration_is_required(self):
+        name = 'dialect_capability_proof'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, name):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_public_cpu_wavelet_bounds_are_binding(self):
         name = 'wavelet_cpu_bounds'
         self.assertIn(name, REQUIRED)
@@ -305,11 +311,12 @@ class StandaloneGateTests(unittest.TestCase):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
 
     def test_each_shared_contract_registration_is_mandatory(self):
-        # These four are registered through hypercine_register_sdk_free_contracts()
+        # These contracts are registered through hypercine_register_sdk_free_contracts()
         # or the merged P4 geometry block; dropping any single registration must
         # fail the gate, not shrink it back to the old green inventory.
         for missing in ('test_reference_release_inventory', 'test_compare_sdk_oracle',
                         'test_compare_sdk_oracle_optimized',
+                        'test_generation_control', 'test_generation_control_optimized',
                         'test_rca159_witness_contract',
                         'filmscan3_geometry_reference_p10'):
             self.assertIn(missing, REQUIRED)
