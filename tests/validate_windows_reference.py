@@ -14,6 +14,7 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import re
 import os
 import shutil
 import struct
@@ -21,6 +22,7 @@ import subprocess
 import tempfile
 import sys
 import reference_sample as sample
+from validation_support import portable_command
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / 'tests/reference_corpus'
@@ -205,16 +207,30 @@ def inspect_inventory(manifest, root):
 
 
 def compiler_info():
-    configured = os.environ.get('HYPERCINE_TEST_COMPILER')
-    if configured:
-        return configured
-    compiler = shutil.which('c++')
-    return (subprocess.check_output([compiler, '--version'], text=True).strip()
-            if compiler else 'NOT RECORDED: run through configured CTest')
+    """Emit only a CMake compiler family and numeric version, never local paths.
+
+    CMake normally provides 'GNU 14.2.0 (/build/path/to/c++)'. The executable
+    path and all other caller-controlled suffix text are deliberately discarded.
+    Without that exact prefix, provenance stays unqualified; do not fall back
+    to publishing an arbitrary --version banner.
+    """
+    configured = os.environ.get('HYPERCINE_TEST_COMPILER', '')
+    match = re.match(
+        r'^(MSVC|GNU|AppleClang|Clang|IntelLLVM|Intel|NVHPC) '
+        r'([0-9]{1,6}(?:[.][0-9]{1,6}){0,3})(?=$|[ (])',
+        configured)
+    return '%s %s' % match.groups() if match else 'NOT_RECORDED'
+
+
+class QuietArgumentParser(argparse.ArgumentParser):
+    """CLI parse errors must not print arguments containing private paths."""
+
+    def error(self, message):
+        raise ValueError('invalid Windows reference arguments')
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = QuietArgumentParser(description=__doc__)
     parser.add_argument('--probe', type=Path, required=True)
     parser.add_argument('--inputs-only', action='store_true')
     parser.add_argument('--sdk-replay', action='store_true', help='replay documented CG709/default midpoint arithmetic with frozen exported divisors')
@@ -228,7 +244,7 @@ def main():
               'probe_sha256': sha(args.probe.read_bytes()),
               'compiler': compiler_info(),
               'cmake': subprocess.check_output(['cmake', '--version'], text=True).splitlines()[0],
-              'command': [sys.executable] + sys.argv,
+              'command_template': portable_command('validate_windows_reference.py', sys.argv[1:]),
               'source_files': [{'path': name, 'sha256': sha((ROOT/name).read_bytes())} for name in
                                ['CMakeLists.txt', 'tests/reference_frame_generator.h',
                                 'tests/validate_windows_reference.py', 'tests/reference_sample.py', 'tools/hypercine_reference_probe.cpp',
@@ -277,6 +293,7 @@ def main():
 if __name__ == '__main__':
     try:
         raise SystemExit(main())
-    except (ValueError, KeyError, StopIteration, OSError, subprocess.CalledProcessError) as error:
-        print('FAIL:', error)
+    except (ValueError, KeyError, StopIteration, OSError, subprocess.CalledProcessError):
+        # Exception text may include private tool, corpus or output paths.
+        print('FAIL: Windows reference validation rejected')
         raise SystemExit(1)
