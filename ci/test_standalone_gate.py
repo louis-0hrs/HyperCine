@@ -24,6 +24,13 @@ main = runner.main
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_vc5_inspector_registrations_are_mandatory(self):
+        for name in ('test_vc5_inspect', 'test_vc5_inspect_optimized',
+                     'test_vc5_inspect_mutations', 'test_vc5_inspect_mutations_optimized'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_dialect_capability_proof_registration_is_required(self):
         name = 'dialect_capability_proof'
         self.assertIn(name, REQUIRED)
