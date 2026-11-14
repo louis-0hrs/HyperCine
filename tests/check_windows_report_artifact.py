@@ -12,6 +12,13 @@ import sys
 COMPILER = re.compile(r"(?:MSVC|GNU|AppleClang|Clang|IntelLLVM|Intel|NVHPC) [0-9]{1,6}(?:[.][0-9]{1,6}){0,3}\Z")
 CMAKE = re.compile(r"cmake version [0-9]{1,6}(?:[.][0-9]{1,6}){1,3}\Z")
 HEX = re.compile(r"[0-9a-f]{64}\Z")
+REQUIRED_SOURCES = frozenset((
+    "CMakeLists.txt", "tests/reference_frame_generator.h",
+    "tests/validate_windows_reference.py", "tests/reference_sample.py",
+    "tools/hypercine_reference_probe.cpp", "src/cpu/standalone_frontend.cpp",
+    "src/core/standalone_encoder.cpp", "src/cpu/wavelet_cpu.cpp",
+))
+REQUIRED_MANIFESTS = frozenset(("manifest.json", "phase3a_1080p_120_manifest.json"))
 EXPECTED_COMMAND = [
     "python3", "tests/validate_windows_reference.py",
     "--probe", "${HYPERCINE_PROBE}", "--inputs-only",
@@ -42,7 +49,7 @@ def check_report(report, raw, report_path, probe_path, root):
     require(HEX.fullmatch(report["probe_sha256"]))
     require(digest(probe_path.read_bytes()) == report["probe_sha256"])
     sources = report.get("source_files")
-    require(isinstance(sources, list) and len(sources) >= 5)
+    require(isinstance(sources, list) and len(sources) == len(REQUIRED_SOURCES))
     for item in sources:
         require(type(item) is dict and type(item.get("path")) is str and
                 type(item.get("sha256")) is str and HEX.fullmatch(item["sha256"]))
@@ -51,8 +58,10 @@ def check_report(report, raw, report_path, probe_path, root):
         file = (root / rel).resolve()
         require(root.resolve() in file.parents and file.is_file())
         require(digest(file.read_bytes()) == item["sha256"])
+    require({item["path"] for item in sources} == REQUIRED_SOURCES)
     runs = report.get("runs")
-    require(isinstance(runs, list) and len(runs) == 2)
+    require(isinstance(runs, list) and len(runs) == len(REQUIRED_MANIFESTS))
+    require({run.get("manifest") for run in runs if isinstance(run, dict)} == REQUIRED_MANIFESTS)
     for run in runs:
         require(isinstance(run, dict) and run.get("input_gate") == "PASS")
         rows = run.get("frames")
@@ -78,6 +87,17 @@ def negative_controls(report, raw, report_path, probe_path, root):
         candidates.append(mutant)
     mutant = dict(report)
     mutant["runs"] = []
+    candidates.append(mutant)
+    # An edited report must not omit source files or duplicate one source/run
+    # while still satisfying the minimal count and SHA checks.
+    mutant = dict(report)
+    mutant["source_files"] = report["source_files"][:-1]
+    candidates.append(mutant)
+    mutant = dict(report)
+    mutant["source_files"] = report["source_files"][:-1] + [report["source_files"][0]]
+    candidates.append(mutant)
+    mutant = dict(report)
+    mutant["runs"] = [report["runs"][0], report["runs"][0]]
     candidates.append(mutant)
     for item in candidates:
         try:
