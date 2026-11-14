@@ -287,6 +287,18 @@ class StandaloneGateTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
+    def test_real_report_artifact_registration_is_mandatory(self):
+        name = 'windows_reference_report_artifact'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
+    def test_public_report_provenance_registration_is_mandatory(self):
+        name = 'windows_reference_report_provenance'
+        self.assertIn(name, REQUIRED)
+        with self.assertRaises(ValueError):
+            registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_complete_inventory(self):
         self.assertEqual(registered_tests({'tests': [{'name': n} for n in REQUIRED]}), REQUIRED)
 
