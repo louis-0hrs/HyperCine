@@ -874,6 +874,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME windows_reference_inputs COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_windows_reference.py"
             --probe $<TARGET_FILE:hypercine_reference_probe> --inputs-only)
+        add_test(NAME windows_reference_report_provenance COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_report_provenance.py")
         add_test(NAME windows_reference_guardrails COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_windows_reference.py")
         add_test(NAME windows_reference_parser COMMAND "${Python3_EXECUTABLE}"
