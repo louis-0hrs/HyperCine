@@ -20,6 +20,7 @@ Exit 0 means the matrix is internally consistent and its artifact digests
 match, not that any decoder is globally correct.
 """
 import argparse
+import copy
 import hashlib
 import json
 import math
@@ -28,7 +29,7 @@ from pathlib import Path
 import re
 import shutil
 import struct
-import subprocess
+from compat_process import run_bounded
 import sys
 import tempfile
 
@@ -104,6 +105,7 @@ def _relative_parts(relative):
 def bound_artifact(root, relative, declared_bytes, declared_sha):
     """Read one committed artifact once, bounded, and bind bytes to digest."""
     path = root.joinpath(*_relative_parts(relative))
+    require(root.resolve() in path.resolve().parents, 'unsafe artifact path')
     require(path.is_file() and not path.is_symlink(), 'missing or linked artifact')
     require(type(declared_bytes) is int and 0 < declared_bytes <= MAX_ARTIFACT_BYTES,
             'invalid declared artifact length')
@@ -119,11 +121,17 @@ def load_manifest(path):
     with path.open('rb') as stream:
         payload = stream.read(MAX_MANIFEST_BYTES + 1)
     require(len(payload) <= MAX_MANIFEST_BYTES, 'fixture manifest exceeds size limit')
-    return json.loads(payload.decode('utf-8'))
+    manifest = json.loads(payload.decode('utf-8'))
+    require(type(manifest) is dict, 'malformed fixture manifest')
+    return manifest
 
 
 def manifest_files(manifest):
     """Return (name, bytes, sha256) for either manifest shape."""
+    require(type(manifest) is dict, 'malformed fixture manifest')
+    for field in ('files', 'samples'):
+        require(type(manifest.get(field, [])) is list, 'malformed manifest entries')
+        require(all(type(entry) is dict for entry in manifest.get(field, [])), 'malformed manifest entry')
     records = []
     for entry in manifest.get('files', []):
         records.append((entry.get('file'), entry.get('bytes'), entry.get('sha256')))
@@ -277,8 +285,7 @@ def live_measurements(fixtures, ffmpeg, ffprobe):
             digest.update(block)
     binary_sha = digest.hexdigest()
     version = oracle.validated_ffmpeg_version(
-        subprocess.check_output([ffmpeg, '-version'], text=True,
-                                stderr=subprocess.DEVNULL).splitlines()[0])
+        run_bounded([ffmpeg, '-version'], stdout_limit=65536).decode('utf-8').splitlines()[0])
     identity = bound_decoder('ffmpeg-cfhd', version, binary_sha)
     workspace = tempfile.mkdtemp(prefix='hypercine-compat-')
     results = {}
@@ -290,21 +297,17 @@ def live_measurements(fixtures, ffmpeg, ffprobe):
             packet = (fixtures / group / name).read_bytes()
             container = Path(workspace) / (name + '.avi')
             container.write_bytes(oracle.avi(packet))
-            stream_row = json.loads(subprocess.check_output(
+            stream_row = json.loads(run_bounded(
                 [ffprobe, '-v', 'error', '-show_streams', '-of', 'json',
-                 str(container)], stderr=subprocess.DEVNULL))['streams'][0]
+                 str(container)], stdout_limit=65536))['streams'][0]
             require((stream_row['codec_name'], stream_row['width'],
                      stream_row['height'], stream_row['pix_fmt']) ==
                     ('cfhd', 128, 128, 'yuv422p10le'),
                     'unexpected decoder stream geometry')
-            decoded = Path(workspace) / (name + '.p10')
-            subprocess.run([ffmpeg, '-v', 'error', '-xerror', '-n', '-i',
-                            str(container), '-frames:v', '1', '-c:v', 'rawvideo',
-                            '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo',
-                            str(decoded)], check=True, stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL)
-            with decoded.open('rb') as source:
-                payload = source.read(FRAME_BYTES + 1)
+            payload = run_bounded([ffmpeg, '-v', 'error', '-xerror', '-i',
+                                   str(container), '-frames:v', '1', '-c:v', 'rawvideo',
+                                   '-pix_fmt', 'yuv422p10le', '-f', 'rawvideo', 'pipe:1'],
+                                  stdout_limit=FRAME_BYTES)
             require(len(payload) == FRAME_BYTES, 'invalid decoded frame size')
             results['%s/%s' % (group, name)] = (identity, payload)
     finally:
@@ -456,6 +459,7 @@ def build_matrix(artifacts, payloads, live=None):
 
 
 def validate_matrix(matrix, fixtures=None):
+    require(type(matrix) is dict, 'matrix must be an object')
     require(matrix.get('schema') == 'hypercine.compat-matrix/1',
             'unsupported matrix schema')
     context = matrix.get('measurement_context')
@@ -465,7 +469,9 @@ def validate_matrix(matrix, fixtures=None):
     rows = matrix.get('rows')
     require(isinstance(rows, list) and rows, 'matrix has no rows')
     seen = set()
+    verified = inventory(fixtures) if fixtures is not None else None
     for row in rows:
+        require(type(row) is dict, 'malformed matrix row')
         require(set(row) == {'id', 'packet', 'direction', 'scope', 'comparisons',
                              'status', 'limitations'}, 'malformed matrix row')
         require(row['id'] and row['id'] not in seen, 'duplicate matrix row id')
@@ -475,20 +481,45 @@ def validate_matrix(matrix, fixtures=None):
         require(isinstance(row['scope'], dict), 'row without a scope')
         _validate_comparisons(row)
         _validate_status_scope(row)
+        require(row['direction'] in ('hypercine-packet-to-external-decoder',
+                                     'legacy-gopro-packet-to-gopro-sdk-decoder'),
+                'unmeasured compatibility direction')
         if fixtures is not None:
             _reverify_packet(row, fixtures)
+            _reverify_comparisons(row, *verified)
     _validate_backlog(matrix.get('backlog'))
-    return matrix
+    # Return a verification report, never promote unavailable historical captures.
+    result = copy.deepcopy(matrix)
+    result['schema'] = 'hypercine.compat-verification/1'
+    result['verification'] = {'schema': 'hypercine.compat-verification/1', 'rows': []}
+    for row in result['rows']:
+        history = row.pop('status')
+        replay = []
+        for item in row['comparisons']:
+            available = fixtures is not None and item['basis'] == BASIS_COMMITTED
+            item['replay_status'] = 'REPLAYED' if available else 'NOT_REPLAY_QUALIFIED'
+            if available:
+                replay.append(item)
+        row['historical_status'] = history
+        row['status'] = derive_status(replay)
+        row['replay_status'] = ('COMPLETE' if replay and len(replay) == len(row['comparisons'])
+                                else 'PARTIAL' if replay else 'NOT_REPLAY_QUALIFIED')
+        result['verification']['rows'].append({'historical_status': history,
+            'replay_qualification': row['status'], 'replay_status': row['replay_status'],
+            'comparisons': [item['replay_status'] for item in row['comparisons']]})
+    return result
 
 
 def _validate_comparisons(row):
     comparisons = row['comparisons']
     require(isinstance(comparisons, list), 'comparisons must be a list')
     for item in comparisons:
+        require(type(item) is dict, 'malformed comparison record')
         require(set(item) == set(COMPARISON_KEYS), 'malformed comparison record')
         require(item['basis'] in BASES, 'unknown evidence basis')
         require(item['verdict'] in VERDICTS, 'unknown comparison verdict')
         decoder = item['decoder']
+        require(type(decoder) is dict, 'malformed decoder record')
         require(set(decoder) == set(DECODER_KEYS), 'malformed decoder record')
         require(isinstance(decoder['id'], str) and decoder['id'],
                 'comparison decoder without an id')
@@ -496,6 +527,7 @@ def _validate_comparisons(row):
                 'comparison decoder without a version')
         bound = decoder['binary_sha256']
         if item['basis'] == BASIS_LOCAL:
+            require(decoder['id'] == 'ffmpeg-cfhd', 'local decoder role mismatch')
             require(isinstance(bound, str) and HEX64.match(bound),
                     'local measurement without a bound decoder executable')
         else:
@@ -503,49 +535,61 @@ def _validate_comparisons(row):
                     'committed-artifact comparison must not claim a binary digest')
         for field in ('capture', 'against'):
             reference = item[field]
+            require(type(reference) is dict, 'malformed artifact reference')
             require(set(reference) == {'artifact', 'sha256'},
                     'malformed artifact reference')
             require(isinstance(reference['artifact'], str) and reference['artifact'],
                     'artifact reference without a name')
-            require(HEX64.match(reference['sha256']),
+            require(type(reference['sha256']) is str and HEX64.match(reference['sha256']),
                     'artifact reference without a bound digest')
         require(item['capture']['artifact'] != item['against']['artifact'],
                 'comparison compares an artifact with itself')
         metrics = item['metrics']
+        require(type(metrics) is dict, 'malformed metrics record')
         require(set(metrics) == set(METRIC_KEYS), 'malformed metrics record')
         for field in ('max_error', 'mismatches', 'samples'):
             require(type(metrics[field]) is int and metrics[field] >= 0,
                     'invalid metric value: ' + field)
         require(metrics['samples'] > 0, 'comparison without samples')
+        require(metrics['samples'] == SAMPLE_COUNT, 'invalid comparison sample domain')
+        require(metrics['mismatches'] <= SAMPLE_COUNT and metrics['max_error'] <= 65535, 'invalid metric range')
+        psnr = metrics['psnr_db']
+        require(psnr is None or (type(psnr) in (int, float) and -1000 <= psnr <= 1000 and math.isfinite(psnr)), 'invalid PSNR type or value')
         if item['verdict'] == VERDICT_IDENTICAL:
             require(metrics['mismatches'] == 0 and metrics['max_error'] == 0,
                     'IDENTICAL verdict contradicts the measured error')
         else:
             require(metrics['mismatches'] > 0 and metrics['max_error'] > 0,
                     'DIFFERENT verdict without a measured difference')
+        require((psnr is None) == (metrics['mismatches'] == 0), 'PSNR error semantics mismatch')
     require(row['status'] == derive_status(comparisons),
             'row status contradicts its comparisons')
 
 
 def _validate_status_scope(row):
     """An identity claim needs a bound capture and the admitted domain."""
-    if row['status'] != STATUS_IDENTITY:
+    for field, expected in ADMITTED_SCOPE.items():
+        require(type(row['scope'].get(field)) is type(expected), 'invalid scope type: ' + field)
+    if not row['comparisons']:
         return
-    require(row['comparisons'], 'identity claim without a comparison')
     scope = row['scope']
     for field, expected in ADMITTED_SCOPE.items():
         if field in SCOPE_EXEMPT:
             continue
         require(scope.get(field) == expected,
-                'identity claim outside the admitted scope: ' + field)
+                'comparison outside the admitted scope: ' + field)
 
 
 def _reverify_packet(row, fixtures):
     packet = row['packet']
+    require(type(packet) is dict, 'malformed packet record')
     require(set(packet) == {'artifact', 'sha256', 'role', 'producer',
                             'source_commit'}, 'malformed packet record')
+    for field in ('artifact', 'sha256', 'role', 'producer'):
+        require(type(packet[field]) is str and packet[field], 'malformed packet field')
+    require(HEX64.match(packet['sha256']), 'malformed packet digest')
     require(packet['source_commit'] is None or
-            GIT_ID.match(packet['source_commit']),
+            (type(packet['source_commit']) is str and GIT_ID.match(packet['source_commit'])),
             'packet source commit is not a digest')
     group, name = packet['artifact'].split('/', 1)
     path = (fixtures / group).joinpath(*_relative_parts(name))
@@ -553,9 +597,49 @@ def _reverify_packet(row, fixtures):
     bound_artifact(fixtures / group, name, path.stat().st_size, packet['sha256'])
 
 
+def _reverify_comparisons(row, artifacts, payloads):
+    packet = row['packet']['artifact']
+    require(packet in artifacts, 'packet not manifest-listed')
+    require(row['packet']['role'] == artifacts[packet]['role'], 'packet role mismatch')
+    require(row['packet']['source_commit'] == artifacts[packet]['source_commit'], 'packet source commit mismatch')
+    group, filename = packet.split('/', 1)
+    stem = filename[:-5]
+    expected_direction = ('legacy-gopro-packet-to-gopro-sdk-decoder' if group == 'windows-oracle'
+                          else 'hypercine-packet-to-external-decoder')
+    require(row['direction'] == expected_direction, 'unmeasured compatibility direction')
+    producers = {'standalone': 'HyperCine standalone CPU encoder',
+                 'windows-oracle': 'legacy GoPro encoder (control packet)',
+                 'macos-filmscan3': 'HyperCine Metal FilmScan3 encoder (macOS)'}
+    require(row['packet']['producer'] == producers.get(group), 'packet producer mismatch')
+    captures = {'standalone/' + stem + '.p10', 'windows-oracle/' + stem + '.sdk-p10'}
+    if group != 'standalone':
+        captures = {'windows-oracle/' + stem + '.sdk-p10'} if group == 'windows-oracle' else set()
+    source = 'standalone/' + ('canonical' if stem == 'control' else stem) + '.input-p10'
+    for item in row['comparisons']:
+        values = {}
+        for field in ('capture', 'against'):
+            ref = item[field]; key = ref['artifact']
+            if item['basis'] == BASIS_LOCAL and field == 'capture':
+                require(key == 'local/ffmpeg-cfhd/' + stem + '.p10', 'local capture packet linkage mismatch')
+                continue
+            require(key in artifacts, 'comparison artifact not manifest-listed')
+            require(key in (captures if field == 'capture' else captures | {source}), 'comparison packet linkage mismatch')
+            role = ('encoder_input_p10' if key.endswith('.input-p10') else
+                    'gopro_sdk_decoded_p10' if key.endswith('.sdk-p10') else 'committed_ffmpeg_decoded_p10')
+            require(artifacts[key]['role'] == role, 'comparison role mismatch')
+            require(ref['sha256'] == artifacts[key]['sha256'], 'artifact digest mismatch')
+            values[field] = payloads[key]
+        if item['basis'] == BASIS_COMMITTED:
+            require(item['metrics'] == diff_metrics(values['capture'], values['against'], SAMPLE_COUNT),
+                    'comparison metrics mismatch')
+            decoder = 'gopro-sdk-decoder' if item['capture']['artifact'].endswith('.sdk-p10') else 'ffmpeg-cfhd'
+            require(item['decoder']['id'] == decoder, 'capture decoder role mismatch')
+
+
 def _validate_backlog(backlog):
     require(isinstance(backlog, list) and backlog, 'backlog must be enumerated')
     for item in backlog:
+        require(type(item) is dict, 'malformed backlog entry')
         require(set(item) == {'feature', 'reason', 'tracked_by'},
                 'backlog entry carries unexpected fields')
         require(item['feature'] and item['reason'], 'backlog entry without a reason')
@@ -607,9 +691,8 @@ def main(argv=None):
         if args.verify:
             with open(args.verify, 'r', encoding='utf-8') as stream:
                 matrix = json.load(stream)
-            validate_matrix(matrix, root)
-            print('matrix verified: %d rows, %d backlog entries' %
-                  (len(matrix['rows']), len(matrix['backlog'])))
+            verified = validate_matrix(matrix, root)
+            print(json.dumps(verified['verification'], sort_keys=True))
             return 0
         artifacts, payloads = inventory(root)
         live = None
@@ -627,8 +710,8 @@ def main(argv=None):
         elif not args.out:
             print(json.dumps(matrix, indent=2, sort_keys=True))
         return 0
-    except (ValueError, KeyError, OSError) as error:
-        print('compat qualification failed: %s' % error, file=sys.stderr)
+    except (ValueError, KeyError, OSError, TypeError, IndexError, UnicodeError):
+        print('compat qualification failed: invalid evidence or bounded tool failure', file=sys.stderr)
         return 2
 
 

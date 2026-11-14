@@ -2,7 +2,7 @@
 # Dual-licensed under the MIT License or Apache License, Version 2.0.
 # See LICENSE-MIT and LICENSE-APACHE for details.
 """Regression checks for false-green CI results, independent of a codec build."""
-from pathlib import Path
+from pathlib import Path, PureWindowsPath, PurePosixPath
 import tempfile
 import hashlib
 import json
@@ -21,6 +21,55 @@ required_tests = runner.required_tests
 validate_architecture = runner.validate_architecture
 invalidate_results = runner.invalidate_results
 main = runner.main
+
+
+class CompatibilityCommandTests(unittest.TestCase):
+    def test_windows_path_separators_case_and_identity(self):
+        root = PureWindowsPath('C:/Work/Project')
+        python = 'C:/Python/python.exe'
+        names = {
+            'compat_qualification_matrix': [python, '-B', 'C:/Work/Project/tests/test_compat_qualification.py'],
+            'compat_qualification_matrix_optimized': [python, '-B', '-O', 'C:/Work/Project/tests/test_compat_qualification.py'],
+            'compat_qualification_committed_matrix': [python, '-B', 'C:/Work/Project/tools/compat_qualification.py',
+                '--verify', 'C:/Work/Project/tests/compatibility/matrix.json', '--fixtures', 'C:/Work/Project/tests/fixtures'],
+        }
+        document = {'tests': [{'name': n, 'command': c[:]} for n, c in names.items()]}
+        # Windows semantics are case-insensitive, and separators can differ.
+        runner.validate_compat_commands(document, root, r'c:\python\PYTHON.EXE', PureWindowsPath)
+        for index, position, value in ((0, 0, 'D:/Python/python.exe'),
+                (0, 2, 'C:/Work/Other/tests/test_compat_qualification.py'),
+                (1, 2, '-b'), (2, 3, '--VERIFY'),
+                (2, 4, 'D:/Work/Project/tests/compatibility/matrix.json'),
+                (2, 6, '/' + '/other/share/tests/fixtures')):
+            with self.subTest(index=index, position=position):
+                changed = {'tests': [{'name': t['name'], 'command': t['command'][:]} for t in document['tests']]}
+                changed['tests'][index]['command'][position] = value
+                with self.assertRaises(ValueError):
+                    runner.validate_compat_commands(changed, root, python, PureWindowsPath)
+        # POSIX retains case-sensitive identity and does not translate backslashes.
+        self.assertNotEqual(PurePosixPath('/A/test'), PurePosixPath('/a/test'))
+        self.assertNotEqual(PurePosixPath('/A/test'), PurePosixPath(r'/A\test'))
+
+    def test_actual_command_contract_mutations(self):
+        root = Path(__file__).resolve().parent.parent
+        python = '/test/python'
+        specs = {
+            'compat_qualification_matrix': [python, '-B', str(root / 'tests/test_compat_qualification.py')],
+            'compat_qualification_matrix_optimized': [python, '-B', '-O', str(root / 'tests/test_compat_qualification.py')],
+            'compat_qualification_committed_matrix': [python, '-B', str(root / 'tools/compat_qualification.py'),
+                '--verify', str(root / 'tests/compatibility/matrix.json'), '--fixtures', str(root / 'tests/fixtures')],
+        }
+        document = {'tests': [{'name': n, 'command': c[:]} for n, c in specs.items()]}
+        runner.validate_compat_commands(document, root, python)
+        for index, position in ((0, 1), (1, 2), (2, 2), (2, 3), (2, 4), (2, 5)):
+            with self.subTest(index=index, position=position):
+                changed = {'tests': [{'name': t['name'], 'command': t['command'][:]} for t in document['tests']]}
+                changed['tests'][index]['command'][position] = 'incorrect'
+                with self.assertRaises(ValueError):
+                    runner.validate_compat_commands(changed, root, python)
+        for item in document['tests']:
+            with self.subTest(missing=item['name']), self.assertRaises(ValueError):
+                runner.validate_compat_commands({'tests': [t for t in document['tests'] if t is not item]}, root, python)
 
 
 class StandaloneGateTests(unittest.TestCase):

@@ -88,11 +88,26 @@ endif()
 # standalone build, which returns before add_subdirectory(tests). Kept in one
 # function so the two build modes cannot drift apart.
 function(hypercine_register_sdk_free_contracts)
-    find_package(Python3 QUIET COMPONENTS Interpreter)
-    if(NOT Python3_Interpreter_FOUND)
-        return()
-    endif()
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    foreach(required_file IN ITEMS
+            "${PROJECT_SOURCE_DIR}/tests/test_compat_qualification.py"
+            "${PROJECT_SOURCE_DIR}/tools/compat_qualification.py"
+            "${PROJECT_SOURCE_DIR}/tools/compat_process.py"
+            "${PROJECT_SOURCE_DIR}/tests/compatibility/matrix.json")
+        if(NOT EXISTS "${required_file}" OR IS_DIRECTORY "${required_file}")
+            message(FATAL_ERROR "Required compatibility contract file missing: ${required_file}")
+        endif()
+    endforeach()
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
+    add_test(NAME compat_qualification_matrix
+        COMMAND "${Python3_EXECUTABLE}" -B "${contracts}/test_compat_qualification.py")
+    add_test(NAME compat_qualification_matrix_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${contracts}/test_compat_qualification.py")
+    add_test(NAME compat_qualification_committed_matrix
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tools/compat_qualification.py"
+            --verify "${contracts}/compatibility/matrix.json" --fixtures "${contracts}/fixtures")
+    set_tests_properties(compat_qualification_matrix compat_qualification_matrix_optimized
+        compat_qualification_committed_matrix PROPERTIES LABELS "contract" TIMEOUT 300)
     # #363: a clean checkout is not proof of an unchanged committed SDK.
     add_test(NAME upstream_immutable
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/check_upstream_immutable.py"

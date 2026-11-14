@@ -12,6 +12,9 @@ recorded digest.
 Synthetic fixtures only; no retained corpus and no external decoder is needed.
 """
 import copy
+import pathlib
+import subprocess
+import time
 import json
 from pathlib import Path
 import sys
@@ -20,6 +23,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import compat_qualification as cq
+from compat_process import run_bounded
 
 FRAME = bytes(range(256)) * 256
 OTHER = bytes(reversed(bytes(range(256)))) * 256
@@ -291,6 +295,201 @@ class Matrix(unittest.TestCase):
         with self.assertRaises(ValueError) as caught:
             cq.validate_matrix(self.matrix, self.root)
         self.assertEqual(str(caught.exception), 'artifact digest mismatch')
+
+
+class ReplayControls(unittest.TestCase):
+    setUp = Matrix.setUp
+    row = Matrix.row
+    def test_mutated_capture(self):
+        (self.root / 'standalone/flat.p10').write_bytes(OTHER)
+        with self.assertRaisesRegex(ValueError, 'artifact digest mismatch'):
+            cq.validate_matrix(self.matrix, self.root)
+
+    def test_forged_consistent_metrics(self):
+        item = self.matrix['rows'][1]['comparisons'][0]
+        item['metrics']['max_error'] += 1
+        with self.assertRaisesRegex(ValueError, 'comparison metrics mismatch'):
+            cq.validate_matrix(self.matrix, self.root)
+
+    def test_wrong_linkage(self):
+        self.matrix['rows'][0]['comparisons'][0]['capture'] = cq.artifact_ref(
+            self.artifacts, 'standalone/gradient.p10', 'committed_ffmpeg_decoded_p10')
+        with self.assertRaisesRegex(ValueError, 'packet linkage mismatch'):
+            cq.validate_matrix(self.matrix, self.root)
+
+    def test_wrong_packet_role(self):
+        self.matrix['rows'][0]['packet']['role'] = 'legacy_gopro_packet'
+        with self.assertRaisesRegex(ValueError, 'packet role mismatch'):
+            cq.validate_matrix(self.matrix, self.root)
+
+    def test_json_scope_types(self):
+        for field, value in [('gop', True), ('gop', 1.0), ('bit_depth', 10.0),
+                             ('bit_depth', True), ('scan', 1), ('geometry', []),
+                             ('range', None), ('chroma_siting', False), ('pixel_format', 0)]:
+            broken = json.loads(json.dumps(self.matrix))
+            broken['rows'][0]['scope'][field] = value
+            with self.assertRaisesRegex(ValueError, 'invalid scope type: ' + field):
+                cq.validate_matrix(broken, self.root)
+
+
+class ProcessControls(unittest.TestCase):
+    def run_tool(self, source, **kwargs):
+        from compat_process import run_bounded
+        return run_bounded([sys.executable, '-c', source], **kwargs)
+
+    def test_success(self):
+        self.assertEqual(self.run_tool("print('ok')"), b'ok\n' if sys.platform != 'win32' else b'ok\r\n')
+
+    def test_hanging(self):
+        with self.assertRaisesRegex(ValueError, '^tool timeout$'):
+            self.run_tool('import time; time.sleep(60)', timeout=0.2)
+
+    def test_overflow(self):
+        with self.assertRaisesRegex(ValueError, '^tool output limit exceeded$'):
+            self.run_tool("import os;\nwhile True: os.write(1,b'x'*4096)", stdout_limit=8192)
+
+    def test_nonzero_secret_banner(self):
+        with self.assertRaisesRegex(ValueError, '^tool nonzero exit$'):
+            self.run_tool("import sys; print('SECRET_BANNER_PRIVATE'); sys.exit(3)")
+
+    def test_stderr_overflow(self):
+        with self.assertRaisesRegex(ValueError, '^tool output limit exceeded$'):
+            self.run_tool("import os;\nwhile True: os.write(2,b'x'*4096)", stdout_limit=8192)
+
+    def test_malformed_json(self):
+        with self.assertRaises(json.JSONDecodeError):
+            json.loads(self.run_tool("print('{bad')"))
+
+    def test_launch_error_sanitized(self):
+        from compat_process import run_bounded
+        with self.assertRaisesRegex(ValueError, '^tool launch failed$'):
+            run_bounded(['MISSING_SECRET_PRIVATE_EXECUTABLE'])
+
+    def test_exited_parent_grandchild_cleanup(self):
+        import time
+        with tempfile.TemporaryDirectory() as temp:
+            sentinel = Path(temp) / 'escaped'
+            child = "import time,pathlib; time.sleep(1); pathlib.Path(%r).write_text('escaped')" % str(sentinel)
+            source = "import subprocess,sys; subprocess.Popen([sys.executable,'-c',%r],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)" % child
+            self.run_tool(source, timeout=0.5)
+            time.sleep(1.2)
+            self.assertFalse(sentinel.exists(), 'grandchild escaped containment')
+
+    def test_inherited_pipe_descendant(self):
+        import time
+        with tempfile.TemporaryDirectory() as temp:
+            sentinel = Path(temp) / 'escaped'
+            child = "import time,pathlib; time.sleep(1); pathlib.Path(%r).write_text('escaped')" % str(sentinel)
+            source = "import subprocess,sys; subprocess.Popen([sys.executable,'-c',%r])" % child
+            with self.assertRaisesRegex(ValueError, '^tool timeout$'):
+                self.run_tool(source, timeout=0.3)
+            time.sleep(1.1)
+            self.assertFalse(sentinel.exists())
+
+
+class IndependentReviewControls(unittest.TestCase):
+ def setUp(self):
+  self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+  self.root=SyntheticTree(pathlib.Path(self.tmp.name)).write()
+  a,p=cq.inventory(self.root);self.matrix=cq.build_matrix(a,p)
+ def test_valid_control(self): cq.validate_matrix(self.matrix,self.root)
+ def test_forged_identity_metrics_refused(self):
+  r=self.matrix['rows'][1]
+  for c in r['comparisons']:
+   c['metrics']={'psnr_db':None,'max_error':0,'mismatches':0,'samples':32768};c['verdict']='IDENTICAL'
+  r['status']='QUALIFIED_IDENTITY'
+  with self.assertRaisesRegex(ValueError,'comparison metrics mismatch'):cq.validate_matrix(self.matrix,self.root)
+ def test_foreign_packet_capture_refused(self):
+  self.matrix['rows'][0]['comparisons'][0]['capture']['artifact']='standalone/gradient.p10'
+  with self.assertRaisesRegex(ValueError,'packet linkage mismatch'):cq.validate_matrix(self.matrix,self.root)
+ def test_identity_bool_scope_refused(self):
+  self.matrix['rows'][0]['scope']['gop']=True
+  with self.assertRaisesRegex(ValueError,'invalid scope type'):cq.validate_matrix(self.matrix,self.root)
+ def test_unsupported_direction_refused(self):
+  self.matrix['rows'][0]['direction']='hypercine-packet-to-hypercine-decoder'
+  with self.assertRaisesRegex(ValueError,'unmeasured compatibility direction'):cq.validate_matrix(self.matrix,self.root)
+ def test_packet_manifest_commit_relabel_refused(self):
+  self.matrix['rows'][0]['packet']['source_commit']='1'*40
+  with self.assertRaisesRegex(ValueError,'packet source commit mismatch'):cq.validate_matrix(self.matrix,self.root)
+ def local_row(self):
+  r=self.matrix['rows'][1];c=copy.deepcopy(r['comparisons'][0]);c['basis']='local_decoder'
+  c['decoder']={'id':'ffmpeg-cfhd','version':'recorded','binary_sha256':'1'*64}
+  c['capture']={'artifact':'local/ffmpeg-cfhd/canonical.p10','sha256':'2'*64}
+  c['metrics']={'psnr_db':None,'max_error':0,'mismatches':0,'samples':32768};c['verdict']='IDENTICAL'
+  r['comparisons']=[c];r['status']='QUALIFIED_IDENTITY'
+  return c
+ def test_local_fake_role_domain_psnr_refused(self):
+  for field,value,reason in [('decoder','not-ffmpeg','local decoder role'),('samples',1,'sample domain'),('psnr_db',{'arbitrary':'json'},'PSNR type')]:
+   c=self.local_row()
+   if field=='decoder':c['decoder']['id']=value
+   else:c['metrics'][field]=value
+   with self.assertRaisesRegex(ValueError,reason):cq.validate_matrix(self.matrix,self.root)
+ def test_local_recorded_not_replay_qualified(self):
+  self.local_row();out=cq.validate_matrix(self.matrix,self.root);r=out['rows'][1]
+  self.assertEqual(r['historical_status'],'QUALIFIED_IDENTITY')
+  self.assertEqual(r['status'],'NOT_OBSERVABLE')
+  self.assertEqual(r['replay_status'],'NOT_REPLAY_QUALIFIED')
+  self.assertEqual(r['comparisons'][0]['replay_status'],'NOT_REPLAY_QUALIFIED')
+ def test_cli_nonobject_evidence_sanitized(self):
+  f=self.root/'PRIVATE_REVIEW_SENTINEL.json';f.write_text('[]')
+  self.cli_refused(f)
+ def cli_refused(self,f):
+  command=[sys.executable]+(['-O'] if sys.flags.optimize else [])+[str(Path(cq.__file__)), '--verify',str(f),'--fixtures',str(self.root)]
+  p=subprocess.run(command,capture_output=True,text=True,timeout=10)
+  self.assertEqual(p.returncode,2,p.stderr)
+  self.assertEqual(p.stdout,'')
+  self.assertEqual(p.stderr,'compat qualification failed: invalid evidence or bounded tool failure\n')
+ def test_nested_manifest_sanitized(self):
+  for bad in [[],{'files':[None]}, {'samples':{'bad':'shape'}}, {'files':['private']}]:
+   (self.root/'standalone/manifest.json').write_text(json.dumps(bad))
+   f=self.root/'PRIVATE_REVIEW_SENTINEL.json';f.write_text(json.dumps(self.matrix))
+   self.cli_refused(f)
+ def test_psnr_semantics_and_types(self):
+  for value in [True,{},[],float('nan'),float('inf'),1.0]:
+   c=self.local_row();c['metrics']['psnr_db']=value
+   with self.assertRaisesRegex(ValueError,'PSNR'):cq.validate_matrix(self.matrix,self.root)
+ def test_known_manifest_provenance(self):
+  f=self.root/'standalone/manifest.json';d=json.loads(f.read_text());d['encoder_commit']='a'*40;f.write_text(json.dumps(d))
+  a,p=cq.inventory(self.root);m=cq.build_matrix(a,p);cq.validate_matrix(m,self.root)
+  m['rows'][0]['packet']['source_commit']=None
+  with self.assertRaisesRegex(ValueError,'source commit mismatch'):cq.validate_matrix(m,self.root)
+ def test_local_difference_scope_refused(self):
+  c=self.local_row();c['metrics']={'psnr_db':90.0,'max_error':1,'mismatches':1,'samples':32768};c['verdict']='DIFFERENT'
+  self.matrix['rows'][1]['status']='MEASURED_DIFFERENCE'
+  self.matrix['rows'][1]['scope']['geometry']='1920x1080'
+  with self.assertRaisesRegex(ValueError,'outside the admitted scope'):cq.validate_matrix(self.matrix,self.root)
+ def test_cli_machine_readable_replay(self):
+  self.local_row();f=self.root/'matrix.json';f.write_text(json.dumps(self.matrix))
+  command=[sys.executable]+(['-O'] if sys.flags.optimize else [])+[str(Path(cq.__file__)), '--verify',str(f),'--fixtures',str(self.root)]
+  p=subprocess.run(command,capture_output=True,text=True,timeout=10)
+  self.assertEqual(p.returncode,0,p.stderr);self.assertEqual(p.stderr,'')
+  report=json.loads(p.stdout);r=report['rows'][1]
+  self.assertEqual(r['historical_status'],'QUALIFIED_IDENTITY')
+  self.assertEqual(r['replay_qualification'],'NOT_OBSERVABLE')
+  self.assertEqual(r['comparisons'],['NOT_REPLAY_QUALIFIED'])
+  self.assertNotIn(str(self.root),p.stdout)
+ def test_cli_nested_row_shapes_sanitized(self):
+  mutations=[('rows',[[]]),('rows',[{'id':'bad'}])]
+  for field,value in mutations:
+   m=copy.deepcopy(self.matrix);m[field]=value
+   f=self.root/'PRIVATE_REVIEW_SENTINEL.json';f.write_text(json.dumps(m));self.cli_refused(f)
+  for field in ['decoder','capture','against','metrics']:
+   m=copy.deepcopy(self.matrix);m['rows'][0]['comparisons'][0][field]=[]
+   f=self.root/'PRIVATE_REVIEW_SENTINEL.json';f.write_text(json.dumps(m));self.cli_refused(f)
+  for field in ['artifact','sha256','role','producer','source_commit']:
+   m=copy.deepcopy(self.matrix);m['rows'][0]['packet'][field]=[]
+   f=self.root/'PRIVATE_REVIEW_SENTINEL.json';f.write_text(json.dumps(m));self.cli_refused(f)
+ def test_producer_relabel_refused(self):
+  self.matrix['rows'][0]['packet']['producer']='GoPro encoder'
+  with self.assertRaisesRegex(ValueError,'packet producer mismatch'):cq.validate_matrix(self.matrix,self.root)
+ def test_finite_mixed_output(self):
+  self.assertEqual(run_bounded([sys.executable,'-c',"import os;os.write(1,b'x'*8192);os.write(2,b'y'*8192)"],stdout_limit=8192),b'x'*8192)
+ def test_stderr_over_limit(self):
+  with self.assertRaisesRegex(ValueError,'output limit'):run_bounded([sys.executable,'-c',"import os;os.write(2,b'x'*8193)"],stdout_limit=8192)
+ def test_closed_pipe_descendant_cleanup(self):
+  f=self.root/'sentinel';child="import time,pathlib;time.sleep(.4);pathlib.Path(%r).write_text('x')"%str(f)
+  run_bounded([sys.executable,'-c',"import subprocess,sys;subprocess.Popen([sys.executable,'-c',%r],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)"%child],timeout=1)
+  time.sleep(.6);self.assertFalse(f.exists())
 
 
 class Metrics(unittest.TestCase):

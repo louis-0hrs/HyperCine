@@ -4,9 +4,9 @@
 [![SDK-free standalone CI](https://github.com/louis-0hrs/HyperCine/actions/workflows/ci-standalone.yml/badge.svg)](https://github.com/louis-0hrs/HyperCine/actions/workflows/ci-standalone.yml)  
 [![Privacy guard](https://github.com/louis-0hrs/HyperCine/actions/workflows/privacy-guard.yml/badge.svg)](https://github.com/louis-0hrs/HyperCine/actions/workflows/privacy-guard.yml)
 
-**GPU-accelerated CineForm encoding with upstream-compatible CFHD output.**
+**GPU-accelerated CineForm encoding; standards-correct VC-5 encode/decode and bidirectional GoPro compatibility are the development goals.**
 
-HyperCine is an independent C++17 / NVIDIA CUDA engineering and research project built alongside the open-source [GoPro CineForm SDK](https://github.com/gopro/cineform-sdk). It accelerates the CineForm (`CFHD` / SMPTE VC-5) intra-frame wavelet encoder and validates its bitstreams against the upstream reference.
+HyperCine is an independent C++17 engineering and research project built alongside the open-source [GoPro CineForm SDK](https://github.com/gopro/cineform-sdk). The established accelerated path emits legacy CineForm `CFHD`; that wire format must not be conflated with standardized SMPTE VC-5. GoPro remains an important engineering and interoperability reference, not the sole correctness oracle.
 
 **Stage:** `v0.1.0-alpha` · **CUDA target:** Windows x64 / NVIDIA · **Primary accelerated format:** BGRA8 → CFHD YUV 4:2:2 (10-bit codec precision), FilmScan 3
 
@@ -14,6 +14,30 @@ HyperCine is an independent C++17 / NVIDIA CUDA engineering and research project
 > HyperCine is **not an official GoPro product** and is not affiliated with or endorsed by GoPro, Inc. The reference SDK in [`upstream/`](upstream/) is frozen at commit `11574d0295771edccadd17af14af74a539f924c7` and remains unmodified. HyperCine's compiler integration, wrappers, and implementation live outside that directory.
 
 [Performance](#performance) · [Technical scope](#technical-scope) · [Architecture](#architecture) · [Build and test](#build-and-test) · [Limitations](#limitations) · [Documentation](#documentation) · [License](#license-and-attribution)
+
+## Project direction and current limits
+
+The [owner-approved direction #382](https://github.com/louis-0hrs/HyperCine/issues/382)
+sets three complementary goals: **VC-5 conformance**, **bidirectional GoPro/CFHD
+interoperability**, and **measured multigeneration quality**. Universal identity
+with the GoPro encoder's packet bytes is not the product definition. Existing
+byte-parity tests and benchmark evidence remain intact until a reviewed test
+migration provides replacement coverage.
+
+**These are goals, not newly implemented features.** Full VC-5 coverage, a complete
+independent decoder and universal editing-application compatibility are not
+claimed. Distinct CFHD/VC-5 output modes are planned where their wire syntax
+cannot be shared; a GoPro decoder's limitations do not define the VC-5 standard.
+The first standards milestone covers parts -1/-3/-4, with -5/-6/-7 explicitly
+remaining in the full-essence roadmap. MXF wrapping is a separate milestone.
+
+See the [validation contract](docs/VALIDATION_CONTRACT.md),
+[conformance work #303](https://github.com/louis-0hrs/HyperCine/issues/303),
+[interoperability work #381](https://github.com/louis-0hrs/HyperCine/issues/381)
+and [generation-quality experiment #383](https://github.com/louis-0hrs/HyperCine/issues/383).
+No general guarantee of zero additional loss after re-encoding has been
+established. Historical SDK samples are retained, not discarded or silently
+promoted to independently correct pixel expectations.
 
 ## Performance
 
@@ -50,7 +74,8 @@ FilmScan3**. This does **not** imply that all six are qualified for every
 geometry, frame sequence, CPU/GPU backend or production application. Do not
 extrapolate the legacy CUDA benchmark numbers to this standalone writer.
 
-The original GoPro SDK remains the reference oracle. The six-quality writer's
+The original GoPro SDK remains a scoped compatibility and regression reference,
+not an infallible pixel or standards oracle. The six-quality writer's
 rate-control counter was corrected to match the original SDK's overbitrate
 enter/hold/leave transitions; an original-SDK 7-frame hysteresis regression is
 checked in. Independently indexed private Windows/Linux golden corpora have
@@ -63,7 +88,8 @@ the public hosted CI.
 
 - [#46 — SDK oracle and quality qualification](https://github.com/louis-0hrs/HyperCine/issues/46)
   and [#321 — Windows reference corpus](https://github.com/louis-0hrs/HyperCine/issues/321)
-  track remaining source-bound validation and provenance.
+  track scoped quality evidence and retained provenance limitations; historical
+  compiler recovery is not a prerequisite for independent conformance work.
 - [#259 — internal encoder sessions and backends](https://github.com/louis-0hrs/HyperCine/issues/259)
   tracks per-profile CPU/CUDA/Metal admission. A CPU packet match is not
   proof of GPU execution, and GPU/CPU self-consistency is not an SDK oracle.
@@ -82,11 +108,11 @@ the private original-SDK golden corpus.
 
 ### Frozen upstream, separate implementation
 
-The [GoPro SDK baseline](docs/UPSTREAM.md) is retained as an immutable oracle. Compiler settings, warnings, and workarounds are applied in HyperCine's build and wrapper layers rather than by patching `upstream/`. The overall design is outlined in [Architecture](docs/ARCHITECTURE.md).
+The [GoPro SDK baseline](docs/UPSTREAM.md) is retained as an immutable reference with explicitly qualified uses. Compiler settings, warnings, and workarounds are applied in HyperCine's build and wrapper layers rather than by patching `upstream/`. The overall design is outlined in [Architecture](docs/ARCHITECTURE.md).
 
 ### Three input memory contracts
 
-**`HostPageableEndToEnd` — regular host buffers.** Includes pageable-to-pinned staging, H2D DMA, GPU encode, compressed D2H DMA, and host CFHD assembly. This is the primary public performance comparison.
+**`HostPageableEndToEnd` — regular host buffers.** Includes pageable-to-pinned staging, H2D DMA, GPU encode, compressed D2H transfer, and host CFHD assembly. This is the primary public performance comparison.
 
 **`HostPinnedApi` — caller-pinned host buffers.** Uses `cudaMallocHost` input and skips the staging copy, but still measures transfers and assembly.
 
@@ -192,7 +218,7 @@ The following are the **Phase 3A.2c release-candidate boundaries**, not a claim 
 
 **CUDA release-candidate platform.** The Phase 3A.2c GPU path targets **Windows x64 + NVIDIA CUDA**. Vulkan is not part of this release. A **separate experimental Apple Metal frontend** exists for the SDK-free standalone encoder, but it is not the Phase 3A.2c CUDA pipeline. The original-SDK CPU reference build is verified on Windows x64 (MSVC 19.44) and in [CPU-only CI](.github/workflows/ci-cpu.yml); the cross-platform [standalone CI](.github/workflows/ci-standalone.yml) tests a different, SDK-free build. Do not conflate those validation scopes.
 
-**Pixel Format & Compression Profile Scope.** The full GPU pipeline (`Phase3AEncoderContext`) currently accelerates 8-bit `BGRA` (`CFHD_PIXEL_FORMAT_BGRA`) $\to$ 12-bit internal `YUV 4:2:2` (`CFHD_ENCODED_FORMAT_YUV_422`) at `FilmScan 3` (`CFHD_ENCODING_QUALITY_FILMSCAN3`), progressive, `GOP = 1`. Other CineForm pixel formats (`v210`, `RG48`, `b64a`, `BYR4` Bayer RAW, `YUV 4:4:4`, alpha channels) fall back to the upstream CPU SDK.
+**Pixel Format & Compression Profile Scope.** The full GPU pipeline (`Phase3AEncoderContext`) currently accelerates 8-bit `BGRA` (`CFHD_PIXEL_FORMAT_BGRA`) $\to$ `YUV 4:2:2` at 10-bit codec precision with wider internal intermediates (`CFHD_ENCODED_FORMAT_YUV_422`) at `FilmScan 3` (`CFHD_ENCODING_QUALITY_FILMSCAN3`), progressive, `GOP = 1`. Other CineForm pixel formats (`v210`, `RG48`, `b64a`, `BYR4` Bayer RAW, `YUV 4:4:4`, alpha channels) fall back to the upstream CPU SDK.
 
 **Encoder-Only GPU Acceleration.** Phase 3A.2c GPU acceleration is implemented for **encoding**, not decoding. Reference verification uses the original GoPro CPU decoder; some test paths limit its worker count via `TAG_CPU_MAX = 1`. Reference-decoder nondeterminism remains under investigation ([#120](https://github.com/louis-0hrs/HyperCine/issues/120)); successful API status alone does not establish identical decoded pixels.
 
@@ -208,7 +234,7 @@ The decoder reproducibility and release-gating investigations are tracked separa
 
 ## Documentation
 
-**Orientation:** [Architecture](docs/ARCHITECTURE.md) · [Compatibility matrix](docs/COMPATIBILITY.md) · [Upstream provenance and rules](docs/UPSTREAM.md)
+**Orientation:** [Validation contract](docs/VALIDATION_CONTRACT.md) · [Architecture](docs/ARCHITECTURE.md) · [Compatibility matrix](docs/COMPATIBILITY.md) · [Upstream provenance and rules](docs/UPSTREAM.md)
 
 **Performance:** [Canonical results in detail](docs/BENCHMARK_DETAILS.md) · [Benchmark methodology and historical comparison](docs/PHASE3A1_BENCHMARK_HARDENING.md) · [Benchmark results guide](benchmarks/results/README.md) · [Optimization opportunities](docs/PHASE3B_PERFORMANCE_OPPORTUNITIES.md)
 

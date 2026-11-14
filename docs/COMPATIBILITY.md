@@ -5,6 +5,33 @@ HyperCine has **multiple independently qualified implementations**. A passing te
 > [!IMPORTANT]
 > **Bitstream equivalence is not decoder correctness.** Phase 3A.2c demonstrates upstream-encoder equivalence for specified inputs and states. The frozen GoPro decoder has separately reproduced nondeterministic output on identical packets; its release-safety investigation is still open ([#120](https://github.com/louis-0hrs/HyperCine/issues/120), [#159](https://github.com/louis-0hrs/HyperCine/issues/159), [#160](https://github.com/louis-0hrs/HyperCine/issues/160)). Neither successful API return nor a shared CFHD FourCC establishes application-wide interoperability.
 
+## New acceptance contract, unchanged measured history
+
+The [validation contract](VALIDATION_CONTRACT.md) implements
+[direction #382](https://github.com/louis-0hrs/HyperCine/issues/382).
+The existing measurements below keep their original scope; they do not become
+VC-5 results by renaming the project goal. No conformance, decoder, GPU or
+application status is upgraded by this documentation change.
+
+| Required direction | Acceptance target | Current qualification boundary |
+| :--- | :--- | :--- |
+| GoPro CFHD -> HyperCine | Correct native reconstruction for each declared supported format | [#381](https://github.com/louis-0hrs/HyperCine/issues/381); partial reference/decoder evidence is not a complete independent decoder |
+| HyperCine CFHD -> GoPro / FFmpeg / applications | Correct decoded components plus separately tested container, metadata and application behavior | Existing scoped tests retained; broader version/format matrix remains open in #381 |
+| HyperCine VC-5 -> qualified VC-5 decoder | Applicable edition/part-specific bitstream conformance | [#303](https://github.com/louis-0hrs/HyperCine/issues/303); partial inspection is not full conformance |
+| Official applicable VC-5 vectors -> HyperCine | Exact prescribed decoded-reference image equality | #303; complete inventory and qualified reference material remain required |
+| Repeated decode/re-encode | Initial loss separated from subsequent drift and any scoped fixed point | [#383](https://github.com/louis-0hrs/HyperCine/issues/383); no universal zero-loss promise |
+
+Legacy CFHD and standardized VC-5 are distinct wire dialects. Test GoPro support
+for standard-permitted choices rather than assuming it; where syntax cannot be
+shared, the planned explicit CFHD/VC-5 modes must not be disguised as a universal
+stream. FilmScan/Low/Medium/High names are SDK-inspired quality settings, not by
+themselves normative VC-5 conformance profiles. See the integrated
+[format audit](research/vc5/PHASE_A_REFERENCE_AUDIT.md).
+
+Existing exact-parity gates remain active. A reviewed migration must identify
+replacement correctness/interoperability/quality coverage before changing them.
+Missing, skipped, unstable or unqualified results cannot turn into a PASS.
+
 ## Status at a glance
 
 | Path | Implemented scope | Evidence / boundary |
@@ -47,6 +74,23 @@ These are **CUDA release-candidate** assertions, not an exhaustive inventory of 
 
 The original upstream `CFHD_DecodeSample` can return `CFHD_ERROR_OKAY` and expected geometry while decoded pixels differ for identical input on some CPU/thread configurations. Issue [#120](https://github.com/louis-0hrs/HyperCine/issues/120) tracks test classification and safe verification; [#159](https://github.com/louis-0hrs/HyperCine/issues/159) tracks Linux behavior, and [#160](https://github.com/louis-0hrs/HyperCine/issues/160) tracks causal investigation. A one-worker decoder configuration is **a diagnostic constraint, not a general repair or release certification**. The actual root cause is not declared solved here.
 
+## Reference artifact qualification
+
+Keep old source frames, encoded SDK packets, SDK state traces, decoded-pixel
+captures and indexes immutable. Add a separate use/qualification ledger instead
+of overwriting, renaming or bulk-regenerating them. Encoded sample integrity,
+decode repeatability and independent pixel correctness are different findings.
+A decoder scheduler race does not prove that every encoded sample is bad; a
+stable hash does not prove that a decoded capture is correct. Known-bad captures
+remain useful diagnostic fixtures, not pixel ground truth.
+
+[#321](https://github.com/louis-0hrs/HyperCine/issues/321) retains historical
+provenance limits. Its old-compiler search is withdrawn and is not a universal
+product blocker. Small new SDK builds or samples must answer a named compatibility
+question under #381 and must not replace historical evidence. Independently
+qualify the reference build and account for shared code ancestry when comparing
+decoders; two agreeing related implementations are not independent proof.
+
 ## What to read next
 
-[Architecture and component ownership](ARCHITECTURE.md) · [SDK-free FilmScan 3 limits](MACOS_FILMSCAN3_CPU.md) · [Experimental Metal](MACOS_METAL_BACKEND.md) · [Frozen upstream](UPSTREAM.md) · [Current CUDA benchmark artifact](../benchmarks/phase3a2c_release_candidate.json) · [Contribution and test expectations](../CONTRIBUTING.md)
+[Validation contract](VALIDATION_CONTRACT.md) · [Architecture and component ownership](ARCHITECTURE.md) · [SDK-free FilmScan 3 limits](MACOS_FILMSCAN3_CPU.md) · [Experimental Metal](MACOS_METAL_BACKEND.md) · [Frozen upstream](UPSTREAM.md) · [Current CUDA benchmark artifact](../benchmarks/phase3a2c_release_candidate.json) · [Contribution and test expectations](../CONTRIBUTING.md)
