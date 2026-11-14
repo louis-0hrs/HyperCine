@@ -17,6 +17,8 @@ else:
 
 REQUIRED = {
     'upstream_immutable', 'upstream_immutable_guardrails',
+    'compat_qualification_matrix', 'compat_qualification_matrix_optimized',
+    'compat_qualification_committed_matrix',
     # Fail closed if the C0 geometry arithmetic or recorded-report gate disappears.
     'extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report',
     # P0 RGB444 frame and RG48 importer must never disappear from standalone CI.
@@ -129,6 +131,29 @@ def registered_tests(document, required=None):
     return set(names)
 
 
+def validate_compat_commands(document, source, python, path_class=Path):
+    """Bind the compatibility names to their actual CTest command arrays."""
+    source = path_class(source)
+    python = str(python)
+    expected = {
+        'compat_qualification_matrix': [python, '-B', str(source / 'tests/test_compat_qualification.py')],
+        'compat_qualification_matrix_optimized': [python, '-B', '-O', str(source / 'tests/test_compat_qualification.py')],
+        'compat_qualification_committed_matrix': [python, '-B', str(source / 'tools/compat_qualification.py'),
+            '--verify', str(source / 'tests/compatibility/matrix.json'), '--fixtures', str(source / 'tests/fixtures')],
+    }
+    for name, command in expected.items():
+        matches = [test for test in document['tests'] if test['name'] == name]
+        actual = matches[0].get('command') if len(matches) == 1 else None
+        path_positions = {0, len(command) - 1}
+        if name == 'compat_qualification_committed_matrix':
+            path_positions = {0, 2, 4, 6}
+        if (not isinstance(actual, list) or len(actual) != len(command)
+                or any(not isinstance(got, str) or
+                       (path_class(got) != path_class(want) if i in path_positions else got != want)
+                       for i, (got, want) in enumerate(zip(actual, command)))):
+            raise ValueError('invalid compatibility CTest command: ' + name)
+
+
 def completed_tests(path, registered):
     root = ET.parse(path).getroot()
     cases = list(root.iter('testcase'))
@@ -180,6 +205,7 @@ def main():
     ctest = ['ctest', '--test-dir', str(build), '-C', 'Release']
     document = json.loads(subprocess.check_output(ctest + ['--show-only=json-v1'], text=True))
     registered = registered_tests(document, required_tests(cache))
+    validate_compat_commands(document, Path(__file__).resolve().parents[1], cache['_Python3_EXECUTABLE'])
     if cache.get('HYPERCINE_SCALAR_ORACLE_ROOT') and 'scalar_inverse_original_six_pairs' not in registered:
         raise ValueError('requested original scalar replay not registered')
     (build / 'registered-tests.json').write_text(json.dumps(document, indent=2) + '\n')
