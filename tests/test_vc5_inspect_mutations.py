@@ -20,7 +20,7 @@ MUTATIONS = [
  ('image_format', "require(tag != 84 or 1 <= value <= 4, 'IMAGE_FORMAT_RANGE')", 'pass', 'test_header_legality'),
  ('reference_state', "if d['state'] != 'completed':", 'if False:', 'test_reference_missing'),
  ('qualification', "elif not d['qualified']:", 'elif False:', 'test_warning_error_success_false_pass'),
- ('regular_file', "require(stat.S_ISREG(os.fstat(stream.fileno()).st_mode), 'REGULAR_FILE_REQUIRED')", 'pass', 'test_nonregular_and_bounded_file'),
+ ('regular_file', "require(stat.S_ISREG(os.fstat(stream.fileno()).st_mode), 'REGULAR_FILE_REQUIRED')", 'pass', 'test_nonregular_descriptor_rejected_before_read'),
 
  ('framing', "if data[:4] != b'VC-5':", 'if False:', 'test_framing'),
  ('truncation', "require(len(data) % 4 == 0, 'TRUNCATED_SEGMENT')", 'pass', 'test_framing'),

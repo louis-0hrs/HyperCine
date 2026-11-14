@@ -270,5 +270,26 @@ class InspectorTests(unittest.TestCase):
                 with self.assertRaises(v.Refusal): v.read_bounded(fifo, 3)
 
 
+    def test_nonregular_descriptor_rejected_before_read(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory)/'input'; p.write_bytes(b'abc')
+            real_fdopen = os.fdopen
+            reads = []
+            class Spy:
+                def __init__(self, fd, mode): self.file = real_fdopen(fd, mode)
+                def __enter__(self): return self
+                def __exit__(self, *args): self.file.close()
+                def fileno(self): return self.file.fileno()
+                def read(self, size=-1):
+                    reads.append(size)
+                    return self.file.read(size)
+            with mock.patch.object(v.os, 'fdopen', Spy), mock.patch.object(v.os, 'fstat') as fstat:
+                fstat.return_value.st_mode = 0
+                with self.assertRaisesRegex(v.Refusal, '^REGULAR_FILE_REQUIRED$'):
+                    v.read_bounded(p, 3)
+                fstat.assert_called_once()
+            self.assertEqual(reads, [])
+
+
 if __name__ == '__main__':
     unittest.main()
