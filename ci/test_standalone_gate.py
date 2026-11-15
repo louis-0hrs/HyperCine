@@ -96,6 +96,13 @@ class SanitizerParallelPilotTests(unittest.TestCase):
 
 
 class StandaloneGateTests(unittest.TestCase):
+    def test_p7_audit_registrations_are_mandatory(self):
+        for name in ('p7_plane_contract', 'p7_json_contract', 'p7_public_sdk_fixture'):
+            with self.subTest(name=name):
+                self.assertIn(name, REQUIRED)
+                with self.assertRaises(ValueError):
+                    registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_vc5_inspector_registrations_are_mandatory(self):
         for name in ('test_vc5_inspect', 'test_vc5_inspect_optimized',
                      'test_vc5_inspect_mutations', 'test_vc5_inspect_mutations_optimized'):
