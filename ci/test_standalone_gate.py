@@ -72,6 +72,29 @@ class CompatibilityCommandTests(unittest.TestCase):
                 runner.validate_compat_commands({'tests': [t for t in document['tests'] if t is not item]}, root, python)
 
 
+class SanitizerParallelPilotTests(unittest.TestCase):
+    def test_parallelism_is_bounded_and_fail_closed(self):
+        self.assertEqual(runner.ctest_parallel_jobs('1'), 1)
+        self.assertEqual(runner.ctest_parallel_jobs('2'), 2)
+        for invalid in ('', '0', '3', '4', '-1', '1.5', 'auto', None, 2, True):
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                runner.ctest_parallel_jobs(invalid)
+
+    def test_parallel_command_retains_required_fail_closed_options(self):
+        original = ['ctest', '--test-dir', 'build', '-C', 'Release']
+        command = runner.ctest_execution_command(original, 2, 'results.xml')
+        self.assertEqual(command, original + ['--parallel', '2', '--output-on-failure',
+                                              '--no-tests=error', '--output-junit', 'results.xml'])
+        self.assertEqual(original, ['ctest', '--test-dir', 'build', '-C', 'Release'])
+
+    def test_workflow_only_enables_linux_sanitizer_pilot(self):
+        workflow = (Path(__file__).resolve().parents[1] /
+                    '.github/workflows/ci-standalone.yml').read_text()
+        self.assertIn("HYPERCINE_STANDALONE_CTEST_JOBS: ${{ matrix.system == 'Linux' && matrix.sanitize == 'ON' && '2' || '1' }}", workflow)
+        self.assertIn("ctest_execution_command(ctest, parallel_jobs, junit)",
+                      (Path(__file__).resolve().parent / 'run_standalone.py').read_text())
+
+
 class StandaloneGateTests(unittest.TestCase):
     def test_vc5_inspector_registrations_are_mandatory(self):
         for name in ('test_vc5_inspect', 'test_vc5_inspect_optimized',
