@@ -17,6 +17,8 @@ else:
     from check_upstream_immutable import verify_upstream
 
 REQUIRED = {
+    # Public P7 audit must actually execute on each standalone lane.
+    'p7_plane_contract', 'p7_json_contract', 'p7_public_sdk_fixture',
     'upstream_immutable', 'upstream_immutable_guardrails',
     'dialect_capability_proof',
     'compat_qualification_matrix', 'compat_qualification_matrix_optimized',
