@@ -44,6 +44,7 @@ REQUIRED = {
     'optimized_standalone_acceptance',
     'filmscan3_backend_selection', 'entropy_bitexact',
     'encoder_backend_selection_contract', 'encoder_backend_session_packets',
+    'encoder_wire_request_normal', 'encoder_wire_request_optimized',
     'encoder_move_ownership',
     'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence',
     'wavelet_simd_exact', 'wavelet_simd_packets',
