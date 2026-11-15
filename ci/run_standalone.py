@@ -5,6 +5,7 @@
 """Run the complete standalone gate; missing or skipped tests are failures."""
 import argparse
 import json
+import os
 from pathlib import Path
 import platform
 import subprocess
@@ -87,6 +88,19 @@ REQUIRED |= {'standalone_external_' + size for size in
 
 REQUIRED |= {'scalar_inverse_arithmetic', 'scalar_inverse_rejection', 'scalar_inverse_vectors',
              'scalar_inverse_replay_contract', 'original_descale_review_contract'} | {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
+
+
+def ctest_parallel_jobs(value):
+    """Conservative CI opt-in: one test normally, two only on the sanitizer lane."""
+    if value not in ('1', '2'):
+        raise ValueError('invalid standalone CTest parallelism; expected 1 or 2')
+    return int(value)
+
+
+def ctest_execution_command(base, jobs, junit):
+    """Keep all fail-closed inventory/JUnit requirements under parallel CTest."""
+    return base + ['--parallel', str(jobs), '--output-on-failure',
+                   '--no-tests=error', '--output-junit', str(junit)]
 
 
 def cmake_enabled(value):
@@ -207,6 +221,7 @@ def main():
         subprocess.run([cache[key], '-version'], check=True)
     subprocess.run(['cmake', '--version'], check=True)
     verify_upstream(Path(__file__).resolve().parents[1])
+    parallel_jobs = ctest_parallel_jobs(os.environ.get('HYPERCINE_STANDALONE_CTEST_JOBS', '1'))
     ctest = ['ctest', '--test-dir', str(build), '-C', 'Release']
     document = json.loads(subprocess.check_output(ctest + ['--show-only=json-v1'], text=True))
     registered = registered_tests(document, required_tests(cache))
@@ -218,9 +233,10 @@ def main():
     junit = build / 'standalone-results.xml'
     if junit.exists():
         junit.unlink()  # Never accept a stale result from an earlier run.
-    subprocess.run(ctest + ['--output-on-failure', '--no-tests=error', '--output-junit', str(junit)], check=True)
+    subprocess.run(ctest_execution_command(ctest, parallel_jobs, junit), check=True)
     count = completed_tests(junit, registered)
     result = {'status': 'PASS', 'registered_tests': len(registered), 'passed_tests': count,
+              'ctest_parallel_jobs': parallel_jobs,
               'system': platform.system(), 'architecture': machine,
               'scalar_original_stage_replay': ('SIX_PAIRS_EQUAL' if 'scalar_inverse_original_six_pairs' in registered else 'NOT_RUN'),
               'windows_binaries': 'NOT REQUIRED: versioned manifests/fixtures; optional NAS corpus is separate'}

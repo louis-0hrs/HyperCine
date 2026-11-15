@@ -121,6 +121,9 @@ jobs:
         env:
           EXPECTED_SYSTEM: ${{ matrix.system }}
           EXPECTED_MACHINE: ${{ matrix.machine }}
+          # Pilot: only the Linux sanitizer job runs two tests concurrently.
+          # Leave release lanes and Mac fallback unchanged.
+          HYPERCINE_STANDALONE_CTEST_JOBS: ${{ matrix.system == 'Linux' && matrix.sanitize == 'ON' && '2' || '1' }}
           # AppleClang ASan on arm64 does not support LeakSanitizer.
           ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
