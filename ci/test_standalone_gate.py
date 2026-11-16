@@ -139,6 +139,7 @@ class StandaloneGateTests(unittest.TestCase):
 
     def test_internal_backend_session_gates_are_binding(self):
         for name in ('encoder_backend_selection_contract', 'encoder_backend_session_packets',
+                     'encoder_wire_request_normal', 'encoder_wire_request_optimized',
                      'encoder_move_ownership',
                      'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence'):
             self.assertIn(name, REQUIRED)

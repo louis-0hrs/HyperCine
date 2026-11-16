@@ -367,7 +367,8 @@ if(HYPERCINE_BUILD_STANDALONE)
         src/core/filmscan3_backend.cpp
         src/core/quality_profile_bridge.cpp
         src/core/encoder_capability.cpp
-        src/core/encoder_backend_selection.cpp)
+        src/core/encoder_backend_selection.cpp
+        src/core/encoder_wire_request.cpp)
     target_include_directories(hypercine_standalone PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
     # The six-profile quality mathematics lives in one shared SDK-free library
     # (#29). The encoder consumes it instead of keeping a second table set.
@@ -599,6 +600,35 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_test(NAME encoder_backend_session_packets COMMAND test_encoder_backend_selection packets)
         set_tests_properties(encoder_backend_selection_contract encoder_backend_session_packets PROPERTIES
             LABELS "cpu;encoder;session" TIMEOUT 180)
+        # Private wire boundary: normal compiles its own non-NDEBUG adapter;
+        # optimized exercises the actual production adapter from the Release library.
+        foreach(wire_mode IN ITEMS normal optimized)
+            add_executable(test_encoder_wire_request_${wire_mode}
+                tests/test_encoder_wire_request.cpp)
+            if(wire_mode STREQUAL "normal")
+                target_sources(test_encoder_wire_request_${wire_mode} PRIVATE src/core/encoder_wire_request.cpp)
+            endif()
+            target_link_libraries(test_encoder_wire_request_${wire_mode}
+                PRIVATE hypercine_standalone Threads::Threads)
+            if(wire_mode STREQUAL "normal")
+                if(MSVC)
+                    target_compile_options(test_encoder_wire_request_${wire_mode} PRIVATE /UNDEBUG /Od)
+                else()
+                    target_compile_options(test_encoder_wire_request_${wire_mode} PRIVATE -UNDEBUG -O0)
+                endif()
+            else()
+                target_compile_definitions(test_encoder_wire_request_${wire_mode} PRIVATE NDEBUG)
+                if(MSVC)
+                    target_compile_options(test_encoder_wire_request_${wire_mode} PRIVATE /O2)
+                else()
+                    target_compile_options(test_encoder_wire_request_${wire_mode} PRIVATE -O2)
+                endif()
+            endif()
+            add_test(NAME encoder_wire_request_${wire_mode}
+                COMMAND test_encoder_wire_request_${wire_mode})
+            set_tests_properties(encoder_wire_request_${wire_mode} PROPERTIES
+                LABELS "cpu;encoder;session;capability" TIMEOUT 180)
+        endforeach()
         add_executable(test_encoder_ownership tests/test_encoder_ownership.cpp)
         target_link_libraries(test_encoder_ownership PRIVATE hypercine_standalone)
         add_test(NAME encoder_move_ownership COMMAND test_encoder_ownership)
