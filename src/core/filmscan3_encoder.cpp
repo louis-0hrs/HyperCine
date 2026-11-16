@@ -179,11 +179,18 @@ FilmScan3Geometry FilmScan3Encoder::geometry() const noexcept {
     if (!active_) return {0,0,0};
     return frontend_ ? frontend_->Geometry() : FilmScan3Geometry{};
 }
-FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride) {
+namespace {
+// Frame-timecode default shared by the BGRA and native-planes entries, so the
+// two paths cannot disagree on metadata before the caller supplies any.
+FilmScan3Metadata DefaultMetadata(unsigned frame_index) {
     FilmScan3Metadata metadata;
-    const unsigned f=state_.frame_index,parts[]={f/(30*60*60)%24,f/(30*60)%60,f/30%60,f%30};
+    const unsigned f=frame_index,parts[]={f/(30*60*60)%24,f/(30*60)%60,f/30%60,f%30};
     for(unsigned p=0;p<4;++p){metadata.timecode[3*p]=static_cast<char>('0'+parts[p]/10);metadata.timecode[3*p+1]=static_cast<char>('0'+parts[p]%10);}
-    return Encode(data,bytes,stride,metadata);
+    return metadata;
+}
+}
+FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride) {
+    return Encode(data,bytes,stride,DefaultMetadata(state_.frame_index));
 }
 FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,std::size_t stride,const FilmScan3Metadata& metadata) {
     if (!active_) throw std::logic_error("moved-from FilmScan3 encoder is inactive");
@@ -192,8 +199,34 @@ FilmScan3Frame FilmScan3Encoder::Encode(const uint8_t* data,std::size_t bytes,st
     auto& frontend=*selected;
     const auto g=selected->Geometry();
     ValidateFilmScan3Geometry(g);
-    const auto pixels=static_cast<std::size_t>(g.width)*g.height;
     auto pyramid=frontend.Transform(data,bytes,g.width,g.height,stride);
+    return EncodePrepared(std::move(selected),std::move(pyramid),metadata);
+}
+FilmScan3Frame FilmScan3Encoder::Encode(const Planes& planes) {
+    return Encode(planes,DefaultMetadata(state_.frame_index));
+}
+FilmScan3Frame FilmScan3Encoder::Encode(const Planes& planes,const FilmScan3Metadata& metadata) {
+    if (!active_) throw std::logic_error("moved-from FilmScan3 encoder is inactive");
+    if(state_.frame_index>=65535)throw std::length_error("FilmScan3 frame counter exhausted");
+    auto selected=frontend_ ? frontend_ : detail::BindFrontend(detail::CpuFrontend());
+    auto& frontend=*selected;
+    const auto g=selected->Geometry();
+    ValidateFilmScan3Geometry(g);
+    // Validate before dispatch: a malformed plane set must not reach a backend
+    // that could reinterpret it, and it must not consume session state.
+    ValidateFilmScan3Planes(planes,g);
+    auto pyramid=frontend.TransformPlanes(planes);
+    return EncodePrepared(std::move(selected),std::move(pyramid),metadata);
+}
+FilmScan3Frame FilmScan3Encoder::EncodePrepared(std::shared_ptr<detail::Frontend> selected,
+                                                detail::FrontendFrame&& prepared,
+                                                const FilmScan3Metadata& metadata) {
+    if (!active_) throw std::logic_error("moved-from FilmScan3 encoder is inactive");
+    if(state_.frame_index>=65535)throw std::length_error("FilmScan3 frame counter exhausted");
+    auto& frontend=*selected;
+    const auto g=selected->Geometry();
+    auto pyramid=std::move(prepared);
+    const auto pixels=static_cast<std::size_t>(g.width)*g.height;
     using Clock=std::chrono::steady_clock;
     const bool profile=frontend.ProfileHost();
     auto stamp=[&]{return profile ? Clock::now() : Clock::time_point{};};

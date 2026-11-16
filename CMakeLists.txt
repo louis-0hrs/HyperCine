@@ -899,6 +899,12 @@ if(HYPERCINE_BUILD_STANDALONE)
         add_executable(test_filmscan3_geometry tests/test_filmscan3_geometry.cpp)
         target_link_libraries(test_filmscan3_geometry PRIVATE hypercine_standalone)
         add_test(NAME filmscan3_geometry COMMAND test_filmscan3_geometry)
+        # Issue #383: a native planes entry exists so a generation loop can run
+        # without the declared 8-bit/4:2:2 re-entry. It must be byte-equal to the
+        # converted path, not a second input dialect.
+        add_executable(test_filmscan3_planes tests/test_filmscan3_planes.cpp)
+        target_link_libraries(test_filmscan3_planes PRIVATE hypercine_standalone)
+        add_test(NAME filmscan3_planes_domain COMMAND test_filmscan3_planes)
         # Separate current wavelet shape from the bounded FilmScan3 pixel budget.
         add_executable(test_filmscan3_geometry_budget tests/test_filmscan3_geometry_budget.cpp)
         target_link_libraries(test_filmscan3_geometry_budget PRIVATE hypercine_standalone)

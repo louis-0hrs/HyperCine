@@ -60,6 +60,32 @@ Planes ConvertFilmScan3Bgra(const uint8_t* input, std::size_t bytes, int width, 
     }
     return out;
 }
+// Native planes-domain contract. The BGRA path converts into exactly this
+// layout; accepting any other shape or an out-of-range sample would let the
+// native entry encode something the converted entry can never produce.
+void ValidateFilmScan3Planes(const Planes& planes, FilmScan3Geometry geometry) {
+    ValidateFilmScan3Geometry(geometry);
+    const int chroma_width=geometry.width/2;
+    if (planes[0].width!=geometry.width || planes[0].height!=geometry.height ||
+        planes[1].width!=chroma_width || planes[1].height!=geometry.height ||
+        planes[2].width!=chroma_width || planes[2].height!=geometry.height)
+        throw std::invalid_argument(
+            "FilmScan3 planes must be Y width x height and two chroma planes of width/2 x height");
+    for (int c=0;c<3;++c) {
+        const Plane& plane=planes[c];
+        // Same storage/shape preconditions the converted planes must satisfy
+        // before Forward, so both entries reach the wavelet with one contract.
+        detail::ValidateWaveletInput(plane,0);
+        for (int y=0;y<plane.height;++y) {
+            for (int x=0;x<plane.width;++x) {
+                const int value=plane.pixels[static_cast<std::size_t>(y)*plane.stride+x];
+                if (value<0 || value>1024)
+                    throw std::invalid_argument(
+                        "FilmScan3 plane sample is outside the 10-bit code range [0,1024]");
+            }
+        }
+    }
+}
 // NEON quantisation (issue #70, performance follow-up).
 //
 // The scalar rule is
