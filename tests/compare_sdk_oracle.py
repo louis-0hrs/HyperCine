@@ -153,6 +153,52 @@ def write_exclusive(path, data):
         target.write(data)
 
 
+# Keys that only this harness writes into comparison.json. A directory may be
+# reused for a re-run only when every entry is attributable to a previous run.
+ORACLE_REPORT_KEYS = ('copyright', 'license', 'windows_run', 'log_sha256',
+                      'control', 'samples', 'input_contract')
+MAX_OWNED_REPORT_BYTES = 4 * 1024 * 1024
+
+
+def owned_output_directory(root):
+    """True only for a directory this harness itself produced."""
+    try:
+        report = root / 'comparison.json'
+        if report.is_symlink() or not report.is_file():
+            return False
+        if report.stat().st_size > MAX_OWNED_REPORT_BYTES:
+            return False
+        document = json.loads(report.read_bytes())
+    except (OSError, ValueError):
+        return False
+    return type(document) is dict and all(key in document for key in ORACLE_REPORT_KEYS)
+
+
+def clear_owned_destinations(root, destinations, replace):
+    """Refuse occupied evidence unless an explicit opt-in matched our own output.
+
+    Default behaviour is unchanged: an occupied destination is a refusal. With
+    replace=True the directory is cleared only when its complete inventory is
+    one previous run of this harness; any foreign, non-regular or symlinked
+    entry still refuses before a single file is removed.
+    """
+    targets = [root / name for name in sorted(destinations)]
+    for target in targets:
+        require(target.resolve().parent == root.resolve() and not target.is_symlink(),
+                'unsafe or occupied oracle destination')
+    occupied = [target for target in targets if target.exists()]
+    if not occupied:
+        return
+    require(replace and owned_output_directory(root),
+            'unsafe or occupied oracle destination')
+    entries = list(root.iterdir())
+    require(all(entry.name in destinations and entry.is_file() and not entry.is_symlink()
+                for entry in entries),
+            'unsafe or occupied oracle destination')
+    for target in occupied:
+        target.unlink()
+
+
 def main():
     parser = QuietArgumentParser()
     source = parser.add_mutually_exclusive_group(required=True)
@@ -162,6 +208,7 @@ def main():
     parser.add_argument('--ffprobe', required=True)
     parser.add_argument('--run-url')
     parser.add_argument('--output', required=True)
+    parser.add_argument('--replace-owned-output', action='store_true')
     args = parser.parse_args()
     root = Path(args.output)
     # The retained Windows fixture root is evidence INPUT, never an output target.
@@ -226,11 +273,7 @@ def main():
     destinations = {'control.avi', 'control.ffmpeg-p10', 'comparison.json'}
     if args.log:
         destinations.update(ORACLE_NAMES)
-    for name in sorted(destinations):
-        target = root / name
-        require(target.resolve().parent == root.resolve() and
-                not target.exists() and not target.is_symlink(),
-                'unsafe or occupied oracle destination')
+    clear_owned_destinations(root, destinations, args.replace_owned_output)
     if args.log:
         for name in sorted(ORACLE_NAMES):
             write_exclusive(root / name, data[name])

@@ -156,6 +156,67 @@ class OracleFailClosed(unittest.TestCase):
             self.assertEqual(sentinel.read_bytes(), b'prior-independent-evidence')
             self.assertEqual(sorted(p.name for p in output.iterdir()), ['comparison.json'])
 
+    def test_owned_replay_output_requires_explicit_opt_in(self):
+        # The registered CTest runs repeatedly in one build tree: an exact
+        # previous run of this harness may be replaced, nothing else.
+        destinations = {'comparison.json', 'control.avi', 'control.ffmpeg-p10'}
+        report = {'copyright': 'Copyright (c) 2026 HyperCine Contributors.',
+                  'license': 'MIT OR Apache-2.0',
+                  'windows_run': 'https://github.com/louis-0hrs/HyperCine/actions/runs/1',
+                  'log_sha256': '0' * 64, 'control': {}, 'samples': [],
+                  'input_contract': 'contract'}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'comparison.json').write_text(json.dumps(report), encoding='utf-8')
+            (root / 'control.avi').write_bytes(b'prior-run')
+            (root / 'control.ffmpeg-p10').write_bytes(b'prior-run')
+            with self.assertRaisesRegex(ValueError, 'unsafe or occupied'):
+                compare.clear_owned_destinations(root, destinations, False)
+            self.assertEqual(len(list(root.iterdir())), 3)
+            compare.clear_owned_destinations(root, destinations, True)
+            self.assertEqual(list(root.iterdir()), [])
+
+    def test_foreign_entry_blocks_owned_replay_replacement(self):
+        destinations = {'comparison.json', 'control.avi', 'control.ffmpeg-p10'}
+        report = {key: None for key in compare.ORACLE_REPORT_KEYS}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'comparison.json').write_text(json.dumps(report), encoding='utf-8')
+            (root / 'unrelated-evidence.txt').write_bytes(b'keep me')
+            with self.assertRaisesRegex(ValueError, 'unsafe or occupied'):
+                compare.clear_owned_destinations(root, destinations, True)
+            self.assertEqual((root / 'unrelated-evidence.txt').read_bytes(), b'keep me')
+            self.assertTrue((root / 'comparison.json').exists())
+
+    def test_unrecognized_review_report_is_never_replaced(self):
+        destinations = {'comparison.json', 'control.avi', 'control.ffmpeg-p10'}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'comparison.json').write_bytes(b'prior-independent-evidence')
+            with self.assertRaisesRegex(ValueError, 'unsafe or occupied'):
+                compare.clear_owned_destinations(root, destinations, True)
+            self.assertEqual((root / 'comparison.json').read_bytes(),
+                             b'prior-independent-evidence')
+
+    def test_symlinked_destination_blocks_owned_replay_replacement(self):
+        destinations = {'comparison.json', 'control.avi', 'control.ffmpeg-p10'}
+        report = {key: None for key in compare.ORACLE_REPORT_KEYS}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'comparison.json').write_text(json.dumps(report), encoding='utf-8')
+            outside = root / 'outside.bin'
+            outside.write_bytes(b'protected')
+            alias = root / 'control.avi'
+            try:
+                alias.symlink_to(outside)
+            except (OSError, NotImplementedError):
+                return  # Windows without symlink privilege still covers the checks above.
+            with self.assertRaisesRegex(ValueError, 'unsafe or occupied'):
+                compare.clear_owned_destinations(root, destinations, True)
+            self.assertEqual(outside.read_bytes(), b'protected')
+            self.assertTrue(alias.is_symlink())
+
+
     def test_exclusive_evidence_write_does_not_clobber(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -1133,6 +1133,7 @@ if(HYPERCINE_BUILD_STANDALONE)
                 --windows-fixtures "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/windows-oracle"
                 --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
                 --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
+                --replace-owned-output
                 --output "${CMAKE_CURRENT_BINARY_DIR}/windows-oracle-replay")
         else()
             message(STATUS "Optional standalone external decode test not registered: FFmpeg/ffprobe unavailable")
