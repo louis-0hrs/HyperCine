@@ -4,14 +4,14 @@
 #include "filmscan3_backend.h"
 #include "encoder_session_config.h"
 namespace hypercine { namespace standalone { namespace detail {
-FrontendFrame Frontend::Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool audit) {
+FrontendFrame WaveletPyramid(Frontend& frontend, Planes color, bool audit) {
     FrontendFrame out;
-    out.color=Convert(p,n,w,h,s);
+    out.color=std::move(color);
     for(int c=0;c<3;++c) {
         auto& levels=out.levels[c];
-        levels[0]=Forward(out.color[c],0);
-        levels[1]=Forward(levels[0].bands[0],2);
-        levels[2]=Forward(levels[1].bands[0],0);
+        levels[0]=frontend.Forward(out.color[c],0);
+        levels[1]=frontend.Forward(levels[0].bands[0],2);
+        levels[2]=frontend.Forward(levels[1].bands[0],0);
         if(!audit) {
             out.color[c].pixels=AlignedVector<int16_t>{};
             levels[0].bands[0].pixels=AlignedVector<int16_t>{};
@@ -19,6 +19,12 @@ FrontendFrame Frontend::Transform(const uint8_t* p,std::size_t n,int w,int h,std
         }
     }
     return out;
+}
+FrontendFrame Frontend::Transform(const uint8_t* p,std::size_t n,int w,int h,std::size_t s,bool audit) {
+    return WaveletPyramid(*this,Convert(p,n,w,h,s),audit);
+}
+FrontendFrame Frontend::TransformPlanes(const Planes&,bool) {
+    throw std::logic_error("planes-domain input is not supported by this backend");
 }
 namespace {
 class BoundFrontend final : public Frontend {
@@ -30,6 +36,12 @@ class BoundFrontend final : public Frontend {
         if(current.width!=geometry_.width || current.height!=geometry_.height ||
            current.sample_capacity_bytes!=geometry_.sample_capacity_bytes)
             throw std::invalid_argument("frontend declaration changed after session binding");
+    }
+    void RequirePlaneGeometry(const Planes& planes) const {
+        if(planes[0].width!=geometry_.width || planes[0].height!=geometry_.height ||
+           planes[1].width!=geometry_.width/2 || planes[1].height!=geometry_.height ||
+           planes[2].width!=geometry_.width/2 || planes[2].height!=geometry_.height)
+            throw std::invalid_argument("planes differ from the bound session geometry");
     }
 public:
     BoundFrontend(std::shared_ptr<Frontend> inner, FilmScan3Geometry geometry)
@@ -58,6 +70,13 @@ public:
             throw std::invalid_argument("transform dimensions differ from the bound session");
         return inner_->Transform(data,bytes,width,height,stride,audit);
     }
+    FrontendFrame TransformPlanes(const Planes& planes,bool audit) override {
+        // Same session-bound check as Transform: a changed declaration or a
+        // foreign plane shape must fail before any backend dispatch.
+        RequireBoundGeometry();
+        RequirePlaneGeometry(planes);
+        return inner_->TransformPlanes(planes,audit);
+    }
 };
 class Cpu final : public Frontend {
     FilmScan3Geometry geometry_;
@@ -83,6 +102,9 @@ private:
     }
     WaveletLevel Forward(const Plane& p,int s) override {
         return requested_ == WaveletIsa::Auto ? ForwardLevel(p,s) : ForwardLevel(p,s,resolved_);
+    }
+    FrontendFrame TransformPlanes(const Planes& planes,bool audit) override {
+        return WaveletPyramid(*this,planes,audit);
     }
     std::string DeviceName() const override {
         return Isa() == WaveletIsa::Neon ? "CPU neon" : "CPU scalar";

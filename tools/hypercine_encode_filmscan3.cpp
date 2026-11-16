@@ -49,6 +49,10 @@ FilmScan3Geometry ParseGeometry(const std::string& value) {
 int main(int argc,char** argv) {
     try {
         int begin=1;fs::path metadata_path;bool reference_yuv=false;bool coefficient_hashing=true;
+        // Native planar input: Y, then Cb, then Cr as 16-bit little-endian
+        // code words (FFmpeg yuv422p10le order). The encoder maps that to its
+        // Y, Cr, Cb channel order; no RGB conversion happens.
+        bool input_yuv422p10le=false;
         // The session profile is explicit rather than implied: a caller that
         // asks for another profile must get that profile or a refusal.
         EncodingQuality quality=EncodingQuality::FilmScan3;
@@ -57,6 +61,7 @@ int main(int argc,char** argv) {
         while(begin<argc && std::string(argv[begin]).rfind("--",0)==0) {
             const std::string flag=argv[begin++];
             if(flag=="--reference-yuv")reference_yuv=true;
+            else if(flag=="--input-yuv422p10le")input_yuv422p10le=true;
             else if(flag=="--geometry" && begin<argc) {
                 geometry=ParseGeometry(argv[begin++]);
             }
@@ -81,7 +86,9 @@ int main(int argc,char** argv) {
                 if(metadata_path.empty())throw std::invalid_argument("explicit metadata path must not be empty");
             } else throw std::invalid_argument("unknown or incomplete FilmScan3 option");
         }
-        if(argc-begin<2)throw std::invalid_argument("usage: hypercine_encode_filmscan3 [--geometry WIDTHxHEIGHT] [--quality PROFILE] [--metadata-binary values.raw] [--coefficient-hash full|off] OUTPUT_DIR INPUT.bgra [INPUT.bgra ...]");
+        if(input_yuv422p10le && reference_yuv)
+            throw std::invalid_argument("--reference-yuv is only defined for BGRA input; with --input-yuv422p10le the input already is the canonical reference");
+        if(argc-begin<2)throw std::invalid_argument("usage: hypercine_encode_filmscan3 [--geometry WIDTHxHEIGHT] [--quality PROFILE] [--metadata-binary values.raw] [--coefficient-hash full|off] [--input-yuv422p10le] OUTPUT_DIR INPUT.bgra|INPUT.yuv422p10le [INPUT ...]");
         const fs::path directory=argv[begin++];
         FilmScan3Encoder encoder(geometry);
         encoder.SetCoefficientHashing(coefficient_hashing);
@@ -134,7 +141,28 @@ int main(int argc,char** argv) {
                 std::ostringstream filename;filename.exceptions(std::ios::badbit | std::ios::failbit);filename<<"frame_"<<std::setfill('0')<<std::setw(4)<<encoder.state().frame_index<<".reference.yuv";
                 output_run.WriteNew(filename.str(),bytes.data(),bytes.size());
             }
-            auto result=encoder.Encode(input.data(),input.size(),stride,values);
+            FilmScan3Frame result;
+            if(input_yuv422p10le) {
+                Planes planes{Plane(geometry.width,geometry.height),
+                              Plane(geometry.width/2,geometry.height),
+                              Plane(geometry.width/2,geometry.height)};
+                std::size_t at=0;
+                auto fill_plane=[&](Plane& plane) {
+                    for(int y=0;y<plane.height;++y)for(int x=0;x<plane.width;++x) {
+                        if(at+2>input.size())throw std::invalid_argument("truncated planar input");
+                        plane.pixels[static_cast<std::size_t>(y)*plane.stride+x]=
+                            static_cast<int16_t>(static_cast<unsigned>(input[at]) |
+                                                 (static_cast<unsigned>(input[at+1])<<8));
+                        at+=2;
+                    }
+                };
+                // File order Y, Cb, Cr; Planes order is Y, Cr, Cb.
+                fill_plane(planes[0]);fill_plane(planes[2]);fill_plane(planes[1]);
+                if(at!=input.size())throw std::invalid_argument("planar input size mismatch");
+                result=encoder.Encode(planes,values);
+            } else {
+                result=encoder.Encode(input.data(),input.size(),stride,values);
+            }
             std::ostringstream name;name.exceptions(std::ios::badbit | std::ios::failbit);name<<"frame_"<<std::setfill('0')<<std::setw(4)<<result.state.frame_index<<".cfhd";
             output_run.WriteNew(name.str(),result.sample.data(),result.sample.size());
             if(i!=begin)trace<<',';

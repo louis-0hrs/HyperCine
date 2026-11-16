@@ -68,6 +68,9 @@ inline const char* FilmScan3CoefficientHashName(FilmScan3CoefficientHash hash) n
 }
 // Independently callable CPU mathematics for stage tests/future backends.
 Planes ConvertFilmScan3Bgra(const uint8_t* data, std::size_t bytes, int width, int height, std::size_t stride);
+// Native Y, Cr, Cb 10-bit planes for Encode(planes, ...). Refuses shapes or
+// storage the converted path cannot produce and samples outside [0,1024].
+void ValidateFilmScan3Planes(const Planes& planes, FilmScan3Geometry geometry);
 int16_t QuantizeFilmScan3(int16_t value, unsigned divisor);
 // Quantizes a contiguous coefficient block with the same scalar rounding rule.
 // NEON vectorization is an execution optimization, not a new codec profile.
@@ -76,7 +79,7 @@ FilmScan3Tables ComputeFilmScan3Tables(int fs_rate_limiter);
 // Metal requires an enabled Apple build and fails if device/pipeline creation fails.
 // MetalOrCpu falls back only during initialization; dispatch failures propagate.
 enum class FilmScan3Backend { Cpu, Metal, MetalOrCpu };
-namespace detail { struct Frontend; struct FrontendAccess; }
+namespace detail { struct Frontend; struct FrontendAccess; struct FrontendFrame; }
 // A stateful session has one owner. Copying would share a mutable GPU frontend
 // while duplicating rate state and diagnostic identity, so only moves are legal.
 // Concurrent operations on the same encoder (including moves) are unsupported;
@@ -118,6 +121,17 @@ public:
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride);
     FilmScan3Frame Encode(const uint8_t* data, std::size_t bytes, std::size_t stride,
                          const FilmScan3Metadata& metadata);
+    // Native planes-domain entry. Same session, rate state, tables, writer and
+    // metadata contract as the BGRA overload; only the color conversion is
+    // skipped. The planes must already be the canonical Y, Cr, Cb order of this
+    // session (Planes is Y, Cr, Cb): Y is width x height, both chroma planes are
+    // width/2 x height. Samples are 10-bit codes in [0,1024]; 1024 is reachable
+    // through the documented CG709 conversion, so it is accepted rather than
+    // silently clipped. Out-of-range or incomplete storage is refused.
+    // The default Frontend refuses this entry, so a backend that cannot consume
+    // native planes never reinterprets BGRA storage as planes.
+    FilmScan3Frame Encode(const Planes& planes);
+    FilmScan3Frame Encode(const Planes& planes, const FilmScan3Metadata& metadata);
     // Session quality profile. Any of the six regular profiles is accepted; an
     // invalid enum throws std::invalid_argument.
     //
@@ -142,6 +156,9 @@ public:
     void SetCoefficientHashing(bool enabled) noexcept;
     bool coefficient_hashing() const noexcept { return coefficient_hashing_; }
 private:
+    FilmScan3Frame EncodePrepared(std::shared_ptr<detail::Frontend> selected,
+                                  detail::FrontendFrame&& pyramid,
+                                  const FilmScan3Metadata& metadata);
     void StampDiagnosticOff(FilmScan3Frame& result);
     bool coefficient_hashing_ = true;
     // Set once a frame has been encoded successfully; Reset() deliberately does

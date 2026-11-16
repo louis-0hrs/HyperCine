@@ -59,6 +59,9 @@ REQUIRED = {
     'filmscan3_geometry', 'filmscan3_geometry_external_decode',
     'filmscan3_geometry_validation', 'filmscan3_geometry_reference_p10',
     'filmscan3_4k_gate_contract',
+    # #383: losing the native planes entry would silently return the generation
+    # measurement lane to an 8-bit BGRA re-entry.
+    'filmscan3_planes_domain',
     # #259: loss of the capability/budget/ISA gates must fail the CI inventory.
     'encoder_capability_contract', 'filmscan3_geometry_budget',
     'wavelet_isa_session_policy', 'wavelet_isa_parallel_sessions',

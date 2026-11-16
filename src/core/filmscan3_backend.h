@@ -41,6 +41,10 @@ struct Frontend {
     // Full audit retains color and intermediate LL storage. Production consumers
     // require only L3 LL + nine highpass bands per channel; other LL layouts remain.
     virtual FrontendFrame Transform(const uint8_t*, std::size_t, int, int, std::size_t, bool audit=false);
+    // Planes-domain input: skips Convert and builds the same wavelet pyramid.
+    // The base implementation refuses, so a backend without a native planes
+    // path cannot silently treat BGRA storage as 10-bit planes.
+    virtual FrontendFrame TransformPlanes(const Planes&, bool audit=false);
     virtual bool ProfileHost() const { return false; }
     virtual void RecordHostTiming(const HostTiming&) {}
 };
@@ -71,6 +75,9 @@ std::shared_ptr<Frontend> MetalFrontend(); // throws if disabled/device/pipeline
 // degrading, so an explicitly requested Metal backend cannot silently become CPU.
 std::shared_ptr<Frontend> MetalFrontend(FilmScan3Geometry);
 MetalTiming ReadMetalTiming(const Frontend&);
+// Shared pyramid construction for the BGRA and native-planes entries. Keeps a
+// single wavelet chain: a second copy would let the two entries drift.
+FrontendFrame WaveletPyramid(Frontend&, Planes, bool audit=false);
 // One-shot deterministic failure *after real GPU completion*, before readback.
 // This tests state rollback/reuse without submitting unsafe commands to the GPU.
 void FailNextMetalCompletion(Frontend&);
