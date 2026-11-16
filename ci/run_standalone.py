@@ -23,6 +23,10 @@ REQUIRED = {
     'dialect_capability_proof',
     'compat_qualification_matrix', 'compat_qualification_matrix_optimized',
     'compat_qualification_committed_matrix',
+    # #381: the bounded decoded-pixel capture of the committed Metal packet and
+    # its hash-only evidence re-check must never drop out of the gate.
+    'metal_packet_capture_contract', 'metal_packet_capture_contract_optimized',
+    'metal_packet_capture_evidence',
     'test_vc5_inspect', 'test_vc5_inspect_optimized',
     'test_vc5_inspect_mutations', 'test_vc5_inspect_mutations_optimized',
     # Fail closed if the C0 geometry arithmetic or recorded-report gate disappears.

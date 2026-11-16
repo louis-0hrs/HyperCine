@@ -413,9 +413,10 @@ def _metal_row(artifacts):
         'scope': dict(ADMITTED_SCOPE, geometry='1920x1080'),
         'comparisons': [],
         'status': STATUS_NOT_OBSERVABLE,
-        'limitations': ['Packets are committed but no decoded-pixel capture and '
-                        'no independent pixel expectation exist in Git, so no '
-                        'compatibility verdict is possible here.'],
+        'limitations': ['The packet decodes reproducibly and matches the recorded macOS '
+                        'digest (docs/validation/METAL_PACKET_CAPTURE_381.md), but no committed '
+                        'encoder input pixels and no committed macOS capture bytes exist, so no '
+                        'sample-level comparison and no compatibility verdict are possible here.'],
     }
 
 

@@ -1,0 +1,100 @@
+{
+  "capture": {
+    "bit_depth": 10,
+    "byte_length": 8294400,
+    "pixel_format": "yuv422p10le",
+    "samples": 4147200,
+    "sha256": "ab5fd41c064b943e53877d0ba6106614e1983d9c0d2701e255a632564b95f774"
+  },
+  "compared": {
+    "against": "retained macOS external-FFmpeg decode of the same packet and frame",
+    "frame_index": 0,
+    "macos_decoded_sha256": "ab5fd41c064b943e53877d0ba6106614e1983d9c0d2701e255a632564b95f774",
+    "match": true,
+    "source": "docs/validation/metal-filmscan3-ffmpeg.json"
+  },
+  "container": {
+    "codec": "cfhd",
+    "height": 1080,
+    "kind": "single-frame AVI wrapper of the raw CFHD packet",
+    "pixel_format": "yuv422p10le",
+    "width": 1920
+  },
+  "decoder": {
+    "binary_sha256": "e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a",
+    "host": "Linux-6.12.107+deb13-amd64-x86_64-with-glibc2.41",
+    "id": "ffmpeg-cfhd",
+    "version": "ffmpeg version 7.1.5-0+deb13u1"
+  },
+  "interpretation": {
+    "chroma_siting": "not asserted by this packet",
+    "planes": [
+      {
+        "byte_length": 4147200,
+        "height": 1080,
+        "offset_bytes": 0,
+        "plane": "y",
+        "stride_bytes": 3840,
+        "width": 1920
+      },
+      {
+        "byte_length": 2073600,
+        "height": 1080,
+        "offset_bytes": 4147200,
+        "plane": "u",
+        "stride_bytes": 1920,
+        "width": 960
+      },
+      {
+        "byte_length": 2073600,
+        "height": 1080,
+        "offset_bytes": 6220800,
+        "plane": "v",
+        "stride_bytes": 1920,
+        "width": 960
+      }
+    ],
+    "range": "studio (64-940)",
+    "sample_domain": "0..1023 code values, peak 1023 for error metrics",
+    "storage": "16-bit little-endian per sample, tightly packed planes"
+  },
+  "issue": "#381",
+  "limits": [
+    "One packet, one frame, one decoder executable and one host.",
+    "No committed encoder input and no committed macOS capture bytes, so no sample-level difference against a source pattern is recomputed here.",
+    "Decoder agreement on these bytes is not a HyperCine decoder, GoPro product, SDK or SMPTE VC-5 conformance result."
+  ],
+  "negatives": {
+    "changed_capture": {
+      "applied": "first sample raised by one code value",
+      "detected": true,
+      "max_error": 1,
+      "mismatches": 1
+    },
+    "forged_metrics": {
+      "claim": "identity (0 mismatches, 0 maximum error)",
+      "rejected": true
+    }
+  },
+  "packet": {
+    "artifact": "macos-filmscan3/flat.cfhd",
+    "byte_length": 185648,
+    "frame_index": 0,
+    "producer": "HyperCine Metal FilmScan3 encoder (macOS)",
+    "sha256": "d75e6af7980558e42a520e8ce3bd3513626a854c3210da1c8b78240f4d75d6df"
+  },
+  "question": "Decode the committed 1920x1080 Metal FilmScan3 packet to 10-bit planar pixels on Linux and bind the result to the retained macOS decode digest.",
+  "schema": "hypercine.metal-packet-capture/1",
+  "stability": {
+    "digest": "ab5fd41c064b943e53877d0ba6106614e1983d9c0d2701e255a632564b95f774",
+    "distinct_digests": 1,
+    "identical": true,
+    "runs": 4,
+    "variants": [
+      "default",
+      "single-thread",
+      "four-thread",
+      "single-filter-thread"
+    ]
+  }
+}
