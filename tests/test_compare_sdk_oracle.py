@@ -441,5 +441,110 @@ class OraclePublicationPrivacy(unittest.TestCase):
             self.assertEqual(list(output.iterdir()), [])
 
 
+
+class SharedOracleSupervisor(unittest.TestCase):
+    """#379 clean forward-port: real synthetic children, no second process manager."""
+
+    def child(self, root, code, name='synthetic-oracle.py'):
+        path = Path(root) / name
+        path.write_text(code, encoding='utf-8')
+        return [sys.executable, '-I', '-B', str(path)]
+
+    def test_adapter_uses_approved_supervisor_and_bounded_discard(self):
+        with patch.object(compare.compat_process, 'run_bounded', return_value=b'') as shared:
+            self.assertEqual(compare.run_bounded(['synthetic'], 30, None), b'')
+            shared.assert_called_once_with(
+                ['synthetic'], timeout=30, stdout_limit=65536, discard_stdout=True)
+        with patch.object(compare.compat_process, 'run_bounded', return_value=b'x') as shared:
+            self.assertEqual(compare.run_bounded(['synthetic'], 60, 128), b'x')
+            shared.assert_called_once_with(
+                ['synthetic'], timeout=60, stdout_limit=128, discard_stdout=False)
+
+    def test_invalid_limits_rejected_without_launch(self):
+        with patch.object(compare.compat_process, 'run_bounded') as shared:
+            for timeout, limit in ((0, 1), (121, 1), (float('nan'), 1),
+                                   (True, 1), ('20', 1), (30, 0), (30, -1),
+                                   (30, 65537), (30, 1.0), (30, True)):
+                with self.subTest(timeout=timeout, limit=limit), self.assertRaisesRegex(
+                        ValueError, 'invalid external tool budget'):
+                    compare.run_bounded(['synthetic'], timeout, limit)
+            shared.assert_not_called()
+
+    def test_tool_error_or_containment_uncertainty_cannot_become_success(self):
+        for error, expected in (
+                (compare.compat_process.ToolFailure('private/argument'),
+                 'external tool rejected'),
+                (compare.compat_process.ToolFailure('private/argument', cleanup_failed=True),
+                 'external tool cleanup or containment unconfirmed'),
+                (compare.compat_process.ToolFailure('private/argument', containment_unconfirmed=True),
+                 'external tool cleanup or containment unconfirmed')):
+            with self.subTest(expected=expected), patch.object(
+                    compare.compat_process, 'run_bounded', side_effect=error):
+                with self.assertRaisesRegex(ValueError, '^' + expected + ') as caught:
+                    compare.run_bounded(['private/argument'], 30, 128)
+                self.assertNotIn('private/argument', str(caught.exception))
+
+    def test_real_stdout_capture_exact_limit_and_overflow(self):
+        with tempfile.TemporaryDirectory() as directory:
+            exact = self.child(directory, 'import sys\nsys.stdout.buffer.write(b"A"*4096)\n')
+            self.assertEqual(compare.run_bounded(exact, 20, 4096), b'A' * 4096)
+            over = self.child(directory, 'import sys\nsys.stdout.buffer.write(b"A"*4097)\n',
+                              'overflow.py')
+            with self.assertRaisesRegex(ValueError, '^external tool rejected):
+                compare.run_bounded(over, 20, 4096)
+
+    def test_real_stdout_discard_drains_large_output_without_capture(self):
+        with tempfile.TemporaryDirectory() as directory:
+            talker = self.child(directory,
+                                'import sys\nsys.stdout.buffer.write(b"x"*(4*1024*1024))\n')
+            self.assertEqual(compare.run_bounded(talker, 25, None), b'')
+
+    def test_real_nonzero_and_missing_child_fail_without_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            failing = self.child(directory,
+                'import sys\nprint("PRIVATE_TOKEN /private/thing")\nsys.exit(7)\n')
+            for argv in (failing, [str(Path(directory)/'MISSING_PRIVATE_TOKEN')]):
+                with self.subTest(argv=argv[0]), self.assertRaises(ValueError) as caught:
+                    compare.run_bounded(argv, 20, 4096)
+                self.assertNotIn('PRIVATE_TOKEN', str(caught.exception))
+                self.assertNotIn(directory, str(caught.exception))
+
+    def test_real_timeout_is_fail_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            hanging = self.child(directory, 'import time\ntime.sleep(20)\n')
+            with self.assertRaisesRegex(ValueError, '^external tool rejected):
+                compare.run_bounded(hanging, 1.0, 1024)
+
+    def test_ended_parent_with_descendant_pipe_never_yields_partial_json(self):
+        """Native runners must reject a valid JSON prefix with missing pipe EOF."""
+        with tempfile.TemporaryDirectory() as directory:
+            descendant = self.child(directory, 'import time\ntime.sleep(20)\n',
+                                    'descendant.py')
+            parent_code = (
+                'import subprocess,sys\n'
+                + 'subprocess.Popen(' + repr(descendant)
+                + ',stdin=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n'
+                + 'print(\'{"streams":[{"codec_name":"cfhd"}]}\',flush=True)\n')
+            parent = self.child(directory, parent_code, 'parent.py')
+            with self.assertRaisesRegex(ValueError, '^external tool rejected):
+                compare.run_bounded(parent, 2.0, 65536)
+
+    def test_stdout_and_ffprobe_parsers_reject_malformed_data(self):
+        self.assertEqual(compare.bounded_stdout_text(b'ffmpeg version 7.1\n'),
+                         'ffmpeg version 7.1\n')
+        self.assertEqual(compare.parse_probe_stream(
+            b'{"streams":[{"codec_name":"cfhd"}]}')['codec_name'], 'cfhd')
+        for payload in (b'', b'not json', b'{}', b'{"streams":[]}',
+                        b'{"streams":[null]}', b'\xff'):
+            with self.subTest(payload=payload), self.assertRaises(ValueError):
+                compare.parse_probe_stream(payload)
+
+    def test_oracle_source_does_not_fork_a_second_process_manager(self):
+        source = inspect.getsource(compare)
+        self.assertIn('from tools import compat_process', source)
+        self.assertNotIn('subprocess.Popen(', source)
+        self.assertNotIn('taskkill', source)
+        self.assertNotIn('os.killpg(', source)
+
 if __name__ == '__main__':
     unittest.main()
