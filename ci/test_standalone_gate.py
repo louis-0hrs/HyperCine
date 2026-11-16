@@ -87,10 +87,12 @@ class SanitizerParallelPilotTests(unittest.TestCase):
                                               '--no-tests=error', '--output-junit', 'results.xml'])
         self.assertEqual(original, ['ctest', '--test-dir', 'build', '-C', 'Release'])
 
-    def test_workflow_only_enables_linux_sanitizer_pilot(self):
+    def test_workflow_uses_bounded_two_slots_on_non_mac_lanes(self):
         workflow = (Path(__file__).resolve().parents[1] /
                     '.github/workflows/ci-standalone.yml').read_text()
-        self.assertIn("HYPERCINE_STANDALONE_CTEST_JOBS: ${{ matrix.system == 'Linux' && matrix.sanitize == 'ON' && '2' || '1' }}", workflow)
+        self.assertIn("HYPERCINE_STANDALONE_CTEST_JOBS: '2'", workflow)
+        self.assertIn('python ci/test_ci_performance.py', workflow)
+        self.assertIn('python ci/ci_performance.py prepare-linux --install', workflow)
         self.assertIn("ctest_execution_command(ctest, parallel_jobs, junit)",
                       (Path(__file__).resolve().parent / 'run_standalone.py').read_text())
 
@@ -399,7 +401,7 @@ class StandaloneGateTests(unittest.TestCase):
         merged |= {'scalar_inverse_graph_workers_' + str(w) for w in (1, 2, 4, 16)}
         self.assertTrue(merged <= REQUIRED)
         for missing in sorted(merged):
-            with self.subTest(missing=missing), self.assertRaises(ValueError):
+            with self.subTest(missing=missing), self.assertRaisesRegex(ValueError, missing):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != missing]})
 
     def test_each_shared_contract_registration_is_mandatory(self):

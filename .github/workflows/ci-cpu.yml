@@ -16,6 +16,7 @@ jobs:
   cpu-only-windows-msvc:
     name: Windows MSVC (CPU-Only Build & Tests)
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,8 +31,18 @@ jobs:
 
       - name: Build Release
         shell: pwsh
-        run: cmake --build build-cpu --config Release
+        run: python ci/ci_performance.py measure --output build-cpu/ci-build-timing.json --label reference-build -- cmake --build build-cpu --config Release --parallel 3
 
       - name: Run CPU CTest Suite
         shell: pwsh
-        run: ctest --test-dir build-cpu -C Release --output-on-failure
+        run: python ci/ci_performance.py measure --output build-cpu/ci-test-timing.json --label reference-tests --junit build-cpu/reference-results.xml -- ctest --test-dir build-cpu -C Release --output-on-failure --no-tests=error --output-junit "$PWD/build-cpu/reference-results.xml"
+
+      - name: Preserve CPU timing diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-cpu-timing
+          retention-days: 7
+          path: |
+            build-cpu/ci-*-timing.json
+            build-cpu/reference-results.xml
