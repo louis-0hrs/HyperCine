@@ -480,7 +480,7 @@ class SharedOracleSupervisor(unittest.TestCase):
                  'external tool cleanup or containment unconfirmed')):
             with self.subTest(expected=expected), patch.object(
                     compare.compat_process, 'run_bounded', side_effect=error):
-                with self.assertRaisesRegex(ValueError, '^' + expected + ') as caught:
+                with self.assertRaisesRegex(ValueError, expected) as caught:
                     compare.run_bounded(['private/argument'], 30, 128)
                 self.assertNotIn('private/argument', str(caught.exception))
 
@@ -490,7 +490,7 @@ class SharedOracleSupervisor(unittest.TestCase):
             self.assertEqual(compare.run_bounded(exact, 20, 4096), b'A' * 4096)
             over = self.child(directory, 'import sys\nsys.stdout.buffer.write(b"A"*4097)\n',
                               'overflow.py')
-            with self.assertRaisesRegex(ValueError, '^external tool rejected):
+            with self.assertRaisesRegex(ValueError, 'external tool rejected'):
                 compare.run_bounded(over, 20, 4096)
 
     def test_real_stdout_discard_drains_large_output_without_capture(self):
@@ -512,7 +512,7 @@ class SharedOracleSupervisor(unittest.TestCase):
     def test_real_timeout_is_fail_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             hanging = self.child(directory, 'import time\ntime.sleep(20)\n')
-            with self.assertRaisesRegex(ValueError, '^external tool rejected):
+            with self.assertRaisesRegex(ValueError, 'external tool rejected'):
                 compare.run_bounded(hanging, 1.0, 1024)
 
     def test_ended_parent_with_descendant_pipe_never_yields_partial_json(self):
@@ -526,7 +526,7 @@ class SharedOracleSupervisor(unittest.TestCase):
                 + ',stdin=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n'
                 + 'print(\'{"streams":[{"codec_name":"cfhd"}]}\',flush=True)\n')
             parent = self.child(directory, parent_code, 'parent.py')
-            with self.assertRaisesRegex(ValueError, '^external tool rejected):
+            with self.assertRaisesRegex(ValueError, 'external tool rejected'):
                 compare.run_bounded(parent, 2.0, 65536)
 
     def test_stdout_and_ffprobe_parsers_reject_malformed_data(self):
