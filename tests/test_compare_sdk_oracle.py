@@ -518,16 +518,30 @@ class SharedOracleSupervisor(unittest.TestCase):
     def test_ended_parent_with_descendant_pipe_never_yields_partial_json(self):
         """Native runners must reject a valid JSON prefix with missing pipe EOF."""
         with tempfile.TemporaryDirectory() as directory:
-            descendant = self.child(directory, 'import time\ntime.sleep(20)\n',
-                                    'descendant.py')
+            # A marker proves that the actual grandchild started and held the
+            # inherited stdout pipe before the parent printed valid-prefix JSON.
+            # The delayed marker must never be written after job/group cleanup.
+            ready = Path(directory) / 'descendant-started'
+            escaped = Path(directory) / 'descendant-escaped'
+            descendant = self.child(directory,
+                'from pathlib import Path\nimport time\n'
+                + 'Path(' + repr(str(ready)) + ').write_text("started")\n'
+                + 'time.sleep(1.8)\n'
+                + 'Path(' + repr(str(escaped)) + ').write_text("escaped")\n',
+                'descendant.py')
             parent_code = (
-                'import subprocess,sys\n'
+                'import subprocess,sys,time,pathlib\n'
                 + 'subprocess.Popen(' + repr(descendant)
                 + ',stdin=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n'
+                + 'while not pathlib.Path(' + repr(str(ready))
+                + ').is_file(): time.sleep(0.01)\n'
                 + 'print(\'{"streams":[{"codec_name":"cfhd"}]}\',flush=True)\n')
             parent = self.child(directory, parent_code, 'parent.py')
             with self.assertRaisesRegex(ValueError, 'external tool rejected'):
-                compare.run_bounded(parent, 2.0, 65536)
+                compare.run_bounded(parent, 1.0, 65536)
+            self.assertTrue(ready.is_file(), 'grandchild never entered the held-pipe case')
+            time.sleep(2.0)
+            self.assertFalse(escaped.exists(), 'owned grandchild survived cleanup')
 
     def test_stdout_and_ffprobe_parsers_reject_malformed_data(self):
         self.assertEqual(compare.bounded_stdout_text(b'ffmpeg version 7.1\n'),
