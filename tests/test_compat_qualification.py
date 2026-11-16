@@ -364,6 +364,37 @@ class ProcessControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '^tool output limit exceeded$'):
             self.run_tool("import os;\nwhile True: os.write(2,b'x'*4096)", stdout_limit=8192)
 
+    def test_discard_stdout_drains_large_output_without_retaining_it(self):
+        # No output is retained. The process still has to reach clean EOF.
+        script = "import os;\nfor _ in range(64): os.write(1,b'x'*65536)"
+        self.assertEqual(self.run_tool(script, timeout=15, stdout_limit=4096,
+                                       discard_stdout=True), b'')
+        with self.assertRaisesRegex(ValueError, '^tool output limit exceeded$'):
+            self.run_tool(script, timeout=15, stdout_limit=4096)
+
+    def test_discard_stdout_keeps_stderr_bounded_and_sanitized(self):
+        with self.assertRaisesRegex(ValueError, '^tool output limit exceeded$') as caught:
+            self.run_tool("import os;os.write(2,b'PRIVATE_STDERR_CANARY'+b'x'*8192)",
+                          timeout=5, stdout_limit=4096, discard_stdout=True)
+        self.assertNotIn('PRIVATE_STDERR_CANARY', str(caught.exception))
+
+    def test_discard_stdout_keeps_exit_and_parameter_validation(self):
+        with self.assertRaisesRegex(ValueError, '^tool nonzero exit$'):
+            self.run_tool("import sys;print('PRIVATE_STDOUT_CANARY');sys.exit(7)",
+                          timeout=5, stdout_limit=4096, discard_stdout=True)
+        with self.assertRaisesRegex(ValueError, '^invalid tool budget$'):
+            self.run_tool("print('should never execute')", discard_stdout=1)
+
+    def test_discard_stdout_still_requires_descendant_pipe_eof(self):
+        with tempfile.TemporaryDirectory() as temp:
+            sentinel = Path(temp) / 'escaped'
+            child = "import time,pathlib;time.sleep(1.0);pathlib.Path(%r).write_text('escaped')" % str(sentinel)
+            parent = "import subprocess,sys;subprocess.Popen([sys.executable,'-c',%r]);print('ready')" % child
+            with self.assertRaisesRegex(ValueError, '^tool timeout$'):
+                self.run_tool(parent, timeout=0.3, stdout_limit=4096, discard_stdout=True)
+            time.sleep(1.2)
+            self.assertFalse(sentinel.exists(), 'discard mode lost descendant containment')
+
     def test_malformed_json(self):
         with self.assertRaises(json.JSONDecodeError):
             json.loads(self.run_tool("print('{bad')"))

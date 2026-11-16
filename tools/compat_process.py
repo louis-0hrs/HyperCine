@@ -425,7 +425,7 @@ def _windows_open_pipe(kernel):
     return _WindowsPipe(kernel)
 
 
-def _run_windows(argv, timeout, stdout_limit):
+def _run_windows(argv, timeout, stdout_limit, discard_stdout=False):
     process = kernel = job = None
     streams = []
     output = bytearray()
@@ -466,6 +466,10 @@ def _run_windows(argv, timeout, stdout_limit):
                     active[index] = False
                 elif chunk:
                     progress = True
+                    # Discard mode still drains to EOF and checks the child/job;
+                    # stdout bytes never enter memory or a public receipt.
+                    if index == 0 and discard_stdout:
+                        continue
                     counts[index] += len(chunk)
                     if counts[index] > stdout_limit:
                         raise ToolFailure('tool output limit exceeded')
@@ -593,7 +597,7 @@ def _supervise(control_fd, argv):
         signal.pause()
 
 
-def _run_posix(argv, timeout, stdout_limit):
+def _run_posix(argv, timeout, stdout_limit, discard_stdout=False):
     anchor = None
     control_r = control_w = None
     streams = []
@@ -661,6 +665,10 @@ def _run_posix(argv, timeout, stdout_limit):
                     if len(status) > 5 or status[0:1] != b'R':
                         raise ToolFailure('tool containment unavailable')
                 else:
+                    # Even discarded stdout must reach EOF before success;
+                    # stderr retains the caller's finite byte cap.
+                    if key.data == 'out' and discard_stdout:
+                        continue
                     counts[key.data] += len(chunk)
                     if counts[key.data] > stdout_limit:
                         raise ToolFailure('tool output limit exceeded')
@@ -742,12 +750,20 @@ def _run_posix(argv, timeout, stdout_limit):
     return bytes(output)
 
 
-def run_bounded(argv, timeout=15.0, stdout_limit=65536):
-    if not (0 < timeout <= 120 and type(stdout_limit) is int and 0 < stdout_limit <= 134217728):
+def run_bounded(argv, timeout=15.0, stdout_limit=65536, *, discard_stdout=False):
+    """Run a contained tool. Opt-in discard drains stdout without storing it.
+
+    stdout_limit remains a mandatory, positive bound for stderr even in
+    discard mode. Inherited pipes, timeouts, nonzero exits and cleanup errors
+    remain fail-closed. No unbounded bytes are returned to the caller.
+    """
+    if not (type(timeout) in (int, float) and 0 < timeout <= 120 and
+            type(stdout_limit) is int and 0 < stdout_limit <= 134217728 and
+            type(discard_stdout) is bool):
         raise ToolFailure('invalid tool budget')
     if os.name == 'nt':
-        return _run_windows(argv, timeout, stdout_limit)
-    return _run_posix(argv, timeout, stdout_limit)
+        return _run_windows(argv, timeout, stdout_limit, discard_stdout)
+    return _run_posix(argv, timeout, stdout_limit, discard_stdout)
 
 
 if __name__ == '__main__':
