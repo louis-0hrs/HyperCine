@@ -64,14 +64,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Test CI performance helpers
+        if: runner.os != 'macOS'
+        run: python ci/test_ci_performance.py
       - name: Install FFmpeg and Ninja (macOS)
         if: runner.os == 'macOS' && runner.environment != 'self-hosted'
         run: brew install ffmpeg ninja
       - name: Install FFmpeg and Ninja (Linux)
         if: runner.os == 'Linux' && runner.environment != 'self-hosted'
-        run: |
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y ffmpeg ninja-build
+        env:
+          HC_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: python ci/ci_performance.py prepare-linux --install
       - name: Install FFmpeg (Windows)
         if: runner.os == 'Windows' && runner.environment != 'self-hosted'
         shell: pwsh
@@ -115,21 +118,23 @@ jobs:
             -DHYPERCINE_BUILD_BENCHMARKS=OFF -DHYPERCINE_REQUIRE_EXTERNAL_DECODE=ON "${flags[@]}"
       - name: Build
         if: runner.os != 'macOS'
-        run: cmake --build build --parallel 3
+        run: python ci/ci_performance.py measure --output build/ci-build-timing.json --label standalone-build -- cmake --build build --parallel 3
       - name: Full CTest, architecture and external decode gate
         if: runner.os != 'macOS'
         env:
           EXPECTED_SYSTEM: ${{ matrix.system }}
           EXPECTED_MACHINE: ${{ matrix.machine }}
-          # Pilot: only the Linux sanitizer job runs two tests concurrently.
-          # Leave release lanes and Mac fallback unchanged.
-          HYPERCINE_STANDALONE_CTEST_JOBS: ${{ matrix.system == 'Linux' && matrix.sanitize == 'ON' && '2' || '1' }}
+          # Keep the proven sanitizer bound; also use two slots on Release.
+          # Mac uses its separately qualified native lane, not this step.
+          HYPERCINE_STANDALONE_CTEST_JOBS: '2'
           # AppleClang ASan on arm64 does not support LeakSanitizer.
           ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
         run: |
           python ci/test_standalone_gate.py
-          python ci/run_standalone.py --system "$EXPECTED_SYSTEM" --machine "$EXPECTED_MACHINE"
+          python ci/ci_performance.py measure --output build/ci-test-timing.json --label standalone-tests \
+            --junit build/standalone-results.xml -- \
+            python ci/run_standalone.py --system "$EXPECTED_SYSTEM" --machine "$EXPECTED_MACHINE"
       - name: Preserve test diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -142,6 +147,7 @@ jobs:
             build/registered-tests.json
             build/standalone-results.xml
             build/standalone-gate.json
+            build/ci-*-timing.json
             build/Testing/Temporary/
             build/samples*/validation.json
             build/windows-oracle-replay/*.json
