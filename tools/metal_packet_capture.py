@@ -274,7 +274,13 @@ def build_evidence(packet_path, ffmpeg, ffprobe, manifest_path, macos_path):
     capture, stability, stream = decode_capture(packet, ffmpeg, ffprobe)
 
     macos = macos_recorded_digest(macos_path)
+    require(macos.get('raw_sha256') == manifest['sha256'],
+            'retained macOS evidence belongs to another packet')
     require(is_digest(macos.get('decoded_sha256')), 'macOS evidence has no decode digest')
+    # The record is specifically decoder agreement, not a difference report.
+    # Never publish match=False as a successfully measured agreement.
+    require(stability['digest'] == macos['decoded_sha256'],
+            'decoded pixels disagree with retained macOS evidence')
 
     changed = one_sample_change(capture)
     changed_metrics = diff_metrics(changed, capture)
@@ -361,6 +367,10 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
             'capture format is not the registered one')
     require(is_digest(capture.get('sha256')), 'capture has no bound digest')
 
+    container = evidence['container']
+    require((container.get('codec'), container.get('width'), container.get('height'),
+             container.get('pixel_format')) == ('cfhd', WIDTH, HEIGHT, PIXEL_FORMAT),
+            'container geometry or codec label changed')
     interpretation = evidence['interpretation']
     validate_planes(interpretation.get('planes'))
     require(interpretation.get('range') == 'studio (64-940)', 'range interpretation changed')
@@ -368,8 +378,11 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
             'chroma siting must stay unasserted')
 
     stability = evidence['stability']
-    require(stability.get('identical') is True and stability.get('runs', 0) >= 2,
-            'capture was not proven stable across independent decodes')
+    require(stability.get('identical') is True and
+            type(stability.get('runs')) is int and
+            stability['runs'] == len(DECODE_VARIANTS) and
+            stability.get('variants') == [name for name, _ in DECODE_VARIANTS],
+            'capture was not proven stable across registered independent decodes')
     require(stability.get('distinct_digests') == 1, 'stability claims differing digests')
     require(stability.get('digest') == capture['sha256'], 'stability digest is not the capture digest')
 
@@ -380,6 +393,8 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
             'decoder version is not recorded')
 
     require(evidence['packet'].get('frame_index') == FRAME_INDEX, 'unexpected frame index')
+    require(evidence['packet'].get('artifact') == PACKET_ARTIFACT,
+            'packet provenance artifact changed')
     if packet_path is not None:
         packet = Path(packet_path).read_bytes()
         require(len(packet) == evidence['packet'].get('byte_length'),
@@ -400,12 +415,16 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
             'comparison has no bound macOS digest')
     if macos_path is not None:
         macos = macos_recorded_digest(macos_path)
+        require(macos.get('raw_sha256') == evidence['packet'].get('sha256'),
+                'retained macOS evidence belongs to another packet')
         require(compared['macos_decoded_sha256'] == macos.get('decoded_sha256'),
                 'comparison digest contradicts the retained macOS evidence')
         require(compared.get('match') is (macos['decoded_sha256'] == capture['sha256']),
                 'match flag contradicts the retained macOS evidence')
     require(compared.get('match') is (compared['macos_decoded_sha256'] == capture['sha256']),
             'match flag contradicts the recorded digests')
+    require(compared.get('match') is True,
+            'decoded pixels disagree with retained macOS evidence')
 
     negatives = evidence['negatives']
     require(negatives.get('changed_capture', {}).get('detected') is True,

@@ -15,6 +15,7 @@ import pathlib
 import struct
 import sys
 import tempfile
+from unittest.mock import patch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -167,6 +168,13 @@ def test_committed_evidence_refuses_tampering():
                  'range interpretation')
     expect_error(mutated(lambda e: e['stability'].update(identical=False)), 'proven stable')
     expect_error(mutated(lambda e: e['stability'].update(runs=1)), 'proven stable')
+    expect_error(mutated(lambda e: e['stability'].update(runs=2)), 'registered independent')
+    expect_error(mutated(lambda e: e['stability'].update(variants=['default'])),
+                 'registered independent')
+    expect_error(mutated(lambda e: e['container'].update(codec='rawvideo')),
+                 'container geometry or codec')
+    expect_error(mutated(lambda e: e['packet'].update(artifact='other.cfhd')),
+                 'packet provenance')
     expect_error(mutated(lambda e: e['stability'].update(digest='0' * 64)), 'stability digest')
     expect_error(mutated(lambda e: e['decoder'].update(binary_sha256='*' * 64)),
                  'executable is not bound')
@@ -186,6 +194,48 @@ def test_committed_evidence_refuses_tampering():
     expect_error(mutated(lambda e: e.update(issue='#999')), 'another issue')
     expect_error(mutated(lambda e: e.update(schema='hypercine.compat-matrix/1')),
                  'unsupported evidence schema')
+
+
+
+def test_live_recorder_refuses_mismatched_decode_even_when_decoder_completed():
+    args = verified_arguments()
+    # A fully valid committed packet/manifest and authentic retained macOS
+    # record: substitute only an apparently successful, wrong decoded digest.
+    # No external decoder or hardware is required to prove this refusal.
+    with patch.object(capture, 'decoder_identity', return_value={'id': 'ffmpeg-cfhd'}), \
+         patch.object(capture, 'decode_capture',
+                      return_value=(b'', {'digest': '0' * 64}, {})):
+        expect_error(lambda: capture.build_evidence(
+            args['packet_path'], 'synthetic-ffmpeg', 'synthetic-ffprobe',
+            args['manifest_path'], args['macos_path']),
+            'decoded pixels disagree')
+
+
+def test_hash_only_verifier_refuses_truthful_mismatch_without_macos_file():
+    source = json.loads(committed_evidence_path().read_text(encoding='utf-8'))
+    source['compared']['macos_decoded_sha256'] = '0' * 64
+    source['compared']['match'] = False
+    args = verified_arguments()
+    # Even when the optional external macOS record isn't supplied, hash-only
+    # verification must not turn a documented agreement into a negative claim.
+    expect_error(lambda: capture.verify_evidence(
+        source, packet_path=args['packet_path'],
+        manifest_path=args['manifest_path'], macos_path=None),
+        'decoded pixels disagree')
+
+
+def test_retained_macos_frame_must_bind_the_same_packet():
+    args = verified_arguments()
+    source = json.loads(committed_evidence_path().read_text(encoding='utf-8'))
+    retained = json.loads(args['macos_path'].read_text(encoding='utf-8'))
+    retained['frames'][0]['raw_sha256'] = '0' * 64
+    with tempfile.TemporaryDirectory() as directory:
+        mismatched = pathlib.Path(directory) / 'foreign-mac-evidence.json'
+        mismatched.write_text(json.dumps(retained), encoding='utf-8')
+        expect_error(lambda: capture.verify_evidence(
+            source, packet_path=args['packet_path'],
+            manifest_path=args['manifest_path'], macos_path=mismatched),
+            'belongs to another packet')
 
 
 def test_packet_and_manifest_disagreement_is_refused():
