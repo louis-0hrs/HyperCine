@@ -23,7 +23,31 @@ enum class CodecFamily : int {
 enum class SourcePixelFormat : int {
     Bgra8 = 1,
     Yuy2 = 2,
-    Rgb48 = 3
+    Rgb48 = 3,
+    // Native 10-bit YUV422 planar source: three caller-owned int16 planes in the
+    // canonical Y, Cr, Cb order that FilmScan3Encoder::Encode(const Planes&)
+    // consumes (Y is width x height, both chroma planes width/2 x height).
+    //
+    // This is a storage domain of its own, not a BGRA buffer whose samples
+    // happen to be 10-bit: there is no interleaved byte stride, no row padding in
+    // bytes and no color conversion. A request carrying this format must be
+    // answered by the native planes path or refused -- never by reinterpreting a
+    // BGRA/strided buffer as planes.
+    Yuv422p10Native = 4
+};
+
+// Caller-declared storage of a native YUV422p10 source. Both strides are in
+// int16 SAMPLES, exactly like Plane::stride; they are never byte strides and
+// must not be put in EncoderSessionConfig::input_stride_bytes.
+//
+// Zero for both means "shape-only query, no storage bound yet". That is legal
+// for a capability query, because the caller may not have allocated the planes.
+// One zero and one nonzero is refused: a half-bound planar layout cannot be
+// addressed, and guessing the missing stride would silently describe storage
+// the caller does not own.
+struct NativePlaneStorage {
+    std::int64_t luma_stride_samples = 0;
+    std::int64_t chroma_stride_samples = 0;
 };
 
 enum class GopMode : int {
@@ -64,8 +88,14 @@ struct EncoderSessionConfig {
     std::int64_t width = 1920;
     std::int64_t height = 1080;
     // Bytes. Zero together with input_bytes means storage is not bound yet.
+    // Only meaningful for interleaved sources (Bgra8). A native planes source
+    // must leave both zero: mixing the two addressing domains is a format error,
+    // not a fallback, so a caller never believes its planes were byte-budgeted.
     std::uint64_t input_stride_bytes = 0;
     std::uint64_t input_bytes = 0;
+    // Native planes storage domain. Only meaningful, and only permitted, when
+    // pixel_format is SourcePixelFormat::Yuv422p10Native.
+    NativePlaneStorage native_planes{};
     Rational frame_rate{};
     GopMode gop = GopMode::IntraGop1;
     bool progressive = true;
@@ -156,8 +186,24 @@ struct EncoderCapabilityResult {
 // Fail-closed. Does not allocate frames, planes, wavelet scratch, or a sample.
 // ValidateFilmScan3Geometry is the implementation geometry authority and may
 // throw; that exception is caught here and is not a frame allocation.
+//
+// This is the interleaved BGRA storage entry. A configuration whose
+// pixel_format is SourcePixelFormat::Yuv422p10Native is refused here with
+// ValidButNotImplemented rather than answered as bytes; query
+// CheckNativePlaneCapability for that domain.
 EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& config,
                                                const EncoderDevice& device);
+
+// Native YUV422p10 planes entry. Same geometry/shape, pixel-budget, storage,
+// profile-admission and evidence axes as CheckEncoderCapability, with the
+// source layout as the only difference. Implemented for the CPU scalar session
+// (the existing Planes encode path); a Metal/CUDA/Vulkan request is refused with
+// ValidButNotImplemented before the geometry validator, any factory or any
+// allocation, because no GPU planes frontend exists and BGRA substitution is
+// not a fallback. An explicitly permitted absent-backend scalar fallback is
+// still observable through fell_back_to_cpu_scalar. Never allocates.
+EncoderCapabilityResult CheckNativePlaneCapability(const EncoderSessionConfig& config,
+                                                   const EncoderDevice& device);
 
 const char* CapabilityReasonName(CapabilityReason reason) noexcept;
 
