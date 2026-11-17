@@ -98,6 +98,16 @@ class IsolatedOracleReplayTests(unittest.TestCase):
                 replay.run_in_scratch(fixtures, 'ffmpeg', 'ffprobe', alias)
             self.assertEqual(foreign.read_bytes(), b'keep')
 
+    def test_malformed_cli_does_not_disclose_private_values(self):
+        args = ['run_isolated_oracle_replay.py', '--windows-fixtures',
+                'PRIVATE_FIXTURE_PATH', '--ffmpeg', 'ffmpeg', '--ffprobe', 'ffprobe',
+                '--scratch-parent', 'scratch', '--unexpected', 'PRIVATE_TOKEN']
+        with patch.object(sys, 'argv', args):
+            with self.assertRaisesRegex(ValueError, '^invalid isolated oracle arguments$') as caught:
+                replay.main()
+            self.assertNotIn('PRIVATE_TOKEN', str(caught.exception))
+            self.assertNotIn('PRIVATE_FIXTURE_PATH', str(caught.exception))
+
     def test_workflow_calls_wrapper_and_preserves_original_oracle(self):
         root = Path(__file__).resolve().parents[1]
         cmake = (root / 'CMakeLists.txt').read_text(encoding='utf-8')

@@ -30,24 +30,24 @@ invisible there.
 
 ## Replacement: non-destructive isolated scratch (17 Nov 2026)
 
-The original candidate HEAD \`0c80a9f768bcac5dd6195b314db004e0820286ea\`
-used \`--replace-owned-output\` and was **unsafe**: a forged JSON object
+The original candidate HEAD `0c80a9f768bcac5dd6195b314db004e0820286ea`
+used `--replace-owned-output` and was **unsafe**: a forged JSON object
 containing known report keys could cause deletion of unrelated files with
 known destination names. The earlier claimed ownership check is withdrawn.
 
 This correction removes that flag, restores the original strict,
 create-exclusive oracle and its old contract tests byte-for-byte, and runs
-the CTest replay through \`tests/run_isolated_oracle_replay.py\`.
+the CTest replay through `tests/run_isolated_oracle_replay.py`.
 Each invocation creates a new private, random temporary subdirectory using
 the standard library's exclusive creation, runs the existing oracle there in
 the same Python process, and only cleans up **that new subdirectory**.
-Previously existing \`comparison.json\`, \`control.avi\`, other receipts
+Previously existing `comparison.json`, `control.avi`, other receipts
 and arbitrary files in the parent are never examined, overwritten or removed.
 This avoids the repeat-run collision without a forged ownership heuristic or
 a second process supervisor. The retained fixture source directory cannot
 be selected as a scratch parent, and a symlinked scratch parent is refused.
 
-Five new executable safety controls cover repeated invocations with old and
+Six new executable safety controls cover repeated invocations with old and
 foreign entries, failure cleanup without clobber, fixture overlap, symlinked
 parent and CMake/strict-inventory wiring. A new mandatory CTest registers
 these controls. The wrapper keeps the oracle's stdout/exit verdict; outputs

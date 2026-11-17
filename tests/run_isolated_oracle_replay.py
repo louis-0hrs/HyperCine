@@ -41,8 +41,14 @@ def run_in_scratch(fixtures, ffmpeg, ffprobe, scratch_parent, execute=None):
             sys.argv = previous
 
 
+class QuietArgumentParser(argparse.ArgumentParser):
+    """Never echo private build paths or arbitrary CLI tokens to CI logs."""
+    def error(self, message):
+        raise ValueError('invalid isolated oracle arguments')
+
+
 def main():
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = QuietArgumentParser(add_help=False)
     parser.add_argument('--windows-fixtures', required=True)
     parser.add_argument('--ffmpeg', required=True)
     parser.add_argument('--ffprobe', required=True)
