@@ -223,6 +223,46 @@ int main() {
             RejectNative(over, host, CapabilityReason::MemoryBudgetExceeded, "budget", false);
         }
 
+        // 1b. The planning ceiling counts the bound source storage. A bound native
+        // layout must be costed like the equivalent BGRA buffer, otherwise the
+        // native domain would silently widen admission against the existing rule.
+        {
+            constexpr std::uint64_t kWidth = 3840, kHeight = 2160;
+            const std::uint64_t pixels = kWidth * kHeight;
+            const std::uint64_t native_bytes = kWidth * kHeight * 4;  // Y + 2x(U16 chroma)
+            const std::uint64_t bgra_bytes = kWidth * 4 * kHeight;    // same 4 bytes/pixel
+            Require(native_bytes == bgra_bytes, "native/BGRA storage cost is not 4 bytes/pixel");
+            const std::uint64_t base = pixels * 36u + 1024u * 1024u;
+            // The reviewer's probe: one byte above 36P + 1MiB. With the native
+            // storage term missing this budget admitted the native request.
+            const std::uint64_t probe = base + 1u;
+            const std::uint64_t exact = base + native_bytes;
+
+            auto native = NativeConfig(kWidth, kHeight);
+            native.cpu_memory_budget_bytes = probe;
+            RejectNative(native, host, CapabilityReason::MemoryBudgetExceeded,
+                         "planning ceiling", false);
+
+            auto bgra = NativeConfig(kWidth, kHeight);
+            bgra.pixel_format = SourcePixelFormat::Bgra8;
+            bgra.native_planes = NativePlaneStorage{};
+            bgra.input_stride_bytes = kWidth * 4;
+            bgra.input_bytes = bgra.input_stride_bytes * kHeight;
+            bgra.cpu_memory_budget_bytes = probe;
+            Require(CheckEncoderCapability(bgra, host).primary ==
+                        CapabilityReason::MemoryBudgetExceeded,
+                    "BGRA parity probe did not refuse the same over-budget geometry");
+
+            // At the exactly computed ceiling both domains are admitted: the rule
+            // is the existing one, not a new tighter or wider one.
+            native.cpu_memory_budget_bytes = exact;
+            Require(CheckNativePlaneCapability(native, host).allocation_permitted,
+                    "native request refused at its exact planning ceiling");
+            bgra.cpu_memory_budget_bytes = exact;
+            Require(CheckEncoderCapability(bgra, host).allocation_permitted,
+                    "BGRA request refused at the same exact planning ceiling");
+        }
+
         // 2. Metal / CUDA / Vulkan native planes: typed unimplemented, on a device
         // that really claims the backend and on a device that does not. A required
         // GPU backend is never answered by BGRA or by the CPU frontend.
@@ -236,12 +276,37 @@ int main() {
                          "CPU scalar session only");
             Require(!CheckNativePlaneCapability(required, host).fell_back_to_cpu_scalar,
                     "required GPU-native request fell back to the CPU scalar backend");
+            // The refusal is a domain refusal, so it is decided before the
+            // geometry validator is even asked about this shape.
+            Require(!CheckNativePlaneCapability(required, gpu).geometry_validator_invoked &&
+                        !CheckNativePlaneCapability(required, host).geometry_validator_invoked,
+                    "GPU-native refusal invoked the geometry validator");
+            // The same configuration on the CPU scalar backend is admitted, so the
+            // test distinguishes the domain decision from a blanket refusal.
+            auto cpu = required;
+            cpu.backend = SessionBackend::CpuScalar;
+            const auto admitted = CheckNativePlaneCapability(cpu, host);
+            Require(admitted.allocation_permitted && admitted.geometry_validator_invoked,
+                    "CPU-native control was not admitted");
             // Even an explicitly permitted fallback must not disguise a *present*
             // backend's missing planes domain.
             auto permitted = required;
             permitted.allow_cpu_scalar_fallback = true;
             RejectNative(permitted, gpu, CapabilityReason::ValidButNotImplemented,
                          "CPU scalar session only");
+            // An invalid geometry does not replace the domain refusal: the format
+            // flag is carried, the primary stays the missing planes frontend, and
+            // the validator is still never invoked.
+            auto odd = permitted;
+            odd.width = 129;
+            odd.native_planes.luma_stride_samples = 136;
+            odd.native_planes.chroma_stride_samples = 72;
+            RejectNative(odd, gpu, CapabilityReason::ValidButNotImplemented,
+                         "CPU scalar session only");
+            const auto odd_result = CheckNativePlaneCapability(odd, gpu);
+            Require(odd_result.reasons.format_mathematically_invalid &&
+                        !odd_result.geometry_validator_invoked,
+                    "GPU-native refusal lost the format axis or ran the validator");
         }
         {
             // The only admitted GPU-native shape is the caller's own explicit

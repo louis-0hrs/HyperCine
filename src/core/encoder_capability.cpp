@@ -367,21 +367,26 @@ EncoderCapabilityResult Evaluate(const EncoderSessionConfig& config, const Encod
     // (reinterpreting plane storage) or with the CPU scalar frontend would change
     // the source domain the caller asked for, so it is a typed refusal instead.
     //
+    // The refusal is unconditional: a GPU-native request never reads a geometry
+    // that this revision cannot serve that way. Cheap pre-checks that already ran
+    // (quality enum, stride domain, pixel budget) keep their flags on the result,
+    // but the primary reason names the missing planes domain and
+    // geometry_validator_invoked stays false. When the geometry itself is also
+    // illegal, format_mathematically_invalid is still set for a caller that reads
+    // the flags instead of the primary.
+    //
     // The explicit scalar-fallback flag above is a *presence* policy and is
     // resolved first: when the caller permitted it and the requested device is
     // genuinely absent, the admitted CPU session is observable through
     // fell_back_to_cpu_scalar. Nothing here substitutes silently.
     if (native_planes && effective != SessionBackend::CpuScalar) {
         result.reasons.valid_but_not_implemented = true;
-        unimplemented_detail =
+        result.primary = CapabilityReason::ValidButNotImplemented;
+        result.detail =
             "native YUV422p10 plane input is implemented for the CPU scalar session only; "
             "this backend has no planes frontend and BGRA substitution is refused";
-        if (!result.reasons.format_mathematically_invalid && !result.reasons.memory_budget_exceeded) {
-            result.primary = CapabilityReason::ValidButNotImplemented;
-            result.detail = unimplemented_detail;
-            result.allocation_permitted = false;
-            return result;
-        }
+        result.allocation_permitted = false;
+        return result;
     }
 
     // Profile admission is evaluated against the backend that will actually
@@ -483,7 +488,32 @@ EncoderCapabilityResult Evaluate(const EncoderSessionConfig& config, const Encod
     if (product_ok && (cpu_attempt || gpu_effective)) {
         std::uint64_t extra = 0;
         bool extra_ok = true;
-        if (storage_bound && config.input_stride_bytes != 0 && config.height > 0) {
+        if (native_planes) {
+            // A bound native layout owns the storage just as the BGRA branch owns
+            // its buffer: three int16 planes, Y (luma stride) plus two chroma
+            // planes of width/2. Counting them here is the same rule, not a new
+            // one; leaving them out would widen CPU-native admission against the
+            // existing static planning ceiling. All steps are overflow-guarded
+            // and a bound layout is only counted when both strides are positive.
+            const auto max = std::numeric_limits<std::uint64_t>::max();
+            const auto h = static_cast<std::uint64_t>(config.height);
+            const auto luma = static_cast<std::uint64_t>(luma_stride);
+            const auto chroma = static_cast<std::uint64_t>(chroma_stride);
+            if (native_storage_bound && luma > 0 && chroma > 0 && h > 0) {
+                const bool pair_ok = chroma <= max / 2u;
+                const auto pair = pair_ok ? chroma * 2u : 0u;
+                const bool row_ok = pair_ok && luma <= max - pair;
+                const auto row = row_ok ? luma + pair : 0u;
+                const bool samples_ok = row_ok && row > 0 && h <= max / row;
+                const auto samples = samples_ok ? row * h : 0u;
+                // Two bytes per int16 sample.
+                if (!samples_ok || samples > max / 2u) {
+                    extra_ok = false;
+                } else {
+                    extra = samples * 2u;
+                }
+            }
+        } else if (storage_bound && config.input_stride_bytes != 0 && config.height > 0) {
             const auto h = static_cast<std::uint64_t>(config.height);
             if (config.input_stride_bytes > std::numeric_limits<std::uint64_t>::max() / h) extra_ok = false;
             else extra = config.input_stride_bytes * h;
@@ -495,7 +525,8 @@ EncoderCapabilityResult Evaluate(const EncoderSessionConfig& config, const Encod
             memory_detail = "padded stride*height overflows uint64";
         }
         std::uint64_t ceiling = 0;
-        // Conservative static planning, not RSS: 36P + 1MiB + stride*height.
+        // Conservative static planning, not RSS: 36P + 1MiB + the source storage
+        // bytes this request binds (interleaved BGRA buffer or native planes).
         const bool planning_ok = extra_ok && PlanningCeiling(pixels, extra, ceiling);
         const auto budget = gpu_effective ? config.gpu_memory_budget_bytes : config.cpu_memory_budget_bytes;
         // Both GPU frontends still allocate host color/wavelet/writer storage.

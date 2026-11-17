@@ -198,10 +198,12 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
 // profile-admission and evidence axes as CheckEncoderCapability, with the
 // source layout as the only difference. Implemented for the CPU scalar session
 // (the existing Planes encode path); a Metal/CUDA/Vulkan request is refused with
-// ValidButNotImplemented before the geometry validator, any factory or any
-// allocation, because no GPU planes frontend exists and BGRA substitution is
-// not a fallback. An explicitly permitted absent-backend scalar fallback is
-// still observable through fell_back_to_cpu_scalar. Never allocates.
+// ValidButNotImplemented unconditionally, before the geometry validator, any
+// factory or any allocation -- geometry_validator_invoked stays false, and a
+// co-existing geometry/budget flag is carried on the result without changing
+// that primary reason. No GPU planes frontend exists and BGRA substitution is
+// not a fallback. An explicitly permitted absent-backend fallback is still
+// observable through fell_back_to_cpu_scalar. Never allocates.
 EncoderCapabilityResult CheckNativePlaneCapability(const EncoderSessionConfig& config,
                                                    const EncoderDevice& device);
 

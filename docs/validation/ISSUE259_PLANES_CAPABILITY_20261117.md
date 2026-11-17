@@ -63,12 +63,19 @@ class layout changed.
 - Backend rule, decided on the **effective** backend after the existing presence
   policy is resolved:
   - CPU scalar: admitted inside the existing evidence geometry table and the
-    existing pixel/plane budgets. No new geometry, no new profile matrix.
+    existing pixel/plane budgets. No new geometry, no new profile matrix. A
+    bound native layout is costed in the same static planning ceiling as a BGRA
+    buffer: `2 bytes * height * (luma_stride + 2*chroma_stride)` (overflow-guarded),
+    which is 4 bytes/pixel for the canonical YUV422p10 layout. Without that term
+    the native domain would have admitted requests the BGRA domain refuses at the
+    same geometry and budget.
   - Metal / CUDA / Vulkan: `CapabilityReason::ValidButNotImplemented` with a
-    detail that names the missing planes frontend, returned *before* the geometry
-    validator, before any factory and before any allocation. The base
-    `Frontend::TransformPlanes` still refuses, so no backend can silently
-    reinterpret BGRA storage as planes.
+    detail that names the missing planes frontend. The refusal is
+    **unconditional** and precedes the geometry validator
+    (`geometry_validator_invoked` stays false), any factory and any allocation;
+    cheap pre-checks that already ran keep their flags on the result, but the
+    primary reason names the domain gap. The base `Frontend::TransformPlanes`
+    still refuses, so no backend can silently reinterpret BGRA storage as planes.
   - The existing `allow_cpu_scalar_fallback` flag is a **presence** policy, not a
     source-domain policy. With a genuinely absent device and the flag set, the
     admitted CPU session is observable through `fell_back_to_cpu_scalar`; with
@@ -103,13 +110,16 @@ strict standalone configuration (`STANDALONE=ON`, `UPSTREAM=OFF`, `CUDA=OFF`,
 `TESTS=ON`, `REQUIRE_EXTERNAL_DECODE=ON`), build directory outside the Git tree.
 
 - Registration inventory measured before the slice on `main` `309f007c`: **160**.
-- This head: **162 registered / 162 passed / 0 failed / 0 skipped**, 467.49 s,
-  CTest parallelism 1 (JUnit SHA-256 `4280124bc20e52df0822bcc3d5083e720b9205a51543851a089e9719e8c1f7f8`,
+- This head: **162 registered / 162 passed / 0 failed / 0 skipped**, 462.19 s,
+  CTest parallelism 1 (JUnit SHA-256 `ad4e693724142858435d44e4aab3b4ee131ee764735e8967843006b4a7f09838`,
   local evidence, not committed). The two additive registrations are the new
   test in its normal and optimized build modes.
-- New focused test: **213 checks PASS** in both modes (normal compiles its own
+- New focused test: **252 checks PASS** in both modes (normal compiles its own
   non-NDEBUG capability translation unit; optimized consumes the Release
-  library copy).
+  library copy). The planning-ceiling boundary is source-bound: at
+  `36P + 1MiB + 1` both the bound native layout and the equivalent BGRA buffer
+  are refused, and at the exactly computed ceiling
+  (`36P + 1MiB + 4*w*h`) both are admitted.
 - `ci/test_standalone_gate.py`: **46/46 PASS** normal and **46/46** under
   `python3 -O`.
 - Focused ASan + UBSan + LeakSanitizer build of the two new registrations:
@@ -124,7 +134,9 @@ strict standalone configuration (`STANDALONE=ON`, `UPSTREAM=OFF`, `CUDA=OFF`,
   degrades to a misleading backend-storage/geometry cause); removing the native
   luma stride check turns both modes RED (`native refusal admitted allocation`);
   disabling the interleaved-session refusal turns both modes RED (`BGRA session
-  query admitted a native planes source`).
+  query admitted a native planes source`); removing the native storage term from
+  the planning ceiling turns both modes RED at the new boundary negative
+  (`native refusal admitted allocation: planning ceiling`).
 
 ## Non-claims
 
