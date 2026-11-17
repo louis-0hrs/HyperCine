@@ -5,6 +5,8 @@
 
 Windows never needs FFmpeg. Its real SDK control packet and unmasked pixel planes
 are carried in log records and decoded/compared on Mac. No SDK is emulated.
+External FFmpeg and ffprobe processes reuse the approved shared contained process
+supervisor, with finite stdout/stderr, descendant ownership and wall budgets.
 """
 import argparse
 import base64
@@ -13,10 +15,22 @@ import json
 import math
 import os
 import re
+import sys
 from pathlib import Path
 from validation_support import require, hex_digest, p10_samples
-import subprocess
 from validate_standalone import avi, reference
+
+# Direct CLI invocation from tests/ is supported without a user PYTHONPATH.
+# Resolve only the checked-out repository's shared process supervisor.
+_REPO_ROOT = str(Path(__file__).resolve().parents[1])
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+from tools import compat_process
+
+VERSION_BUDGET_SECONDS = 30.0
+PROBE_BUDGET_SECONDS = 60.0
+DECODE_BUDGET_SECONDS = 120.0
+STDOUT_LIMIT_BYTES = 64 * 1024
 
 
 class QuietArgumentParser(argparse.ArgumentParser):
@@ -144,6 +158,52 @@ def read_bounded_decoded(path):
     return payload
 
 
+def bounded_stdout_text(payload):
+    """Decode captured tool stdout strictly, never publish arbitrary bytes."""
+    try:
+        text = payload.decode('utf-8')
+    except UnicodeDecodeError:
+        raise ValueError('invalid external tool output') from None
+    require(text != '', 'invalid external tool output')
+    return text
+
+
+def parse_probe_stream(payload):
+    """Refuse invalid ffprobe JSON or an incomplete stream inventory."""
+    try:
+        streams = json.loads(bounded_stdout_text(payload))['streams']
+        stream = streams[0]
+    except (ValueError, KeyError, IndexError, TypeError):
+        raise ValueError('invalid oracle stream') from None
+    require(type(stream) is dict, 'invalid oracle stream')
+    return stream
+
+
+def run_bounded(argv, timeout, limit=None):
+    """Adapt Oracle's three modes to the approved cross-platform supervisor.
+
+    None means *discard stdout while draining it to EOF*, NOT infinite capture.
+    A positive finite limit means retain that many bytes at most. The shared
+    supervisor also enforces finite stderr, owned Windows Job/POSIX group,
+    timeout, complete EOF and exit-status checks. No duplicate Popen/kill logic.
+    """
+    if (type(timeout) not in (int, float) or not 0 < timeout <= 120 or
+            (limit is not None and (type(limit) is not int or
+                                    not 1 <= limit <= STDOUT_LIMIT_BYTES))):
+        raise ValueError('invalid external tool budget')
+    try:
+        return compat_process.run_bounded(
+            argv, timeout=timeout,
+            stdout_limit=STDOUT_LIMIT_BYTES if limit is None else limit,
+            discard_stdout=limit is None)
+    except compat_process.ToolFailure as error:
+        # Preserve explicit containment uncertainty without disclosing paths,
+        # command lines or child output in public CI logs.
+        if error.cleanup_failed or error.containment_unconfirmed:
+            raise ValueError('external tool cleanup or containment unconfirmed') from None
+        raise ValueError('external tool rejected') from None
+
+
 def write_exclusive(path, data):
     """Create an evidence file once: never follow a final symlink or truncate a prior receipt."""
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -236,8 +296,9 @@ def main():
             write_exclusive(root / name, data[name])
     results = dict(copyright='Copyright (c) 2026 HyperCine Contributors.', license='MIT OR Apache-2.0',
         windows_run=run_url, log_sha256=log_sha, windows_observations=observations,
-        ffmpeg_version=validated_ffmpeg_version(subprocess.check_output(
-            [args.ffmpeg, '-version'], text=True, stderr=subprocess.DEVNULL).splitlines()[0]),
+        ffmpeg_version=validated_ffmpeg_version(bounded_stdout_text(run_bounded(
+            [args.ffmpeg, '-version'], timeout=VERSION_BUDGET_SECONDS,
+            limit=STDOUT_LIMIT_BYTES)).splitlines()[0]),
         input_contract='128x128 top-down BT.709 studio YUV422 p10; YU64 LE Y0 Cr Y1 Cb >>6; BGRA SDK bottom-up',
         alpha_excluded=True, samples=[], control={})
     for pattern in ('flat', 'gradient', 'canonical'):
@@ -257,14 +318,15 @@ def main():
             sdk_vs_source_rgb=metric([x for i, x in enumerate(topdown) if i%4 != 3], source_rgb, 255))
         results['samples'].append(record)
     packet=data['control.cfhd']; container=root/'control.avi';write_exclusive(container, avi(packet))
-    stream=json.loads(subprocess.check_output([args.ffprobe,'-v','error','-show_streams','-of','json',str(container)],
-            stderr=subprocess.DEVNULL))['streams'][0]
-    require((stream['codec_name'],stream['width'],stream['height'],stream['pix_fmt']) ==
+    stream=parse_probe_stream(run_bounded(
+            [args.ffprobe,'-v','error','-show_streams','-of','json',str(container)],
+            timeout=PROBE_BUDGET_SECONDS, limit=STDOUT_LIMIT_BYTES))
+    require((stream.get('codec_name'),stream.get('width'),stream.get('height'),stream.get('pix_fmt')) ==
             ('cfhd',128,128,'yuv422p10le'), 'unexpected oracle stream')
     decoded=root/'control.ffmpeg-p10'
-    subprocess.run([args.ffmpeg,'-v','error','-xerror','-n','-i',str(container),'-frames:v','1',
+    run_bounded([args.ffmpeg,'-v','error','-xerror','-n','-i',str(container),'-frames:v','1',
         '-c:v','rawvideo','-pix_fmt','yuv422p10le','-f','rawvideo',str(decoded)],
-        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        timeout=DECODE_BUDGET_SECONDS)
     raw=read_bounded_decoded(decoded);source=(fixture/'canonical.input-p10').read_bytes()
     results['control']=dict(packet_bytes=len(packet),packet_sha256=hashlib.sha256(packet).hexdigest(),
         sdk_p10_sha256=hashlib.sha256(data['control.sdk-p10']).hexdigest(),
