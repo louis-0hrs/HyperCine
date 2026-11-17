@@ -1,0 +1,89 @@
+{
+  "base_head": "d8b6adc4b95809776b7d4f635d277405908db13d",
+  "defect": {
+    "cause": "fixed CTest output directory plus the harness's deliberate occupied-destination refusal",
+    "first_execution": "158/158 PASS",
+    "observed_on": "untouched base head",
+    "second_execution_same_tree": "157/158, exit 8, FAIL: SDK oracle replay rejected or unavailable (0.07 s)",
+    "test": "standalone_windows_oracle_replay"
+  },
+  "fix": {
+    "strategy": "per-invocation exclusive TemporaryDirectory; no deletion of pre-existing files",
+    "oracle_source": "restored to main unchanged; exclusive evidence writes retained",
+    "ctest_entry": "tests/run_isolated_oracle_replay.py",
+    "negative_controls": "tests/test_isolated_oracle_replay.py (new mandatory CTest)",
+    "previously_claimed_report_key_ownership": "REJECTED_UNSAFE",
+    "previous_unsafe_head": "0c80a9f768bcac5dd6195b314db004e0820286ea",
+    "candidate_status": "pending fresh exact-head hosted qualification and independent review"
+  },
+  "full_gate_runs": [
+    {
+      "ctest_parallel_jobs": 1,
+      "failed_tests": 0,
+      "junit_sha256": "ec3013f88c9427d9afd8368a3163c80da1aae7a0f411fd6e9136db322db69858",
+      "registered_tests": 158,
+      "run": "A",
+      "skipped_tests": 0,
+      "summed_test_seconds": 463.8,
+      "wall_seconds": 464.6
+    },
+    {
+      "ctest_parallel_jobs": 1,
+      "failed_tests": 0,
+      "junit_sha256": "34ce09a94c4ad83172272937290c18f14299f5abbc77e9c391cf64feb1834442",
+      "registered_tests": 158,
+      "run": "B",
+      "skipped_tests": 0,
+      "summed_test_seconds": 464.3,
+      "wall_seconds": 465.1
+    },
+    {
+      "ctest_parallel_jobs": 2,
+      "failed_tests": 0,
+      "junit_sha256": "94221f41a957f140c2cbd762acfdab7d79ba9769ec04adef84a0730e1f6c86ce",
+      "registered_tests": 158,
+      "run": "C",
+      "skipped_tests": 0,
+      "summed_test_seconds": 467.5,
+      "wall_seconds": 234.5
+    },
+    {
+      "ctest_parallel_jobs": 2,
+      "failed_tests": 0,
+      "junit_sha256": "07da19400693cec4d033043c8b63da981471e37dee6ab7dede0bbf46d79140be",
+      "registered_tests": 158,
+      "run": "D",
+      "skipped_tests": 0,
+      "summed_test_seconds": 470.1,
+      "wall_seconds": 235.8
+    }
+  ],
+  "host": {
+    "architecture": "x86_64",
+    "cmake": "3.31.6",
+    "compiler": "GCC 14.2.0",
+    "ffmpeg": "7.1.5",
+    "logical_cpus": 48,
+    "ninja": "1.13",
+    "os": "Linux",
+    "python": "3.13.5"
+  },
+  "identical_pass_set": true,
+  "issue": "https://github.com/louis-0hrs/HyperCine/issues/349",
+  "limits": [
+    "one host",
+    "n=2 per slot setting",
+    "no hosted or Windows timing claim",
+    "summed test seconds are not CPU utilization",
+    "measurements were executed on superseded destructive candidate; not qualification of new code"
+  ],
+  "schema": "hypercine/standalone-repeatability/v1",
+  "scope": "test-harness repeatability and CTest slot check; no codec/SDK/GPU/VC-5 qualification",
+  "targeted_repeats": {
+    "consecutive_passes_in_one_tree": 3,
+    "foreign_entry_negative_control": "refused; foreign file and prior evidence preserved byte-identical",
+    "test": "standalone_windows_oracle_replay",
+    "previous_head": "0c80a9f768bcac5dd6195b314db004e0820286ea",
+    "current_candidate_status": "needs exact-head verification"
+  }
+}

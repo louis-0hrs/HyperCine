@@ -87,6 +87,7 @@ REQUIRED = {
     'windows_reference_sdk_coefficients', 'filmscan3_autonomous_manifest',
     'filmscan3_sequence_manifest', 'filmscan3_external_decode',
     'standalone_external_decode', 'standalone_windows_oracle_replay',
+    'standalone_oracle_replay_isolation',
 } | {'standalone_' + stage for stage in
      ('color', 'wavelet', 'quantization', 'entropy', 'sample', 'geometry')}
 REQUIRED |= {'standalone_external_' + size for size in
