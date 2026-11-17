@@ -3,8 +3,8 @@
 # Standalone gate repeatability and CTest slot check
 
 Bounded infrastructure evidence for #349. Base head
-`d8b6adc4b95809776b7d4f635d277405908db13d`; one additive local change on top
-(`--replace-owned-output` for the standalone SDK-oracle replay registration).
+`d8b6adc4b95809776b7d4f635d277405908db13d`; the earlier destructive candidate `0c80a9f768bcac5dd6195b314db004e0820286ea`.
+The current correction replaces that approach; see below.
 
 This is a test-harness repeatability result on one Linux x86-64 host. It is not
 codec, SDK, GPU, VC-5 or GoPro qualification, and it does not replace any hosted
@@ -28,29 +28,42 @@ reported a product-looking failure that was caused only by the previous run's
 own evidence. Hosted CI starts from a clean workspace, so the defect was
 invisible there.
 
-## Fix
+## Replacement: non-destructive isolated scratch (17 Nov 2026)
 
-`tests/compare_sdk_oracle.py` gains an opt-in `--replace-owned-output` that the
-standalone registration passes; no other caller changes.
+The original candidate HEAD \`0c80a9f768bcac5dd6195b314db004e0820286ea\`
+used \`--replace-owned-output\` and was **unsafe**: a forged JSON object
+containing known report keys could cause deletion of unrelated files with
+known destination names. The earlier claimed ownership check is withdrawn.
 
-Replacement is permitted only when the destination directory is provably one
-previous run of this harness:
+This correction removes that flag, restores the original strict,
+create-exclusive oracle and its old contract tests byte-for-byte, and runs
+the CTest replay through \`tests/run_isolated_oracle_replay.py\`.
+Each invocation creates a new private, random temporary subdirectory using
+the standard library's exclusive creation, runs the existing oracle there in
+the same Python process, and only cleans up **that new subdirectory**.
+Previously existing \`comparison.json\`, \`control.avi\`, other receipts
+and arbitrary files in the parent are never examined, overwritten or removed.
+This avoids the repeat-run collision without a forged ownership heuristic or
+a second process supervisor. The retained fixture source directory cannot
+be selected as a scratch parent, and a symlinked scratch parent is refused.
 
-- `comparison.json` must parse as this harness's report and carry every
-  `ORACLE_REPORT_KEYS` field;
-- every directory entry must be a known destination name, a regular file and
-  not a symlink;
-- the retained fixture input tree, path escapes and symlinked destinations keep
-  refusing.
+Five new executable safety controls cover repeated invocations with old and
+foreign entries, failure cleanup without clobber, fixture overlap, symlinked
+parent and CMake/strict-inventory wiring. A new mandatory CTest registers
+these controls. The wrapper keeps the oracle's stdout/exit verdict; outputs
+are ephemeral scratch, while CI/CTest logs remain the published receipt.
+This intentional change means no persistent replay JSON is uploaded from
+the original fixed directory; no PASS or prior evidence is restored.
 
-Any foreign entry, unparsable report or symlink still refuses **before** a
-single file is removed. Without the flag the previous strict behaviour is
-unchanged, so the existing "never clobber prior independent evidence" tests and
-`write_exclusive` semantics still hold.
+The benchmarks and repeatability counts below are **historical results from
+the superseded destructive candidate**; they are not acceptance evidence
+for this new implementation. New exact-head Windows/Linux/ASan and native
+repeat-run results must be checked before merge.
+
 
 ## Executed evidence
 
-Exact test-level repeats on the fixed tree (no directory cleanup between runs):
+Historical test-level repeats on the superseded candidate (not the repaired HEAD):
 
 - `standalone_windows_oracle_replay`: 3/3 PASS on consecutive executions.
 - Full strict gate in one build tree: 158/158 PASS twice (465 s and 465 s).

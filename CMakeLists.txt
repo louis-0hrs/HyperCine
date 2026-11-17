@@ -1129,12 +1129,15 @@ if(HYPERCINE_BUILD_STANDALONE)
                     --output-dir "${CMAKE_CURRENT_BINARY_DIR}/samples-${geometry}")
             endforeach()
             add_test(NAME standalone_windows_oracle_replay COMMAND "${Python3_EXECUTABLE}"
-                "${CMAKE_CURRENT_SOURCE_DIR}/tests/compare_sdk_oracle.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/run_isolated_oracle_replay.py"
                 --windows-fixtures "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/windows-oracle"
                 --ffmpeg "${HYPERCINE_FFMPEG_EXECUTABLE}"
                 --ffprobe "${HYPERCINE_FFPROBE_EXECUTABLE}"
-                --replace-owned-output
-                --output "${CMAKE_CURRENT_BINARY_DIR}/windows-oracle-replay")
+                --scratch-parent "${CMAKE_CURRENT_BINARY_DIR}/windows-oracle-replay")
+            add_test(NAME standalone_oracle_replay_isolation COMMAND "${Python3_EXECUTABLE}"
+                "-B" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_isolated_oracle_replay.py")
+            set_tests_properties(standalone_oracle_replay_isolation PROPERTIES
+                LABELS "validation;reference-oracle;negative-control" TIMEOUT 60)
         else()
             message(STATUS "Optional standalone external decode test not registered: FFmpeg/ffprobe unavailable")
         endif()

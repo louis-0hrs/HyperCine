@@ -8,9 +8,13 @@
     "test": "standalone_windows_oracle_replay"
   },
   "fix": {
-    "default_unchanged": true,
-    "flag": "--replace-owned-output",
-    "policy": "replace only when every entry is a known destination, a regular non-symlink file, and comparison.json carries all ORACLE_REPORT_KEYS"
+    "strategy": "per-invocation exclusive TemporaryDirectory; no deletion of pre-existing files",
+    "oracle_source": "restored to main unchanged; exclusive evidence writes retained",
+    "ctest_entry": "tests/run_isolated_oracle_replay.py",
+    "negative_controls": "tests/test_isolated_oracle_replay.py (new mandatory CTest)",
+    "previously_claimed_report_key_ownership": "REJECTED_UNSAFE",
+    "previous_unsafe_head": "0c80a9f768bcac5dd6195b314db004e0820286ea",
+    "candidate_status": "pending fresh exact-head hosted qualification and independent review"
   },
   "full_gate_runs": [
     {
@@ -70,13 +74,16 @@
     "one host",
     "n=2 per slot setting",
     "no hosted or Windows timing claim",
-    "summed test seconds are not CPU utilization"
+    "summed test seconds are not CPU utilization",
+    "measurements were executed on superseded destructive candidate; not qualification of new code"
   ],
   "schema": "hypercine/standalone-repeatability/v1",
   "scope": "test-harness repeatability and CTest slot check; no codec/SDK/GPU/VC-5 qualification",
   "targeted_repeats": {
     "consecutive_passes_in_one_tree": 3,
     "foreign_entry_negative_control": "refused; foreign file and prior evidence preserved byte-identical",
-    "test": "standalone_windows_oracle_replay"
+    "test": "standalone_windows_oracle_replay",
+    "previous_head": "0c80a9f768bcac5dd6195b314db004e0820286ea",
+    "current_candidate_status": "needs exact-head verification"
   }
 }
