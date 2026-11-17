@@ -148,6 +148,14 @@ class StandaloneGateTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
                 registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
 
+    def test_native_planes_source_domain_gates_are_binding(self):
+        # #259: both modes must stay registered, or a GPU-native request answered
+        # by BGRA/CPU could be reintroduced without any gate noticing.
+        for name in ('encoder_native_planes_normal', 'encoder_native_planes_optimized'):
+            self.assertIn(name, REQUIRED)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, name):
+                registered_tests({'tests': [{'name': n} for n in REQUIRED if n != name]})
+
     def test_windows_evidence_snapshot_gates_are_mandatory(self):
         for name in ('windows_sdk_corpus_contract', 'windows_sdk_snapshot_contract',
                      'windows_sdk_snapshot_optimized'):

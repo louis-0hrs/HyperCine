@@ -167,8 +167,13 @@ const char* ProfileAdmissionNote(SessionBackend backend, hypercine::EncodingQual
     return "this backend has session packet evidence for the FilmScan3 profile only";
 }
 
-EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& config,
-                                               const EncoderDevice& device) {
+namespace {
+
+// One implementation for both source domains. `native_domain` selects which
+// entry is answering; it never weakens a geometry, budget, profile or evidence
+// axis, so the two queries cannot drift into different resource logic.
+EncoderCapabilityResult Evaluate(const EncoderSessionConfig& config, const EncoderDevice& device,
+                                 bool native_domain) {
     EncoderCapabilityResult result;
     result.reference_qualified = false;
     result.reasons.reference_missing = true;
@@ -193,12 +198,33 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         result.reasons.format_mathematically_invalid = true;
         format_detail = "quality profile is not one of the six regular profiles";
     }
-    if (config.pixel_format != SourcePixelFormat::Bgra8) {
+    // Source domain. Native YUV422p10 planes are a distinct storage domain: the
+    // samples are already the Y, Cr, Cb codes the wavelet consumes, so that entry
+    // skips Convert instead of reinterpreting storage. Which backends actually
+    // consume the domain is decided against the effective backend below, after an
+    // explicitly permitted scalar fallback has been resolved.
+    const bool native_planes = config.pixel_format == SourcePixelFormat::Yuv422p10Native;
+    if (native_planes && !native_domain) {
+        // A native planes configuration must never reach a session whose only
+        // storage entry is interleaved BGRA bytes: that would be the silent BGRA
+        // substitution this domain exists to prevent. Typed refusal before any
+        // geometry evaluation, allocation or factory call; the native query
+        // answers the domain question.
+        result.reasons.valid_but_not_implemented = true;
+        result.primary = CapabilityReason::ValidButNotImplemented;
+        result.detail = "native YUV422p10 plane input is not an interleaved BGRA session source; "
+                        "query the native planes capability instead";
+        return result;
+    }
+    if (!native_planes && native_domain) {
+        result.reasons.format_mathematically_invalid = true;
+        format_detail = "the native planes capability query requires the native YUV422p10 source format";
+    }
+    if (config.pixel_format != SourcePixelFormat::Bgra8 && !native_planes) {
         if (config.pixel_format == SourcePixelFormat::Yuy2 || config.pixel_format == SourcePixelFormat::Rgb48)
             result.reasons.valid_but_not_implemented = true;
         else result.reasons.format_mathematically_invalid = true;
-        if (config.pixel_format != SourcePixelFormat::Bgra8)
-            unimplemented_detail = "only BGRA8 input is implemented";
+        unimplemented_detail = "only BGRA8 and native YUV422p10 plane input are implemented";
     }
     if (config.gop != GopMode::IntraGop1) {
         result.reasons.valid_but_not_implemented = true;
@@ -247,8 +273,49 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         memory_detail = "pixel count exceeds kMaxPlaneElements";
     }
 
+    // Storage binding. Each source domain has exactly one addressing contract, and
+    // the two are not interchangeable: bytes+interleaved stride for BGRA, sample
+    // strides for the three native planes. A request that carries both (or the
+    // plane strides without the plane format) is refused as a format error rather
+    // than guessed, because a capability query that budgeted the wrong domain
+    // would later admit a buffer the encoder cannot address.
     const bool storage_bound = config.input_stride_bytes != 0 || config.input_bytes != 0;
-    if (storage_bound && product_ok && WaveletShape(config.width, config.height)) {
+    const auto luma_stride = config.native_planes.luma_stride_samples;
+    const auto chroma_stride = config.native_planes.chroma_stride_samples;
+    const bool native_storage_bound = native_planes && (luma_stride != 0 || chroma_stride != 0);
+    if (native_planes && storage_bound) {
+        result.reasons.format_mathematically_invalid = true;
+        format_detail = "a native planes source must not carry a BGRA stride/byte binding";
+    } else if (!native_planes && (luma_stride != 0 || chroma_stride != 0)) {
+        result.reasons.format_mathematically_invalid = true;
+        format_detail = "native plane strides require the native YUV422p10 source format";
+    }
+    if (native_planes) {
+        const auto chroma_width = config.width / 2;
+        if (luma_stride < 0 || chroma_stride < 0) {
+            result.reasons.format_mathematically_invalid = true;
+            format_detail = "native plane strides are sample counts and cannot be negative";
+        } else if ((luma_stride == 0) != (chroma_stride == 0)) {
+            result.reasons.format_mathematically_invalid = true;
+            format_detail = "native luma and chroma strides must be bound together";
+        } else if (native_storage_bound && product_ok &&
+                   WaveletShape(config.width, config.height) && FitsInt(config.height)) {
+            if (!FitsInt(luma_stride) || !FitsInt(chroma_stride) || !FitsInt(chroma_width)) {
+                result.reasons.format_mathematically_invalid = true;
+                format_detail = "native plane stride does not fit the int16 Plane element type";
+            } else if (luma_stride < config.width || luma_stride % 8 != 0) {
+                result.reasons.format_mathematically_invalid = true;
+                format_detail = "native luma stride must cover the row and be 16-byte aligned (8 int16 samples)";
+            } else if (chroma_stride < chroma_width || chroma_stride % 8 != 0) {
+                result.reasons.format_mathematically_invalid = true;
+                format_detail = "native chroma stride must cover width/2 and be 16-byte aligned (8 int16 samples)";
+            } else if (!PlaneStorageFits(static_cast<int>(luma_stride), static_cast<int>(config.height)) ||
+                       !PlaneStorageFits(static_cast<int>(chroma_stride), static_cast<int>(config.height))) {
+                result.reasons.memory_budget_exceeded = true;
+                memory_detail = "native plane stride*height exceeds the per-plane allocation budget";
+            }
+        }
+    } else if (storage_bound && product_ok && WaveletShape(config.width, config.height)) {
         const auto row = static_cast<std::uint64_t>(config.width) * 4u;
         if (config.input_stride_bytes == 0 || config.input_bytes == 0) {
             result.reasons.format_mathematically_invalid = true;
@@ -292,6 +359,35 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
         effective = SessionBackend::CpuScalar;
     }
     result.effective_backend = effective;
+
+    // Native planes on a GPU backend this revision cannot serve are refused here,
+    // before the geometry validator, the profile matrix, any factory and any
+    // allocation. There is no Metal/CUDA/Vulkan planes frontend, and the base
+    // Frontend::TransformPlanes refuses: answering such a request with BGRA
+    // (reinterpreting plane storage) or with the CPU scalar frontend would change
+    // the source domain the caller asked for, so it is a typed refusal instead.
+    //
+    // The refusal is unconditional: a GPU-native request never reads a geometry
+    // that this revision cannot serve that way. Cheap pre-checks that already ran
+    // (quality enum, stride domain, pixel budget) keep their flags on the result,
+    // but the primary reason names the missing planes domain and
+    // geometry_validator_invoked stays false. When the geometry itself is also
+    // illegal, format_mathematically_invalid is still set for a caller that reads
+    // the flags instead of the primary.
+    //
+    // The explicit scalar-fallback flag above is a *presence* policy and is
+    // resolved first: when the caller permitted it and the requested device is
+    // genuinely absent, the admitted CPU session is observable through
+    // fell_back_to_cpu_scalar. Nothing here substitutes silently.
+    if (native_planes && effective != SessionBackend::CpuScalar) {
+        result.reasons.valid_but_not_implemented = true;
+        result.primary = CapabilityReason::ValidButNotImplemented;
+        result.detail =
+            "native YUV422p10 plane input is implemented for the CPU scalar session only; "
+            "this backend has no planes frontend and BGRA substitution is refused";
+        result.allocation_permitted = false;
+        return result;
+    }
 
     // Profile admission is evaluated against the backend that will actually
     // run, so an explicitly permitted scalar fallback does not inherit a GPU's
@@ -392,7 +488,32 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     if (product_ok && (cpu_attempt || gpu_effective)) {
         std::uint64_t extra = 0;
         bool extra_ok = true;
-        if (storage_bound && config.input_stride_bytes != 0 && config.height > 0) {
+        if (native_planes) {
+            // A bound native layout owns the storage just as the BGRA branch owns
+            // its buffer: three int16 planes, Y (luma stride) plus two chroma
+            // planes of width/2. Counting them here is the same rule, not a new
+            // one; leaving them out would widen CPU-native admission against the
+            // existing static planning ceiling. All steps are overflow-guarded
+            // and a bound layout is only counted when both strides are positive.
+            const auto max = std::numeric_limits<std::uint64_t>::max();
+            const auto h = static_cast<std::uint64_t>(config.height);
+            const auto luma = static_cast<std::uint64_t>(luma_stride);
+            const auto chroma = static_cast<std::uint64_t>(chroma_stride);
+            if (native_storage_bound && luma > 0 && chroma > 0 && h > 0) {
+                const bool pair_ok = chroma <= max / 2u;
+                const auto pair = pair_ok ? chroma * 2u : 0u;
+                const bool row_ok = pair_ok && luma <= max - pair;
+                const auto row = row_ok ? luma + pair : 0u;
+                const bool samples_ok = row_ok && row > 0 && h <= max / row;
+                const auto samples = samples_ok ? row * h : 0u;
+                // Two bytes per int16 sample.
+                if (!samples_ok || samples > max / 2u) {
+                    extra_ok = false;
+                } else {
+                    extra = samples * 2u;
+                }
+            }
+        } else if (storage_bound && config.input_stride_bytes != 0 && config.height > 0) {
             const auto h = static_cast<std::uint64_t>(config.height);
             if (config.input_stride_bytes > std::numeric_limits<std::uint64_t>::max() / h) extra_ok = false;
             else extra = config.input_stride_bytes * h;
@@ -404,7 +525,8 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
             memory_detail = "padded stride*height overflows uint64";
         }
         std::uint64_t ceiling = 0;
-        // Conservative static planning, not RSS: 36P + 1MiB + stride*height.
+        // Conservative static planning, not RSS: 36P + 1MiB + the source storage
+        // bytes this request binds (interleaved BGRA buffer or native planes).
         const bool planning_ok = extra_ok && PlanningCeiling(pixels, extra, ceiling);
         const auto budget = gpu_effective ? config.gpu_memory_budget_bytes : config.cpu_memory_budget_bytes;
         // Both GPU frontends still allocate host color/wavelet/writer storage.
@@ -496,6 +618,23 @@ EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& confi
     }
     if (result.primary != CapabilityReason::ExperimentallySupported) result.allocation_permitted = false;
     return result;
+}
+
+}  // namespace
+
+EncoderCapabilityResult CheckEncoderCapability(const EncoderSessionConfig& config,
+                                               const EncoderDevice& device) {
+    // Interleaved BGRA storage session entry. A native planes configuration is
+    // refused inside Evaluate, never reinterpreted as byte storage.
+    return Evaluate(config, device, false);
+}
+
+EncoderCapabilityResult CheckNativePlaneCapability(const EncoderSessionConfig& config,
+                                                   const EncoderDevice& device) {
+    // Native YUV422p10 plane entry. The same geometry, pixel-budget, profile and
+    // evidence axes as the BGRA session query; the source domain is the only
+    // difference, and there is no byte-storage fallback in either direction.
+    return Evaluate(config, device, true);
 }
 
 }}

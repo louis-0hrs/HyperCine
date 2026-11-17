@@ -45,6 +45,9 @@ REQUIRED = {
     'filmscan3_backend_selection', 'entropy_bitexact',
     'encoder_backend_selection_contract', 'encoder_backend_session_packets',
     'encoder_wire_request_normal', 'encoder_wire_request_optimized',
+    # #259: dropping the native YUV422p10 source-domain registrations would let
+    # a silent BGRA/CPU substitution for a GPU-native request stay green.
+    'encoder_native_planes_normal', 'encoder_native_planes_optimized',
     'encoder_move_ownership',
     'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence',
     'wavelet_simd_exact', 'wavelet_simd_packets',
