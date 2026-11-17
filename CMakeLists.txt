@@ -629,6 +629,39 @@ if(HYPERCINE_BUILD_STANDALONE)
             set_tests_properties(encoder_wire_request_${wire_mode} PROPERTIES
                 LABELS "cpu;encoder;session;capability" TIMEOUT 180)
         endforeach()
+        # Issue #259: native YUV422p10 plane input as an explicit source domain.
+        # Same normal/optimized split as the wire boundary: `normal` compiles its
+        # own non-NDEBUG capability translation unit, `optimized` exercises the
+        # actual Release-library copy, so the domain rules are tested in both.
+        foreach(planes_mode IN ITEMS normal optimized)
+            add_executable(test_encoder_native_planes_${planes_mode}
+                tests/test_encoder_native_planes_capability.cpp)
+            if(planes_mode STREQUAL "normal")
+                target_sources(test_encoder_native_planes_${planes_mode} PRIVATE
+                    src/core/encoder_capability.cpp
+                    src/core/encoder_wire_request.cpp)
+            endif()
+            target_link_libraries(test_encoder_native_planes_${planes_mode}
+                PRIVATE hypercine_standalone Threads::Threads)
+            if(planes_mode STREQUAL "normal")
+                if(MSVC)
+                    target_compile_options(test_encoder_native_planes_${planes_mode} PRIVATE /UNDEBUG /Od)
+                else()
+                    target_compile_options(test_encoder_native_planes_${planes_mode} PRIVATE -UNDEBUG -O0)
+                endif()
+            else()
+                target_compile_definitions(test_encoder_native_planes_${planes_mode} PRIVATE NDEBUG)
+                if(MSVC)
+                    target_compile_options(test_encoder_native_planes_${planes_mode} PRIVATE /O2)
+                else()
+                    target_compile_options(test_encoder_native_planes_${planes_mode} PRIVATE -O2)
+                endif()
+            endif()
+            add_test(NAME encoder_native_planes_${planes_mode}
+                COMMAND test_encoder_native_planes_${planes_mode})
+            set_tests_properties(encoder_native_planes_${planes_mode} PROPERTIES
+                LABELS "cpu;encoder;session;capability" TIMEOUT 180)
+        endforeach()
         add_executable(test_encoder_ownership tests/test_encoder_ownership.cpp)
         target_link_libraries(test_encoder_ownership PRIVATE hypercine_standalone)
         add_test(NAME encoder_move_ownership COMMAND test_encoder_ownership)
