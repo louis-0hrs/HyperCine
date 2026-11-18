@@ -5,7 +5,7 @@
 
 Synthetic fixtures only: no decoder, no network and no fixture media is
 written. The live measurement is recorded in
-`docs/validation/metal-packet-capture-381-20261117.json`, and the committed
+`docs/validation/metal-packet-capture-381-20261118.json`, and the committed
 file is re-verified here so an edited claim cannot drift away from the packet
 and the retained macOS evidence it names.
 """
@@ -129,7 +129,74 @@ def test_forged_metrics_are_rejected():
 
 
 def committed_evidence_path():
-    return ROOT / 'docs/validation/metal-packet-capture-381-20261117.json'
+    return ROOT / 'docs/validation/metal-packet-capture-381-20261118.json'
+
+
+def test_decode_worker_options_bind_input_and_capture_stays_bounded():
+    frame = bytes(capture.CAPTURE_BYTES)
+    for name, extra in capture.DECODE_VARIANTS:
+        with patch.object(capture, 'run_bounded', return_value=frame) as run:
+            check(capture._decode('synthetic-ffmpeg', 'frame.avi', extra) == frame)
+        argv = run.call_args.args[0]
+        input_index = argv.index('-i')
+        check(argv[input_index + 1] == 'frame.avi')
+        check(argv.count('-i') == 1)
+        before, after = argv[:input_index], argv[input_index + 2:]
+        if name in ('single-thread', 'four-thread'):
+            check('-threads' in before, 'decoder thread setting must precede input')
+            check(before[before.index('-threads') + 1] ==
+                  ('1' if name == 'single-thread' else '4'))
+        else:
+            check('-threads' not in before)
+        check('-threads' not in after, 'decoder option must not configure output')
+        if name == 'single-filter-thread':
+            check(before[before.index('-filter_threads') + 1] == '1')
+        check(after[after.index('-c:v') + 1] == 'rawvideo')
+        check(after[after.index('-threads:v') + 1] == '1')
+        check(after[after.index('-frames:v') + 1] == '1')
+        check(after[after.index('-pix_fmt') + 1] == 'yuv422p10le')
+        check(after[-1] == 'pipe:1')
+        check(run.call_args.kwargs == {'timeout': capture.DECODE_TIMEOUT,
+                                      'stdout_limit': capture.CAPTURE_BYTES + 1})
+
+
+def test_command_evidence_cannot_swap_decoder_and_encoder_roles():
+    original = json.loads(committed_evidence_path().read_text(encoding='utf-8'))
+    for change in ('missing', 'swapped', 'count', 'output'):
+        evidence = copy.deepcopy(original)
+        if change == 'missing':
+            del evidence['stability']['commands']
+        else:
+            argv = evidence['stability']['commands'][1]['argv']
+            if change == 'swapped':
+                index = argv.index('-threads')
+                options = argv[index:index + 2]
+                del argv[index:index + 2]
+                argv[-1:-1] = options
+            elif change == 'count':
+                argv[argv.index('-threads') + 1] = '4'
+            else:
+                argv[argv.index('-threads:v') + 1] = '4'
+        expect_error(lambda: capture.verify_evidence(evidence, **verified_arguments()),
+                     'input/output roles')
+
+
+def test_historical_capture_remains_digest_only_evidence():
+    path = ROOT / 'docs/validation/metal-packet-capture-381-20261117.json'
+    evidence = json.loads(path.read_text(encoding='utf-8'))
+    check(evidence['schema'] == capture.LEGACY_SCHEMA)
+    capture.verify_evidence(evidence, **verified_arguments())
+    # Attaching today's commands cannot retroactively requalify the old run.
+    evidence['stability']['commands'] = capture.recorded_commands()
+    expect_error(lambda: capture.verify_evidence(evidence, **verified_arguments()),
+                 'legacy evidence cannot claim')
+
+
+def test_comparison_source_label_must_name_the_verified_macos_artifact():
+    evidence = json.loads(committed_evidence_path().read_text(encoding='utf-8'))
+    evidence['compared']['source'] = 'docs/validation/unrelated-record.json'
+    expect_error(lambda: capture.verify_evidence(evidence, **verified_arguments()),
+                 'comparison source')
 
 
 def verified_arguments():

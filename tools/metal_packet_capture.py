@@ -55,7 +55,8 @@ import tempfile
 
 from compat_process import run_bounded
 
-SCHEMA = 'hypercine.metal-packet-capture/1'
+SCHEMA = 'hypercine.metal-packet-capture/2'
+LEGACY_SCHEMA = 'hypercine.metal-packet-capture/1'
 ROOT = Path(__file__).resolve().parents[1]
 PACKET_ARTIFACT = 'macos-filmscan3/flat.cfhd'
 MANIFEST_ARTIFACT = 'tests/fixtures/macos-filmscan3/manifest.json'
@@ -68,9 +69,9 @@ PEAK = 1023
 DECODE_TIMEOUT = 60.0
 CAPTURE_BYTES = WIDTH * HEIGHT * 4
 SAMPLE_COUNT = WIDTH * HEIGHT * 2
-# Independent decodes plus explicit thread settings. All must agree byte for
-# byte; a decoder that only agrees with itself at one thread count is not
-# stable enough to record a digest.
+# Independent one-frame decodes with explicit input-decoder settings. This is
+# configuration coverage, not multiframe concurrency stress. Filter threads are
+# a separate global option, never a decoder-worker setting.
 DECODE_VARIANTS = (
     ('default', ()),
     ('single-thread', ('-threads', '1')),
@@ -195,11 +196,23 @@ def decoder_identity(ffmpeg):
             'binary_sha256': digest.hexdigest()}
 
 
+def decode_command(ffmpeg, container, extra):
+    # FFmpeg scopes codec options to the next input/output file. In particular,
+    # -threads after -i would configure rawvideo encoding instead of CFHD decode.
+    return ([ffmpeg, '-v', 'error', '-xerror'] + list(extra) +
+            ['-i', str(container), '-frames:v', '1', '-c:v', 'rawvideo',
+             '-threads:v', '1', '-pix_fmt', PIXEL_FORMAT, '-f', 'rawvideo', 'pipe:1'])
+
+
+def recorded_commands():
+    """Portable command templates, with no executable or temporary host paths."""
+    return [{'variant': name, 'argv': decode_command('ffmpeg', 'frame.avi', extra)}
+            for name, extra in DECODE_VARIANTS]
+
+
 def _decode(ffmpeg, container, extra):
     payload = run_bounded(
-        [ffmpeg, '-v', 'error', '-xerror', '-i', str(container),
-         '-frames:v', '1'] + list(extra) +
-        ['-c:v', 'rawvideo', '-pix_fmt', PIXEL_FORMAT, '-f', 'rawvideo', 'pipe:1'],
+        decode_command(ffmpeg, container, extra),
         timeout=DECODE_TIMEOUT, stdout_limit=CAPTURE_BYTES + 1)
     require(len(payload) == CAPTURE_BYTES, 'invalid decoded frame size')
     return payload
@@ -238,6 +251,7 @@ def decode_capture(packet, ffmpeg, ffprobe):
     require(len(set(lengths)) == 1 and lengths[0] == CAPTURE_BYTES,
             'independent decode lengths disagree')
     return payload, {'runs': len(digests), 'variants': [name for name, _ in DECODE_VARIANTS],
+                     'commands': recorded_commands(),
                      'distinct_digests': 1, 'identical': True,
                      'digest': digests[0]}, stream
 
@@ -304,7 +318,7 @@ def build_evidence(packet_path, ffmpeg, ffprobe, manifest_path, macos_path):
                    'byte_length': manifest['byte_length'],
                    'producer': 'HyperCine Metal FilmScan3 encoder (macOS)',
                    'frame_index': FRAME_INDEX},
-        'decoder': dict(identity, host=platform.platform()),
+        'decoder': dict(identity, host=platform.system() + ' ' + platform.machine()),
         'container': {'kind': 'single-frame AVI wrapper of the raw CFHD packet',
                       'codec': stream['codec_name'],
                       'width': stream['width'], 'height': stream['height'],
@@ -337,6 +351,8 @@ def build_evidence(packet_path, ffmpeg, ffprobe, manifest_path, macos_path):
         },
         'limits': [
             'One packet, one frame, one decoder executable and one host.',
+            'Requested input-decoder thread settings are exercised on one frame; '
+            'this does not establish multiframe concurrency stress coverage.',
             'No committed encoder input and no committed macOS capture bytes, so no '
             'sample-level difference against a source pattern is recomputed here.',
             'Decoder agreement on these bytes is not a HyperCine decoder, GoPro '
@@ -353,7 +369,7 @@ def validate_planes(planes):
 
 def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=None):
     """Hash-only re-check of a committed evidence file."""
-    require(type(evidence) is dict and evidence.get('schema') == SCHEMA,
+    require(type(evidence) is dict and evidence.get('schema') in (SCHEMA, LEGACY_SCHEMA),
             'unsupported evidence schema')
     require(evidence.get('issue') == '#381', 'evidence names another issue')
     for field in ('packet', 'decoder', 'container', 'capture', 'interpretation',
@@ -385,6 +401,14 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
             'capture was not proven stable across registered independent decodes')
     require(stability.get('distinct_digests') == 1, 'stability claims differing digests')
     require(stability.get('digest') == capture['sha256'], 'stability digest is not the capture digest')
+    if evidence['schema'] == SCHEMA:
+        require(stability.get('commands') == recorded_commands(),
+                'decode command options do not bind the registered input/output roles')
+    else:
+        # Keep immutable v1 measurements verifiable as digest evidence only.
+        # They did not record commands and placed -threads on the output encoder.
+        require('commands' not in stability,
+                'legacy evidence cannot claim corrected decoder command coverage')
 
     decoder = evidence['decoder']
     require(decoder.get('id') == 'ffmpeg-cfhd', 'decoder role mismatch')
@@ -410,6 +434,8 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
                 'evidence packet length is not the manifest length')
 
     compared = evidence['compared']
+    require(compared.get('source') == MACOS_EVIDENCE_ARTIFACT,
+            'comparison source is not the retained macOS evidence artifact')
     require(compared.get('frame_index') == FRAME_INDEX, 'comparison names another frame')
     require(is_digest(compared.get('macos_decoded_sha256')),
             'comparison has no bound macOS digest')
@@ -455,7 +481,8 @@ def main(argv=None):
             evidence = json.loads(Path(arguments.verify).read_text(encoding='utf-8'))
             verify_evidence(evidence, arguments.packet, arguments.manifest,
                             arguments.macos_evidence)
-            print(json.dumps({'schema': SCHEMA, 'verified': True,
+            print(json.dumps({'schema': evidence['schema'], 'verified': True,
+                              'input_thread_options_bound': evidence['schema'] == SCHEMA,
                               'capture_sha256': evidence['capture']['sha256'],
                               'match': evidence['compared']['match']}))
             return 0

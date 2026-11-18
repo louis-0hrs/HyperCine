@@ -121,6 +121,7 @@ function(hypercine_register_sdk_free_contracts)
             "${PROJECT_SOURCE_DIR}/tools/metal_packet_capture.py"
             "${PROJECT_SOURCE_DIR}/tests/test_metal_packet_capture.py"
             "${PROJECT_SOURCE_DIR}/docs/validation/metal-packet-capture-381-20261117.json"
+            "${PROJECT_SOURCE_DIR}/docs/validation/metal-packet-capture-381-20261118.json"
             "${PROJECT_SOURCE_DIR}/tests/compatibility/matrix.json")
         if(NOT EXISTS "${required_file}" OR IS_DIRECTORY "${required_file}")
             message(FATAL_ERROR "Required compatibility contract file missing: ${required_file}")
@@ -142,7 +143,7 @@ function(hypercine_register_sdk_free_contracts)
         COMMAND "${Python3_EXECUTABLE}" -B -O "${PROJECT_SOURCE_DIR}/tests/test_metal_packet_capture.py")
     add_test(NAME metal_packet_capture_evidence
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tools/metal_packet_capture.py"
-            --verify "${PROJECT_SOURCE_DIR}/docs/validation/metal-packet-capture-381-20261117.json"
+            --verify "${PROJECT_SOURCE_DIR}/docs/validation/metal-packet-capture-381-20261118.json"
             --packet "${contracts}/fixtures/macos-filmscan3/flat.cfhd"
             --manifest "${contracts}/fixtures/macos-filmscan3/manifest.json")
     set_tests_properties(metal_packet_capture_contract metal_packet_capture_contract_optimized

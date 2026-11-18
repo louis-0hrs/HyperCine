@@ -9,12 +9,12 @@ This is one packet, one frame, one decoder executable. It is not a
 compatibility verdict, not a HyperCine decoder result, not GoPro product
 qualification and not VC-5 conformance.
 
-## What was executed
+## Corrected measurement — 18 November 2026
 
 ```sh
 python3 tools/metal_packet_capture.py \
   --ffmpeg /usr/bin/ffmpeg --ffprobe /usr/bin/ffprobe \
-  --out docs/validation/metal-packet-capture-381-20261117.json
+  --out docs/validation/metal-packet-capture-381-20261118.json
 ```
 
 The tool wraps the raw packet in the already-reviewed single-frame AVI
@@ -22,12 +22,20 @@ container, decodes exactly one frame to `yuv422p10le`, and repeats that decode
 in four independent processes (default, `-threads 1`, `-threads 4`,
 `-filter_threads 1`) before it records anything.
 
+The decoder options now precede `-i`; rawvideo output uses an independently
+fixed `-threads:v 1`. FFmpeg applies codec options to the next input/output
+file, as described in its [command documentation](https://ffmpeg.org/ffmpeg.html#Description).
+Schema `/2` records the four portable command arrays and verifies their input
+and output roles. The filter-thread option is global. These are requested
+decoder configurations on **one frame**, not multiframe concurrency stress or
+proof that four workers performed useful work.
+
 | Field | Value |
 | :-- | :-- |
 | Packet | `tests/fixtures/macos-filmscan3/flat.cfhd`, 185648 bytes |
 | Packet SHA-256 | `d75e6af7980558e42a520e8ce3bd3513626a854c3210da1c8b78240f4d75d6df` |
 | Decoder | FFmpeg `7.1.5-0+deb13u1`, executable SHA-256 `e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a` |
-| Host | `Linux-6.12.107+deb13-amd64-x86_64-with-glibc2.41` |
+| Host | Linux x86_64 |
 | Capture SHA-256 | `ab5fd41c064b943e53877d0ba6106614e1983d9c0d2701e255a632564b95f774` |
 | Capture bytes / samples | 8294400 / 4147200 |
 | Stability | 4 decodes, 1 distinct digest, byte-identical |
@@ -37,6 +45,29 @@ in four independent processes (default, `-threads 1`, `-threads 4`,
 The macOS digest is not re-derived here: it is read from the retained evidence
 in `docs/validation/metal-filmscan3-ffmpeg.json` (frame 0, `decoded_sha256`).
 The recorder refuses to publish a capture whose digest does not reproduce it.
+
+### Historical evidence stays immutable
+
+The retained `metal-packet-capture-381-20261117.json` is schema `/1`. Its runner
+placed `-threads` after `-i`, so those options configured the rawvideo **output
+encoder**, not the CFHD input decoder. Its four equal output digests remain
+historical decoder-agreement evidence; they do not establish decoder-thread
+configuration coverage. The verifier preserves this distinction and reports
+`input_thread_options_bound=false` for the legacy record. Attaching new command
+arrays to a legacy record is refused. The corrected `/2` capture independently
+reproduced the same digest under all four corrected commands.
+
+### Historical source attribution
+
+The packet fixture's immutable `manifest.json` records
+`base_commit=cf7a46dda868a4d65bd96eae71460f3a0258b32d`. That revision does not
+contain four of the nine `sources[]` paths, and its `src/cpu/wavelet_cpu.cpp`
+does not match the recorded hash. Only four source entries match that base.
+All **nine** recorded source hashes match the later commit
+`78acf9fa95d2e004542d01a35218e51668951288`. This reconciles the recorded file
+identities; it does not retrospectively establish the original checkout,
+compiler or build flags. The manifest, packet and retained macOS JSON are
+unchanged, and no runtime result is inferred from source hashes alone.
 
 ## Pixel interpretation
 
@@ -67,6 +98,29 @@ Both are re-run by `tests/test_metal_packet_capture.py` in normal and `-O` mode,
 and the committed evidence file is re-verified hash-only by
 `tools/metal_packet_capture.py --verify` (registered as
 `metal_packet_capture_evidence`).
+
+The same guard suite checks actual command construction: decoder settings
+must precede the input, output encoder settings remain separate, and timeout,
+one-frame and capture-size bounds remain intact. It rejects command-role
+tampering and a `compared.source` label that names any record other than the
+retained macOS artifact. The historical `/1` record is also verified with its
+explicitly narrower scope.
+
+### Correction acceptance
+
+On Linux x86_64, the corrected source passed all **165/165** registered
+standalone CTests with zero failures or CTest skips. The capture guard script
+passed **18/18** under normal Python and **18/18** under `python -O`.
+An independent review separately removed the recorder agreement refusal,
+verifier agreement refusal, input-thread option placement and comparison-source
+binding: all four deliberate defects turned their intended tests RED in both
+Python modes. Restored source re-passed the full guard script. An independent
+live four-command capture reproduced the entire new JSON byte-for-byte.
+
+These are local Linux and bounded measurement receipts. Updated-head Windows
+and hosted sanitizer acceptance remain pending the separately reviewed CI
+prerequisite #404 and subsequent final-tree checks; earlier #403 hosted results
+are not transferred to this correction.
 
 ## What this still does not establish
 

@@ -131,6 +131,10 @@ python3 tests/test_metal_packet_capture.py
 
 The Metal packet capture recorder and its committed evidence are separate from
 this matrix; see `docs/validation/METAL_PACKET_CAPTURE_381.md`.
+The current `/2` capture binds decoder thread options before the FFmpeg input.
+The immutable `/1` capture retains digest-agreement evidence only because its
+thread options selected the output encoder. Neither record changes this
+matrix's `NOT_OBSERVABLE` verdict.
 
 The live path wraps each committed packet with the already-reviewed `avi()`
 helper from `tests/compare_sdk_oracle.py`, decodes one frame to `yuv422p10le`
