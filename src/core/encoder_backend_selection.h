@@ -46,6 +46,16 @@ BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, const BackendFactories&);
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, ScalarFrontendFactory);
 
+// Format-aware capability preflight for internal admission boundaries. It
+// dispatches on the declared source format: native YUV422p10 planes are answered
+// by CheckNativePlaneCapability, everything else by the interleaved BGRA entry.
+// A boundary must not answer a planes request through the BGRA gate (or the
+// reverse) merely because both queries share one signature; that mistake is a
+// silent domain substitution, not a stricter refusal. Never allocates, never
+// probes hardware and never selects or constructs a frontend.
+EncoderCapabilityResult CheckSessionSourceCapability(const EncoderSessionConfig&,
+                                                     const EncoderDevice&);
+
 class BackendSelectionError final : public std::runtime_error {
 public:
     explicit BackendSelectionError(const BackendSelection& result);

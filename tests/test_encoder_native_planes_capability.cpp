@@ -702,11 +702,17 @@ int main() {
             Require(std::strstr(result.detail, "interleaved BGRA session source") != nullptr,
                     "BGRA session query did not name the domain mismatch");
             Require(before == after, "BGRA session query allocated for a native refusal");
+            // The wire boundary is format-aware: this request must be answered
+            // by the native gate above, not budgeted as interleaved BGRA bytes.
+            // The direct BGRA query on the same configuration still refuses.
             EncoderWireRequest request(WireDialect::Cfhd, St2073Edition::None, 0,
                                        DecoderTarget::Unspecified, NativeConfig());
             factory_calls = 0;
             auto session = CreateWireSession(request, host, CountingFactory);
-            Require(!session && factory_calls == 0, "native planes reached a BGRA session factory");
+            Require(session && factory_calls == 1,
+                    "native planes did not reach the native session factory");
+            Require(session->config().pixel_format == SourcePixelFormat::Yuv422p10Native,
+                    "wire session lost the native source domain");
         }
 
         // 4. Source-bound: the admitted geometry really encodes through the

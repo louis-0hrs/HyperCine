@@ -107,6 +107,68 @@ int main() {
     bad.backend=SessionBackend::Vulkan; auto present=d; present.vulkan_available=true;
     Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,bad,present,
            WireRefusal::CapabilityRefused);
+    // --- #259 native wire-request admission -------------------------------
+    // The wire boundary must answer the declared source domain. A native
+    // YUV422p10 config used to be refused by the interleaved BGRA gate, which
+    // is fail-closed but also made the reviewed wire path silently BGRA-only.
+    auto native = Small();
+    native.pixel_format = SourcePixelFormat::Yuv422p10Native;
+    EncoderWireRequest native_request(WireDialect::Cfhd,St2073Edition::None,0,
+                                      DecoderTarget::Unspecified,native);
+    auto native_capability = CheckWireRequest(native_request,d);
+    Require(native_capability.permitted(), "native CPU wire request refused");
+    Require(native_capability.capability.allocation_permitted &&
+            !native_capability.capability.reasons.valid_but_not_implemented,
+            "native CPU wire request was answered by the BGRA gate");
+    calls=0;
+    auto native_session=CreateWireSession(native_request,d,Count);
+    Require(native_session && native_session->active() && calls==1,
+            "native wire session not created");
+    Require(native_session->config().pixel_format==SourcePixelFormat::Yuv422p10Native &&
+            native_session->selection().effective.effective_backend==SessionBackend::CpuScalar,
+            "native wire session lost the source domain");
+    bool byte_refused=false;
+    try { std::uint8_t sample[4]={0,0,0,0}; native_session->Encode(sample,sizeof sample,128); }
+    catch (const std::invalid_argument&) { byte_refused=true; }
+    Require(byte_refused, "native wire session accepted interleaved BGRA bytes");
+
+    // Bound sample strides are admitted; the addressing domains stay exclusive.
+    native.native_planes={128,64};
+    EncoderWireRequest bound_request(WireDialect::Cfhd,St2073Edition::None,0,
+                                     DecoderTarget::Unspecified,native);
+    Require(CheckWireRequest(bound_request,d).permitted(), "bound native request refused");
+    auto byte_binding=native; byte_binding.input_stride_bytes=256;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,byte_binding,d,
+           WireRefusal::CapabilityRefused);
+    auto half_bound=native; half_bound.native_planes={128,0};
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,half_bound,d,
+           WireRefusal::CapabilityRefused);
+    auto negative=native; negative.native_planes={-128,64};
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,negative,d,
+           WireRefusal::CapabilityRefused);
+    auto odd_geometry=native; odd_geometry.width=129;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,odd_geometry,d,
+           WireRefusal::CapabilityRefused);
+    auto reference=native; reference.require_reference_oracle=true;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,reference,d,
+           WireRefusal::CapabilityRefused);
+    // No GPU planes frontend exists. A native GPU request must refuse, and an
+    // explicit scalar fallback must not turn that into a CPU admission.
+    auto metal=native; metal.backend=SessionBackend::Metal;
+    auto metal_device=d; metal_device.metal_available=true;
+    metal_device.metal_max_buffer_length_bytes=64u*1024u*1024u;
+    metal_device.metal_recommended_working_set_bytes=256u*1024u*1024u;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,metal,metal_device,
+           WireRefusal::CapabilityRefused);
+    metal.allow_cpu_scalar_fallback=true;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,metal,metal_device,
+           WireRefusal::CapabilityRefused);
+    auto cuda=native; cuda.backend=SessionBackend::Cuda;
+    auto cuda_device=d; cuda_device.cuda_available=true;
+    cuda_device.cuda_total_global_memory_bytes=1024ull*1024ull*1024ull;
+    cuda.allow_cpu_scalar_fallback=true;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,cuda,cuda_device,
+           WireRefusal::CapabilityRefused);
     std::cout << checks << " checks PASS\n";
     return 0;
  } catch (const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
