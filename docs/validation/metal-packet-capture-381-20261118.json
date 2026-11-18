@@ -28,6 +28,23 @@
   },
   "interpretation": {
     "chroma_siting": "not asserted by this packet",
+    "observed_samples": [
+      {
+        "maximum": 871,
+        "minimum": 113,
+        "plane": "y"
+      },
+      {
+        "maximum": 545,
+        "minimum": 476,
+        "plane": "u"
+      },
+      {
+        "maximum": 542,
+        "minimum": 478,
+        "plane": "v"
+      }
+    ],
     "planes": [
       {
         "byte_length": 4147200,
@@ -63,7 +80,10 @@
     "One packet, one frame, one decoder executable and one host.",
     "Requested input-decoder thread settings are exercised on one frame; this does not establish multiframe concurrency stress coverage.",
     "No committed encoder input and no committed macOS capture bytes, so no sample-level difference against a source pattern is recomputed here.",
-    "Decoder agreement on these bytes is not a HyperCine decoder, GoPro product, SDK or SMPTE VC-5 conformance result."
+    "Decoder agreement on these bytes is not a HyperCine decoder, GoPro product, SDK or SMPTE VC-5 conformance result.",
+    "The decoder executable digest is recorded, not externally pinned; --verify checks its form and the recorded banner, not the binary.",
+    "--verify trusts the artifact schema it is given: a relabeled copy carries the labels of its new schema, not the history of the run.",
+    "Per-plane sample minima and maxima are recorded from this capture; --verify checks their domain and the range label, not a re-decode."
   ],
   "negatives": {
     "changed_capture": {

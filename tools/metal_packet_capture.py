@@ -308,6 +308,8 @@ def build_evidence(packet_path, ffmpeg, ffprobe, manifest_path, macos_path):
         rejected = True
     require(rejected, 'forged metrics record was not rejected')
 
+    observed_samples = observed_sample_range(capture)
+
     return {
         'schema': SCHEMA,
         'issue': '#381',
@@ -329,7 +331,8 @@ def build_evidence(packet_path, ffmpeg, ffprobe, manifest_path, macos_path):
         'interpretation': {
             'storage': '16-bit little-endian per sample, tightly packed planes',
             'sample_domain': '0..1023 code values, peak 1023 for error metrics',
-            'range': 'studio (64-940)',
+            'range': range_label(observed_samples),
+            'observed_samples': observed_samples,
             'chroma_siting': 'not asserted by this packet',
             'planes': plane_layout(WIDTH, HEIGHT),
         },
@@ -357,8 +360,55 @@ def build_evidence(packet_path, ffmpeg, ffprobe, manifest_path, macos_path):
             'sample-level difference against a source pattern is recomputed here.',
             'Decoder agreement on these bytes is not a HyperCine decoder, GoPro '
             'product, SDK or SMPTE VC-5 conformance result.',
+            'The decoder executable digest is recorded, not externally pinned; '
+            '--verify checks its form and the recorded banner, not the binary.',
+            '--verify trusts the artifact schema it is given: a relabeled copy '
+            'carries the labels of its new schema, not the history of the run.',
+            'Per-plane sample minima and maxima are recorded from this capture; '
+            '--verify checks their domain and the range label, not a re-decode.',
         ],
     }
+
+
+def observed_sample_range(payload):
+    """Per-plane min/max code values from one decoded capture, in layout order."""
+    require(type(payload) is bytes and len(payload) == CAPTURE_BYTES,
+            'capture length contradicts the geometry')
+    samples = array.array('H')
+    samples.frombytes(payload)
+    if sys.byteorder == 'big':
+        samples.byteswap()
+    observed = []
+    for plane in plane_layout(WIDTH, HEIGHT):
+        step = plane['stride_bytes'] // 2
+        offset = plane['offset_bytes'] // 2
+        low, high = PEAK, 0
+        for row in range(plane['height']):
+            start = offset + row * step
+            values = samples[start:start + plane['width']]
+            if values:
+                low = min(low, min(values))
+                high = max(high, max(values))
+        observed.append({'plane': plane['plane'], 'minimum': low, 'maximum': high})
+    return observed
+
+
+def range_label(observed):
+    """Name the measured code-value span, never a presumed one."""
+    inside = all(64 <= item['minimum'] and item['maximum'] <= 940 for item in observed)
+    return 'studio (64-940)' if inside else 'outside studio (64-940)'
+
+
+def validate_observed_samples(observed):
+    require(type(observed) is list and len(observed) == 3,
+            'observed sample range is malformed')
+    expected = plane_layout(WIDTH, HEIGHT)
+    for item, plane in zip(observed, expected):
+        require(type(item) is dict and item.get('plane') == plane['plane'],
+                'observed sample range names another plane')
+        low, high = item.get('minimum'), item.get('maximum')
+        require(type(low) is int and type(high) is int and 0 <= low <= high <= PEAK,
+                'observed sample range is outside the 10-bit domain')
 
 
 def validate_planes(planes):
@@ -378,7 +428,9 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
 
     capture = evidence['capture']
     require(capture.get('byte_length') == CAPTURE_BYTES, 'capture length contradicts the geometry')
-    require(capture.get('samples') == SAMPLE_COUNT, 'capture sample count contradicts the geometry')
+    require(capture.get('samples') == SAMPLE_COUNT and
+            type(capture.get('samples')) is int,
+            'capture sample count contradicts the geometry')
     require((capture.get('pixel_format'), capture.get('bit_depth')) == (PIXEL_FORMAT, BIT_DEPTH),
             'capture format is not the registered one')
     require(is_digest(capture.get('sha256')), 'capture has no bound digest')
@@ -389,7 +441,17 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
             'container geometry or codec label changed')
     interpretation = evidence['interpretation']
     validate_planes(interpretation.get('planes'))
-    require(interpretation.get('range') == 'studio (64-940)', 'range interpretation changed')
+    if evidence['schema'] == SCHEMA:
+        validate_observed_samples(interpretation.get('observed_samples'))
+        require(interpretation.get('range') == range_label(interpretation['observed_samples']),
+                'range interpretation contradicts the observed samples')
+    else:
+        # The immutable v1 record predates per-plane measurement; it stays
+        # digest-only evidence and cannot acquire today's observations.
+        require('observed_samples' not in interpretation,
+                'legacy evidence cannot claim observed samples')
+        require(interpretation.get('range') == 'studio (64-940)',
+                'range interpretation changed')
     require('not asserted' in str(interpretation.get('chroma_siting')),
             'chroma siting must stay unasserted')
 
@@ -399,7 +461,9 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
             stability['runs'] == len(DECODE_VARIANTS) and
             stability.get('variants') == [name for name, _ in DECODE_VARIANTS],
             'capture was not proven stable across registered independent decodes')
-    require(stability.get('distinct_digests') == 1, 'stability claims differing digests')
+    require(stability.get('distinct_digests') == 1 and
+            type(stability.get('distinct_digests')) is int,
+            'stability claims differing digests')
     require(stability.get('digest') == capture['sha256'], 'stability digest is not the capture digest')
     if evidence['schema'] == SCHEMA:
         require(stability.get('commands') == recorded_commands(),
@@ -413,8 +477,9 @@ def verify_evidence(evidence, packet_path=None, manifest_path=None, macos_path=N
     decoder = evidence['decoder']
     require(decoder.get('id') == 'ffmpeg-cfhd', 'decoder role mismatch')
     require(is_digest(decoder.get('binary_sha256')), 'decoder executable is not bound')
-    require(isinstance(decoder.get('version'), str) and decoder['version'],
-            'decoder version is not recorded')
+    require(isinstance(decoder.get('version'), str) and decoder['version'] and
+            _decoder_version(decoder['version']) == decoder['version'],
+            'decoder version is not a bound ffmpeg banner')
 
     require(evidence['packet'].get('frame_index') == FRAME_INDEX, 'unexpected frame index')
     require(evidence['packet'].get('artifact') == PACKET_ARTIFACT,

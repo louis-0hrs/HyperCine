@@ -52,10 +52,13 @@ The retained `metal-packet-capture-381-20261117.json` is schema `/1`. Its runner
 placed `-threads` after `-i`, so those options configured the rawvideo **output
 encoder**, not the CFHD input decoder. Its four equal output digests remain
 historical decoder-agreement evidence; they do not establish decoder-thread
-configuration coverage. The verifier preserves this distinction and reports
-`input_thread_options_bound=false` for the legacy record. Attaching new command
-arrays to a legacy record is refused. The corrected `/2` capture independently
-reproduced the same digest under all four corrected commands.
+configuration coverage. The verifier applies the legacy record's narrower rules
+and reports `input_thread_options_bound=false` because the artifact declares
+schema `/1`; the schema is the artifact's own label. The committed files are
+therefore additionally pinned by SHA-256 in the guard suite, and the provenance
+of a `/2` copy rests on recorder reproduction, not on `--verify`. Attaching new
+command arrays to a legacy record is refused. The corrected `/2` capture
+independently reproduced the same digest under all four corrected commands.
 
 ### Historical source attribution
 
@@ -80,9 +83,12 @@ Tightly packed planar 4:2:2, 10-bit code values in 16-bit little-endian storage,
 | u | 960 | 1080 | 1920 | 4147200 |
 | v | 960 | 1080 | 1920 | 6220800 |
 
-Range is studio (64–940); chroma siting is deliberately **not asserted**,
-because this packet carries no independent siting evidence. Error metrics are
-computed per sample in code values with peak 1023, never per byte.
+Measured per-plane extremes of this capture are y **113–871**, u **476–545**
+and v **478–542**; all lie inside the studio (64–940) span, and the range label
+is derived from those recorded values rather than asserted. Chroma siting is
+deliberately **not asserted**, because this packet carries no independent siting
+evidence. Error metrics are computed per sample in code values with peak 1023,
+never per byte.
 
 ## Negative controls actually executed
 
@@ -108,14 +114,23 @@ explicitly narrower scope.
 
 ### Correction acceptance
 
-On Linux x86_64, the corrected source passed all **165/165** registered
-standalone CTests with zero failures or CTest skips. The capture guard script
-passed **18/18** under normal Python and **18/18** under `python -O`.
+On Linux x86_64, the corrected C++ tree (unchanged by this evidence revision)
+passed all **165/165** registered standalone CTests with zero failures or CTest
+skips; the hosted runs at the evidence-revision head are linked from the PR.
+The capture guard script passed **19/19** under normal Python and **19/19**
+under `python -O`.
 An independent review separately removed the recorder agreement refusal,
 verifier agreement refusal, input-thread option placement and comparison-source
 binding: all four deliberate defects turned their intended tests RED in both
-Python modes. Restored source re-passed the full guard script. An independent
-live four-command capture reproduced the entire new JSON byte-for-byte.
+Python modes. A second independent review of the corrected head reproduced the
+record byte-for-byte and found two evidence-integrity gaps: the verifier cannot
+distinguish a relabeled legacy copy, and the decoder identity was recorded but
+unvalidated. Both are now addressed: the committed artifacts are digest-pinned
+in the guard suite, the decoder banner is format-checked at verify time, and
+per-plane sample extremes are recorded and cross-checked against the range
+label. Restored source re-passed the full guard script. The committed JSON at
+this head comes from one fresh four-command run of the recorder; its capture
+digest is unchanged (`ab5fd41c…`).
 
 These are local Linux and bounded measurement receipts. Updated-head Windows
 and hosted sanitizer acceptance remain pending the separately reviewed CI

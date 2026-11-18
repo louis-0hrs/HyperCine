@@ -261,6 +261,40 @@ def test_committed_evidence_refuses_tampering():
     expect_error(mutated(lambda e: e.update(issue='#999')), 'another issue')
     expect_error(mutated(lambda e: e.update(schema='hypercine.compat-matrix/1')),
                  'unsupported evidence schema')
+    expect_error(mutated(lambda e: e['packet'].update(frame_index=1)),
+                 'unexpected frame index')
+    expect_error(mutated(lambda e: e['compared'].update(frame_index=1)),
+                 'another frame')
+    expect_error(mutated(lambda e: e['stability'].update(distinct_digests=2)),
+                 'differing digests')
+    expect_error(mutated(lambda e: e['stability'].update(distinct_digests=True)),
+                 'differing digests')
+    expect_error(mutated(lambda e: e['capture'].update(samples=float(capture.SAMPLE_COUNT))),
+                 'sample count')
+    expect_error(mutated(lambda e: e['decoder'].update(version='gopro sdk 1.0')),
+                 'decoder version')
+    expect_error(mutated(lambda e: e['interpretation'].update(range='outside studio (64-940)')),
+                 'range interpretation')
+    expect_error(mutated(lambda e: e['interpretation']['observed_samples'][0].update(
+        minimum=1024)), '10-bit domain')
+    expect_error(mutated(lambda e: e['interpretation']['observed_samples'][1].update(
+        plane='y')), 'another plane')
+
+
+def test_committed_evidence_files_are_pinned_by_digest():
+    # The verifier cannot attest the provenance of an arbitrary copy: an
+    # edited file declares its own schema. The committed artifacts are pinned
+    # here so a silent rewrite inside the repository fails the guard suite.
+    pinned = {
+        ROOT / 'docs/validation/metal-packet-capture-381-20261118.json':
+            'cbe80cfb6ef24daaea6e132f7eaa05b62ef35239d8e10f4adef99106908f8b26',
+        ROOT / 'docs/validation/metal-packet-capture-381-20261117.json':
+            '7bb27ecba0adf3cae8cf8508c2c1166a4c446c6876c4f8ef0fad35d3e68e5b10',
+    }
+    for path, expected in pinned.items():
+        check(capture.sha256(path.read_bytes()) == expected, 'committed evidence digest changed: ' + path.name)
+    check(json.loads((ROOT / 'docs/validation/metal-packet-capture-381-20261117.json')
+                     .read_text(encoding='utf-8'))['schema'] == capture.LEGACY_SCHEMA)
 
 
 

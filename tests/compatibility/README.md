@@ -137,9 +137,11 @@ thread options selected the output encoder. Neither record changes this
 matrix's `NOT_OBSERVABLE` verdict.
 
 The live path wraps each committed packet with the already-reviewed `avi()`
-helper from `tests/compare_sdk_oracle.py`, decodes one frame to `yuv422p10le`
-and binds the decoder executable by SHA-256. It never writes into the fixture
-directories.
+helper from `tests/validate_standalone.py`, decodes one frame to `yuv422p10le`
+and records the decoder executable's SHA-256 plus its format-checked ffmpeg
+version banner. The digest is recorded, not externally pinned: `--verify`
+checks the artifact's internal consistency, not the presence of that binary. It
+never writes into the fixture directories.
 
 ## Rules for editing
 
