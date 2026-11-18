@@ -10,24 +10,73 @@
 #include "hypercine/filmscan3.h"
 
 #include <atomic>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <new>
+#if defined(_MSC_VER)
+#include <malloc.h>
+#endif
 #include <stdexcept>
 #include <string>
 
 namespace { std::atomic<unsigned long long> allocations{0}; }
-void* operator new(std::size_t n) {
+
+// The "no allocation" windows below are only as strong as this instrumentation.
+// A counter that intercepts the unaligned overloads alone cannot notice an
+// aligned allocation, so it covers the whole family: plain and aligned, scalar
+// and array, each with its matching delete. AllocationInstrumentation() is the
+// positive control that proves every path is really counted.
+void* CountedAllocate(std::size_t n) {
     if (void* p = std::malloc(n ? n : 1)) { ++allocations; return p; }
     throw std::bad_alloc();
 }
+
+void* CountedAllocateAligned(std::size_t n, std::align_val_t alignment) {
+    const auto bytes = static_cast<std::size_t>(alignment);
+    void* p = nullptr;
+#if defined(_MSC_VER)
+    p = ::_aligned_malloc(n ? n : 1, bytes);
+#else
+    if (::posix_memalign(&p, bytes, n ? n : 1) != 0) p = nullptr;
+#endif
+    if (!p) throw std::bad_alloc();
+    ++allocations;
+    return p;
+}
+
+void CountedFreeAligned(void* p) noexcept {
+#if defined(_MSC_VER)
+    ::_aligned_free(p);
+#else
+    std::free(p);
+#endif
+}
+
+void* operator new(std::size_t n) { return CountedAllocate(n); }
+void* operator new[](std::size_t n) { return CountedAllocate(n); }
 void operator delete(void* p) noexcept { std::free(p); }
 void operator delete(void* p, std::size_t) noexcept { std::free(p); }
-void* operator new[](std::size_t n) { return ::operator new(n); }
-void operator delete[](void* p) noexcept { ::operator delete(p); }
-void operator delete[](void* p, std::size_t) noexcept { ::operator delete(p); }
+void operator delete[](void* p) noexcept { std::free(p); }
+void operator delete[](void* p, std::size_t) noexcept { std::free(p); }
+void* operator new(std::size_t n, std::align_val_t a) {
+    return CountedAllocateAligned(n, a);
+}
+void* operator new[](std::size_t n, std::align_val_t a) {
+    return CountedAllocateAligned(n, a);
+}
+void operator delete(void* p, std::align_val_t) noexcept { CountedFreeAligned(p); }
+void operator delete(void* p, std::size_t, std::align_val_t) noexcept {
+    CountedFreeAligned(p);
+}
+void operator delete[](void* p, std::align_val_t) noexcept {
+    CountedFreeAligned(p);
+}
+void operator delete[](void* p, std::size_t, std::align_val_t) noexcept {
+    CountedFreeAligned(p);
+}
 
 using namespace hypercine::standalone;
 using namespace hypercine::standalone::detail;
@@ -42,6 +91,41 @@ unsigned frontend_calls = 0;
 void Require(bool ok, const std::string& message) {
     ++checks;
     if (!ok) throw std::runtime_error(message);
+}
+
+// Positive control for the counter above. Each call is made directly on the
+// allocation function, so no compiler elision can stand in for a real
+// allocation: four calls must move the counter by exactly four, the aligned
+// pair must be 64-byte aligned, and deallocation must not be counted (a counter
+// that counted frees as allocations could cancel an undetected allocation in a
+// later window).
+void AllocationInstrumentation() {
+    const auto start = allocations.load();
+
+    void* const plain = ::operator new(96);
+    void* const plain_array = ::operator new[](96);
+    void* const aligned = ::operator new(96, std::align_val_t{64});
+    void* const aligned_array = ::operator new[](96, std::align_val_t{64});
+
+    // Snapshot before Require: building its message string is itself an
+    // allocation, so reading the counter as a Require argument (evaluation
+    // order of the two arguments is unspecified) would count the message.
+    const auto allocated = allocations.load() - start;
+    Require(allocated == 4,
+            "allocation counter did not observe every allocation path");
+    Require(reinterpret_cast<std::uintptr_t>(aligned) % 64 == 0 &&
+                reinterpret_cast<std::uintptr_t>(aligned_array) % 64 == 0,
+            "aligned allocation did not honour the requested alignment");
+
+    const auto before_free = allocations.load();
+    ::operator delete(plain);
+    ::operator delete[](plain_array);
+    ::operator delete(aligned, std::align_val_t{64});
+    ::operator delete[](aligned_array, std::align_val_t{64});
+
+    const auto after_delete = allocations.load() - before_free;
+    Require(after_delete == 0,
+            "deallocation changed the allocation counter");
 }
 
 std::unique_ptr<EncoderSession> CountingFactory(const EncoderSessionConfig& config,
@@ -402,6 +486,8 @@ void NativeSessionContract() {
 
 int main() {
     try {
+        AllocationInstrumentation();
+
         // The native domain is its own enumerator, not an alias of an existing
         // format: an alias would let one of them silently answer for the other.
         Require(static_cast<int>(SourcePixelFormat::Yuv422p10Native) !=
