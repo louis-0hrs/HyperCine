@@ -52,9 +52,15 @@ def prepare_linux(install=False):
         if (not install or os.environ.get('GITHUB_ACTIONS') != 'true' or
                 os.environ.get('HC_RUNNER_ENVIRONMENT') != 'github-hosted'):
             raise RuntimeError('missing prerequisites; hosted installation not authorized')
-        for command in (['sudo', '-n', 'apt-get', 'update'],
-                        ['sudo', '-n', 'apt-get', 'install', '--no-install-recommends', '-y'] + packages):
-            subprocess.run(command, stdin=subprocess.DEVNULL, check=True, timeout=600)
+        # Hosted mirrors can deliver FFmpeg's transitive dependencies slowly.
+        # Keep update bounded at 10 minutes; give only the package install a
+        # 20-minute ceiling (within the workflow's 45-minute job budget).
+        # This does not retry or relax any post-install probe or test verdict.
+        for command, timeout in (
+                (['sudo', '-n', 'apt-get', 'update'], 600),
+                (['sudo', '-n', 'apt-get', 'install', '--no-install-recommends', '-y']
+                 + packages, 1200)):
+            subprocess.run(command, stdin=subprocess.DEVNULL, check=True, timeout=timeout)
         if missing_packages():
             raise RuntimeError('prerequisites still missing after installation')
     result = {'setup': 'installed_missing' if packages else 'reused_image_tools',
