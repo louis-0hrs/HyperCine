@@ -292,7 +292,10 @@ def test_committed_evidence_files_are_pinned_by_digest():
             '7bb27ecba0adf3cae8cf8508c2c1166a4c446c6876c4f8ef0fad35d3e68e5b10',
     }
     for path, expected in pinned.items():
-        check(capture.sha256(path.read_bytes()) == expected, 'committed evidence digest changed: ' + path.name)
+        # Normalize line endings: Git may check the same blob out as CRLF.
+        text = path.read_text(encoding='utf-8').replace('\r\n', '\n')
+        check(capture.sha256(text.encode('utf-8')) == expected,
+              'committed evidence digest changed: ' + path.name)
     check(json.loads((ROOT / 'docs/validation/metal-packet-capture-381-20261117.json')
                      .read_text(encoding='utf-8'))['schema'] == capture.LEGACY_SCHEMA)
 
