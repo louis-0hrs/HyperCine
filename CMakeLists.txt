@@ -631,7 +631,7 @@ if(HYPERCINE_BUILD_STANDALONE)
         endforeach()
         # Issue #259: native YUV422p10 plane input as an explicit source domain.
         # Same normal/optimized split as the wire boundary: `normal` compiles its
-        # own non-NDEBUG capability translation unit, `optimized` exercises the
+        # own non-NDEBUG capability/session translation units, `optimized` exercises the
         # actual Release-library copy, so the domain rules are tested in both.
         foreach(planes_mode IN ITEMS normal optimized)
             add_executable(test_encoder_native_planes_${planes_mode}
@@ -639,6 +639,7 @@ if(HYPERCINE_BUILD_STANDALONE)
             if(planes_mode STREQUAL "normal")
                 target_sources(test_encoder_native_planes_${planes_mode} PRIVATE
                     src/core/encoder_capability.cpp
+                    src/core/encoder_backend_selection.cpp
                     src/core/encoder_wire_request.cpp)
             endif()
             target_link_libraries(test_encoder_native_planes_${planes_mode}
