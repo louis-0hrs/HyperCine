@@ -158,6 +158,7 @@ jobs:
           name: cuda-build-log
           path: build.log
           if-no-files-found: warn
+          retention-days: 7
 
   inventory-gate-selftest:
     # The gate in cuda-build only proves the inventory it measures is complete.
@@ -188,3 +189,4 @@ jobs:
           name: cuda-inventory-gate-selftest-log
           path: inventory-gate-selftest.log
           if-no-files-found: warn
+          retention-days: 7
