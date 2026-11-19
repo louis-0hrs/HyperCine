@@ -32,9 +32,11 @@ HEIGHT = 128
 OUTPUT_BYTES = WIDTH * HEIGHT * 4  # yuv422p10le: Y + Cb + Cr, 16-bit LE
 PEAK = 1023
 PATTERNS = ('flat', 'gradient', 'canonical')
-# Builds that reproduced the pinned n8.0 reference bytes on the measured host.
+# Builds that reproduced the pinned n8.0 reference bytes on a measured host.
 # Extend only after re-running this harness and reviewing the new evidence.
-QUALIFIED_BUILD_PREFIXES = ('n8.0', '9.0.2')
+#   9.0.2  Windows x64 build (docs/validation/FFMPEG_ORACLE_QUALIFICATION_20261025.md)
+#   7.1.5  Debian 13 x86_64 build, gcc 14.2.0-19 (same note, 2026-11-19 section)
+QUALIFIED_BUILD_PREFIXES = ('n8.0', '9.0.2', '7.1.5')
 # Pre-registered discriminator control: flip one entropy-payload byte of the
 # canonical packet. The offset is fixed here, not chosen per run.
 MUTATION_OFFSET = 500

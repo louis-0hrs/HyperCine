@@ -130,3 +130,52 @@ therefore reports a blocked gate, not a green one.
    owned by Draft #237, and at callsite #5, which remains with the phase lane.
 4. Only then may `tools/check_reference_release.py` report
    `independent_pixel_oracle.qualified=true`.
+
+## Second measured build — Debian FFmpeg 7.1.5 (2026-11-19)
+
+Base: protected `main` `a10bf185490d1b726a3eef9b8b3ed724cf6b3fb7`, tree
+`bd0c839503893312be3a6c6e23cbee0c1bc046c2`. No fixture, manifest or adapter
+byte changed for this entry; only `QUALIFIED_BUILD_PREFIXES` gained `7.1.5`.
+
+- Build banner: `ffmpeg version 7.1.5-0+deb13u1`, built with gcc 14
+  (Debian 14.2.0-19).
+- Decoder binaries: `/usr/bin/ffmpeg`
+  `e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a`,
+  `/usr/bin/ffprobe`
+  `cefc5f81c0b18429cdbf8fa5a89e1e9c759235e10f93f9b329ff1b2fdff26f46`.
+- Host: Linux x86_64, Debian 13, Python 3.13.5, CPU only.
+
+`python -B tests/qualify_ffmpeg_oracle.py` → exit `0`
+(`ORACLE_QUALIFICATION state=QUALIFIED decoder_build=7.1.5-0+deb13u1 packets=3 repeats=5`).
+
+| Packet | Distinct outputs / 5 | Output SHA-256 | Reference match |
+| --- | ---: | --- | --- |
+| flat | 1 | `427618421e3b4c84e8be9a39381f7607b294859dd37b91f439c81b0090e9593a` | exact |
+| gradient | 1 | `30a73209e9ca96bd4b052012c69b733572f8d179a9cfe4d8588e73d6d154513d` | exact |
+| canonical | 1 | `0f55d646a41090ac2cbed1b6d7d83815f6e747187f7533ab2eb707d78c3de84f` | exact |
+
+- `control=cross_packet outcome=REJECTED`
+- `control=mutated_packet outcome=PIXELS_DIFFER`
+
+**Why the entry is justified by a difference, not by repetition.** Before this
+change the same command on the same host exited `77` with
+`ORACLE_QUALIFICATION_BLOCKED reason=decoder build 7.1.5-0+deb13u1 is not on the
+measured list (n8.0, 9.0.2)`, and CTest reported `ffmpeg_oracle_qualification`
+as Skipped. A Debian 13 host therefore produced no oracle verdict at all, while
+`#383` already used this exact build for the cross-platform generation campaign.
+After the entry the gate executes and passes, and the three reference outputs
+are unchanged, so the 7.1.5 build is now a *measured* candidate rather than an
+assumed one.
+
+**Discrimination is preserved.** The contract test now asserts `7.1.5-0+deb13u1`
+is accepted and that `7.1.50` and `7.1.5.1` remain blocked: the rule stays
+"same version plus build suffix", never a bare string prefix, exactly as for
+`9.0.20` versus `9.0.2`.
+
+**Unchanged boundaries.** Three 128×128 standalone fixtures only; no
+1080p/4K, chroma, GOP, FIELDPLUS, GPU or original-SDK parity claim. This is not
+a GoPro or VC-5 conformance statement, and hosted GitHub runners still ship a
+build that stays `BLOCKED` (exit `77`), which is a missing candidate, not a
+failure and not a pass. `tools/check_reference_release.py`
+`independent_pixel_oracle.qualified` remains `false`; the allowlist entry still
+needs maintainer review in this Draft.
