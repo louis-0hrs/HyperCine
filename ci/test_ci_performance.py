@@ -87,7 +87,21 @@ class CIPerformanceTests(unittest.TestCase):
         self.assertEqual(run.call_args_list[1].args[0],
                          ['sudo', '-n', 'apt-get', 'install', '--no-install-recommends', '-y', 'ninja-build'])
         self.assertEqual(report['installed_packages'], ['ninja-build'])
-        self.assertTrue(all(call.kwargs['check'] and call.kwargs['timeout'] == 600 for call in run.call_args_list))
+        self.assertTrue(all(call.kwargs['check'] for call in run.call_args_list))
+        self.assertEqual([call.kwargs['timeout'] for call in run.call_args_list], [600, 1200])
+
+    def test_slow_install_exceeding_extended_bound_is_still_failure(self):
+        env = {'GITHUB_ACTIONS': 'true', 'HC_RUNNER_ENVIRONMENT': 'github-hosted'}
+        with patch.object(perf.platform, 'system', return_value='Linux'), \
+             patch.dict(perf.os.environ, env, clear=True), \
+             patch.object(perf, 'missing_packages', return_value=['ffmpeg']), \
+             patch.object(perf.subprocess, 'run', side_effect=[
+                 subprocess.CompletedProcess([], 0),
+                 subprocess.TimeoutExpired('apt-get install', 1200)]) as run, \
+             self.assertRaises(subprocess.TimeoutExpired):
+            perf.prepare_linux(True)
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(run.call_args_list[1].kwargs['timeout'], 1200)
 
     def test_failed_install_never_reports_setup_success(self):
         env = {'GITHUB_ACTIONS': 'true', 'HC_RUNNER_ENVIRONMENT': 'github-hosted'}
