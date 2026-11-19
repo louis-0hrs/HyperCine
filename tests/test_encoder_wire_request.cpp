@@ -28,6 +28,64 @@ std::unique_ptr<EncoderSession> Count(const EncoderSessionConfig& c, const Encod
     return std::make_unique<EncoderSession>(c, d);
 }
 EncoderSessionConfig Small() { EncoderSessionConfig c; c.width=128; c.height=24; return c; }
+
+Planes NativeFrame(bool padded, unsigned frame) {
+    Planes planes{{Plane(128,24),Plane(64,24),Plane(64,24)}};
+    for (unsigned channel=0; channel!=planes.size(); ++channel) {
+        auto& plane=planes[channel];
+        if (padded) plane.stride+=8;
+        // Padding is outside the active image; its invalid sample code must
+        // never reach the transform. Active samples retain all ten bits.
+        plane.pixels.assign(static_cast<std::size_t>(plane.stride)*plane.height,1025);
+        for (int y=0; y!=plane.height; ++y)
+            for (int x=0; x!=plane.width; ++x)
+                plane.pixels[static_cast<std::size_t>(y)*plane.stride+x]=
+                    static_cast<int16_t>((x*17+y*29+channel*127+frame*53)&1023);
+        plane.pixels[0]=0;
+        plane.pixels[1]=1024; // Existing native-domain inclusive boundary.
+    }
+    return planes;
+}
+
+void NativeWireEncode(const EncoderDevice& device, bool padded) {
+    auto config=Small();
+    config.pixel_format=SourcePixelFormat::Yuv422p10Native;
+    // Nondefault profiles expose a factory that accidentally drops config.
+    config.quality=padded ? hypercine::EncodingQuality::FilmScan2 : hypercine::EncodingQuality::Medium;
+    if (padded) config.native_planes={136,72};
+    EncoderWireRequest request(WireDialect::Cfhd,St2073Edition::None,0,
+                               DecoderTarget::Unspecified,config);
+    auto wire=CreateWireSession(request,device); // Actual default factory.
+    Require(wire && wire->active(), "native encode wire session not created");
+    Require(wire->config().quality==config.quality &&
+            wire->config().native_planes.luma_stride_samples==config.native_planes.luma_stride_samples &&
+            wire->config().native_planes.chroma_stride_samples==config.native_planes.chroma_stride_samples,
+            "native wire factory lost profile or layout binding");
+    EncoderSession direct(config,device);
+    std::vector<uint8_t> previous_sample;
+    for (unsigned frame=0; frame!=3; ++frame) {
+        const auto input=NativeFrame(padded,frame);
+        const auto actual=wire->Encode(input);
+        const auto expected=direct.Encode(input);
+        Require(!actual.sample.empty() && actual.sample==expected.sample,
+                "native wire packet differs from direct native session");
+        Require(actual.sample!=previous_sample, "native wire repeated a previous frame");
+        Require(actual.tables.quant==expected.tables.quant && actual.tables.scale==expected.tables.scale,
+                "native wire quality tables differ from direct native session");
+        Require(actual.state.frame_index==frame && actual.state.frame_index==expected.state.frame_index,
+                "native wire frame state differs from direct native session");
+        Require(actual.state.fs_rate_limiter==expected.state.fs_rate_limiter,
+                "native wire rate limiter differs from direct native session");
+        Require(actual.state.previous_sample_bytes==expected.state.previous_sample_bytes,
+                "native wire sample-size state differs from direct native session");
+        Require(actual.state.fs_overbitrate==expected.state.fs_overbitrate,
+                "native wire hysteresis state differs from direct native session");
+        Require(FilmScan3FullCoefficientHashesEqual(actual,expected),
+                "native wire coefficient hashes differ from direct native session");
+        previous_sample=actual.sample;
+    }
+}
+
 void Reject(WireDialect w, St2073Edition e, std::uint32_t p, DecoderTarget t,
             const EncoderSessionConfig& c, const EncoderDevice& d, WireRefusal reason) {
     EncoderWireRequest r(w,e,p,t,c); calls=0;
@@ -132,12 +190,20 @@ int main() {
     catch (const std::invalid_argument&) { byte_refused=true; }
     Require(byte_refused, "native wire session accepted interleaved BGRA bytes");
 
+    // Complete the admitted path: real packets through the production factory,
+    // shape-only packed input and explicitly bound padded sample strides.
+    NativeWireEncode(d,false);
+    NativeWireEncode(d,true);
+
     // Bound sample strides are admitted; the addressing domains stay exclusive.
     native.native_planes={128,64};
     EncoderWireRequest bound_request(WireDialect::Cfhd,St2073Edition::None,0,
                                      DecoderTarget::Unspecified,native);
     Require(CheckWireRequest(bound_request,d).permitted(), "bound native request refused");
     auto byte_binding=native; byte_binding.input_stride_bytes=256;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,byte_binding,d,
+           WireRefusal::CapabilityRefused);
+    byte_binding=native; byte_binding.input_bytes=1; // Byte count alone is also a domain mix.
     Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,byte_binding,d,
            WireRefusal::CapabilityRefused);
     auto half_bound=native; half_bound.native_planes={128,0};
@@ -152,8 +218,8 @@ int main() {
     auto reference=native; reference.require_reference_oracle=true;
     Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,reference,d,
            WireRefusal::CapabilityRefused);
-    // No GPU planes frontend exists. A native GPU request must refuse, and an
-    // explicit scalar fallback must not turn that into a CPU admission.
+    // No present GPU has a planes frontend. Explicit scalar fallback cannot
+    // repair that missing domain; absent-backend fallback is a separate policy.
     auto metal=native; metal.backend=SessionBackend::Metal;
     auto metal_device=d; metal_device.metal_available=true;
     metal_device.metal_max_buffer_length_bytes=64u*1024u*1024u;
@@ -168,6 +234,13 @@ int main() {
     cuda_device.cuda_total_global_memory_bytes=1024ull*1024ull*1024ull;
     cuda.allow_cpu_scalar_fallback=true;
     Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,cuda,cuda_device,
+           WireRefusal::CapabilityRefused);
+    auto vulkan=native; vulkan.backend=SessionBackend::Vulkan;
+    auto vulkan_device=d; vulkan_device.vulkan_available=true;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,vulkan,vulkan_device,
+           WireRefusal::CapabilityRefused);
+    vulkan.allow_cpu_scalar_fallback=true;
+    Reject(WireDialect::Cfhd,St2073Edition::None,0,DecoderTarget::Unspecified,vulkan,vulkan_device,
            WireRefusal::CapabilityRefused);
     std::cout << checks << " checks PASS\n";
     return 0;

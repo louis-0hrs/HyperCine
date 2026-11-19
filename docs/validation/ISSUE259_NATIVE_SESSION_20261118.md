@@ -133,7 +133,8 @@ This head closes that gap in the test only:
   fails at 705-check parity, so the old wording is now demonstrably
   unsupported rather than merely reworded.
 - The source was restored byte-identical after every arm
-  (`d5ea777d89e80ada77ef4fceafc45760b7b1538dcde8607d3f6b0a9e43e6e544`).
+  (`afd075680dc1c23aa8223700a97063a992e44be29524cc016536ee369c2774aa`, the
+  committed blob at this head).
 - No production decode, encode, capability or budget path changed; every
   existing refusal window still reports `before == after` under the wider
   counter.
@@ -145,11 +146,22 @@ Tested source SHA-256 identities:
 | `CMakeLists.txt` | `7d29cc66788a0d7b247830804703d060ab36bfb5cf8bbada00e090fce3e66b4b` |
 | `src/core/encoder_backend_selection.h` | `1cdd82e0059e1f82d4cc4565bc867fd8824572e3027a25e7e38c2d37d64d964d` |
 | `src/core/encoder_backend_selection.cpp` | `5aed401055a8b8f54751ff357582f1dba43c76de05fe84b1e4378d8d41677ca6` |
-| `tests/test_encoder_native_planes_capability.cpp` | `d5ea777d89e80ada77ef4fceafc45760b7b1538dcde8607d3f6b0a9e43e6e544` |
+| `tests/test_encoder_native_planes_capability.cpp` | `afd075680dc1c23aa8223700a97063a992e44be29524cc016536ee369c2774aa` |
 
 The pre-correction identity of that test file was
 `6495012de99f8a4dd66173583d693a8a1076b26c3023fbdd63b6fa920350ca3a`; the other
 three files are unchanged by this correction.
+
+**Evidence correction (same day).** An earlier revision of this section
+recorded the test-file identity as
+`d5ea777d89e80ada77ef4fceafc45760b7b1538dcde8607d3f6b0a9e43e6e544`. That digest
+corresponds to no committed blob in this repository's history and is withdrawn:
+`git cat-file -p HEAD:tests/test_encoder_native_planes_capability.cpp` hashes to
+`afd07568…` above. The check count (705 in each mode, re-run against the
+committed file) and the mutation results are unchanged; only the recorded
+identity was wrong. A pin that does not name the committed source cannot bind
+this evidence, so the corrected digest replaces it rather than being annotated
+as an alternative.
 
 No Windows/macOS runtime, native GPU, GoPro SDK, product or SMPTE VC-5
 qualification is claimed by this local result. `upstream/`, retained reference
