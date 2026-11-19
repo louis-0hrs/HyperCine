@@ -95,8 +95,15 @@ What these numbers do and do not say:
   the frozen control (`38.8927 dB` / max 280 to source, `62.7518 dB` / max 3
   SDK-vs-FFmpeg) on a different host and a different FFmpeg major version.
   Reproducing a claim is not new evidence about GoPro encoding quality.
-- **Metal packets** have no decoded-pixel capture in Git, so they stay
-  `NOT_OBSERVABLE`. Their existence is not interoperability evidence.
+- **Metal packets** still have no committed decoded-pixel capture and no
+  committed encoder input in Git, so the 1920x1080 row stays `NOT_OBSERVABLE`.
+  What *has* been measured since: the committed packet decodes on Linux FFmpeg
+  `7.1.5` to the exact digest recorded for the macOS decode
+  (`ab5fd41c…`, 4 decodes, one distinct digest), with the plane layout, range
+  and unasserted chroma siting spelled out in
+  `docs/validation/METAL_PACKET_CAPTURE_381.md`. Decoder agreement on those
+  bytes is not a verdict: a comparison still needs committed input or capture
+  bytes.
 
 ## Reproduce
 
@@ -119,12 +126,22 @@ Guard suite (corpus-free, synthetic fixtures only):
 
 ```sh
 python3 tests/test_compat_qualification.py
+python3 tests/test_metal_packet_capture.py
 ```
 
+The Metal packet capture recorder and its committed evidence are separate from
+this matrix; see `docs/validation/METAL_PACKET_CAPTURE_381.md`.
+The current `/2` capture binds decoder thread options before the FFmpeg input.
+The immutable `/1` capture retains digest-agreement evidence only because its
+thread options selected the output encoder. Neither record changes this
+matrix's `NOT_OBSERVABLE` verdict.
+
 The live path wraps each committed packet with the already-reviewed `avi()`
-helper from `tests/compare_sdk_oracle.py`, decodes one frame to `yuv422p10le`
-and binds the decoder executable by SHA-256. It never writes into the fixture
-directories.
+helper from `tests/validate_standalone.py`, decodes one frame to `yuv422p10le`
+and records the decoder executable's SHA-256 plus its format-checked ffmpeg
+version banner. The digest is recorded, not externally pinned: `--verify`
+checks the artifact's internal consistency, not the presence of that binary. It
+never writes into the fixture directories.
 
 ## Rules for editing
 

@@ -118,6 +118,10 @@ function(hypercine_register_sdk_free_contracts)
             "${PROJECT_SOURCE_DIR}/tests/test_compat_qualification.py"
             "${PROJECT_SOURCE_DIR}/tools/compat_qualification.py"
             "${PROJECT_SOURCE_DIR}/tools/compat_process.py"
+            "${PROJECT_SOURCE_DIR}/tools/metal_packet_capture.py"
+            "${PROJECT_SOURCE_DIR}/tests/test_metal_packet_capture.py"
+            "${PROJECT_SOURCE_DIR}/docs/validation/metal-packet-capture-381-20261117.json"
+            "${PROJECT_SOURCE_DIR}/docs/validation/metal-packet-capture-381-20261118.json"
             "${PROJECT_SOURCE_DIR}/tests/compatibility/matrix.json")
         if(NOT EXISTS "${required_file}" OR IS_DIRECTORY "${required_file}")
             message(FATAL_ERROR "Required compatibility contract file missing: ${required_file}")
@@ -132,6 +136,18 @@ function(hypercine_register_sdk_free_contracts)
             --verify "${contracts}/compatibility/matrix.json" --fixtures "${contracts}/fixtures")
     set_tests_properties(compat_qualification_matrix compat_qualification_matrix_optimized
         compat_qualification_committed_matrix PROPERTIES LABELS "contract" TIMEOUT 300)
+    # #381: one bounded decoded-pixel capture of the committed Metal packet.
+    add_test(NAME metal_packet_capture_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tests/test_metal_packet_capture.py")
+    add_test(NAME metal_packet_capture_contract_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${PROJECT_SOURCE_DIR}/tests/test_metal_packet_capture.py")
+    add_test(NAME metal_packet_capture_evidence
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tools/metal_packet_capture.py"
+            --verify "${PROJECT_SOURCE_DIR}/docs/validation/metal-packet-capture-381-20261118.json"
+            --packet "${contracts}/fixtures/macos-filmscan3/flat.cfhd"
+            --manifest "${contracts}/fixtures/macos-filmscan3/manifest.json")
+    set_tests_properties(metal_packet_capture_contract metal_packet_capture_contract_optimized
+        metal_packet_capture_evidence PROPERTIES LABELS "contract" TIMEOUT 120)
     # #363: a clean checkout is not proof of an unchanged committed SDK.
     add_test(NAME upstream_immutable
         COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/ci/check_upstream_immutable.py"
