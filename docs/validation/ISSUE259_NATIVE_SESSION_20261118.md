@@ -46,8 +46,9 @@ entry that report explicitly left for later.
   hashes across different sessions.
 
 The independent `CheckEncoderCapability` and `CreateWireSession` boundaries
-remain BGRA-only. Native wire-request admission is a separate follow-up; this
-change does not silently widen the reviewed wire contract.
+remain BGRA-only in this change. Native wire-request admission is a separate
+follow-up on a stacked branch (`feat/issue259-native-wire-admission-20261118`),
+so this change does not silently widen the reviewed wire contract.
 
 ## Regression coverage
 

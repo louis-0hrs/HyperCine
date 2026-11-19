@@ -5,11 +5,6 @@
 
 namespace hypercine { namespace standalone { namespace detail {
 namespace {
-EncoderCapabilityResult CheckSessionSource(const EncoderSessionConfig& config,
-                                           const EncoderDevice& device) {
-    return config.pixel_format == SourcePixelFormat::Yuv422p10Native
-        ? CheckNativePlaneCapability(config, device) : CheckEncoderCapability(config, device);
-}
 bool BackendOnlyRefusal(const EncoderCapabilityResult& capability) {
     const auto& flags = capability.reasons;
     // Backend fallback is not permission to repair a format, profile, resource,
@@ -35,6 +30,12 @@ BackendSelection RequireSelection(BackendSelection selection) {
 }
 }
 
+EncoderCapabilityResult CheckSessionSourceCapability(const EncoderSessionConfig& config,
+                                                     const EncoderDevice& device) {
+    return config.pixel_format == SourcePixelFormat::Yuv422p10Native
+        ? CheckNativePlaneCapability(config, device) : CheckEncoderCapability(config, device);
+}
+
 BackendSelection SelectBackend(const EncoderSessionConfig& config, const EncoderDevice& device) {
     return SelectBackend(config, device, BackendFactories{});
 }
@@ -49,14 +50,14 @@ BackendSelection SelectBackend(const EncoderSessionConfig& config, const Encoder
 BackendSelection SelectBackend(const EncoderSessionConfig& config, const EncoderDevice& device,
                                const BackendFactories& factories) {
     BackendSelection result;
-    result.requested = CheckSessionSource(config, device);
+    result.requested = CheckSessionSourceCapability(config, device);
     result.effective = result.requested;
     if (!result.effective.allocation_permitted && config.allow_cpu_scalar_fallback &&
         config.backend != SessionBackend::CpuScalar && BackendOnlyRefusal(result.requested)) {
         auto scalar = config;
         scalar.backend = SessionBackend::CpuScalar;
         scalar.allow_cpu_scalar_fallback = false;
-        result.effective = CheckSessionSource(scalar, device);
+        result.effective = CheckSessionSourceCapability(scalar, device);
         result.fallback = result.requested.primary == CapabilityReason::BackendNotPresent
             ? ScalarFallbackReason::BackendNotPresent : ScalarFallbackReason::BackendNotQualified;
     }

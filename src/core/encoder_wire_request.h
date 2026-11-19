@@ -36,6 +36,9 @@ struct WireCapability {
 WireCapability CheckWireRequest(const EncoderWireRequest&, const EncoderDevice&);
 // Returns null on refusal, before allocating even the session object or invoking
 // a backend factory. Factory overload is per-call and exercises the real path.
+// Admission is format-aware: a request whose config declares native YUV422p10
+// planes is answered by the native planes gate, never by the interleaved BGRA
+// gate, so the wire boundary cannot silently redefine the caller's source.
 using WireSessionFactory = std::unique_ptr<EncoderSession>(*)(const EncoderSessionConfig&, const EncoderDevice&);
 std::unique_ptr<EncoderSession> CreateWireSession(const EncoderWireRequest&, const EncoderDevice&,
                                                   WireSessionFactory = nullptr);
