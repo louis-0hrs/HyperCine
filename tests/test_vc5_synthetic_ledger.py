@@ -205,17 +205,18 @@ class SyntheticLedgerTests(unittest.TestCase):
         for mutant, (relative, before, after, assertion_name) in mutations.items():
             with self.subTest(mutant=mutant), tempfile.TemporaryDirectory() as temp:
                 root = Path(temp) / "repo"
+                # Reuse immutable committed objects, but give every arm its own
+                # metadata and working files. No temporary add/commit or hooks
+                # are needed to measure the mutated working-source manifest.
+                # Capture pipes so the bounded command waits for its output
+                # handles before TemporaryDirectory can remove the fixture.
+                subprocess.run(["git", "clone", "--shared", "--no-checkout",
+                                "--quiet", str(ROOT), str(root)],
+                               check=True, capture_output=True, timeout=30)
                 for name in generator.SOURCE_FILES:
                     target = root / name
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(ROOT / name, target)
-                subprocess.run(["git", "init", "-q", str(root)], check=True, timeout=3)
-                subprocess.run(["git", "-C", str(root), "-c", "user.name=Test",
-                                "-c", "user.email=test@example.invalid", "add", "."],
-                               check=True, timeout=3)
-                subprocess.run(["git", "-C", str(root), "-c", "user.name=Test",
-                                "-c", "user.email=test@example.invalid", "commit", "-qm", "fixture"],
-                               check=True, timeout=5)
 
                 def assert_artifact():
                     gen = root / "tools/vc5_synthetic_packet.py"

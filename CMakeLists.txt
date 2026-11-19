@@ -112,6 +112,8 @@ function(hypercine_register_sdk_free_contracts)
         test_vc5_inspect_mutations test_vc5_inspect_mutations_optimized
         test_vc5_synthetic_ledger test_vc5_synthetic_ledger_optimized
         PROPERTIES LABELS "validation;vc5-structure" TIMEOUT 30)
+    set_tests_properties(test_vc5_synthetic_ledger test_vc5_synthetic_ledger_optimized
+        PROPERTIES TIMEOUT 120)
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
     foreach(required_file IN ITEMS
             "${PROJECT_SOURCE_DIR}/tests/test_compat_qualification.py"
