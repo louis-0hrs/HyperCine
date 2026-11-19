@@ -10,24 +10,73 @@
 #include "hypercine/filmscan3.h"
 
 #include <atomic>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <new>
+#if defined(_MSC_VER)
+#include <malloc.h>
+#endif
 #include <stdexcept>
 #include <string>
 
 namespace { std::atomic<unsigned long long> allocations{0}; }
-void* operator new(std::size_t n) {
+
+// The "no allocation" windows below are only as strong as this instrumentation.
+// A counter that intercepts the unaligned overloads alone cannot notice an
+// aligned allocation, so it covers the whole family: plain and aligned, scalar
+// and array, each with its matching delete. AllocationInstrumentation() is the
+// positive control that proves every path is really counted.
+void* CountedAllocate(std::size_t n) {
     if (void* p = std::malloc(n ? n : 1)) { ++allocations; return p; }
     throw std::bad_alloc();
 }
+
+void* CountedAllocateAligned(std::size_t n, std::align_val_t alignment) {
+    const auto bytes = static_cast<std::size_t>(alignment);
+    void* p = nullptr;
+#if defined(_MSC_VER)
+    p = ::_aligned_malloc(n ? n : 1, bytes);
+#else
+    if (::posix_memalign(&p, bytes, n ? n : 1) != 0) p = nullptr;
+#endif
+    if (!p) throw std::bad_alloc();
+    ++allocations;
+    return p;
+}
+
+void CountedFreeAligned(void* p) noexcept {
+#if defined(_MSC_VER)
+    ::_aligned_free(p);
+#else
+    std::free(p);
+#endif
+}
+
+void* operator new(std::size_t n) { return CountedAllocate(n); }
+void* operator new[](std::size_t n) { return CountedAllocate(n); }
 void operator delete(void* p) noexcept { std::free(p); }
 void operator delete(void* p, std::size_t) noexcept { std::free(p); }
-void* operator new[](std::size_t n) { return ::operator new(n); }
-void operator delete[](void* p) noexcept { ::operator delete(p); }
-void operator delete[](void* p, std::size_t) noexcept { ::operator delete(p); }
+void operator delete[](void* p) noexcept { std::free(p); }
+void operator delete[](void* p, std::size_t) noexcept { std::free(p); }
+void* operator new(std::size_t n, std::align_val_t a) {
+    return CountedAllocateAligned(n, a);
+}
+void* operator new[](std::size_t n, std::align_val_t a) {
+    return CountedAllocateAligned(n, a);
+}
+void operator delete(void* p, std::align_val_t) noexcept { CountedFreeAligned(p); }
+void operator delete(void* p, std::size_t, std::align_val_t) noexcept {
+    CountedFreeAligned(p);
+}
+void operator delete[](void* p, std::align_val_t) noexcept {
+    CountedFreeAligned(p);
+}
+void operator delete[](void* p, std::size_t, std::align_val_t) noexcept {
+    CountedFreeAligned(p);
+}
 
 using namespace hypercine::standalone;
 using namespace hypercine::standalone::detail;
@@ -37,16 +86,57 @@ namespace {
 unsigned checks = 0;
 // Counts real factory invocations on the wire/session path.
 unsigned factory_calls = 0;
+unsigned frontend_calls = 0;
 
 void Require(bool ok, const std::string& message) {
     ++checks;
     if (!ok) throw std::runtime_error(message);
 }
 
+// Positive control for the counter above. Each call is made directly on the
+// allocation function, so no compiler elision can stand in for a real
+// allocation: four calls must move the counter by exactly four, the aligned
+// pair must be 64-byte aligned, and deallocation must not be counted (a counter
+// that counted frees as allocations could cancel an undetected allocation in a
+// later window).
+void AllocationInstrumentation() {
+    const auto start = allocations.load();
+
+    void* const plain = ::operator new(96);
+    void* const plain_array = ::operator new[](96);
+    void* const aligned = ::operator new(96, std::align_val_t{64});
+    void* const aligned_array = ::operator new[](96, std::align_val_t{64});
+
+    // Snapshot before Require: building its message string is itself an
+    // allocation, so reading the counter as a Require argument (evaluation
+    // order of the two arguments is unspecified) would count the message.
+    const auto allocated = allocations.load() - start;
+    Require(allocated == 4,
+            "allocation counter did not observe every allocation path");
+    Require(reinterpret_cast<std::uintptr_t>(aligned) % 64 == 0 &&
+                reinterpret_cast<std::uintptr_t>(aligned_array) % 64 == 0,
+            "aligned allocation did not honour the requested alignment");
+
+    const auto before_free = allocations.load();
+    ::operator delete(plain);
+    ::operator delete[](plain_array);
+    ::operator delete(aligned, std::align_val_t{64});
+    ::operator delete[](aligned_array, std::align_val_t{64});
+
+    const auto after_delete = allocations.load() - before_free;
+    Require(after_delete == 0,
+            "deallocation changed the allocation counter");
+}
+
 std::unique_ptr<EncoderSession> CountingFactory(const EncoderSessionConfig& config,
                                                 const EncoderDevice& device) {
     ++factory_calls;
     return std::make_unique<EncoderSession>(config, device);
+}
+
+std::shared_ptr<Frontend> CountingFrontend(FilmScan3Geometry geometry, WaveletIsa isa) {
+    ++frontend_calls;
+    return CpuFrontend(geometry, isa);
 }
 
 EncoderDevice Host() {
@@ -105,6 +195,16 @@ void RejectNative(const EncoderSessionConfig& config, const EncoderDevice& devic
     if (expect_no_allocation)
         Require(before == after, "native refusal allocated memory: " + detail_part);
 
+    // The new native session entry must consume the same refusal before the
+    // backend factory, independently of the deliberately BGRA-only wire gate.
+    frontend_calls = 0;
+    const auto selected = SelectBackend(config, device, CountingFrontend);
+    Require(!selected && !selected.frontend && frontend_calls == 0,
+            "native refusal reached a frontend factory: " + detail_part);
+    Require(selected.status == BackendSelectionStatus::CapabilityRefused &&
+                selected.effective.primary == reason,
+            "native session selection lost the capability refusal: " + detail_part);
+
     // The same configuration through the real wire/factory path: nothing is
     // created and the factory is never called.
     EncoderWireRequest request(WireDialect::Cfhd, St2073Edition::None, 0, DecoderTarget::Unspecified,
@@ -153,10 +253,241 @@ bool SamePlanes(const Planes& a, const Planes& b) {
     return true;
 }
 
+void RequireSameFrame(const FilmScan3Frame& actual, const FilmScan3Frame& expected,
+                      const std::string& label) {
+    Require(actual.sample == expected.sample, label + ": packet bytes differ");
+    Require(actual.tables.quant == expected.tables.quant && actual.tables.scale == expected.tables.scale,
+            label + ": shared quantization tables differ");
+    RequireSameState(actual.state, expected.state, label + ": rate state");
+    Require(actual.coefficient_hash == expected.coefficient_hash,
+            label + ": diagnostic policy differs");
+    if (actual.coefficient_hash == FilmScan3CoefficientHash::Full) {
+        Require(FilmScan3FullCoefficientHashesEqual(actual, expected), label + ": coefficients differ");
+    } else {
+        Require(actual.coefficient_hash == FilmScan3CoefficientHash::DiagnosticOff,
+                label + ": encoded frame has no diagnostic disposition");
+        // Disabled-hash tombstones bind distinct session identities. Compare
+        // only their prescribed marker/slot/serial, never call them equal hashes.
+        for (unsigned slot = 0; slot != 30; ++slot) {
+            const auto a = actual.coefficient_fnv64[slot], b = expected.coefficient_fnv64[slot];
+            Require(a >> 48 == (0xd100u | slot) && b >> 48 == (0xd100u | slot) &&
+                        (a & 0xffffffu) == (b & 0xffffffu),
+                    label + ": invalid diagnostic tombstone or serial");
+        }
+    }
+}
+
+Planes Padded(const Planes& input) {
+    Planes result = input;
+    for (unsigned c = 0; c != 3; ++c) {
+        auto& plane = result[c];
+        plane.stride += 8;
+        // Deliberately out-of-range padding is not an active component.
+        plane.pixels.assign(static_cast<std::size_t>(plane.stride) * plane.height, 1025);
+        for (int y = 0; y != plane.height; ++y)
+            for (int x = 0; x != plane.width; ++x)
+                plane.pixels[static_cast<std::size_t>(y) * plane.stride + x] =
+                    input[c].pixels[static_cast<std::size_t>(y) * input[c].stride + x];
+    }
+    return result;
+}
+
+void NativeSessionContract() {
+    constexpr int width = 128, height = 24;
+    const FilmScan3Geometry geometry{width, height};
+    const auto host = Host();
+    const auto bgra = BgraFrame(width, height);
+    const auto planes = Converted(bgra, width, height);
+
+    // Selection reaches exactly the admitted scalar factory and never widens
+    // profile/geometry/reference admission. Six immutable profile snapshots all
+    // feed the same encoder, including their state over ordered distinct frames.
+    for (const auto quality : {hypercine::EncodingQuality::Low, hypercine::EncodingQuality::Medium,
+                                hypercine::EncodingQuality::High, hypercine::EncodingQuality::FilmScan1,
+                                hypercine::EncodingQuality::FilmScan2, hypercine::EncodingQuality::FilmScan3}) {
+        auto config = NativeConfig();
+        config.quality = quality;
+        frontend_calls = 0;
+        const auto selected = SelectBackend(config, host, CountingFrontend);
+        Require(selected && frontend_calls == 1 && selected.frontend->Backend() == FrontendBackend::Cpu &&
+                    selected.frontend->Isa() == WaveletIsa::Scalar,
+                "native session did not select the scalar factory exactly once");
+        EncoderSession session(config, host);
+        FilmScan3Encoder direct(geometry, WaveletIsa::Scalar);
+        direct.SetSessionQuality(quality);
+        config.quality = hypercine::EncodingQuality::Low;
+        config.width = 256;
+        config.native_planes.luma_stride_samples = 256;
+        Require(session.config().quality == quality && session.config().width == width &&
+                    session.config().native_planes.luma_stride_samples == width,
+                "caller mutation changed the session profile/layout snapshot");
+        for (int frame = 0; frame != 3; ++frame) {
+            auto current = planes;
+            current[0].pixels[0] = static_cast<int16_t>(64 + frame * 31);
+            RequireSameFrame(session.Encode(current), direct.Encode(current), "native session sequence");
+        }
+        session.Reset();
+        direct.Reset();
+        Require(session.config().quality == quality, "Reset changed the session profile snapshot");
+        RequireSameFrame(session.Encode(planes), direct.Encode(planes), "native session reset");
+    }
+
+    // Refused calls in an established session cannot consume frame/rate/hash
+    // state. Compare the next successful packet with an uninterrupted control.
+    {
+        auto config = NativeConfig();
+        EncoderSession session(config, host), control(config, host);
+        RequireSameFrame(session.Encode(planes), control.Encode(planes), "refusal setup");
+        bool refused = false;
+        try { (void)session.Encode(bgra.data(), bgra.size(), width * 4); }
+        catch (const std::invalid_argument&) { refused = true; }
+        Require(refused, "native session accepted BGRA bytes");
+        for (int invalid : {-1, 1025}) {
+            auto bad = planes;
+            bad[2].pixels[0] = static_cast<int16_t>(invalid);
+            const auto before = bad;
+            refused = false;
+            try { (void)session.Encode(bad); }
+            catch (const std::invalid_argument&) { refused = true; }
+            Require(refused && SamePlanes(before, bad), "native sample refusal changed source or succeeded");
+        }
+        auto bad_shape = planes;
+        --bad_shape[1].height;
+        refused = false;
+        try { (void)session.Encode(bad_shape); }
+        catch (const std::invalid_argument&) { refused = true; }
+        Require(refused, "native session accepted a wrong chroma shape");
+        auto short_storage = planes;
+        short_storage[0].pixels.pop_back();
+        refused = false;
+        try { (void)session.Encode(short_storage); }
+        catch (const std::invalid_argument&) { refused = true; }
+        Require(refused, "native session accepted truncated plane storage");
+        const auto padded = Padded(planes);
+        refused = false;
+        try { (void)session.Encode(padded); }
+        catch (const std::invalid_argument&) { refused = true; }
+        Require(refused, "native session ignored its bound sample strides");
+        RequireSameFrame(session.Encode(planes), control.Encode(planes), "all native refusals rollback");
+    }
+    {
+        EncoderSessionConfig config;
+        config.width = width; config.height = height;
+        EncoderSession session(config, host), control(config, host);
+        bool refused = false;
+        try { (void)session.Encode(planes); }
+        catch (const std::invalid_argument&) { refused = true; }
+        Require(refused, "BGRA session accepted native planes");
+        RequireSameFrame(session.Encode(bgra.data(), bgra.size(), width * 4),
+                         control.Encode(bgra.data(), bgra.size(), width * 4), "BGRA domain refusal rollback");
+    }
+
+    // A shape-only query does not charge storage until actual planes arrive.
+    // Exact packed/padded boundaries prove the per-frame budget recheck; neither
+    // an accepted shape nor a prior successful frame waives a later frame's cost.
+    {
+        const auto padded = Padded(planes);
+        const std::uint64_t base = 36u * width * height + 1024u * 1024u;
+        const std::uint64_t packed_bytes = 4u * width * height;
+        const std::uint64_t padded_bytes = 2u * height * (padded[0].stride + 2u * padded[1].stride);
+        auto config = NativeConfig();
+        config.native_planes = NativePlaneStorage{};
+        config.cpu_memory_budget_bytes = base + packed_bytes;
+        EncoderSession session(config, host), control(config, host);
+        RequireSameFrame(session.Encode(planes), control.Encode(planes), "shape-only packed budget");
+        bool refused = false;
+        try { (void)session.Encode(padded); }
+        catch (const BackendSelectionError& error) {
+            refused = error.status() == BackendSelectionStatus::CapabilityRefused &&
+                      error.reason() == CapabilityReason::MemoryBudgetExceeded;
+        }
+        Require(refused, "actual padded planes bypassed the session memory budget");
+        auto extra_storage = planes;
+        extra_storage[0].pixels.push_back(0);
+        refused = false;
+        try { (void)session.Encode(extra_storage); }
+        catch (const std::invalid_argument&) { refused = true; }
+        Require(refused, "inactive vector tail bypassed the native storage budget");
+        RequireSameFrame(session.Encode(planes), control.Encode(planes), "budget refusal rollback");
+        config.cpu_memory_budget_bytes = base + padded_bytes;
+        EncoderSession padded_session(config, host);
+        FilmScan3Encoder direct(geometry, WaveletIsa::Scalar);
+        RequireSameFrame(padded_session.Encode(padded), direct.Encode(planes), "exact padded budget");
+        auto unequal_chroma = padded;
+        unequal_chroma[2] = planes[2];
+        refused = false;
+        try { (void)padded_session.Encode(unequal_chroma); }
+        catch (const std::invalid_argument&) { refused = true; }
+        Require(refused, "shape-only session guessed an unequal chroma stride");
+        config.cpu_memory_budget_bytes = base + packed_bytes - 1;
+        EncoderSession short_budget(config, host);
+        refused = false;
+        try { (void)short_budget.Encode(planes); }
+        catch (const BackendSelectionError& error) {
+            refused = error.reason() == CapabilityReason::MemoryBudgetExceeded;
+        }
+        Require(refused, "shape-only session admitted one byte below packed planning ceiling");
+    }
+
+    // Explicit absent-backend fallback still works, but a present GPU cannot
+    // borrow the CPU planes implementation. The selected origin stays visible.
+    {
+        auto config = NativeConfig();
+        config.backend = SessionBackend::Metal;
+        config.allow_cpu_scalar_fallback = true;
+        EncoderSession session(config, host);
+        Require(session.selection().fallback == ScalarFallbackReason::BackendNotPresent &&
+                    session.selection().effective.effective_backend == SessionBackend::CpuScalar,
+                "native scalar fallback origin was lost");
+        FilmScan3Encoder direct(geometry, WaveletIsa::Scalar);
+        RequireSameFrame(session.Encode(planes), direct.Encode(planes), "explicit native fallback");
+        frontend_calls = 0;
+        const auto present = SelectBackend(config, AllBackends(), CountingFrontend);
+        Require(!present && frontend_calls == 0 &&
+                    present.effective.primary == CapabilityReason::ValidButNotImplemented,
+                "present Metal planes request became a silent scalar fallback");
+    }
+
+    // Move transfers the source-domain snapshot, quality, diagnostics and frame
+    // state. Neither native Encode nor Reset can reactivate the source object.
+    {
+        auto config = NativeConfig();
+        config.quality = hypercine::EncodingQuality::Medium;
+        config.diagnostic = DiagnosticMode::None;
+        EncoderSession original(config, host), control(config, host);
+        const auto first = original.Encode(planes);
+        RequireSameFrame(first, control.Encode(planes), "move setup");
+        EncoderSession moved(std::move(original));
+        bool refused = false;
+        try { (void)original.Encode(planes); }
+        catch (const std::logic_error&) { refused = true; }
+        Require(refused && !original.active(), "moved-from native session remained active");
+        original.Reset();
+        Require(!original.active(), "Reset reactivated a moved-from native session");
+        const auto second = moved.Encode(planes);
+        RequireSameFrame(second, control.Encode(planes), "native move constructor");
+        Require((first.coefficient_fnv64[0] & ~std::uint64_t{0xffffffu}) ==
+                    (second.coefficient_fnv64[0] & ~std::uint64_t{0xffffffu}),
+                "native move constructor changed diagnostic session identity");
+        EncoderSession target(NativeConfig(), host);
+        target = std::move(moved);
+        Require(!moved.active() && target.config().quality == hypercine::EncodingQuality::Medium &&
+                    target.config().diagnostic == DiagnosticMode::None,
+                "native move assignment lost the profile/diagnostic snapshot");
+        const auto third = target.Encode(planes);
+        RequireSameFrame(third, control.Encode(planes), "native move assignment");
+        Require((first.coefficient_fnv64[0] & ~std::uint64_t{0xffffffu}) ==
+                    (third.coefficient_fnv64[0] & ~std::uint64_t{0xffffffu}),
+                "native move assignment changed diagnostic session identity");
+    }
+}
+
 }  // namespace
 
 int main() {
     try {
+        AllocationInstrumentation();
+
         // The native domain is its own enumerator, not an alias of an existing
         // format: an alias would let one of them silently answer for the other.
         Require(static_cast<int>(SourcePixelFormat::Yuv422p10Native) !=
@@ -169,6 +500,7 @@ int main() {
 
         const auto host = Host();
         const auto gpu = AllBackends();
+        NativeSessionContract();
 
         // 1. CPU-native is supported inside the existing geometry/budget limits,
         // for all six profiles through the one shared admission/evidence table.
@@ -370,11 +702,17 @@ int main() {
             Require(std::strstr(result.detail, "interleaved BGRA session source") != nullptr,
                     "BGRA session query did not name the domain mismatch");
             Require(before == after, "BGRA session query allocated for a native refusal");
+            // The wire boundary is format-aware: this request must be answered
+            // by the native gate above, not budgeted as interleaved BGRA bytes.
+            // The direct BGRA query on the same configuration still refuses.
             EncoderWireRequest request(WireDialect::Cfhd, St2073Edition::None, 0,
                                        DecoderTarget::Unspecified, NativeConfig());
             factory_calls = 0;
             auto session = CreateWireSession(request, host, CountingFactory);
-            Require(!session && factory_calls == 0, "native planes reached a BGRA session factory");
+            Require(session && factory_calls == 1,
+                    "native planes did not reach the native session factory");
+            Require(session->config().pixel_format == SourcePixelFormat::Yuv422p10Native,
+                    "wire session lost the native source domain");
         }
 
         // 4. Source-bound: the admitted geometry really encodes through the

@@ -46,6 +46,16 @@ BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, const BackendFactories&);
 BackendSelection SelectBackend(const EncoderSessionConfig&, const EncoderDevice&, ScalarFrontendFactory);
 
+// Format-aware capability preflight for internal admission boundaries. It
+// dispatches on the declared source format: native YUV422p10 planes are answered
+// by CheckNativePlaneCapability, everything else by the interleaved BGRA entry.
+// A boundary must not answer a planes request through the BGRA gate (or the
+// reverse) merely because both queries share one signature; that mistake is a
+// silent domain substitution, not a stricter refusal. Never allocates, never
+// probes hardware and never selects or constructs a frontend.
+EncoderCapabilityResult CheckSessionSourceCapability(const EncoderSessionConfig&,
+                                                     const EncoderDevice&);
+
 class BackendSelectionError final : public std::runtime_error {
 public:
     explicit BackendSelectionError(const BackendSelection& result);
@@ -60,7 +70,8 @@ private:
 
 // Internal entry point that actually consumes permission before constructing a
 // frontend. Owns a config snapshot and the existing FilmScan3Encoder, not another
-// writer. Bound storage and diagnostics are applied for every Encode call.
+// writer. The immutable source format selects the BGRA or native-planes gate;
+// bound storage and diagnostics are applied for every matching Encode call.
 class EncoderSession final {
 public:
     EncoderSession(const EncoderSessionConfig&, const EncoderDevice&);
@@ -74,6 +85,12 @@ public:
     // reactivate it. Only move assignment can install another session.
     bool active() const noexcept { return encoder_.active(); }
     FilmScan3Frame Encode(const uint8_t*, std::size_t bytes, std::size_t stride);
+    // Native Y, Cr, Cb storage only, admitted through CheckNativePlaneCapability.
+    // The source domain cannot change during a session. Actual strides are
+    // checked against both the optional binding and the memory ceiling; vectors
+    // must contain exactly stride*height samples, with equal chroma strides.
+    // These checks precede sample consumption and any encoder state change.
+    FilmScan3Frame Encode(const Planes&);
     void Reset() noexcept { encoder_.Reset(); }
     const BackendSelection& selection() const noexcept { return selection_; }
     const EncoderSessionConfig& config() const noexcept { return config_; }

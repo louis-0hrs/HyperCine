@@ -30,6 +30,12 @@ BackendSelection RequireSelection(BackendSelection selection) {
 }
 }
 
+EncoderCapabilityResult CheckSessionSourceCapability(const EncoderSessionConfig& config,
+                                                     const EncoderDevice& device) {
+    return config.pixel_format == SourcePixelFormat::Yuv422p10Native
+        ? CheckNativePlaneCapability(config, device) : CheckEncoderCapability(config, device);
+}
+
 BackendSelection SelectBackend(const EncoderSessionConfig& config, const EncoderDevice& device) {
     return SelectBackend(config, device, BackendFactories{});
 }
@@ -44,14 +50,14 @@ BackendSelection SelectBackend(const EncoderSessionConfig& config, const Encoder
 BackendSelection SelectBackend(const EncoderSessionConfig& config, const EncoderDevice& device,
                                const BackendFactories& factories) {
     BackendSelection result;
-    result.requested = CheckEncoderCapability(config, device);
+    result.requested = CheckSessionSourceCapability(config, device);
     result.effective = result.requested;
     if (!result.effective.allocation_permitted && config.allow_cpu_scalar_fallback &&
         config.backend != SessionBackend::CpuScalar && BackendOnlyRefusal(result.requested)) {
         auto scalar = config;
         scalar.backend = SessionBackend::CpuScalar;
         scalar.allow_cpu_scalar_fallback = false;
-        result.effective = CheckEncoderCapability(scalar, device);
+        result.effective = CheckSessionSourceCapability(scalar, device);
         result.fallback = result.requested.primary == CapabilityReason::BackendNotPresent
             ? ScalarFallbackReason::BackendNotPresent : ScalarFallbackReason::BackendNotQualified;
     }
@@ -144,6 +150,8 @@ EncoderSession& EncoderSession::operator=(EncoderSession&& other) noexcept {
 
 FilmScan3Frame EncoderSession::Encode(const uint8_t* data, std::size_t bytes, std::size_t stride) {
     if (!active()) throw std::logic_error("moved-from encoder session is inactive");
+    if (config_.pixel_format != SourcePixelFormat::Bgra8)
+        throw std::invalid_argument("BGRA input does not match the session source domain");
     if (config_.input_stride_bytes != 0 &&
         (stride != config_.input_stride_bytes || bytes < config_.input_bytes))
         throw std::invalid_argument("input does not match the session storage contract");
@@ -151,6 +159,46 @@ FilmScan3Frame EncoderSession::Encode(const uint8_t* data, std::size_t bytes, st
     // a successful preallocation query is not proof of caller-owned storage.
     ValidateFilmScan3Input(data, bytes, geometry().width, geometry().height, stride);
     return encoder_.Encode(data, bytes, stride);
+}
+
+FilmScan3Frame EncoderSession::Encode(const Planes& planes) {
+    if (!active()) throw std::logic_error("moved-from encoder session is inactive");
+    if (config_.pixel_format != SourcePixelFormat::Yuv422p10Native)
+        throw std::invalid_argument("native planes do not match the session source domain");
+    if (planes[1].stride != planes[2].stride)
+        throw std::invalid_argument("native chroma strides do not match the session storage contract");
+    if (config_.native_planes.luma_stride_samples != 0 &&
+        (planes[0].stride != config_.native_planes.luma_stride_samples ||
+         planes[1].stride != config_.native_planes.chroma_stride_samples))
+        throw std::invalid_argument("native planes do not match the session storage contract");
+
+    // Shape-only admission does not bind caller-owned storage. Check the real
+    // strides on every frame so extra padding cannot bypass the caller's memory
+    // ceiling. The selected native backend is already CPU scalar; use that
+    // effective identity without re-probing hardware or retrying a GPU factory.
+    auto bound = config_;
+    bound.backend = selection_.effective.effective_backend;
+    bound.allow_cpu_scalar_fallback = false;
+    bound.native_planes = {planes[0].stride, planes[1].stride};
+    BackendSelection actual;
+    actual.requested = CheckNativePlaneCapability(bound, EncoderDevice{});
+    actual.effective = actual.requested;
+    if (!actual.effective.allocation_permitted) throw BackendSelectionError(actual);
+    // The CPU pyramid copies whole vectors, including any inactive tail. The
+    // capability ceiling charges stride*height, so accepting a larger vector
+    // would allocate bytes that were never admitted. Exact storage also makes
+    // truncated planes fail here before any sample is read.
+    for (const auto& plane : planes) {
+        const auto extent = static_cast<std::size_t>(plane.stride) *
+                            static_cast<std::size_t>(geometry().height);
+        if (plane.pixels.size() != extent)
+            throw std::invalid_argument("native plane storage must equal stride times session height");
+    }
+
+    // The existing planes entry checks geometry, allocation extent, alignment
+    // and every active sample before TransformPlanes and the one shared writer.
+    // Rejections therefore preserve both caller planes and encoder state.
+    return encoder_.Encode(planes);
 }
 
 }}}

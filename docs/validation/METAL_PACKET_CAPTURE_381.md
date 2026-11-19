@@ -132,10 +132,28 @@ label. Restored source re-passed the full guard script. The committed JSON at
 this head comes from one fresh four-command run of the recorder; its capture
 digest is unchanged (`ab5fd41c…`).
 
-These are local Linux and bounded measurement receipts. Updated-head Windows
-and hosted sanitizer acceptance remain pending the separately reviewed CI
-prerequisite #404 and subsequent final-tree checks; earlier #403 hosted results
-are not transferred to this correction.
+The corrected revision `84beceefb7cd24f534c94391d55e977d4ab634a8`
+(tree `25a929f272bf87e4f4ec12c3813ac9c4d58a2670`) subsequently passed
+**165/165** CTests on Windows MSVC, Linux Release and Linux ASan+UBSan in
+[hosted run 44394171736](https://github.com/louis-0hrs/HyperCine/actions/runs/44394171736).
+Those results qualify that historical tree, including the corrected evidence
+checks; they are not native Metal execution.
+
+### Integration with native sessions and wire admission — 19 November 2026
+
+PRs #404, #405 and #406 are now integrated in `main` at
+`77178c3418cc6897f705efeee9ffc4d18d07a090`. PR #403 forward-merges that
+baseline while preserving the three capture registrations, the native-plane
+and wire-session tests, and the corrected CI package-install timeout. The
+combined strict inventory remains **165 distinct CTests**. The packet,
+manifest, retained macOS record and both capture JSON files remain unchanged.
+
+This combined tree requires its own full Windows MSVC, Linux Release and
+Linux ASan+UBSan results, plus the applicable auxiliary workflow gates. The
+exact integration head/tree and executed platform receipts are recorded in
+[PR #403](https://github.com/louis-0hrs/HyperCine/pull/403). Neither the earlier
+165-test capture tree nor the 162-test native-session tree substitutes for
+those combined-tree checks. The compatibility verdict remains unchanged.
 
 ## What this still does not establish
 

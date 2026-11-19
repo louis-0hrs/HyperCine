@@ -14,7 +14,7 @@ WireCapability CheckWireRequest(const EncoderWireRequest& request, const Encoder
         result.refusal = WireRefusal::UnsupportedTarget;
         return result;
     }
-    result.capability = CheckEncoderCapability(request.config(), device);
+    result.capability = CheckSessionSourceCapability(request.config(), device);
     result.refusal = result.capability.allocation_permitted ? WireRefusal::None : WireRefusal::CapabilityRefused;
     return result;
 }
