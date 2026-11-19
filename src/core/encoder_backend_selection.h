@@ -60,7 +60,8 @@ private:
 
 // Internal entry point that actually consumes permission before constructing a
 // frontend. Owns a config snapshot and the existing FilmScan3Encoder, not another
-// writer. Bound storage and diagnostics are applied for every Encode call.
+// writer. The immutable source format selects the BGRA or native-planes gate;
+// bound storage and diagnostics are applied for every matching Encode call.
 class EncoderSession final {
 public:
     EncoderSession(const EncoderSessionConfig&, const EncoderDevice&);
@@ -74,6 +75,12 @@ public:
     // reactivate it. Only move assignment can install another session.
     bool active() const noexcept { return encoder_.active(); }
     FilmScan3Frame Encode(const uint8_t*, std::size_t bytes, std::size_t stride);
+    // Native Y, Cr, Cb storage only, admitted through CheckNativePlaneCapability.
+    // The source domain cannot change during a session. Actual strides are
+    // checked against both the optional binding and the memory ceiling; vectors
+    // must contain exactly stride*height samples, with equal chroma strides.
+    // These checks precede sample consumption and any encoder state change.
+    FilmScan3Frame Encode(const Planes&);
     void Reset() noexcept { encoder_.Reset(); }
     const BackendSelection& selection() const noexcept { return selection_; }
     const EncoderSessionConfig& config() const noexcept { return config_; }
