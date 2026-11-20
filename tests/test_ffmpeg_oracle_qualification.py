@@ -29,7 +29,9 @@ class QualificationContractTest(unittest.TestCase):
     def test_unmeasured_builds_are_blocked(self):
         # 7.1.50 and 7.1.5.1 are different builds from 7.1.5, exactly like
         # 9.0.20 is different from 9.0.2; the suffix rule is not a prefix rule.
-        for token in ('9.1.0', 'n7.1', '7.0.2', '9.0.20', 'n8.0.1', '7.1.50', '7.1.5.1'):
+        for token in ('9.1.0', 'n7.1', '7.0.2', '9.0.20', 'n8.0.1',
+                      '7.1.5', '7.1.5-unmeasured', '7.1.5-0+deb13u2',
+                      '7.1.5-0+deb13u1-fork', '7.1.50', '7.1.5.1'):
             with self.assertRaises(harness.Blocked):
                 harness.require_qualified_build(token)
 

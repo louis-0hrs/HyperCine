@@ -36,7 +36,8 @@ PATTERNS = ('flat', 'gradient', 'canonical')
 # Extend only after re-running this harness and reviewing the new evidence.
 #   9.0.2  Windows x64 build (docs/validation/FFMPEG_ORACLE_QUALIFICATION_20261025.md)
 #   7.1.5  Debian 13 x86_64 build, gcc 14.2.0-19 (same note, 2026-11-19 section)
-QUALIFIED_BUILD_PREFIXES = ('n8.0', '9.0.2', '7.1.5')
+QUALIFIED_BUILD_PREFIXES = ('n8.0', '9.0.2')
+QUALIFIED_EXACT_BUILDS = frozenset({'7.1.5-0+deb13u1'})
 # Pre-registered discriminator control: flip one entropy-payload byte of the
 # canonical packet. The offset is fixed here, not chosen per run.
 MUTATION_OFFSET = 500
@@ -127,8 +128,9 @@ def build_token(ffmpeg):
 def require_qualified_build(token):
     # Exact version token or a build suffix, never a bare string prefix:
     # "9.0.20" and "n8.0.1" are different builds from "9.0.2" and "n8.0".
-    matched = any(token == prefix or token.startswith(prefix + '-')
-                  for prefix in QUALIFIED_BUILD_PREFIXES)
+    matched = (token in QUALIFIED_EXACT_BUILDS or
+               any(token == prefix or token.startswith(prefix + '-')
+                   for prefix in QUALIFIED_BUILD_PREFIXES))
     if not matched:
         raise Blocked('decoder build {} is not on the measured list ({})'.format(
             token, ', '.join(QUALIFIED_BUILD_PREFIXES)))

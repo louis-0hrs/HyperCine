@@ -33,10 +33,12 @@ still pass the parity check; the encoder regression gate remains
 - The pinned reference bytes were produced by `FFmpeg n8.0`
   `140fd653aed8cad774f991ba083e2d01e86420c7` (fixture manifest).
 
-Only builds listed in `QUALIFIED_BUILD_PREFIXES` are evaluated. Any other
-build, or a missing tool, exits `77` with `ORACLE_QUALIFICATION_BLOCKED`; it is
-never reported as qualified. Adding a build is a reviewed change: re-run the
-harness, record the measured evidence, then extend the list.
+Only builds in `QUALIFIED_EXACT_BUILDS` or matching the existing
+`QUALIFIED_BUILD_PREFIXES` policy are evaluated. The Debian entry is admitted
+by exact token `7.1.5-0+deb13u1`, not by a `7.1.5` build-family prefix; other
+7.1.5 rebuilds or suffixes exit `77` with `ORACLE_QUALIFICATION_BLOCKED`. Any
+missing tool is blocked the same way. Adding a build is a reviewed change: re-run
+the harness, record the measured evidence, then extend the appropriate allowlist.
 
 ## Adapter and normalization contract
 
@@ -134,8 +136,9 @@ therefore reports a blocked gate, not a green one.
 ## Second measured build — Debian FFmpeg 7.1.5 (2026-11-19)
 
 Base: protected `main` `a10bf185490d1b726a3eef9b8b3ed724cf6b3fb7`, tree
-`bd0c839503893312be3a6c6e23cbee0c1bc046c2`. No fixture, manifest or adapter
-byte changed for this entry; only `QUALIFIED_BUILD_PREFIXES` gained `7.1.5`.
+`bd0c839503893312be3a6c6e23cbee0c1bc046c2`. No fixture or manifest byte changed for this entry. Historically the adapter
+added the broad `7.1.5` prefix; the corrective Draft409 change narrows that
+measurement to the exact Debian token.
 
 - Build banner: `ffmpeg version 7.1.5-0+deb13u1`, built with gcc 14
   (Debian 14.2.0-19).
@@ -167,10 +170,10 @@ After the entry the gate executes and passes, and the three reference outputs
 are unchanged, so the 7.1.5 build is now a *measured* candidate rather than an
 assumed one.
 
-**Discrimination is preserved.** The contract test now asserts `7.1.5-0+deb13u1`
-is accepted and that `7.1.50` and `7.1.5.1` remain blocked: the rule stays
-"same version plus build suffix", never a bare string prefix, exactly as for
-`9.0.20` versus `9.0.2`.
+**Exact-build boundary.** The contract accepts `7.1.5-0+deb13u1` only. It blocks
+`7.1.5`, `7.1.5-unmeasured`, `7.1.5-0+deb13u2`,
+`7.1.5-0+deb13u1-fork`, `7.1.50` and `7.1.5.1`. Existing n8.0/9.0.2
+version-plus-suffix behavior remains unchanged.
 
 **Unchanged boundaries.** Three 128×128 standalone fixtures only; no
 1080p/4K, chroma, GOP, FIELDPLUS, GPU or original-SDK parity claim. This is not
@@ -179,3 +182,16 @@ build that stays `BLOCKED` (exit `77`), which is a missing candidate, not a
 failure and not a pass. `tools/check_reference_release.py`
 `independent_pixel_oracle.qualified` remains `false`; the allowlist entry still
 needs maintainer review in this Draft.
+
+## Corrective Draft409 fresh receipt (2026-11-20)
+
+This is a fresh same-host rerun, distinct from the historical 2026-11-19
+measurement above. Source SHA-256 for `tests/qualify_ffmpeg_oracle.py`:
+`dc8343d3b93cfe3f8b2f04dbda57290f9d6634fa2fd8344cec4618ff3d8bfab2`;
+`ffmpeg` SHA-256: `e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a`;
+`ffprobe` SHA-256: `cefc5f81c0b18429cdbf8fa5a89e1e9c759235e10f93f9b329ff1b2fdff26f46`.
+Fresh command `python3 -B tests/qualify_ffmpeg_oracle.py` exited `0`: three
+packets × five decodes (15 total), each output matched the pinned reference
+with one distinct output; `cross_packet=REJECTED`;
+`mutated_packet=PIXELS_DIFFER`. This result is bounded to these fixtures,
+build and host; it does not expand any general oracle claim.
