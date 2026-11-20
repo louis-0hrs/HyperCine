@@ -18,6 +18,16 @@ spec = importlib.util.spec_from_file_location("synthetic_packet", GENERATOR)
 generator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(generator)
 EXPECTED = {"framing": "VC-5", "ChannelCount": 3, "Width": 48, "Height": 48}
+# Pinned independently of the generator module: removing an entry from
+# generator.SOURCE_FILES must fail closed instead of silently shrinking the ledger.
+PINNED_SOURCE_FILES = (
+    "CMakeLists.txt",
+    "cmake/vc5_contract_inventory.cmake",
+    "ci/run_standalone.py",
+    "tests/test_vc5_synthetic_ledger.py",
+    "tools/vc5_inspect.py",
+    "tools/vc5_synthetic_packet.py",
+)
 
 def parse_packet(data):
     if data[:4] != b"VC-5":
@@ -64,6 +74,24 @@ class SyntheticLedgerTests(unittest.TestCase):
                                 check=True, capture_output=True, timeout=8).stdout
         return ledger, packet
 
+    def isolated_root(self, temp):
+        """Private copy carrying the current working source, no extra commits."""
+        root = Path(temp) / "repo"
+        subprocess.run(["git", "clone", "--shared", "--no-checkout", "--quiet",
+                        str(ROOT), str(root)],
+                       check=True, capture_output=True, timeout=30)
+        for name in PINNED_SOURCE_FILES:
+            target = root / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / name, target)
+        return root
+
+    def run_selected(self, root, name, optimized):
+        command = [sys.executable, "-B"] + (["-O"] if optimized else []) + [
+            "tests/test_vc5_synthetic_ledger.py", name]
+        return subprocess.run(command, cwd=str(root), capture_output=True,
+                              text=True, timeout=60)
+
     def test_cli_ledger_packet_and_field_expectations(self):
         ledger, data = self.cli_artifacts()
         self.assertEqual(ledger["schema"], "hypercine.vc5-synthetic-ledger/1")
@@ -101,19 +129,35 @@ class SyntheticLedgerTests(unittest.TestCase):
                          hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest())
 
     def test_manifest_changes_with_working_source_bytes(self):
+        self.assertEqual(len(generator.SOURCE_FILES), len(PINNED_SOURCE_FILES))
+        self.assertEqual(set(generator.SOURCE_FILES), set(PINNED_SOURCE_FILES))
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            for name in generator.SOURCE_FILES:
+            for name in PINNED_SOURCE_FILES:
                 target = root / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / name, target)
             original = generator.working_manifest(root)[1]
-            for name in generator.SOURCE_FILES:
+            for name in PINNED_SOURCE_FILES:
                 target = root / name
                 before = target.read_bytes()
                 target.write_bytes(before + b"\n# manifest mutation\n")
                 self.assertNotEqual(generator.working_manifest(root)[1], original, name)
                 target.write_bytes(before)
+
+    def test_source_inventory_is_pinned_independently(self):
+        ledger, _ = self.cli_artifacts()
+        files = ledger["source"]["files"]
+        pinned = set(PINNED_SOURCE_FILES)
+        advertised = set(generator.SOURCE_FILES)
+        self.assertEqual(advertised, pinned, "generator inventory missing=%s extra=%s"
+                         % (sorted(pinned - advertised), sorted(advertised - pinned)))
+        self.assertEqual(len(generator.SOURCE_FILES), len(PINNED_SOURCE_FILES))
+        self.assertEqual(set(files), pinned, "ledger inventory missing=%s extra=%s"
+                         % (sorted(pinned - set(files)), sorted(set(files) - pinned)))
+        for name in PINNED_SOURCE_FILES:
+            self.assertEqual(files[name],
+                             hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), name)
 
     def test_real_inspector_source_and_packet_identity(self):
         ledger, data = self.cli_artifacts()
@@ -256,11 +300,11 @@ class SyntheticLedgerTests(unittest.TestCase):
 
     def test_negative_framing_tag_truncation_and_ambiguity(self):
         _, packet = self.cli_artifacts()
-        cases = [("wrong framing", b"NOPE" + packet[4:], "UNKNOWN_FRAMING", "FAIL"),
+        cases = [("wrong framing", b"NOPE" + packet[4:], "UNKNOWN_FRAMING", "FAIL", 1),
                  ("invalid header tag", packet[:8] + b"\x03\xe7\x00\x01" + packet[12:],
-                  "HEADER_TAG", "UNQUALIFIED"),
-                 ("truncated chunk", packet[:-1], "TRUNCATED_SEGMENT", "FAIL")]
-        for label, data, reason, verdict in cases:
+                  "HEADER_TAG", "UNQUALIFIED", 3),
+                 ("truncated chunk", packet[:-1], "TRUNCATED_SEGMENT", "FAIL", 1)]
+        for label, data, reason, verdict, expected_exit in cases:
             with self.subTest(case=label), tempfile.TemporaryDirectory() as temp:
                 ledger, _ = self.cli_artifacts()
                 packet_path = Path(temp) / "packet"
@@ -271,6 +315,7 @@ class SyntheticLedgerTests(unittest.TestCase):
                                          "--input", str(packet_path), "--context", str(context_path)],
                                         capture_output=True, timeout=8)
                 report = json.loads(result.stdout)
+                self.assertEqual(result.returncode, expected_exit, result.stderr)
                 self.assertEqual(report["syntax"]["reason"], reason)
                 self.assertEqual(report["verdict"], verdict)
         inspector_module = importlib.util.spec_from_file_location("inspector", INSPECTOR)
@@ -279,6 +324,57 @@ class SyntheticLedgerTests(unittest.TestCase):
         prescale = inspector.inspect_bytes(packet, [1, 3])["prescale"]
         self.assertNotEqual(prescale["table_b1"], prescale["reference_layout"])
         self.assertEqual(prescale["status"], "UNQUALIFIED")
+
+    def test_cli_refusal_exit_is_causally_guarded(self):
+        """A FAIL path returning 0 with an unchanged report must be caught."""
+        before = "return 1 if report['verdict'] == 'FAIL' else 2"
+        after = "return 0 if report['verdict'] == 'FAIL' else 2"
+        name = ("SyntheticLedgerTests."
+                "test_negative_framing_tag_truncation_and_ambiguity")
+        with tempfile.TemporaryDirectory() as temp:
+            root = self.isolated_root(temp)
+            target = root / "tools" / "vc5_inspect.py"
+            original = target.read_bytes()
+            for optimized in (False, True):
+                mode = "-O" if optimized else "normal"
+                baseline = self.run_selected(root, name, optimized)
+                self.assertEqual(baseline.returncode, 0,
+                                 mode + baseline.stdout + baseline.stderr)
+                text = original.decode("utf-8")
+                self.assertIn(before, text)
+                target.write_text(text.replace(before, after, 1), encoding="utf-8")
+                mutant = self.run_selected(root, name, optimized)
+                self.assertNotEqual(mutant.returncode, 0, mode + mutant.stdout)
+                self.assertIn("0 != 1", mutant.stderr, mode + mutant.stderr)
+                target.write_bytes(original)
+                restored = self.run_selected(root, name, optimized)
+                self.assertEqual(restored.returncode, 0,
+                                 mode + restored.stdout + restored.stderr)
+
+    def test_source_inventory_omission_is_causally_guarded(self):
+        """Dropping a required path from the generator inventory must fail closed."""
+        before = '    "ci/run_standalone.py",\n'
+        name = "SyntheticLedgerTests.test_source_inventory_is_pinned_independently"
+        with tempfile.TemporaryDirectory() as temp:
+            root = self.isolated_root(temp)
+            target = root / "tools" / "vc5_synthetic_packet.py"
+            original = target.read_bytes()
+            for optimized in (False, True):
+                mode = "-O" if optimized else "normal"
+                baseline = self.run_selected(root, name, optimized)
+                self.assertEqual(baseline.returncode, 0,
+                                 mode + baseline.stdout + baseline.stderr)
+                text = original.decode("utf-8")
+                self.assertIn(before, text)
+                target.write_text(text.replace(before, "", 1), encoding="utf-8")
+                mutant = self.run_selected(root, name, optimized)
+                self.assertNotEqual(mutant.returncode, 0, mode + mutant.stdout)
+                self.assertIn("missing=['ci/run_standalone.py']", mutant.stderr,
+                              mode + mutant.stderr)
+                target.write_bytes(original)
+                restored = self.run_selected(root, name, optimized)
+                self.assertEqual(restored.returncode, 0,
+                                 mode + restored.stdout + restored.stderr)
 
 if __name__ == "__main__":
     unittest.main()
