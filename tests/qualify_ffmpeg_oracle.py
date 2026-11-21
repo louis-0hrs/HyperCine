@@ -11,8 +11,9 @@ pinned reference, and the comparison still rejects a different packet and a
 mutated packet. It does not qualify any other packet, format, resolution or
 GPU path, and it never promotes a release gate by itself.
 
-Exit codes: 0 qualified, 1 control failed, 77 blocked (tool absent or build
-not on the measured list).
+Exit codes: 0 qualified, 1 control failed, 77 blocked (tool absent, build not on
+the measured list, or a build-bound executable whose bytes are not the measured
+binary).
 """
 import argparse
 import hashlib
@@ -38,6 +39,18 @@ PATTERNS = ('flat', 'gradient', 'canonical')
 #   7.1.5  Debian 13 x86_64 build, gcc 14.2.0-19 (same note, 2026-11-19 section)
 QUALIFIED_BUILD_PREFIXES = ('n8.0', '9.0.2')
 QUALIFIED_EXACT_BUILDS = frozenset({'7.1.5-0+deb13u1'})
+# Executable bytes for exact builds whose evidence is a binary digest, not just
+# a banner. Token admission says which build reports which version; this table
+# says whether the file on disk is the executable that was actually measured.
+# Legacy prefix entries stay token-only because no digest was recorded for them.
+QUALIFIED_EXECUTABLE_SHA256 = {
+    # docs/validation/FFMPEG_ORACLE_QUALIFICATION_20261025.md, 2026-11-19 and
+    # the 2026-11-20 corrective receipt: Debian 13 x86_64 /usr/bin binaries.
+    '7.1.5-0+deb13u1': {
+        'ffmpeg': 'e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a',
+        'ffprobe': 'cefc5f81c0b18429cdbf8fa5a89e1e9c759235e10f93f9b329ff1b2fdff26f46',
+    },
+}
 # Pre-registered discriminator control: flip one entropy-payload byte of the
 # canonical packet. The offset is fixed here, not chosen per run.
 MUTATION_OFFSET = 500
@@ -135,6 +148,42 @@ def require_qualified_build(token):
         raise Blocked('decoder build {} is not on the measured list ({})'.format(
             token, ', '.join(QUALIFIED_BUILD_PREFIXES)))
     return token
+
+
+def file_sha256(path, name):
+    """Hash one executable without loading it into memory in one block."""
+    digest = hashlib.sha256()
+    try:
+        with open(path, 'rb') as handle:
+            for chunk in iter(lambda: handle.read(1 << 20), b''):
+                digest.update(chunk)
+    except OSError as error:
+        raise Blocked('cannot read {} for identity binding: {}'.format(
+            name, error))
+    return digest.hexdigest()
+
+
+def require_measured_executables(token, ffmpeg, ffprobe):
+    """Bind a build-bound entry to the measured executable bytes.
+
+    Token admission says which build reports which banner; this says whether the
+    file is the executable whose digest the measurement recorded. Both tools are
+    hashed, because `ffprobe` is resolved independently and a token-only check
+    would admit any probe. Legacy prefix entries return None: their documented
+    evidence is a banner, so they stay token-only instead of pretending to a
+    binary identity that was never measured.
+    """
+    expected = QUALIFIED_EXECUTABLE_SHA256.get(token)
+    if expected is None:
+        return None
+    observed = {}
+    for name, path in (('ffmpeg', ffmpeg), ('ffprobe', ffprobe)):
+        digest = file_sha256(path, name)
+        if digest != expected[name]:
+            raise Blocked('{} sha256 {} is not the measured {} binary {}'.format(
+                name, digest, token, expected[name]))
+        observed[name] = digest
+    return observed
 
 
 def validate_output(raw):
@@ -287,6 +336,7 @@ def main():
         ffmpeg = find_tool(args.ffmpeg, 'ffmpeg')
         ffprobe = find_tool(args.ffprobe, 'ffprobe')
         token = require_qualified_build(build_token(ffmpeg))
+        identity = require_measured_executables(token, ffmpeg, ffprobe)
         report = qualify(args.fixtures, ffmpeg, ffprobe, args.repeats)
     except Blocked as error:
         print('ORACLE_QUALIFICATION_BLOCKED reason={}'.format(error))
@@ -295,6 +345,11 @@ def main():
         print('ORACLE_QUALIFICATION_FAILED reason={}'.format(error))
         return EXIT_FAILED
     report['decoder_build'] = token
+    if identity is None:
+        print('ORACLE_QUALIFICATION executable_identity=token-only')
+    else:
+        print('ORACLE_QUALIFICATION executable_identity=measured '
+              'ffmpeg_sha256={ffmpeg} ffprobe_sha256={ffprobe}'.format(**identity))
     print('ORACLE_QUALIFICATION state=QUALIFIED decoder_build={} packets={} repeats={}'.format(
         token, len(report['packets']), args.repeats))
     for packet in report['packets']:

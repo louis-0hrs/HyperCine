@@ -34,7 +34,9 @@ still pass the parity check; the encoder regression gate remains
   `140fd653aed8cad774f991ba083e2d01e86420c7` (fixture manifest).
 
 Only builds in `QUALIFIED_EXACT_BUILDS` or matching the existing
-`QUALIFIED_BUILD_PREFIXES` policy are evaluated. The Debian entry is admitted
+`QUALIFIED_BUILD_PREFIXES` policy are evaluated, and an entry that carries
+recorded binary digests additionally requires both executables to match them
+(see "Measured executable identity" below). The Debian entry is admitted
 by exact token `7.1.5-0+deb13u1`, not by a `7.1.5` build-family prefix; other
 7.1.5 rebuilds or suffixes exit `77` with `ORACLE_QUALIFICATION_BLOCKED`. Any
 missing tool is blocked the same way. Adding a build is a reviewed change: re-run
@@ -187,7 +189,8 @@ needs maintainer review in this Draft.
 
 This is a fresh same-host rerun, distinct from the historical 2026-11-19
 measurement above. Source SHA-256 for `tests/qualify_ffmpeg_oracle.py`:
-`dc8343d3b93cfe3f8b2f04dbda57290f9d6634fa2fd8344cec4618ff3d8bfab2`;
+`dc8343d3b93cfe3f8b2f04dbda57290f9d6634fa2fd8344cec4618ff3d8bfab2` (the
+2026-11-21 identity correction below supersedes this source revision);
 `ffmpeg` SHA-256: `e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a`;
 `ffprobe` SHA-256: `cefc5f81c0b18429cdbf8fa5a89e1e9c759235e10f93f9b329ff1b2fdff26f46`.
 Fresh command `python3 -B tests/qualify_ffmpeg_oracle.py` exited `0`: three
@@ -195,3 +198,46 @@ packets × five decodes (15 total), each output matched the pinned reference
 with one distinct output; `cross_packet=REJECTED`;
 `mutated_packet=PIXELS_DIFFER`. This result is bounded to these fixtures,
 build and host; it does not expand any general oracle claim.
+
+## Measured executable identity for the Debian entry (Draft409 correction, 2026-11-21)
+
+The previous entry admitted `7.1.5-0+deb13u1` by version token alone, while the
+recorded evidence above is a pair of Debian **binary** SHA-256 digests. Any
+executable printing that banner therefore passed the admission gate, and
+`ffprobe` — resolved independently of `ffmpeg` — was not identified at all.
+That gap is closed for this entry; it was never claimed closed for the legacy
+entries below.
+
+- Admission, not qualification, now has two separate decisions:
+  1. **Token admission** (`require_qualified_build`): the banner maps to a
+     measured build; unchanged positives and negatives.
+  2. **Measured executable identity** (`require_measured_executables`): for
+     entries listed in `QUALIFIED_EXECUTABLE_SHA256`, both `ffmpeg` and
+     `ffprobe` are streamed through SHA-256 and must equal the measured digests
+     before any packet or fixture is touched. An unreadable binary or any
+     mismatch is `77=BLOCKED`, never a failed control and never a qualified run.
+- Source under test: `tests/qualify_ffmpeg_oracle.py` SHA-256
+  `cd1de0d3d2b42963cdc0e0f80c0c4cb1c35775b4c8fc287b3b4cff128f56bcc0`,
+  `tests/test_ffmpeg_oracle_qualification.py` SHA-256
+  `9b4cbf793b7ab170b9b7796712c5319cf49d8b12b57ddc215ad70b205ecb74db`.
+- Bound digests for `7.1.5-0+deb13u1`:
+  `ffmpeg` `e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a`,
+  `ffprobe` `cefc5f81c0b18429cdbf8fa5a89e1e9c759235e10f93f9b329ff1b2fdff26f46`.
+  A qualified report prints
+  `executable_identity=measured` with both observed digests.
+- **Legacy entries stay token-only, by record.** `n8.0` and `9.0.2` documented a
+  banner and a host, not binary bytes, so the harness reports
+  `executable_identity=token-only` for them instead of asserting an identity
+  that was never measured. Adding a digest binding for them would require a new
+  measurement, and this correction does not invent one.
+- Causal controls: with the identity gate disabled in an isolated private copy,
+  four contract tests fail in both normal and `python -O`
+  (`same_banner_different_bytes`, `unreadable_bound_binary`,
+  `cli_exits_77_before_qualification`, `measured_debian_binaries`); restored,
+  all 16 pass in both modes. The same-banner/different-bytes arms bind the
+  recorded digests to private fake tools for the GREEN baseline, so the only
+  difference in a RED arm is one tool's bytes, and no fake decode is executed.
+- This remains token/executable admission plus the same three 128×128 fixtures.
+  It is not a GoPro, VC-5, GPU or product conformance statement, and it does not
+  turn `tools/check_reference_release.py` `independent_pixel_oracle.qualified`
+  on.

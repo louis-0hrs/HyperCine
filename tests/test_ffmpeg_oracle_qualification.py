@@ -9,15 +9,28 @@ harness makes before any external decoder runs.
 import os
 import shutil
 import struct
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).parent))
 import qualify_ffmpeg_oracle as harness
 
 FIXTURES = Path(__file__).parent / 'fixtures' / 'standalone'
+HARNESS = Path(__file__).parent / 'qualify_ffmpeg_oracle.py'
+DEBIAN_TOKEN = '7.1.5-0+deb13u1'
+DEBIAN_BANNER = 'ffmpeg version ' + DEBIAN_TOKEN
+
+
+def banner_shim(directory, name, banner=DEBIAN_BANNER):
+    """A private executable that reports a banner and never decodes."""
+    path = Path(directory) / name
+    path.write_text('#!/bin/sh\nprintf "%s\\n" "{}"\n'.format(banner))
+    path.chmod(0o755)
+    return path
 
 
 class QualificationContractTest(unittest.TestCase):
@@ -102,6 +115,106 @@ class QualificationContractTest(unittest.TestCase):
             (copy / 'flat.cfhd').unlink()
             with self.assertRaises(harness.Failed):
                 harness.load_bound(copy, declared, 'flat.cfhd')
+
+
+class MeasuredExecutableIdentityTest(unittest.TestCase):
+    """Token admission and measured executable identity are separate gates."""
+
+    def test_only_the_debian_entry_binds_executable_bytes(self):
+        self.assertEqual(set(harness.QUALIFIED_EXECUTABLE_SHA256),
+                         {DEBIAN_TOKEN})
+        for digests in harness.QUALIFIED_EXECUTABLE_SHA256.values():
+            self.assertEqual(set(digests), {'ffmpeg', 'ffprobe'})
+            for digest in digests.values():
+                self.assertRegex(digest, r'^[0-9a-f]{64}$')
+
+    def test_legacy_prefix_entries_stay_token_only(self):
+        # n8.0/9.0.2 documented a banner, not a binary digest; they must not
+        # silently acquire a hash requirement they were never measured against.
+        for token in ('n8.0-140fd653aed8',
+                      '9.0.2-essentials_build-www.gyan.dev'):
+            self.assertIsNone(harness.require_measured_executables(
+                token, '/nonexistent/ffmpeg', '/nonexistent/ffprobe'))
+
+    def test_unreadable_bound_binary_is_blocked(self):
+        with self.assertRaises(harness.Blocked):
+            harness.require_measured_executables(
+                DEBIAN_TOKEN, str(FIXTURES / 'no-such-ffmpeg'),
+                str(FIXTURES / 'no-such-ffprobe'))
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-dir-') as temporary:
+            with self.assertRaises(harness.Blocked):
+                harness.require_measured_executables(
+                    DEBIAN_TOKEN, temporary, temporary)
+
+    @unittest.skipUnless(os.name == 'posix', 'needs POSIX executable shims')
+    def test_same_banner_different_bytes_blocks_each_tool(self):
+        # Same banner, different bytes. The recorded digests are bound to the
+        # fake files for the GREEN baseline, so the *only* difference in the
+        # RED arms is one tool's bytes; no decode is ever executed.
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-identity-') as temporary:
+            ffmpeg = banner_shim(temporary, 'ffmpeg')
+            ffprobe = banner_shim(temporary, 'ffprobe')
+            actual = {
+                '7.1.5-0+deb13u1': {
+                    'ffmpeg': harness.file_sha256(str(ffmpeg), 'ffmpeg'),
+                    'ffprobe': harness.file_sha256(str(ffprobe), 'ffprobe'),
+                }
+            }
+            with mock.patch.dict(harness.QUALIFIED_EXECUTABLE_SHA256, actual,
+                                 clear=True):
+                self.assertEqual(
+                    harness.require_measured_executables(
+                        DEBIAN_TOKEN, str(ffmpeg), str(ffprobe)),
+                    actual['7.1.5-0+deb13u1'])
+            for name in ('ffmpeg', 'ffprobe'):
+                wrong = dict(actual['7.1.5-0+deb13u1'])
+                wrong[name] = '0' * 64
+                with mock.patch.dict(harness.QUALIFIED_EXECUTABLE_SHA256,
+                                     {DEBIAN_TOKEN: wrong}, clear=True):
+                    with self.assertRaises(harness.Blocked) as caught:
+                        harness.require_measured_executables(
+                            DEBIAN_TOKEN, str(ffmpeg), str(ffprobe))
+                    self.assertIn(name, str(caught.exception))
+            with mock.patch.dict(harness.QUALIFIED_EXECUTABLE_SHA256, actual,
+                                 clear=True):
+                self.assertEqual(
+                    harness.require_measured_executables(
+                        DEBIAN_TOKEN, str(ffmpeg), str(ffprobe)),
+                    actual['7.1.5-0+deb13u1'])
+
+    @unittest.skipUnless(os.name == 'posix', 'needs POSIX executable shims')
+    def test_cli_exits_77_before_qualification_on_identity_mismatch(self):
+        # End-to-end through main() in normal and optimized Python: the fake
+        # tools carry the measured banner but not the measured bytes, so the
+        # run must stop at 77 with no QUALIFIED line and no fixture work.
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-cli-') as temporary:
+            ffmpeg = banner_shim(temporary, 'ffmpeg')
+            ffprobe = banner_shim(temporary, 'ffprobe')
+            for flags in (['-B'], ['-B', '-O']):
+                completed = subprocess.run(
+                    [sys.executable] + flags + [str(HARNESS),
+                     '--ffmpeg', str(ffmpeg), '--ffprobe', str(ffprobe),
+                     '--fixtures', str(Path(temporary) / 'no-fixtures')],
+                    capture_output=True, text=True, check=False)
+                self.assertEqual(completed.returncode, harness.EXIT_BLOCKED,
+                                 completed.stdout + completed.stderr)
+                output = completed.stdout + completed.stderr
+                self.assertIn('ORACLE_QUALIFICATION_BLOCKED', output)
+                self.assertIn('sha256', output)
+                self.assertNotIn('state=QUALIFIED', output)
+
+    def test_measured_debian_binaries_on_this_host_are_accepted(self):
+        # The real measured host: accepted bytes must pass, and a host whose
+        # binaries are not the measured ones is a skip, never a fake pass.
+        try:
+            ffmpeg = harness.find_tool(None, 'ffmpeg')
+            ffprobe = harness.find_tool(None, 'ffprobe')
+            observed = harness.require_measured_executables(
+                DEBIAN_TOKEN, ffmpeg, ffprobe)
+        except harness.Blocked as error:
+            self.skipTest(str(error))
+        self.assertEqual(observed,
+                         harness.QUALIFIED_EXECUTABLE_SHA256[DEBIAN_TOKEN])
 
 
 if __name__ == '__main__':
