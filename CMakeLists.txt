@@ -113,6 +113,19 @@ function(hypercine_register_sdk_free_contracts)
     set_tests_properties(test_vc5_inspect test_vc5_inspect_optimized
         test_vc5_inspect_mutations test_vc5_inspect_mutations_optimized
         PROPERTIES LABELS "validation;vc5-structure" TIMEOUT 30)
+    # #381: the oracle subprocess and privacy controls are mandatory in both
+    # Python modes; actual Debian identity remains host-dependent, never fake PASS.
+    if(NOT EXISTS "${PROJECT_SOURCE_DIR}/tests/test_ffmpeg_oracle_qualification.py" OR
+       NOT EXISTS "${PROJECT_SOURCE_DIR}/tests/qualify_ffmpeg_oracle.py")
+        message(FATAL_ERROR "Required FFmpeg oracle qualification source missing")
+    endif()
+    add_test(NAME ffmpeg_oracle_process_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tests/test_ffmpeg_oracle_qualification.py")
+    add_test(NAME ffmpeg_oracle_process_contract_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${PROJECT_SOURCE_DIR}/tests/test_ffmpeg_oracle_qualification.py")
+    set_tests_properties(ffmpeg_oracle_process_contract
+        ffmpeg_oracle_process_contract_optimized PROPERTIES
+        LABELS "validation;reference-oracle" TIMEOUT 120)
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
     foreach(required_file IN ITEMS
             "${PROJECT_SOURCE_DIR}/tests/test_compat_qualification.py"
