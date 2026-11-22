@@ -245,5 +245,118 @@ class MeasuredExecutableIdentityTest(unittest.TestCase):
                          harness.QUALIFIED_EXECUTABLE_SHA256[DEBIAN_TOKEN])
 
 
+
+
+class BoundedExternalToolTest(unittest.TestCase):
+    """The external oracle runner must never use unbounded capture or raw output."""
+
+    def test_budgeted_success_paths_and_exact_decode_bytes(self):
+        stream = {'streams': [{'codec_name': 'cfhd', 'width': 128,
+                               'height': 128, 'pix_fmt': 'yuv422p10le'}]}
+        calls = []
+        def simulated(argv, **kwargs):
+            calls.append((list(argv), kwargs))
+            if '-version' in argv:
+                return b'ffmpeg version 9.0.2-essentials_build-www.gyan.dev\n'
+            if '-show_streams' in argv:
+                return json.dumps(stream).encode('utf-8')
+            return bytes(harness.OUTPUT_BYTES)
+
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-bounds-') as tmp:
+            with mock.patch.object(harness.compat_process, 'run_bounded',
+                                   side_effect=simulated):
+                self.assertEqual(harness.build_token('candidate'),
+                                 '9.0.2-essentials_build-www.gyan.dev')
+                self.assertEqual(harness.decode(
+                    'candidate', 'probe', b'test-packet', Path(tmp), 'bounded'),
+                    bytes(harness.OUTPUT_BYTES))
+        self.assertEqual(len(calls), 3)
+        self.assertEqual([c[1]['timeout'] for c in calls],
+                         [30.0, 60.0, 120.0])
+        self.assertEqual([c[1]['stdout_limit'] for c in calls],
+                         [65536, 65536, 65536])
+        self.assertEqual(calls[-1][0][-1], 'pipe:1')
+        self.assertNotIn('-y', calls[-1][0])
+        self.assertFalse(any('.yuv' in a for a in calls[-1][0]))
+
+    def test_under_exact_over_length_fail_closed(self):
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-length-') as tmp:
+            with mock.patch.object(harness, 'probe_stream'):
+                for size in (65535, 65537):
+                    with self.subTest(size=size):
+                        with mock.patch.object(harness.compat_process,
+                                               'run_bounded',
+                                               return_value=bytes(size)):
+                            with self.assertRaises(harness.Failed):
+                                harness.decode('candidate', 'probe', b'p',
+                                               Path(tmp), 'bad-length')
+                with mock.patch.object(harness.compat_process, 'run_bounded',
+                                       return_value=bytes(65536)):
+                    self.assertEqual(
+                        len(harness.decode('candidate', 'probe', b'p',
+                                           Path(tmp), 'exact-length')), 65536)
+
+    def test_public_reasons_never_reemit_external_bytes(self):
+        marker = 'EXTERNAL_SENTINEL_731'
+        for banner in (marker, 'ffmpeg version ' + marker,
+                       'ffmpeg version 9.0.2\n' + marker):
+            if banner.startswith('ffmpeg version 9.0.2\n'):
+                self.assertEqual(harness.parse_banner(banner), '9.0.2')
+            else:
+                with self.assertRaises(harness.Blocked) as caught:
+                    harness.parse_banner(banner)
+                self.assertNotIn(marker, str(caught.exception))
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-privacy-') as tmp:
+            with mock.patch.object(harness.compat_process, 'run_bounded',
+                                   return_value=marker.encode('utf-8')):
+                with self.assertRaises(harness.Failed) as caught:
+                    harness.probe_stream('probe', Path(tmp) / 'input.avi')
+                self.assertNotIn(marker, str(caught.exception))
+            with mock.patch.object(harness, 'probe_stream'):
+                with mock.patch.object(harness.compat_process, 'run_bounded',
+                                       side_effect=harness.compat_process.ToolFailure(
+                                           'tool nonzero exit')):
+                    with self.assertRaises(harness.Failed) as caught:
+                        harness.decode('ffmpeg', 'ffprobe', b'p', Path(tmp), 'failed')
+                    self.assertNotIn(marker, str(caught.exception))
+
+    def test_actual_supervisor_output_and_timeout_are_finite(self):
+        def script(source, timeout=5):
+            return harness.run_tool([sys.executable, '-c', source],
+                                    timeout, 65536)
+        self.assertEqual(len(script(
+            'import sys; sys.stdout.buffer.write(b"x"*65536)')), 65536)
+        for source, timeout in (
+                ('import sys; sys.stdout.buffer.write(b"x"*65537)', 5),
+                ('import time; time.sleep(10)', 0.35)):
+            with self.subTest(source=source):
+                with self.assertRaises(harness.Failed):
+                    script(source, timeout)
+
+    @unittest.skipUnless(os.name == 'posix', 'needs POSIX shell shims')
+    def test_real_external_stderr_and_banner_never_leak(self):
+        marker = 'EXTERNAL_SENTINEL_731'
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-sentinel-') as tmp:
+            shim = Path(tmp) / 'tool'
+            shim.write_text('#!/bin/sh\n'
+                            'if [ "$1" = "-version" ]; then\n'
+                            '  printf "%s\\n" "' + marker + '"\n'
+                            '  exit 0\n'
+                            'fi\n'
+                            'printf "%s\\n" "' + marker + '" >&2\n'
+                            'exit 3\n')
+            shim.chmod(0o755)
+            with self.assertRaises(harness.Blocked) as caught:
+                harness.build_token(str(shim))
+            self.assertNotIn(marker, str(caught.exception))
+            with self.assertRaises(harness.Failed) as caught:
+                harness.probe_stream(str(shim), Path(tmp) / 'probe.avi')
+            self.assertNotIn(marker, str(caught.exception))
+            with mock.patch.object(harness, 'probe_stream'):
+                with self.assertRaises(harness.Failed) as caught:
+                    harness.decode(str(shim), str(shim), b'p', Path(tmp), 'decode')
+                self.assertNotIn(marker, str(caught.exception))
+
+
 if __name__ == '__main__':
     unittest.main()
