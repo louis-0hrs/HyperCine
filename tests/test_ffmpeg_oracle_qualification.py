@@ -304,7 +304,7 @@ class BoundedExternalToolTest(unittest.TestCase):
                 self.assertEqual(harness.parse_banner(banner), '9.0.2')
             else:
                 with self.assertRaises(harness.Blocked) as caught:
-                    harness.parse_banner(banner)
+                    harness.require_qualified_build(harness.parse_banner(banner))
                 self.assertNotIn(marker, str(caught.exception))
         with tempfile.TemporaryDirectory(prefix='hypercine-oracle-privacy-') as tmp:
             with mock.patch.object(harness.compat_process, 'run_bounded',
