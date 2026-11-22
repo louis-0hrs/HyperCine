@@ -22,11 +22,23 @@ import re
 from pathlib import Path
 import shutil
 import struct
-import subprocess
 import sys
 import tempfile
 
 from validate_standalone import avi
+
+# Reuse the existing platform-specific process supervisor. The external
+# decoder and probe are untrusted even when their banners are allowlisted.
+_REPO_ROOT = str(Path(__file__).resolve().parents[1])
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+from tools import compat_process
+
+VERSION_BUDGET_SECONDS = 30.0
+PROBE_BUDGET_SECONDS = 60.0
+DECODE_BUDGET_SECONDS = 120.0
+TEXT_LIMIT_BYTES = 64 * 1024
+
 
 WIDTH = 128
 HEIGHT = 128
@@ -77,8 +89,8 @@ def load_manifest(fixtures):
     path = Path(fixtures) / 'manifest.json'
     try:
         manifest = json.loads(path.read_text())
-    except (OSError, ValueError) as error:
-        raise Failed('cannot read fixture manifest: {}'.format(error))
+    except (OSError, ValueError):
+        raise Failed('cannot read fixture manifest') from None
     declared = {entry['file']: entry for entry in manifest.get('files', [])}
     if not declared:
         raise Failed('fixture manifest declares no files')
@@ -91,15 +103,14 @@ def load_bound(fixtures, declared, name):
         raise Failed('fixture {} is not declared in the manifest'.format(name))
     try:
         data = (Path(fixtures) / name).read_bytes()
-    except OSError as error:
-        raise Failed('cannot read fixture {}: {}'.format(name, error))
+    except OSError:
+        raise Failed('cannot read fixture {}'.format(name)) from None
     if len(data) != entry['bytes']:
         raise Failed('{} is {} bytes, manifest binds {}'.format(
             name, len(data), entry['bytes']))
     digest = sha256(data)
     if digest != entry['sha256']:
-        raise Failed('{} sha256 {} does not match manifest {}'.format(
-            name, digest, entry['sha256']))
+        raise Failed('{} sha256 does not match manifest'.format(name))
     return data
 
 
@@ -115,28 +126,45 @@ def find_tool(explicit, name):
     return found
 
 
-def parse_banner(banner):
-    """Bind the candidate's `-version` output to a version token.
+def run_tool(argv, timeout, output_limit, *, candidate=False):
+    """Run an external candidate with bounded capture and descendant ownership.
 
-    An executable whose banner cannot be bound to an FFmpeg build is not a
-    measured candidate, so this is the blocked state and never a failed
-    control; the banner is kept in the reason so the evidence is not lost.
+    Both stdout and stderr have the finite output_limit, including on
+    Windows. A failed cleanup is never reported as an ordinary codec failure;
+    no subprocess output, local path or command is surfaced in CI diagnostics.
     """
+    try:
+        return compat_process.run_bounded(
+            argv, timeout=timeout, stdout_limit=output_limit)
+    except compat_process.ToolFailure as error:
+        if error.cleanup_failed or error.containment_unconfirmed:
+            raise Blocked('external tool containment unconfirmed') from None
+        if candidate:
+            raise Blocked('candidate decoder unavailable') from None
+        if error.primary_category in ('tool launch failed',
+                                      'tool containment unavailable'):
+            raise Blocked('external tool unavailable') from None
+        raise Failed('external tool execution rejected') from None
+
+
+def parse_banner(banner):
+    """Return a bounded printable version token, never raw vendor text."""
     first = banner.splitlines()[0] if banner.splitlines() else ''
-    match = re.match(r'ffmpeg version (\S+)', first)
-    if not match:
-        raise Blocked('unrecognized decoder banner: {!r}'.format(first))
+    match = re.match(r'^ffmpeg version ([A-Za-z0-9_.+-]{1,80})(?:[ \t]|$)',
+                     first)
+    if match is None:
+        raise Blocked('unrecognized decoder banner')
     return match.group(1)
 
 
 def build_token(ffmpeg):
+    raw = run_tool([ffmpeg, '-version'], VERSION_BUDGET_SECONDS,
+                   TEXT_LIMIT_BYTES, candidate=True)
     try:
-        banner = subprocess.check_output(
-            [ffmpeg, '-version'], stderr=subprocess.STDOUT, text=True)
-    except (OSError, subprocess.CalledProcessError) as error:
-        raise Blocked('cannot run the candidate decoder: {}'.format(error))
+        banner = raw.decode('utf-8')
+    except UnicodeDecodeError:
+        raise Blocked('unrecognized decoder banner') from None
     return parse_banner(banner)
-
 
 def require_qualified_build(token):
     # Exact version token or a build suffix, never a bare string prefix:
@@ -145,8 +173,7 @@ def require_qualified_build(token):
                any(token == prefix or token.startswith(prefix + '-')
                    for prefix in QUALIFIED_BUILD_PREFIXES))
     if not matched:
-        raise Blocked('decoder build {} is not on the measured list ({})'.format(
-            token, ', '.join(QUALIFIED_BUILD_PREFIXES)))
+        raise Blocked('decoder build is not on the measured list')
     return token
 
 
@@ -157,9 +184,8 @@ def file_sha256(path, name):
         with open(path, 'rb') as handle:
             for chunk in iter(lambda: handle.read(1 << 20), b''):
                 digest.update(chunk)
-    except OSError as error:
-        raise Blocked('cannot read {} for identity binding: {}'.format(
-            name, error))
+    except OSError:
+        raise Blocked('{} executable sha256 unavailable'.format(name))
     return digest.hexdigest()
 
 
@@ -180,8 +206,7 @@ def require_measured_executables(token, ffmpeg, ffprobe):
     for name, path in (('ffmpeg', ffmpeg), ('ffprobe', ffprobe)):
         digest = file_sha256(path, name)
         if digest != expected[name]:
-            raise Blocked('{} sha256 {} is not the measured {} binary {}'.format(
-                name, digest, token, expected[name]))
+            raise Blocked('{} sha256 differs from measured executable'.format(name))
         observed[name] = digest
     return observed
 
@@ -199,48 +224,46 @@ def validate_output(raw):
 
 
 def probe_stream(ffprobe, container):
-    probe = subprocess.run(
-        [ffprobe, '-v', 'error', '-show_streams', '-of', 'json', str(container)],
-        check=False, capture_output=True, text=True)
-    if probe.returncode != 0:
-        raise Failed('ffprobe rejected the container: {}'.format(
-            probe.stderr.strip()))
+    raw = run_tool(
+        [ffprobe, '-v', 'error', '-show_streams', '-of', 'json',
+         str(container)],
+        PROBE_BUDGET_SECONDS, TEXT_LIMIT_BYTES)
     try:
-        streams = json.loads(probe.stdout).get('streams', [])
-    except ValueError as error:
-        raise Failed('ffprobe emitted invalid JSON: {}'.format(error))
-    if len(streams) != 1:
-        raise Failed('expected one stream, found {}'.format(len(streams)))
+        document = json.loads(raw.decode('utf-8'))
+    except (UnicodeDecodeError, ValueError):
+        raise Failed('ffprobe emitted invalid stream JSON') from None
+    if not isinstance(document, dict):
+        raise Failed('ffprobe emitted invalid stream JSON')
+    streams = document.get('streams')
+    if not isinstance(streams, list) or len(streams) != 1:
+        raise Failed('ffprobe stream inventory mismatch')
     stream = streams[0]
+    if not isinstance(stream, dict):
+        raise Failed('ffprobe emitted invalid stream JSON')
     observed = (stream.get('codec_name'), stream.get('width'),
                 stream.get('height'), stream.get('pix_fmt'))
     expected = ('cfhd', WIDTH, HEIGHT, 'yuv422p10le')
     if observed != expected:
-        raise Failed('stream contract {} != {}'.format(observed, expected))
+        raise Failed('ffprobe stream contract mismatch')
     return observed
 
 
 def decode(ffmpeg, ffprobe, packet, workdir, label):
     container = workdir / (label + '.avi')
-    container.write_bytes(avi(packet))
-    probe_stream(ffprobe, container)
-    output = workdir / (label + '.yuv')
-    result = subprocess.run(
-        [ffmpeg, '-v', 'error', '-xerror', '-y', '-i', str(container),
-         '-frames:v', '1', '-c:v', 'rawvideo', '-pix_fmt', 'yuv422p10le',
-         '-f', 'rawvideo', str(output)],
-        check=False, capture_output=True, text=True)
-    if result.returncode != 0:
-        lines = result.stderr.strip().splitlines()
-        raise Failed('decode of {} failed: {}'.format(
-            label, lines[-1] if lines else 'no output'))
     try:
-        raw = output.read_bytes()
-    except OSError as error:
-        raise Failed('decode of {} wrote no image: {}'.format(label, error))
+        container.write_bytes(avi(packet))
+    except OSError:
+        raise Failed('cannot write temporary container') from None
+    probe_stream(ffprobe, container)
+    # Pipe-capture is size-bounded; a .yuv output file and read_bytes()
+    # would bypass the supervisor's memory/output limits.
+    raw = run_tool(
+        [ffmpeg, '-v', 'error', '-xerror', '-i', str(container),
+         '-frames:v', '1', '-c:v', 'rawvideo', '-pix_fmt', 'yuv422p10le',
+         '-f', 'rawvideo', 'pipe:1'],
+        DECODE_BUDGET_SECONDS, OUTPUT_BYTES)
     validate_output(raw)
     return raw
-
 
 def self_check_rejects_corrupt_output():
     """The adapter must reject data outside its declared normalization."""
