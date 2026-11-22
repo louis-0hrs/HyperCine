@@ -234,10 +234,32 @@ entries below.
   four contract tests fail in both normal and `python -O`
   (`same_banner_different_bytes`, `unreadable_bound_binary`,
   `cli_exits_77_before_qualification`, `measured_debian_binaries`); restored,
-  all 16 pass in both modes. The same-banner/different-bytes arms bind the
-  recorded digests to private fake tools for the GREEN baseline, so the only
-  difference in a RED arm is one tool's bytes, and no fake decode is executed.
+  all 16 pass in both modes. Those original RED arms changed the expected
+  digest table, not executable bytes; they did not establish the advertised
+  same-banner/different-file-bytes control. The correction below supersedes
+  that test-evidence claim, not the measured runtime binary identities.
 - This remains token/executable admission plus the same three 128×128 fixtures.
   It is not a GoPro, VC-5, GPU or product conformance statement, and it does not
   turn `tools/check_reference_release.py` `independent_pixel_oracle.qualified`
   on.
+
+
+## Actual file-byte controls (Draft409 review correction, 2026-11-22)
+
+The identity test now pins one private SHA map for its complete lifetime.
+For ffmpeg, then separately ffprobe, it appends a harmless shell comment
+only to that executable file, asserts that its SHA differs while stdout and
+stderr from -version remain byte-identical, and verifies the peer file and
+banner remain unchanged. The identity gate must raise Blocked naming the
+altered tool. A finally block restores the original bytes exactly; admission
+and the unchanged expected map must be GREEN after each restoration. The
+private shims are invoked only with -version; no fake decode runs. The
+existing end-to-end exit-77-before-fixtures test is retained unchanged.
+
+These are POSIX shim controls, executed in normal and optimized Python; the
+existing native-Windows skips are explicit, not Windows byte-control evidence.
+The disabled-hash-check mutant must make both per-tool subtests fail; restored
+source must pass. Runtime harness, token policy, binary digests, fixtures and
+legacy token-only policy are unchanged. This does not qualify the separate
+combined 167-test integration tree, process-runner hardening, SDK/GoPro,
+GPU execution, pixels or normative VC-5.

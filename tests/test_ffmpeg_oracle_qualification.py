@@ -160,27 +160,55 @@ class MeasuredExecutableIdentityTest(unittest.TestCase):
                     'ffprobe': harness.file_sha256(str(ffprobe), 'ffprobe'),
                 }
             }
+            tools = {'ffmpeg': ffmpeg, 'ffprobe': ffprobe}
+            original = {name: path.read_bytes() for name, path in tools.items()}
+
+            def banner(path):
+                result = subprocess.run(
+                    [str(path), '-version'], capture_output=True,
+                    check=True, timeout=5)
+                return result.stdout, result.stderr
+
+            banners = {name: banner(path) for name, path in tools.items()}
+            expected = dict(actual[DEBIAN_TOKEN])
+            # One fixed mapping covers baseline, both byte mutations and each
+            # restoration. Never change the expected record to manufacture RED.
             with mock.patch.dict(harness.QUALIFIED_EXECUTABLE_SHA256, actual,
                                  clear=True):
                 self.assertEqual(
                     harness.require_measured_executables(
                         DEBIAN_TOKEN, str(ffmpeg), str(ffprobe)),
-                    actual['7.1.5-0+deb13u1'])
-            for name in ('ffmpeg', 'ffprobe'):
-                wrong = dict(actual['7.1.5-0+deb13u1'])
-                wrong[name] = '0' * 64
-                with mock.patch.dict(harness.QUALIFIED_EXECUTABLE_SHA256,
-                                     {DEBIAN_TOKEN: wrong}, clear=True):
-                    with self.assertRaises(harness.Blocked) as caught:
-                        harness.require_measured_executables(
-                            DEBIAN_TOKEN, str(ffmpeg), str(ffprobe))
-                    self.assertIn(name, str(caught.exception))
-            with mock.patch.dict(harness.QUALIFIED_EXECUTABLE_SHA256, actual,
-                                 clear=True):
-                self.assertEqual(
-                    harness.require_measured_executables(
-                        DEBIAN_TOKEN, str(ffmpeg), str(ffprobe)),
-                    actual['7.1.5-0+deb13u1'])
+                    expected)
+                for name, path in tools.items():
+                    with self.subTest(tool=name):
+                        peer = 'ffprobe' if name == 'ffmpeg' else 'ffmpeg'
+                        try:
+                            path.write_bytes(original[name] +
+                                             b'\n# identity-only byte mutation\n')
+                            self.assertNotEqual(
+                                harness.file_sha256(str(path), name),
+                                expected[name])
+                            self.assertEqual(banner(path), banners[name])
+                            self.assertEqual(tools[peer].read_bytes(), original[peer])
+                            self.assertEqual(banner(tools[peer]), banners[peer])
+                            self.assertEqual(
+                                harness.QUALIFIED_EXECUTABLE_SHA256[DEBIAN_TOKEN],
+                                expected)
+                            with self.assertRaises(harness.Blocked) as caught:
+                                harness.require_measured_executables(
+                                    DEBIAN_TOKEN, str(ffmpeg), str(ffprobe))
+                            self.assertIn(name, str(caught.exception))
+                        finally:
+                            path.write_bytes(original[name])
+                        self.assertEqual(path.read_bytes(), original[name])
+                        self.assertEqual(banner(path), banners[name])
+                        self.assertEqual(
+                            harness.require_measured_executables(
+                                DEBIAN_TOKEN, str(ffmpeg), str(ffprobe)),
+                            expected)
+                        self.assertEqual(
+                            harness.QUALIFIED_EXECUTABLE_SHA256[DEBIAN_TOKEN],
+                            expected)
 
     @unittest.skipUnless(os.name == 'posix', 'needs POSIX executable shims')
     def test_cli_exits_77_before_qualification_on_identity_mismatch(self):
