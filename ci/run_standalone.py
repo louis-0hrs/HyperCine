@@ -23,6 +23,7 @@ REQUIRED = {
     'dialect_capability_proof',
     'compat_qualification_matrix', 'compat_qualification_matrix_optimized',
     'compat_qualification_committed_matrix',
+    'ffmpeg_oracle_process_contract', 'ffmpeg_oracle_process_contract_optimized',
     # #381: bounded decoded-pixel capture; both Python modes plus evidence.
     'metal_packet_capture_contract', 'metal_packet_capture_contract_optimized',
     'metal_packet_capture_evidence',
