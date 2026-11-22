@@ -6,6 +6,7 @@
 No FFmpeg and no SDK are needed: these pin the fail-closed decisions that the
 harness makes before any external decoder runs.
 """
+import json
 import os
 import shutil
 import struct
