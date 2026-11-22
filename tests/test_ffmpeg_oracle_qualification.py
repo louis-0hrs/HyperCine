@@ -358,5 +358,52 @@ class BoundedExternalToolTest(unittest.TestCase):
                 self.assertNotIn(marker, str(caught.exception))
 
 
+    @unittest.skipUnless(os.name == 'posix', 'needs POSIX CLI executable shims')
+    def test_actual_cli_redacts_external_banner_probe_and_decode_stderr(self):
+        marker = 'EXTERNAL_SENTINEL_731'
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-cli-privacy-') as tmp:
+            def shim(name, content):
+                path = Path(tmp) / name
+                path.write_text('#!/bin/sh\n' + content)
+                path.chmod(0o755)
+                return path
+
+            ffmpeg_bad = shim('bad-banner',
+                              'printf "%s\\n" "' + marker + '"\n')
+            ffmpeg = shim(
+                'version-and-fail',
+                'if [ "$1" = "-version" ]; then\n'
+                '  printf "%s\\n" "ffmpeg version 9.0.2-privacy-test"\n'
+                '  exit 0\n'
+                'fi\n'
+                'printf "%s\\n" "' + marker + '" >&2\n'
+                'exit 1\n')
+            probe_bad = shim('probe-fail',
+                             'printf "%s\\n" "' + marker + '" >&2\nexit 1\n')
+            probe_good = shim(
+                'probe-good',
+                'printf "%s\\n" '
+                '\'{"streams":[{"codec_name":"cfhd","width":128,'
+                '"height":128,"pix_fmt":"yuv422p10le"}]}\'\n')
+            cases = (
+                ('banner', ffmpeg_bad, probe_good, 77),
+                ('probe', ffmpeg, probe_bad, 1),
+                ('decode', ffmpeg, probe_good, 1),
+            )
+            for flags in (['-B'], ['-B', '-O']):
+                for label, exe, probe, expected_exit in cases:
+                    with self.subTest(flags=flags, case=label):
+                        proc = subprocess.run(
+                            [sys.executable] + flags + [str(HARNESS),
+                             '--ffmpeg', str(exe), '--ffprobe', str(probe),
+                             '--repeats', '2'],
+                            capture_output=True, timeout=30, text=True)
+                        public = proc.stdout + proc.stderr
+                        self.assertEqual(proc.returncode, expected_exit, public)
+                        self.assertIn('ORACLE_QUALIFICATION_', public)
+                        self.assertNotIn(marker, public)
+                        self.assertNotIn('state=QUALIFIED', public)
+
+
 if __name__ == '__main__':
     unittest.main()
