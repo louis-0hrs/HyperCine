@@ -94,25 +94,39 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME dialect_capability_proof COMMAND test_dialect_capability_proof)
 
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
-    foreach(required_file IN ITEMS
-            tests/test_vc5_inspect.py tests/test_vc5_inspect_mutations.py
-            tools/vc5_inspect.py)
-        if(NOT EXISTS "${PROJECT_SOURCE_DIR}/${required_file}" OR
-           IS_DIRECTORY "${PROJECT_SOURCE_DIR}/${required_file}")
-            message(FATAL_ERROR "Required VC-5 contract source missing: ${required_file}")
-        endif()
-    endforeach()
+    include("${PROJECT_SOURCE_DIR}/cmake/vc5_contract_inventory.cmake")
+    hypercine_require_vc5_contract_files("${PROJECT_SOURCE_DIR}")
     add_test(NAME test_vc5_inspect COMMAND "${Python3_EXECUTABLE}" -B
         "${PROJECT_SOURCE_DIR}/tests/test_vc5_inspect.py")
     add_test(NAME test_vc5_inspect_optimized COMMAND "${Python3_EXECUTABLE}" -B -O
         "${PROJECT_SOURCE_DIR}/tests/test_vc5_inspect.py")
     add_test(NAME test_vc5_inspect_mutations COMMAND "${Python3_EXECUTABLE}" -B
         "${PROJECT_SOURCE_DIR}/tests/test_vc5_inspect_mutations.py")
+    add_test(NAME test_vc5_synthetic_ledger COMMAND "${Python3_EXECUTABLE}" -B
+        "${PROJECT_SOURCE_DIR}/tests/test_vc5_synthetic_ledger.py")
+    add_test(NAME test_vc5_synthetic_ledger_optimized COMMAND "${Python3_EXECUTABLE}" -B -O
+        "${PROJECT_SOURCE_DIR}/tests/test_vc5_synthetic_ledger.py")
     add_test(NAME test_vc5_inspect_mutations_optimized COMMAND "${Python3_EXECUTABLE}" -B -O
         "${PROJECT_SOURCE_DIR}/tests/test_vc5_inspect_mutations.py")
     set_tests_properties(test_vc5_inspect test_vc5_inspect_optimized
         test_vc5_inspect_mutations test_vc5_inspect_mutations_optimized
+        test_vc5_synthetic_ledger test_vc5_synthetic_ledger_optimized
         PROPERTIES LABELS "validation;vc5-structure" TIMEOUT 30)
+    set_tests_properties(test_vc5_synthetic_ledger test_vc5_synthetic_ledger_optimized
+        PROPERTIES TIMEOUT 120)
+    # #381: the oracle subprocess and privacy controls are mandatory in both
+    # Python modes; actual Debian identity remains host-dependent, never fake PASS.
+    if(NOT EXISTS "${PROJECT_SOURCE_DIR}/tests/test_ffmpeg_oracle_qualification.py" OR
+       NOT EXISTS "${PROJECT_SOURCE_DIR}/tests/qualify_ffmpeg_oracle.py")
+        message(FATAL_ERROR "Required FFmpeg oracle qualification source missing")
+    endif()
+    add_test(NAME ffmpeg_oracle_process_contract
+        COMMAND "${Python3_EXECUTABLE}" -B "${PROJECT_SOURCE_DIR}/tests/test_ffmpeg_oracle_qualification.py")
+    add_test(NAME ffmpeg_oracle_process_contract_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${PROJECT_SOURCE_DIR}/tests/test_ffmpeg_oracle_qualification.py")
+    set_tests_properties(ffmpeg_oracle_process_contract
+        ffmpeg_oracle_process_contract_optimized PROPERTIES
+        LABELS "validation;reference-oracle" TIMEOUT 120)
     set(contracts "${PROJECT_SOURCE_DIR}/tests")
     foreach(required_file IN ITEMS
             "${PROJECT_SOURCE_DIR}/tests/test_compat_qualification.py"

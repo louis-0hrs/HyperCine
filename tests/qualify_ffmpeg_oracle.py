@@ -11,8 +11,9 @@ pinned reference, and the comparison still rejects a different packet and a
 mutated packet. It does not qualify any other packet, format, resolution or
 GPU path, and it never promotes a release gate by itself.
 
-Exit codes: 0 qualified, 1 control failed, 77 blocked (tool absent or build
-not on the measured list).
+Exit codes: 0 qualified, 1 control failed, 77 blocked (tool absent, build not on
+the measured list, or a build-bound executable whose bytes are not the measured
+binary).
 """
 import argparse
 import hashlib
@@ -21,20 +22,47 @@ import re
 from pathlib import Path
 import shutil
 import struct
-import subprocess
 import sys
 import tempfile
 
 from validate_standalone import avi
+
+# Reuse the existing platform-specific process supervisor. The external
+# decoder and probe are untrusted even when their banners are allowlisted.
+_REPO_ROOT = str(Path(__file__).resolve().parents[1])
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+from tools import compat_process
+
+VERSION_BUDGET_SECONDS = 30.0
+PROBE_BUDGET_SECONDS = 60.0
+DECODE_BUDGET_SECONDS = 120.0
+TEXT_LIMIT_BYTES = 64 * 1024
+
 
 WIDTH = 128
 HEIGHT = 128
 OUTPUT_BYTES = WIDTH * HEIGHT * 4  # yuv422p10le: Y + Cb + Cr, 16-bit LE
 PEAK = 1023
 PATTERNS = ('flat', 'gradient', 'canonical')
-# Builds that reproduced the pinned n8.0 reference bytes on the measured host.
+# Builds that reproduced the pinned n8.0 reference bytes on a measured host.
 # Extend only after re-running this harness and reviewing the new evidence.
+#   9.0.2  Windows x64 build (docs/validation/FFMPEG_ORACLE_QUALIFICATION_20261025.md)
+#   7.1.5  Debian 13 x86_64 build, gcc 14.2.0-19 (same note, 2026-11-19 section)
 QUALIFIED_BUILD_PREFIXES = ('n8.0', '9.0.2')
+QUALIFIED_EXACT_BUILDS = frozenset({'7.1.5-0+deb13u1'})
+# Executable bytes for exact builds whose evidence is a binary digest, not just
+# a banner. Token admission says which build reports which version; this table
+# says whether the file on disk is the executable that was actually measured.
+# Legacy prefix entries stay token-only because no digest was recorded for them.
+QUALIFIED_EXECUTABLE_SHA256 = {
+    # docs/validation/FFMPEG_ORACLE_QUALIFICATION_20261025.md, 2026-11-19 and
+    # the 2026-11-20 corrective receipt: Debian 13 x86_64 /usr/bin binaries.
+    '7.1.5-0+deb13u1': {
+        'ffmpeg': 'e8a8d46f5225f3062cec7c07fb145d58ae73c603cb740dcd5bad34bfb54e455a',
+        'ffprobe': 'cefc5f81c0b18429cdbf8fa5a89e1e9c759235e10f93f9b329ff1b2fdff26f46',
+    },
+}
 # Pre-registered discriminator control: flip one entropy-payload byte of the
 # canonical packet. The offset is fixed here, not chosen per run.
 MUTATION_OFFSET = 500
@@ -61,8 +89,8 @@ def load_manifest(fixtures):
     path = Path(fixtures) / 'manifest.json'
     try:
         manifest = json.loads(path.read_text())
-    except (OSError, ValueError) as error:
-        raise Failed('cannot read fixture manifest: {}'.format(error))
+    except (OSError, ValueError):
+        raise Failed('cannot read fixture manifest') from None
     declared = {entry['file']: entry for entry in manifest.get('files', [])}
     if not declared:
         raise Failed('fixture manifest declares no files')
@@ -75,15 +103,14 @@ def load_bound(fixtures, declared, name):
         raise Failed('fixture {} is not declared in the manifest'.format(name))
     try:
         data = (Path(fixtures) / name).read_bytes()
-    except OSError as error:
-        raise Failed('cannot read fixture {}: {}'.format(name, error))
+    except OSError:
+        raise Failed('cannot read fixture {}'.format(name)) from None
     if len(data) != entry['bytes']:
         raise Failed('{} is {} bytes, manifest binds {}'.format(
             name, len(data), entry['bytes']))
     digest = sha256(data)
     if digest != entry['sha256']:
-        raise Failed('{} sha256 {} does not match manifest {}'.format(
-            name, digest, entry['sha256']))
+        raise Failed('{} sha256 does not match manifest'.format(name))
     return data
 
 
@@ -99,38 +126,89 @@ def find_tool(explicit, name):
     return found
 
 
-def parse_banner(banner):
-    """Bind the candidate's `-version` output to a version token.
+def run_tool(argv, timeout, output_limit, *, candidate=False):
+    """Run an external candidate with bounded capture and descendant ownership.
 
-    An executable whose banner cannot be bound to an FFmpeg build is not a
-    measured candidate, so this is the blocked state and never a failed
-    control; the banner is kept in the reason so the evidence is not lost.
+    Both stdout and stderr have the finite output_limit, including on
+    Windows. A failed cleanup is never reported as an ordinary codec failure;
+    no subprocess output, local path or command is surfaced in CI diagnostics.
     """
+    try:
+        return compat_process.run_bounded(
+            argv, timeout=timeout, stdout_limit=output_limit)
+    except compat_process.ToolFailure as error:
+        if error.cleanup_failed or error.containment_unconfirmed:
+            raise Blocked('external tool containment unconfirmed') from None
+        if candidate:
+            raise Blocked('candidate decoder unavailable') from None
+        if error.primary_category in ('tool launch failed',
+                                      'tool containment unavailable'):
+            raise Blocked('external tool unavailable') from None
+        raise Failed('external tool execution rejected') from None
+
+
+def parse_banner(banner):
+    """Return a bounded printable version token, never raw vendor text."""
     first = banner.splitlines()[0] if banner.splitlines() else ''
-    match = re.match(r'ffmpeg version (\S+)', first)
-    if not match:
-        raise Blocked('unrecognized decoder banner: {!r}'.format(first))
+    match = re.match(r'^ffmpeg version ([A-Za-z0-9_.+-]{1,80})(?:[ \t]|$)',
+                     first)
+    if match is None:
+        raise Blocked('unrecognized decoder banner')
     return match.group(1)
 
 
 def build_token(ffmpeg):
+    raw = run_tool([ffmpeg, '-version'], VERSION_BUDGET_SECONDS,
+                   TEXT_LIMIT_BYTES, candidate=True)
     try:
-        banner = subprocess.check_output(
-            [ffmpeg, '-version'], stderr=subprocess.STDOUT, text=True)
-    except (OSError, subprocess.CalledProcessError) as error:
-        raise Blocked('cannot run the candidate decoder: {}'.format(error))
+        banner = raw.decode('utf-8')
+    except UnicodeDecodeError:
+        raise Blocked('unrecognized decoder banner') from None
     return parse_banner(banner)
-
 
 def require_qualified_build(token):
     # Exact version token or a build suffix, never a bare string prefix:
     # "9.0.20" and "n8.0.1" are different builds from "9.0.2" and "n8.0".
-    matched = any(token == prefix or token.startswith(prefix + '-')
-                  for prefix in QUALIFIED_BUILD_PREFIXES)
+    matched = (token in QUALIFIED_EXACT_BUILDS or
+               any(token == prefix or token.startswith(prefix + '-')
+                   for prefix in QUALIFIED_BUILD_PREFIXES))
     if not matched:
-        raise Blocked('decoder build {} is not on the measured list ({})'.format(
-            token, ', '.join(QUALIFIED_BUILD_PREFIXES)))
+        raise Blocked('decoder build is not on the measured list')
     return token
+
+
+def file_sha256(path, name):
+    """Hash one executable without loading it into memory in one block."""
+    digest = hashlib.sha256()
+    try:
+        with open(path, 'rb') as handle:
+            for chunk in iter(lambda: handle.read(1 << 20), b''):
+                digest.update(chunk)
+    except OSError:
+        raise Blocked('{} executable sha256 unavailable'.format(name))
+    return digest.hexdigest()
+
+
+def require_measured_executables(token, ffmpeg, ffprobe):
+    """Bind a build-bound entry to the measured executable bytes.
+
+    Token admission says which build reports which banner; this says whether the
+    file is the executable whose digest the measurement recorded. Both tools are
+    hashed, because `ffprobe` is resolved independently and a token-only check
+    would admit any probe. Legacy prefix entries return None: their documented
+    evidence is a banner, so they stay token-only instead of pretending to a
+    binary identity that was never measured.
+    """
+    expected = QUALIFIED_EXECUTABLE_SHA256.get(token)
+    if expected is None:
+        return None
+    observed = {}
+    for name, path in (('ffmpeg', ffmpeg), ('ffprobe', ffprobe)):
+        digest = file_sha256(path, name)
+        if digest != expected[name]:
+            raise Blocked('{} sha256 differs from measured executable'.format(name))
+        observed[name] = digest
+    return observed
 
 
 def validate_output(raw):
@@ -146,48 +224,46 @@ def validate_output(raw):
 
 
 def probe_stream(ffprobe, container):
-    probe = subprocess.run(
-        [ffprobe, '-v', 'error', '-show_streams', '-of', 'json', str(container)],
-        check=False, capture_output=True, text=True)
-    if probe.returncode != 0:
-        raise Failed('ffprobe rejected the container: {}'.format(
-            probe.stderr.strip()))
+    raw = run_tool(
+        [ffprobe, '-v', 'error', '-show_streams', '-of', 'json',
+         str(container)],
+        PROBE_BUDGET_SECONDS, TEXT_LIMIT_BYTES)
     try:
-        streams = json.loads(probe.stdout).get('streams', [])
-    except ValueError as error:
-        raise Failed('ffprobe emitted invalid JSON: {}'.format(error))
-    if len(streams) != 1:
-        raise Failed('expected one stream, found {}'.format(len(streams)))
+        document = json.loads(raw.decode('utf-8'))
+    except (UnicodeDecodeError, ValueError):
+        raise Failed('ffprobe emitted invalid stream JSON') from None
+    if not isinstance(document, dict):
+        raise Failed('ffprobe emitted invalid stream JSON')
+    streams = document.get('streams')
+    if not isinstance(streams, list) or len(streams) != 1:
+        raise Failed('ffprobe stream inventory mismatch')
     stream = streams[0]
+    if not isinstance(stream, dict):
+        raise Failed('ffprobe emitted invalid stream JSON')
     observed = (stream.get('codec_name'), stream.get('width'),
                 stream.get('height'), stream.get('pix_fmt'))
     expected = ('cfhd', WIDTH, HEIGHT, 'yuv422p10le')
     if observed != expected:
-        raise Failed('stream contract {} != {}'.format(observed, expected))
+        raise Failed('ffprobe stream contract mismatch')
     return observed
 
 
 def decode(ffmpeg, ffprobe, packet, workdir, label):
     container = workdir / (label + '.avi')
-    container.write_bytes(avi(packet))
-    probe_stream(ffprobe, container)
-    output = workdir / (label + '.yuv')
-    result = subprocess.run(
-        [ffmpeg, '-v', 'error', '-xerror', '-y', '-i', str(container),
-         '-frames:v', '1', '-c:v', 'rawvideo', '-pix_fmt', 'yuv422p10le',
-         '-f', 'rawvideo', str(output)],
-        check=False, capture_output=True, text=True)
-    if result.returncode != 0:
-        lines = result.stderr.strip().splitlines()
-        raise Failed('decode of {} failed: {}'.format(
-            label, lines[-1] if lines else 'no output'))
     try:
-        raw = output.read_bytes()
-    except OSError as error:
-        raise Failed('decode of {} wrote no image: {}'.format(label, error))
+        container.write_bytes(avi(packet))
+    except OSError:
+        raise Failed('cannot write temporary container') from None
+    probe_stream(ffprobe, container)
+    # Pipe-capture is size-bounded; a .yuv output file and read_bytes()
+    # would bypass the supervisor's memory/output limits.
+    raw = run_tool(
+        [ffmpeg, '-v', 'error', '-xerror', '-i', str(container),
+         '-frames:v', '1', '-c:v', 'rawvideo', '-pix_fmt', 'yuv422p10le',
+         '-f', 'rawvideo', 'pipe:1'],
+        DECODE_BUDGET_SECONDS, OUTPUT_BYTES)
     validate_output(raw)
     return raw
-
 
 def self_check_rejects_corrupt_output():
     """The adapter must reject data outside its declared normalization."""
@@ -283,6 +359,7 @@ def main():
         ffmpeg = find_tool(args.ffmpeg, 'ffmpeg')
         ffprobe = find_tool(args.ffprobe, 'ffprobe')
         token = require_qualified_build(build_token(ffmpeg))
+        identity = require_measured_executables(token, ffmpeg, ffprobe)
         report = qualify(args.fixtures, ffmpeg, ffprobe, args.repeats)
     except Blocked as error:
         print('ORACLE_QUALIFICATION_BLOCKED reason={}'.format(error))
@@ -291,6 +368,11 @@ def main():
         print('ORACLE_QUALIFICATION_FAILED reason={}'.format(error))
         return EXIT_FAILED
     report['decoder_build'] = token
+    if identity is None:
+        print('ORACLE_QUALIFICATION executable_identity=token-only')
+    else:
+        print('ORACLE_QUALIFICATION executable_identity=measured '
+              'ffmpeg_sha256={ffmpeg} ffprobe_sha256={ffprobe}'.format(**identity))
     print('ORACLE_QUALIFICATION state=QUALIFIED decoder_build={} packets={} repeats={}'.format(
         token, len(report['packets']), args.repeats))
     for packet in report['packets']:
