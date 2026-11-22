@@ -51,6 +51,15 @@ def run_json(command, timeout=8):
     result = subprocess.run(command, check=True, capture_output=True, timeout=timeout)
     return json.loads(result.stdout)
 
+def source_text(path):
+    """Decoded source bytes with the checkout's newline policy removed.
+
+    Mutations must not depend on how the tree was checked out: Windows runners
+    materialise these files with CRLF, so a needle carrying ``\n`` cannot be
+    matched against ``read_bytes().decode()`` there.
+    """
+    return path.read_bytes().decode("utf-8").replace("\r\n", "\n")
+
 def context_for(ledger, interpreter=sys.executable):
     source = ledger["source"]
     executable_hash = hashlib.sha256(Path(interpreter).read_bytes()).hexdigest()
@@ -353,20 +362,25 @@ class SyntheticLedgerTests(unittest.TestCase):
 
     def test_source_inventory_omission_is_causally_guarded(self):
         """Dropping a required path from the generator inventory must fail closed."""
-        before = '    "ci/run_standalone.py",\n'
+        before = '    "ci/run_standalone.py",'
         name = "SyntheticLedgerTests.test_source_inventory_is_pinned_independently"
         with tempfile.TemporaryDirectory() as temp:
             root = self.isolated_root(temp)
             target = root / "tools" / "vc5_synthetic_packet.py"
             original = target.read_bytes()
+            newline = "\r\n" if b"\r\n" in original else "\n"
             for optimized in (False, True):
                 mode = "-O" if optimized else "normal"
                 baseline = self.run_selected(root, name, optimized)
                 self.assertEqual(baseline.returncode, 0,
                                  mode + baseline.stdout + baseline.stderr)
-                text = original.decode("utf-8")
-                self.assertIn(before, text)
-                target.write_text(text.replace(before, "", 1), encoding="utf-8")
+                lines = source_text(target).split("\n")
+                # Exactly one line may carry the inventory entry: a needle that
+                # also matched a comment or a second tuple would make the guard
+                # pass for the wrong reason.
+                self.assertEqual(lines.count(before), 1, mode)
+                target.write_bytes(newline.join(line for line in lines
+                                                if line != before).encode("utf-8"))
                 mutant = self.run_selected(root, name, optimized)
                 self.assertNotEqual(mutant.returncode, 0, mode + mutant.stdout)
                 self.assertIn("missing=['ci/run_standalone.py']", mutant.stderr,
