@@ -6,6 +6,8 @@
 No FFmpeg and no SDK are needed: these pin the fail-closed decisions that the
 harness makes before any external decoder runs.
 """
+import copy
+import io
 import json
 import os
 import shutil
@@ -13,7 +15,9 @@ import struct
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -116,6 +120,86 @@ class QualificationContractTest(unittest.TestCase):
             (copy / 'flat.cfhd').unlink()
             with self.assertRaises(harness.Failed):
                 harness.load_bound(copy, declared, 'flat.cfhd')
+
+
+class ManifestContractTest(unittest.TestCase):
+    def test_malformed_manifests_fail_without_disclosing_input(self):
+        marker = 'MANIFEST_SENTINEL_731'
+        original = json.loads((FIXTURES / 'manifest.json').read_bytes())
+        cases = [('array-root', []), ('null-root', None), ('text-root', marker)]
+        for key in original:
+            missing = dict(original)
+            del missing[key]
+            cases.append(('missing-' + key, missing))
+            cases.append(('null-' + key, dict(original, **{key: None})))
+        cases.extend(('files-type', dict(original, files=value))
+                     for value in (marker, {}, 4, []))
+        for key in ('copyright', 'license', 'encoder_commit', 'decoder'):
+            for value in ([], 42, marker):
+                cases.append(('metadata-' + key, dict(original, **{key: value})))
+        cases.append(('extra-root-key', dict(original, **{marker: None})))
+        for key, value in (('file', [marker]), ('file', '../' + marker),
+                           ('file', None), ('file', '/' + marker),
+                           ('bytes', -1), ('bytes', '65536'), ('bytes', False),
+                           ('bytes', 65536.0), ('bytes', None),
+                           ('sha256', 17), ('sha256', None),
+                           ('sha256', 'a' * 63), ('sha256', 'g' * 64),
+                           ('sha256', marker), (marker, None)):
+            value_case = copy.deepcopy(original)
+            value_case['files'][0][key] = value
+            cases.append(('entry-value', value_case))
+        for key in ('file', 'bytes', 'sha256'):
+            missing = copy.deepcopy(original)
+            del missing['files'][0][key]
+            cases.append(('missing-entry-' + key, missing))
+        for entry in (None, [], {}, marker, original['files'][1]):
+            cases.append(('invalid-or-duplicate-entry',
+                          dict(original, files=[entry] + original['files'][1:])))
+        cases.append(('incomplete-inventory', dict(original, files=original['files'][1:])))
+        payloads = [(label, json.dumps(value).encode('utf-8')) for label, value in cases]
+        payloads += [
+            ('truncated-json', b'{"files":[' + marker.encode()),
+            ('invalid-utf8', b'\xff'),
+            ('excessive-nesting', b'[' * 2000 + b'0' + b']' * 2000),
+            ('oversized-manifest', b' ' * harness.MANIFEST_LIMIT_BYTES + b'{}'),
+            ('duplicate-root-key', b'{"files":null,' + json.dumps(original).encode()[1:]),
+            ('duplicate-entry-key', json.dumps(original).encode().replace(
+                b'"bytes":', b'"bytes":null,"bytes":', 1)),
+        ]
+        # Run the actual CLI entry in the current interpreter mode. Only tool
+        # discovery/admission is stubbed, so Windows needs no POSIX shims.
+        driver = r"""
+import sys
+from unittest.mock import patch
+sys.path.insert(0, sys.argv.pop(1))
+import qualify_ffmpeg_oracle as q
+with patch.object(q, 'find_tool', return_value='candidate'), \
+     patch.object(q, 'build_token', return_value='9.0.2'), \
+     patch.object(q, 'load_bound', side_effect=RuntimeError('UNVALIDATED_FIXTURE_READ')):
+    sys.exit(q.main())
+"""
+        flags = ['-B'] + (['-O'] if sys.flags.optimize else [])
+        with tempfile.TemporaryDirectory(prefix=marker) as tmp:
+            for label, raw in payloads + [('missing-manifest', None)]:
+                with self.subTest(case=label):
+                    path = Path(tmp) / 'manifest.json'
+                    if raw is None:
+                        path.unlink()
+                    else:
+                        path.write_bytes(raw)
+                    result = subprocess.run(
+                        [sys.executable] + flags + ['-c', driver,
+                         str(HARNESS.resolve().parent), '--fixtures', tmp],
+                        capture_output=True, text=True, timeout=15)
+                    self.assertEqual(result.returncode, 1)
+                    self.assertTrue(result.stdout.startswith('ORACLE_QUALIFICATION_FAILED reason='))
+                    self.assertTrue(not result.stderr, 'unexpected manifest stderr')
+                    for disallowed in (marker, tmp, 'Traceback', 'UNVALIDATED_FIXTURE_READ'):
+                        self.assertTrue(disallowed not in result.stdout,
+                                        'manifest diagnostic disclosed private input')
+                    self.assertIn(result.stdout.strip().split(' reason=', 1)[1], (
+                        'invalid fixture manifest schema', 'cannot read fixture manifest',
+                        'fixture manifest exceeds size limit'))
 
 
 class MeasuredExecutableIdentityTest(unittest.TestCase):
@@ -334,6 +418,27 @@ class BoundedExternalToolTest(unittest.TestCase):
                 with self.assertRaises(harness.Failed):
                     script(source, timeout)
 
+    def test_probe_rejects_float_dimensions_and_excessive_json_nesting(self):
+        stream = {'codec_name': 'cfhd', 'width': 128.0, 'height': 128,
+                  'pix_fmt': 'yuv422p10le'}
+        for raw in (json.dumps({'streams': [stream]}).encode('utf-8'),
+                    b'[' * 2000 + b'0' + b']' * 2000):
+            with mock.patch.object(harness, 'run_tool', return_value=raw):
+                with self.assertRaises(harness.Failed):
+                    harness.probe_stream('probe', 'input.avi')
+
+    def test_success_report_never_echoes_legacy_vendor_suffix(self):
+        token = '9.0.2-EXTERNAL_SENTINEL_731'
+        output = io.StringIO()
+        with mock.patch.object(sys, 'argv', ['qualify_ffmpeg_oracle.py']), \
+             mock.patch.object(harness, 'find_tool', return_value='candidate'), \
+             mock.patch.object(harness, 'build_token', return_value=token), \
+             mock.patch.object(harness, 'qualify', return_value={'packets': [], 'controls': []}), \
+             redirect_stdout(output):
+            self.assertEqual(harness.main(), 0)
+        self.assertIn('decoder_build=9.0.2 ', output.getvalue())
+        self.assertNotIn('EXTERNAL_SENTINEL_731', output.getvalue())
+
     @unittest.skipUnless(os.name == 'posix', 'needs POSIX shell shims')
     def test_real_external_stderr_and_banner_never_leak(self):
         marker = 'EXTERNAL_SENTINEL_731'
@@ -406,5 +511,83 @@ class BoundedExternalToolTest(unittest.TestCase):
                         self.assertNotIn('state=QUALIFIED', public)
 
 
+@unittest.skipUnless(sys.platform in ('win32', 'linux'), 'needs native Windows or Linux liveness probe')
+class DescendantLivenessTest(unittest.TestCase):
+    def wait_for_descendant_exit(self, pid):
+        if sys.platform == 'win32':
+            import ctypes
+            from ctypes import wintypes
+            kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+            kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+            kernel.OpenProcess.restype = wintypes.HANDLE
+            kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+            kernel.WaitForSingleObject.restype = wintypes.DWORD
+            kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+            handle = kernel.OpenProcess(0x00100000, False, pid)  # SYNCHRONIZE
+            if not handle:
+                self.assertEqual(ctypes.get_last_error(), 87)  # process no longer exists
+                return
+            try:
+                self.assertEqual(kernel.WaitForSingleObject(handle, 1500), 0,
+                                 'started descendant is still running after cleanup')
+            finally:
+                kernel.CloseHandle(handle)
+        else:
+            deadline = time.monotonic() + 1.5
+            while True:
+                try:
+                    stat = Path('/proc') / str(pid) / 'stat'
+                    state = stat.read_text().rsplit(')', 1)[1].split()[0]
+                except FileNotFoundError:
+                    return
+                if state in ('Z', 'X'):  # exited, possibly not yet reaped by the OS
+                    return
+                if time.monotonic() >= deadline:
+                    self.fail('started descendant is still running after cleanup')
+                time.sleep(0.02)
+
+    def check_cleanup(self, overflow):
+        descendant = r"""
+import os, pathlib, sys, time
+ready = pathlib.Path(sys.argv[1])
+marker = ready.with_suffix('.pending')
+marker.write_text(str(os.getpid()))
+marker.replace(ready)
+time.sleep(15)
+"""
+        parent = r"""
+import pathlib, subprocess, sys, time
+mode, ready, descendant = sys.argv[1:]
+subprocess.Popen([sys.executable, '-B', '-c', descendant, ready],
+                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                 stderr=subprocess.DEVNULL)
+while not pathlib.Path(ready).exists():
+    time.sleep(0.01)
+if mode == 'overflow':
+    sys.stderr.buffer.write(b'x' * 4097)
+    sys.stderr.buffer.flush()
+time.sleep(15)
+"""
+        mode = 'overflow' if overflow else 'timeout'
+        category = 'tool output limit exceeded' if overflow else 'tool timeout'
+        with tempfile.TemporaryDirectory() as directory:
+            ready = Path(directory) / 'started'
+            with self.assertRaises(harness.compat_process.ToolFailure) as caught:
+                harness.compat_process.run_bounded(
+                    [sys.executable, '-B', '-c', parent, mode, str(ready), descendant],
+                    timeout=5, stdout_limit=4096)
+            self.assertTrue(ready.is_file(), 'the descendant did not start')
+            self.assertEqual(caught.exception.primary_category, category)
+            self.assertFalse(caught.exception.cleanup_failed)
+            self.assertFalse(caught.exception.containment_unconfirmed)
+            self.wait_for_descendant_exit(int(ready.read_text()))
+
+    def test_started_descendant_is_dead_after_timeout(self):
+        self.check_cleanup(overflow=False)
+
+    def test_started_descendant_is_dead_after_stderr_abort(self):
+        self.check_cleanup(overflow=True)
+
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
