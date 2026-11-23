@@ -15,7 +15,9 @@ import struct
 import subprocess
 import sys
 import tempfile
+import threading
 import time
+import tracemalloc
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -200,6 +202,199 @@ with patch.object(q, 'find_tool', return_value='candidate'), \
                     self.assertIn(result.stdout.strip().split(' reason=', 1)[1], (
                         'invalid fixture manifest schema', 'cannot read fixture manifest',
                         'fixture manifest exceeds size limit'))
+
+
+class BoundedFixtureInputTest(unittest.TestCase):
+    """A caller-supplied --fixtures directory must never be read unbounded.
+
+    `--fixtures` accepts any directory, so the twelve admitted names are the
+    only thing a hostile or damaged fixture tree cannot change. Each category
+    therefore carries a finite budget, and the byte count that arrives from the
+    manifest is rejected before a single fixture byte is requested.
+    """
+
+    def test_every_admitted_name_has_a_finite_geometric_budget(self):
+        self.assertEqual(len(harness.FIXTURE_NAMES), 12)
+        self.assertEqual(set(harness.FIXTURE_LIMIT_BYTES),
+                         set(harness.FIXTURE_SUFFIXES))
+        for name in sorted(harness.FIXTURE_NAMES):
+            with self.subTest(name=name):
+                limit = harness.fixture_limit(name)
+                self.assertIsNotNone(limit)
+                self.assertGreater(limit, 0)
+                self.assertLessEqual(limit, harness.PACKET_LIMIT_BYTES)
+        # Raw planes are exactly the committed geometry; only the packet
+        # category carries headroom, and it is a documented multiple.
+        for suffix in ('.bgra', '.input-p10', '.p10'):
+            self.assertEqual(harness.FIXTURE_LIMIT_BYTES[suffix],
+                             harness.OUTPUT_BYTES)
+        self.assertEqual(harness.FIXTURE_LIMIT_BYTES['.cfhd'],
+                         4 * harness.OUTPUT_BYTES)
+        self.assertIsNone(harness.fixture_limit('flat.unknownextension'))
+
+    def test_committed_fixtures_still_load_inside_their_budgets(self):
+        # The bound must not shrink the real inventory: all twelve committed
+        # entries load, at their declared length and pinned digest.
+        declared = harness.load_manifest(FIXTURES)
+        self.assertEqual(set(declared), set(harness.FIXTURE_NAMES))
+        for name, entry in sorted(declared.items()):
+            with self.subTest(name=name):
+                self.assertLessEqual(entry['bytes'], harness.fixture_limit(name))
+                data = harness.load_bound(FIXTURES, declared, name)
+                self.assertEqual(len(data), entry['bytes'])
+                self.assertEqual(harness.sha256(data), entry['sha256'])
+
+    def test_oversized_declaration_fails_in_the_manifest_loader(self):
+        original = json.loads((FIXTURES / 'manifest.json').read_bytes())
+
+        def no_read(*args, **kwargs):
+            raise AssertionError('a fixture was read for an out-of-budget entry')
+
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-declared-') as tmp:
+            manifest = Path(tmp) / 'manifest.json'
+            with mock.patch.object(harness, 'read_bounded', side_effect=no_read):
+                for suffix in harness.FIXTURE_SUFFIXES:
+                    for size in (harness.FIXTURE_LIMIT_BYTES[suffix] + 1,
+                                 harness.FIXTURE_LIMIT_BYTES[suffix] * 4096):
+                        case = copy.deepcopy(original)
+                        target = next(entry for entry in case['files']
+                                      if entry['file'].endswith(suffix))
+                        target['bytes'] = size
+                        manifest.write_bytes(json.dumps(case).encode('utf-8'))
+                        with self.subTest(suffix=suffix, size=size):
+                            with self.assertRaises(harness.Failed) as caught:
+                                harness.load_manifest(tmp)
+                            self.assertIn('byte budget', str(caught.exception))
+                            self.assertNotIn(tmp, str(caught.exception))
+
+    def test_load_bound_refuses_an_out_of_budget_entry_without_reading(self):
+        def no_read(*args, **kwargs):
+            raise AssertionError('a fixture was read for an out-of-budget entry')
+
+        declared = {'flat.cfhd': {
+            'file': 'flat.cfhd',
+            'bytes': harness.PACKET_LIMIT_BYTES + 1,
+            'sha256': 'a' * 64,
+        }}
+        with mock.patch.object(harness, 'read_bounded', side_effect=no_read):
+            with self.assertRaises(harness.Failed) as caught:
+                harness.load_bound(FIXTURES, declared, 'flat.cfhd')
+        self.assertIn('byte budget', str(caught.exception))
+
+    def test_non_regular_fixture_entry_fails_closed(self):
+        declared = harness.load_manifest(FIXTURES)
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-nonreg-') as tmp:
+            copy = Path(tmp) / 'fixtures'
+            shutil.copytree(FIXTURES, copy)
+            (copy / 'flat.cfhd').unlink()
+            (copy / 'flat.cfhd').mkdir()
+            with self.assertRaises(harness.Failed) as caught:
+                harness.load_bound(copy, declared, 'flat.cfhd')
+            self.assertIn('flat.cfhd', str(caught.exception))
+            self.assertNotIn(tmp, str(caught.exception))
+
+    @unittest.skipUnless(os.name == 'posix', 'needs a POSIX FIFO')
+    def test_fifo_fixture_entry_fails_closed_instead_of_blocking(self):
+        # A named pipe behind an admitted name must be rejected, not opened:
+        # an unbounded read on a FIFO would wait for a writer forever.
+        declared = harness.load_manifest(FIXTURES)
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-fifo-') as tmp:
+            copy = Path(tmp) / 'fixtures'
+            shutil.copytree(FIXTURES, copy)
+            (copy / 'flat.cfhd').unlink()
+            os.mkfifo(copy / 'flat.cfhd')
+            outcome = {}
+
+            def attempt():
+                try:
+                    harness.load_bound(copy, declared, 'flat.cfhd')
+                except harness.Failed as error:
+                    outcome['reason'] = str(error)
+                except BaseException as error:  # pragma: no cover - diagnostic
+                    outcome['reason'] = repr(error)
+
+            worker = threading.Thread(target=attempt, daemon=True)
+            worker.start()
+            worker.join(10)
+            self.assertFalse(worker.is_alive(), 'a FIFO fixture blocked the read')
+            self.assertIn('flat.cfhd', outcome.get('reason', ''))
+            self.assertNotIn(tmp, outcome.get('reason', ''))
+
+    def test_sparse_oversized_fixture_is_bounded_by_the_declaration(self):
+        # A declared 65,536-byte packet behind a 512 MiB sparse file: the read
+        # stops at declaration + 1, so the measured Python allocation stays at
+        # fixture scale instead of following the file size. This is the causal
+        # assertion: an unbounded read_bytes() moves the peak by six orders of
+        # magnitude and turns this test RED.
+        oversized = 512 * 1024 * 1024
+        with tempfile.TemporaryDirectory(prefix='hypercine-oracle-sparse-') as tmp:
+            copy = Path(tmp) / 'fixtures'
+            shutil.copytree(FIXTURES, copy)
+            declared = harness.load_manifest(copy)
+            path = copy / 'flat.cfhd'
+            with open(path, 'wb') as handle:
+                handle.truncate(oversized)
+            self.assertEqual(path.stat().st_size, oversized)
+            tracemalloc.start()
+            try:
+                with self.assertRaises(harness.Failed) as caught:
+                    harness.load_bound(copy, declared, 'flat.cfhd')
+                _, peak = tracemalloc.get_traced_memory()
+            finally:
+                tracemalloc.stop()
+            self.assertIn('size does not match manifest', str(caught.exception))
+            self.assertNotIn(tmp, str(caught.exception))
+            self.assertLess(peak, harness.PACKET_LIMIT_BYTES,
+                            'fixture read allocated {} bytes for a {} byte file'.format(
+                                peak, oversized))
+
+    def test_cli_fails_closed_on_oversized_declaration_and_sparse_entry(self):
+        # Real CLI entry point in normal and optimized Python. Only tool
+        # admission is stubbed, so the failure is the fixture-input bound.
+        marker = 'FIXTURE_SENTINEL_731'
+        driver = r"""
+import sys
+from unittest.mock import patch
+sys.path.insert(0, sys.argv.pop(1))
+import qualify_ffmpeg_oracle as q
+with patch.object(q, 'find_tool', return_value='candidate'), \
+     patch.object(q, 'build_token', return_value='9.0.2'):
+    sys.exit(q.main())
+"""
+        original = json.loads((FIXTURES / 'manifest.json').read_bytes())
+        flags = ['-B'] + (['-O'] if sys.flags.optimize else [])
+        with tempfile.TemporaryDirectory(prefix=marker) as tmp:
+            root = Path(tmp)
+            fixtures = root / 'fixtures'
+            shutil.copytree(FIXTURES, fixtures)
+
+            def run(label, expected_reason):
+                result = subprocess.run(
+                    [sys.executable] + flags + ['-c', driver,
+                     str(HARNESS.resolve().parent), '--fixtures', str(fixtures)],
+                    capture_output=True, text=True, timeout=30)
+                public = result.stdout + result.stderr
+                self.assertEqual(result.returncode, 1, public)
+                self.assertTrue(result.stdout.startswith(
+                    'ORACLE_QUALIFICATION_FAILED reason='), public)
+                self.assertIn(expected_reason, result.stdout)
+                for disallowed in (marker, tmp, 'Traceback', 'state=QUALIFIED'):
+                    self.assertTrue(disallowed not in public,
+                                    '{} disclosed {}'.format(label, disallowed))
+
+            declared = copy.deepcopy(original)
+            for entry in declared['files']:
+                if entry['file'] == 'canonical.cfhd':
+                    entry['bytes'] = 1 << 40
+            (fixtures / 'manifest.json').write_bytes(
+                json.dumps(declared).encode('utf-8'))
+            run('oversized-declaration', 'byte budget')
+
+            (fixtures / 'manifest.json').write_bytes(
+                (FIXTURES / 'manifest.json').read_bytes())
+            with open(fixtures / 'flat.cfhd', 'wb') as handle:
+                handle.truncate(512 * 1024 * 1024)
+            run('sparse-entry', 'size does not match manifest')
 
 
 class MeasuredExecutableIdentityTest(unittest.TestCase):
