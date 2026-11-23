@@ -23,11 +23,13 @@ REQUIRED = {
     'dialect_capability_proof',
     'compat_qualification_matrix', 'compat_qualification_matrix_optimized',
     'compat_qualification_committed_matrix',
+    'ffmpeg_oracle_process_contract', 'ffmpeg_oracle_process_contract_optimized',
     # #381: bounded decoded-pixel capture; both Python modes plus evidence.
     'metal_packet_capture_contract', 'metal_packet_capture_contract_optimized',
     'metal_packet_capture_evidence',
     'test_vc5_inspect', 'test_vc5_inspect_optimized',
     'test_vc5_inspect_mutations', 'test_vc5_inspect_mutations_optimized',
+    'test_vc5_synthetic_ledger', 'test_vc5_synthetic_ledger_optimized',
     # Fail closed if the C0 geometry arithmetic or recorded-report gate disappears.
     'extreme_geometry_c0_arithmetic', 'extreme_geometry_c0_report',
     # P0 RGB444 frame and RG48 importer must never disappear from standalone CI.
