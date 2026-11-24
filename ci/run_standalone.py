@@ -46,6 +46,7 @@ REQUIRED = {
     'rgb444_p12_transform_contract',
     'reference_decode_contract',
     'quality_state_unit', 'standalone_gate_guardrails',
+    'quality_state_corpus_contract', 'quality_state_corpus_contract_optimized',
     'optimized_standalone_acceptance',
     'filmscan3_backend_selection', 'entropy_bitexact',
     'encoder_backend_selection_contract', 'encoder_backend_session_packets',
