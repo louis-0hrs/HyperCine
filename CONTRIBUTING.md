@@ -7,7 +7,10 @@ HyperCine is an experimental CineForm (`CFHD` / SMPTE VC-5) engineering project.
 
 ## Before you start
 
-Read [`AGENTS.md`](AGENTS.md) for mandatory repo-wide rules, including agent claims, independent worktrees, branch ownership, pre-publication privacy gates and handoffs. Use a focused issue and an isolated branch; coordinate against [issue #62](https://github.com/louis-0hrs/HyperCine/issues/62) before editing files an agent already owns. Do not autonomously merge or release.
+Read [`AGENTS.md`](AGENTS.md) for mandatory repo-wide rules, including agent claims, independent worktrees, branch ownership, pre-publication privacy gates and handoffs. Use a focused issue and an isolated branch; coordinate against [issue #62](https://github.com/louis-0hrs/HyperCine/issues/62) before editing files an agent already owns. Workers must not autonomously merge
+or release. The independent integration maintainer has the scoped standing
+owner approval documented in `AGENTS.md` section 13; its qualification gates,
+branch protections and all retained approval boundaries still apply.
 
 New HyperCine source files require the repository's dual **MIT OR Apache-2.0** copyright/license header. Keep core codec dependencies within the project's published C++17/platform-native SDK constraints.
 
@@ -31,4 +34,6 @@ Public branches, draft PRs, issue comments, logs and artifacts are **public befo
 
 Before every commit, review the staged diff and run `python ci/privacy_guard.py --staged`. Before pushing, use the configured pre-push guard to scan **every outgoing commit** and review any generated evidence. A hosted CI check is not a pre-publication substitute. Follow [`docs/PRIVACY.md`](docs/PRIVACY.md) for hook/worktree setup and incident handling; never bypass a failing guard just to publish.
 
-Open a **Draft PR** linking its issue. Include the actual test commands, OS/compiler/GPU and driver versions where relevant, sample/commit hashes without private paths, PASS/FAIL/SKIP/BLOCKED classifications, scope boundaries, and unresolved risks. The [pull-request template](.github/pull_request_template.md) provides the final checklist. Leave protected-main integration to the maintainer's explicit review process.
+Open a **Draft PR** linking its issue. Include the actual test commands, OS/compiler/GPU and driver versions where relevant, sample/commit hashes without private paths, PASS/FAIL/SKIP/BLOCKED classifications, scope boundaries, and unresolved risks. The [pull-request template](.github/pull_request_template.md) provides the final checklist. Leave protected-main integration to the independent maintainer's gated process
+under the scoped standing owner approval in `AGENTS.md` section 13; this does
+not grant workers merge permission or authorize a release.
