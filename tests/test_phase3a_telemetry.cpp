@@ -98,6 +98,24 @@ static void Check(bool condition, const char* message) {
     if (!condition) throw std::runtime_error(message);
 }
 
+// The aggregate must not retain per-poll samples. sizeof() cannot see a heap
+// container, so measure the process RSS across the million-poll loop where the
+// platform exposes it and report the claim as Linux-local otherwise.
+#if defined(__linux__) && !defined(_WIN32)
+#include <unistd.h>
+static long long ProcessRssBytes() {
+    FILE* statm = std::fopen("/proc/self/statm", "r");
+    if (!statm) return -1;
+    long long total_pages = 0, resident_pages = 0;
+    const int scanned = std::fscanf(statm, "%lld %lld", &total_pages, &resident_pages);
+    std::fclose(statm);
+    if (scanned != 2) return -1;
+    const long page = sysconf(_SC_PAGESIZE);
+    if (page <= 0) return -1;
+    return resident_pages * static_cast<long long>(page);
+}
+#endif
+
 int main() {
     try {
         detail::NvmlAccumulator acc;
@@ -119,10 +137,19 @@ int main() {
         Check(mixed.temperature_c_start == 50 && mixed.temperature_c_end == 70 && mixed.temperature_c_max == 70, "temperature endpoints");
         Check(mixed.power_w_mean == 100 && mixed.power_w_max == 200 && mixed.throttle_reasons_bitmask == 4, "zero readings and throttle union");
         detail::NvmlAccumulator long_run;
+#if defined(__linux__) && !defined(_WIN32)
+        const long long rss_before_polls = ProcessRssBytes();
+#endif
         for (int i = 0; i < 1000000; ++i) long_run.Add(first);
         auto million = long_run.Finish(true);
         Check(million.sample_count == 1000000 && million.graphics_clock_mhz_mean == 1000, "million-poll aggregation");
         Check(sizeof(detail::NvmlAccumulator) < 512, "fixed accumulator storage");
+#if defined(__linux__) && !defined(_WIN32)
+        const long long rss_after_polls = ProcessRssBytes();
+        Check(rss_before_polls > 0 && rss_after_polls > 0, "RSS readable");
+        Check(rss_after_polls - rss_before_polls < (8LL << 20),
+              "bounded streaming storage: million polls must not retain per-poll samples");
+#endif
 
         Phase3AResult memory;
         memory.slot_selection.total_estimated_vram_bytes = 9999;

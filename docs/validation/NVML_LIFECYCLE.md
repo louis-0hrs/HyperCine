@@ -39,3 +39,40 @@ Native CI Python: 19/19 PASS. Debug ASan+UBSan actual-sampler/both-writer
 CTest: 2/2 PASS, 1.29 seconds. This is synthetic provider coverage only.
 Full native SDK-free Release required-external-decode CTest: 30/30 PASS,
 zero skips, 76.33 seconds.
+
+## Forward adaptation onto current main (2026-11-24)
+
+This change was recovered from the reviewed stack ``951f371` (#132)` and forward-adapted
+onto protected `main` `3c7030facd6edfbd604097682ece5ce0b91c47fd`; the stack
+branches themselves are untouched. Conflict-free against current main apart from
+the `.gitignore`/root `CMakeLists.txt` allowlist and registration points, which
+were merged by hand (Vulkan option kept, telemetry registration added after it).
+
+Environment of this adaptation: Linux x86_64, GCC 14.2.0, CMake 3.31.6,
+Ninja 1.13, Python 3.13.5, FFmpeg 7.1.5. Full registered strict SDK-free suite
+**91/91 PASS** (72.78 s). Both telemetry executables pass, including the strict
+Python writer checks, also under Debug ASan+UBSan (2/2, 1.92 s). CI Python
+discovery is 524 tests with **one pre-existing failure** on unmodified
+`3c7030fa` (`compute_policy.tests.test_routing_scope.MacScopeTests.
+test_native_job_steps_unchanged`, a recorded `ci-cpu.yml` job-step hash), which
+this change does not touch.
+
+Causal negative controls, each a one-line mutation of the restored fix in this
+tree, all fail the suite at this head:
+
+| Mutation | Failing assertion |
+|---|---|
+| init guard without the `nvmlShutdown` symbol | `missing required lifecycle symbol` |
+| zero/decreasing delta replaced by the slot estimate | `measured zero is not estimate` |
+| accumulator that retains every poll | `bounded streaming storage: million polls must not retain per-poll samples` |
+
+The third control exposed a real gap in the recovered test: `sizeof()` of the
+aggregate cannot see a heap container, so a growing vector passed it. The bound
+is now measured as process RSS growth across one million polls
+(`< 8 MiB`). That measurement is Linux-local (`/proc/self/statm`); on Windows and
+macOS only the fixed-size check runs, and the storage claim is reported as
+Linux-proven.
+
+**Hardware status: NOT_RUN.** No usable NVIDIA device is present on this host.
+Native NVML/CUDA execution, real driver return codes, a CUDA-enabled full build
+and a Tesla M4 8K trace stay open and are not implied by these numbers.
