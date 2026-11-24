@@ -104,6 +104,9 @@ Makefile
 !tests/verify_benchmark_artifact_contract.cmake
 !tests/verify_benchmark_fail_closed.cmake
 
+# Handwritten telemetry test configuration
+!cmake/TelemetryTests.cmake
+
 # Local test temp dir (never commit)
 .tmptest/
 .tmptest2/

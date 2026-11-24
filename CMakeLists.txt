@@ -304,6 +304,12 @@ if(HYPERCINE_BUILD_TESTS)
 endif()
 
 option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)
+if(HYPERCINE_BUILD_TESTS)
+    include(cmake/TelemetryTests.cmake)
+endif()
+
+# This path intentionally returns before any SDK include directory or target.
+option(HYPERCINE_BUILD_STANDALONE "Build experimental SDK-free fixed-profile encoder" OFF)
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
 # This path intentionally returns before any SDK include directory or target.
 set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quality-profile corpus root")
