@@ -40,3 +40,13 @@ for case in (failed, missing):
         assert case[key] is None, key
 assert missing["counter_status"]["power"]["unavailable_reason"] == "provider_unavailable"
 print("8 real-writer JSON cases PASS; unique keys, p99, valid zero, partial failure, missing provider")
+
+for case, delta, positive in zip(cases, (50, 0, -50, None), (50, 0, 0, None)):
+    detailed = case["phase3a"]["memory_bytes"]
+    canonical = case["canonical"]["memory_bytes"]
+    for memory in (detailed, canonical):
+        assert memory["measured_global_vram_delta_bytes"] == delta
+        assert memory["vram_used_bytes"] == positive
+        assert memory["total_estimated_vram_bytes"] == 9999
+        assert memory["vram_measurement_scope"] == "global_device_usage_delta"
+print("8 real-writer memory records PASS; signed/zero/null deltas separate from estimates")

@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -470,6 +471,10 @@ struct Phase3AResult {
     size_t vram_mid_run_bytes = 0;
     size_t vram_end_run_bytes = 0;
     size_t vram_after_destroy_bytes = 0;
+    // Global device-use delta, not process-owned allocations or a peak.
+    // Unavailable if either cudaMemGetInfo snapshot failed.
+    std::optional<int64_t> measured_global_vram_delta_bytes;
+    // Compatibility field: positive part of the measured delta, never estimate.
     size_t vram_used_bytes = 0;
     size_t slot_vram_bytes = 0;
     size_t slot_pinned_host_bytes = 0;

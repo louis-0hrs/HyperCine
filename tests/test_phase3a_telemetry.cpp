@@ -19,9 +19,15 @@ using HMODULE = void*;
 static bool provider_present = true;
 static bool readings_work = true;
 static int power_status = 0;
-static int init() { return 0; }
-static int shutdown_nvml() { return 0; }
-static int get_device(unsigned, void** dev) { *dev = reinterpret_cast<void*>(1); return 0; }
+static const char* missing_symbol = "";
+static int init_status = 0, device_status = 0;
+static int init_calls = 0, shutdown_calls = 0, load_calls = 0, unload_calls = 0;
+static int init() { ++init_calls; return init_status; }
+static int shutdown_nvml() { ++shutdown_calls; return 0; }
+static int get_device(unsigned, void** dev) {
+    if (device_status) return device_status;
+    *dev = reinterpret_cast<void*>(1); return 0;
+}
 struct NvmlUtilization;
 static int utilization(void*, NvmlUtilization* ptr);
 
@@ -41,9 +47,13 @@ static int throttle(void*, unsigned long long* v) {
     if (!readings_work) return 3;
     *v = 0; return 0;
 }
-static HMODULE LoadLibraryA(const char*) { return provider_present ? reinterpret_cast<void*>(1) : nullptr; }
-static void FreeLibrary(HMODULE) {}
+static HMODULE LoadLibraryA(const char*) {
+    if (!provider_present) return nullptr;
+    ++load_calls; return reinterpret_cast<void*>(1);
+}
+static void FreeLibrary(HMODULE) { ++unload_calls; }
 static void* GetProcAddress(HMODULE, const char* name) {
+    if (!std::strcmp(name, missing_symbol)) return nullptr;
     if (!std::strcmp(name, "nvmlInit_v2")) return reinterpret_cast<void*>(&init);
     if (!std::strcmp(name, "nvmlShutdown")) return reinterpret_cast<void*>(&shutdown_nvml);
     if (!std::strcmp(name, "nvmlDeviceGetHandleByIndex_v2")) return reinterpret_cast<void*>(&get_device);
@@ -114,6 +124,55 @@ int main() {
         Check(million.sample_count == 1000000 && million.graphics_clock_mhz_mean == 1000, "million-poll aggregation");
         Check(sizeof(detail::NvmlAccumulator) < 512, "fixed accumulator storage");
 
+        Phase3AResult memory;
+        memory.slot_selection.total_estimated_vram_bytes = 9999;
+        detail::SetMeasuredVramUsage(memory, 100, 150);
+        Check(memory.measured_global_vram_delta_bytes == 50 && memory.vram_used_bytes == 50, "positive measured delta");
+        detail::SetMeasuredVramUsage(memory, 100, 100);
+        Check(memory.measured_global_vram_delta_bytes == 0 && memory.vram_used_bytes == 0, "measured zero is not estimate");
+        detail::SetMeasuredVramUsage(memory, 150, 100);
+        Check(memory.measured_global_vram_delta_bytes == -50 && memory.vram_used_bytes == 0, "negative global delta preserved");
+        for (auto before : {std::optional<size_t>{}, std::optional<size_t>{100}}) {
+            detail::SetMeasuredVramUsage(memory, before, std::nullopt);
+            Check(!memory.measured_global_vram_delta_bytes && memory.vram_used_bytes == 0, "missing after snapshot");
+        }
+        detail::SetMeasuredVramUsage(memory, std::nullopt, 100);
+        Check(!memory.measured_global_vram_delta_bytes, "missing before snapshot");
+        detail::SetMeasuredVramUsage(memory, 0, 0);
+        Check(memory.measured_global_vram_delta_bytes == 0, "two successful zero snapshots");
+        if (std::numeric_limits<size_t>::max() > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
+            detail::SetMeasuredVramUsage(memory, 0, std::numeric_limits<size_t>::max());
+            Check(!memory.measured_global_vram_delta_bytes, "unrepresentable delta unavailable");
+        }
+
+        for (const char* symbol : {"nvmlInit_v2", "nvmlShutdown", "nvmlDeviceGetHandleByIndex_v2"}) {
+            // The alternate device symbol is absent in this fake provider.
+            missing_symbol = symbol;
+            const int starts = init_calls, stops = shutdown_calls, loads = load_calls;
+            {
+                NvmlRuntimeSampler broken;
+                broken.Start();
+                Check(!broken.Stop().nvml_available, "missing required lifecycle symbol");
+            }
+            Check(init_calls == starts && shutdown_calls == stops, "must not initialize without balanced lifecycle");
+            Check(load_calls == loads + 1 && unload_calls == load_calls, "missing-symbol library cleanup");
+        }
+        missing_symbol = "";
+        for (int status : {1, 2}) {
+            init_status = status == 1 ? 3 : 0;
+            device_status = status == 2 ? 3 : 0;
+            const int starts = init_calls, stops = shutdown_calls;
+            {
+                NvmlRuntimeSampler broken;
+                broken.Start();
+                Check(!broken.Stop().nvml_available, "initialization/device failure unavailable");
+            }
+            Check(init_calls == starts + 1, "one initialization attempt");
+            Check(shutdown_calls == stops + (status == 2 ? 1 : 0), "shutdown only successful initialization");
+            Check(unload_calls == load_calls, "failed-provider library cleanup");
+        }
+        init_status = device_status = 0;
+
         NvmlRuntimeSampler sampler;
         sampler.Start(); sampler.Start(); // duplicate start must not replace a joinable thread
         auto live = sampler.Stop();
@@ -139,6 +198,11 @@ int main() {
         for (auto telemetry : {live, partial, failed, missing}) {
             Phase3AResult result;
             result.nvml = telemetry;
+            result.slot_selection.total_estimated_vram_bytes = 9999;
+            if (index == 0) detail::SetMeasuredVramUsage(result, 100, 150);
+            if (index == 1) detail::SetMeasuredVramUsage(result, 100, 100);
+            if (index == 2) detail::SetMeasuredVramUsage(result, 150, 100);
+            if (index == 3) detail::SetMeasuredVramUsage(result, std::nullopt, 100);
             result.mean_latency_ms = 3; result.median_latency_ms = 2;
             result.p95_latency_ms = 7; result.p99_latency_ms = 9.125;
             std::ostringstream json;
