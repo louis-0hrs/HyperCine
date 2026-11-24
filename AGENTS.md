@@ -205,15 +205,29 @@ Every agent operating in this repository must strictly adhere to these rules.
   own claim and update its Draft PR instead of re-claiming or creating
   duplicates. Existing claims and blocked dependencies remain binding; a
   claim grants no tool permissions.
-- **Approval boundary:** approval is required for merges into branches owned
-  by others (especially protected `main`), releases/tags/deployments,
-  force-push/history rewrites, destructive/external service changes, and any
-  special gate in the task. App/tool permission prompts are not bypassable
-  by this document; if rights are missing, report `BLOCKED_TOOL_PERMISSION`
-  with the needed permission rather than inventing a maintainer-approval
-  requirement. All publication privacy checks in section 12 still apply
-  before pushing a branch or opening/updating a Draft PR; verify
-  pseudonymous Git author and committer identities before committing.
+- **Scoped standing integration approval:** the owner
+  [authorized the independent integration maintainer on 2026-11-23](https://github.com/louis-0hrs/HyperCine/issues/62#issuecomment-7112540655)
+  to merge fully reviewed and qualified PRs into protected `main` without
+  separate per-PR owner approval. This exception is for that maintainer,
+  not a general merge permission for every worker or another owned branch.
+  A narrower task-level no-merge instruction still applies.
+- **Before each such integration:** recheck exact HEAD/base/tree, the complete
+  changed-source diff and dependencies, current in-scope Windows/Linux/
+  sanitizer/Privacy/CUDA/reference CI and negative controls, and absence of
+  unresolved blocking review threads, private corpora/secrets or frozen
+  `upstream/` edits. `SKIP`/`NOT_RUN` are not `PASS`; never invent native
+  hardware evidence. Move Draft to Ready only after all scope gates pass,
+  use an expected-head-SHA guarded merge, and check resulting main/CI.
+  If any proof is missing, remain unmerged and hand off the specific gap.
+- **Retained approval boundary:** separate owner approval is still required
+  for releases/tags/deployments, product qualification, force-push/shared-
+  history rewrites, destructive external actions, special issue-specific
+  gates, and otherwise unauthorized merges into another owned branch.
+  SDK/GoPro, native GPU and SMPTE VC-5 qualification remain separate;
+  #259/#46 stay open independently. Tool permissions and branch protections
+  are never bypassable: report `BLOCKED_TOOL_PERMISSION` if rights are
+  missing. All section 12 publication checks and pseudonymous author/
+  committer verification still apply before committing/publishing.
 - Respect issue states `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`,
   `DONE`. A green historical check is not a substitute for testing the
   current commit or correct hardware. Explicitly distinguish CPU-only,
@@ -228,9 +242,10 @@ Every agent operating in this repository must strictly adhere to these rules.
   next action. Keep lengthy telemetry on local disk; publish only sanitized
   evidence and hashes. When a task completes, link the PR to the
   originating issue and return its status to `REVIEW`.
-- Unless explicitly authorized by the maintainer, **do not autonomously
-  merge, release, force-push or rewrite history**. Historical privacy
-  violations require issue #54 remediation rather than disabling checks.
+- Outside the scoped standing integration approval above, **do not
+  autonomously merge** without explicit authorization. Releases, force-push
+  and history rewrites still require separate owner approval. Historical
+  privacy violations require issue #54 remediation, never disabled checks.
 - This is a coordination **protocol**, not a remote-execution system:
   public GitHub issues/comments alone do not wake local agents.
   Unattended discovery needs a separately configured local agent poller,
