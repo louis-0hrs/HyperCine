@@ -11,15 +11,13 @@ import hashlib
 import json
 from pathlib import Path
 import platform
-import os
-import re
-import shutil
 import subprocess
 import sys
 import tempfile
 import reference_sample as sample
 import validate_windows_reference as gate
 from validate_standalone import avi
+from validation_support import parse_geometry, portable_command
 
 
 def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject=False, cpu_encoder=None, geometry=(1920, 1080)):
@@ -147,17 +145,14 @@ def compare_run(probe, encoder, manifest, corpus, directory, ffmpeg=None, inject
             'variable_metadata_injected': inject, 'frames': results, 'status': 'PASS'}
 
 
-def compiler_info():
-    configured = os.environ.get('HYPERCINE_TEST_COMPILER')
-    if configured:
-        return configured
-    compiler = shutil.which('c++')
-    return (subprocess.check_output([compiler, '--version'], text=True).strip()
-            if compiler else 'NOT RECORDED: run through configured CTest')
+class FilmScan3ArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        # argparse may include an unrecognized argument's literal value.
+        super().error('invalid FilmScan3 arguments')
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = FilmScan3ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--probe', required=True, type=Path)
     parser.add_argument('--encoder', required=True, type=Path)
     parser.add_argument('--cpu-encoder', type=Path, help='Also compare every full raw packet using exactly the same input bytes and metadata')
@@ -170,16 +165,13 @@ def main():
     parser.add_argument('--geometry', metavar='WIDTHxHEIGHT', default='1920x1080',
                         help='Frame geometry to validate (default 1920x1080)')
     args = parser.parse_args()
-    # Strict parse: std::stoi-style prefix parsing would accept "3840x2160junk".
-    match = re.fullmatch(r'([0-9]+)x([0-9]+)', args.geometry)
-    if not match:
-        parser.error('--geometry expects exactly WIDTHxHEIGHT in decimal digits')
-    args.geometry = (int(match.group(1)), int(match.group(2)))
-    # Digits alone are not enough: 0x2160 matches the shape but is not a geometry.
-    if args.geometry[0] <= 0 or args.geometry[1] <= 0:
-        parser.error('--geometry width and height must be positive')
+    try:
+        args.geometry = parse_geometry(args.geometry)
+    except ValueError as error:
+        parser.exit(2, f'{error}\n')
     if args.inject_metadata and not args.corpus_root:
-        parser.error('explicit metadata injection requires verified actual originals')
+        parser.exit(2, 'explicit metadata injection requires verified actual originals\n')
+    command_template = portable_command('validate_filmscan3.py', sys.argv[1:])
     name = 'phase3a_1080p_120_manifest.json' if args.sequence else 'manifest.json'
     manifest = gate.load_manifest(gate.CORPUS/name)
     if args.corpus_root:
@@ -194,13 +186,14 @@ def main():
     result.update({'copyright': 'Copyright (c) 2026 HyperCine Contributors.', 'license': 'MIT OR Apache-2.0',
                    'manifest': name, 'inventory': inventory, 'machine': platform.platform(), 'architecture': platform.machine(),
                    'encoder_sha256': gate.sha(args.encoder.read_bytes()),
-                   'compiler': compiler_info(),
+                   'compiler': gate.compiler_info(),
                    'cmake': subprocess.check_output(['cmake', '--version'], text=True).splitlines()[0],
                    'sources': [{'path': name, 'sha256': gate.sha((gate.ROOT/name).read_bytes())}for name in
                                ['include/hypercine/filmscan3.h','src/cpu/filmscan3_frontend.cpp','src/core/filmscan3_encoder.cpp',
                                 'src/cpu/wavelet_cpu.cpp','src/cpu/standalone_frontend.cpp','src/core/standalone_encoder.cpp',
-                                'src/core/standalone_codebook.h','tools/hypercine_encode_filmscan3.cpp','tests/validate_filmscan3.py']],
-                   'command': [sys.executable]+sys.argv,
+                                'src/core/standalone_codebook.h','tools/hypercine_encode_filmscan3.cpp','tests/validate_filmscan3.py',
+                                'tests/validate_windows_reference.py','tests/validation_support.py']],
+                   'command_template': command_template,
                    'windows_gopro_decoder': 'PENDING: actual one-worker Windows test required',
                    'unquantized_windows_intermediates': 'PENDING: Windows stage dumps not supplied'})
     if args.cpu_encoder:
