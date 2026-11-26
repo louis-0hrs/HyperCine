@@ -160,6 +160,106 @@ class NonMacDefaultRoutingPreserved(unittest.TestCase):
                 self.assertFalse(wem._is_self_hosted(item.labels), item.describe())
 
 
+# The frozen workflow-step gate lives in ci/compute_policy/tests/ and was, until
+# this control existed, invisible to hosted CI: the routing workflow neither
+# triggered on those paths nor ran that module. A green routing job therefore
+# proved the event matrix and nothing about the step gate. These tests make the
+# trigger and the invocation part of the checked contract, so removing either
+# one turns the routing job red instead of silently shrinking what it covers.
+
+ROUTING_WORKFLOW = "ci-workflow-routing.yml"
+ROUTING_JOB = "routing-contract"
+SCOPE_MODULE = "ci.compute_policy.tests.test_routing_scope"
+SCOPE_PATHS = (
+    "ci/compute_policy/tests/test_routing_scope.py",
+    "ci/compute_policy/tests/reviewed_step_changes.json",
+    "ci/compute_policy/tests/hosted_non_mac_baseline.json",
+)
+
+
+def _routing_job(d: dict) -> dict:
+    return d[ROUTING_WORKFLOW]["jobs"][ROUTING_JOB]
+
+
+def _run_lines(d: dict) -> set[str]:
+    return {
+        line.strip()
+        for step in _routing_job(d)["steps"]
+        for line in str(step.get("run", "")).splitlines()
+        if line.strip()
+    }
+
+
+def _gate_events(path: str) -> list[wem.Event]:
+    return [
+        wem.Event(
+            name="pull_request",
+            ref="refs/pull/45/merge",
+            ref_name="infra/gate",
+            ref_type="branch",
+            changed=[path],
+            pr_number=45,
+        ),
+        wem.Event(
+            name="push",
+            ref="refs/heads/main",
+            ref_name="main",
+            ref_type="branch",
+            changed=[path],
+        ),
+    ]
+
+
+class FrozenStepGateIsExecuted(unittest.TestCase):
+    """A green routing job must actually run the frozen workflow-step gate."""
+
+    def test_scope_paths_schedule_the_routing_gate(self) -> None:
+        for path in SCOPE_PATHS:
+            for event in _gate_events(path):
+                with self.subTest(event=event.name, path=path):
+                    items = wem._by(wem.plan(BASE, event), ROUTING_WORKFLOW, ROUTING_JOB)
+                    self.assertEqual(1, len(items))
+                    self.assertEqual(["ubuntu-24.04"], items[0].labels)
+
+    def test_unrelated_source_still_does_not_schedule_the_gate(self) -> None:
+        for path in ("src/core/pipeline.cpp", "docs/CI_EFFICIENCY.md"):
+            for event in _gate_events(path):
+                with self.subTest(event=event.name, path=path):
+                    self.assertEqual(
+                        [], wem._by(wem.plan(BASE, event), ROUTING_WORKFLOW, ROUTING_JOB)
+                    )
+
+    def test_gate_invokes_the_frozen_scope_module_in_both_python_modes(self) -> None:
+        lines = _run_lines(BASE)
+        self.assertIn(f"python -m unittest {SCOPE_MODULE}", lines)
+        self.assertIn(f"python -O -m unittest {SCOPE_MODULE}", lines)
+
+    def test_losing_either_scope_filter_is_detected(self) -> None:
+        for trigger in ("push", "pull_request"):
+            mutant = docs()
+            paths = mutant[ROUTING_WORKFLOW]["on"][trigger]["paths"]
+            self.assertIn("ci/compute_policy/tests/**", paths)
+            paths.remove("ci/compute_policy/tests/**")
+            event = next(
+                e for e in _gate_events(SCOPE_PATHS[0]) if e.name == trigger
+            )
+            with self.subTest(trigger=trigger):
+                self.assertEqual(
+                    [], wem._by(wem.plan(mutant, event), ROUTING_WORKFLOW, ROUTING_JOB)
+                )
+
+    def test_losing_the_scope_invocation_is_detected(self) -> None:
+        mutant = docs()
+        _routing_job(mutant)["steps"] = [
+            step
+            for step in _routing_job(mutant)["steps"]
+            if "test_routing_scope" not in str(step.get("run", ""))
+        ]
+        lines = _run_lines(mutant)
+        self.assertNotIn(f"python -m unittest {SCOPE_MODULE}", lines)
+        self.assertNotIn(f"python -O -m unittest {SCOPE_MODULE}", lines)
+
+
 class RequiredPrivacyScope(unittest.TestCase):
     def test_r1_push_scope_removed_from_privacy(self) -> None:
         d = docs()
