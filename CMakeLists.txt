@@ -998,6 +998,12 @@ if(HYPERCINE_BUILD_STANDALONE)
             -O "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_geometry_reference_p10.py")
         add_test(NAME filmscan3_geometry_validation COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_geometry_validation.py")
+        add_test(NAME filmscan3_report_provenance COMMAND "${Python3_EXECUTABLE}" -B
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_report_provenance.py")
+        add_test(NAME filmscan3_report_provenance_optimized COMMAND "${Python3_EXECUTABLE}" -B -O
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_filmscan3_report_provenance.py")
+        set_tests_properties(filmscan3_report_provenance filmscan3_report_provenance_optimized
+            PROPERTIES LABELS "validation;report-provenance" TIMEOUT 30)
         # Optional private F1 original-artifact replay. Not a default pixel-oracle claim.
         add_test(NAME rgb444_rg48_replay_contract COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_rgb444_rg48_replay.py"

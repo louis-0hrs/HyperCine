@@ -34,8 +34,18 @@ def p10_samples(data, width, height):
     return pixels
 
 
+def parse_geometry(value):
+    """Parse decimal dimensions within the FilmScan3 encoder's CLI range."""
+    match = re.fullmatch(r'([0-9]+)x([0-9]+)', value or '')
+    require(match is not None, '--geometry expects exactly WIDTHxHEIGHT in decimal digits')
+    width, height = (field.lstrip('0') for field in match.groups())
+    require(width and height, '--geometry width and height must be positive')
+    require(len(width) <= 9 and len(height) <= 9, '--geometry exceeds the encoder range and is NOT validated')
+    return int(width), int(height)
+
+
 def portable_command(script, arguments):
-    """Retain only recognized switches and numeric frame indices, never paths.
+    """Retain only recognized switches and validated numeric values, never paths.
 
     This is a reproduction template, not the literal local execution command.
     Unknown arguments fail closed rather than entering a public report.
@@ -58,6 +68,10 @@ def portable_command(script, arguments):
             frames = False
         elif arg in flags:
             result.append(arg)
+            frames = False
+        elif option == '--geometry':
+            width, height = parse_geometry(value if equal else next(args, None))
+            result.extend([option, f'{width}x{height}'])
             frames = False
         elif arg == '--frames':
             result.append(arg)

@@ -66,6 +66,7 @@ REQUIRED = {
     'filmscan3_cli_4k_ffmpeg_gate',
     'filmscan3_geometry', 'filmscan3_geometry_external_decode',
     'filmscan3_geometry_validation', 'filmscan3_geometry_reference_p10',
+    'filmscan3_report_provenance', 'filmscan3_report_provenance_optimized',
     'filmscan3_4k_gate_contract',
     # #383: losing the native planes entry would silently return the generation
     # measurement lane to an 8-bit BGRA re-entry.
