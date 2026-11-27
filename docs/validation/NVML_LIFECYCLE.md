@@ -76,3 +76,33 @@ Linux-proven.
 **Hardware status: NOT_RUN.** No usable NVIDIA device is present on this host.
 Native NVML/CUDA execution, real driver return codes, a CUDA-enabled full build
 and a Tesla M4 8K trace stay open and are not implied by these numbers.
+
+## Device binding and the 2026-11-27 review (item 1 and 3)
+
+The provider used to resolve device index `0` unconditionally. On a host with
+reordered visible devices or more than one GPU that can sample a different
+physical card than the workload runs on. The sampler now takes the locally
+observed identity of the active compute device (`cudaGetDevice` +
+`cudaDeviceGetUuid`, formatted to the provider's own `GPU-<uuid>` text) and binds
+only when `detail::SelectNvmlDeviceIndex` finds exactly one provider device with
+that identity. Nothing about the identity is written to any report, log or JSON
+field: only the resulting availability is published. Missing, empty, unmatched,
+duplicate or over-counted enumerations all fail closed to `available = false` with
+zero samples, so an unprovable mapping can no longer masquerade as a measurement.
+
+Synthetic coverage at this head: two devices in reversed provider order (index 0
+is the inactive card), an unmatched identity, an empty identity, a duplicated
+identity, an enumeration failure, an identity-query failure, an empty host, and
+the bound-index happy path. Mutating the binding back to a fixed index 0 fails
+`sampled the active device, not fixed index 0` - run and observed, not asserted.
+The real UUID/PCI mapping against a driver remains **NOT_RUN** here (no NVIDIA
+device); it is the Windows/CUDA agent's receipt, not a PASS from this host.
+
+Registration placement also changed: `cmake/TelemetryTests.cmake` is included
+inside the standalone test branch, and the duplicate `HYPERCINE_BUILD_STANDALONE`
+declaration is gone. That is what reconciles the previously confusing counts:
+at `72a2a0c` the SDK/upstream lane registered **91** tests (two of them the
+standalone-only telemetry tests, leaked by the early include) while the strict
+standalone lane registered **171**. After this change the SDK lane registers
+**89** with no telemetry test, the standalone lane **172** (the added optimized
+Python mode), and quality-state-only **45** with no telemetry test.

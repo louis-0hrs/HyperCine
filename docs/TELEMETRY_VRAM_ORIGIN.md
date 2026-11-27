@@ -43,6 +43,36 @@ state reset and signed-range bounds. Strict Python parsing checks eight memory
 records, including separate estimates, nullable values and unique JSON keys.
 The existing NVML/p99 coverage remains binding.
 
+## Cross-trial aggregation and consumer scope (review `6048815961`, item 2)
+
+`detail::VramDeltaSummary` is the single aggregation used by the canonical
+slot-scaling summary. It counts only successful measurements, keeps a measured
+zero as a real observation, preserves negative global deltas, and exposes the
+values in trial order so the writer can publish the signed median. Mixed
+valid/invalid trials therefore keep the success denominator instead of silently
+shrinking it to the valid ones. The C++ test drives it directly with the same
+four trials the writer emits (50, 0, −50, missing) plus an all-negative set; a
+summary that clamps negatives or drops zeros fails.
+
+The Python contract no longer uses `assert`: every check raises, so the file
+means the same thing under `python -O`. Both modes are registered in the strict
+standalone inventory (`phase3a_telemetry_json`, `phase3a_telemetry_json_optimized`),
+and the verifier is exercised against eight malformed or incorrect writer
+outputs (duplicate key, dropped case, sign flip, estimate substituted for a
+failed measurement, removed nullable field, an absent provider reported as
+available, a measured zero reported as missing, and an erased valid counter). A
+verifier that stops looking now fails those controls instead of passing.
+
+**Intentionally limited consumer scope.** Three consumers are covered: the two
+extracted writers and the canonical summary. Deliberately *not* covered:
+historical JSON already on disk (not rewritten), the Phase 2C/2D
+`vram_used_bytes` fields (a different result type, still the unsigned legacy
+estimate, unchanged by this work), and the M4 SM52 probe, which reads the
+Phase 2C structure and never parses Phase 3A telemetry JSON. Any consumer that
+starts reading `phase3a` memory records must treat
+`measured_global_vram_delta_bytes` and the compatibility `vram_used_bytes` as
+nullable and must not fall back to `total_estimated_vram_bytes`.
+
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
   -DHYPERCINE_BUILD_UPSTREAM=OFF -DHYPERCINE_BUILD_BENCHMARKS=OFF \

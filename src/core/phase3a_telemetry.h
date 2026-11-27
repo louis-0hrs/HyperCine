@@ -10,6 +10,8 @@
 #include <optional>
 #include <limits>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace hypercine { namespace detail {
 
@@ -24,6 +26,60 @@ inline void SetMeasuredVramUsage(Phase3AResult& result,
     const int64_t delta = static_cast<int64_t>(magnitude);
     result.measured_global_vram_delta_bytes = *after >= *before ? delta : -delta;
     if (*after > *before) result.vram_used_bytes = magnitude;
+}
+
+// Cross-trial aggregation of the signed measured deltas. A missing measurement
+// (failed query or unrepresentable difference) is excluded from the denominator;
+// a measured zero is a real observation and is counted; a negative global delta
+// stays negative and must never be clamped or turned into an estimate.
+class VramDeltaSummary {
+public:
+    void Add(const std::optional<int64_t>& delta) {
+        if (!delta) return;
+        const double value = static_cast<double>(*delta);
+        if (count_ == 0) { min_ = max_ = value; }
+        if (value < min_) min_ = value;
+        if (value > max_) max_ = value;
+        sum_ += value;
+        values_.push_back(value);
+        ++count_;
+    }
+    int Count() const { return count_; }
+    double Sum() const { return sum_; }
+    double Mean() const { return count_ ? sum_ / count_ : 0.0; }
+    double Min() const { return count_ ? min_ : 0.0; }
+    double Max() const { return count_ ? max_ : 0.0; }
+    // Only successful measurements, in trial order; the caller decides how to
+    // reduce them (the canonical summary publishes the median).
+    const std::vector<double>& Values() const { return values_; }
+private:
+    int count_ = 0;
+    double sum_ = 0.0, min_ = 0.0, max_ = 0.0;
+    std::vector<double> values_;
+};
+
+// Local-only device identity matching between the active compute device and the
+// provider's own enumeration. ``identity`` is the provider's stable local handle
+// text (compared, never emitted). A missing, empty or ambiguous match returns
+// nullopt so the caller reports the provider as unavailable rather than sampling
+// an unrelated physical device. A duplicate identity is treated as ambiguity, not
+// as "first match wins".
+struct NvmlDeviceCandidate {
+    unsigned int index = 0;
+    std::string identity;
+};
+
+inline std::optional<unsigned int> SelectNvmlDeviceIndex(
+        const std::string& active_identity,
+        const std::vector<NvmlDeviceCandidate>& candidates) {
+    if (active_identity.empty()) return std::nullopt;
+    std::optional<unsigned int> match;
+    for (const auto& candidate : candidates) {
+        if (candidate.identity.empty() || candidate.identity != active_identity) continue;
+        if (match) return std::nullopt;
+        match = candidate.index;
+    }
+    return match;
 }
 
 inline void WriteVramUsageJson(std::ostream& out, const Phase3AResult& result) {

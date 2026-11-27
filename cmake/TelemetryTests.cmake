@@ -38,5 +38,11 @@ find_package(Threads REQUIRED)
 target_link_libraries(test_phase3a_telemetry PRIVATE Threads::Threads)
 add_test(NAME phase3a_telemetry COMMAND test_phase3a_telemetry)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
-add_test(NAME phase3a_telemetry_json COMMAND "${Python3_EXECUTABLE}"
+# Both Python modes are registered deliberately: the contract must survive
+# ``python -O`` as well, because ``assert`` statements disappear there.
+add_test(NAME phase3a_telemetry_json COMMAND "${Python3_EXECUTABLE}" -B
     "${PROJECT_SOURCE_DIR}/tests/test_phase3a_telemetry_json.py" $<TARGET_FILE:test_phase3a_telemetry>)
+add_test(NAME phase3a_telemetry_json_optimized COMMAND "${Python3_EXECUTABLE}" -B -O
+    "${PROJECT_SOURCE_DIR}/tests/test_phase3a_telemetry_json.py" $<TARGET_FILE:test_phase3a_telemetry>)
+set_tests_properties(phase3a_telemetry phase3a_telemetry_json
+    phase3a_telemetry_json_optimized PROPERTIES LABELS "cpu;telemetry;diagnostics" TIMEOUT 120)

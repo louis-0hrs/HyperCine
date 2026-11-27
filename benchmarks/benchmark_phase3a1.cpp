@@ -1592,15 +1592,18 @@ int main(int argc, char** argv) {
                     }
                 }
                 if (matching.empty()) continue;
-                std::vector<double> fps_vals, mean_lat_vals, med_lat_vals, p95_lat_vals, vram_used_vals;
+                std::vector<double> fps_vals, mean_lat_vals, med_lat_vals, p95_lat_vals;
+                // Only successful measurements enter the signed summary; zero and
+                // negative deltas stay observable instead of collapsing to the
+                // slot-selection estimate.
+                hypercine::detail::VramDeltaSummary vram_summary;
                 size_t est_vram = 0, per_slot_vram = 0, ws_vram = 0;
                 for (const TrialRecord* tr : matching) {
                     fps_vals.push_back(tr->gpu.sustained_fps);
                     mean_lat_vals.push_back(tr->gpu.mean_latency_ms);
                     med_lat_vals.push_back(tr->gpu.median_latency_ms);
                     p95_lat_vals.push_back(tr->gpu.p95_latency_ms);
-                    if (tr->gpu.measured_global_vram_delta_bytes)
-                        vram_used_vals.push_back(static_cast<double>(*tr->gpu.measured_global_vram_delta_bytes));
+                    vram_summary.Add(tr->gpu.measured_global_vram_delta_bytes);
                     est_vram = tr->gpu.slot_selection.total_estimated_vram_bytes;
                     per_slot_vram = tr->gpu.slot_selection.per_slot_vram_bytes;
                     ws_vram = tr->gpu.slot_selection.session_workspace_vram_bytes;
@@ -1610,7 +1613,7 @@ int main(int argc, char** argv) {
                 Stats(mean_lat_vals, &mean_lat, nullptr, nullptr, nullptr, nullptr);
                 Stats(med_lat_vals, &med_lat, nullptr, nullptr, nullptr, nullptr);
                 Stats(p95_lat_vals, &p95_lat, nullptr, nullptr, nullptr, nullptr);
-                Stats(vram_used_vals, nullptr, &med_vram, nullptr, nullptr, nullptr);
+                Stats(vram_summary.Values(), nullptr, &med_vram, nullptr, nullptr, nullptr);
                 if (!first_slot_entry) json << ",\n";
                 first_slot_entry = false;
                 json << "      {\n";
@@ -1627,9 +1630,9 @@ int main(int argc, char** argv) {
                 json << "        \"per_slot_estimated_vram_bytes\": " << per_slot_vram << ",\n";
                 json << "        \"session_workspace_estimated_vram_bytes\": " << ws_vram << ",\n";
                 json << "        \"total_estimated_vram_bytes\": " << est_vram << ",\n";
-                json << "        \"measured_vram_trial_count\": " << vram_used_vals.size() << ",\n";
+                json << "        \"measured_vram_trial_count\": " << vram_summary.Count() << ",\n";
                 json << "        \"measured_global_vram_delta_bytes_median\": ";
-                if (vram_used_vals.empty()) json << "null";
+                if (!vram_summary.Count()) json << "null";
                 else json << med_vram;
                 json << "\n";
                 json << "      }";

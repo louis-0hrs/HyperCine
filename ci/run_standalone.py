@@ -54,6 +54,12 @@ REQUIRED = {
     # a silent BGRA/CPU substitution for a GPU-native request stay green.
     'encoder_native_planes_normal', 'encoder_native_planes_optimized',
     'encoder_move_ownership',
+    # #115: the telemetry contract must never silently leave the standalone
+    # inventory. Both Python modes and the C++ sampler test are registered, so
+    # dropping any of the three registrations fails this inventory instead of
+    # leaving a green strict run with no telemetry coverage.
+    'phase3a_telemetry', 'phase3a_telemetry_json',
+    'phase3a_telemetry_json_optimized',
     'encoder_profile_session_matrix', 'overbitrate_hysteresis_sdk_sequence',
     'wavelet_simd_exact', 'wavelet_simd_packets',
     'wavelet_cpu_bounds',

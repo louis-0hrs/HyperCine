@@ -174,7 +174,13 @@ struct NvmlUtilization {
 
 class NvmlRuntimeSampler {
 public:
-    NvmlRuntimeSampler() {
+    // ``active_identity`` is the locally observed identity of the compute device
+    // this process actually runs on. It is used only to bind the provider to that
+    // device and is never published in telemetry output. When the mapping cannot
+    // be proved one-to-one the sampler reports unavailable instead of silently
+    // sampling an unrelated GPU.
+    explicit NvmlRuntimeSampler(std::string active_identity)
+        : active_identity_(std::move(active_identity)) {
 #ifdef _WIN32
         dll_ = LoadLibraryA("nvml.dll");
         if (!dll_) dll_ = LoadLibraryA("C:\\Windows\\System32\\nvml.dll");
@@ -186,6 +192,9 @@ public:
         fn_shutdown_ = reinterpret_cast<FnShutdown>(GetProcAddress(dll_, "nvmlShutdown"));
         fn_get_dev_ = reinterpret_cast<FnGetDevice>(GetProcAddress(dll_, "nvmlDeviceGetHandleByIndex_v2"));
         if (!fn_get_dev_) fn_get_dev_ = reinterpret_cast<FnGetDevice>(GetProcAddress(dll_, "nvmlDeviceGetHandleByIndex"));
+        fn_count_ = reinterpret_cast<FnGetCount>(GetProcAddress(dll_, "nvmlDeviceGetCount_v2"));
+        if (!fn_count_) fn_count_ = reinterpret_cast<FnGetCount>(GetProcAddress(dll_, "nvmlDeviceGetCount"));
+        fn_uuid_ = reinterpret_cast<FnGetUuid>(GetProcAddress(dll_, "nvmlDeviceGetUUID"));
         fn_util_ = reinterpret_cast<FnGetUtil>(GetProcAddress(dll_, "nvmlDeviceGetUtilizationRates"));
         fn_clock_ = reinterpret_cast<FnGetClock>(GetProcAddress(dll_, "nvmlDeviceGetClockInfo"));
         fn_temp_ = reinterpret_cast<FnGetTemp>(GetProcAddress(dll_, "nvmlDeviceGetTemperature"));
@@ -195,11 +204,10 @@ public:
             fn_throttle_ = reinterpret_cast<FnGetThrottle>(GetProcAddress(dll_, "nvmlDeviceGetCurrentClocksEventReasons"));
         }
 
-        if (fn_init_ && fn_shutdown_ && fn_get_dev_ && fn_init_() == 0) {
+        if (fn_init_ && fn_shutdown_ && fn_get_dev_ && fn_count_ && fn_uuid_ && fn_init_() == 0) {
             inited_ = true;
-            if (fn_get_dev_(0, &dev_) == 0 && dev_ != nullptr) {
-                available_ = true;
-            }
+            dev_ = ResolveBoundDevice();
+            available_ = dev_ != nullptr;
         }
 #endif
     }
@@ -275,6 +283,35 @@ public:
     }
 
 private:
+#ifdef _WIN32
+    // Enumerate the locally visible devices and bind to the one whose identity
+    // equals the active compute device's identity. Ambiguous or absent matches
+    // return nullptr (fail closed). No identity is written to any output file.
+    void* ResolveBoundDevice() {
+        if (active_identity_.empty() || !fn_count_ || !fn_uuid_) return nullptr;
+        unsigned int count = 0;
+        if (fn_count_(&count) != 0 || count == 0 || count > kMaxNvmlDevices) return nullptr;
+        std::vector<void*> handles(count, nullptr);
+        std::vector<detail::NvmlDeviceCandidate> candidates;
+        candidates.reserve(count);
+        for (unsigned int i = 0; i < count; ++i) {
+            void* handle = nullptr;
+            char uuid[96] = {};
+            if (fn_get_dev_(i, &handle) != 0 || handle == nullptr) continue;
+            if (fn_uuid_(handle, uuid, sizeof(uuid)) != 0) continue;
+            handles[i] = handle;
+            detail::NvmlDeviceCandidate candidate;
+            candidate.index = i;
+            candidate.identity = std::string(uuid);
+            candidates.push_back(candidate);
+        }
+        const std::optional<unsigned int> bound =
+            detail::SelectNvmlDeviceIndex(active_identity_, candidates);
+        if (!bound || *bound >= handles.size()) return nullptr;
+        return handles[*bound];
+    }
+#endif
+
     void SampleOnce() {
 #ifdef _WIN32
         if (!available_ || !dev_) return;
@@ -312,6 +349,8 @@ private:
     using FnInit = int (*)();
     using FnShutdown = int (*)();
     using FnGetDevice = int (*)(unsigned int, void**);
+    using FnGetCount = int (*)(unsigned int*);
+    using FnGetUuid = int (*)(void*, char*, unsigned int);
     using FnGetUtil = int (*)(void*, NvmlUtilization*);
     using FnGetClock = int (*)(void*, int, unsigned int*);
     using FnGetTemp = int (*)(void*, int, unsigned int*);
@@ -322,6 +361,8 @@ private:
     FnInit fn_init_ = nullptr;
     FnShutdown fn_shutdown_ = nullptr;
     FnGetDevice fn_get_dev_ = nullptr;
+    FnGetCount fn_count_ = nullptr;
+    FnGetUuid fn_uuid_ = nullptr;
     FnGetUtil fn_util_ = nullptr;
     FnGetClock fn_clock_ = nullptr;
     FnGetTemp fn_temp_ = nullptr;
@@ -330,6 +371,9 @@ private:
     void* dev_ = nullptr;
     bool inited_ = false;
 #endif
+    // Bounded so a hostile/over-reporting count cannot drive an unbounded loop.
+    static constexpr unsigned int kMaxNvmlDevices = 64;
+    std::string active_identity_;
     bool available_ = false;
     std::atomic<bool> stop_{false};
     std::thread thread_;
@@ -343,6 +387,30 @@ private:
 // ============================================================================
 // Stateful Phase 3A Encoder Context (Matches Upstream Per-Frame State Machine)
 // ============================================================================
+
+// Locally observed identity of the compute device this process runs on. The value
+// is compared against the provider's own enumeration and is never written to any
+// report, log or JSON field: only the resulting validity is published (review
+// 6048815961, item 1). An unprovable identity yields an empty string, which makes
+// the sampler report unavailable instead of sampling a different physical GPU.
+static std::string ActiveComputeDeviceIdentity() {
+#ifdef _WIN32
+    int device = -1;
+    if (cudaGetDevice(&device) != cudaSuccess || device < 0) return std::string();
+    cudaUUID_t uuid{};
+    if (cudaDeviceGetUuid(&uuid, device) != cudaSuccess) return std::string();
+    const unsigned char* b = reinterpret_cast<const unsigned char*>(&uuid);
+    char text[64] = {};
+    std::snprintf(text, sizeof(text),
+                  "GPU-%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                  b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
+                  b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]);
+    return std::string(text);
+#else
+    // The NVML sampler is Windows-only today; there is no second provider to bind.
+    return std::string();
+#endif
+}
 
 struct QuantTables3A {
     int prescale[3] = {};
@@ -2740,7 +2808,7 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
         });
     }
 
-    NvmlRuntimeSampler nvml_sampler;
+    NvmlRuntimeSampler nvml_sampler(ActiveComputeDeviceIdentity());
 
     int next_submit_frame = 0;
     int next_wavelet_kick_frame = 0;
