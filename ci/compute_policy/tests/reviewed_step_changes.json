@@ -1,0 +1,252 @@
+{
+  "license": "MIT OR Apache-2.0",
+  "reason": "Exact whole-step inverses from reviewed merged #391, #394 and #407, in source chronology; no baseline hashes replaced.",
+  "changes": [
+    {
+      "pr": 391,
+      "source": "f2a8fbf04246e86d077eb92105dfe294e61d163c",
+      "workflow": "ci-standalone.yml",
+      "job": "standalone",
+      "before": {
+        "name": "Full CTest, architecture and external decode gate",
+        "if": "runner.os != 'macOS'",
+        "env": {
+          "EXPECTED_SYSTEM": "${{ matrix.system }}",
+          "EXPECTED_MACHINE": "${{ matrix.machine }}",
+          "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1",
+          "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+        },
+        "run": "python ci/test_standalone_gate.py\npython ci/run_standalone.py --system \"$EXPECTED_SYSTEM\" --machine \"$EXPECTED_MACHINE\"\n"
+      },
+      "after": {
+        "name": "Full CTest, architecture and external decode gate",
+        "if": "runner.os != 'macOS'",
+        "env": {
+          "EXPECTED_SYSTEM": "${{ matrix.system }}",
+          "EXPECTED_MACHINE": "${{ matrix.machine }}",
+          "HYPERCINE_STANDALONE_CTEST_JOBS": "${{ matrix.system == 'Linux' && matrix.sanitize == 'ON' && '2' || '1' }}",
+          "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1",
+          "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+        },
+        "run": "python ci/test_standalone_gate.py\npython ci/run_standalone.py --system \"$EXPECTED_SYSTEM\" --machine \"$EXPECTED_MACHINE\"\n"
+      },
+      "index_after": 9
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-cpu.yml",
+      "job": "cpu-only-windows-msvc",
+      "before": {
+        "name": "Build Release",
+        "shell": "pwsh",
+        "run": "cmake --build build-cpu --config Release"
+      },
+      "after": {
+        "name": "Build Release",
+        "shell": "pwsh",
+        "run": "python ci/ci_performance.py measure --output build-cpu/ci-build-timing.json --label reference-build -- cmake --build build-cpu --config Release --parallel 3"
+      },
+      "index_after": 3
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-cpu.yml",
+      "job": "cpu-only-windows-msvc",
+      "before": {
+        "name": "Run CPU CTest Suite",
+        "shell": "pwsh",
+        "run": "ctest --test-dir build-cpu -C Release --output-on-failure"
+      },
+      "after": {
+        "name": "Run CPU CTest Suite",
+        "shell": "pwsh",
+        "run": "python ci/ci_performance.py measure --output build-cpu/ci-test-timing.json --label reference-tests --junit build-cpu/reference-results.xml -- ctest --test-dir build-cpu -C Release --output-on-failure --no-tests=error --output-junit \"$PWD/build-cpu/reference-results.xml\""
+      },
+      "index_after": 4
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-cpu.yml",
+      "job": "cpu-only-windows-msvc",
+      "before": null,
+      "after": {
+        "name": "Preserve CPU timing diagnostics",
+        "if": "always()",
+        "uses": "actions/upload-artifact@v4",
+        "with": {
+          "name": "reference-cpu-timing",
+          "retention-days": 7,
+          "path": "build-cpu/ci-*-timing.json\nbuild-cpu/reference-results.xml\n"
+        }
+      },
+      "index_after": 5
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-standalone.yml",
+      "job": "standalone",
+      "before": null,
+      "after": {
+        "name": "Test CI performance helpers",
+        "if": "runner.os != 'macOS'",
+        "run": "python ci/test_ci_performance.py"
+      },
+      "index_after": 2
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-standalone.yml",
+      "job": "standalone",
+      "before": {
+        "name": "Install FFmpeg and Ninja (Linux)",
+        "if": "runner.os == 'Linux' && runner.environment != 'self-hosted'",
+        "run": "sudo apt-get update\nsudo apt-get install --no-install-recommends -y ffmpeg ninja-build\n"
+      },
+      "after": {
+        "name": "Install FFmpeg and Ninja (Linux)",
+        "if": "runner.os == 'Linux' && runner.environment != 'self-hosted'",
+        "env": {
+          "HC_RUNNER_ENVIRONMENT": "${{ runner.environment }}"
+        },
+        "run": "python ci/ci_performance.py prepare-linux --install"
+      },
+      "index_after": 4
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-standalone.yml",
+      "job": "standalone",
+      "before": {
+        "name": "Build",
+        "if": "runner.os != 'macOS'",
+        "run": "cmake --build build --parallel 3"
+      },
+      "after": {
+        "name": "Build",
+        "if": "runner.os != 'macOS'",
+        "run": "python ci/ci_performance.py measure --output build/ci-build-timing.json --label standalone-build -- cmake --build build --parallel 3"
+      },
+      "index_after": 9
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-standalone.yml",
+      "job": "standalone",
+      "before": {
+        "name": "Full CTest, architecture and external decode gate",
+        "if": "runner.os != 'macOS'",
+        "env": {
+          "EXPECTED_SYSTEM": "${{ matrix.system }}",
+          "EXPECTED_MACHINE": "${{ matrix.machine }}",
+          "HYPERCINE_STANDALONE_CTEST_JOBS": "${{ matrix.system == 'Linux' && matrix.sanitize == 'ON' && '2' || '1' }}",
+          "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1",
+          "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+        },
+        "run": "python ci/test_standalone_gate.py\npython ci/run_standalone.py --system \"$EXPECTED_SYSTEM\" --machine \"$EXPECTED_MACHINE\"\n"
+      },
+      "after": {
+        "name": "Full CTest, architecture and external decode gate",
+        "if": "runner.os != 'macOS'",
+        "env": {
+          "EXPECTED_SYSTEM": "${{ matrix.system }}",
+          "EXPECTED_MACHINE": "${{ matrix.machine }}",
+          "HYPERCINE_STANDALONE_CTEST_JOBS": "2",
+          "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1",
+          "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+        },
+        "run": "python ci/test_standalone_gate.py\npython ci/ci_performance.py measure --output build/ci-test-timing.json --label standalone-tests \\\n  --junit build/standalone-results.xml -- \\\n  python ci/run_standalone.py --system \"$EXPECTED_SYSTEM\" --machine \"$EXPECTED_MACHINE\"\n"
+      },
+      "index_after": 10
+    },
+    {
+      "pr": 394,
+      "source": "7dcfc657cf174eab1385dee3f27c5b2b9e6b5d72",
+      "workflow": "ci-standalone.yml",
+      "job": "standalone",
+      "before": {
+        "name": "Preserve test diagnostics",
+        "if": "always()",
+        "uses": "actions/upload-artifact@v4",
+        "with": {
+          "name": "standalone-${{ matrix.system }}-${{ matrix.config }}",
+          "retention-days": 7,
+          "path": "build/CMakeCache.txt\nbuild/compile_commands.json\nbuild/registered-tests.json\nbuild/standalone-results.xml\nbuild/standalone-gate.json\nbuild/Testing/Temporary/\nbuild/samples*/validation.json\nbuild/windows-oracle-replay/*.json\n"
+        }
+      },
+      "after": {
+        "name": "Preserve test diagnostics",
+        "if": "always()",
+        "uses": "actions/upload-artifact@v4",
+        "with": {
+          "name": "standalone-${{ matrix.system }}-${{ matrix.config }}",
+          "retention-days": 7,
+          "path": "build/CMakeCache.txt\nbuild/compile_commands.json\nbuild/registered-tests.json\nbuild/standalone-results.xml\nbuild/standalone-gate.json\nbuild/ci-*-timing.json\nbuild/Testing/Temporary/\nbuild/samples*/validation.json\nbuild/windows-oracle-replay/*.json\n"
+        }
+      },
+      "index_after": 11
+    },
+    {
+      "pr": 407,
+      "source": "960d3ebf0cf6562b9636881784faa3e3e9f3df9e",
+      "workflow": "ci-cuda-build.yml",
+      "job": "cuda-build",
+      "before": {
+        "name": "Preserve build log",
+        "if": "always()",
+        "uses": "actions/upload-artifact@v4",
+        "with": {
+          "name": "cuda-build-log",
+          "path": "build.log",
+          "if-no-files-found": "warn"
+        }
+      },
+      "after": {
+        "name": "Preserve build log",
+        "if": "always()",
+        "uses": "actions/upload-artifact@v4",
+        "with": {
+          "name": "cuda-build-log",
+          "path": "build.log",
+          "if-no-files-found": "warn",
+          "retention-days": 7
+        }
+      },
+      "index_after": 9
+    },
+    {
+      "pr": 407,
+      "source": "960d3ebf0cf6562b9636881784faa3e3e9f3df9e",
+      "workflow": "ci-cuda-build.yml",
+      "job": "inventory-gate-selftest",
+      "before": {
+        "name": "Preserve selftest log",
+        "if": "always()",
+        "uses": "actions/upload-artifact@v4",
+        "with": {
+          "name": "cuda-inventory-gate-selftest-log",
+          "path": "inventory-gate-selftest.log",
+          "if-no-files-found": "warn"
+        }
+      },
+      "after": {
+        "name": "Preserve selftest log",
+        "if": "always()",
+        "uses": "actions/upload-artifact@v4",
+        "with": {
+          "name": "cuda-inventory-gate-selftest-log",
+          "path": "inventory-gate-selftest.log",
+          "if-no-files-found": "warn",
+          "retention-days": 7
+        }
+      },
+      "index_after": 3
+    }
+  ]
+}

@@ -5,9 +5,14 @@
 #
 # This job exists because moving lanes to self-hosted runners changes *where*
 # a required check runs, and nothing else in the repository reads that. It is
-# deliberately narrow: it starts only when a workflow file or the verifier
-# changes, has no matrix, no build and no corpus, and finishes in seconds. It
-# is advisory, not a required status check.
+# deliberately narrow: it starts only when a workflow file, the verifier or the
+# frozen workflow-step gate (test module, reviewed-change fixture, hosted
+# baseline) changes, has no matrix, no build and no corpus, and finishes in
+# seconds. It is advisory, not a required status check.
+#
+# The step list also executes the frozen workflow-step gate itself. That gate
+# lives in ci/compute_policy/tests/ and is otherwise only run locally, so a
+# green routing job must never be read as proof that it ran.
 name: Workflow routing contract
 
 on:
@@ -19,6 +24,7 @@ on:
       - 'ci/check_runner_capability.py'
       - 'ci/test_runner_capability.py'
       - 'ci/run_macos_lane.py'
+      - 'ci/compute_policy/tests/**'
   pull_request:
     paths:
       - '.github/workflows/**'
@@ -27,6 +33,7 @@ on:
       - 'ci/check_runner_capability.py'
       - 'ci/test_runner_capability.py'
       - 'ci/run_macos_lane.py'
+      - 'ci/compute_policy/tests/**'
   workflow_dispatch:
 
 permissions:
@@ -54,5 +61,9 @@ jobs:
         run: |
           python ci/workflow_event_matrix.py
           python -m unittest ci.test_workflow_event_matrix ci.test_runner_capability
+      - name: Verify the frozen workflow-step gate (normal and optimized)
+        run: |
+          python -m unittest ci.compute_policy.tests.test_routing_scope
+          python -O -m unittest ci.compute_policy.tests.test_routing_scope
       - name: Publish the resolved routing table
         run: python ci/workflow_event_matrix.py --list
