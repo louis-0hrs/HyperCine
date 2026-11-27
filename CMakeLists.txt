@@ -84,6 +84,15 @@ if(HYPERCINE_ENABLE_CUDA)
     endif()
 endif()
 
+function(hypercine_register_quality_state_corpus_contracts)
+    set(test_file "${PROJECT_SOURCE_DIR}/tests/test_quality_state_corpus.py")
+    add_test(NAME quality_state_corpus_contract COMMAND "${Python3_EXECUTABLE}" -B "${test_file}")
+    add_test(NAME quality_state_corpus_contract_optimized
+        COMMAND "${Python3_EXECUTABLE}" -B -O "${test_file}")
+    set_tests_properties(quality_state_corpus_contract quality_state_corpus_contract_optimized
+        PROPERTIES LABELS "quality;oracle-contract" TIMEOUT 30)
+endfunction()
+
 # SDK-free contracts, registered by both the regular test tree and the
 # standalone build, which returns before add_subdirectory(tests). Kept in one
 # function so the two build modes cannot drift apart.
@@ -94,6 +103,7 @@ function(hypercine_register_sdk_free_contracts)
     add_test(NAME dialect_capability_proof COMMAND test_dialect_capability_proof)
 
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    hypercine_register_quality_state_corpus_contracts()
     include("${PROJECT_SOURCE_DIR}/cmake/vc5_contract_inventory.cmake")
     hypercine_require_vc5_contract_files("${PROJECT_SOURCE_DIR}")
     add_test(NAME test_vc5_inspect COMMAND "${Python3_EXECUTABLE}" -B
@@ -334,6 +344,7 @@ if(HYPERCINE_BUILD_QUALITY_STATE_ONLY)
     target_link_libraries(test_overbitrate_hysteresis PRIVATE hypercine_quality_state)
     add_test(NAME overbitrate_hysteresis_sdk_sequence COMMAND test_overbitrate_hysteresis)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    hypercine_register_quality_state_corpus_contracts()
     add_test(NAME quality_state_probe_arguments COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_quality_state_probe.py"
         $<TARGET_FILE:quality_state_probe>)
