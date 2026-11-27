@@ -8,7 +8,10 @@ to an explicit list of measured FFmpeg builds. It proves four things on this
 host: the inputs and pinned reference bytes match their manifest, fresh
 processes of the candidate decoder agree, their output is byte-identical to the
 pinned reference, and the comparison still rejects a different packet and a
-mutated packet. It does not qualify any other packet, format, resolution or
+mutated packet. Every fixture read is bounded by a per-category budget derived
+from the fixed 128x128 geometry, so a caller-supplied `--fixtures` directory
+cannot turn a manifest declaration or an oversized entry into an unbounded
+allocation. It does not qualify any other packet, format, resolution or
 GPU path, and it never promotes a release gate by itself.
 
 Exit codes: 0 qualified, 1 control failed, 77 blocked (tool absent, build not on
@@ -18,9 +21,11 @@ binary).
 import argparse
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 import shutil
+import stat
 import struct
 import sys
 import tempfile
@@ -46,9 +51,24 @@ HEIGHT = 128
 OUTPUT_BYTES = WIDTH * HEIGHT * 4  # yuv422p10le: Y + Cb + Cr, 16-bit LE
 PEAK = 1023
 PATTERNS = ('flat', 'gradient', 'canonical')
+FIXTURE_SUFFIXES = ('.bgra', '.cfhd', '.input-p10', '.p10')
 FIXTURE_NAMES = frozenset(
-    pattern + suffix for pattern in PATTERNS
-    for suffix in ('.bgra', '.cfhd', '.input-p10', '.p10'))
+    pattern + suffix for pattern in PATTERNS for suffix in FIXTURE_SUFFIXES)
+# Every admitted fixture category carries a finite byte budget, because
+# `--fixtures` may point at any directory and the manifest is the only thing
+# that describes it. The three raw-plane categories are geometrically exact for
+# the fixed 128x128 contract: BGRA is 128*128*4 at 8 bits per channel and
+# yuv422p10le is 128*128*4 as 16-bit samples, so both are exactly OUTPUT_BYTES.
+# A `.cfhd` packet is one intra frame of that same plane; its four-times-plain
+# budget leaves room for an incompressible frame while bounding an allocation.
+# The largest committed packet is 25,604 bytes, well inside the budget.
+PACKET_LIMIT_BYTES = 4 * OUTPUT_BYTES
+FIXTURE_LIMIT_BYTES = {
+    '.bgra': OUTPUT_BYTES,
+    '.cfhd': PACKET_LIMIT_BYTES,
+    '.input-p10': OUTPUT_BYTES,
+    '.p10': OUTPUT_BYTES,
+}
 MANIFEST_FIELDS = {'copyright', 'license', 'encoder_commit', 'decoder', 'files'}
 ENTRY_FIELDS = {'file', 'bytes', 'sha256'}
 # Builds that reproduced the pinned n8.0 reference bytes on a measured host.
@@ -105,6 +125,14 @@ def matches_text(value, pattern):
     return isinstance(value, str) and re.fullmatch(pattern, value) is not None
 
 
+def fixture_limit(name):
+    """Return the finite byte budget of one admitted fixture name."""
+    for suffix in FIXTURE_SUFFIXES:
+        if name.endswith(suffix):
+            return FIXTURE_LIMIT_BYTES[suffix]
+    return None
+
+
 def validate_manifest(manifest):
     reason = 'invalid fixture manifest schema'
     if (not isinstance(manifest, dict) or manifest.keys() != MANIFEST_FIELDS or
@@ -126,6 +154,10 @@ def validate_manifest(manifest):
                 type(size) is not int or size < 0 or
                 not matches_text(digest, r'[0-9a-f]{64}')):
             raise Failed(reason)
+        # The declaration is bounded before any fixture byte is read, so an
+        # oversized number cannot become an allocation later on.
+        if size > fixture_limit(name):
+            raise Failed('fixture {} declaration exceeds its byte budget'.format(name))
         declared[name] = entry
     return declared
 
@@ -142,14 +174,38 @@ def load_manifest(fixtures):
     return validate_manifest(manifest)
 
 
+def read_bounded(path, name, limit):
+    """Read one fixture with an explicit ceiling, never a whole unknown file.
+
+    `limit + 1` keeps a single excess byte available so that a file longer than
+    its declaration is detected instead of silently truncated. Only a regular
+    file is accepted: the path is caller-supplied, so a directory, device or
+    FIFO behind one of the twelve admitted names must fail closed rather than
+    block or stream without a bound.
+    """
+    try:
+        # Checked before open, because opening a FIFO would block; checked
+        # again on the handle, so the decision refers to the opened object.
+        if not stat.S_ISREG(os.stat(path).st_mode):
+            raise Failed('{} is not a regular fixture file'.format(name))
+        with open(path, 'rb') as handle:
+            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+                raise Failed('{} is not a regular fixture file'.format(name))
+            return handle.read(limit + 1)
+    except OSError:
+        raise Failed('cannot read fixture {}'.format(name)) from None
+
+
 def load_bound(fixtures, declared, name):
     entry = declared.get(name)
     if entry is None:
         raise Failed('fixture {} is not declared in the manifest'.format(name))
-    try:
-        data = (Path(fixtures) / name).read_bytes()
-    except OSError:
-        raise Failed('cannot read fixture {}'.format(name)) from None
+    limit = fixture_limit(name)
+    # Repeated here so a hand-built `declared` mapping cannot bypass the bound
+    # that the manifest loader already enforces.
+    if limit is None or entry['bytes'] > limit:
+        raise Failed('fixture {} declaration exceeds its byte budget'.format(name))
+    data = read_bounded(Path(fixtures) / name, name, entry['bytes'])
     if len(data) != entry['bytes']:
         raise Failed('{} size does not match manifest'.format(name))
     digest = sha256(data)
