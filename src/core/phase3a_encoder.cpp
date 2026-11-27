@@ -12,6 +12,8 @@
 #endif
 
 #include "hypercine/phase3a.h"
+#include "phase3a_telemetry.h"
+#include <condition_variable>
 
 #include "hypercine/canonical.h"
 #include "hypercine/entropy_parallel.h"
@@ -172,7 +174,13 @@ struct NvmlUtilization {
 
 class NvmlRuntimeSampler {
 public:
-    NvmlRuntimeSampler() {
+    // ``active_identity`` is the locally observed identity of the compute device
+    // this process actually runs on. It is used only to bind the provider to that
+    // device and is never published in telemetry output. When the mapping cannot
+    // be proved one-to-one the sampler reports unavailable instead of silently
+    // sampling an unrelated GPU.
+    explicit NvmlRuntimeSampler(std::string active_identity)
+        : active_identity_(std::move(active_identity)) {
 #ifdef _WIN32
         dll_ = LoadLibraryA("nvml.dll");
         if (!dll_) dll_ = LoadLibraryA("C:\\Windows\\System32\\nvml.dll");
@@ -184,6 +192,9 @@ public:
         fn_shutdown_ = reinterpret_cast<FnShutdown>(GetProcAddress(dll_, "nvmlShutdown"));
         fn_get_dev_ = reinterpret_cast<FnGetDevice>(GetProcAddress(dll_, "nvmlDeviceGetHandleByIndex_v2"));
         if (!fn_get_dev_) fn_get_dev_ = reinterpret_cast<FnGetDevice>(GetProcAddress(dll_, "nvmlDeviceGetHandleByIndex"));
+        fn_count_ = reinterpret_cast<FnGetCount>(GetProcAddress(dll_, "nvmlDeviceGetCount_v2"));
+        if (!fn_count_) fn_count_ = reinterpret_cast<FnGetCount>(GetProcAddress(dll_, "nvmlDeviceGetCount"));
+        fn_uuid_ = reinterpret_cast<FnGetUuid>(GetProcAddress(dll_, "nvmlDeviceGetUUID"));
         fn_util_ = reinterpret_cast<FnGetUtil>(GetProcAddress(dll_, "nvmlDeviceGetUtilizationRates"));
         fn_clock_ = reinterpret_cast<FnGetClock>(GetProcAddress(dll_, "nvmlDeviceGetClockInfo"));
         fn_temp_ = reinterpret_cast<FnGetTemp>(GetProcAddress(dll_, "nvmlDeviceGetTemperature"));
@@ -193,11 +204,10 @@ public:
             fn_throttle_ = reinterpret_cast<FnGetThrottle>(GetProcAddress(dll_, "nvmlDeviceGetCurrentClocksEventReasons"));
         }
 
-        if (fn_init_ && fn_get_dev_ && fn_init_() == 0) {
+        if (fn_init_ && fn_shutdown_ && fn_get_dev_ && fn_count_ && fn_uuid_ && fn_init_() == 0) {
             inited_ = true;
-            if (fn_get_dev_(0, &dev_) == 0 && dev_ != nullptr) {
-                available_ = true;
-            }
+            dev_ = ResolveBoundDevice();
+            available_ = dev_ != nullptr;
         }
 #endif
     }
@@ -211,13 +221,17 @@ public:
     }
 
     void Start() {
-        if (!available_) return;
+        if (!available_ || thread_.joinable()) return;
+        accumulator_ = {};
+        stopped_ = false;
         stop_.store(false, std::memory_order_release);
         SampleOnce();
         thread_ = std::thread([this]() {
             while (!stop_.load(std::memory_order_acquire)) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(15));
-                if (stop_.load(std::memory_order_acquire)) break;
+                std::unique_lock<std::mutex> wait_lock(wait_mu_);
+                if (wake_.wait_for(wait_lock, std::chrono::milliseconds(250),
+                        [this]() { return stop_.load(std::memory_order_acquire); })) break;
+                wait_lock.unlock();
                 SampleOnce();
             }
         });
@@ -225,61 +239,19 @@ public:
 
     Phase3ANvmlTelemetry Stop() {
         if (thread_.joinable()) {
-            stop_.store(true, std::memory_order_release);
+            {
+                std::lock_guard<std::mutex> wait_lock(wait_mu_);
+                stop_.store(true, std::memory_order_release);
+            }
+            wake_.notify_all();
             thread_.join();
         }
-        if (available_) SampleOnce();
-
+        if (available_ && !stopped_) SampleOnce();
+        stopped_ = true;
         std::lock_guard<std::mutex> lk(mu_);
-        Phase3ANvmlTelemetry out;
-        out.nvml_available = available_ && !samples_.empty();
-        out.sample_count = static_cast<int>(samples_.size());
-        if (samples_.empty()) return out;
-
-        double sum_gpu = 0.0, max_gpu = 0.0;
-        double sum_mem = 0.0, max_mem = 0.0;
-        double sum_gclk = 0.0, sum_mclk = 0.0;
-        int min_gclk = samples_[0].gclk, max_gclk = samples_[0].gclk;
-        int min_mclk = samples_[0].mclk, max_mclk = samples_[0].mclk;
-        int max_temp = samples_[0].temp;
-        double sum_pwr = 0.0, max_pwr = 0.0;
-        uint64_t throttle_union = 0;
-
-        for (const Sample& s : samples_) {
-            sum_gpu += s.gpu_util;
-            max_gpu = std::max<double>(max_gpu, s.gpu_util);
-            sum_mem += s.mem_util;
-            max_mem = std::max<double>(max_mem, s.mem_util);
-            sum_gclk += s.gclk;
-            min_gclk = std::min(min_gclk, s.gclk);
-            max_gclk = std::max(max_gclk, s.gclk);
-            sum_mclk += s.mclk;
-            min_mclk = std::min(min_mclk, s.mclk);
-            max_mclk = std::max(max_mclk, s.mclk);
-            max_temp = std::max(max_temp, s.temp);
-            sum_pwr += s.power_w;
-            max_pwr = std::max(max_pwr, s.power_w);
-            throttle_union |= s.throttle;
-        }
-
-        const double inv_n = 1.0 / static_cast<double>(samples_.size());
-        out.hardware_gpu_utilization_pct_mean = sum_gpu * inv_n;
-        out.hardware_gpu_utilization_pct_max = max_gpu;
-        out.hardware_mem_utilization_pct_mean = sum_mem * inv_n;
-        out.hardware_mem_utilization_pct_max = max_mem;
-        out.graphics_clock_mhz_mean = sum_gclk * inv_n;
-        out.graphics_clock_mhz_min = min_gclk;
-        out.graphics_clock_mhz_max = max_gclk;
-        out.mem_clock_mhz_mean = sum_mclk * inv_n;
-        out.mem_clock_mhz_min = min_mclk;
-        out.mem_clock_mhz_max = max_mclk;
-        out.temperature_c_start = samples_.front().temp;
-        out.temperature_c_end = samples_.back().temp;
-        out.temperature_c_max = max_temp;
-        out.power_w_mean = sum_pwr * inv_n;
-        out.power_w_max = max_pwr;
-        out.throttle_reasons_bitmask = throttle_union;
-        out.throttle_reasons_str = FormatThrottleReasons(throttle_union);
+        auto out = accumulator_.Finish(available_);
+        out.throttle_reasons_str = out.throttle_sample_count
+            ? FormatThrottleReasons(out.throttle_reasons_bitmask) : "Unavailable";
         return out;
     }
 
@@ -311,20 +283,39 @@ public:
     }
 
 private:
-    struct Sample {
-        int gpu_util = 0;
-        int mem_util = 0;
-        int gclk = 0;
-        int mclk = 0;
-        int temp = 0;
-        double power_w = 0.0;
-        uint64_t throttle = 0;
-    };
+#ifdef _WIN32
+    // Enumerate the locally visible devices and bind to the one whose identity
+    // equals the active compute device's identity. Ambiguous or absent matches
+    // return nullptr (fail closed). No identity is written to any output file.
+    void* ResolveBoundDevice() {
+        if (active_identity_.empty() || !fn_count_ || !fn_uuid_) return nullptr;
+        unsigned int count = 0;
+        if (fn_count_(&count) != 0 || count == 0 || count > kMaxNvmlDevices) return nullptr;
+        std::vector<void*> handles(count, nullptr);
+        std::vector<detail::NvmlDeviceCandidate> candidates;
+        candidates.reserve(count);
+        for (unsigned int i = 0; i < count; ++i) {
+            void* handle = nullptr;
+            char uuid[96] = {};
+            if (fn_get_dev_(i, &handle) != 0 || handle == nullptr) continue;
+            if (fn_uuid_(handle, uuid, sizeof(uuid)) != 0) continue;
+            handles[i] = handle;
+            detail::NvmlDeviceCandidate candidate;
+            candidate.index = i;
+            candidate.identity = std::string(uuid);
+            candidates.push_back(candidate);
+        }
+        const std::optional<unsigned int> bound =
+            detail::SelectNvmlDeviceIndex(active_identity_, candidates);
+        if (!bound || *bound >= handles.size()) return nullptr;
+        return handles[*bound];
+    }
+#endif
 
     void SampleOnce() {
 #ifdef _WIN32
         if (!available_ || !dev_) return;
-        Sample s{};
+        detail::NvmlSample s{};
         if (fn_util_) {
             NvmlUtilization u{};
             if (fn_util_(dev_, &u) == 0) {
@@ -350,7 +341,7 @@ private:
             if (fn_throttle_(dev_, &tr) == 0) s.throttle = static_cast<uint64_t>(tr);
         }
         std::lock_guard<std::mutex> lk(mu_);
-        samples_.push_back(s);
+        accumulator_.Add(s);
 #endif
     }
 
@@ -358,6 +349,8 @@ private:
     using FnInit = int (*)();
     using FnShutdown = int (*)();
     using FnGetDevice = int (*)(unsigned int, void**);
+    using FnGetCount = int (*)(unsigned int*);
+    using FnGetUuid = int (*)(void*, char*, unsigned int);
     using FnGetUtil = int (*)(void*, NvmlUtilization*);
     using FnGetClock = int (*)(void*, int, unsigned int*);
     using FnGetTemp = int (*)(void*, int, unsigned int*);
@@ -368,6 +361,8 @@ private:
     FnInit fn_init_ = nullptr;
     FnShutdown fn_shutdown_ = nullptr;
     FnGetDevice fn_get_dev_ = nullptr;
+    FnGetCount fn_count_ = nullptr;
+    FnGetUuid fn_uuid_ = nullptr;
     FnGetUtil fn_util_ = nullptr;
     FnGetClock fn_clock_ = nullptr;
     FnGetTemp fn_temp_ = nullptr;
@@ -376,16 +371,46 @@ private:
     void* dev_ = nullptr;
     bool inited_ = false;
 #endif
+    // Bounded so a hostile/over-reporting count cannot drive an unbounded loop.
+    static constexpr unsigned int kMaxNvmlDevices = 64;
+    std::string active_identity_;
     bool available_ = false;
     std::atomic<bool> stop_{false};
     std::thread thread_;
     std::mutex mu_;
-    std::vector<Sample> samples_;
+    detail::NvmlAccumulator accumulator_;
+    bool stopped_ = false;
+    std::mutex wait_mu_;
+    std::condition_variable wake_;
 };
 
 // ============================================================================
 // Stateful Phase 3A Encoder Context (Matches Upstream Per-Frame State Machine)
 // ============================================================================
+
+// Locally observed identity of the compute device this process runs on. The value
+// is compared against the provider's own enumeration and is never written to any
+// report, log or JSON field: only the resulting validity is published (review
+// 6048815961, item 1). An unprovable identity yields an empty string, which makes
+// the sampler report unavailable instead of sampling a different physical GPU.
+static std::string ActiveComputeDeviceIdentity() {
+#ifdef _WIN32
+    int device = -1;
+    if (cudaGetDevice(&device) != cudaSuccess || device < 0) return std::string();
+    cudaUUID_t uuid{};
+    if (cudaDeviceGetUuid(&uuid, device) != cudaSuccess) return std::string();
+    const unsigned char* b = reinterpret_cast<const unsigned char*>(&uuid);
+    char text[64] = {};
+    std::snprintf(text, sizeof(text),
+                  "GPU-%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                  b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
+                  b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]);
+    return std::string(text);
+#else
+    // The NVML sampler is Windows-only today; there is no second provider to bind.
+    return std::string();
+#endif
+}
 
 struct QuantTables3A {
     int prescale[3] = {};
@@ -2321,7 +2346,15 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
     const int pitch = width * 4;
     const size_t frame_bytes = static_cast<size_t>(pitch) * static_cast<size_t>(height);
 
-    res.vram_before_bytes = HyperCine_QueryUsedVramBytes();
+    // The legacy query returns zero on error; retain status for this delta.
+    const auto query_used_vram = []() -> std::optional<size_t> {
+        size_t free_bytes = 0, total_bytes = 0;
+        if (cudaMemGetInfo(&free_bytes, &total_bytes) != cudaSuccess ||
+            free_bytes > total_bytes) return std::nullopt;
+        return total_bytes - free_bytes;
+    };
+    const auto vram_before = query_used_vram();
+    res.vram_before_bytes = vram_before.value_or(0);
     res.host_rss_before_bytes = QueryProcessWorkingSetBytes();
 
     res.slot_selection = SelectPhase2DFrameSlots(
@@ -2508,10 +2541,9 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
         }
     }
 
-    res.vram_after_init_bytes = HyperCine_QueryUsedVramBytes();
-    res.vram_used_bytes = (res.vram_after_init_bytes > res.vram_before_bytes)
-        ? (res.vram_after_init_bytes - res.vram_before_bytes)
-        : res.slot_selection.total_estimated_vram_bytes;
+    const auto vram_after_init = query_used_vram();
+    res.vram_after_init_bytes = vram_after_init.value_or(0);
+    detail::SetMeasuredVramUsage(res, vram_before, vram_after_init);
     res.slot_vram_bytes = res.slot_selection.per_slot_vram_bytes * static_cast<size_t>(num_slots);
     const size_t max_px = static_cast<size_t>(width) * static_cast<size_t>(height);
     const size_t lp_host_bytes = (max_px / 64u) * 2u * sizeof(int16_t);
@@ -2776,7 +2808,7 @@ Phase3AResult RunPhase3A(const Phase3AConfig& cfg,
         });
     }
 
-    NvmlRuntimeSampler nvml_sampler;
+    NvmlRuntimeSampler nvml_sampler(ActiveComputeDeviceIdentity());
 
     int next_submit_frame = 0;
     int next_wavelet_kick_frame = 0;
@@ -3591,22 +3623,34 @@ Phase3AVarianceStudySummary RunPhase3AVarianceStudy(
 
         Phase3AResult r = RunPhase3A(cfg);
         fps_list.push_back(r.sustained_fps);
-        clk_sum += r.nvml.graphics_clock_mhz_mean;
-        if (r.nvml.graphics_clock_mhz_min > 0) min_clk = std::min(min_clk, r.nvml.graphics_clock_mhz_min);
-        max_clk = std::max(max_clk, r.nvml.graphics_clock_mhz_max);
-        pwr_sum += r.nvml.power_w_mean;
-        max_pwr = std::max(max_pwr, r.nvml.power_w_max);
-        max_temp = std::max(max_temp, r.nvml.temperature_c_max);
-        throttle_mask |= r.nvml.throttle_reasons_bitmask;
+        if (r.nvml.graphics_clock_sample_count) {
+            ++sum.clock_trial_count;
+            clk_sum += r.nvml.graphics_clock_mhz_mean;
+            min_clk = std::min(min_clk, r.nvml.graphics_clock_mhz_min);
+            max_clk = std::max(max_clk, r.nvml.graphics_clock_mhz_max);
+        }
+        if (r.nvml.power_sample_count) {
+            ++sum.power_trial_count;
+            pwr_sum += r.nvml.power_w_mean;
+            max_pwr = std::max(max_pwr, r.nvml.power_w_max);
+        }
+        if (r.nvml.temperature_sample_count) {
+            ++sum.temperature_trial_count;
+            max_temp = std::max(max_temp, r.nvml.temperature_c_max);
+        }
+        if (r.nvml.throttle_sample_count) {
+            ++sum.throttle_trial_count;
+            throttle_mask |= r.nvml.throttle_reasons_bitmask;
+        }
         sum.trial_results.push_back(std::move(r));
     }
 
     ComputeStats(fps_list, &sum.mean_fps, &sum.median_fps, nullptr,
                  &sum.min_fps, &sum.max_fps, &sum.stddev_fps);
-    sum.mean_clock_mhz = trials > 0 ? (clk_sum / trials) : 0.0;
+    sum.mean_clock_mhz = sum.clock_trial_count ? (clk_sum / sum.clock_trial_count) : 0.0;
     sum.min_clock_mhz = (min_clk == 99999) ? 0 : min_clk;
     sum.max_clock_mhz = max_clk;
-    sum.mean_power_w = trials > 0 ? (pwr_sum / trials) : 0.0;
+    sum.mean_power_w = sum.power_trial_count ? (pwr_sum / sum.power_trial_count) : 0.0;
     sum.max_power_w = max_pwr;
     sum.max_temp_c = max_temp;
     sum.combined_throttle_reasons = NvmlRuntimeSampler::FormatThrottleReasons(throttle_mask);

@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -333,7 +334,14 @@ Phase3AMetadataSequenceReport VerifyPhase3AMetadataSequence(
 
 struct Phase3ANvmlTelemetry {
     bool nvml_available = false;
-    int sample_count = 0;
+    int sample_count = 0; // Poll attempts, including partial/failed readings.
+    int sampling_interval_ms = 250;
+    int utilization_sample_count = 0;
+    int graphics_clock_sample_count = 0;
+    int mem_clock_sample_count = 0;
+    int temperature_sample_count = 0;
+    int power_sample_count = 0;
+    int throttle_sample_count = 0;
     double hardware_gpu_utilization_pct_mean = 0.0;
     double hardware_gpu_utilization_pct_max = 0.0;
     double hardware_mem_utilization_pct_mean = 0.0;
@@ -463,6 +471,10 @@ struct Phase3AResult {
     size_t vram_mid_run_bytes = 0;
     size_t vram_end_run_bytes = 0;
     size_t vram_after_destroy_bytes = 0;
+    // Global device-use delta, not process-owned allocations or a peak.
+    // Unavailable if either cudaMemGetInfo snapshot failed.
+    std::optional<int64_t> measured_global_vram_delta_bytes;
+    // Compatibility field: positive part of the measured delta, never estimate.
     size_t vram_used_bytes = 0;
     size_t slot_vram_bytes = 0;
     size_t slot_pinned_host_bytes = 0;
@@ -508,6 +520,10 @@ struct Phase3AVarianceStudySummary {
     double stddev_fps = 0.0;
     double min_fps = 0.0;
     double max_fps = 0.0;
+    int clock_trial_count = 0;
+    int power_trial_count = 0;
+    int temperature_trial_count = 0;
+    int throttle_trial_count = 0;
     double mean_clock_mhz = 0.0;
     int min_clock_mhz = 0;
     int max_clock_mhz = 0;

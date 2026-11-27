@@ -304,6 +304,11 @@ if(HYPERCINE_BUILD_TESTS)
 endif()
 
 option(HYPERCINE_ENABLE_VULKAN "Enable experimental Vulkan compute FilmScan3 frontend" OFF)
+# HYPERCINE_BUILD_STANDALONE is declared once, at the top, because the policy
+# guards above run before CUDA compiler detection. A second declaration here
+# would silently shadow it (and could reset a cache value mid-configure).
+
+# This path intentionally returns before any SDK include directory or target.
 option(HYPERCINE_REQUIRE_EXTERNAL_DECODE "Require standalone FFmpeg decode tests" OFF)
 # This path intentionally returns before any SDK include directory or target.
 set(HYPERCINE_QUALITY_ORACLE_ROOT "" CACHE PATH "Optional verified Windows quality-profile corpus root")
@@ -516,6 +521,11 @@ if(HYPERCINE_BUILD_STANDALONE)
     endif()
     if(HYPERCINE_BUILD_TESTS)
         enable_testing()
+        # #115: the telemetry sampler/writer tests compile source slices of the
+        # actual standalone encoder and benchmark writers. Registered here, not
+        # before the quality-state-only branch: that mode must keep its own
+        # contract and must not gain telemetry targets (review 6048815961, item 3).
+        include(cmake/TelemetryTests.cmake)
         add_executable(test_wavelet_simd_packets tests/test_wavelet_simd_packets.cpp)
         target_link_libraries(test_wavelet_simd_packets PRIVATE hypercine_wavelet_simd hypercine_standalone)
         add_test(NAME wavelet_simd_packets COMMAND test_wavelet_simd_packets
